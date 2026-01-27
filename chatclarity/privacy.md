@@ -1,91 +1,147 @@
-# ChatClarity Privacy Policy
+# Privacy Policy
 
-Effective Date: January 2026
+Last updated: January 2026
 
-ChatClarity (“we,” “our,” or “the app”) is designed to help users practice everyday communication in a calm, private way. We take privacy seriously and aim to collect as little data as possible.
+ChatClarity (“we”, “our”, or “us”) respects your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use the ChatClarity mobile application and related services.
+
+By using ChatClarity, you agree to the practices described in this policy.
 
 ---
 
-## Information We Collect
+## 1. Information We Collect
 
-ChatClarity does not require users to create an account.
+### Account Information
+When you create an account, we may collect:
+- Email address
+- Name (if provided via Google sign-in)
 
-### Information You Provide
-- Text you enter during practice sessions is temporarily processed to generate feedback.
-- This information is **not used for advertising**, profiling, or tracking.
+### Usage Data
+We collect limited usage information to improve the app, including:
+- Feature interactions
+- Session activity
+- Anonymous analytics events
 
-### Automatically Collected Information
-We may collect limited, non-identifying technical information to keep the app running properly, such as:
-- App version
+### User Content
+If you use message analysis or communication tools, we may temporarily process text you submit in order to provide feedback. This content is not sold or shared and is used only to deliver app functionality.
+
+We do **not** store private conversations unless explicitly saved by you.
+
+### Device Information
+We may collect:
 - Device type
-- Error or crash diagnostics
+- Operating system version
+- App version
+- Anonymous identifiers
 
-This information cannot be used to identify you personally.
-
----
-
-## How We Use Information
-
-We use information only to:
-- Generate practice feedback
-- Improve app stability and performance
-- Enforce usage limits (such as free daily practice limits)
-
-We do **not** use your information for:
-- Advertising
-- Behavioral profiling
-- Selling or sharing with third parties
+This is used only for performance, debugging, and reliability.
 
 ---
 
-## Data Storage and Retention
+## 2. What We Do NOT Collect
 
-- Practice messages are stored **temporarily** only to generate feedback.
-- Conversations are **not stored long-term**.
-- We do not maintain conversation histories.
-- We do not associate content with real-world identities.
+We do **not** collect:
+- Phone numbers
+- Contacts
+- Location data
+- Biometric data
+- Government IDs
+- Financial information
+- Payment card details (handled entirely by Apple)
 
----
-
-## Third-Party Services
-
-ChatClarity may use trusted third-party services strictly for:
-- App infrastructure
-- Error monitoring
-- Subscription management (via Apple In-App Purchases)
-
-These services are required to handle data securely and only for their intended purpose.
+All subscriptions are processed securely through Apple In-App Purchases.
 
 ---
 
-## Subscriptions
+## 3. How We Use Information
 
-All purchases are handled securely by Apple through In-App Purchases. ChatClarity does not receive or store payment or billing information.
+We use your information to:
+- Provide app features
+- Improve user experience
+- Maintain security and prevent abuse
+- Manage subscriptions and access levels
+- Respond to support requests
+
+We never sell personal data.
 
 ---
 
-## Children’s Privacy
+## 4. Subscriptions & Payments
 
-ChatClarity does not knowingly collect personal information from children. Age suitability is determined and enforced through the App Store’s age rating system.
+All payments are handled by Apple via App Store In-App Purchases.
+
+We do not have access to your payment details.
+
+Subscription status is managed through Apple and RevenueCat.
 
 ---
 
-## Your Choices
+## 5. Account Enforcement & Moderation
+
+We reserve the right to suspend or terminate accounts that violate our Terms, including abusive behavior, misuse of the platform, or attempts to exploit the service.
+
+If an account is removed for violations, access to paid features may be revoked. Refunds are handled exclusively by Apple according to App Store policies.
+
+---
+
+## 6. Data Retention
+
+We retain only the minimum data necessary to operate the app.
+
+You may request account deletion at any time by contacting support.
+
+Upon deletion:
+- Account data is removed
+- Saved content is erased
+- Analytics identifiers are anonymized
+
+---
+
+## 7. Third-Party Services
+
+We use trusted third-party services for:
+- Authentication
+- Analytics
+- Subscription management
+
+These services follow industry-standard privacy practices.
+
+---
+
+## 8. Children’s Privacy
+
+ChatClarity is not intended for users under 13.
+
+We do not knowingly collect data from children.
+
+---
+
+## 9. Security
+
+We use industry-standard security measures to protect your data. However, no system is 100% secure.
+
+---
+
+## 10. Your Rights
 
 You may:
-- Stop using the app at any time
-- Delete the app to remove locally stored data
+- Request deletion of your account
+- Access your stored information
+- Contact us with privacy questions
+
+Email: support@chatclarity.app
 
 ---
 
-## Changes to This Policy
+## 11. Changes to This Policy
 
-We may update this Privacy Policy from time to time. Updates will be reflected on this page with a new effective date.
+We may update this Privacy Policy periodically. Changes will be posted here with an updated date.
+
+Continued use of the app means acceptance of the updated policy.
 
 ---
 
 ## Contact
 
-If you have questions about this Privacy Policy, you may contact us at:
+If you have questions about this Privacy Policy:
 
-support@verixiaapps.com
+Email: support@chatclarity.app
