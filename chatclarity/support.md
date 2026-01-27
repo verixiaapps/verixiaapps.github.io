@@ -1,50 +1,89 @@
 # ChatClarity Support
 
-We’re here to help.
+Welcome to ChatClarity Support.
 
-ChatClarity is designed as a simple, private tool for practicing everyday communication. If you have questions, run into issues, or need help with subscriptions, please reach out.
+We’re here to help you get the most out of ChatClarity.
 
 ---
 
 ## Contact Support
 
-Email:
-support@verixiaapps.com
+If you need help or have questions, please contact us:
 
-We aim to respond as quickly as possible, typically within a few business days.
+📧 **Email:** support@chatclarity.app
+
+We typically respond within 24–48 hours.
 
 ---
 
 ## Common Topics
 
-**App Questions**
-- How ChatClarity works
-- Practice sessions and feedback
-- Usage limits and subscriptions
-
-**Subscriptions & Billing**
-- Subscription status
-- Cancellations or renewals
-- Restoring purchases
-
-All purchases are handled securely through Apple In-App Purchases. Subscription management (including cancellations) can be done in your device’s App Store settings.
+### Account Issues
+If you’re having trouble logging in, accessing Pro features, or restoring purchases, please include:
+- The email associated with your account
+- A brief description of the issue
+- Screenshots (if applicable)
 
 ---
 
-## Privacy & Data
+### Subscriptions & Billing
 
-ChatClarity does not require an account and does not store conversation histories long-term.  
-For details, please review our Privacy Policy:
-https://verixiaapps.github.io/chatclarity/privacy
+All subscriptions are managed through Apple App Store In-App Purchases.
+
+To manage or cancel your subscription:
+
+1. Open **Settings** on your iPhone
+2. Tap your Apple ID
+3. Tap **Subscriptions**
+4. Select **ChatClarity**
+
+For refunds, Apple handles all requests directly:
+
+👉 https://reportaproblem.apple.com
+
+ChatClarity cannot issue refunds directly.
 
 ---
 
-## Important Note
+### Feature Questions
 
-ChatClarity is a communication practice tool. It provides optional suggestions for phrasing and clarity and does not offer medical, therapeutic, or professional advice.
-
-If you are experiencing significant distress, we encourage you to seek support from a trusted person or a qualified professional.
+ChatClarity provides communication coaching and message analysis tools. If something isn’t working as expected, let us know and we’ll help.
 
 ---
 
-Thank you for using ChatClarity.
+### Account Moderation
+
+We reserve the right to suspend or terminate accounts that violate our Terms, including abusive behavior or misuse of the platform.
+
+If your account is restricted, you may contact support for clarification.
+
+Refunds for suspended accounts are subject to Apple’s policies.
+
+---
+
+### Privacy & Data Requests
+
+You may request:
+- Account deletion
+- Data access
+- Privacy clarification
+
+Email: support@chatclarity.app
+
+---
+
+## Feedback
+
+We love feedback. If you have ideas for improving ChatClarity, feel free to reach out.
+
+---
+
+## Response Times
+
+Typical response time: **24–48 hours**
+
+During busy periods it may take slightly longer, but we’ll always get back to you.
+
+---
+
+Thank you for using ChatClarity 💙
