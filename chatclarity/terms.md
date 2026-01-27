@@ -1,112 +1,151 @@
-# ChatClarity Terms of Use
+# Terms of Service
 
-Effective Date: January 2026
+Last Updated: January 2026
 
-Welcome to ChatClarity. These Terms of Use (“Terms”) govern your use of the ChatClarity mobile application (“ChatClarity,” “the app,” “we,” or “us”). By accessing or using the app, you agree to be bound by these Terms.
+Welcome to ChatClarity. By downloading, accessing, or using ChatClarity (“the App”), you agree to these Terms of Service (“Terms”). If you do not agree, please do not use the App.
 
-If you do not agree to these Terms, please do not use the app.
-
----
-
-## 1. Purpose of the App
-
-ChatClarity is a communication practice tool designed to help users rehearse everyday conversations. The app provides optional suggestions for phrasing and clarity.
-
-ChatClarity does **not** provide medical, mental health, therapeutic, legal, or professional advice. Use of the app is voluntary and at your own discretion.
+ChatClarity is operated by Verixia Apps (“we,” “us,” or “our”).
 
 ---
 
-## 2. No Professional Advice
+## 1. Description of Service
 
-Any feedback or suggestions provided by ChatClarity are informational only. You acknowledge and agree that:
+ChatClarity provides communication coaching and message analysis tools designed to help users improve clarity, tone, and effectiveness in written communication.
 
-- ChatClarity is not a substitute for professional services
-- You are solely responsible for how you use or apply any suggestions
-- We make no guarantees regarding outcomes, results, or improvements
+ChatClarity does not provide professional, legal, medical, or psychological advice. All feedback is informational only.
 
 ---
 
-## 3. User Responsibilities
+## 2. Eligibility
 
-You agree to use ChatClarity only for lawful purposes and in accordance with these Terms.
+You must be at least 17 years old to use ChatClarity.
+
+By using the App, you confirm that you meet this requirement.
+
+---
+
+## 3. Accounts
+
+Some features may require creating an account.
+
+You are responsible for maintaining the confidentiality of your account and for all activity that occurs under your account.
+
+You agree to provide accurate information and keep it up to date.
+
+---
+
+## 4. Subscriptions & Billing
+
+ChatClarity offers optional Pro subscriptions.
+
+### Important Billing Notes:
+
+- Payments are processed exclusively through Apple In-App Purchases.
+- Subscriptions automatically renew unless canceled at least 24 hours before the end of the billing period.
+- You can manage or cancel your subscription in your Apple ID settings.
+- Pricing may vary by region.
+
+ChatClarity does not directly process payments and cannot issue refunds.
+
+All refunds are handled by Apple:
+
+👉 https://reportaproblem.apple.com
+
+---
+
+## 5. Free vs Pro Features
+
+Free users have access to basic functionality.
+
+Pro subscribers receive additional features such as enhanced analysis, history, and advanced tools.
+
+Features may change over time.
+
+---
+
+## 6. Acceptable Use
 
 You agree not to:
-- Use the app in a way that violates applicable laws
-- Attempt to interfere with or disrupt the app
-- Misuse the app in a manner that could harm others or the service
+
+- Abuse or harass others
+- Use the App for illegal purposes
+- Attempt to reverse engineer or exploit the App
+- Submit harmful, offensive, or malicious content
+- Circumvent feature restrictions or subscription systems
 
 ---
 
-## 4. Subscriptions and Payments
+## 7. Account Moderation & Termination
 
-Some features of ChatClarity may require a paid subscription.
+We reserve the right to suspend or permanently terminate accounts at our sole discretion, including but not limited to:
 
-All payments are processed securely through Apple In-App Purchases. We do not process or store payment information.
+- Repeated abusive behavior
+- Misuse of the platform
+- Attempts to exploit systems
+- Violations of these Terms
 
-Subscription management, cancellations, and refunds are handled through your device’s App Store settings in accordance with Apple’s policies.
+We may restrict or remove access without prior notice.
 
----
+If an account is terminated, access to paid features may be revoked.
 
-## 5. Disclaimer of Warranties
-
-ChatClarity is provided on an **“as is”** and **“as available”** basis.
-
-To the fullest extent permitted by law, we disclaim all warranties, express or implied, including but not limited to:
-- Fitness for a particular purpose
-- Accuracy or reliability of content
-- Availability or uninterrupted operation
-
-We do not warrant that the app will meet your expectations or operate without errors.
+Refunds for terminated accounts are governed solely by Apple’s refund policies.
 
 ---
 
-## 6. Limitation of Liability
+## 8. No Guarantee of Results
 
-To the maximum extent permitted by law:
+ChatClarity provides guidance and suggestions only.
 
-ChatClarity and its developer shall not be liable for any indirect, incidental, consequential, special, or punitive damages, including but not limited to loss of data, loss of use, or loss of opportunity.
-
-In no event shall our total liability for any claim related to the app exceed the amount you paid (if any) for ChatClarity in the twelve (12) months preceding the claim.
+We do not guarantee outcomes, improvements, relationships, or success resulting from use of the App.
 
 ---
 
-## 7. Arbitration and Class Action Waiver
+## 9. Intellectual Property
 
-**PLEASE READ THIS SECTION CAREFULLY.**
+All content, design, logos, and software are owned by Verixia Apps.
 
-You agree that any dispute, claim, or controversy arising out of or relating to these Terms or your use of ChatClarity shall be resolved through **binding individual arbitration**, rather than in court.
-
-You waive the right to participate in:
-- Class actions
-- Class arbitrations
-- Representative actions
-
-Arbitration will be conducted on an individual basis in accordance with applicable arbitration rules. Each party will bear its own costs unless otherwise required by law.
+You may not copy, modify, distribute, or create derivative works without permission.
 
 ---
 
-## 8. Termination
+## 10. Privacy
 
-You may stop using ChatClarity at any time.
+Your use of ChatClarity is also governed by our Privacy Policy:
 
-We reserve the right to suspend or discontinue access to the app if these Terms are violated or if required for operational or legal reasons.
-
----
-
-## 9. Changes to These Terms
-
-We may update these Terms from time to time. Changes will be reflected on this page with an updated effective date. Continued use of the app after changes constitutes acceptance of the updated Terms.
+https://verixiaapps.github.io/chatclarity/privacy
 
 ---
 
-## 10. Governing Law
+## 11. Disclaimer of Warranties
 
-These Terms are governed by and construed in accordance with the laws of the United States, without regard to conflict-of-law principles.
+ChatClarity is provided “as is” and “as available.”
+
+We make no warranties regarding availability, accuracy, or reliability.
+
+Use of the App is at your own risk.
 
 ---
 
-## 11. Contact
+## 12. Limitation of Liability
 
-If you have questions about these Terms, please contact:
+To the maximum extent permitted by law, Verixia Apps shall not be liable for any indirect, incidental, or consequential damages arising from use of the App.
 
-support@verixiaapps.com
+---
+
+## 13. Changes to These Terms
+
+We may update these Terms from time to time.
+
+Continued use of ChatClarity after changes means you accept the updated Terms.
+
+---
+
+## 14. Contact
+
+If you have questions about these Terms, contact us:
+
+📧 support@chatclarity.app
+
+---
+
+Thank you for using ChatClarity.
