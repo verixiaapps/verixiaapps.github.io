@@ -2,13 +2,14 @@
 <html>
 <head>
 
-<title>Scam Check Now – Test Page</title>
-<meta name="description" content="Check if a message, website, or offer may be a scam before you respond or send money.">
+<title>Scam Check Now – Free Scam Detector</title>
+
+<meta name="description" content="Check if a message, job offer, link, or website may be a scam. Get a quick risk analysis before sending money or personal information.">
 
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 max-width:700px;
 margin:auto;
 padding:40px;
@@ -25,6 +26,7 @@ button{
 margin-top:10px;
 padding:12px 20px;
 font-size:16px;
+cursor:pointer;
 }
 
 #result{
@@ -41,10 +43,14 @@ white-space:pre-wrap;
 <h1>Scam Check Now</h1>
 
 <p>
-Paste a message, job offer, website, or link and get a scam risk analysis.
+Paste a message, job offer, website, or link and get a scam risk analysis instantly.
 </p>
 
-<textarea id="text"></textarea>
+<textarea id="text" placeholder="Paste message, website, job offer, or link..."></textarea>
+
+<br>
+
+<input id="email" placeholder="Email (required if subscribed)" style="width:100%;padding:10px;margin-top:10px;">
 
 <br>
 
@@ -57,6 +63,7 @@ Paste a message, job offer, website, or link and get a scam risk analysis.
 async function check(){
 
 const text = document.getElementById("text").value;
+const email = document.getElementById("email").value;
 
 const response = await fetch(
 "https://awake-integrity-production-faa0.up.railway.app/analyze",
@@ -66,7 +73,8 @@ headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-text:text
+text:text,
+email:email
 })
 }
 );
@@ -110,6 +118,24 @@ window.location = data.url;
 }
 
 </script>
+
+<hr>
+
+<h2>How the Scam Checker Works</h2>
+
+<p>
+Many scams rely on urgency, pressure, or confusing language. This tool analyzes messages, links, and offers to highlight possible red flags so you can make safer decisions before responding or sending money.
+</p>
+
+<h2>Common Scams This Tool Can Help Identify</h2>
+
+<ul>
+<li>Job offer scams</li>
+<li>Investment scams</li>
+<li>Phishing emails</li>
+<li>Fake websites</li>
+<li>Online marketplace fraud</li>
+</ul>
 
 </body>
 </html>
