@@ -178,17 +178,11 @@ Example:
 
 <h3>Unlock Unlimited Scam Checks</h3>
 
-<button class="plan" onclick="checkout('price_1T83LGJJ0FYjaiRQdPH5y4P2')">
-Weekly Plan
-</button>
+<button class="plan" onclick="checkout('price_1T83LGJJ0FYjaiRQdPH5y4P2')">Weekly Plan</button>
 
-<button class="plan" onclick="checkout('price_1T83MJJJ0FYjaiRQk6BXSIJL')">
-Monthly Plan
-</button>
+<button class="plan" onclick="checkout('price_1T83MJJJ0FYjaiRQk6BXSIJL')">Monthly Plan</button>
 
-<button class="plan" onclick="checkout('price_1T83NVJJ0FYjaiRQ2aowT5k0')">
-Yearly Plan
-</button>
+<button class="plan" onclick="checkout('price_1T83NVJJ0FYjaiRQ2aowT5k0')">Yearly Plan</button>
 
 </div>
 
@@ -199,7 +193,7 @@ Yearly Plan
 <h2>How This Scam Checker Works</h2>
 
 <p>
-This AI scam checker analyzes suspicious messages, emails, job offers and links for patterns commonly used in fraud. The system looks for urgency tactics, impersonation attempts, suspicious domains and requests for payment or personal information.
+This AI scam checker analyzes suspicious messages, emails, job offers and links for patterns commonly used in fraud.
 </p>
 
 </div>
@@ -242,14 +236,14 @@ document.getElementById("email").value = savedEmail
 
 async function check(){
 
-const text = document.getElementById("text").value
-const email = document.getElementById("email").value
+const text=document.getElementById("text").value
+const email=document.getElementById("email").value
 
 if(email){
 localStorage.setItem("email",email)
 }
 
-const response = await fetch(API + "/analyze",{
+const response=await fetch(API+"/analyze",{
 
 method:"POST",
 
@@ -264,11 +258,11 @@ email:email
 
 })
 
-const data = await response.json()
+const data=await response.json()
 
 if(data.limit){
 
-document.getElementById("result").innerText =
+document.getElementById("result").innerText=
 "Free checks used. Upgrade for unlimited scam detection."
 
 document.getElementById("upgrade").style.display="block"
@@ -277,15 +271,17 @@ return
 
 }
 
-document.getElementById("result").innerText = data.result
+document.getElementById("result").innerText=data.result
 
 }
 
 async function checkout(priceId){
 
-const email = document.getElementById("email").value
+const email=document.getElementById("email").value
 
-const response = await fetch(API + "/create-checkout",{
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
 
 method:"POST",
 
@@ -296,14 +292,14 @@ headers:{
 body:JSON.stringify({
 priceId:priceId,
 email:email,
-successUrl:window.location.href
+successUrl:pageUrl
 })
 
 })
 
-const data = await response.json()
+const data=await response.json()
 
-window.location = data.url
+window.location=data.url
 
 }
 
