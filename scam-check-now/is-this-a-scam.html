@@ -283,6 +283,8 @@ document.getElementById("result").innerText = data.result
 
 async function checkout(priceId){
 
+const email = document.getElementById("email").value
+
 const response = await fetch(API + "/create-checkout",{
 
 method:"POST",
@@ -292,7 +294,9 @@ headers:{
 },
 
 body:JSON.stringify({
-priceId:priceId
+priceId:priceId,
+email:email,
+successUrl:window.location.href
 })
 
 })
