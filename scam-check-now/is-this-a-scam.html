@@ -21,8 +21,6 @@ color:#111;
 line-height:1.6;
 }
 
-/* TOP UPGRADE BUTTON */
-
 .upgrade-top{
 position:fixed;
 top:18px;
@@ -175,7 +173,7 @@ font-size:14px;
 
 <body>
 
-<div class="upgrade-top" onclick="document.getElementById('upgrade').scrollIntoView({behavior:'smooth'})">
+<div class="upgrade-top" onclick="showUpgrade()">
 Upgrade
 </div>
 
@@ -288,6 +286,16 @@ if(savedEmail){
 document.getElementById("email").value=savedEmail
 }
 
+function showUpgrade(){
+
+const upgradeBox=document.getElementById("upgrade")
+
+upgradeBox.style.display="block"
+
+upgradeBox.scrollIntoView({behavior:"smooth"})
+
+}
+
 async function check(){
 
 const text=document.getElementById("text").value
@@ -312,16 +320,10 @@ const data=await response.json()
 
 if(data.limit){
 
-document.getElementById("result").innerText =
+document.getElementById("result").innerText=
 "Free checks used. Upgrade for unlimited scam detection."
 
-const upgradeBox=document.getElementById("upgrade")
-
-upgradeBox.style.display="block"
-
-upgradeBox.scrollIntoView({
-behavior:"smooth"
-})
+showUpgrade()
 
 return
 
