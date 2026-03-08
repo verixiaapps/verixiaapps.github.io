@@ -66,6 +66,16 @@ color:white;
 margin-bottom:12px;
 }
 
+input{
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+background:#1a1a1a;
+color:white;
+margin-bottom:12px;
+}
+
 .btn{
 width:100%;
 padding:14px;
@@ -123,6 +133,34 @@ color:#777;
 font-size:12px;
 }
 
+#result{
+margin-top:25px;
+white-space:pre-wrap;
+background:#111;
+padding:20px;
+border-radius:10px;
+}
+
+.upgrade{
+display:none;
+margin-top:25px;
+padding:20px;
+background:#111;
+border-radius:10px;
+text-align:center;
+}
+
+.plan{
+width:100%;
+margin-top:10px;
+background:#e6c15a;
+color:#000;
+padding:12px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+}
+
 </style>
 </head>
 
@@ -144,11 +182,33 @@ Paste a suspicious SMS or message to instantly analyze scam risk
 
 <div class="card">
 
-<textarea placeholder="Paste suspicious text message here..."></textarea>
+<textarea id="text" placeholder="Paste suspicious text message here..."></textarea>
 
-<div class="btn">Check Scam Risk</div>
+<input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="warning">Free checks used — unlock unlimited scans</div>
+<div class="btn" onclick="check()">Check Scam Risk</div>
+
+<div class="warning">3 free scam checks available</div>
+
+<div id="result"></div>
+
+<div class="upgrade" id="upgrade">
+
+<h3>Unlock Unlimited Scam Checks</h3>
+
+<div class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+Weekly Access
+</div>
+
+<div class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+Monthly Access
+</div>
+
+<div class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+Yearly Access
+</div>
+
+</div>
 
 </div>
 
@@ -169,11 +229,11 @@ Paste a suspicious SMS or message to instantly analyze scam risk
 <h2>How the Scam Message Checker Works</h2>
 
 <p>
-Paste the text message you received. The system scans the message for common scam patterns including urgency, impersonation, suspicious links, payment requests, and known phishing tactics.
+Paste the text message you received. The system scans the message for scam patterns including urgency, impersonation, suspicious links and payment requests.
 </p>
 
 <p>
-The result will show a risk level such as <strong>Low Risk, Medium Risk, or High Risk</strong>, along with explanations for why the message may be dangerous.
+You receive a clear result: <strong>Low Risk, Medium Risk, or High Risk</strong> with explanations of potential red flags.
 </p>
 
 </div>
@@ -182,11 +242,11 @@ The result will show a risk level such as <strong>Low Risk, Medium Risk, or High
 
 <h2>Warning Signs of an SMS Scam</h2>
 
-<div class="bullet">• The message creates urgency or fear</div>
-<div class="bullet">• A link asks you to log in or verify information</div>
-<div class="bullet">• You are asked to send money or gift cards</div>
-<div class="bullet">• The sender claims to be a bank or company unexpectedly</div>
-<div class="bullet">• The message contains shortened or suspicious links</div>
+<div class="bullet">• Urgent threats or deadlines</div>
+<div class="bullet">• Links asking you to log in or verify accounts</div>
+<div class="bullet">• Requests for payment or gift cards</div>
+<div class="bullet">• Messages pretending to be banks or delivery companies</div>
+<div class="bullet">• Suspicious shortened links</div>
 
 </div>
 
@@ -212,25 +272,100 @@ Check If a Job Offer Is a Scam
 
 </div>
 
-<div class="cta">
-
-<h2>Check Suspicious Messages Before You Respond</h2>
-
-<p>
-One quick check can prevent scams, identity theft, and financial loss.
-</p>
-
-<a href="#" class="cta-btn">
-Open Scam Checker
-</a>
-
-</div>
-
 <div class="footer">
 Scam Check Now © 2026 • AI powered scam detection
 </div>
 
 </div>
+
+<script>
+
+const API="https://awake-integrity-production-faa0.up.railway.app"
+
+const params=new URLSearchParams(window.location.search)
+
+if(params.get("subscribed")){
+localStorage.setItem("subscriber","true")
+}
+
+const savedEmail=localStorage.getItem("email")
+
+if(savedEmail){
+document.getElementById("email").value=savedEmail
+}
+
+function showUpgrade(){
+
+const upgradeBox=document.getElementById("upgrade")
+
+upgradeBox.style.display="block"
+
+upgradeBox.scrollIntoView({behavior:"smooth"})
+
+}
+
+async function check(){
+
+const text=document.getElementById("text").value
+const email=document.getElementById("email").value
+
+if(email){
+localStorage.setItem("email",email)
+}
+
+const response=await fetch(API+"/analyze",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+text:text,
+email:email
+})
+})
+
+const data=await response.json()
+
+if(data.limit){
+
+document.getElementById("result").innerText=
+"Free checks used. Upgrade for unlimited scam detection."
+
+showUpgrade()
+
+return
+
+}
+
+document.getElementById("result").innerText=data.result
+
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+priceId:priceId,
+email:email,
+successUrl:pageUrl
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
+
+}
+
+</script>
 
 </body>
 </html>
