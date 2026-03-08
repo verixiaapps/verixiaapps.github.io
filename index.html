@@ -33,6 +33,7 @@ font-weight:700;
 cursor:pointer;
 z-index:999;
 box-shadow:0 4px 12px rgba(0,0,0,0.4);
+border:none;
 }
 
 .upgrade-top:hover{
@@ -82,6 +83,7 @@ border:none;
 background:#1a1a1a;
 color:white;
 margin-bottom:12px;
+font-size:16px;
 }
 
 input{
@@ -92,6 +94,7 @@ border:none;
 background:#1a1a1a;
 color:white;
 margin-bottom:12px;
+font-size:16px;
 }
 
 .btn{
@@ -101,8 +104,9 @@ border-radius:10px;
 background:#e6c15a;
 color:black;
 font-weight:700;
-text-align:center;
 cursor:pointer;
+border:none;
+font-size:16px;
 }
 
 .warning{
@@ -189,6 +193,7 @@ padding:12px;
 border-radius:8px;
 font-weight:700;
 cursor:pointer;
+border:none;
 }
 
 </style>
@@ -196,7 +201,7 @@ cursor:pointer;
 
 <body>
 
-<div class="upgrade-top" onclick="showUpgrade()">Upgrade</div>
+<button class="upgrade-top" type="button" onclick="showUpgrade()">Upgrade</button>
 
 <div class="container">
 
@@ -213,7 +218,7 @@ cursor:pointer;
 
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="btn" onclick="check()">Check Scam Risk</div>
+<button type="button" class="btn" onclick="check()">Check Scam Risk</button>
 
 <div class="warning">3 free scam checks available</div>
 
@@ -223,17 +228,11 @@ cursor:pointer;
 
 <h3>Unlock Unlimited Scam Checks</h3>
 
-<div class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
-Weekly Access
-</div>
+<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
 
-<div class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
-Monthly Access
-</div>
+<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
 
-<div class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
-Yearly Access
-</div>
+<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
 
 </div>
 
@@ -303,16 +302,15 @@ document.getElementById("email").value=savedEmail
 }
 
 function showUpgrade(){
-
 const upgradeBox=document.getElementById("upgrade")
-
 upgradeBox.style.display="block"
-
 upgradeBox.scrollIntoView({behavior:"smooth"})
-
 }
 
 async function check(){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
 
 const text=document.getElementById("text").value
 const email=document.getElementById("email").value
@@ -335,14 +333,9 @@ email:email
 const data=await response.json()
 
 if(data.limit){
-
-document.getElementById("result").innerText=
-"Free checks used. Upgrade for unlimited scam detection."
-
+document.getElementById("result").innerText="Free checks used. Upgrade for unlimited scam detection."
 showUpgrade()
-
 return
-
 }
 
 document.getElementById("result").innerText=data.result
@@ -350,6 +343,9 @@ document.getElementById("result").innerText=data.result
 }
 
 async function checkout(priceId){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
 
 const email=document.getElementById("email").value
 
