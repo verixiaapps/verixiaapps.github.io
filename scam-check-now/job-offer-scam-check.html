@@ -6,7 +6,7 @@
 
 <title>Is This Job Offer a Scam? Check Job Offers Instantly</title>
 
-<meta name="description" content="Check if a job offer is a scam. Paste the job message, recruiter email, or job listing to instantly analyze scam risk and detect fake job offers." />
+<meta name="description" content="Check if a job offer is a scam. Paste the job message, recruiter email, or job listing to instantly analyze scam risk and detect fake job offers.">
 
 <meta name="keywords" content="job offer scam check, is this job offer a scam, fake job offer checker, job scam detector, recruiter scam check">
 
@@ -33,10 +33,7 @@ font-weight:700;
 cursor:pointer;
 z-index:999;
 box-shadow:0 4px 12px rgba(0,0,0,0.4);
-}
-
-.upgrade-top:hover{
-background:#f0d27c;
+border:none;
 }
 
 .container{
@@ -82,6 +79,7 @@ border:none;
 background:#1a1a1a;
 color:white;
 margin-bottom:12px;
+font-size:16px;
 }
 
 input{
@@ -92,6 +90,7 @@ border:none;
 background:#1a1a1a;
 color:white;
 margin-bottom:12px;
+font-size:16px;
 }
 
 .btn{
@@ -101,8 +100,9 @@ border-radius:10px;
 background:#e6c15a;
 color:black;
 font-weight:700;
-text-align:center;
 cursor:pointer;
+border:none;
+font-size:16px;
 }
 
 .warning{
@@ -157,6 +157,7 @@ padding:12px;
 border-radius:8px;
 font-weight:700;
 cursor:pointer;
+border:none;
 }
 
 </style>
@@ -164,7 +165,7 @@ cursor:pointer;
 
 <body>
 
-<div class="upgrade-top" onclick="showUpgrade()">Upgrade</div>
+<button class="upgrade-top" type="button" onclick="showUpgrade()">Upgrade</button>
 
 <div class="container">
 
@@ -186,7 +187,7 @@ Paste a recruiter message, job offer email, or job listing to analyze scam risk
 
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="btn" onclick="check()">Check Job Offer Risk</div>
+<button type="button" class="btn" onclick="check()">Check Job Offer Risk</button>
 
 <div class="warning">3 free scam checks available</div>
 
@@ -196,17 +197,17 @@ Paste a recruiter message, job offer email, or job listing to analyze scam risk
 
 <h3>Unlock Unlimited Scam Checks</h3>
 
-<div class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
 Weekly Access
-</div>
+</button>
 
-<div class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
 Monthly Access
-</div>
+</button>
 
-<div class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
 Yearly Access
-</div>
+</button>
 
 </div>
 
@@ -275,14 +276,15 @@ document.getElementById("email").value=savedEmail
 function showUpgrade(){
 
 const upgradeBox=document.getElementById("upgrade")
-
 upgradeBox.style.display="block"
-
 upgradeBox.scrollIntoView({behavior:"smooth"})
 
 }
 
 async function check(){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
 
 const text=document.getElementById("text").value
 const email=document.getElementById("email").value
@@ -306,11 +308,8 @@ const data=await response.json()
 
 if(data.limit){
 
-document.getElementById("result").innerText=
-"Free checks used. Upgrade for unlimited scam detection."
-
+document.getElementById("result").innerText="Free checks used. Upgrade for unlimited scam detection."
 showUpgrade()
-
 return
 
 }
@@ -320,6 +319,9 @@ document.getElementById("result").innerText=data.result
 }
 
 async function checkout(priceId){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
 
 const email=document.getElementById("email").value
 
