@@ -33,6 +33,7 @@ font-weight:600;
 cursor:pointer;
 z-index:999;
 box-shadow:0 4px 10px rgba(0,0,0,0.2);
+border:none;
 }
 
 .upgrade-top:hover{
@@ -173,9 +174,9 @@ font-size:14px;
 
 <body>
 
-<div class="upgrade-top" onclick="showUpgrade()">
+<button class="upgrade-top" type="button" onclick="showUpgrade()">
 Upgrade
-</div>
+</button>
 
 <div class="hero">
 
@@ -194,7 +195,7 @@ Example:
 
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<button class="check" onclick="check()">Analyze Scam Risk</button>
+<button type="button" class="check" onclick="check()">Analyze Scam Risk</button>
 
 <div class="note">
 3 free scam checks available
@@ -206,15 +207,15 @@ Example:
 
 <h3>Unlock Unlimited Scam Checks</h3>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
 Weekly Access
 </button>
 
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
 Monthly Access
 </button>
 
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
 Yearly Access
 </button>
 
@@ -265,9 +266,7 @@ This tool provides a quick second opinion using AI analysis so users can better 
 </div>
 
 <div class="footer">
-
 Scam Check Now © 2026 • AI scam detection • Not legal or financial advice
-
 </div>
 
 <script>
@@ -289,14 +288,15 @@ document.getElementById("email").value=savedEmail
 function showUpgrade(){
 
 const upgradeBox=document.getElementById("upgrade")
-
 upgradeBox.style.display="block"
-
 upgradeBox.scrollIntoView({behavior:"smooth"})
 
 }
 
 async function check(){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
 
 const text=document.getElementById("text").value
 const email=document.getElementById("email").value
@@ -324,7 +324,6 @@ document.getElementById("result").innerText=
 "Free checks used. Upgrade for unlimited scam detection."
 
 showUpgrade()
-
 return
 
 }
@@ -334,6 +333,9 @@ document.getElementById("result").innerText=data.result
 }
 
 async function checkout(priceId){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
 
 const email=document.getElementById("email").value
 
