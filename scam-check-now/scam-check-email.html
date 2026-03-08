@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Scam Email Checker | Check If an Email Is a Scam</title>
+
+<meta name="description" content="Paste a suspicious email and instantly check if it may be a scam. Detect phishing emails, fake invoices, job offer scams, and impersonation attempts.">
+
+<meta name="keywords" content="check scam email, is this email a scam, phishing email checker, fake email scam detector, suspicious email check">
+
+<meta name="robots" content="index, follow">
+
+<style>
+
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+background:radial-gradient(circle at top,#111,#000);
+color:white;
+}
+
+.upgrade-top{
+position:fixed;
+top:18px;
+right:18px;
+background:#e6c15a;
+color:#000;
+padding:10px 18px;
+border-radius:8px;
+font-weight:700;
+cursor:pointer;
+z-index:999;
+box-shadow:0 4px 12px rgba(0,0,0,0.4);
+border:none;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:24px;
+}
+
+.header{
+color:#e6c15a;
+font-weight:600;
+margin-bottom:30px;
+}
+
+.hero{
+text-align:center;
+margin-bottom:30px;
+}
+
+h1{
+font-size:38px;
+margin-bottom:10px;
+}
+
+.sub{
+color:#bbb;
+font-size:18px;
+}
+
+.card{
+background:#111;
+border:1px solid #222;
+border-radius:16px;
+padding:20px;
+margin-top:20px;
+}
+
+textarea{
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+background:#1a1a1a;
+color:white;
+margin-bottom:12px;
+font-size:16px;
+}
+
+input{
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+background:#1a1a1a;
+color:white;
+margin-bottom:12px;
+font-size:16px;
+}
+
+.btn{
+width:100%;
+padding:14px;
+border-radius:10px;
+background:#e6c15a;
+color:black;
+font-weight:700;
+cursor:pointer;
+border:none;
+font-size:16px;
+}
+
+.warning{
+text-align:center;
+color:#ff4d4d;
+margin-top:12px;
+}
+
+.section{
+margin-top:40px;
+}
+
+h2{
+margin-bottom:10px;
+}
+
+.bullet{
+margin:6px 0;
+color:#ccc;
+}
+
+.footer{
+margin-top:60px;
+text-align:center;
+color:#777;
+font-size:12px;
+}
+
+#result{
+margin-top:25px;
+white-space:pre-wrap;
+background:#111;
+padding:20px;
+border-radius:10px;
+}
+
+.upgrade{
+display:none;
+margin-top:25px;
+padding:20px;
+background:#111;
+border-radius:10px;
+text-align:center;
+}
+
+.plan{
+width:100%;
+margin-top:10px;
+background:#e6c15a;
+color:#000;
+padding:12px;
+border-radius:8px;
+font-weight:700;
+cursor:pointer;
+border:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<button class="upgrade-top" type="button" onclick="showUpgrade()">Upgrade</button>
+
+<div class="container">
+
+<div class="header">🛡️ Scam Check Now</div>
+
+<div class="hero">
+<h1>Check If an Email Is a Scam</h1>
+<div class="sub">Paste a suspicious email to instantly analyze phishing and fraud risk</div>
+</div>
+
+<div class="card">
+
+<textarea id="text" placeholder="Paste suspicious email here..."></textarea>
+
+<input id="email" placeholder="Email (used to verify subscriptions)">
+
+<button type="button" class="btn" onclick="check()">Check Email Risk</button>
+
+<div class="warning">3 free scam checks available</div>
+
+<div id="result"></div>
+
+<div class="upgrade" id="upgrade">
+
+<h3>Unlock Unlimited Scam Checks</h3>
+
+<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+
+<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+
+<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+
+</div>
+
+</div>
+
+<div class="section">
+<h2>Common Email Scams</h2>
+<div class="bullet">• Phishing emails asking for passwords</div>
+<div class="bullet">• Fake payment or invoice emails</div>
+<div class="bullet">• Job offer scams sent by email</div>
+<div class="bullet">• Cryptocurrency investment scams</div>
+<div class="bullet">• Emails impersonating banks or companies</div>
+</div>
+
+<div class="section">
+<h2>How the Email Scam Checker Works</h2>
+<p>
+Paste the email message you received. The system scans for phishing signals including impersonation attempts, suspicious links, payment requests, and urgency tactics used by scammers.
+</p>
+<p>
+You receive a clear result: <strong>Low Risk, Medium Risk, or High Risk</strong> with explanations of possible red flags.
+</p>
+</div>
+
+<div class="section">
+<h2>Warning Signs of an Email Scam</h2>
+<div class="bullet">• Urgent requests for payment</div>
+<div class="bullet">• Links asking you to verify accounts</div>
+<div class="bullet">• Suspicious attachments</div>
+<div class="bullet">• Sender email not matching the company</div>
+<div class="bullet">• Requests for personal information</div>
+</div>
+
+<div class="footer">
+Scam Check Now © 2026 • AI powered scam detection
+</div>
+
+</div>
+
+<script>
+
+const API="https://awake-integrity-production-faa0.up.railway.app"
+
+const params=new URLSearchParams(window.location.search)
+
+if(params.get("subscribed")){
+localStorage.setItem("subscriber","true")
+}
+
+const savedEmail=localStorage.getItem("email")
+
+if(savedEmail){
+document.getElementById("email").value=savedEmail
+}
+
+function showUpgrade(){
+const box=document.getElementById("upgrade")
+box.style.display="block"
+box.scrollIntoView({behavior:"smooth"})
+}
+
+async function check(){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
+
+const text=document.getElementById("text").value
+const email=document.getElementById("email").value
+
+if(email){
+localStorage.setItem("email",email)
+}
+
+const response=await fetch(API+"/analyze",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+text:text,
+email:email
+})
+})
+
+const data=await response.json()
+
+if(data.limit){
+document.getElementById("result").innerText="Free checks used. Upgrade for unlimited scam detection."
+showUpgrade()
+return
+}
+
+document.getElementById("result").innerText=data.result
+}
+
+async function checkout(priceId){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
+
+const email=document.getElementById("email").value
+
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+priceId:priceId,
+email:email,
+successUrl:pageUrl
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
+
+}
+
+</script>
+
+</body>
+</html>
