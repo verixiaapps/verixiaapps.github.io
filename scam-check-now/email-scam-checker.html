@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Email Scam Checker | Check If an Email Is a Scam</title>
+
+<meta name="description" content="Paste a suspicious email and instantly check if it may be a scam. Detect phishing emails, fake invoices, account alerts, and fraud attempts.">
+
+<meta name="keywords" content="email scam checker, phishing email checker, check scam email, detect phishing email, email fraud checker">
+
+<meta name="robots" content="index, follow">
+
+<style>
+
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:radial-gradient(circle at top,#111,#000);color:white;}
+.upgrade-top{position:fixed;top:18px;right:18px;background:#e6c15a;color:#000;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,0.4);border:none;}
+.container{max-width:900px;margin:auto;padding:24px;}
+.header{color:#e6c15a;font-weight:600;margin-bottom:30px;}
+.hero{text-align:center;margin-bottom:30px;}
+h1{font-size:40px;margin-bottom:10px;}
+.sub{color:#bbb;font-size:18px;}
+.card{background:#111;border:1px solid #222;border-radius:16px;padding:20px;margin-top:20px;}
+textarea{width:100%;padding:14px;border-radius:10px;border:none;background:#1a1a1a;color:white;margin-bottom:12px;font-size:16px;}
+input{width:100%;padding:14px;border-radius:10px;border:none;background:#1a1a1a;color:white;margin-bottom:12px;font-size:16px;}
+.btn{width:100%;padding:14px;border-radius:10px;background:#e6c15a;color:black;font-weight:700;cursor:pointer;border:none;font-size:16px;}
+.warning{text-align:center;color:#ff4d4d;margin-top:12px;}
+.section{margin-top:40px;}
+h2{margin-bottom:10px;}
+.bullet{margin:6px 0;color:#ccc;}
+.footer{margin-top:60px;text-align:center;color:#777;font-size:12px;}
+#result{margin-top:25px;white-space:pre-wrap;background:#111;padding:20px;border-radius:10px;}
+.upgrade{display:none;margin-top:25px;padding:20px;background:#111;border-radius:10px;text-align:center;}
+.plan{width:100%;margin-top:10px;background:#e6c15a;color:#000;padding:12px;border-radius:8px;font-weight:700;cursor:pointer;border:none;}
+a{color:#e6c15a;text-decoration:none;}
+
+</style>
+</head>
+
+<body>
+
+<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+
+<div class="container">
+
+<div class="header">🛡️ Scam Check Now</div>
+
+<div class="hero">
+<h1>Email Scam Checker</h1>
+<div class="sub">Paste a suspicious email to analyze scam risk instantly</div>
+</div>
+
+<div class="card">
+
+<textarea id="text" placeholder="Paste suspicious email here..."></textarea>
+<input id="email" placeholder="Email (used to verify subscriptions)">
+<button class="btn" onclick="check()">Check Email</button>
+
+<div class="warning">3 free scam checks available</div>
+<div id="result"></div>
+
+<div class="upgrade" id="upgrade">
+<h3>Unlock Unlimited Scam Checks</h3>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>How Email Scams Work</h2>
+
+<p>
+Email scams often impersonate trusted companies like banks, PayPal, or delivery services. These phishing emails attempt to steal passwords, financial information, or trick victims into sending money.
+</p>
+
+<p>
+Paste the email into the scam checker above to analyze common fraud signals such as suspicious links, impersonation, and payment requests.
+</p>
+
+</div>
+
+<div class="section">
+
+<h2>Common Email Scam Types</h2>
+
+<div class="bullet">• Phishing emails asking for login information</div>
+<div class="bullet">• Fake invoice or payment requests</div>
+<div class="bullet">• Cryptocurrency investment scams</div>
+<div class="bullet">• Account security alerts</div>
+<div class="bullet">• Fake job offers</div>
+
+</div>
+
+<div class="section">
+
+<h2>Related Scam Checks</h2>
+
+<div class="bullet"><a href="/scam-check-now/scam-message-checker.html">Scam Message Checker</a></div>
+<div class="bullet"><a href="/scam-check-now/text-scam-checker.html">Text Scam Checker</a></div>
+<div class="bullet"><a href="/scam-check-now/job-offer-scam-check.html">Job Offer Scam Checker</a></div>
+
+</div>
+
+<div class="footer">
+Scam Check Now © 2026 • AI powered scam detection
+</div>
+
+</div>
+
+<script src="/scam-check-now/app-link.js"></script>
+
+<script>
+
+const API="https://awake-integrity-production-faa0.up.railway.app"
+
+function showUpgrade(){
+document.getElementById("upgrade").style.display="block"
+}
+
+async function check(){
+
+const text=document.getElementById("text").value
+const email=document.getElementById("email").value
+
+const response=await fetch(API+"/analyze",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({text:text,email:email})
+})
+
+const data=await response.json()
+
+if(data.limit){
+document.getElementById("result").innerText="Free checks used. Upgrade for unlimited scam detection."
+showUpgrade()
+return
+}
+
+document.getElementById("result").innerText=data.result
+
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({priceId:priceId,email:email,successUrl:pageUrl})
+})
+
+const data=await response.json()
+window.location=data.url
+
+}
+
+</script>
+
+</body>
+</html>
