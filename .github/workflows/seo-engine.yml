@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -25,24 +24,20 @@ jobs:
           pip install openai
 
       - name: Expand keywords
-        run: |
-          python scripts/expand_keywords.py
+        run: python scripts/expand_keywords.py
 
       - name: Generate AI content
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python scripts/generate_content.py
+        run: python scripts/generate_content.py
 
       - name: Build SEO pages
-        run: |
-          python scripts/build_seo.py
+        run: python scripts/build_seo.py
 
       - name: Commit changes
         run: |
           git config --global user.name "seo-bot"
           git config --global user.email "bot@github.com"
-
           git add .
           git commit -m "auto seo pages update" || echo "No changes"
           git push
