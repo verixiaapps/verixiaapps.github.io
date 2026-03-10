@@ -189,6 +189,15 @@ margin-top:70px;
 padding:0 20px;
 }
 
+.section h2{
+font-size:26px;
+margin-bottom:12px;
+}
+
+.section p{
+margin-bottom:18px;
+}
+
 .footer{
 text-align:center;
 margin-top:80px;
@@ -203,12 +212,17 @@ font-size:14px;
 
 <body>
 
-<button class="app-top" type="button" onclick="openApp()">📱 Get App</button>
-<button class="upgrade-top" type="button" onclick="showUpgrade()">Upgrade</button>
+<button class="app-top" type="button" onclick="openApp()">
+📱 Get App
+</button>
+
+<button class="upgrade-top" type="button" onclick="showUpgrade()">
+Upgrade
+</button>
 
 <div class="hero">
 
-<h1>{{KEYWORD}}</h1>
+<h1>{{KEYWORD}} Scam Check</h1>
 
 <p>Free AI scam checker for suspicious messages, emails, job offers and links.</p>
 
@@ -216,7 +230,10 @@ font-size:14px;
 
 <div class="container">
 
-<textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here..."></textarea>
+<textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here...
+
+Example:
+'You've won a crypto giveaway. Send 0.5 ETH to claim your reward.'"></textarea>
 
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
@@ -227,6 +244,10 @@ font-size:14px;
 <button type="button" class="check" onclick="check()">
 Check Scam Risk
 </button>
+
+<div class="note">
+Instant AI analysis appears after submission
+</div>
 
 <div id="result"></div>
 
@@ -281,6 +302,85 @@ Scam Check Now © 2026 • AI scam detection • Not legal or financial advice
 </div>
 
 <script src="/scam-check-now/app-link.js"></script>
+
+<script>
+
+const API="https://awake-integrity-production-faa0.up.railway.app"
+
+function showUpgrade(){
+document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+}
+
+async function check(){
+
+document.getElementById("text").blur()
+document.getElementById("email").blur()
+
+const text=document.getElementById("text").value.trim()
+const email=document.getElementById("email").value
+
+if(!text){
+document.getElementById("result").innerText="Paste a message, email, or link to analyze."
+return
+}
+
+const response=await fetch(API+"/analyze",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+text:text,
+email:email
+})
+})
+
+const data=await response.json()
+
+if(data.limit){
+
+document.getElementById("result").innerText=
+"Free checks used. Upgrade for unlimited scam detection."
+
+document.getElementById("resultAction").style.display="block"
+
+showUpgrade()
+
+return
+}
+
+document.getElementById("result").innerText=data.result
+
+document.getElementById("resultAction").style.display="block"
+
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+priceId:priceId,
+email:email,
+successUrl:pageUrl
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
+
+}
+
+</script>
 
 </body>
 </html>
