@@ -1,0 +1,33 @@
+name: SEO Page Generator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run SEO builder
+        run: python scripts/build_seo.py
+
+      - name: Commit pages
+        run: |
+          git config --global user.name "seo-bot"
+          git config --global user.email "bot@github.com"
+          git add .
+          git commit -m "auto seo pages" || echo "no changes"
+          git push
