@@ -21,7 +21,6 @@ def slugify(text):
     return text.strip("-")
 
 
-# ensure folders exist
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(CONTENT_DIR, exist_ok=True)
 
@@ -58,16 +57,14 @@ for page in pages:
 
     description = f"{keyword.title()} tool. Check suspicious messages, emails, links or job offers for scam risk."
 
-    # AI CONTENT
     content_path = f"{CONTENT_DIR}/{slug}.txt"
 
     if os.path.exists(content_path):
         with open(content_path) as f:
             ai_text = f.read()
     else:
-        ai_text = ""
+        ai_text = f"{keyword.title()} scams often involve messages requesting payment, personal information, or urgent action. If you receive a suspicious message related to {keyword}, verify the sender and avoid clicking unknown links or sending money."
 
-    # RELATED LINKS
     related_candidates = [p for p in pages if p["slug"] != slug]
 
     related_pages = random.sample(
@@ -96,8 +93,6 @@ for page in pages:
 
     print("generated:", filename)
 
-
-# BUILD ALL-PAGES HUB
 
 links = ""
 
@@ -133,13 +128,12 @@ with open(ALL_PAGES_FILE, "w") as f:
 print("updated all-pages.html")
 
 
-# BUILD SITEMAP
-
 today = datetime.utcnow().strftime("%Y-%m-%d")
 
 sitemap_links = ""
 
 for page in pages:
+
     slug = page["slug"]
 
     sitemap_links += f"""
@@ -148,6 +142,7 @@ for page in pages:
 <lastmod>{today}</lastmod>
 </url>
 """
+
 
 sitemap_xml = f"""
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
