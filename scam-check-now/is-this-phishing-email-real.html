@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
@@ -21,10 +20,70 @@ color:#111;
 line-height:1.6;
 }
 
+.app-top{
+position:fixed;
+top:18px;
+left:18px;
+background:#0066ff;
+color:white;
+padding:10px 16px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+z-index:999;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+border:none;
+}
+
+.app-top:hover{
+background:#004fd1;
+}
+
+.upgrade-top{
+position:fixed;
+top:18px;
+right:18px;
+background:#111;
+color:white;
+padding:10px 16px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+z-index:999;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+border:none;
+}
+
+.upgrade-top:hover{
+background:#333;
+}
+
+.hero{
+background:linear-gradient(135deg,#0066ff,#3c8cff);
+color:white;
+padding:70px 20px;
+text-align:center;
+}
+
+.hero h1{
+margin:0;
+font-size:40px;
+}
+
+.hero p{
+margin-top:12px;
+font-size:18px;
+opacity:.95;
+}
+
 .container{
 max-width:760px;
 margin:auto;
-padding:40px 20px;
+margin-top:-45px;
+background:white;
+padding:35px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,0.12);
 }
 
 textarea{
@@ -62,6 +121,17 @@ margin-top:10px;
 font-weight:600;
 }
 
+.check:hover{
+background:#004fd1;
+}
+
+.note{
+margin-top:12px;
+font-size:14px;
+color:#666;
+text-align:center;
+}
+
 #result{
 margin-top:25px;
 white-space:pre-wrap;
@@ -71,8 +141,69 @@ padding:20px;
 border-radius:8px;
 }
 
+.resultAction{
+display:none;
+margin-top:18px;
+text-align:center;
+}
+
+.resultAction button{
+background:#0066ff;
+color:white;
+padding:14px 20px;
+border-radius:8px;
+font-weight:600;
+border:none;
+cursor:pointer;
+}
+
+.resultAction button:hover{
+background:#004fd1;
+}
+
+.upgrade{
+display:none;
+margin-top:25px;
+padding:25px;
+background:#f7f9ff;
+border-radius:10px;
+text-align:center;
+}
+
+.plan{
+width:100%;
+margin-top:10px;
+background:#111;
+color:white;
+font-weight:600;
+}
+
+.plan:hover{
+background:#333;
+}
+
 .section{
-margin-top:50px;
+max-width:760px;
+margin:auto;
+margin-top:70px;
+padding:0 20px;
+}
+
+.section h2{
+font-size:26px;
+margin-bottom:12px;
+}
+
+.section p{
+margin-bottom:18px;
+}
+
+.footer{
+text-align:center;
+margin-top:80px;
+padding:40px;
+color:#777;
+font-size:14px;
 }
 
 </style>
@@ -81,17 +212,74 @@ margin-top:50px;
 
 <body>
 
+<button class="app-top" type="button" onclick="openApp()">
+📱 Get App
+</button>
+
+<button class="upgrade-top" type="button" onclick="showUpgrade()">
+Upgrade
+</button>
+
+<div class="hero">
+
+<h1>is this phishing email real Scam Check</h1>
+
+<p>Free AI scam checker for suspicious messages, emails, job offers and links.</p>
+
+</div>
+
 <div class="container">
 
-<h1>is this phishing email real</h1>
+<textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here...
 
-<textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here..."></textarea>
+Example:
+'You've won a crypto giveaway. Send 0.5 ETH to claim your reward.'"></textarea>
 
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<button class="check" onclick="check()">Check Scam Risk</button>
+<div class="note">
+3 free scam checks available • no signup required
+</div>
+
+<button type="button" class="check" onclick="check()">
+Check Scam Risk
+</button>
+
+<div class="note">
+Instant AI analysis appears after submission
+</div>
 
 <div id="result"></div>
+
+<div id="resultAction" class="resultAction">
+
+<p style="margin-bottom:10px;font-weight:600;">
+Scan suspicious messages instantly on your phone
+</p>
+
+<button onclick="openApp()">📱 Get the Scam Check App</button>
+
+</div>
+
+<div class="upgrade" id="upgrade">
+
+<h3>Unlock Unlimited Scam Checks</h3>
+
+<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+Weekly Access
+</button>
+
+<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+Monthly Access
+</button>
+
+<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+Yearly Access
+</button>
+
+</div>
+
+</div>
 
 <div class="section">
 
@@ -101,45 +289,21 @@ margin-top:50px;
 Phishing emails often pretend to be from trusted sources like banks or popular companies. They usually ask you to click a link or provide personal information. Common warning signs include spelling mistakes, urgent or threatening language, unfamiliar sender addresses, and links that don’t match the official website. If you receive a suspicious message, don’t click any links or download attachments. Instead, verify the sender by contacting the company directly through their official website or phone number. Always keep your software updated and consider using security tools to help detect scams. Staying cautious helps protect your personal information and devices from fraud.
 </p>
 
-</div>
-
-<div class="section">
-
-<h2>Common Scam Warning Signs</h2>
+<h3>Related Scam Checks</h3>
 
 <ul>
-<li>Requests for urgent payment or cryptocurrency</li>
-<li>Messages impersonating companies or government agencies</li>
-<li>Links directing you to unfamiliar websites</li>
-<li>Requests for passwords, codes or personal information</li>
-<li>Offers that appear too good to be true</li>
-</ul>
-
-</div>
-
-<div class="section">
-
-<h2>Related Scam Checks</h2>
-
-<ul>
-
-<li><a href="/scam-check-now/verify-scam-text.html">Verify Scam Text</a></li>
-<li><a href="/scam-check-now/is-this-paypal-scam-legit.html">Is This Paypal Scam Legit</a></li>
-<li><a href="/scam-check-now/how-to-identify-crypto-scam.html">How To Identify Crypto Scam</a></li>
-<li><a href="/scam-check-now/detect-telegram-scam.html">Detect Telegram Scam</a></li>
-<li><a href="/scam-check-now/is-this-fake-investment-legit.html">Is This Fake Investment Legit</a></li>
-
+<li><a href="/scam-check-now/detect-fake-investment.html">Detect Fake Investment</a></li>
+<li><a href="/scam-check-now/is-this-a-fake-investment.html">Is This A Fake Investment</a></li>
+<li><a href="/scam-check-now/is-this-a-facebook-scam.html">Is This A Facebook Scam</a></li>
+<li><a href="/scam-check-now/is-this-a-instagram-scam.html">Is This A Instagram Scam</a></li>
+<li><a href="/scam-check-now/check-suspicious-telegram-scam.html">Check Suspicious Telegram Scam</a></li>
 
 </ul>
 
 </div>
 
-<p>
-<a href="/scam-check-now/is-this-a-scam.html">
-Open the main scam checker tool
-</a>
-</p>
-
+<div class="footer">
+Scam Check Now © 2026 • AI scam detection • Not legal or financial advice
 </div>
 
 <script src="/scam-check-now/app-link.js"></script>
@@ -148,10 +312,23 @@ Open the main scam checker tool
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
+function showUpgrade(){
+document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+}
+
 async function check(){
 
-const text=document.getElementById("text").value
+document.getElementById("text").blur()
+document.getElementById("email").blur()
+
+const text=document.getElementById("text").value.trim()
 const email=document.getElementById("email").value
+
+if(!text){
+document.getElementById("result").innerText="Paste a message, email, or link to analyze."
+return
+}
 
 const response=await fetch(API+"/analyze",{
 method:"POST",
@@ -166,12 +343,49 @@ email:email
 
 const data=await response.json()
 
+if(data.limit){
+
+document.getElementById("result").innerText=
+"Free checks used. Upgrade for unlimited scam detection."
+
+document.getElementById("resultAction").style.display="block"
+
+showUpgrade()
+
+return
+}
+
 document.getElementById("result").innerText=data.result
+
+document.getElementById("resultAction").style.display="block"
+
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+priceId:priceId,
+email:email,
+successUrl:pageUrl
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
 
 }
 
 </script>
 
 </body>
-
 </html>
