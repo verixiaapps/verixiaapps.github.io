@@ -1,30 +1,44 @@
 import os
 
-seed_file = "data/seed_keywords.txt"
-pattern_file = "data/patterns.txt"
+SEED_FILE = "data/seed_keywords.txt"
+PATTERN_FILE = "data/patterns.txt"
+OUTPUT_FILE = "data/keywords.txt"
 
-output_file = "data/keywords.txt"
 
-seeds = open(seed_file).read().splitlines()
-patterns = open(pattern_file).read().splitlines()
+# ensure data directory exists
+os.makedirs("data", exist_ok=True)
 
-keywords = []
+
+# load seeds
+with open(SEED_FILE) as f:
+    seeds = [s.strip() for s in f.readlines() if s.strip()]
+
+
+# load patterns
+with open(PATTERN_FILE) as f:
+    patterns = [p.strip() for p in f.readlines() if p.strip()]
+
+
+keywords = set()
+
 
 for seed in seeds:
-
     for pattern in patterns:
 
         kw = pattern.replace("{keyword}", seed)
 
-        keywords.append(kw)
+        kw = kw.strip().lower()
+
+        keywords.add(kw)
 
 
-keywords = list(set(keywords))
+# sort for stable output
+keywords = sorted(list(keywords))
 
-with open(output_file,"w") as f:
 
+with open(OUTPUT_FILE, "w") as f:
     for kw in keywords:
-
         f.write(kw + "\n")
+
 
 print("Generated", len(keywords), "keywords")
