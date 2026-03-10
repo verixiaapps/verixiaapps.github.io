@@ -54,11 +54,6 @@ for page in pages:
     filename = f"{slug}.html"
     path = f"{OUTPUT_DIR}/{filename}"
 
-    # DO NOT overwrite existing pages
-    if os.path.exists(path):
-        print("skipping existing page:", filename)
-        continue
-
     title = keyword.title() + " | Scam Check Now"
 
     description = f"{keyword.title()} tool. Check suspicious messages, emails, links or job offers for scam risk."
