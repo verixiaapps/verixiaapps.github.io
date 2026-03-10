@@ -101,9 +101,10 @@ for page in pages:
 
 links = ""
 
-for page in generated:
-    title = page.replace("-", " ").replace(".html", "").title()
-    links += f'<div><a href="/scam-check-now/{page}">{title}</a></div>\n'
+for page in pages:
+    slug = page["slug"]
+    title = page["keyword"].title()
+    links += f'<div><a href="/scam-check-now/{slug}.html">{title}</a></div>\n'
 
 
 all_pages_html = f"""
@@ -138,10 +139,12 @@ today = datetime.utcnow().strftime("%Y-%m-%d")
 
 sitemap_links = ""
 
-for page in generated:
+for page in pages:
+    slug = page["slug"]
+
     sitemap_links += f"""
 <url>
-<loc>{SITE}/scam-check-now/{page}</loc>
+<loc>{SITE}/scam-check-now/{slug}.html</loc>
 <lastmod>{today}</lastmod>
 </url>
 """
