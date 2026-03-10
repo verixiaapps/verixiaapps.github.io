@@ -365,8 +365,13 @@ async function check(){
 document.getElementById("text").blur()
 document.getElementById("email").blur()
 
-const text=document.getElementById("text").value
+const text=document.getElementById("text").value.trim()
 const email=document.getElementById("email").value
+
+if(!text){
+document.getElementById("result").innerText="Paste a message, email, or link to analyze."
+return
+}
 
 if(email){
 localStorage.setItem("email",email)
@@ -390,9 +395,11 @@ if(data.limit){
 document.getElementById("result").innerText=
 "Free checks used. Upgrade for unlimited scam detection."
 
-showUpgrade()
-return
+document.getElementById("resultAction").style.display="block"
 
+showUpgrade()
+
+return
 }
 
 document.getElementById("result").innerText=data.result
