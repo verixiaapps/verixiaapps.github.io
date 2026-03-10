@@ -31,6 +31,23 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python scripts/generate_content.py
 
+      - name: Remove previously generated SEO pages
+        run: |
+          python - << 'EOF'
+import os,re
+keywords=open("data/keywords.txt").read().splitlines()
+def slugify(text):
+    text=text.lower()
+    text=re.sub(r'[^a-z0-9]+','-',text)
+    return text.strip("-")
+for kw in keywords:
+    slug=slugify(kw)
+    path=f"scam-check-now/{slug}.html"
+    if os.path.exists(path):
+        os.remove(path)
+        print("deleted",path)
+EOF
+
       - name: Build SEO pages
         run: python scripts/build_seo.py
 
