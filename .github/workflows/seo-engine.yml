@@ -1,10 +1,14 @@
 name: SEO Engine
 
 on:
+
   workflow_dispatch:
 
   schedule:
     - cron: "0 4 * * *"
+
+permissions:
+  contents: write
 
 jobs:
 
@@ -16,6 +20,8 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -41,13 +47,13 @@ jobs:
         run: |
           python scripts/build_seo.py
 
-      - name: Commit Changes
+      - name: Commit and Push Changes
         run: |
           git config --global user.name "seo-bot"
           git config --global user.email "bot@github.com"
 
           git add .
 
-          git commit -m "auto seo pages update" || echo "No changes"
+          git diff --cached --quiet || git commit -m "auto seo pages update"
 
           git push
