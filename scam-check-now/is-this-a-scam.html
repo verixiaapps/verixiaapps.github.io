@@ -5,10 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Is This a Scam? Free AI Scam Checker for Messages, Emails & Links</title>
+<title>{{TITLE}}</title>
 
-<meta name="description" content="Paste a suspicious message, email, website or job offer and instantly check if it may be a scam. AI scam checker analyzes fraud signals and explains the risks.">
-
+<meta name="description" content="{{DESCRIPTION}}">
 <meta name="robots" content="index, follow">
 
 <style>
@@ -20,8 +19,6 @@ margin:0;
 color:#111;
 line-height:1.6;
 }
-
-/* APP BUTTON */
 
 .app-top{
 position:fixed;
@@ -41,8 +38,6 @@ border:none;
 .app-top:hover{
 background:#004fd1;
 }
-
-/* UPGRADE BUTTON */
 
 .upgrade-top{
 position:fixed;
@@ -146,8 +141,6 @@ padding:20px;
 border-radius:8px;
 }
 
-/* RESULT APP CTA */
-
 .resultAction{
 display:none;
 margin-top:18px;
@@ -205,6 +198,16 @@ margin-bottom:12px;
 margin-bottom:18px;
 }
 
+.scanBlock{
+max-width:760px;
+margin:50px auto;
+background:white;
+padding:30px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,0.12);
+text-align:center;
+}
+
 .footer{
 text-align:center;
 margin-top:80px;
@@ -219,18 +222,12 @@ font-size:14px;
 
 <body>
 
-<button class="app-top" type="button" onclick="openApp()">
-📱 Get App
-</button>
-
-<button class="upgrade-top" type="button" onclick="showUpgrade()">
-Upgrade
-</button>
+<button class="app-top" type="button" onclick="openApp()">📱 Get App</button>
+<button class="upgrade-top" type="button" onclick="showUpgrade()">Upgrade</button>
 
 <div class="hero">
 
-<h1>Is This a Scam?</h1>
-
+<h1>{{KEYWORD}} Scam Check</h1>
 <p>Free AI scam checker for suspicious messages, emails, job offers and links.</p>
 
 </div>
@@ -244,17 +241,11 @@ Example:
 
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="note">
-3 free scam checks available • no signup required
-</div>
+<div class="note">3 free scam checks available • no signup required</div>
 
-<button type="button" class="check" onclick="check()">
-Check Scam Risk
-</button>
+<button type="button" class="check" onclick="check()">Check Scam Risk</button>
 
-<div class="note">
-Instant AI analysis appears after submission
-</div>
+<div class="note">Instant AI analysis appears after submission</div>
 
 <div id="result"></div>
 
@@ -272,17 +263,9 @@ Scan suspicious messages instantly on your phone
 
 <h3>Unlock Unlimited Scam Checks</h3>
 
-<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
-Weekly Access
-</button>
-
-<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
-Monthly Access
-</button>
-
-<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
-Yearly Access
-</button>
+<button type="button" class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+<button type="button" class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+<button type="button" class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
 
 </div>
 
@@ -290,43 +273,31 @@ Yearly Access
 
 <div class="section">
 
-<h2>How This Scam Checker Works</h2>
+<h2>About {{KEYWORD}}</h2>
 
-<p>
-The AI scam checker analyzes suspicious messages, emails, job offers and websites for patterns commonly used in fraud such as impersonation attempts, urgency tactics, suspicious domains and payment requests.
-</p>
+<p>{{AI_CONTENT}}</p>
 
-<p>
-The system evaluates the content and returns a risk level along with explanations of potential red flags and recommended next steps.
-</p>
-
-</div>
-
-<div class="section">
-
-<h2>Common Scams This Tool Detects</h2>
+<h3>Related Scam Checks</h3>
 
 <ul>
-<li>Fake job offers and recruiter scams</li>
-<li>Crypto investment scams and giveaways</li>
-<li>Phishing emails asking for passwords</li>
-<li>Marketplace and payment scams</li>
-<li>Social media impersonation scams</li>
+{{RELATED_LINKS}}
 </ul>
 
 </div>
 
-<div class="section">
+<!-- NEW CONVERSION BLOCK -->
 
-<h2>Why People Use Scam Check Now</h2>
+<div class="scanBlock">
 
-<p>
-Online scams are becoming increasingly sophisticated. Messages often impersonate trusted companies or individuals and pressure victims to act quickly.
-</p>
+<h2>Still unsure if this is a scam?</h2>
 
 <p>
-Checking suspicious messages before responding can help prevent financial loss and identity theft. This AI tool provides a quick second opinion before you send money or share personal information.
+Paste the suspicious message, email or link into the AI scam checker above to instantly analyze potential fraud signals.
 </p>
+
+<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+Scan a Message Now
+</button>
 
 </div>
 
@@ -340,24 +311,9 @@ Scam Check Now © 2026 • AI scam detection • Not legal or financial advice
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
-const params=new URLSearchParams(window.location.search)
-
-if(params.get("subscribed")){
-localStorage.setItem("subscriber","true")
-}
-
-const savedEmail=localStorage.getItem("email")
-
-if(savedEmail){
-document.getElementById("email").value=savedEmail
-}
-
 function showUpgrade(){
-
-const upgradeBox=document.getElementById("upgrade")
-upgradeBox.style.display="block"
-upgradeBox.scrollIntoView({behavior:"smooth"})
-
+document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
 async function check(){
@@ -371,10 +327,6 @@ const email=document.getElementById("email").value
 if(!text){
 document.getElementById("result").innerText="Paste a message, email, or link to analyze."
 return
-}
-
-if(email){
-localStorage.setItem("email",email)
 }
 
 const response=await fetch(API+"/analyze",{
@@ -409,9 +361,6 @@ document.getElementById("resultAction").style.display="block"
 }
 
 async function checkout(priceId){
-
-document.getElementById("text").blur()
-document.getElementById("email").blur()
 
 const email=document.getElementById("email").value
 
