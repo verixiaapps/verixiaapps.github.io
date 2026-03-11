@@ -58,9 +58,10 @@ for page in pages:
         print("skipping existing page:", filename)
         continue
 
-    title = keyword.title() + " | Scam Check Now"
+    # Cleaner SEO title
+    title = f"Is {keyword.title()} a Scam? | Scam Check Now"
 
-    description = f"{keyword.title()} tool. Check suspicious messages, emails, links or job offers for scam risk."
+    description = f"Is {keyword.title()} a scam? Use this free AI scam checker to analyze suspicious messages, emails, links, or job offers related to {keyword}."
 
     content_path = f"{CONTENT_DIR}/{slug}.txt"
 
