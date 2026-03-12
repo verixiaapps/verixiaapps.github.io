@@ -29,7 +29,7 @@ color:#111;
 line-height:1.6;
 }
 
-/* top buttons */
+/* fixed buttons */
 
 .app-top{
 position:fixed;
@@ -70,7 +70,7 @@ border:none;
 .hero{
 background:linear-gradient(135deg,#0066ff,#3c8cff);
 color:white;
-padding:110px 20px 80px 20px;
+padding:100px 20px 80px 20px;
 text-align:center;
 }
 
@@ -88,7 +88,7 @@ margin-left:auto;
 margin-right:auto;
 }
 
-/* main card */
+/* main container */
 
 .container{
 max-width:760px;
@@ -148,7 +148,7 @@ color:#666;
 text-align:center;
 }
 
-/* result */
+/* result box */
 
 #result{
 margin-top:25px;
@@ -175,7 +175,7 @@ border-radius:8px;
 font-weight:600;
 }
 
-/* upgrade section */
+/* upgrade */
 
 .upgrade{
 display:none;
@@ -196,7 +196,22 @@ font-weight:600;
 
 .plan:hover{background:#333;}
 
-/* footer */
+.section{
+max-width:760px;
+margin:auto;
+margin-top:70px;
+padding:0 20px;
+}
+
+.scanBlock{
+max-width:760px;
+margin:50px auto;
+background:white;
+padding:30px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,.12);
+text-align:center;
+}
 
 .footer{
 text-align:center;
@@ -230,9 +245,11 @@ font-size:14px;
 3 free scam checks available • no signup required
 </div>
 
-<button class="check" onclick="check()">
-Check Scam Risk
-</button>
+<button class="check" onclick="check()">Check Scam Risk</button>
+
+<div class="note">
+Instant AI analysis appears after submission
+</div>
 
 <div id="result"></div>
 
@@ -266,9 +283,39 @@ Yearly Access
 
 </div>
 
+<div class="section">
+
+<h2>About This Scam Check</h2>
+
+<p>
+Online scams are becoming increasingly sophisticated. Messages often impersonate trusted companies, delivery services, banks, or government agencies.
+</p>
+
+<p>
+This AI scam checker analyzes suspicious messages, emails, and links for patterns commonly used in fraud including impersonation attempts, suspicious domains, payment requests, and urgency tactics.
+</p>
+
+</div>
+
+<div class="scanBlock">
+
+<h2>Still unsure if this is a scam?</h2>
+
+<p>
+Paste the suspicious message above to instantly analyze possible fraud signals.
+</p>
+
+<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+Scan a Message Now
+</button>
+
+</div>
+
 <div class="footer">
 Scam Check Now © 2026 • AI scam detection • Not legal or financial advice
 </div>
+
+<script src="/scam-check-now/app-link.js"></script>
 
 <script>
 
@@ -292,6 +339,8 @@ return
 
 result.innerText="Analyzing..."
 
+try{
+
 const response=await fetch(API+"/analyze",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
@@ -304,7 +353,6 @@ if(data.limit){
 
 result.innerText="Free checks used. Upgrade for unlimited scam detection."
 document.getElementById("resultAction").style.display="block"
-
 showUpgrade()
 return
 
@@ -312,6 +360,12 @@ return
 
 result.innerText=data.result
 document.getElementById("resultAction").style.display="block"
+
+}catch(e){
+
+result.innerText="Error analyzing message. Please try again."
+
+}
 
 }
 
