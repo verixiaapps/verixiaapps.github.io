@@ -10,38 +10,40 @@
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-
 gtag('js', new Date());
 gtag('config', 'AW-17956428385');
 </script>
 
-<!-- Google Ads Conversion Event -->
 <script>
+
+function redirectUser(){
+
+  const fallback = "https://verixiaapps.github.io/scam-check-now/is-this-a-scam.html";
+
+  if(
+    document.referrer &&
+    document.referrer.includes("verixiaapps.github.io/scam-check-now/")
+  ){
+    window.location.href = document.referrer;
+  }else{
+    window.location.href = fallback;
+  }
+
+}
+
 window.addEventListener("load", function(){
 
+  // Fire Google Ads purchase conversion
   gtag('event', 'conversion', {
     'send_to': 'AW-17956428385/dE43C004_IUcEOG0pfJC',
     'currency': 'USD'
   });
 
+  // Wait 2 seconds to ensure tracking fires
+  setTimeout(redirectUser,2000);
+
 });
-</script>
 
-<script>
-setTimeout(function() {
-
-  const fallback = "https://verixiaapps.github.io/scam-check-now/is-this-a-scam.html";
-
-  if (
-    document.referrer &&
-    document.referrer.includes("verixiaapps.github.io/scam-check-now/")
-  ) {
-    window.location.href = document.referrer;
-  } else {
-    window.location.href = fallback;
-  }
-
-}, 2000);
 </script>
 
 </head>
