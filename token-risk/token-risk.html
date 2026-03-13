@@ -10,6 +10,14 @@ el.scrollIntoView({behavior:"smooth"})
 }
 }
 
+function confidenceColor(level){
+if(!level) return "#aaa"
+if(level==="HIGH") return "#00e676"
+if(level==="MEDIUM") return "#ffb300"
+if(level==="LOW") return "#ff5252"
+return "#aaa"
+}
+
 function formatResult(data){
 
 if(!data) return "<div class='resultCard'>No result returned.</div>"
@@ -19,15 +27,11 @@ let text=data.result || ""
 
 let html="<div class='resultCard'>"
 
-if(text.includes("Risk Level: High")){
-html+="<div class='riskHigh'>Risk: High</div>"
-}
-else if(text.includes("Risk Level: Medium")){
-html+="<div class='riskHigh'>Risk: Medium</div>"
-}
-else if(text.includes("Risk Level: Low")){
-html+="<div class='riskHigh'>Risk: Low</div>"
-}
+let risk="Low"
+if(text.includes("Risk Level: High")) risk="High"
+else if(text.includes("Risk Level: Medium")) risk="Medium"
+
+html+=`<div class="riskHigh">Risk: ${risk}</div>`
 
 html+=`
 <div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
@@ -35,6 +39,12 @@ html+=`
 <div class="metric"><span>Price change 24h</span><span class="green">${m.priceChange || "-"}</span></div>
 <div class="metric"><span>Pair age</span>${m.pairAge || "-"}</div>
 <div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
+<div class="metric">
+<span>Liquidity Confidence</span>
+<span style="color:${confidenceColor(m.liquidityConfidence)};font-weight:700">
+${m.liquidityConfidence || "-"}
+</span>
+</div>
 `
 
 text=text.replace("Risk Level: High","")
