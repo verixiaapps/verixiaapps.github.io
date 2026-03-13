@@ -7,7 +7,7 @@
 
 <title>Token Risk – Crypto Rug Checker</title>
 
-<meta name="description" content="Paste a crypto token contract address to analyze rug pull risk and liquidity signals.">
+<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk, liquidity signals, and suspicious indicators using AI.">
 <meta name="robots" content="index,follow">
 
 <style>
@@ -17,7 +17,42 @@ font-family:system-ui,-apple-system,Arial;
 background:#f4f6f9;
 margin:0;
 color:#111;
+line-height:1.6;
 }
+
+/* top buttons */
+
+.app-top{
+position:fixed;
+top:18px;
+left:18px;
+background:#0066ff;
+color:white;
+padding:10px 16px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+z-index:999;
+border:none;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
+}
+
+.upgrade-top{
+position:fixed;
+top:18px;
+right:18px;
+background:#111;
+color:white;
+padding:10px 16px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+z-index:999;
+border:none;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
+}
+
+/* hero */
 
 .hero{
 background:linear-gradient(135deg,#0066ff,#3c8cff);
@@ -30,6 +65,14 @@ text-align:center;
 margin:0;
 font-size:40px;
 }
+
+.hero p{
+margin-top:12px;
+font-size:18px;
+opacity:.95;
+}
+
+/* card */
 
 .container{
 max-width:760px;
@@ -62,37 +105,107 @@ padding:15px;
 width:100%;
 background:#0066ff;
 color:white;
-margin-top:12px;
+margin-top:10px;
 font-weight:600;
 }
 
 .check:hover{background:#004fd1;}
 
 .note{
-margin-top:10px;
+margin-top:12px;
 font-size:14px;
 color:#666;
 text-align:center;
 }
 
-#result{
+/* result card */
+
+.resultCard{
 margin-top:25px;
-white-space:pre-wrap;
-font-size:15px;
-background:#f7f9ff;
-padding:20px;
-border-radius:10px;
-line-height:1.6;
+background:#111;
+color:white;
+padding:25px;
+border-radius:12px;
 }
 
 .metric{
+background:#1a1a1a;
+padding:14px 16px;
+border-radius:10px;
 display:flex;
 justify-content:space-between;
-margin-bottom:6px;
+margin-top:10px;
+font-size:15px;
 }
 
 .metric span{
-color:#666;
+opacity:.7;
+}
+
+.riskBadge{
+display:inline-block;
+padding:8px 14px;
+border-radius:10px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.riskHigh{
+border:1px solid #ff5252;
+color:#ff5252;
+background:#2a0c0c;
+}
+
+.riskMedium{
+border:1px solid #ffb300;
+color:#ffb300;
+background:#2a220c;
+}
+
+.riskLow{
+border:1px solid #00e676;
+color:#00e676;
+background:#0c2a16;
+}
+
+.sectionTitle{
+margin-top:26px;
+font-weight:700;
+letter-spacing:.04em;
+}
+
+.red{color:#ff5252;}
+.green{color:#00e676;}
+
+/* upgrade */
+
+.upgrade{
+display:none;
+margin-top:25px;
+padding:25px;
+background:#f7f9ff;
+border-radius:10px;
+text-align:center;
+}
+
+.plan{
+width:100%;
+margin-top:12px;
+background:#635bff;
+color:white;
+font-weight:600;
+}
+
+.plan:hover{
+background:#5249d8;
+}
+
+.footer{
+text-align:center;
+margin-top:80px;
+padding:40px;
+color:#777;
+font-size:14px;
 }
 
 </style>
@@ -100,6 +213,9 @@ color:#666;
 </head>
 
 <body>
+
+<button class="app-top" onclick="openApp()">📱 Get App</button>
+<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 
 <div class="hero">
 <h1>Token Risk</h1>
@@ -110,23 +226,127 @@ color:#666;
 
 <input id="tokenAddress" placeholder="Paste token contract address">
 
-<input id="email" placeholder="Email (optional for subscriptions)">
+<input id="email" placeholder="Email (used to verify subscriptions)">
 
 <div class="note">
-3 free token checks available
+3 free token checks available • no signup required
 </div>
 
-<button class="check" onclick="checkToken()">
-Analyze Token
-</button>
+<button class="check" onclick="checkToken()">Analyze Token</button>
 
 <div id="result"></div>
 
+<div class="upgrade" id="upgrade">
+
+<h3>Unlock Unlimited Token Checks</h3>
+
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+Weekly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+Monthly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+Yearly Access
+</button>
+
+<div style="margin-top:14px;font-size:13px;color:#666;">
+Secure payments powered by Stripe
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+Token Risk © 2026 • Crypto token analysis • Not financial advice
 </div>
 
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
+
+function openApp(){
+window.location="https://verixiaapps.github.io/scam-check-now/"
+}
+
+function showUpgrade(){
+document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+}
+
+function confidenceColor(level){
+
+if(!level) return "#aaa"
+
+level=level.toUpperCase()
+
+if(level==="HIGH") return "#00e676"
+if(level==="MEDIUM") return "#ffb300"
+if(level==="LOW") return "#ff5252"
+
+return "#aaa"
+
+}
+
+function riskBadge(text){
+
+if(text.includes("Risk Level: High")){
+return "<div class='riskBadge riskHigh'>Risk: High</div>"
+}
+
+if(text.includes("Risk Level: Medium")){
+return "<div class='riskBadge riskMedium'>Risk: Medium</div>"
+}
+
+return "<div class='riskBadge riskLow'>Risk: Low</div>"
+
+}
+
+function formatResult(data){
+
+const m=data.metrics || {}
+let text=data.result || ""
+
+let html="<div class='resultCard'>"
+
+html+=riskBadge(text)
+
+html+=`
+<div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
+<div class="metric"><span>Volume 24h</span>${m.volume || "-"}</div>
+<div class="metric"><span>Price Change</span><span class="green">${m.priceChange || "-"}</span></div>
+<div class="metric"><span>Pair Age</span>${m.pairAge || "-"}</div>
+<div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
+<div class="metric">
+<span>Liquidity Confidence</span>
+<span style="color:${confidenceColor(m.liquidityConfidence)};font-weight:700">
+${m.liquidityConfidence || "-"}
+</span>
+</div>
+`
+
+text=text.replace("Risk Level: High","")
+text=text.replace("Risk Level: Medium","")
+text=text.replace("Risk Level: Low","")
+
+text=text.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
+text=text.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
+text=text.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
+text=text.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
+text=text.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
+text=text.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
+
+text=text.replace(/\n/g,"<br>")
+
+html+=text
+html+="</div>"
+
+return html
+
+}
 
 async function checkToken(){
 
@@ -145,49 +365,46 @@ try{
 
 const response=await fetch(API+"/token-risk",{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-tokenAddress,
-email
-})
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({tokenAddress,email})
 })
 
 const data=await response.json()
 
 if(data.limit){
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
+showUpgrade()
 return
 }
 
-let output=""
-
-if(data.metrics){
-
-const m=data.metrics
-
-output+=`
-Liquidity: ${m.liquidity}
-24h Volume: ${m.volume}
-Price Change: ${m.priceChange}
-Pair Age: ${m.pairAge}
-FDV: ${m.fdv}
-Liquidity Confidence: ${m.liquidityConfidence}
-
-`
-
-}
-
-output+=data.result || "No analysis returned."
-
-result.innerText=output
+result.innerHTML=formatResult(data)
 
 }catch(e){
 
 result.innerText="Error analyzing token."
 
 }
+
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+priceId,
+email,
+successUrl:pageUrl
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
 
 }
 
