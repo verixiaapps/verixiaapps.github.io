@@ -110,31 +110,54 @@ text-align:center;
 
 .resultCard{
 margin-top:25px;
-background:#f7f9ff;
+background:#111;
+color:white;
 padding:25px;
+border-radius:12px;
+}
+
+.metric{
+background:#1a1a1a;
+padding:14px 16px;
 border-radius:10px;
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+font-size:15px;
+}
+
+.metric span{
+opacity:.7;
+}
+
+.riskHigh{
+display:inline-block;
+background:#2a120c;
+border:1px solid #ff6a00;
+color:#ff6a00;
+padding:8px 14px;
+border-radius:10px;
+font-weight:700;
+margin-bottom:15px;
 }
 
 .sectionTitle{
-margin-top:25px;
+margin-top:28px;
 font-weight:700;
 letter-spacing:.04em;
 }
 
 .red{
 color:#ff3b30;
-font-weight:600;
 }
 
 .green{
-color:#00c853;
-font-weight:600;
+color:#00e676;
 }
 
 .orange{
 color:#ff6a00;
 font-weight:700;
-font-size:18px;
 }
 
 .upgrade{
@@ -278,24 +301,62 @@ document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
+function parseMetrics(text){
+
+const liquidity=text.match(/Liquidity.*?\$([\d,.]+)/i)
+const volume=text.match(/Volume.*?\$([\d,.]+)/i)
+const price=text.match(/Price.*?([\+\-]?\d+\.?\d*%)/i)
+const age=text.match(/Pair age.*?(\d+d \d+h|\d+h|\d+d)/i)
+const fdv=text.match(/FDV.*?\$([\d,.]+)/i)
+
+return{
+liquidity:liquidity?liquidity[1]:"—",
+volume:volume?volume[1]:"—",
+price:price?price[1]:"—",
+age:age?age[1]:"—",
+fdv:fdv?fdv[1]:"—"
+}
+
+}
+
 function formatResult(text){
 
-let html=text
+const m=parseMetrics(text)
 
-html=html.replace("Risk Level: High","<div class='orange'>Risk: High</div>")
-html=html.replace("Risk Level: Medium","<div class='orange'>Risk: Medium</div>")
-html=html.replace("Risk Level: Low","<div class='orange'>Risk: Low</div>")
+let html=""
 
-html=html.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
-html=html.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
-html=html.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
-html=html.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
-html=html.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
-html=html.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
+html+="<div class='resultCard'>"
 
-html=html.replace(/\n/g,"<br>")
+if(text.includes("Risk Level: High")){
+html+="<div class='riskHigh'>Risk: High</div>"
+}
 
-return "<div class='resultCard'>"+html+"</div>"
+html+=`
+<div class="metric"><span>Liquidity USD</span>$${m.liquidity}</div>
+<div class="metric"><span>Volume 24h</span>$${m.volume}</div>
+<div class="metric"><span>Price change 24h</span><span class="green">${m.price}</span></div>
+<div class="metric"><span>Pair age</span>${m.age}</div>
+<div class="metric"><span>FDV</span>$${m.fdv}</div>
+`
+
+let content=text
+content=content.replace("Risk Level: High","")
+content=content.replace("Risk Level: Medium","")
+content=content.replace("Risk Level: Low","")
+
+content=content.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
+content=content.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
+content=content.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
+content=content.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
+content=content.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
+content=content.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
+
+content=content.replace(/\n/g,"<br>")
+
+html+=content
+html+="</div>"
+
+return html
 
 }
 
