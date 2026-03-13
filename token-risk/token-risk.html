@@ -23,7 +23,15 @@ if(level==="LOW") return "#ff5252"
 return "#aaa"
 }
 
-function getRisk(text){
+function riskColor(risk){
+
+if(risk==="High") return "#ff6a00"
+if(risk==="Medium") return "#ffb300"
+return "#00e676"
+
+}
+
+function detectRisk(text){
 
 if(!text) return "Low"
 
@@ -34,62 +42,49 @@ return "Low"
 
 }
 
-function riskBadge(risk){
-
-if(risk==="High")
-return "<div class='riskHigh'>Risk: High</div>"
-
-if(risk==="Medium")
-return "<div class='riskHigh' style='border-color:#ffb300;color:#ffb300;background:#2a220c'>Risk: Medium</div>"
-
-return "<div class='riskHigh' style='border-color:#00e676;color:#00e676;background:#0c2a16'>Risk: Low</div>"
-
-}
-
 function formatResult(data){
 
 if(!data){
-return "<div class='resultCard'>No result returned.</div>"
+return "<div class='resultCard'>No analysis returned.</div>"
 }
 
-const m=data.metrics || {}
+const metrics=data.metrics || {}
+let report=data.result || ""
 
-let text=data.result || ""
-
-const risk=getRisk(text)
+const risk=detectRisk(report)
 
 let html="<div class='resultCard'>"
 
-html+=riskBadge(risk)
+html+=`<div class="riskHigh" style="color:${riskColor(risk)};border-color:${riskColor(risk)}">Risk: ${risk}</div>`
 
 html+=`
-<div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
-<div class="metric"><span>24h Volume</span>${m.volume || "-"}</div>
-<div class="metric"><span>24h Price Change</span><span class="green">${m.priceChange || "-"}</span></div>
-<div class="metric"><span>Pair Age</span>${m.pairAge || "-"}</div>
-<div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
+<div class="metric"><span>Liquidity USD</span>${metrics.liquidity || "-"}</div>
+<div class="metric"><span>24h Volume</span>${metrics.volume || "-"}</div>
+<div class="metric"><span>24h Price Change</span><span class="green">${metrics.priceChange || "-"}</span></div>
+<div class="metric"><span>Pair Age</span>${metrics.pairAge || "-"}</div>
+<div class="metric"><span>FDV</span>${metrics.fdv || "-"}</div>
 <div class="metric">
 <span>Liquidity Confidence</span>
-<span style="color:${confidenceColor(m.liquidityConfidence)};font-weight:700">
-${m.liquidityConfidence || "-"}
+<span style="color:${confidenceColor(metrics.liquidityConfidence)};font-weight:700">
+${metrics.liquidityConfidence || "-"}
 </span>
 </div>
 `
 
-text=text.replace("Risk Level: High","")
-text=text.replace("Risk Level: Medium","")
-text=text.replace("Risk Level: Low","")
+report=report.replace("Risk Level: High","")
+report=report.replace("Risk Level: Medium","")
+report=report.replace("Risk Level: Low","")
 
-text=text.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
-text=text.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
-text=text.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
-text=text.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
-text=text.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
-text=text.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
+report=report.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
+report=report.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
+report=report.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
+report=report.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
+report=report.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
+report=report.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
 
-text=text.replace(/\n/g,"<br>")
+report=report.replace(/\n/g,"<br>")
 
-html+=text
+html+=report
 html+="</div>"
 
 return html
@@ -111,7 +106,7 @@ result.innerText="Analyzing token..."
 
 try{
 
-const response=await fetch(API+"/token-risk",{
+const res=await fetch(API+"/token-risk",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -122,11 +117,7 @@ email
 })
 })
 
-if(!response.ok){
-throw new Error("API error")
-}
-
-const data=await response.json()
+const data=await res.json()
 
 if(data.limit){
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
@@ -136,11 +127,10 @@ return
 
 result.innerHTML=formatResult(data)
 
-}catch(e){
+}catch(err){
 
-console.error(e)
-
-result.innerHTML="<div class='resultCard'>Error analyzing token. Please try again.</div>"
+console.error(err)
+result.innerHTML="<div class='resultCard'>Analysis failed. Try again.</div>"
 
 }
 
@@ -153,7 +143,7 @@ const pageUrl=window.location.origin+window.location.pathname
 
 try{
 
-const response=await fetch(API+"/create-checkout",{
+const res=await fetch(API+"/create-checkout",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -165,7 +155,7 @@ successUrl:pageUrl
 })
 })
 
-const data=await response.json()
+const data=await res.json()
 
 if(data.url){
 window.location=data.url
