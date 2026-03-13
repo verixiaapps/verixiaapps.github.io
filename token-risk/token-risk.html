@@ -1,25 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Token Risk – Crypto Rug Checker</title>
+
+<meta name="description" content="Paste a crypto token contract address to analyze rug pull risk and liquidity signals.">
+<meta name="robots" content="index,follow">
+
+<style>
+
+body{
+font-family:system-ui,-apple-system,Arial;
+background:#f4f6f9;
+margin:0;
+color:#111;
+}
+
+.hero{
+background:linear-gradient(135deg,#0066ff,#3c8cff);
+color:white;
+padding:100px 20px 80px 20px;
+text-align:center;
+}
+
+.hero h1{
+margin:0;
+font-size:40px;
+}
+
+.container{
+max-width:760px;
+margin:auto;
+margin-top:-60px;
+background:white;
+padding:35px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+
+input{
+width:100%;
+padding:14px;
+margin-top:12px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+button{
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:16px;
+padding:15px;
+}
+
+.check{
+width:100%;
+background:#0066ff;
+color:white;
+margin-top:12px;
+font-weight:600;
+}
+
+.check:hover{background:#004fd1;}
+
+.note{
+margin-top:10px;
+font-size:14px;
+color:#666;
+text-align:center;
+}
+
+#result{
+margin-top:25px;
+white-space:pre-wrap;
+font-size:15px;
+background:#f7f9ff;
+padding:20px;
+border-radius:10px;
+line-height:1.6;
+}
+
+.metric{
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+}
+
+.metric span{
+color:#666;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="hero">
+<h1>Token Risk</h1>
+<p>AI crypto rug pull checker</p>
+</div>
+
+<div class="container">
+
+<input id="tokenAddress" placeholder="Paste token contract address">
+
+<input id="email" placeholder="Email (optional for subscriptions)">
+
+<div class="note">
+3 free token checks available
+</div>
+
+<button class="check" onclick="checkToken()">
+Analyze Token
+</button>
+
+<div id="result"></div>
+
+</div>
+
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
-
-function showUpgrade(){
-document.getElementById("upgrade").style.display="block"
-document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
-}
-
-function confidenceColor(level){
-
-if(!level) return "#aaa"
-
-level=level.toUpperCase()
-
-if(level==="HIGH") return "#00e676"
-if(level==="MEDIUM") return "#ffb300"
-if(level==="LOW") return "#ff5252"
-
-return "#aaa"
-
-}
 
 async function checkToken(){
 
@@ -32,24 +139,26 @@ result.innerText="Paste a token address to analyze."
 return
 }
 
-result.innerText="Analyzing..."
+result.innerText="Analyzing token..."
 
 try{
 
 const response=await fetch(API+"/token-risk",{
 method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({tokenAddress,email})
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+tokenAddress,
+email
+})
 })
 
 const data=await response.json()
 
 if(data.limit){
-
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
-showUpgrade()
 return
-
 }
 
 let output=""
@@ -64,42 +173,25 @@ Liquidity: ${m.liquidity}
 Price Change: ${m.priceChange}
 Pair Age: ${m.pairAge}
 FDV: ${m.fdv}
-Liquidity Confidence: %c${m.liquidityConfidence}
+Liquidity Confidence: ${m.liquidityConfidence}
+
 `
 
 }
 
-output+="\n\n"+(data.result || "")
+output+=data.result || "No analysis returned."
 
 result.innerText=output
 
 }catch(e){
 
-result.innerText="Error analyzing token. Please try again."
+result.innerText="Error analyzing token."
 
 }
-
-}
-
-async function checkout(priceId){
-
-const email=document.getElementById("email").value
-const pageUrl=window.location.origin+window.location.pathname
-
-const response=await fetch(API+"/create-checkout",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-priceId,
-email,
-successUrl:pageUrl
-})
-})
-
-const data=await response.json()
-
-window.location=data.url
 
 }
 
 </script>
+
+</body>
+</html>
