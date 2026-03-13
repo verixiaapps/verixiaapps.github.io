@@ -11,30 +11,52 @@ el.scrollIntoView({behavior:"smooth"})
 }
 
 function confidenceColor(level){
+
 if(!level) return "#aaa"
+
 level=level.toUpperCase()
+
 if(level==="HIGH") return "#00e676"
 if(level==="MEDIUM") return "#ffb300"
 if(level==="LOW") return "#ff5252"
+
 return "#aaa"
 }
 
+function getRisk(text){
+
+if(!text) return "Low"
+
+if(text.includes("Risk Level: High")) return "High"
+if(text.includes("Risk Level: Medium")) return "Medium"
+
+return "Low"
+
+}
+
 function riskBadge(risk){
-if(risk==="High") return "<div class='riskHigh'>Risk: High</div>"
-if(risk==="Medium") return "<div class='riskHigh' style='border-color:#ffb300;color:#ffb300;background:#2a220c'>Risk: Medium</div>"
+
+if(risk==="High")
+return "<div class='riskHigh'>Risk: High</div>"
+
+if(risk==="Medium")
+return "<div class='riskHigh' style='border-color:#ffb300;color:#ffb300;background:#2a220c'>Risk: Medium</div>"
+
 return "<div class='riskHigh' style='border-color:#00e676;color:#00e676;background:#0c2a16'>Risk: Low</div>"
+
 }
 
 function formatResult(data){
 
-if(!data) return "<div class='resultCard'>No result returned.</div>"
+if(!data){
+return "<div class='resultCard'>No result returned.</div>"
+}
 
 const m=data.metrics || {}
+
 let text=data.result || ""
 
-let risk="Low"
-if(text.includes("Risk Level: High")) risk="High"
-else if(text.includes("Risk Level: Medium")) risk="Medium"
+const risk=getRisk(text)
 
 let html="<div class='resultCard'>"
 
@@ -71,6 +93,7 @@ html+=text
 html+="</div>"
 
 return html
+
 }
 
 async function checkToken(){
@@ -90,9 +113,18 @@ try{
 
 const response=await fetch(API+"/token-risk",{
 method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({tokenAddress,email})
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+tokenAddress,
+email
 })
+})
+
+if(!response.ok){
+throw new Error("API error")
+}
 
 const data=await response.json()
 
@@ -107,7 +139,8 @@ result.innerHTML=formatResult(data)
 }catch(e){
 
 console.error(e)
-result.innerText="Error analyzing token. Please try again."
+
+result.innerHTML="<div class='resultCard'>Error analyzing token. Please try again.</div>"
 
 }
 
@@ -122,7 +155,9 @@ try{
 
 const response=await fetch(API+"/create-checkout",{
 method:"POST",
-headers:{"Content-Type":"application/json"},
+headers:{
+"Content-Type":"application/json"
+},
 body:JSON.stringify({
 priceId,
 email,
@@ -137,8 +172,10 @@ window.location=data.url
 }
 
 }catch(e){
+
 console.error(e)
 alert("Checkout failed")
+
 }
 
 }
