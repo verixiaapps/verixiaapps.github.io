@@ -160,8 +160,6 @@ border-radius:10px;
 text-align:center;
 }
 
-/* Stripe style buttons */
-
 .plan{
 width:100%;
 margin-top:12px;
@@ -320,10 +318,13 @@ result.innerText="Analyzing token..."
 
 try{
 
+const dexResponse=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`)
+const dexData=await dexResponse.json()
+
 const response=await fetch(API+"/token-risk",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({tokenAddress,email})
+body:JSON.stringify({tokenAddress,email,tokenData:dexData})
 })
 
 const data=await response.json()
