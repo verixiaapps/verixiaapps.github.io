@@ -3,14 +3,19 @@
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
 function showUpgrade(){
-document.getElementById("upgrade").style.display="block"
-document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+const el=document.getElementById("upgrade")
+if(el){
+el.style.display="block"
+el.scrollIntoView({behavior:"smooth"})
+}
 }
 
 function formatResult(data){
 
-const m=data.metrics
-let text=data.result
+if(!data) return "<div class='resultCard'>No result returned.</div>"
+
+const m=data.metrics || {}
+let text=data.result || ""
 
 let html="<div class='resultCard'>"
 
@@ -20,16 +25,16 @@ html+="<div class='riskHigh'>Risk: High</div>"
 else if(text.includes("Risk Level: Medium")){
 html+="<div class='riskHigh'>Risk: Medium</div>"
 }
-else{
+else if(text.includes("Risk Level: Low")){
 html+="<div class='riskHigh'>Risk: Low</div>"
 }
 
 html+=`
-<div class="metric"><span>Liquidity USD</span>${m.liquidity}</div>
-<div class="metric"><span>Volume 24h</span>${m.volume}</div>
-<div class="metric"><span>Price change 24h</span><span class="green">${m.priceChange}</span></div>
-<div class="metric"><span>Pair age</span>${m.pairAge}</div>
-<div class="metric"><span>FDV</span>${m.fdv}</div>
+<div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
+<div class="metric"><span>Volume 24h</span>${m.volume || "-"}</div>
+<div class="metric"><span>Price change 24h</span><span class="green">${m.priceChange || "-"}</span></div>
+<div class="metric"><span>Pair age</span>${m.pairAge || "-"}</div>
+<div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
 `
 
 text=text.replace("Risk Level: High","")
@@ -49,7 +54,6 @@ html+=text
 html+="</div>"
 
 return html
-
 }
 
 async function checkToken(){
@@ -85,6 +89,7 @@ result.innerHTML=formatResult(data)
 
 }catch(e){
 
+console.error(e)
 result.innerText="Error analyzing token. Please try again."
 
 }
@@ -95,6 +100,8 @@ async function checkout(priceId){
 
 const email=document.getElementById("email").value
 const pageUrl=window.location.origin+window.location.pathname
+
+try{
 
 const response=await fetch(API+"/create-checkout",{
 method:"POST",
@@ -108,7 +115,14 @@ successUrl:pageUrl
 
 const data=await response.json()
 
+if(data.url){
 window.location=data.url
+}
+
+}catch(e){
+console.error(e)
+alert("Checkout failed")
+}
 
 }
 
