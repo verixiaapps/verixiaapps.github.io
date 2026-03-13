@@ -19,6 +19,22 @@ gtag('js', new Date());
 gtag('config', 'AW-17956428385');
 </script>
 
+<!-- Purchase Conversion Detection -->
+<script>
+if (
+  window.location.search.includes("subscribed=true") &&
+  !sessionStorage.getItem("ads_conversion")
+) {
+
+  gtag('event','conversion',{
+    'send_to':'AW-17956428385/CONVERSION_LABEL'
+  });
+
+  sessionStorage.setItem("ads_conversion","1");
+
+}
+</script>
+
 <style>
 
 body{
@@ -170,8 +186,6 @@ border-radius:10px;
 text-align:center;
 }
 
-/* Stripe style buttons */
-
 .plan{
 width:100%;
 margin-top:12px;
@@ -277,38 +291,6 @@ Yearly Access
 
 </div>
 
-<div class="section">
-
-<h2>About This Scam Check</h2>
-
-<p>
-Online scams are becoming increasingly sophisticated. Messages often impersonate trusted companies, delivery services, banks, or government agencies.
-</p>
-
-<p>
-This AI scam checker analyzes suspicious messages, emails, and links for patterns commonly used in fraud including impersonation attempts, suspicious domains, payment requests, and urgency tactics.
-</p>
-
-</div>
-
-<div class="scanBlock">
-
-<h2>Still unsure if this is a scam?</h2>
-
-<p>
-Paste the suspicious message above to instantly analyze possible fraud signals.
-</p>
-
-<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-Scan a Message Now
-</button>
-
-</div>
-
-<div class="footer">
-Scam Check Now © 2026 • AI scam detection • Not legal or financial advice
-</div>
-
 <script src="/scam-check-now/app-link.js"></script>
 
 <script>
@@ -374,7 +356,7 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl
+successUrl:pageUrl + "?subscribed=true"
 })
 })
 
