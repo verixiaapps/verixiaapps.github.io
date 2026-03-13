@@ -21,73 +21,6 @@ if(level==="MEDIUM") return "#ffb300"
 if(level==="LOW") return "#ff5252"
 
 return "#aaa"
-}
-
-function riskColor(risk){
-
-if(risk==="High") return "#ff6a00"
-if(risk==="Medium") return "#ffb300"
-return "#00e676"
-
-}
-
-function detectRisk(text){
-
-if(!text) return "Low"
-
-if(text.includes("Risk Level: High")) return "High"
-if(text.includes("Risk Level: Medium")) return "Medium"
-
-return "Low"
-
-}
-
-function formatResult(data){
-
-if(!data){
-return "<div class='resultCard'>No analysis returned.</div>"
-}
-
-const metrics=data.metrics || {}
-let report=data.result || ""
-
-const risk=detectRisk(report)
-
-let html="<div class='resultCard'>"
-
-html+=`<div class="riskHigh" style="color:${riskColor(risk)};border-color:${riskColor(risk)}">Risk: ${risk}</div>`
-
-html+=`
-<div class="metric"><span>Liquidity USD</span>${metrics.liquidity || "-"}</div>
-<div class="metric"><span>24h Volume</span>${metrics.volume || "-"}</div>
-<div class="metric"><span>24h Price Change</span><span class="green">${metrics.priceChange || "-"}</span></div>
-<div class="metric"><span>Pair Age</span>${metrics.pairAge || "-"}</div>
-<div class="metric"><span>FDV</span>${metrics.fdv || "-"}</div>
-<div class="metric">
-<span>Liquidity Confidence</span>
-<span style="color:${confidenceColor(metrics.liquidityConfidence)};font-weight:700">
-${metrics.liquidityConfidence || "-"}
-</span>
-</div>
-`
-
-report=report.replace("Risk Level: High","")
-report=report.replace("Risk Level: Medium","")
-report=report.replace("Risk Level: Low","")
-
-report=report.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
-report=report.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
-report=report.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
-report=report.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
-report=report.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
-report=report.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
-
-report=report.replace(/\n/g,"<br>")
-
-html+=report
-html+="</div>"
-
-return html
 
 }
 
@@ -106,7 +39,7 @@ result.innerText="Analyzing token..."
 
 try{
 
-const res=await fetch(API+"/token-risk",{
+const response=await fetch(API+"/token-risk",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -117,7 +50,7 @@ email
 })
 })
 
-const data=await res.json()
+const data=await response.json()
 
 if(data.limit){
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
@@ -125,12 +58,37 @@ showUpgrade()
 return
 }
 
-result.innerHTML=formatResult(data)
+const m=data.metrics || {}
 
-}catch(err){
+result.innerHTML=`
+<div class="resultCard">
 
-console.error(err)
-result.innerHTML="<div class='resultCard'>Analysis failed. Try again.</div>"
+<div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
+<div class="metric"><span>24h Volume</span>${m.volume || "-"}</div>
+<div class="metric"><span>24h Price Change</span>${m.priceChange || "-"}</div>
+<div class="metric"><span>Pair Age</span>${m.pairAge || "-"}</div>
+<div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
+
+<div class="metric">
+<span>Liquidity Confidence</span>
+<span style="color:${confidenceColor(m.liquidityConfidence)};font-weight:700">
+${m.liquidityConfidence || "-"}
+</span>
+</div>
+
+<br>
+
+<div style="line-height:1.6">
+${(data.result || "").replace(/\n/g,"<br>")}
+</div>
+
+</div>
+`
+
+}catch(e){
+
+console.error(e)
+result.innerText="Error analyzing token."
 
 }
 
@@ -143,7 +101,7 @@ const pageUrl=window.location.origin+window.location.pathname
 
 try{
 
-const res=await fetch(API+"/create-checkout",{
+const response=await fetch(API+"/create-checkout",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -155,7 +113,7 @@ successUrl:pageUrl
 })
 })
 
-const data=await res.json()
+const data=await response.json()
 
 if(data.url){
 window.location=data.url
