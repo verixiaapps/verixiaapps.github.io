@@ -10,7 +10,6 @@
 <meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk, liquidity signals, and suspicious indicators using AI.">
 <meta name="robots" content="index,follow">
 
-<!-- Google Ads Global Tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -29,23 +28,6 @@ color:#111;
 line-height:1.6;
 }
 
-.app-top{
-position:fixed;
-top:18px;
-left:18px;
-background:#0066ff;
-color:white;
-padding:10px 16px;
-border-radius:8px;
-font-weight:600;
-cursor:pointer;
-z-index:999;
-box-shadow:0 4px 10px rgba(0,0,0,.2);
-border:none;
-}
-
-.app-top:hover{background:#004fd1;}
-
 .upgrade-top{
 position:fixed;
 top:18px;
@@ -60,8 +42,6 @@ z-index:999;
 box-shadow:0 4px 10px rgba(0,0,0,.2);
 border:none;
 }
-
-.upgrade-top:hover{background:#333;}
 
 .hero{
 background:linear-gradient(135deg,#0066ff,#3c8cff);
@@ -128,27 +108,33 @@ color:#666;
 text-align:center;
 }
 
-#result{
+.resultCard{
 margin-top:25px;
-white-space:pre-wrap;
-font-size:16px;
 background:#f7f9ff;
-padding:20px;
-border-radius:8px;
+padding:25px;
+border-radius:10px;
 }
 
-.resultAction{
-display:none;
-margin-top:18px;
-text-align:center;
+.sectionTitle{
+margin-top:25px;
+font-weight:700;
+letter-spacing:.04em;
 }
 
-.resultAction button{
-background:#0066ff;
-color:white;
-padding:14px 20px;
-border-radius:8px;
+.red{
+color:#ff3b30;
 font-weight:600;
+}
+
+.green{
+color:#00c853;
+font-weight:600;
+}
+
+.orange{
+color:#ff6a00;
+font-weight:700;
+font-size:18px;
 }
 
 .upgrade{
@@ -166,12 +152,10 @@ margin-top:12px;
 background:#635bff;
 color:white;
 font-weight:600;
-transition:all .15s ease;
 }
 
 .plan:hover{
 background:#5249d8;
-transform:translateY(-1px);
 }
 
 .section{
@@ -215,7 +199,6 @@ font-size:14px;
 <div class="container">
 
 <input id="tokenAddress" placeholder="Paste token contract address">
-
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
 <div class="note">
@@ -229,14 +212,6 @@ Instant AI token analysis appears after submission
 </div>
 
 <div id="result"></div>
-
-<div id="resultAction" class="resultAction">
-
-<p style="margin-bottom:10px;font-weight:600;">
-Check suspicious tokens instantly on your phone
-</p>
-
-</div>
 
 <div class="upgrade" id="upgrade">
 
@@ -303,6 +278,27 @@ document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
+function formatResult(text){
+
+let html=text
+
+html=html.replace("Risk Level: High","<div class='orange'>Risk: High</div>")
+html=html.replace("Risk Level: Medium","<div class='orange'>Risk: Medium</div>")
+html=html.replace("Risk Level: Low","<div class='orange'>Risk: Low</div>")
+
+html=html.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
+html=html.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
+html=html.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
+html=html.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
+html=html.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
+html=html.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
+
+html=html.replace(/\n/g,"<br>")
+
+return "<div class='resultCard'>"+html+"</div>"
+
+}
+
 async function checkToken(){
 
 const tokenAddress=document.getElementById("tokenAddress").value.trim()
@@ -330,17 +326,12 @@ body:JSON.stringify({tokenAddress,email,tokenData:dexData})
 const data=await response.json()
 
 if(data.limit){
-
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
-document.getElementById("resultAction").style.display="block"
-
 showUpgrade()
 return
-
 }
 
-result.innerText=data.result
-document.getElementById("resultAction").style.display="block"
+result.innerHTML=formatResult(data.result)
 
 }catch(e){
 
