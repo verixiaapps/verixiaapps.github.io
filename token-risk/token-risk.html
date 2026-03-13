@@ -3,11 +3,8 @@
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
 function showUpgrade(){
-const el=document.getElementById("upgrade")
-if(el){
-el.style.display="block"
-el.scrollIntoView({behavior:"smooth"})
-}
+document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
 function confidenceColor(level){
@@ -35,60 +32,50 @@ result.innerText="Paste a token address to analyze."
 return
 }
 
-result.innerText="Analyzing token..."
+result.innerText="Analyzing..."
 
 try{
 
 const response=await fetch(API+"/token-risk",{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-tokenAddress,
-email
-})
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({tokenAddress,email})
 })
 
 const data=await response.json()
 
 if(data.limit){
+
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
 showUpgrade()
 return
+
 }
 
-const m=data.metrics || {}
+let output=""
 
-result.innerHTML=`
-<div class="resultCard">
+if(data.metrics){
 
-<div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
-<div class="metric"><span>24h Volume</span>${m.volume || "-"}</div>
-<div class="metric"><span>24h Price Change</span>${m.priceChange || "-"}</div>
-<div class="metric"><span>Pair Age</span>${m.pairAge || "-"}</div>
-<div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
+const m=data.metrics
 
-<div class="metric">
-<span>Liquidity Confidence</span>
-<span style="color:${confidenceColor(m.liquidityConfidence)};font-weight:700">
-${m.liquidityConfidence || "-"}
-</span>
-</div>
-
-<br>
-
-<div style="line-height:1.6">
-${(data.result || "").replace(/\n/g,"<br>")}
-</div>
-
-</div>
+output+=`
+Liquidity: ${m.liquidity}
+24h Volume: ${m.volume}
+Price Change: ${m.priceChange}
+Pair Age: ${m.pairAge}
+FDV: ${m.fdv}
+Liquidity Confidence: %c${m.liquidityConfidence}
 `
+
+}
+
+output+="\n\n"+(data.result || "")
+
+result.innerText=output
 
 }catch(e){
 
-console.error(e)
-result.innerText="Error analyzing token."
+result.innerText="Error analyzing token. Please try again."
 
 }
 
@@ -99,13 +86,9 @@ async function checkout(priceId){
 const email=document.getElementById("email").value
 const pageUrl=window.location.origin+window.location.pathname
 
-try{
-
 const response=await fetch(API+"/create-checkout",{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
+headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
@@ -115,16 +98,7 @@ successUrl:pageUrl
 
 const data=await response.json()
 
-if(data.url){
 window.location=data.url
-}
-
-}catch(e){
-
-console.error(e)
-alert("Checkout failed")
-
-}
 
 }
 
