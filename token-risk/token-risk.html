@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Token Risk – Crypto Rug Checker</title>
+
+<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk, liquidity signals, and suspicious indicators using AI.">
+<meta name="robots" content="index,follow">
+
+<!-- Google Ads Global Tag -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'AW-17956428385');
+</script>
+
+<style>
+
+body{
+font-family:system-ui,-apple-system,Arial;
+background:#f4f6f9;
+margin:0;
+color:#111;
+line-height:1.6;
+}
+
+.app-top{
+position:fixed;
+top:18px;
+left:18px;
+background:#0066ff;
+color:white;
+padding:10px 16px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+z-index:999;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
+border:none;
+}
+
+.app-top:hover{background:#004fd1;}
+
+.upgrade-top{
+position:fixed;
+top:18px;
+right:18px;
+background:#111;
+color:white;
+padding:10px 16px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+z-index:999;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
+border:none;
+}
+
+.upgrade-top:hover{background:#333;}
+
+.hero{
+background:linear-gradient(135deg,#0066ff,#3c8cff);
+color:white;
+padding:100px 20px 80px 20px;
+text-align:center;
+}
+
+.hero h1{
+margin:0;
+font-size:40px;
+}
+
+.hero p{
+margin-top:12px;
+font-size:18px;
+opacity:.95;
+max-width:640px;
+margin-left:auto;
+margin-right:auto;
+}
+
+.container{
+max-width:760px;
+margin:auto;
+margin-top:-60px;
+background:white;
+padding:35px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+
+input{
+width:100%;
+padding:14px;
+margin-top:12px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+button{
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:16px;
+padding:15px;
+}
+
+.check{
+width:100%;
+background:#0066ff;
+color:white;
+margin-top:10px;
+font-weight:600;
+}
+
+.check:hover{background:#004fd1;}
+
+.note{
+margin-top:12px;
+font-size:14px;
+color:#666;
+text-align:center;
+}
+
+#result{
+margin-top:25px;
+white-space:pre-wrap;
+font-size:16px;
+background:#f7f9ff;
+padding:20px;
+border-radius:8px;
+}
+
+.resultAction{
+display:none;
+margin-top:18px;
+text-align:center;
+}
+
+.resultAction button{
+background:#0066ff;
+color:white;
+padding:14px 20px;
+border-radius:8px;
+font-weight:600;
+}
+
+.upgrade{
+display:none;
+margin-top:25px;
+padding:25px;
+background:#f7f9ff;
+border-radius:10px;
+text-align:center;
+}
+
+/* Stripe style buttons */
+
+.plan{
+width:100%;
+margin-top:12px;
+background:#635bff;
+color:white;
+font-weight:600;
+transition:all .15s ease;
+}
+
+.plan:hover{
+background:#5249d8;
+transform:translateY(-1px);
+}
+
+.section{
+max-width:760px;
+margin:auto;
+margin-top:70px;
+padding:0 20px;
+}
+
+.scanBlock{
+max-width:760px;
+margin:50px auto;
+background:white;
+padding:30px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,.12);
+text-align:center;
+}
+
+.footer{
+text-align:center;
+margin-top:80px;
+padding:40px;
+color:#777;
+font-size:14px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+
+<div class="hero">
+<h1>Token Risk – Crypto Rug Checker</h1>
+<p>Paste a token contract address to analyze rug pull risk, liquidity signals, and suspicious token activity.</p>
+</div>
+
+<div class="container">
+
+<input id="tokenAddress" placeholder="Paste token contract address">
+
+<input id="email" placeholder="Email (used to verify subscriptions)">
+
+<div class="note">
+3 free token checks available • no signup required
+</div>
+
+<button class="check" onclick="checkToken()">Check Token Risk</button>
+
+<div class="note">
+Instant AI token analysis appears after submission
+</div>
+
+<div id="result"></div>
+
+<div id="resultAction" class="resultAction">
+
+<p style="margin-bottom:10px;font-weight:600;">
+Check suspicious tokens instantly on your phone
+</p>
+
+</div>
+
+<div class="upgrade" id="upgrade">
+
+<h3>Unlock Unlimited Token Checks</h3>
+
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+Weekly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+Monthly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+Yearly Access
+</button>
+
+<div style="margin-top:14px;font-size:13px;color:#666;">
+🔒 Secure payments powered by Stripe
+</div>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>About Token Risk</h2>
+
+<p>
+Crypto rug pulls and scam tokens are increasingly common in decentralized markets. New tokens can appear legitimate but contain hidden risks such as low liquidity, manipulated volume, or suspicious contract behavior.
+</p>
+
+<p>
+Token Risk analyzes token market data and liquidity signals using AI to help identify potential rug pulls, suspicious trading behavior, and other risk indicators before you trade or invest.
+</p>
+
+</div>
+
+<div class="scanBlock">
+
+<h2>Check a Token Now</h2>
+
+<p>
+Paste a crypto token contract address above to analyze potential risks instantly.
+</p>
+
+<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+Analyze Token
+</button>
+
+</div>
+
+<div class="footer">
+Token Risk © 2026 • Crypto token analysis • Not financial advice
+</div>
+
+<script>
+
+const API="https://awake-integrity-production-faa0.up.railway.app"
+
+function showUpgrade(){
+document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+}
+
+async function checkToken(){
+
+const tokenAddress=document.getElementById("tokenAddress").value.trim()
+const email=document.getElementById("email").value
+const result=document.getElementById("result")
+
+if(!tokenAddress){
+result.innerText="Paste a token address to analyze."
+return
+}
+
+result.innerText="Analyzing token..."
+
+try{
+
+const response=await fetch(API+"/token-risk",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({tokenAddress,email})
+})
+
+const data=await response.json()
+
+if(data.limit){
+
+result.innerText="Free checks used. Upgrade for unlimited token analysis."
+document.getElementById("resultAction").style.display="block"
+
+showUpgrade()
+return
+
+}
+
+result.innerText=data.result
+document.getElementById("resultAction").style.display="block"
+
+}catch(e){
+
+result.innerText="Error analyzing token. Please try again."
+
+}
+
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+priceId,
+email,
+successUrl:pageUrl
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
+
+}
+
+</script>
+
+</body>
+</html>
