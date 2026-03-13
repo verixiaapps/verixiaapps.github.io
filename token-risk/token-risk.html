@@ -1,297 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Token Risk – Crypto Rug Checker</title>
-
-<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk, liquidity signals, and suspicious indicators using AI.">
-<meta name="robots" content="index,follow">
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'AW-17956428385');
-</script>
-
-<style>
-
-body{
-font-family:system-ui,-apple-system,Arial;
-background:#f4f6f9;
-margin:0;
-color:#111;
-line-height:1.6;
-}
-
-.upgrade-top{
-position:fixed;
-top:18px;
-right:18px;
-background:#111;
-color:white;
-padding:10px 16px;
-border-radius:8px;
-font-weight:600;
-cursor:pointer;
-z-index:999;
-box-shadow:0 4px 10px rgba(0,0,0,.2);
-border:none;
-}
-
-.hero{
-background:linear-gradient(135deg,#0066ff,#3c8cff);
-color:white;
-padding:100px 20px 80px 20px;
-text-align:center;
-}
-
-.hero h1{
-margin:0;
-font-size:40px;
-}
-
-.hero p{
-margin-top:12px;
-font-size:18px;
-opacity:.95;
-max-width:640px;
-margin-left:auto;
-margin-right:auto;
-}
-
-.container{
-max-width:760px;
-margin:auto;
-margin-top:-60px;
-background:white;
-padding:35px;
-border-radius:14px;
-box-shadow:0 12px 30px rgba(0,0,0,.12);
-}
-
-input{
-width:100%;
-padding:14px;
-margin-top:12px;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:16px;
-}
-
-button{
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-size:16px;
-padding:15px;
-}
-
-.check{
-width:100%;
-background:#0066ff;
-color:white;
-margin-top:10px;
-font-weight:600;
-}
-
-.check:hover{background:#004fd1;}
-
-.note{
-margin-top:12px;
-font-size:14px;
-color:#666;
-text-align:center;
-}
-
-.resultCard{
-margin-top:25px;
-background:#111;
-color:white;
-padding:25px;
-border-radius:12px;
-}
-
-.metric{
-background:#1a1a1a;
-padding:14px 16px;
-border-radius:10px;
-display:flex;
-justify-content:space-between;
-margin-top:10px;
-font-size:15px;
-}
-
-.metric span{
-opacity:.7;
-}
-
-.riskHigh{
-display:inline-block;
-background:#2a120c;
-border:1px solid #ff6a00;
-color:#ff6a00;
-padding:8px 14px;
-border-radius:10px;
-font-weight:700;
-margin-bottom:15px;
-}
-
-.sectionTitle{
-margin-top:28px;
-font-weight:700;
-letter-spacing:.04em;
-}
-
-.red{
-color:#ff3b30;
-}
-
-.green{
-color:#00e676;
-}
-
-.orange{
-color:#ff6a00;
-font-weight:700;
-}
-
-.upgrade{
-display:none;
-margin-top:25px;
-padding:25px;
-background:#f7f9ff;
-border-radius:10px;
-text-align:center;
-}
-
-.plan{
-width:100%;
-margin-top:12px;
-background:#635bff;
-color:white;
-font-weight:600;
-}
-
-.plan:hover{
-background:#5249d8;
-}
-
-.section{
-max-width:760px;
-margin:auto;
-margin-top:70px;
-padding:0 20px;
-}
-
-.scanBlock{
-max-width:760px;
-margin:50px auto;
-background:white;
-padding:30px;
-border-radius:14px;
-box-shadow:0 12px 30px rgba(0,0,0,.12);
-text-align:center;
-}
-
-.footer{
-text-align:center;
-margin-top:80px;
-padding:40px;
-color:#777;
-font-size:14px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
-
-<div class="hero">
-<h1>Token Risk – Crypto Rug Checker</h1>
-<p>Paste a token contract address to analyze rug pull risk, liquidity signals, and suspicious token activity.</p>
-</div>
-
-<div class="container">
-
-<input id="tokenAddress" placeholder="Paste token contract address">
-<input id="email" placeholder="Email (used to verify subscriptions)">
-
-<div class="note">
-3 free token checks available • no signup required
-</div>
-
-<button class="check" onclick="checkToken()">Check Token Risk</button>
-
-<div class="note">
-Instant AI token analysis appears after submission
-</div>
-
-<div id="result"></div>
-
-<div class="upgrade" id="upgrade">
-
-<h3>Unlock Unlimited Token Checks</h3>
-
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
-Weekly Access
-</button>
-
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
-Monthly Access
-</button>
-
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
-Yearly Access
-</button>
-
-<div style="margin-top:14px;font-size:13px;color:#666;">
-🔒 Secure payments powered by Stripe
-</div>
-
-</div>
-
-</div>
-
-<div class="section">
-
-<h2>About Token Risk</h2>
-
-<p>
-Crypto rug pulls and scam tokens are increasingly common in decentralized markets. New tokens can appear legitimate but contain hidden risks such as low liquidity, manipulated volume, or suspicious contract behavior.
-</p>
-
-<p>
-Token Risk analyzes token market data and liquidity signals using AI to help identify potential rug pulls, suspicious trading behavior, and other risk indicators before you trade or invest.
-</p>
-
-</div>
-
-<div class="scanBlock">
-
-<h2>Check a Token Now</h2>
-
-<p>
-Paste a crypto token contract address above to analyze potential risks instantly.
-</p>
-
-<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-Analyze Token
-</button>
-
-</div>
-
-<div class="footer">
-Token Risk © 2026 • Crypto token analysis • Not financial advice
-</div>
-
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
@@ -301,59 +7,45 @@ document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
-function parseMetrics(text){
+function formatResult(data){
 
-const liquidity=text.match(/Liquidity.*?\$([\d,.]+)/i)
-const volume=text.match(/Volume.*?\$([\d,.]+)/i)
-const price=text.match(/Price.*?([\+\-]?\d+\.?\d*%)/i)
-const age=text.match(/Pair age.*?(\d+d \d+h|\d+h|\d+d)/i)
-const fdv=text.match(/FDV.*?\$([\d,.]+)/i)
+const m=data.metrics
+let text=data.result
 
-return{
-liquidity:liquidity?liquidity[1]:"—",
-volume:volume?volume[1]:"—",
-price:price?price[1]:"—",
-age:age?age[1]:"—",
-fdv:fdv?fdv[1]:"—"
-}
-
-}
-
-function formatResult(text){
-
-const m=parseMetrics(text)
-
-let html=""
-
-html+="<div class='resultCard'>"
+let html="<div class='resultCard'>"
 
 if(text.includes("Risk Level: High")){
 html+="<div class='riskHigh'>Risk: High</div>"
 }
+else if(text.includes("Risk Level: Medium")){
+html+="<div class='riskHigh'>Risk: Medium</div>"
+}
+else{
+html+="<div class='riskHigh'>Risk: Low</div>"
+}
 
 html+=`
-<div class="metric"><span>Liquidity USD</span>$${m.liquidity}</div>
-<div class="metric"><span>Volume 24h</span>$${m.volume}</div>
-<div class="metric"><span>Price change 24h</span><span class="green">${m.price}</span></div>
-<div class="metric"><span>Pair age</span>${m.age}</div>
-<div class="metric"><span>FDV</span>$${m.fdv}</div>
+<div class="metric"><span>Liquidity USD</span>${m.liquidity}</div>
+<div class="metric"><span>Volume 24h</span>${m.volume}</div>
+<div class="metric"><span>Price change 24h</span><span class="green">${m.priceChange}</span></div>
+<div class="metric"><span>Pair age</span>${m.pairAge}</div>
+<div class="metric"><span>FDV</span>${m.fdv}</div>
 `
 
-let content=text
-content=content.replace("Risk Level: High","")
-content=content.replace("Risk Level: Medium","")
-content=content.replace("Risk Level: Low","")
+text=text.replace("Risk Level: High","")
+text=text.replace("Risk Level: Medium","")
+text=text.replace("Risk Level: Low","")
 
-content=content.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
-content=content.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
-content=content.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
-content=content.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
-content=content.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
-content=content.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
+text=text.replace("[SUMMARY]","<div class='sectionTitle'>SUMMARY</div>")
+text=text.replace("[KEY SIGNALS]","<div class='sectionTitle'>KEY SIGNALS</div>")
+text=text.replace("[RED FLAGS]","<div class='sectionTitle red'>RED FLAGS</div>")
+text=text.replace("[SAFE SIGNALS]","<div class='sectionTitle green'>SAFE SIGNALS</div>")
+text=text.replace("[FINAL TAKE]","<div class='sectionTitle'>FINAL TAKE</div>")
+text=text.replace("[WHAT TO WATCH]","<div class='sectionTitle'>WHAT TO WATCH</div>")
 
-content=content.replace(/\n/g,"<br>")
+text=text.replace(/\n/g,"<br>")
 
-html+=content
+html+=text
 html+="</div>"
 
 return html
@@ -375,13 +67,10 @@ result.innerText="Analyzing token..."
 
 try{
 
-const dexResponse=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`)
-const dexData=await dexResponse.json()
-
 const response=await fetch(API+"/token-risk",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({tokenAddress,email,tokenData:dexData})
+body:JSON.stringify({tokenAddress,email})
 })
 
 const data=await response.json()
@@ -392,7 +81,7 @@ showUpgrade()
 return
 }
 
-result.innerHTML=formatResult(data.result)
+result.innerHTML=formatResult(data)
 
 }catch(e){
 
@@ -424,6 +113,3 @@ window.location=data.url
 }
 
 </script>
-
-</body>
-</html>
