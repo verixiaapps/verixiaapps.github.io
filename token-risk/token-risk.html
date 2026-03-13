@@ -12,10 +12,17 @@ el.scrollIntoView({behavior:"smooth"})
 
 function confidenceColor(level){
 if(!level) return "#aaa"
+level=level.toUpperCase()
 if(level==="HIGH") return "#00e676"
 if(level==="MEDIUM") return "#ffb300"
 if(level==="LOW") return "#ff5252"
 return "#aaa"
+}
+
+function riskBadge(risk){
+if(risk==="High") return "<div class='riskHigh'>Risk: High</div>"
+if(risk==="Medium") return "<div class='riskHigh' style='border-color:#ffb300;color:#ffb300;background:#2a220c'>Risk: Medium</div>"
+return "<div class='riskHigh' style='border-color:#00e676;color:#00e676;background:#0c2a16'>Risk: Low</div>"
 }
 
 function formatResult(data){
@@ -25,19 +32,19 @@ if(!data) return "<div class='resultCard'>No result returned.</div>"
 const m=data.metrics || {}
 let text=data.result || ""
 
-let html="<div class='resultCard'>"
-
 let risk="Low"
 if(text.includes("Risk Level: High")) risk="High"
 else if(text.includes("Risk Level: Medium")) risk="Medium"
 
-html+=`<div class="riskHigh">Risk: ${risk}</div>`
+let html="<div class='resultCard'>"
+
+html+=riskBadge(risk)
 
 html+=`
 <div class="metric"><span>Liquidity USD</span>${m.liquidity || "-"}</div>
-<div class="metric"><span>Volume 24h</span>${m.volume || "-"}</div>
-<div class="metric"><span>Price change 24h</span><span class="green">${m.priceChange || "-"}</span></div>
-<div class="metric"><span>Pair age</span>${m.pairAge || "-"}</div>
+<div class="metric"><span>24h Volume</span>${m.volume || "-"}</div>
+<div class="metric"><span>24h Price Change</span><span class="green">${m.priceChange || "-"}</span></div>
+<div class="metric"><span>Pair Age</span>${m.pairAge || "-"}</div>
 <div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
 <div class="metric">
 <span>Liquidity Confidence</span>
