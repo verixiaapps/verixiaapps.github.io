@@ -12,27 +12,31 @@
 
 <!-- Google Ads Global Tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
+
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+
 gtag('js', new Date());
 gtag('config', 'AW-17956428385');
-</script>
 
-<!-- Purchase Conversion Detection -->
-<script>
-if (
-  window.location.search.includes("subscribed=true") &&
-  !sessionStorage.getItem("ads_conversion")
-) {
+/* Conversion trigger after Stripe success */
+window.addEventListener("load", function(){
 
-  gtag('event','conversion',{
-    'send_to':'AW-17956428385/CONVERSION_LABEL'
-  });
+if(
+window.location.search.includes("subscribed=true") &&
+!sessionStorage.getItem("ads_conversion_fired")
+){
 
-  sessionStorage.setItem("ads_conversion","1");
+gtag('event','conversion',{
+'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC'
+});
+
+sessionStorage.setItem("ads_conversion_fired","1");
 
 }
+
+});
 </script>
 
 <style>
@@ -198,23 +202,6 @@ transition:all .15s ease;
 .plan:hover{
 background:#5249d8;
 transform:translateY(-1px);
-}
-
-.section{
-max-width:760px;
-margin:auto;
-margin-top:70px;
-padding:0 20px;
-}
-
-.scanBlock{
-max-width:760px;
-margin:50px auto;
-background:white;
-padding:30px;
-border-radius:14px;
-box-shadow:0 12px 30px rgba(0,0,0,.12);
-text-align:center;
 }
 
 .footer{
