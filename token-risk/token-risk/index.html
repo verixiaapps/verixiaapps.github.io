@@ -18,10 +18,10 @@ gtag('config','AW-17956428385');
 
 <style>
 
-*{box-sizing:border-box;}
+*{box-sizing:border-box}
 
 body{
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Roboto,system-ui;
+font-family:-apple-system,BlinkMacSystemFont,system-ui;
 background:#000;
 margin:0;
 color:#fff;
@@ -42,6 +42,7 @@ font-weight:600;
 font-size:14px;
 z-index:999;
 box-shadow:0 4px 14px rgba(0,0,0,.4);
+cursor:default;
 }
 
 .upgrade-top{
@@ -66,9 +67,10 @@ padding:120px 20px 50px;
 }
 
 .hero h1{
-font-size:42px;
+font-size:40px;
 margin:0;
-letter-spacing:-.4px;
+font-weight:700;
+letter-spacing:-.3px;
 }
 
 .hero p{
@@ -133,7 +135,7 @@ margin-top:12px;
 font-size:14px;
 }
 
-/* results */
+/* result */
 
 #result{
 margin-top:40px;
@@ -155,7 +157,7 @@ font-size:18px;
 margin:20px 0 10px 0;
 }
 
-/* metrics */
+/* metric rows */
 
 .metric{
 display:flex;
@@ -178,9 +180,9 @@ font-weight:600;
 
 /* colors */
 
-.green{color:#2fff76;}
-.red{color:#ff3b30;}
-.orange{color:#ff6a2b;}
+.green{color:#2fff76}
+.red{color:#ff3b30}
+.orange{color:#ff6a2b}
 
 /* sections */
 
@@ -210,11 +212,11 @@ margin-bottom:10px;
 .sub{
 font-size:14px;
 opacity:.6;
-margin-left:18px;
-margin-top:4px;
+margin-top:6px;
+margin-bottom:10px;
 }
 
-/* upgrade box */
+/* upgrade */
 
 .upgrade{
 display:none;
@@ -336,8 +338,6 @@ running=false
 return
 }
 
-if(data.summary){
-
 let html=""
 
 /* risk */
@@ -349,7 +349,6 @@ html+=`<div class="risk">Risk: ${data.riskLevel}</div>`
 /* metrics */
 
 if(data.metrics){
-
 html+=`
 <div class="metric"><span>Liquidity USD</span><span>${data.metrics.liquidityUSD}</span></div>
 <div class="metric"><span>Volume 24h</span><span>${data.metrics.volume24h}</span></div>
@@ -361,21 +360,39 @@ html+=`
 
 /* summary */
 
+if(data.summary){
 html+=`<div class="section"><h3>[SUMMARY]</h3><p>${data.summary}</p></div>`
+}
 
 /* key signals */
 
-if(data.keySignals?.length){
 html+=`<div class="section"><h3>[KEY SIGNALS]</h3>`
-data.keySignals.forEach((x,i)=>{
-if(i===1 && x.startsWith("(")){
-html+=`<div class="sub">${x}</div>`
-}else{
-html+=`<div>• ${x}</div>`
+
+if(data.liquidityConfidence){
+
+let color=""
+
+if(data.liquidityConfidence==="LOW") color="red"
+if(data.liquidityConfidence==="HIGH") color="green"
+
+html+=`<div>Liquidity Confidence: <span class="${color}">${data.liquidityConfidence}</span></div>`
+
+if(data.liquidityExplanation){
+html+=`<div class="sub">(${data.liquidityExplanation})</div>`
 }
-})
+
+}
+
+if(data.metrics){
+html+=`
+<div class="metric"><span>Volume Behavior</span><span>${data.metrics.volume24h}</span></div>
+<div class="metric"><span>Price Behavior</span><span class="${data.metrics.priceChange24h.includes('+')?'green':'red'}">${data.metrics.priceChange24h}</span></div>
+<div class="metric"><span>Pair Age</span><span>${data.metrics.pairAge}</span></div>
+<div class="metric"><span>FDV</span><span>${data.metrics.fdv}</span></div>
+`
+}
+
 html+=`</div>`
-}
 
 /* red flags */
 
@@ -397,10 +414,8 @@ html+=`</ul></div>`
 
 if(data.finalTake){
 let cls=""
-
 if(data.finalTake.toLowerCase()=="avoid") cls="orange"
 if(data.finalTake.toLowerCase()=="safe") cls="green"
-
 html+=`<div class="section"><h3>[FINAL TAKE]</h3><div class="${cls}" style="font-weight:600;font-size:22px">${data.finalTake}</div></div>`
 }
 
@@ -414,16 +429,8 @@ html+=`</ul></div>`
 
 result.innerHTML=html
 
-}else{
-
-result.innerHTML=data.result || "No analysis available."
-
-}
-
 }catch(e){
-
 result.innerText="Error analyzing token."
-
 }
 
 btn.disabled=false
