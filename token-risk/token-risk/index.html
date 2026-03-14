@@ -18,17 +18,17 @@ gtag('config','AW-17956428385');
 
 <style>
 
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box;}
 
 body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,Arial;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Roboto,system-ui;
 background:#000;
 margin:0;
 color:#fff;
 -webkit-font-smoothing:antialiased;
 }
+
+/* top bar */
 
 .app-top{
 position:fixed;
@@ -37,11 +37,10 @@ left:18px;
 background:linear-gradient(135deg,#4c6fff,#355bd8);
 color:#fff;
 padding:10px 18px;
-border-radius:12px;
+border-radius:14px;
 font-weight:600;
 font-size:14px;
 z-index:999;
-cursor:default;
 box-shadow:0 4px 14px rgba(0,0,0,.4);
 }
 
@@ -57,12 +56,9 @@ border:1px solid #222;
 font-weight:600;
 cursor:pointer;
 z-index:999;
-transition:all .2s;
 }
 
-.upgrade-top:hover{
-background:#1a1a1a;
-}
+/* hero */
 
 .hero{
 text-align:center;
@@ -70,22 +66,26 @@ padding:120px 20px 50px;
 }
 
 .hero h1{
-font-size:44px;
+font-size:42px;
 margin:0;
-letter-spacing:-.5px;
+letter-spacing:-.4px;
 }
 
 .hero p{
-opacity:.7;
-margin-top:14px;
+opacity:.65;
+margin-top:12px;
 font-size:18px;
 }
+
+/* layout */
 
 .container{
 max-width:620px;
 margin:auto;
 padding:0 20px 80px;
 }
+
+/* inputs */
 
 input{
 width:100%;
@@ -94,16 +94,16 @@ border:1px solid #1f1f1f;
 color:#fff;
 padding:18px;
 margin-top:14px;
-border-radius:16px;
+border-radius:18px;
 font-size:16px;
 outline:none;
-transition:all .2s;
 }
 
 input:focus{
 border-color:#3b6cff;
-background:#0f0f0f;
 }
+
+/* button */
 
 button.check{
 width:100%;
@@ -111,24 +111,20 @@ background:linear-gradient(135deg,#4c6fff,#355bd8);
 border:none;
 padding:18px;
 margin-top:18px;
-border-radius:16px;
+border-radius:18px;
 font-size:17px;
 font-weight:600;
 color:#fff;
 cursor:pointer;
-transition:all .2s;
 box-shadow:0 8px 24px rgba(0,0,0,.4);
-}
-
-button.check:hover{
-transform:translateY(-1px);
 }
 
 button.check:disabled{
 opacity:.5;
 cursor:not-allowed;
-transform:none;
 }
+
+/* notes */
 
 .note{
 opacity:.6;
@@ -137,64 +133,88 @@ margin-top:12px;
 font-size:14px;
 }
 
+/* results */
+
 #result{
 margin-top:40px;
-font-size:16px;
-line-height:1.6;
+font-size:17px;
+line-height:1.65;
 }
 
+/* risk badge */
+
 .risk{
-display:inline-block;
-border:2px solid #ff5c2b;
-color:#ff5c2b;
-padding:10px 16px;
-border-radius:12px;
-font-weight:700;
-margin:20px 0;
+display:inline-flex;
+align-items:center;
+padding:12px 18px;
+border-radius:14px;
+border:2px solid #ff6a2b;
+color:#ff6a2b;
+font-weight:600;
+font-size:18px;
+margin:20px 0 10px 0;
 }
+
+/* metrics */
 
 .metric{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:16px 18px;
-margin-top:12px;
-border-radius:14px;
+padding:20px 22px;
+margin-top:14px;
+border-radius:22px;
 background:#111;
-font-size:16px;
+font-size:18px;
+}
+
+.metric span:first-child{
+color:#9aa0a6;
 }
 
 .metric span:last-child{
 font-weight:600;
 }
 
-.green{color:#00ff5a;}
-.red{color:#ff4040;}
+/* colors */
+
+.green{color:#2fff76;}
+.red{color:#ff3b30;}
+.orange{color:#ff6a2b;}
+
+/* sections */
 
 .section{
-margin-top:40px;
+margin-top:42px;
 }
 
 .section h3{
-margin-bottom:12px;
-letter-spacing:.5px;
+font-weight:700;
+font-size:20px;
+letter-spacing:.4px;
+margin-bottom:14px;
 }
 
 .section ul{
-padding-left:18px;
-line-height:1.6;
+padding-left:20px;
+line-height:1.7;
+margin-top:10px;
 }
 
-.section p{
-margin:0;
+.section li{
+margin-bottom:10px;
 }
+
+/* liquidity explanation */
 
 .sub{
-opacity:.6;
-font-style:italic;
-margin-top:4px;
 font-size:14px;
+opacity:.6;
+margin-left:18px;
+margin-top:4px;
 }
+
+/* upgrade box */
 
 .upgrade{
 display:none;
@@ -217,11 +237,6 @@ border-radius:14px;
 font-weight:600;
 font-size:15px;
 cursor:pointer;
-transition:.2s;
-}
-
-.plan:hover{
-transform:translateY(-1px);
 }
 
 </style>
@@ -325,9 +340,13 @@ if(data.summary){
 
 let html=""
 
+/* risk */
+
 if(data.riskLevel){
 html+=`<div class="risk">Risk: ${data.riskLevel}</div>`
 }
+
+/* metrics */
 
 if(data.metrics){
 
@@ -340,7 +359,11 @@ html+=`
 `
 }
 
+/* summary */
+
 html+=`<div class="section"><h3>[SUMMARY]</h3><p>${data.summary}</p></div>`
+
+/* key signals */
 
 if(data.keySignals?.length){
 html+=`<div class="section"><h3>[KEY SIGNALS]</h3>`
@@ -348,27 +371,40 @@ data.keySignals.forEach((x,i)=>{
 if(i===1 && x.startsWith("(")){
 html+=`<div class="sub">${x}</div>`
 }else{
-html+=`<p>${x}</p>`
+html+=`<div>• ${x}</div>`
 }
 })
 html+=`</div>`
 }
 
+/* red flags */
+
 if(data.concerningIndicators?.length){
-html+=`<div class="section"><h3 style="color:#ff4040">[RED FLAGS]</h3><ul>`
+html+=`<div class="section"><h3 class="red">[RED FLAGS]</h3><ul>`
 data.concerningIndicators.forEach(x=>html+=`<li>${x}</li>`)
 html+=`</ul></div>`
 }
 
+/* safe signals */
+
 if(data.legitimateElements?.length){
-html+=`<div class="section"><h3 style="color:#00ff5a">[SAFE SIGNALS]</h3><ul>`
+html+=`<div class="section"><h3 class="green">[SAFE SIGNALS]</h3><ul>`
 data.legitimateElements.forEach(x=>html+=`<li>${x}</li>`)
 html+=`</ul></div>`
 }
 
+/* final take */
+
 if(data.finalTake){
-html+=`<div class="section"><h3>[FINAL TAKE]</h3><p style="font-weight:600">${data.finalTake}</p></div>`
+let cls=""
+
+if(data.finalTake.toLowerCase()=="avoid") cls="orange"
+if(data.finalTake.toLowerCase()=="safe") cls="green"
+
+html+=`<div class="section"><h3>[FINAL TAKE]</h3><div class="${cls}" style="font-weight:600;font-size:22px">${data.finalTake}</div></div>`
 }
+
+/* what to watch */
 
 if(data.recommendations?.length){
 html+=`<div class="section"><h3>[WHAT TO WATCH]</h3><ul>`
