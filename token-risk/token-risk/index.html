@@ -5,33 +5,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Token Risk – Crypto Rug Checker</title>
+<title>Is This Token Safe? AI Rug Checker</title>
 
-<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk.">
+<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk using AI.">
+<meta name="robots" content="index,follow">
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'AW-17956428385');
+</script>
 
 <style>
 
 body{
 font-family:system-ui,-apple-system,Arial;
-background:#000;
+background:#0b0b0b;
 margin:0;
 color:#fff;
+line-height:1.6;
+}
+
+.hero{
+text-align:center;
+padding:100px 20px 60px;
+}
+
+.hero h1{
+font-size:38px;
+margin:0;
+}
+
+.hero p{
+opacity:.7;
+margin-top:10px;
+font-size:18px;
 }
 
 .container{
-max-width:640px;
+max-width:760px;
 margin:auto;
-padding:120px 20px 40px;
+padding:0 20px 40px;
 }
 
 input{
 width:100%;
-background:#111;
-border:1px solid #222;
+background:#151515;
+border:none;
 color:#fff;
 padding:16px;
 margin-top:12px;
-border-radius:10px;
+border-radius:12px;
 font-size:16px;
 }
 
@@ -41,21 +67,44 @@ background:#355bd8;
 border:none;
 padding:16px;
 margin-top:16px;
-border-radius:10px;
+border-radius:12px;
 font-size:16px;
 font-weight:600;
 color:#fff;
 cursor:pointer;
 }
 
-button:disabled{
+.note{
 opacity:.6;
+text-align:center;
+margin-top:10px;
+font-size:14px;
 }
 
 #result{
-margin-top:40px;
+margin-top:35px;
 white-space:pre-wrap;
-line-height:1.6;
+}
+
+.upgrade{
+display:none;
+background:#111;
+padding:25px;
+border-radius:12px;
+margin-top:30px;
+text-align:center;
+}
+
+.plan{
+width:100%;
+margin-top:12px;
+background:#635bff;
+border:none;
+color:#fff;
+padding:14px;
+border-radius:10px;
+font-weight:600;
+cursor:pointer;
 }
 
 </style>
@@ -64,16 +113,45 @@ line-height:1.6;
 
 <body>
 
+<div class="hero">
+<h1>Is This Token Safe?</h1>
+<p>AI crypto rug checker — try 3 free scans.</p>
+</div>
+
 <div class="container">
 
-<h1>Is This Token Safe?</h1>
-
 <input id="token" placeholder="Paste token contract address">
-<input id="email" placeholder="Email (optional)">
+<input id="email" placeholder="Email (used to verify subscriptions)">
 
-<button id="checkBtn">Check Token Risk</button>
+<div class="note">
+3 free token checks available • no signup required
+</div>
+
+<button onclick="check()">Check Token Risk</button>
+
+<div class="note">
+Instant AI analysis appears after submission
+</div>
 
 <div id="result"></div>
+
+<div id="upgrade" class="upgrade">
+
+<h3>Unlock Unlimited Token Checks</h3>
+
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+Weekly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+Monthly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+Yearly Access
+</button>
+
+</div>
 
 </div>
 
@@ -81,23 +159,22 @@ line-height:1.6;
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
-document.getElementById("checkBtn").addEventListener("click",check)
+function showUpgrade(){
+document.getElementById("upgrade").style.display="block"
+}
 
 async function check(){
 
-const btn=document.getElementById("checkBtn")
 const token=document.getElementById("token").value.trim()
 const email=document.getElementById("email").value
 const result=document.getElementById("result")
 
 if(!token){
-result.innerText="Paste a token contract address."
+result.innerText="Paste a token contract address to analyze."
 return
 }
 
-btn.disabled=true
-
-result.innerText="Analyzing token..."
+result.innerText="Analyzing..."
 
 try{
 
@@ -111,8 +188,8 @@ const data=await response.json()
 
 if(data.limit){
 
-result.innerText="Free checks used. Upgrade required."
-btn.disabled=false
+result.innerText="Free checks used. Upgrade for unlimited token analysis."
+showUpgrade()
 return
 
 }
@@ -121,11 +198,30 @@ result.innerText=data.result
 
 }catch(e){
 
-result.innerText="Error analyzing token."
+result.innerText="Error analyzing token. Please try again."
 
 }
 
-btn.disabled=false
+}
+
+async function checkout(priceId){
+
+const email=document.getElementById("email").value
+const pageUrl=window.location.origin+window.location.pathname
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+priceId,
+email,
+successUrl:pageUrl + "?subscribed=true"
+})
+})
+
+const data=await response.json()
+
+window.location=data.url
 
 }
 
