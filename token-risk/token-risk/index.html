@@ -8,6 +8,8 @@
 <title>Is This Token Safe? AI Rug Checker</title>
 <meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk using AI.">
 
+<link rel="canonical" href="https://verixiaapps.github.io/scam-check-now/">
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -18,9 +20,7 @@ gtag('config','AW-17956428385');
 
 <style>
 
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
 font-family:-apple-system,BlinkMacSystemFont,system-ui;
@@ -183,9 +183,9 @@ font-weight:600;
 
 /* colors */
 
-.green{color:#2fff76;}
-.red{color:#ff3b30;}
-.orange{color:#ff6a2b;}
+.green{color:#2fff76}
+.red{color:#ff3b30}
+.orange{color:#ff6a2b}
 
 /* sections */
 
@@ -208,15 +208,6 @@ margin-top:10px;
 
 .section li{
 margin-bottom:10px;
-}
-
-/* explanation */
-
-.sub{
-font-size:14px;
-opacity:.55;
-margin-left:8px;
-margin-top:6px;
 }
 
 /* final take */
@@ -302,33 +293,25 @@ const result=document.getElementById("result")
 
 let running=false
 
-function triggerCheck(){
-if(running) return
-running=true
-btn.disabled=true
-check()
-}
-
-btn.addEventListener("pointerup",triggerCheck)
-btn.addEventListener("click",triggerCheck)
-
 function showUpgrade(){
 document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
-async function check(){
+btn.addEventListener("click",async()=>{
+
+if(running) return
 
 const token=document.getElementById("token").value.trim()
-const email=document.getElementById("email").value
+const email=document.getElementById("email").value.trim()
 
 if(!token){
 result.innerText="Paste a token contract address."
-btn.disabled=false
-running=false
 return
 }
 
+running=true
+btn.disabled=true
 result.innerText="Analyzing..."
 
 try{
@@ -344,8 +327,8 @@ const data=await response.json()
 if(data.limit){
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
 showUpgrade()
-btn.disabled=false
 running=false
+btn.disabled=false
 return
 }
 
@@ -360,11 +343,11 @@ html+=`<div class="risk">Risk: ${data.riskLevel}</div>`
 if(data.metrics){
 
 html+=`
-<div class="metric"><span>Liquidity USD</span><span>${data.metrics.liquidityUSD}</span></div>
-<div class="metric"><span>Volume 24h</span><span>${data.metrics.volume24h}</span></div>
-<div class="metric"><span>Price change 24h</span><span class="${data.metrics.priceChange24h.includes('+')?'green':'red'}">${data.metrics.priceChange24h}</span></div>
-<div class="metric"><span>Pair age</span><span>${data.metrics.pairAge}</span></div>
-<div class="metric"><span>FDV</span><span>${data.metrics.fdv}</span></div>
+<div class="metric"><span>Liquidity USD</span><span>${data.metrics.liquidityUSD||"-"}</span></div>
+<div class="metric"><span>Volume 24h</span><span>${data.metrics.volume24h||"-"}</span></div>
+<div class="metric"><span>Price change 24h</span><span>${data.metrics.priceChange24h||"-"}</span></div>
+<div class="metric"><span>Pair age</span><span>${data.metrics.pairAge||"-"}</span></div>
+<div class="metric"><span>FDV</span><span>${data.metrics.fdv||"-"}</span></div>
 `
 }
 
@@ -372,9 +355,7 @@ html+=`<div class="section"><h3>[SUMMARY]</h3><p>${data.summary}</p></div>`
 
 if(data.keySignals?.length){
 html+=`<div class="section"><h3>[KEY SIGNALS]</h3>`
-data.keySignals.forEach(x=>{
-html+=`<div>• ${x}</div>`
-})
+data.keySignals.forEach(x=>html+=`<div>• ${x}</div>`)
 html+=`</div>`
 }
 
@@ -391,13 +372,7 @@ html+=`</ul></div>`
 }
 
 if(data.finalTake){
-
-let cls=""
-
-if(data.finalTake.toLowerCase()=="avoid") cls="orange"
-if(data.finalTake.toLowerCase()=="safe") cls="green"
-
-html+=`<div class="section"><h3>[FINAL TAKE]</h3><div class="final ${cls}">${data.finalTake}</div></div>`
+html+=`<div class="section"><h3>[FINAL TAKE]</h3><div class="final">${data.finalTake}</div></div>`
 }
 
 if(data.recommendations?.length){
@@ -409,39 +384,39 @@ html+=`</ul></div>`
 result.innerHTML=html
 
 }else{
-
-result.innerHTML=data.result || "No analysis available."
-
+result.innerText="No analysis available."
 }
 
 }catch(e){
-
 result.innerText="Error analyzing token."
-
 }
 
-btn.disabled=false
 running=false
+btn.disabled=false
 
-}
+})
 
 async function checkout(priceId){
 
 const email=document.getElementById("email").value
-const pageUrl=window.location.origin+window.location.pathname
+
+try{
 
 const response=await fetch(API+"/create-checkout",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-priceId,
-email,
-successUrl:pageUrl+"?subscribed=true"
-})
+body:JSON.stringify({priceId,email})
 })
 
 const data=await response.json()
+
+if(data.url){
 window.location=data.url
+}
+
+}catch{
+alert("Checkout failed")
+}
 
 }
 
