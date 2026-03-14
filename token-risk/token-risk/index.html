@@ -12,18 +12,13 @@
 
 <link rel="canonical" href="https://verixiaapps.com/token-risk">
 
-<meta property="og:title" content="Token Risk – Crypto Rug Checker">
-<meta property="og:description" content="Analyze crypto tokens for rug pull risk, liquidity signals, and suspicious indicators using AI.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://verixiaapps.com/token-risk">
-
 <style>
 
 body{
 font-family:system-ui,-apple-system,Arial;
-background:#0c0c0c;
+background:#f4f6f9;
 margin:0;
-color:#fff;
+color:#111;
 line-height:1.6;
 }
 
@@ -38,8 +33,11 @@ border-radius:8px;
 font-weight:600;
 cursor:pointer;
 z-index:999;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
 border:none;
 }
+
+.app-top:hover{background:#004fd1;}
 
 .upgrade-top{
 position:fixed;
@@ -52,32 +50,38 @@ border-radius:8px;
 font-weight:600;
 cursor:pointer;
 z-index:999;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
 border:none;
 }
 
+.upgrade-top:hover{background:#333;}
+
 .hero{
-padding:90px 20px 70px;
-text-align:center;
 background:linear-gradient(135deg,#111,#000);
+color:white;
+padding:100px 20px 80px 20px;
+text-align:center;
 }
 
 .hero h1{
 margin:0;
-font-size:42px;
+font-size:40px;
 }
 
 .hero p{
 margin-top:12px;
-opacity:.8;
+font-size:18px;
+opacity:.9;
 }
 
 .container{
-max-width:720px;
+max-width:760px;
 margin:auto;
-margin-top:-40px;
-background:#111;
-padding:30px;
-border-radius:16px;
+margin-top:-60px;
+background:white;
+padding:35px;
+border-radius:14px;
+box-shadow:0 12px 30px rgba(0,0,0,.12);
 }
 
 input{
@@ -85,73 +89,56 @@ width:100%;
 padding:14px;
 margin-top:12px;
 border-radius:8px;
-border:none;
+border:1px solid #ccc;
 font-size:16px;
-background:#1a1a1a;
-color:white;
 }
 
 button{
 border:none;
-border-radius:10px;
+border-radius:8px;
 cursor:pointer;
 font-size:16px;
-padding:16px;
+padding:15px;
 }
 
 .check{
 width:100%;
-background:#e4c36a;
-color:black;
+background:#0066ff;
+color:white;
+margin-top:10px;
 font-weight:600;
-margin-top:12px;
 }
 
+.check:hover{background:#004fd1;}
+
 .note{
-margin-top:10px;
+margin-top:12px;
 font-size:14px;
-opacity:.6;
+color:#666;
 text-align:center;
 }
 
-.resultCard{
+#result{
 margin-top:25px;
-background:#111;
-padding:25px;
-border-radius:12px;
-}
-
-.metric{
-background:#1a1a1a;
-padding:12px 16px;
+white-space:pre-wrap;
+font-size:16px;
+background:#f7f9ff;
+padding:20px;
 border-radius:8px;
-display:flex;
-justify-content:space-between;
-margin-top:8px;
-font-size:14px;
 }
 
-.riskBadge{
-display:inline-block;
-padding:6px 12px;
+.resultAction{
+display:none;
+margin-top:18px;
+text-align:center;
+}
+
+.resultAction button{
+background:#0066ff;
+color:white;
+padding:14px 20px;
 border-radius:8px;
-font-weight:700;
-margin-bottom:12px;
-}
-
-.riskHigh{
-border:1px solid #ff5252;
-color:#ff5252;
-}
-
-.riskMedium{
-border:1px solid #ffb300;
-color:#ffb300;
-}
-
-.riskLow{
-border:1px solid #00e676;
-color:#00e676;
+font-weight:600;
 }
 
 .upgrade{
@@ -161,12 +148,11 @@ padding:25px;
 background:#f7f9ff;
 border-radius:10px;
 text-align:center;
-color:#000;
 }
 
 .plan{
 width:100%;
-margin-top:10px;
+margin-top:12px;
 background:#635bff;
 color:white;
 font-weight:600;
@@ -174,9 +160,9 @@ font-weight:600;
 
 .footer{
 text-align:center;
-margin-top:60px;
-padding:30px;
-opacity:.6;
+margin-top:80px;
+padding:40px;
+color:#777;
 font-size:14px;
 }
 
@@ -189,12 +175,10 @@ font-size:14px;
 <button class="app-top" onclick="openApp()">📱 Get App</button>
 <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 
-<header class="hero">
+<div class="hero">
 <h1>Is This Token Safe?</h1>
-<p>Check token risk instantly — avoid scams and rug pulls</p>
-</header>
-
-<main>
+<p>AI crypto rug checker — try 3 free scans</p>
+</div>
 
 <div class="container">
 
@@ -205,23 +189,39 @@ font-size:14px;
 3 free token checks available • no signup required
 </div>
 
-<button id="checkBtn" class="check" onclick="checkToken()">Check Token Risk</button>
+<button class="check" onclick="checkToken()">Check Token Risk</button>
 
 <div id="result"></div>
+
+<div id="resultAction" class="resultAction">
+
+<p style="margin-bottom:10px;font-weight:600;">
+Analyze tokens instantly on your phone
+</p>
+
+<button onclick="openApp()">📱 Get the App</button>
+
+</div>
 
 <div class="upgrade" id="upgrade">
 
 <h3>Unlock Unlimited Token Checks</h3>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
+Weekly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
+Monthly Access
+</button>
+
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
+Yearly Access
+</button>
 
 </div>
 
 </div>
-
-</main>
 
 <footer class="footer">
 Token Risk © 2026 • Crypto token analysis • Not financial advice
@@ -240,42 +240,8 @@ document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
-function riskBadge(text){
-if(text.includes("High")) return "<div class='riskBadge riskHigh'>High Risk</div>"
-if(text.includes("Medium")) return "<div class='riskBadge riskMedium'>Medium Risk</div>"
-return "<div class='riskBadge riskLow'>Low Risk</div>"
-}
-
-function formatResult(data){
-
-let html="<div class='resultCard'>"
-
-html+=riskBadge(data.result)
-
-if(data.metrics){
-
-const m=data.metrics
-
-html+=`
-<div class="metric"><span>Liquidity</span>${m.liquidity || "-"}</div>
-<div class="metric"><span>Volume 24h</span>${m.volume || "-"}</div>
-<div class="metric"><span>Pair Age</span>${m.pairAge || "-"}</div>
-<div class="metric"><span>FDV</span>${m.fdv || "-"}</div>
-`
-
-}
-
-html+=`<div style="margin-top:14px">${data.result}</div>`
-
-html+="</div>"
-
-return html
-
-}
-
 async function checkToken(){
 
-const btn=document.getElementById("checkBtn")
 const token=document.getElementById("tokenAddress").value.trim()
 const email=document.getElementById("email").value
 const result=document.getElementById("result")
@@ -285,70 +251,64 @@ result.innerText="Paste a token address to analyze."
 return
 }
 
-btn.disabled=true
-btn.innerText="Analyzing..."
-
-result.innerHTML="Fetching token data..."
+result.innerText="Fetching token data..."
 
 try{
 
-/* STEP 1 — GET DATA FROM DEXSCREENER */
+/* STEP 1 — GET TOKEN DATA FROM DEXSCREENER */
 
 const dex=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${token}`)
 const dexData=await dex.json()
 
 if(!dexData.pairs || dexData.pairs.length===0){
 result.innerText="Token not found on Dexscreener."
-btn.disabled=false
-btn.innerText="Check Token Risk"
 return
 }
 
 const pair=dexData.pairs[0]
 
 const metrics={
-liquidity: pair.liquidity?.usd ? "$"+Math.round(pair.liquidity.usd).toLocaleString() : "-",
-volume: pair.volume?.h24 ? "$"+Math.round(pair.volume.h24).toLocaleString() : "-",
-fdv: pair.fdv ? "$"+Math.round(pair.fdv).toLocaleString() : "-",
-pairAge: pair.pairCreatedAt ? Math.floor((Date.now()-pair.pairCreatedAt)/86400000)+" days" : "-"
+liquidity: pair.liquidity?.usd,
+volume: pair.volume?.h24,
+fdv: pair.fdv,
+priceChange: pair.priceChange?.h24
 }
 
-/* STEP 2 — SEND METRICS TO RAILWAY */
+/* STEP 2 — SEND TO RAILWAY + CHATGPT */
 
-result.innerHTML="Running AI analysis..."
+result.innerText="Running AI analysis..."
 
 const response=await fetch(API+"/token-risk",{
 method:"POST",
-headers:{"Content-Type":"application/json"},
+headers:{
+"Content-Type":"application/json"
+},
 body:JSON.stringify({
 tokenAddress:token,
-metrics:metrics,
-email:email
+metrics,
+email
 })
 })
 
 const data=await response.json()
 
 if(data.limit){
-result.innerText="No free checks remaining — unlock unlimited access."
+
+result.innerText="Free checks used. Upgrade for unlimited token analysis."
+document.getElementById("resultAction").style.display="block"
 showUpgrade()
-btn.disabled=false
-btn.innerText="Check Token Risk"
 return
+
 }
 
-data.metrics=metrics
+result.innerText=data.result
+document.getElementById("resultAction").style.display="block"
 
-result.innerHTML=formatResult(data)
-
-}catch(err){
+}catch(e){
 
 result.innerText="Error analyzing token. Please try again."
 
 }
-
-btn.disabled=false
-btn.innerText="Check Token Risk"
 
 }
 
@@ -363,7 +323,7 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl
+successUrl:pageUrl+"?subscribed=true"
 })
 })
 
