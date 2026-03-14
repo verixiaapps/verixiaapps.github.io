@@ -1,0 +1,29 @@
+name: Convert scam-check-now pages to folder URLs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Convert HTML pages to folder structure
+        run: |
+          find scam-check-now -type f -name "*.html" ! -name "index.html" ! -name "all-pages.html" | while read file; do
+            base=$(basename "$file" .html)
+            dir=$(dirname "$file")
+            mkdir -p "$dir/$base"
+            git mv "$file" "$dir/$base/index.html"
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Convert scam-check-now HTML pages to folder structure"
+          git push
