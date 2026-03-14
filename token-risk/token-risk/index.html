@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Is This Token Safe? AI Rug Checker</title>
-
 <meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk using AI.">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
@@ -144,21 +143,6 @@ font-size:16px;
 line-height:1.6;
 }
 
-.metric{
-display:flex;
-justify-content:space-between;
-padding:14px 0;
-border-bottom:1px solid #1a1a1a;
-font-size:17px;
-}
-
-.metric span:last-child{
-font-weight:600;
-}
-
-.green{color:#00ff5a;}
-.red{color:#ff4040;}
-
 .risk{
 display:inline-block;
 border:2px solid #ff5c2b;
@@ -168,6 +152,24 @@ border-radius:12px;
 font-weight:700;
 margin:20px 0;
 }
+
+.metric{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:16px 18px;
+margin-top:12px;
+border-radius:14px;
+background:#111;
+font-size:16px;
+}
+
+.metric span:last-child{
+font-weight:600;
+}
+
+.green{color:#00ff5a;}
+.red{color:#ff4040;}
 
 .section{
 margin-top:40px;
@@ -181,6 +183,17 @@ letter-spacing:.5px;
 .section ul{
 padding-left:18px;
 line-height:1.6;
+}
+
+.section p{
+margin:0;
+}
+
+.sub{
+opacity:.6;
+font-style:italic;
+margin-top:4px;
+font-size:14px;
 }
 
 .upgrade{
@@ -330,9 +343,15 @@ html+=`
 html+=`<div class="section"><h3>[SUMMARY]</h3><p>${data.summary}</p></div>`
 
 if(data.keySignals?.length){
-html+=`<div class="section"><h3>[KEY SIGNALS]</h3><ul>`
-data.keySignals.forEach(x=>html+=`<li>${x}</li>`)
-html+=`</ul></div>`
+html+=`<div class="section"><h3>[KEY SIGNALS]</h3>`
+data.keySignals.forEach((x,i)=>{
+if(i===1 && x.startsWith("(")){
+html+=`<div class="sub">${x}</div>`
+}else{
+html+=`<p>${x}</p>`
+}
+})
+html+=`</div>`
 }
 
 if(data.concerningIndicators?.length){
