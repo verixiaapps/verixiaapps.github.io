@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: seo-engine
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,11 +19,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -41,6 +48,13 @@ jobs:
         run: |
           git config --global user.name "seo-bot"
           git config --global user.email "bot@github.com"
+
           git add .
-          git commit -m "auto seo pages update" || echo "No changes"
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "auto seo pages update $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
