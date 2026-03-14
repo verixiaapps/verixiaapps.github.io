@@ -7,10 +7,33 @@
 
 <title>Token Risk – Crypto Rug Checker</title>
 
-<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk, liquidity signals, and suspicious indicators using AI.">
+<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk and suspicious indicators using AI.">
 <meta name="robots" content="index,follow">
 
-<link rel="canonical" href="https://verixiaapps.com/token-risk">
+<!-- Google Ads Global Tag -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'AW-17956428385');
+</script>
+
+<!-- Purchase Conversion Detection -->
+<script>
+if (
+  window.location.search.includes("subscribed=true") &&
+  !sessionStorage.getItem("ads_conversion")
+) {
+
+  gtag('event','conversion',{
+    'send_to':'AW-17956428385/CONVERSION_LABEL'
+  });
+
+  sessionStorage.setItem("ads_conversion","1");
+
+}
+</script>
 
 <style>
 
@@ -71,7 +94,7 @@ font-size:40px;
 .hero p{
 margin-top:12px;
 font-size:18px;
-opacity:.9;
+opacity:.95;
 }
 
 .container{
@@ -156,6 +179,12 @@ margin-top:12px;
 background:#635bff;
 color:white;
 font-weight:600;
+transition:all .15s ease;
+}
+
+.plan:hover{
+background:#5249d8;
+transform:translateY(-1px);
 }
 
 .footer{
@@ -177,26 +206,31 @@ font-size:14px;
 
 <div class="hero">
 <h1>Is This Token Safe?</h1>
-<p>AI crypto rug checker — try 3 free scans</p>
+<p>AI crypto rug checker — try 3 free scans.</p>
 </div>
 
 <div class="container">
 
-<input id="tokenAddress" placeholder="Paste token contract address">
+<input id="token" placeholder="Paste token contract address">
+
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
 <div class="note">
 3 free token checks available • no signup required
 </div>
 
-<button class="check" onclick="checkToken()">Check Token Risk</button>
+<button class="check" onclick="check()">Check Token Risk</button>
+
+<div class="note">
+Instant AI analysis appears after submission
+</div>
 
 <div id="result"></div>
 
 <div id="resultAction" class="resultAction">
 
 <p style="margin-bottom:10px;font-weight:600;">
-Analyze tokens instantly on your phone
+Scan crypto tokens instantly on your phone
 </p>
 
 <button onclick="openApp()">📱 Get the App</button>
@@ -219,6 +253,10 @@ Monthly Access
 Yearly Access
 </button>
 
+<div style="margin-top:14px;font-size:13px;color:#666;">
+🔒 Secure payments powered by Stripe
+</div>
+
 </div>
 
 </div>
@@ -227,22 +265,20 @@ Yearly Access
 Token Risk © 2026 • Crypto token analysis • Not financial advice
 </footer>
 
+<script src="/scam-check-now/app-link.js"></script>
+
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
-
-function openApp(){
-window.location="https://verixiaapps.com"
-}
 
 function showUpgrade(){
 document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
-async function checkToken(){
+async function check(){
 
-const token=document.getElementById("tokenAddress").value.trim()
+const token=document.getElementById("token").value.trim()
 const email=document.getElementById("email").value
 const result=document.getElementById("result")
 
@@ -255,7 +291,7 @@ result.innerText="Fetching token data..."
 
 try{
 
-/* STEP 1 — GET TOKEN DATA FROM DEXSCREENER */
+/* STEP 1 — DEXSCREENER */
 
 const dex=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${token}`)
 const dexData=await dex.json()
@@ -267,25 +303,23 @@ return
 
 const pair=dexData.pairs[0]
 
-const metrics={
-liquidity: pair.liquidity?.usd,
-volume: pair.volume?.h24,
-fdv: pair.fdv,
-priceChange: pair.priceChange?.h24
-}
+const summary = `
+Token: ${pair.baseToken?.name} (${pair.baseToken?.symbol})
+Liquidity: $${Math.round(pair.liquidity?.usd || 0).toLocaleString()}
+24h Volume: $${Math.round(pair.volume?.h24 || 0).toLocaleString()}
+FDV: $${Math.round(pair.fdv || 0).toLocaleString()}
+Price Change 24h: ${pair.priceChange?.h24 || 0}%
+`
 
-/* STEP 2 — SEND TO RAILWAY + CHATGPT */
+/* STEP 2 — AI ANALYSIS */
 
 result.innerText="Running AI analysis..."
 
-const response=await fetch(API+"/token-risk",{
+const response=await fetch(API+"/analyze",{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
+headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-tokenAddress:token,
-metrics,
+text:summary,
 email
 })
 })
@@ -323,7 +357,7 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl+"?subscribed=true"
+successUrl:pageUrl + "?subscribed=true"
 })
 })
 
