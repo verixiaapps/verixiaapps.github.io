@@ -160,7 +160,7 @@ font-size:18px;
 margin:26px 0 12px 0;
 }
 
-/* metric cards */
+/* metrics */
 
 .metric{
 display:flex;
@@ -263,7 +263,7 @@ cursor:pointer;
 <input id="token" placeholder="Paste token contract address">
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="note">3 free token checks available • no signup required</div>
+<div class="note" id="freeNote">3 free token checks available • no signup required</div>
 
 <button class="check" id="checkBtn">Check Token Risk</button>
 
@@ -292,6 +292,7 @@ cursor:pointer;
 const API="https://awake-integrity-production-faa0.up.railway.app"
 const btn=document.getElementById("checkBtn")
 const result=document.getElementById("result")
+const freeNote=document.getElementById("freeNote")
 
 let running=false
 
@@ -328,11 +329,14 @@ const data=await response.json()
 
 if(data.limit){
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
+freeNote.innerText="Free checks used • upgrade for unlimited token analysis"
 showUpgrade()
 running=false
 btn.disabled=false
 return
 }
+
+freeNote.innerText="Free token check used • upgrade for unlimited scans"
 
 if(data.summary){
 
