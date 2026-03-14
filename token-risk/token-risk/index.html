@@ -7,16 +7,7 @@
 
 <title>Token Risk – Crypto Rug Checker</title>
 
-<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk and suspicious indicators using AI.">
-<meta name="robots" content="index,follow">
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'AW-17956428385');
-</script>
+<meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk.">
 
 <style>
 
@@ -27,191 +18,118 @@ margin:0;
 color:#fff;
 }
 
-.topLeft{
-position:fixed;
-top:16px;
-left:16px;
-background:#3b6cff;
-color:#fff;
-border:none;
-padding:10px 14px;
-border-radius:10px;
-font-weight:600;
-cursor:pointer;
-}
-
-.topRight{
-position:fixed;
-top:16px;
-right:16px;
-background:#111;
-color:#fff;
-border:none;
-padding:10px 14px;
-border-radius:10px;
-font-weight:600;
-cursor:pointer;
-}
-
-.hero{
-text-align:center;
-padding:110px 20px 50px;
-}
-
-.hero h1{
-font-size:42px;
-margin:0;
-}
-
-.hero p{
-opacity:.7;
-margin-top:10px;
-font-size:18px;
-}
-
 .container{
 max-width:640px;
 margin:auto;
-padding:0 20px 40px;
+padding:120px 20px 40px;
 }
 
 input{
 width:100%;
-background:#151515;
-border:none;
+background:#111;
+border:1px solid #222;
 color:#fff;
 padding:16px;
 margin-top:12px;
-border-radius:12px;
+border-radius:10px;
 font-size:16px;
 }
 
-.checkBtn{
+button{
 width:100%;
 background:#355bd8;
 border:none;
 padding:16px;
 margin-top:16px;
-border-radius:12px;
+border-radius:10px;
 font-size:16px;
 font-weight:600;
 color:#fff;
 cursor:pointer;
 }
 
-.note{
+button:disabled{
 opacity:.6;
-text-align:center;
-margin-top:10px;
-font-size:14px;
 }
 
 #result{
-margin-top:35px;
-}
-
-.metric{
-display:flex;
-justify-content:space-between;
-background:#111;
-padding:16px;
-border-radius:14px;
-margin-top:12px;
-}
-
-.metric b{
-font-weight:600;
-}
-
-.risk{
-display:inline-block;
-border:2px solid #ff5c2b;
-color:#ff5c2b;
-padding:10px 16px;
-border-radius:12px;
-font-weight:700;
-margin-bottom:20px;
-}
-
-.green{color:#00ff5a}
-.red{color:#ff4040}
-
-.analysis{
-margin-top:30px;
+margin-top:40px;
+white-space:pre-wrap;
 line-height:1.6;
 }
 
-.analysis h3{
-margin-top:30px;
-}
-
-.upgrade{
-display:none;
-background:#111;
-padding:25px;
-border-radius:12px;
-margin-top:30px;
-text-align:center;
-}
-
-.plan{
-width:100%;
-margin-top:12px;
-background:#635bff;
-border:none;
-color:#fff;
-padding:14px;
-border-radius:10px;
-font-weight:600;
-cursor:pointer;
-}
-
-footer{
-text-align:center;
-opacity:.6;
-margin-top:70px;
-padding-bottom:40px;
-font-size:14px;
-}
-
 </style>
+
 </head>
 
 <body>
 
-<button class="topLeft" onclick="window.location='https://verixiaapps.com'">📱 Get App</button>
-<button class="topRight" onclick="showUpgrade()">Upgrade</button>
-
-<div class="hero">
-<h1>Is This Token Safe?</h1>
-<p>AI crypto rug checker — try 3 free scans.</p>
-</div>
-
 <div class="container">
 
+<h1>Is This Token Safe?</h1>
+
 <input id="token" placeholder="Paste token contract address">
-<input id="email" placeholder="Email (used to verify subscriptions)">
+<input id="email" placeholder="Email (optional)">
 
-<div class="note">3 free token checks available • no signup required</div>
-
-<button class="checkBtn" onclick="check()">Check Token Risk</button>
-
-<div class="note">Instant AI analysis appears after submission</div>
+<button id="checkBtn">Check Token Risk</button>
 
 <div id="result"></div>
 
-<div id="upgrade" class="upgrade">
-
-<h3>Unlock Unlimited Token Checks</h3>
-
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
-
 </div>
 
-</div>
+<script>
 
-<footer>
-Token Risk © 2026 • Crypto token analysis • Not financial advice
-</
+const API="https://awake-integrity-production-faa0.up.railway.app"
+
+document.getElementById("checkBtn").addEventListener("click",check)
+
+async function check(){
+
+const btn=document.getElementById("checkBtn")
+const token=document.getElementById("token").value.trim()
+const email=document.getElementById("email").value
+const result=document.getElementById("result")
+
+if(!token){
+result.innerText="Paste a token contract address."
+return
+}
+
+btn.disabled=true
+
+result.innerText="Analyzing token..."
+
+try{
+
+const response=await fetch(API+"/analyze-token",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({token,email})
+})
+
+const data=await response.json()
+
+if(data.limit){
+
+result.innerText="Free checks used. Upgrade required."
+btn.disabled=false
+return
+
+}
+
+result.innerText=data.result
+
+}catch(e){
+
+result.innerText="Error analyzing token."
+
+}
+
+btn.disabled=false
+
+}
+
+</script>
+
+</body>
+</html>
