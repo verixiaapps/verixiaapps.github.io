@@ -25,40 +25,37 @@ font-family:system-ui,-apple-system,Arial;
 background:#000;
 margin:0;
 color:#fff;
-line-height:1.6;
 }
 
-.app-top{
+.topLeft{
 position:fixed;
-top:18px;
-left:18px;
+top:16px;
+left:16px;
 background:#3b6cff;
-color:white;
-padding:10px 16px;
+color:#fff;
+border:none;
+padding:10px 14px;
 border-radius:10px;
 font-weight:600;
 cursor:pointer;
-z-index:999;
-border:none;
 }
 
-.upgrade-top{
+.topRight{
 position:fixed;
-top:18px;
-right:18px;
+top:16px;
+right:16px;
 background:#111;
-color:white;
-padding:10px 16px;
+color:#fff;
+border:none;
+padding:10px 14px;
 border-radius:10px;
 font-weight:600;
 cursor:pointer;
-z-index:999;
-border:none;
 }
 
 .hero{
-padding:100px 20px 80px;
 text-align:center;
+padding:110px 20px 50px;
 }
 
 .hero h1{
@@ -67,55 +64,50 @@ margin:0;
 }
 
 .hero p{
-margin-top:12px;
-opacity:.8;
+opacity:.7;
+margin-top:10px;
 font-size:18px;
 }
 
 .container{
-max-width:700px;
+max-width:640px;
 margin:auto;
-padding:30px 20px;
+padding:0 20px 40px;
 }
 
 input{
 width:100%;
+background:#151515;
+border:none;
+color:#fff;
 padding:16px;
 margin-top:12px;
-border-radius:10px;
-border:none;
-background:#1a1a1a;
-color:white;
+border-radius:12px;
 font-size:16px;
 }
 
-button{
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-size:16px;
-padding:16px;
-}
-
-.check{
+.checkBtn{
 width:100%;
-background:#2f56c6;
-color:white;
-margin-top:12px;
+background:#355bd8;
+border:none;
+padding:16px;
+margin-top:16px;
+border-radius:12px;
+font-size:16px;
 font-weight:600;
+color:#fff;
+cursor:pointer;
 }
 
 .note{
-margin-top:12px;
 opacity:.6;
 text-align:center;
+margin-top:10px;
 font-size:14px;
 }
 
 #result{
-margin-top:30px;
-white-space:pre-wrap;
-font-size:16px;
+margin-top:35px;
 }
 
 .metric{
@@ -127,35 +119,38 @@ border-radius:14px;
 margin-top:12px;
 }
 
-.metric span:last-child{
+.metric b{
 font-weight:600;
 }
 
 .risk{
 display:inline-block;
-padding:10px 16px;
-border-radius:12px;
 border:2px solid #ff5c2b;
 color:#ff5c2b;
+padding:10px 16px;
+border-radius:12px;
 font-weight:700;
-margin-bottom:25px;
+margin-bottom:20px;
 }
 
-.sectionTitle{
+.green{color:#00ff5a}
+.red{color:#ff4040}
+
+.analysis{
 margin-top:30px;
-font-size:20px;
-font-weight:700;
+line-height:1.6;
 }
 
-.red{color:#ff3b3b}
-.green{color:#00ff4c}
+.analysis h3{
+margin-top:30px;
+}
 
 .upgrade{
 display:none;
-margin-top:30px;
-padding:25px;
 background:#111;
+padding:25px;
 border-radius:12px;
+margin-top:30px;
 text-align:center;
 }
 
@@ -163,15 +158,19 @@ text-align:center;
 width:100%;
 margin-top:12px;
 background:#635bff;
-color:white;
+border:none;
+color:#fff;
+padding:14px;
+border-radius:10px;
 font-weight:600;
+cursor:pointer;
 }
 
-.footer{
+footer{
 text-align:center;
-margin-top:60px;
-padding:40px;
 opacity:.6;
+margin-top:70px;
+padding-bottom:40px;
 font-size:14px;
 }
 
@@ -180,8 +179,8 @@ font-size:14px;
 
 <body>
 
-<button class="app-top" onclick="openApp()">📱 Get App</button>
-<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+<button class="topLeft" onclick="window.location='https://verixiaapps.com'">📱 Get App</button>
+<button class="topRight" onclick="showUpgrade()">Upgrade</button>
 
 <div class="hero">
 <h1>Is This Token Safe?</h1>
@@ -193,165 +192,26 @@ font-size:14px;
 <input id="token" placeholder="Paste token contract address">
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="note">
-3 free token checks available • no signup required
-</div>
+<div class="note">3 free token checks available • no signup required</div>
 
-<button class="check" onclick="check()">Check Token Risk</button>
+<button class="checkBtn" onclick="check()">Check Token Risk</button>
 
-<div class="note">
-Instant AI analysis appears after submission
-</div>
+<div class="note">Instant AI analysis appears after submission</div>
 
 <div id="result"></div>
 
-<div class="upgrade" id="upgrade">
+<div id="upgrade" class="upgrade">
 
 <h3>Unlock Unlimited Token Checks</h3>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
-Weekly Access
-</button>
-
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
-Monthly Access
-</button>
-
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
-Yearly Access
-</button>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
 
 </div>
 
 </div>
 
-<footer class="footer">
+<footer>
 Token Risk © 2026 • Crypto token analysis • Not financial advice
-</footer>
-
-<script>
-
-const API="https://awake-integrity-production-faa0.up.railway.app"
-
-function openApp(){
-window.location="https://verixiaapps.com"
-}
-
-function showUpgrade(){
-document.getElementById("upgrade").style.display="block"
-}
-
-function formatNumber(n){
-return "$"+Math.round(n).toLocaleString()
-}
-
-async function check(){
-
-const token=document.getElementById("token").value.trim()
-const email=document.getElementById("email").value
-const result=document.getElementById("result")
-
-if(!token){
-result.innerText="Paste a token address to analyze."
-return
-}
-
-result.innerText="Fetching token data..."
-
-try{
-
-const dex=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${token}`)
-const dexData=await dex.json()
-
-if(!dexData.pairs || dexData.pairs.length===0){
-result.innerText="Token not found."
-return
-}
-
-const p=dexData.pairs[0]
-
-const metrics={
-liquidity:p.liquidity?.usd||0,
-volume:p.volume?.h24||0,
-fdv:p.fdv||0,
-change:p.priceChange?.h24||0,
-age:p.pairCreatedAt
-}
-
-const ageHours=Math.floor((Date.now()-metrics.age)/3600000)
-const age=`${Math.floor(ageHours/24)}d ${ageHours%24}h`
-
-const summaryText=`
-Liquidity: ${metrics.liquidity}
-Volume: ${metrics.volume}
-FDV: ${metrics.fdv}
-Price Change: ${metrics.change}
-Pair Age: ${age}
-`
-
-result.innerText="Running AI analysis..."
-
-const response=await fetch(API+"/analyze",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({text:summaryText,email})
-})
-
-const data=await response.json()
-
-if(data.limit){
-result.innerText="Free checks used — upgrade required."
-showUpgrade()
-return
-}
-
-let riskLabel="High"
-if(data.result.includes("Low")) riskLabel="Low"
-if(data.result.includes("Medium")) riskLabel="Medium"
-
-result.innerHTML=`
-
-<div class="risk">Risk: ${riskLabel}</div>
-
-<div class="metric"><span>Liquidity USD</span><span>${formatNumber(metrics.liquidity)}</span></div>
-<div class="metric"><span>Volume 24h</span><span>${formatNumber(metrics.volume)}</span></div>
-<div class="metric"><span>Price change 24h</span><span class="${metrics.change>0?'green':'red'}">${metrics.change}%</span></div>
-<div class="metric"><span>Pair age</span><span>${age}</span></div>
-<div class="metric"><span>FDV</span><span>${formatNumber(metrics.fdv)}</span></div>
-
-<div style="margin-top:30px">${data.result}</div>
-`
-
-}catch(e){
-
-result.innerText="Error analyzing token."
-
-}
-
-}
-
-async function checkout(priceId){
-
-const email=document.getElementById("email").value
-const pageUrl=window.location.origin+window.location.pathname
-
-const response=await fetch(API+"/create-checkout",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-priceId,
-email,
-successUrl:pageUrl+"?subscribed=true"
-})
-})
-
-const data=await response.json()
-
-window.location=data.url
-
-}
-
-</script>
-
-</body>
-</html>
+</
