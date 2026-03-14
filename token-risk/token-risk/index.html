@@ -8,7 +8,6 @@
 <title>Is This Token Safe? AI Rug Checker</title>
 
 <meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk using AI.">
-<meta name="robots" content="index,follow">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
@@ -35,10 +34,9 @@ background:#3b6cff;
 color:#fff;
 padding:10px 16px;
 border-radius:10px;
-border:none;
 font-weight:600;
-cursor:pointer;
 z-index:999;
+cursor:default;
 }
 
 .upgrade-top{
@@ -101,6 +99,11 @@ color:#fff;
 cursor:pointer;
 }
 
+button.check:disabled{
+opacity:.5;
+cursor:not-allowed;
+}
+
 .note{
 opacity:.6;
 text-align:center;
@@ -116,10 +119,6 @@ padding:16px;
 border-radius:16px;
 margin-top:14px;
 font-size:17px;
-}
-
-.metric span:last-child{
-font-weight:600;
 }
 
 .green{color:#00ff5a;}
@@ -141,7 +140,6 @@ margin-top:40px;
 
 .section h3{
 margin-bottom:12px;
-letter-spacing:.5px;
 }
 
 .section ul{
@@ -171,12 +169,11 @@ cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<button class="app-top" onclick="window.location='https://verixiaapps.com'">📱 Get App</button>
+<div class="app-top">📱 iPhone App Coming Soon</div>
 <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 
 <div class="hero">
@@ -189,15 +186,11 @@ cursor:pointer;
 <input id="token" placeholder="Paste token contract address">
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
-<div class="note">
-3 free token checks available • no signup required
-</div>
+<div class="note">3 free token checks available • no signup required</div>
 
 <button class="check" id="checkBtn">Check Token Risk</button>
 
-<div class="note">
-Instant AI analysis appears after submission
-</div>
+<div class="note">Instant AI analysis appears after submission</div>
 
 <div id="result"></div>
 
@@ -205,17 +198,9 @@ Instant AI analysis appears after submission
 
 <h3>Unlock Unlimited Token Checks</h3>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">
-Weekly Access
-</button>
-
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">
-Monthly Access
-</button>
-
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">
-Yearly Access
-</button>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
 
 <div style="margin-top:14px;font-size:13px;color:#666;">
 🔒 Secure payments powered by Stripe
@@ -228,29 +213,35 @@ Yearly Access
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
+const btn=document.getElementById("checkBtn")
+const result=document.getElementById("result")
 
-document.getElementById("checkBtn").addEventListener("click",check)
+let running=false
+
+function triggerCheck(e){
+if(running) return
+running=true
+btn.disabled=true
+check()
+}
+
+btn.addEventListener("pointerup",triggerCheck)
+btn.addEventListener("click",triggerCheck)
 
 function showUpgrade(){
 document.getElementById("upgrade").style.display="block"
 document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
-function clean(text){
-return text
-.replace(/\*\*/g,'')
-.replace(/###/g,'')
-.replace(/\n\n/g,'\n')
-}
-
 async function check(){
 
 const token=document.getElementById("token").value.trim()
 const email=document.getElementById("email").value
-const result=document.getElementById("result")
 
 if(!token){
 result.innerText="Paste a token contract address."
+btn.disabled=false
+running=false
 return
 }
 
@@ -269,10 +260,12 @@ const data=await response.json()
 if(data.limit){
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
 showUpgrade()
+btn.disabled=false
+running=false
 return
 }
 
-result.innerHTML=format(clean(data.result))
+result.innerHTML=data.result
 
 }catch(e){
 
@@ -280,54 +273,8 @@ result.innerText="Error analyzing token."
 
 }
 
-}
-
-function format(text){
-
-const lines=text.split("\n")
-let html=""
-
-lines.forEach(l=>{
-
-if(l.includes("Risk Level")){
-html+=`<div class="risk">Risk: High</div>`
-}
-
-else if(l.includes("Liquidity")){
-}
-
-else if(l.startsWith("-")){
-html+=`<li>${l.replace("- ","")}</li>`
-}
-
-else if(l.toUpperCase().includes("SUMMARY")){
-html+=`<div class="section"><h3>[SUMMARY]</h3>`
-}
-
-else if(l.toUpperCase().includes("KEY SIGNALS")){
-html+=`<div class="section"><h3>[KEY SIGNALS]</h3><ul>`
-}
-
-else if(l.toUpperCase().includes("RED FLAGS")){
-html+=`</ul></div><div class="section"><h3 style="color:#ff4040">[RED FLAGS]</h3><ul>`
-}
-
-else if(l.toUpperCase().includes("SAFE SIGNALS")){
-html+=`</ul></div><div class="section"><h3 style="color:#00ff5a">[SAFE SIGNALS]</h3><ul>`
-}
-
-else if(l.toUpperCase().includes("FINAL TAKE")){
-html+=`</ul></div><div class="section"><h3>[FINAL TAKE]</h3>`
-}
-
-else{
-html+=`<p>${l}</p>`
-}
-
-})
-
-html+="</ul></div>"
-return html
+btn.disabled=false
+running=false
 
 }
 
@@ -347,7 +294,6 @@ successUrl:pageUrl+"?subscribed=true"
 })
 
 const data=await response.json()
-
 window.location=data.url
 
 }
