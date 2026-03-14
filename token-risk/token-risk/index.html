@@ -10,7 +10,6 @@
 <meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk and suspicious indicators using AI.">
 <meta name="robots" content="index,follow">
 
-<!-- Google Ads Global Tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -19,29 +18,13 @@ gtag('js', new Date());
 gtag('config', 'AW-17956428385');
 </script>
 
-<!-- Purchase Conversion Detection -->
-<script>
-if (
-  window.location.search.includes("subscribed=true") &&
-  !sessionStorage.getItem("ads_conversion")
-) {
-
-  gtag('event','conversion',{
-    'send_to':'AW-17956428385/CONVERSION_LABEL'
-  });
-
-  sessionStorage.setItem("ads_conversion","1");
-
-}
-</script>
-
 <style>
 
 body{
 font-family:system-ui,-apple-system,Arial;
-background:#f4f6f9;
+background:#000;
 margin:0;
-color:#111;
+color:#fff;
 line-height:1.6;
 }
 
@@ -49,18 +32,15 @@ line-height:1.6;
 position:fixed;
 top:18px;
 left:18px;
-background:#0066ff;
+background:#3b6cff;
 color:white;
 padding:10px 16px;
-border-radius:8px;
+border-radius:10px;
 font-weight:600;
 cursor:pointer;
 z-index:999;
-box-shadow:0 4px 10px rgba(0,0,0,.2);
 border:none;
 }
-
-.app-top:hover{background:#004fd1;}
 
 .upgrade-top{
 position:fixed;
@@ -69,107 +49,113 @@ right:18px;
 background:#111;
 color:white;
 padding:10px 16px;
-border-radius:8px;
+border-radius:10px;
 font-weight:600;
 cursor:pointer;
 z-index:999;
-box-shadow:0 4px 10px rgba(0,0,0,.2);
 border:none;
 }
 
-.upgrade-top:hover{background:#333;}
-
 .hero{
-background:linear-gradient(135deg,#111,#000);
-color:white;
-padding:100px 20px 80px 20px;
+padding:100px 20px 80px;
 text-align:center;
 }
 
 .hero h1{
+font-size:42px;
 margin:0;
-font-size:40px;
 }
 
 .hero p{
 margin-top:12px;
+opacity:.8;
 font-size:18px;
-opacity:.95;
 }
 
 .container{
-max-width:760px;
+max-width:700px;
 margin:auto;
-margin-top:-60px;
-background:white;
-padding:35px;
-border-radius:14px;
-box-shadow:0 12px 30px rgba(0,0,0,.12);
+padding:30px 20px;
 }
 
 input{
 width:100%;
-padding:14px;
+padding:16px;
 margin-top:12px;
-border-radius:8px;
-border:1px solid #ccc;
+border-radius:10px;
+border:none;
+background:#1a1a1a;
+color:white;
 font-size:16px;
 }
 
 button{
 border:none;
-border-radius:8px;
+border-radius:10px;
 cursor:pointer;
 font-size:16px;
-padding:15px;
+padding:16px;
 }
 
 .check{
 width:100%;
-background:#0066ff;
+background:#2f56c6;
 color:white;
-margin-top:10px;
+margin-top:12px;
 font-weight:600;
 }
-
-.check:hover{background:#004fd1;}
 
 .note{
 margin-top:12px;
-font-size:14px;
-color:#666;
+opacity:.6;
 text-align:center;
+font-size:14px;
 }
 
 #result{
-margin-top:25px;
+margin-top:30px;
 white-space:pre-wrap;
 font-size:16px;
-background:#f7f9ff;
-padding:20px;
-border-radius:8px;
 }
 
-.resultAction{
-display:none;
-margin-top:18px;
-text-align:center;
+.metric{
+display:flex;
+justify-content:space-between;
+background:#111;
+padding:16px;
+border-radius:14px;
+margin-top:12px;
 }
 
-.resultAction button{
-background:#0066ff;
-color:white;
-padding:14px 20px;
-border-radius:8px;
+.metric span:last-child{
 font-weight:600;
 }
 
+.risk{
+display:inline-block;
+padding:10px 16px;
+border-radius:12px;
+border:2px solid #ff5c2b;
+color:#ff5c2b;
+font-weight:700;
+margin-bottom:25px;
+}
+
+.sectionTitle{
+margin-top:30px;
+font-size:20px;
+font-weight:700;
+}
+
+.red{color:#ff3b3b}
+.green{color:#00ff4c}
+
 .upgrade{
 display:none;
-margin-top:25px;
+margin-top:30px;
 padding:25px;
-background:#f7f9ff;
-border-radius:10px;
+background:#111;
+border-radius:12px;
 text-align:center;
 }
 
@@ -179,24 +165,17 @@ margin-top:12px;
 background:#635bff;
 color:white;
 font-weight:600;
-transition:all .15s ease;
-}
-
-.plan:hover{
-background:#5249d8;
-transform:translateY(-1px);
 }
 
 .footer{
 text-align:center;
-margin-top:80px;
+margin-top:60px;
 padding:40px;
-color:#777;
+opacity:.6;
 font-size:14px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -212,7 +191,6 @@ font-size:14px;
 <div class="container">
 
 <input id="token" placeholder="Paste token contract address">
-
 <input id="email" placeholder="Email (used to verify subscriptions)">
 
 <div class="note">
@@ -226,16 +204,6 @@ Instant AI analysis appears after submission
 </div>
 
 <div id="result"></div>
-
-<div id="resultAction" class="resultAction">
-
-<p style="margin-bottom:10px;font-weight:600;">
-Scan crypto tokens instantly on your phone
-</p>
-
-<button onclick="openApp()">📱 Get the App</button>
-
-</div>
 
 <div class="upgrade" id="upgrade">
 
@@ -253,10 +221,6 @@ Monthly Access
 Yearly Access
 </button>
 
-<div style="margin-top:14px;font-size:13px;color:#666;">
-🔒 Secure payments powered by Stripe
-</div>
-
 </div>
 
 </div>
@@ -265,15 +229,20 @@ Yearly Access
 Token Risk © 2026 • Crypto token analysis • Not financial advice
 </footer>
 
-<script src="/scam-check-now/app-link.js"></script>
-
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
+function openApp(){
+window.location="https://verixiaapps.com"
+}
+
 function showUpgrade(){
 document.getElementById("upgrade").style.display="block"
-document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+}
+
+function formatNumber(n){
+return "$"+Math.round(n).toLocaleString()
 }
 
 async function check(){
@@ -291,56 +260,71 @@ result.innerText="Fetching token data..."
 
 try{
 
-/* STEP 1 — DEXSCREENER */
-
 const dex=await fetch(`https://api.dexscreener.com/latest/dex/tokens/${token}`)
 const dexData=await dex.json()
 
 if(!dexData.pairs || dexData.pairs.length===0){
-result.innerText="Token not found on Dexscreener."
+result.innerText="Token not found."
 return
 }
 
-const pair=dexData.pairs[0]
+const p=dexData.pairs[0]
 
-const summary = `
-Token: ${pair.baseToken?.name} (${pair.baseToken?.symbol})
-Liquidity: $${Math.round(pair.liquidity?.usd || 0).toLocaleString()}
-24h Volume: $${Math.round(pair.volume?.h24 || 0).toLocaleString()}
-FDV: $${Math.round(pair.fdv || 0).toLocaleString()}
-Price Change 24h: ${pair.priceChange?.h24 || 0}%
+const metrics={
+liquidity:p.liquidity?.usd||0,
+volume:p.volume?.h24||0,
+fdv:p.fdv||0,
+change:p.priceChange?.h24||0,
+age:p.pairCreatedAt
+}
+
+const ageHours=Math.floor((Date.now()-metrics.age)/3600000)
+const age=`${Math.floor(ageHours/24)}d ${ageHours%24}h`
+
+const summaryText=`
+Liquidity: ${metrics.liquidity}
+Volume: ${metrics.volume}
+FDV: ${metrics.fdv}
+Price Change: ${metrics.change}
+Pair Age: ${age}
 `
-
-/* STEP 2 — AI ANALYSIS */
 
 result.innerText="Running AI analysis..."
 
 const response=await fetch(API+"/analyze",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-text:summary,
-email
-})
+body:JSON.stringify({text:summaryText,email})
 })
 
 const data=await response.json()
 
 if(data.limit){
-
-result.innerText="Free checks used. Upgrade for unlimited token analysis."
-document.getElementById("resultAction").style.display="block"
+result.innerText="Free checks used — upgrade required."
 showUpgrade()
 return
-
 }
 
-result.innerText=data.result
-document.getElementById("resultAction").style.display="block"
+let riskLabel="High"
+if(data.result.includes("Low")) riskLabel="Low"
+if(data.result.includes("Medium")) riskLabel="Medium"
+
+result.innerHTML=`
+
+<div class="risk">Risk: ${riskLabel}</div>
+
+<div class="metric"><span>Liquidity USD</span><span>${formatNumber(metrics.liquidity)}</span></div>
+<div class="metric"><span>Volume 24h</span><span>${formatNumber(metrics.volume)}</span></div>
+<div class="metric"><span>Price change 24h</span><span class="${metrics.change>0?'green':'red'}">${metrics.change}%</span></div>
+<div class="metric"><span>Pair age</span><span>${age}</span></div>
+<div class="metric"><span>FDV</span><span>${formatNumber(metrics.fdv)}</span></div>
+
+<div style="margin-top:30px">${data.result}</div>
+`
 
 }catch(e){
 
-result.innerText="Error analyzing token. Please try again."
+result.innerText="Error analyzing token."
 
 }
 
@@ -357,7 +341,7 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl + "?subscribed=true"
+successUrl:pageUrl+"?subscribed=true"
 })
 })
 
