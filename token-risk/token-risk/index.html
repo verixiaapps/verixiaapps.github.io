@@ -18,7 +18,9 @@ gtag('config','AW-17956428385');
 
 <style>
 
-*{box-sizing:border-box}
+*{
+box-sizing:border-box;
+}
 
 body{
 font-family:-apple-system,BlinkMacSystemFont,system-ui;
@@ -26,6 +28,7 @@ background:#000;
 margin:0;
 color:#fff;
 -webkit-font-smoothing:antialiased;
+font-size:17px;
 }
 
 /* top bar */
@@ -42,7 +45,6 @@ font-weight:600;
 font-size:14px;
 z-index:999;
 box-shadow:0 4px 14px rgba(0,0,0,.4);
-cursor:default;
 }
 
 .upgrade-top{
@@ -68,9 +70,9 @@ padding:120px 20px 50px;
 
 .hero h1{
 font-size:40px;
-margin:0;
 font-weight:700;
 letter-spacing:-.3px;
+margin:0;
 }
 
 .hero p{
@@ -135,7 +137,7 @@ margin-top:12px;
 font-size:14px;
 }
 
-/* result */
+/* results */
 
 #result{
 margin-top:40px;
@@ -148,30 +150,31 @@ line-height:1.65;
 .risk{
 display:inline-flex;
 align-items:center;
-padding:12px 18px;
-border-radius:14px;
-border:2px solid #ff6a2b;
+padding:12px 20px;
+border-radius:16px;
+border:2.5px solid #ff6a2b;
 color:#ff6a2b;
 font-weight:600;
 font-size:18px;
-margin:20px 0 10px 0;
+margin:24px 0 12px 0;
 }
 
-/* metric rows */
+/* metrics */
 
 .metric{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:20px 22px;
-margin-top:14px;
-border-radius:22px;
-background:#111;
+padding:22px 24px;
+margin-top:16px;
+border-radius:24px;
+background:#0f1113;
 font-size:18px;
 }
 
 .metric span:first-child{
 color:#9aa0a6;
+font-weight:400;
 }
 
 .metric span:last-child{
@@ -180,21 +183,21 @@ font-weight:600;
 
 /* colors */
 
-.green{color:#2fff76}
-.red{color:#ff3b30}
-.orange{color:#ff6a2b}
+.green{color:#2fff76;}
+.red{color:#ff3b30;}
+.orange{color:#ff6a2b;}
 
 /* sections */
 
 .section{
-margin-top:42px;
+margin-top:48px;
 }
 
 .section h3{
 font-weight:700;
 font-size:20px;
 letter-spacing:.4px;
-margin-bottom:14px;
+margin-bottom:16px;
 }
 
 .section ul{
@@ -207,13 +210,21 @@ margin-top:10px;
 margin-bottom:10px;
 }
 
-/* liquidity explanation */
+/* explanation */
 
 .sub{
 font-size:14px;
-opacity:.6;
+opacity:.55;
+margin-left:8px;
 margin-top:6px;
-margin-bottom:10px;
+}
+
+/* final take */
+
+.final{
+font-size:24px;
+font-weight:600;
+margin-top:6px;
 }
 
 /* upgrade */
@@ -338,17 +349,16 @@ running=false
 return
 }
 
-let html=""
+if(data.summary){
 
-/* risk */
+let html=""
 
 if(data.riskLevel){
 html+=`<div class="risk">Risk: ${data.riskLevel}</div>`
 }
 
-/* metrics */
-
 if(data.metrics){
+
 html+=`
 <div class="metric"><span>Liquidity USD</span><span>${data.metrics.liquidityUSD}</span></div>
 <div class="metric"><span>Volume 24h</span><span>${data.metrics.volume24h}</span></div>
@@ -358,43 +368,15 @@ html+=`
 `
 }
 
-/* summary */
-
-if(data.summary){
 html+=`<div class="section"><h3>[SUMMARY]</h3><p>${data.summary}</p></div>`
-}
 
-/* key signals */
-
+if(data.keySignals?.length){
 html+=`<div class="section"><h3>[KEY SIGNALS]</h3>`
-
-if(data.liquidityConfidence){
-
-let color=""
-
-if(data.liquidityConfidence==="LOW") color="red"
-if(data.liquidityConfidence==="HIGH") color="green"
-
-html+=`<div>Liquidity Confidence: <span class="${color}">${data.liquidityConfidence}</span></div>`
-
-if(data.liquidityExplanation){
-html+=`<div class="sub">(${data.liquidityExplanation})</div>`
-}
-
-}
-
-if(data.metrics){
-html+=`
-<div class="metric"><span>Volume Behavior</span><span>${data.metrics.volume24h}</span></div>
-<div class="metric"><span>Price Behavior</span><span class="${data.metrics.priceChange24h.includes('+')?'green':'red'}">${data.metrics.priceChange24h}</span></div>
-<div class="metric"><span>Pair Age</span><span>${data.metrics.pairAge}</span></div>
-<div class="metric"><span>FDV</span><span>${data.metrics.fdv}</span></div>
-`
-}
-
+data.keySignals.forEach(x=>{
+html+=`<div>• ${x}</div>`
+})
 html+=`</div>`
-
-/* red flags */
+}
 
 if(data.concerningIndicators?.length){
 html+=`<div class="section"><h3 class="red">[RED FLAGS]</h3><ul>`
@@ -402,24 +384,21 @@ data.concerningIndicators.forEach(x=>html+=`<li>${x}</li>`)
 html+=`</ul></div>`
 }
 
-/* safe signals */
-
 if(data.legitimateElements?.length){
 html+=`<div class="section"><h3 class="green">[SAFE SIGNALS]</h3><ul>`
 data.legitimateElements.forEach(x=>html+=`<li>${x}</li>`)
 html+=`</ul></div>`
 }
 
-/* final take */
-
 if(data.finalTake){
+
 let cls=""
+
 if(data.finalTake.toLowerCase()=="avoid") cls="orange"
 if(data.finalTake.toLowerCase()=="safe") cls="green"
-html+=`<div class="section"><h3>[FINAL TAKE]</h3><div class="${cls}" style="font-weight:600;font-size:22px">${data.finalTake}</div></div>`
-}
 
-/* what to watch */
+html+=`<div class="section"><h3>[FINAL TAKE]</h3><div class="final ${cls}">${data.finalTake}</div></div>`
+}
 
 if(data.recommendations?.length){
 html+=`<div class="section"><h3>[WHAT TO WATCH]</h3><ul>`
@@ -429,8 +408,16 @@ html+=`</ul></div>`
 
 result.innerHTML=html
 
+}else{
+
+result.innerHTML=data.result || "No analysis available."
+
+}
+
 }catch(e){
+
 result.innerText="Error analyzing token."
+
 }
 
 btn.disabled=false
