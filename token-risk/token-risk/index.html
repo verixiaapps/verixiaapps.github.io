@@ -10,31 +10,72 @@
 <meta name="description" content="Paste a crypto token address to instantly analyze rug pull risk using AI.">
 <meta name="robots" content="index,follow">
 
+<!-- Google Ads -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'AW-17956428385');
+gtag('config','AW-17956428385');
+</script>
+
+<!-- Purchase Conversion -->
+<script>
+if (
+  window.location.search.includes("subscribed=true") &&
+  !sessionStorage.getItem("ads_conversion")
+) {
+  gtag('event','conversion',{
+    'send_to':'AW-17956428385/CONVERSION_LABEL'
+  });
+  sessionStorage.setItem("ads_conversion","1");
+}
 </script>
 
 <style>
 
 body{
 font-family:system-ui,-apple-system,Arial;
-background:#0b0b0b;
+background:#000;
 margin:0;
 color:#fff;
-line-height:1.6;
+}
+
+.app-top{
+position:fixed;
+top:18px;
+left:18px;
+background:#3b6cff;
+color:white;
+padding:10px 16px;
+border-radius:10px;
+font-weight:600;
+border:none;
+cursor:pointer;
+z-index:999;
+}
+
+.upgrade-top{
+position:fixed;
+top:18px;
+right:18px;
+background:#111;
+color:white;
+padding:10px 16px;
+border-radius:10px;
+font-weight:600;
+border:none;
+cursor:pointer;
+z-index:999;
 }
 
 .hero{
 text-align:center;
-padding:100px 20px 60px;
+padding:110px 20px 60px;
 }
 
 .hero h1{
-font-size:38px;
+font-size:42px;
 margin:0;
 }
 
@@ -47,7 +88,7 @@ font-size:18px;
 .container{
 max-width:760px;
 margin:auto;
-padding:0 20px 40px;
+padding:0 20px 60px;
 }
 
 input{
@@ -61,7 +102,7 @@ border-radius:12px;
 font-size:16px;
 }
 
-button{
+.checkBtn{
 width:100%;
 background:#355bd8;
 border:none;
@@ -83,6 +124,8 @@ font-size:14px;
 
 #result{
 margin-top:35px;
+font-size:16px;
+line-height:1.6;
 white-space:pre-wrap;
 }
 
@@ -113,6 +156,9 @@ cursor:pointer;
 
 <body>
 
+<button class="app-top" onclick="window.location='https://verixiaapps.com'">📱 Get App</button>
+<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+
 <div class="hero">
 <h1>Is This Token Safe?</h1>
 <p>AI crypto rug checker — try 3 free scans.</p>
@@ -127,7 +173,7 @@ cursor:pointer;
 3 free token checks available • no signup required
 </div>
 
-<button onclick="check()">Check Token Risk</button>
+<button class="checkBtn" id="checkBtn">Check Token Risk</button>
 
 <div class="note">
 Instant AI analysis appears after submission
@@ -151,6 +197,10 @@ Monthly Access
 Yearly Access
 </button>
 
+<div style="margin-top:14px;font-size:13px;color:#666;">
+🔒 Secure payments powered by Stripe
+</div>
+
 </div>
 
 </div>
@@ -158,9 +208,13 @@ Yearly Access
 <script>
 
 const API="https://awake-integrity-production-faa0.up.railway.app"
+const btn=document.getElementById("checkBtn")
+
+btn.addEventListener("click",check)
 
 function showUpgrade(){
 document.getElementById("upgrade").style.display="block"
+document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 }
 
 async function check(){
@@ -170,10 +224,11 @@ const email=document.getElementById("email").value
 const result=document.getElementById("result")
 
 if(!token){
-result.innerText="Paste a token contract address to analyze."
+result.innerText="Paste a token contract address."
 return
 }
 
+btn.disabled=true
 result.innerText="Analyzing..."
 
 try{
@@ -187,20 +242,21 @@ body:JSON.stringify({token,email})
 const data=await response.json()
 
 if(data.limit){
-
 result.innerText="Free checks used. Upgrade for unlimited token analysis."
 showUpgrade()
+btn.disabled=false
 return
-
 }
 
 result.innerText=data.result
 
 }catch(e){
 
-result.innerText="Error analyzing token. Please try again."
+result.innerText="Error analyzing token."
 
 }
+
+btn.disabled=false
 
 }
 
@@ -215,7 +271,7 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl + "?subscribed=true"
+successUrl:pageUrl+"?subscribed=true"
 })
 })
 
