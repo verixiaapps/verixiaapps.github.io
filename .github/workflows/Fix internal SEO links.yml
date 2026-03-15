@@ -1,20 +1,50 @@
-name: Fix internal SEO links
+name: Rebuild scam-check-now internal links
 
 on:
   workflow_dispatch:
 
 jobs:
-  fix-links:
+  rebuild-links:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Fix .html internal links safely
+      - name: Generate new link block
         run: |
-          find scam-check-now -type f -name "index.html" | while read file; do
-            sed -E -i 's|(/scam-check-now/[a-zA-Z0-9\-]+)\.html|\1/|g' "$file"
+          base="scam-check-now"
+
+          echo '<div class="section">' > links.html
+          echo '<h2>Related Scam Checks</h2>' >> links.html
+
+          for d in $base/*/ ; do
+            slug=$(basename "$d")
+
+            if [ "$slug" = "is-this-a-scam" ]; then
+              continue
+            fi
+
+            title=$(echo "$slug" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
+
+            echo "<div class=\"bullet\"><a href=\"/scam-check-now/$slug/\">$title</a></div>" >> links.html
+          done
+
+          echo '</div>' >> links.html
+
+      - name: Insert links into pages
+        run: |
+          base="scam-check-now"
+
+          for file in $(find $base -type f -name "index.html" ! -path "$base/is-this-a-scam/*"); do
+            awk '
+              /<\/body>/{
+                while((getline line < "links.html") > 0) print line
+              }
+              {print}
+            ' "$file" > temp.html
+
+            mv temp.html "$file"
           done
 
       - name: Commit changes
@@ -25,8 +55,8 @@ jobs:
           git add -A
 
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "No changes"
           else
-            git commit -m "Fix internal links after folder URL conversion"
+            git commit -m "Add internal links to scam-check-now pages"
             git push
           fi
