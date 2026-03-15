@@ -11,32 +11,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate new link block
+      - name: Rebuild related links per page
         run: |
           base="scam-check-now"
 
-          echo '<div class="section">' > links.html
-          echo '<h2>Related Scam Checks</h2>' >> links.html
-
-          for d in $base/*/ ; do
-            slug=$(basename "$d")
-
-            if [ "$slug" = "is-this-a-scam" ]; then
-              continue
-            fi
-
-            title=$(echo "$slug" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
-
-            echo "<div class=\"bullet\"><a href=\"/scam-check-now/$slug/\">$title</a></div>" >> links.html
-          done
-
-          echo '</div>' >> links.html
-
-      - name: Insert links into pages
-        run: |
-          base="scam-check-now"
+          # Build master list of slugs
+          slugs=$(ls -d $base/*/ | xargs -n1 basename | grep -v "^is-this-a-scam$")
 
           for file in $(find $base -type f -name "index.html" ! -path "$base/is-this-a-scam/*"); do
+
+            # Remove any existing Related Scam Checks block
+            sed -i '/<h2>Related Scam Checks<\/h2>/,/<\/div>/d' "$file"
+
+            # Create fresh links block
+            echo '<div class="section">' > links.html
+            echo '<h2>Related Scam Checks</h2>' >> links.html
+
+            echo "$slugs" | shuf | head -n 15 | while read slug; do
+              title=$(echo "$slug" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
+              echo "<div class=\"bullet\"><a href=\"/scam-check-now/$slug/\">$title</a></div>" >> links.html
+            done
+
+            echo '</div>' >> links.html
+
+            # Insert links before </body>
             awk '
               /<\/body>/{
                 while((getline line < "links.html") > 0) print line
@@ -45,6 +43,7 @@ jobs:
             ' "$file" > temp.html
 
             mv temp.html "$file"
+
           done
 
       - name: Commit changes
@@ -57,6 +56,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Add internal links to scam-check-now pages"
+            git commit -m "Rebuild scam-check-now internal links (15 related per page)"
             git push
           fi
