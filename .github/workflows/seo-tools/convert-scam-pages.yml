@@ -14,16 +14,27 @@ jobs:
       - name: Convert HTML pages to folder structure
         run: |
           find scam-check-now -type f -name "*.html" ! -name "index.html" ! -name "all-pages.html" | while read file; do
+
             base=$(basename "$file" .html)
             dir=$(dirname "$file")
+            target="$dir/$base/index.html"
+
             mkdir -p "$dir/$base"
-            git mv "$file" "$dir/$base/index.html"
+
+            if [ ! -f "$target" ]; then
+              git mv "$file" "$target"
+            fi
+
           done
 
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add .
-          git commit -m "Convert scam-check-now HTML pages to folder structure" || echo "No changes to commit"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Convert scam-check-now HTML pages to folder structure"
+            git push
+          fi
