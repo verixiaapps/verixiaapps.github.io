@@ -13,7 +13,10 @@ jobs:
 
       - name: Convert HTML pages to folder structure
         run: |
-          find scam-check-now -type f -name "*.html" ! -name "index.html" ! -name "all-pages.html" | while read file; do
+          find scam-check-now -type f -name "*.html" \
+          ! -path "scam-check-now/is-this-a-scam/*" \
+          ! -name "index.html" \
+          ! -name "all-pages.html" | while read file; do
 
             base=$(basename "$file" .html)
             dir=$(dirname "$file")
