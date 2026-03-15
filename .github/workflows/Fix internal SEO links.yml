@@ -11,10 +11,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update internal links
+      - name: Fix .html internal links safely
         run: |
           find scam-check-now -type f -name "index.html" | while read file; do
-            sed -i 's/\.html"/\//g' "$file"
+            sed -E -i 's|(/scam-check-now/[a-zA-Z0-9\-]+)\.html|\1/|g' "$file"
           done
 
       - name: Commit changes
@@ -27,6 +27,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Fix internal SEO links after folder conversion"
+            git commit -m "Fix internal links after folder URL conversion"
             git push
           fi
