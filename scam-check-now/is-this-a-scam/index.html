@@ -291,7 +291,7 @@ document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
 async function check(){
 
 const text=document.getElementById("text").value.trim()
-const email=document.getElementById("email").value
+const email=document.getElementById("email").value.trim().toLowerCase()
 const result=document.getElementById("result")
 
 if(!text){
@@ -333,7 +333,7 @@ result.innerText="Error analyzing message. Please try again."
 
 async function checkout(priceId){
 
-const email=document.getElementById("email").value
+const email=document.getElementById("email").value.trim().toLowerCase()
 const pageUrl=window.location.origin+window.location.pathname
 
 const response=await fetch(API+"/create-checkout",{
@@ -342,13 +342,18 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl + "?subscribed=true"
+successUrl:pageUrl+"?subscribed=true",
+cancelUrl:pageUrl
 })
 })
 
 const data=await response.json()
 
+if(data.url){
 window.location=data.url
+}else{
+alert("Checkout failed. Please try again.")
+}
 
 }
 
