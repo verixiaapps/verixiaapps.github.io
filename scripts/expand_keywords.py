@@ -5,40 +5,34 @@ PATTERN_FILE = "data/patterns.txt"
 OUTPUT_FILE = "data/keywords.txt"
 
 
-# ensure data directory exists
-os.makedirs("data", exist_ok=True)
+def load_lines(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return [line.strip().lower() for line in f if line.strip()]
 
 
-# load seeds
-with open(SEED_FILE) as f:
-    seeds = [s.strip() for s in f.readlines() if s.strip()]
+def main():
+
+    # ensure data folder exists
+    os.makedirs("data", exist_ok=True)
+
+    seeds = load_lines(SEED_FILE)
+    patterns = load_lines(PATTERN_FILE)
+
+    keywords = set()
+
+    for seed in seeds:
+        for pattern in patterns:
+            phrase = pattern.replace("{keyword}", seed).strip().lower()
+            keywords.add(phrase)
+
+    keywords = sorted(keywords)
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        for kw in keywords:
+            f.write(kw + "\n")
+
+    print(f"Generated {len(keywords)} keywords")
 
 
-# load patterns
-with open(PATTERN_FILE) as f:
-    patterns = [p.strip() for p in f.readlines() if p.strip()]
-
-
-keywords = set()
-
-
-for seed in seeds:
-    for pattern in patterns:
-
-        kw = pattern.replace("{keyword}", seed)
-
-        kw = kw.strip().lower()
-
-        keywords.add(kw)
-
-
-# sort for stable output
-keywords = sorted(list(keywords))
-
-
-with open(OUTPUT_FILE, "w") as f:
-    for kw in keywords:
-        f.write(kw + "\n")
-
-
-print("Generated", len(keywords), "keywords")
+if __name__ == "__main__":
+    main()
