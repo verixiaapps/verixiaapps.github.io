@@ -10,7 +10,7 @@ TEMPLATE_FILE = "templates/seo-template.html"
 
 OUTPUT_DIR = "scam-check-now"
 
-SITE = "https://verixiaapps.github.io"
+SITE = "https://verixiaapps.com"
 
 ALL_PAGES_FILE = f"{OUTPUT_DIR}/all-pages.html"
 SITEMAP_FILE = f"{OUTPUT_DIR}/sitemap.xml"
@@ -20,6 +20,13 @@ def slugify(text):
     text = text.lower()
     text = re.sub(r'[^a-z0-9]+', '-', text)
     return text.strip("-")
+
+
+def build_title(keyword):
+    kw = keyword.lower()
+    if "scam" in kw:
+        return f"Is {keyword.title()} Legit or a Scam? | Scam Check Now"
+    return f"Is {keyword.title()} a Scam? | Scam Check Now"
 
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -59,7 +66,7 @@ for page in pages:
         print("skipping existing page:", slug)
         continue
 
-    title = f"Is {keyword.title()} a Scam? | Scam Check"
+    title = build_title(keyword)
 
     description = f"Is {keyword.title()} a scam? Use this free AI scam checker to analyze suspicious messages, emails, links, or job offers related to {keyword}."
 
