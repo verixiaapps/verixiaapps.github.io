@@ -10,7 +10,6 @@
 <meta name="description" content="Paste a suspicious message, email, website or job offer and instantly check if it may be a scam. Free AI scam checker.">
 <meta name="robots" content="index,follow">
 
-<!-- Google Ads Global Tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -58,9 +57,7 @@ font-weight:600;
 cursor:pointer;
 z-index:999;
 box-shadow:0 4px 10px rgba(0,0,0,.2);
-border:none;
 text-decoration:none;
-display:inline-block;
 }
 
 .app-top:hover{background:#004fd1;}
@@ -79,8 +76,6 @@ z-index:999;
 box-shadow:0 4px 10px rgba(0,0,0,.2);
 border:none;
 }
-
-.upgrade-top:hover{background:#333;}
 
 .hero{
 background:linear-gradient(135deg,#0066ff,#3c8cff);
@@ -195,12 +190,10 @@ margin-top:12px;
 background:#635bff;
 color:white;
 font-weight:600;
-transition:all .15s ease;
 }
 
 .plan:hover{
 background:#5249d8;
-transform:translateY(-1px);
 }
 
 .footer{
@@ -229,7 +222,7 @@ font-size:14px;
 
 <textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here..."></textarea>
 
-<input id="email" placeholder="Email (used to verify subscriptions)">
+<input id="email" placeholder="Enter your email (used to verify subscription)">
 
 <div class="note">
 Includes 3 free scam checks • upgrade anytime for unlimited scans
@@ -334,6 +327,12 @@ result.innerText="Error analyzing message. Please try again."
 async function checkout(priceId){
 
 const email=document.getElementById("email").value.trim().toLowerCase()
+
+if(!email){
+alert("Please enter your email to activate your subscription.")
+return
+}
+
 const pageUrl=window.location.origin+window.location.pathname
 
 const response=await fetch(API+"/create-checkout",{
