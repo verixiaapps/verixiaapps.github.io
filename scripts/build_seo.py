@@ -2,10 +2,11 @@ import os
 import re
 import random
 from datetime import datetime
+from generate_content import generate_content
+
 
 KEYWORD_FILE = "data/keywords.txt"
 TEMPLATE_FILE = "templates/seo-template.html"
-CONTENT_DIR = "data/content"
 
 OUTPUT_DIR = "scam-check-now"
 
@@ -22,13 +23,12 @@ def slugify(text):
 
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(CONTENT_DIR, exist_ok=True)
 
 
-with open(TEMPLATE_FILE) as f:
+with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
-with open(KEYWORD_FILE) as f:
+with open(KEYWORD_FILE, encoding="utf-8") as f:
     keywords = [k.strip() for k in f.readlines() if k.strip()]
 
 
@@ -50,25 +50,22 @@ for page in pages:
     slug = page["slug"]
     keyword = page["keyword"]
 
-    filename = f"{slug}.html"
-    path = f"{OUTPUT_DIR}/{filename}"
+    folder = f"{OUTPUT_DIR}/{slug}"
+    path = f"{folder}/index.html"
 
-    # SKIP existing pages so they are never overwritten
+    os.makedirs(folder, exist_ok=True)
+
     if os.path.exists(path):
-        print("skipping existing page:", filename)
+        print("skipping existing page:", slug)
         continue
 
-    # Cleaner SEO title
-    title = f"Is {keyword.title()} a Scam? | Scam Check Now"
+    title = f"Is {keyword.title()} a Scam? | Scam Check"
 
     description = f"Is {keyword.title()} a scam? Use this free AI scam checker to analyze suspicious messages, emails, links, or job offers related to {keyword}."
 
-    content_path = f"{CONTENT_DIR}/{slug}.txt"
-
-    if os.path.exists(content_path):
-        with open(content_path) as f:
-            ai_text = f.read()
-    else:
+    try:
+        ai_text = generate_content(keyword)
+    except:
         ai_text = f"{keyword.title()} scams often involve messages requesting payment, personal information, or urgent action. If you receive a suspicious message related to {keyword}, verify the sender and avoid clicking unknown links or sending money."
 
     related_candidates = [p for p in pages if p["slug"] != slug]
@@ -81,7 +78,7 @@ for page in pages:
     links = ""
 
     for r in related_pages:
-        links += f'<li><a href="/scam-check-now/{r["slug"]}.html">{r["keyword"].title()}</a></li>\n'
+        links += f'<li><a href="/scam-check-now/{r["slug"]}/">{r["keyword"].title()}</a></li>\n'
 
 
     html = template
@@ -92,12 +89,12 @@ for page in pages:
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", links)
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
-    generated.append(filename)
+    generated.append(slug)
 
-    print("generated:", filename)
+    print("generated:", slug)
 
 
 links = ""
@@ -105,13 +102,12 @@ links = ""
 for page in pages:
     slug = page["slug"]
     title = page["keyword"].title()
-    links += f'<div><a href="/scam-check-now/{slug}.html">{title}</a></div>\n'
+    links += f'<div><a href="/scam-check-now/{slug}/">{title}</a></div>\n'
 
 
 all_pages_html = f"""
 <!DOCTYPE html>
 <html>
-
 <head>
 <title>Scam Check Pages</title>
 <meta name="robots" content="index, follow">
@@ -128,7 +124,8 @@ all_pages_html = f"""
 </html>
 """
 
-with open(ALL_PAGES_FILE, "w") as f:
+
+with open(ALL_PAGES_FILE, "w", encoding="utf-8") as f:
     f.write(all_pages_html)
 
 print("updated all-pages.html")
@@ -144,7 +141,7 @@ for page in pages:
 
     sitemap_links += f"""
 <url>
-<loc>{SITE}/scam-check-now/{slug}.html</loc>
+<loc>{SITE}/scam-check-now/{slug}/</loc>
 <lastmod>{today}</lastmod>
 </url>
 """
@@ -158,7 +155,8 @@ sitemap_xml = f"""
 </urlset>
 """
 
-with open(SITEMAP_FILE, "w") as f:
+
+with open(SITEMAP_FILE, "w", encoding="utf-8") as f:
     f.write(sitemap_xml)
 
 print("updated sitemap.xml")
