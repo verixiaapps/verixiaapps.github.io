@@ -23,10 +23,15 @@ def slugify(text):
 
 
 def build_title(keyword):
-    kw = keyword.lower()
-    if "scam" in kw:
-        return f"Is {keyword.title()} Legit or a Scam? | Scam Check Now"
-    return f"Is {keyword.title()} a Scam? | Scam Check Now"
+
+    kw = keyword.lower().strip()
+
+    # If keyword already contains "scam", remove it for cleaner titles
+    if kw.endswith(" scam"):
+        brand = kw.replace(" scam", "")
+        return f"Is {brand.title()} a Scam? | Scam Check Now"
+
+    return f"Is {kw.title()} a Scam? | Scam Check Now"
 
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
