@@ -1,206 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Scam Checker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+<title>Is {{keyword}} a Scam? Check Instantly</title>
+<meta name="description" content="Check if {{keyword}} is a scam. Analyze suspicious messages, links, and offers instantly with AI.">
 
-    body {
-      margin: 0;
-      background: linear-gradient(180deg, #5f7cff, #e9ecff);
-      color: #111;
-    }
+<style>
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #6f8cff, #eef2ff);
+  color: #111;
+}
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 30px;
-    }
+/* NAV */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
 
-    .pill {
-      background: rgba(255,255,255,0.2);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 14px;
-      color: white;
-    }
+.btn {
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
 
-    .upgrade {
-      background: #111;
-      color: white;
-    }
+.btn-blue {
+  background: linear-gradient(90deg, #4a6cff, #7ea0ff);
+  color: white;
+}
 
-    h1 {
-      text-align: center;
-      color: white;
-      font-size: 36px;
-      margin-bottom: 10px;
-    }
+.btn-dark {
+  background: #1f2937;
+  color: white;
+}
 
-    .subtitle {
-      text-align: center;
-      color: #e0e6ff;
-      margin-bottom: 30px;
-    }
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 10px 20px 0;
+}
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
 
-    textarea, input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
+.hero p {
+  color: #5b6475;
+  max-width: 600px;
+  margin: auto;
+}
 
-    .button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(90deg, #3b5cff, #6a8dff);
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+/* CARD */
+.card {
+  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.75);
+  border-radius: 20px;
+  padding: 24px;
+  margin: 20px auto;
+  max-width: 720px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+}
 
-    .small {
-      text-align: center;
-      font-size: 12px;
-      color: #777;
-      margin-top: 10px;
-    }
+/* INPUT */
+textarea, input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.1);
+  margin-bottom: 12px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.9);
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+.main-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #4a6cff, #7ea0ff);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
 
-    .section-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+.subtext {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 10px;
+}
 
-    .list a {
-      display: block;
-      color: #3b5cff;
-      text-decoration: none;
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
+/* RESULT */
+.result {
+  text-align: center;
+}
 
-    .pricing div {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-    }
+.risk {
+  display: inline-block;
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
 
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #666;
-      margin-top: 30px;
-    }
+.high { background: #ffe2e2; color: #b91c1c; }
+.medium { background: #fff4d6; color: #b45309; }
+.low { background: #e0f7e9; color: #047857; }
 
-    @media (max-width: 700px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+.section {
+  text-align: left;
+  margin-top: 18px;
+}
+
+.section h3 {
+  margin-bottom: 6px;
+}
+
+/* CTA */
+.cta {
+  text-align: center;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  padding: 30px 20px;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container">
+<div class="nav">
+  <button class="btn btn-blue">Get App</button>
+  <button class="btn btn-dark">Upgrade</button>
+</div>
 
-    <div class="top-bar">
-      <div class="pill">Get App</div>
-      <div class="pill upgrade">Upgrade</div>
-    </div>
+<div class="hero">
+  <h1>Is {{keyword}} a Scam?</h1>
+  <p>Check suspicious messages, links, or offers related to {{keyword}} and get an instant risk analysis.</p>
+</div>
 
-    <h1>Is Venmo a Scam?</h1>
-    <div class="subtitle">
-      AI scam checker — try 3 free scans to analyze suspicious messages, emails, websites, job offers, and links.
-    </div>
+<div class="card">
+  <textarea placeholder="Paste a message, email, or link related to {{keyword}}..."></textarea>
+  <input placeholder="Enter your email to continue">
+  <button class="main-btn">Analyze Scam Risk</button>
+  <div class="subtext">3 free checks • instant results</div>
+</div>
 
-    <div class="card">
-      <textarea placeholder="Paste a suspicious message, email, website, or job offer here..."></textarea>
-      <input type="email" placeholder="Enter your email (used to verify subscription)">
-      <button class="button">Check Scam Risk</button>
-      <div class="small">Instant AI analysis appears after submission</div>
-    </div>
+<div class="card result">
+  <div class="risk high">High Risk</div>
 
-    <div class="grid">
-
-      <div class="card">
-        <div class="section-title">About Venmo</div>
-        <p>
-          Venmo, a popular payment app, is generally safe but has seen numerous scams involving fake transactions,
-          phishing attempts, and social engineering.
-        </p>
-        <button class="button">Check Scam Risk</button>
-        <div class="small">Instant AI analysis appears after submission</div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Unlock Unlimited Scam Checks</div>
-        <div class="pricing">
-          <div>Weekly Access</div>
-          <div>Monthly Access</div>
-          <div>Yearly Access</div>
-        </div>
-        <button class="button">Get the Scam Check App</button>
-        <div class="small">Secure payments powered by Stripe</div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Related Scam Checks</div>
-        <div class="list">
-          <a href="#">PayPal Scam</a>
-          <a href="#">Cash App Scam</a>
-          <a href="#">Zelle Scam</a>
-          <a href="#">Venmo Scam</a>
-          <a href="#">Crypto Airdrop Scam</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Unlock Unlimited Scam Checks</div>
-        <div class="pricing">
-          <div>Weekly Access</div>
-          <div>Monthly Access</div>
-          <div>Yearly Access</div>
-        </div>
-        <button class="button">Get the Scam Check App</button>
-        <div class="small">Secure payments powered by Stripe</div>
-      </div>
-
-    </div>
-
-    <div class="footer">
-      By using this website you agree to our Terms, Privacy Policy, and User Agreement.
-    </div>
-
+  <div class="section">
+    <h3>Why this might be a scam</h3>
+    <p>{{keyword}} scams often involve impersonation, urgent requests, or suspicious links designed to steal information.</p>
   </div>
+
+  <div class="section">
+    <h3>Common warning signs</h3>
+    <p>• Urgent or threatening language</p>
+    <p>• Requests for payment or personal data</p>
+    <p>• Unknown or suspicious links</p>
+  </div>
+
+  <div class="section">
+    <h3>What you should do</h3>
+    <p>Do not engage. Verify directly with official sources before taking action.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h3>About {{keyword}}</h3>
+  <p>{{keyword}} is commonly searched in relation to scams. This page helps you quickly determine if it is safe or suspicious.</p>
+</div>
+
+<div class="card cta">
+  <h3>Check scams anytime on your phone</h3>
+  <button class="main-btn">Download the App</button>
+</div>
+
+<div class="footer">
+  Terms • Privacy • User Agreement<br><br>
+  Scam Check © 2026
+</div>
 
 </body>
 </html>
