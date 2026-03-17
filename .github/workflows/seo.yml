@@ -33,14 +33,16 @@ jobs:
         run: |
           python scripts/build_seo.py
 
-      - name: Build root sitemap
+      - name: Build root sitemap (auto-detect all child sitemaps)
         run: |
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
           echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
 
-          if [ -f scam-check-now/sitemap.xml ]; then
-            echo '<sitemap><loc>https://verixiaapps.com/scam-check-now/sitemap.xml</loc></sitemap>' >> sitemap.xml
-          fi
+          # automatically find all sitemap.xml files except root
+          find . -type f -name "sitemap.xml" ! -path "./sitemap.xml" | while read sitemap; do
+            clean_path=$(echo $sitemap | sed 's|^\./||')
+            echo "<sitemap><loc>https://verixiaapps.com/$clean_path</loc></sitemap>" >> sitemap.xml
+          done
 
           echo '</sitemapindex>' >> sitemap.xml
 
