@@ -2,10 +2,10 @@ const fs = require("fs");
 const path = require("path");
 
 const BASE_URL = "https://verixiaapps.com";
-const PAGES_DIR = "./"; // keep same
+const PAGES_DIR = "./";
 const MAX_URLS = 3000;
 
-// find all html files (same logic, just slightly safer)
+// find all html files
 function getAllPages(dir) {
   let results = [];
   const list = fs.readdirSync(dir);
@@ -25,9 +25,7 @@ function getAllPages(dir) {
       ) {
         results.push(filePath);
       }
-    } catch (e) {
-      // skip any bad files silently (no core behavior change)
-    }
+    } catch (e) {}
   });
 
   return results;
@@ -35,12 +33,16 @@ function getAllPages(dir) {
 
 const files = getAllPages(PAGES_DIR);
 
-// convert to URLs (same logic, just cleaner)
+// convert to CLEAN URLs (fix index.html → /)
 const urls = files.map(file => {
-  let clean = file.replace(PAGES_DIR, "").replace(".html", "");
-  clean = clean.replace(/\\/g, "/");
+  let clean = file.replace(PAGES_DIR, "").replace(/\\/g, "/");
 
-  // avoid double slashes
+  if (clean.endsWith("index.html")) {
+    clean = clean.replace("index.html", "");
+  } else {
+    clean = clean.replace(".html", "");
+  }
+
   if (clean.startsWith("/")) clean = clean.slice(1);
 
   return `${BASE_URL}/${clean}`;
@@ -69,7 +71,7 @@ ${chunk.join("\n")}
   }
 });
 
-// main sitemap index (same structure)
+// main sitemap index
 const indexContent = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemapIndex.join("\n")}
