@@ -15,68 +15,64 @@
 <style>
 /* ===== BASE ===== */
 body { font-family:'Inter',system-ui,-apple-system,Arial,sans-serif; background:#f0f3f8; margin:0; color:#111; line-height:1.7; }
-a { text-decoration:none; }
+a { text-decoration:none; color:#0066ff; }
 h1,h2,h3,h4,h5,h6 { margin:0; }
 
-/* ===== BUTTONS ===== */
-.app-top, .upgrade-top, .check, .plan, .resultAction button {
-  border:none; border-radius:16px; cursor:pointer; font-weight:600; transition:all 0.25s ease;
+/* ===== TOP BUTTONS ===== */
+.app-top, .upgrade-top, .resultAction button {
+  border:none; border-radius:14px; cursor:pointer; font-weight:600; transition:all 0.25s ease;
 }
-.app-top, .resultAction button {
-  padding:14px 22px; background:#0066ff; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.2);
-}
-.app-top:hover, .resultAction button:hover { background:#004fd1; }
-.upgrade-top { padding:14px 22px; background:#111; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.2); }
+.app-top { position:fixed; top:18px; left:18px; padding:12px 20px; background:#0066ff; color:#fff; z-index:999; box-shadow:0 6px 20px rgba(0,0,0,0.2); text-decoration:none; }
+.app-top:hover { background:#004fd1; }
+.upgrade-top { position:fixed; top:18px; right:18px; padding:12px 20px; background:#111; color:#fff; z-index:999; box-shadow:0 6px 20px rgba(0,0,0,0.2); }
 .upgrade-top:hover { background:#222; }
-.check { width:100%; background:#0066ff; color:#fff; padding:18px; font-size:18px; margin-top:16px; }
-.check:hover { background:#004fd1; }
-.plan { width:100%; padding:18px; margin-top:16px; background:#635bff; color:#fff; font-size:17px; }
-.plan:hover { background:#5249d8; }
 
 /* ===== HERO ===== */
-.hero {
-  background: linear-gradient(135deg,#0066ff,#3c8cff); color:#fff; padding:160px 20px 120px; text-align:center;
-  border-bottom-left-radius:80px; border-bottom-right-radius:80px;
-}
+.hero { background: linear-gradient(135deg,#0066ff,#3c8cff); color:#fff; padding:160px 20px 140px; text-align:center; border-bottom-left-radius:80px; border-bottom-right-radius:80px; }
 .hero h1 { font-size:50px; letter-spacing:-0.5px; }
 .hero p { font-size:22px; margin-top:18px; opacity:0.95; max-width:760px; margin:auto; }
 
-/* ===== INPUT CARD ===== */
+/* ===== FLOATING INPUT CARD ===== */
 .container {
-  max-width:800px; margin:auto; margin-top:-100px; background:#fff; padding:45px; border-radius:28px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.15);
+  max-width:800px; margin:auto; margin-top:-120px; background:#fff; padding:50px; border-radius:30px;
+  box-shadow:0 25px 60px rgba(0,0,0,0.15);
 }
 textarea,input { width:100%; padding:18px; font-size:17px; border-radius:16px; border:1px solid #ccc; outline:none; }
-textarea { height:200px; margin-bottom:16px; resize:none; }
+textarea { height:200px; margin-bottom:20px; resize:none; }
 input { margin-top:16px; }
-.note { margin-top:14px; font-size:15px; color:#666; text-align:center; }
+.check { width:100%; background:#0066ff; color:#fff; padding:20px; font-size:18px; margin-top:20px; border-radius:16px; font-weight:600; }
+.check:hover { background:#004fd1; }
+.note { text-align:center; color:#666; font-size:15px; margin-top:16px; }
 
 /* ===== RESULT BOX ===== */
-#result { margin-top:30px; white-space:pre-wrap; font-size:18px; background:#f7f9ff; padding:26px; border-radius:16px; box-shadow:inset 0 3px 8px rgba(0,0,0,0.05); }
+#result { margin-top:30px; font-size:18px; background:#f7f9ff; padding:26px; border-radius:16px; box-shadow: inset 0 3px 10px rgba(0,0,0,0.05); white-space:pre-wrap; }
 .resultAction { display:none; margin-top:24px; text-align:center; }
+.resultAction button { background:#0066ff; color:#fff; padding:16px 22px; font-weight:600; border-radius:16px; }
+.resultAction button:hover { background:#004fd1; }
 
-/* ===== UPGRADE CARD ===== */
-.upgrade {
-  display:none; margin-top:30px; padding:35px; background:#f7f9ff; border-radius:24px; text-align:center;
-  box-shadow:0 12px 40px rgba(0,0,0,0.15);
-}
-.upgrade h3 { margin-bottom:20px; font-size:26px; }
-.upgrade .plan { font-size:17px; padding:18px; }
+/* ===== UPGRADE MODAL ===== */
+.upgrade { display:none; margin-top:30px; padding:40px; background:#f7f9ff; border-radius:28px; box-shadow:0 15px 50px rgba(0,0,0,0.15); text-align:center; }
+.upgrade h3 { font-size:26px; margin-bottom:22px; }
+.upgrade .plan { width:100%; font-size:17px; padding:20px; margin-top:16px; background:#635bff; color:#fff; border-radius:16px; font-weight:600; }
+.upgrade .plan:hover { background:#5249d8; }
 
-/* ===== CONTENT SECTIONS ===== */
-.section {
-  max-width:800px; margin:auto; margin-top:90px; padding:0 20px;
-}
-.section h2 { font-size:30px; margin-bottom:18px; font-weight:700; }
-.section p { margin-bottom:22px; font-size:18px; }
-.section ul { margin-left:20px; margin-bottom:22px; }
-.section li { margin-bottom:8px; }
+/* ===== TWO-COLUMN INFO ===== */
+.infoGrid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:30px; margin-top:50px; }
+.infoCard { background:#fff; padding:25px 30px; border-radius:20px; box-shadow:0 12px 40px rgba(0,0,0,0.12); }
+.infoCard h3 { font-size:20px; margin-bottom:12px; font-weight:600; }
+.infoCard p { font-size:16px; line-height:1.6; }
+.infoCard ul { margin-top:12px; margin-left:20px; }
+.infoCard li { margin-bottom:8px; }
 
 /* ===== CTA BLOCK ===== */
 .scanBlock {
   max-width:800px; margin:70px auto; background:#fff; padding:45px; border-radius:28px;
   box-shadow:0 20px 50px rgba(0,0,0,0.15); text-align:center;
 }
+.scanBlock h2 { font-size:28px; margin-bottom:16px; }
+.scanBlock p { font-size:16px; margin-bottom:24px; }
+.scanBlock button { background:#0066ff; color:#fff; padding:18px 24px; font-size:18px; font-weight:600; border-radius:16px; cursor:pointer; border:none; }
+.scanBlock button:hover { background:#004fd1; }
 
 /* ===== FOOTER ===== */
 .footer { text-align:center; margin-top:120px; padding:50px; color:#666; font-size:15px; }
@@ -99,7 +95,6 @@ input { margin-top:16px; }
 <div class="note">Includes 3 free scam checks • upgrade anytime for unlimited scans</div>
 <button class="check" onclick="check()">Check Scam Risk</button>
 <div class="note">AI analysis appears instantly below</div>
-
 <div id="result"></div>
 
 <div id="resultAction" class="resultAction">
@@ -116,9 +111,22 @@ input { margin-top:16px; }
 </div>
 </div>
 
-<section class="section">
-<h2>About Instagram Scam</h2>
+<!-- TWO-COLUMN INFO -->
+<div class="infoGrid">
+<div class="infoCard">
+<h3>About Instagram Scam</h3>
 <p>{{AI_CONTENT_400}}</p>
+</div>
+<div class="infoCard">
+<h3>Unlock Unlimited Scam Checks</h3>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+<div style="margin-top:12px;font-size:13px;color:#666;">🔒 Secure payments powered by Stripe</div>
+</div>
+</div>
+
+<section class="section">
 <h3>Related Scam Checks</h3>
 <ul>
 <li><a href="/scam-check-now/paypal-scam/">Paypal Scam</a></li>
@@ -133,6 +141,7 @@ input { margin-top:16px; }
 <p>Paste the suspicious message, email, or link into the AI scam checker above to instantly detect fraud signals.</p>
 <button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">Scan a Message Now</button>
 </section>
+
 </main>
 
 <footer class="footer">
@@ -141,47 +150,31 @@ input { margin-top:16px; }
 </footer>
 
 <script>
-const API = "https://awake-integrity-production-faa0.up.railway.app";
+const API="https://awake-integrity-production-faa0.up.railway.app";
 
 function showUpgrade() { document.getElementById("upgrade").style.display="block"; document.getElementById("upgrade").scrollIntoView({behavior:"smooth"}); }
 
-async function check() {
-    const text = document.getElementById("text").value.trim();
-    const email = document.getElementById("email").value.trim().toLowerCase();
-    const result = document.getElementById("result");
-    if(!text){result.innerText="Paste a message, email, or link to analyze."; return;}
-    result.innerText="Analyzing...";
-    try {
-        const response = await fetch(API+"/analyze",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({text,email})
-        });
-        const data = await response.json();
-        if(data.limit){
-            result.innerText="Free checks used. Upgrade for unlimited scam detection.";
-            document.getElementById("resultAction").style.display="block";
-            showUpgrade();
-            return;
-        }
-        result.innerText=data.result;
-        document.getElementById("resultAction").style.display="block";
-    } catch(e){
-        result.innerText="Error analyzing message. Please try again.";
-    }
+async function check(){
+const text=document.getElementById("text").value.trim();
+const email=document.getElementById("email").value.trim().toLowerCase();
+const result=document.getElementById("result");
+if(!text){result.innerText="Paste a message, email, or link to analyze.";return;}
+result.innerText="Analyzing...";
+try{
+const response=await fetch(API+"/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,email})});
+const data=await response.json();
+if(data.limit){result.innerText="Free checks used. Upgrade for unlimited scam detection.";document.getElementById("resultAction").style.display="block";showUpgrade();return;}
+result.innerText=data.result;document.getElementById("resultAction").style.display="block";
+}catch(e){result.innerText="Error analyzing message. Please try again.";}
 }
 
 async function checkout(priceId){
-    const email=document.getElementById("email").value.trim().toLowerCase();
-    if(!email){alert("Please enter your email to activate your subscription.");return;}
-    const pageUrl=window.location.origin+window.location.pathname;
-    const response=await fetch(API+"/create-checkout",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({priceId,email,successUrl:pageUrl+"?subscribed=true",cancelUrl:pageUrl})
-    });
-    const data=await response.json();
-    if(data.url){window.location=data.url;}else{alert("Checkout failed. Please try again.");}
+const email=document.getElementById("email").value.trim().toLowerCase();
+if(!email){alert("Please enter your email to activate your subscription.");return;}
+const pageUrl=window.location.origin+window.location.pathname;
+const response=await fetch(API+"/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId,email,successUrl:pageUrl+"?subscribed=true",cancelUrl:pageUrl})});
+const data=await response.json();
+if(data.url){window.location=data.url;}else{alert("Checkout failed. Please try again.");}
 }
 </script>
 
