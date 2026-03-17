@@ -33,6 +33,18 @@ jobs:
         run: |
           python scripts/build_seo.py
 
+      - name: Build child sitemap for scam-check-now
+        run: |
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > scam-check-now/sitemap.xml
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> scam-check-now/sitemap.xml
+
+          for page in $(ls scam-check-now/pages/*.html); do
+            slug=$(basename "$page" .html)
+            echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug.html</loc></url>" >> scam-check-now/sitemap.xml
+          done
+
+          echo '</urlset>' >> scam-check-now/sitemap.xml
+
       - name: Build root sitemap
         run: |
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
