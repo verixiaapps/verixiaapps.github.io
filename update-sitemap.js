@@ -1,11 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
+// Base settings
 const BASE_URL = "https://verixiaapps.com";
-const PAGES_DIR = "./";
-const MAX_URLS = 3000;
+const APPS = ["scam-check-now", "job-check-now", "crypto-check-now", "review-check-now", "email-check-now", "website-check-now"];
+const MAX_URLS = 3000; // per sitemap chunk
 
-// find all html files
+// Recursive function to get all HTML pages in a folder
 function getAllPages(dir) {
   let results = [];
   const list = fs.readdirSync(dir);
@@ -25,58 +26,51 @@ function getAllPages(dir) {
       ) {
         results.push(filePath);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error reading file:", filePath, e);
+    }
   });
 
   return results;
 }
 
-const files = getAllPages(PAGES_DIR);
-
-// convert to CLEAN URLs (fix index.html → /)
-const urls = files.map(file => {
-  let clean = file.replace(PAGES_DIR, "").replace(/\\/g, "/");
-
-  if (clean.endsWith("index.html")) {
-    clean = clean.replace("index.html", "");
-  } else {
-    clean = clean.replace(".html", "");
-  }
-
-  if (clean.startsWith("/")) clean = clean.slice(1);
-
-  return `${BASE_URL}/${clean}`;
-});
-
+// Generate per-app sitemaps
 let sitemapIndex = [];
-let chunk = [];
-let count = 1;
+APPS.forEach(app => {
+  const PAGES_DIR = `./${app}`;
+  if (!fs.existsSync(PAGES_DIR)) return;
 
-urls.forEach((url, i) => {
-  chunk.push(`<url><loc>${url}</loc></url>`);
+  const files = getAllPages(PAGES_DIR);
+  const urls = files.map(file => {
+    let clean = file.replace(PAGES_DIR, "").replace(/\\/g, "/");
+    if (clean.endsWith("index.html")) clean = clean.replace("index.html", "");
+    else clean = clean.replace(".html", "");
+    if (clean.startsWith("/")) clean = clean.slice(1);
+    return { url: `${BASE_URL}/${app}/${clean}`, filePath: file };
+  });
 
-  if (chunk.length === MAX_URLS || i === urls.length - 1) {
-    const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${chunk.join("\n")}
-</urlset>`;
+  let chunk = [];
+  let count = 1;
 
-    const filename = `sitemap-${count}.xml`;
-    fs.writeFileSync(filename, sitemapContent);
+  urls.forEach((item, i) => {
+    const lastmod = fs.existsSync(item.filePath) ? new Date(fs.statSync(item.filePath).mtime).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
+    chunk.push(`<url>\n<loc>${item.url}</loc>\n<lastmod>${lastmod}</lastmod>\n</url>`);
 
-    sitemapIndex.push(`<sitemap><loc>${BASE_URL}/${filename}</loc></sitemap>`);
+    if (chunk.length === MAX_URLS || i === urls.length - 1) {
+      const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${chunk.join("\n")}\n</urlset>`;
+      const filename = `${app}-sitemap-${count}.xml`;
+      fs.writeFileSync(filename, sitemapContent);
+      console.log(`Generated ${filename} (${chunk.length} URLs)`);
 
-    chunk = [];
-    count++;
-  }
+      sitemapIndex.push(`<sitemap><loc>${BASE_URL}/${filename}</loc></sitemap>`);
+      chunk = [];
+      count++;
+    }
+  });
 });
 
-// main sitemap index
-const indexContent = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemapIndex.join("\n")}
-</sitemapindex>`;
-
+// Generate main root sitemap index
+const indexContent = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapIndex.join("\n")}\n</sitemapindex>`;
 fs.writeFileSync("sitemap.xml", indexContent);
 
-console.log("Sitemaps generated successfully.");
+console.log("Root sitemap.xml generated successfully with all app sitemaps.");
