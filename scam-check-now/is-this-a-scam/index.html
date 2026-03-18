@@ -18,15 +18,24 @@ gtag('js', new Date());
 gtag('config', 'AW-17956428385');
 
 window.addEventListener("load", function(){
-if(
-window.location.search.includes("subscribed=true") &&
-!sessionStorage.getItem("ads_conversion")
-){
-gtag('event','conversion',{
-'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC'
-});
-sessionStorage.setItem("ads_conversion","1");
-}
+
+  const params = new URLSearchParams(window.location.search);
+
+  if(
+    params.get("conversion") === "1" &&
+    !sessionStorage.getItem("ads_conversion")
+  ){
+    gtag('event','conversion',{
+      'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC',
+      'value':10.0,
+      'currency':'USD'
+    });
+
+    sessionStorage.setItem("ads_conversion","1");
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
 });
 </script>
 
@@ -129,8 +138,6 @@ color:#6b7280;
 text-align:center;
 }
 
-/* RESULT */
-
 #result{
 margin-top:25px;
 display:none;
@@ -171,8 +178,6 @@ margin:0;
 padding-left:18px;
 }
 
-/* ACTION */
-
 .resultAction{
 display:none;
 margin-top:18px;
@@ -186,8 +191,6 @@ padding:14px 20px;
 border-radius:10px;
 font-weight:600;
 }
-
-/* PAYWALL */
 
 .upgrade{
 display:none;
@@ -381,7 +384,7 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
 email,
-successUrl:pageUrl+"?subscribed=true",
+successUrl:pageUrl+"?subscribed=true&conversion=1",
 cancelUrl:pageUrl
 })
 })
