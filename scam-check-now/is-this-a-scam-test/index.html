@@ -36,9 +36,8 @@ window.addEventListener("load", function(){
   }
 
   if(params.get("subscribed") === "true"){
-    const msg = document.getElementById("postPurchase");
-    if(msg) msg.style.display = "block";
-    document.getElementById("cta").innerText = "Unlock My Access";
+    document.getElementById("postPurchase").style.display = "block";
+    document.getElementById("cta").innerText = "Check Scam Risk";
   }
 
 });
@@ -50,41 +49,42 @@ body{
 font-family:system-ui,-apple-system,Arial;
 background:linear-gradient(180deg,#eef2ff,#f8fafc);
 margin:0;
+padding-top:70px;
 color:#1f2937;
 line-height:1.6;
 }
 
+/* FIXED BUTTON SAFE */
 .app-top{
 position:fixed;
-top:18px;
-left:18px;
+top:12px;
+left:12px;
 background:#3b82f6;
 color:white;
-padding:10px 16px;
+padding:8px 12px;
 border-radius:10px;
 font-weight:600;
-z-index:999;
+z-index:1000;
 box-shadow:0 6px 18px rgba(0,0,0,.12);
 text-decoration:none;
+font-size:14px;
 }
-
-/* removed floating upgrade button */
 
 .hero{
 text-align:center;
-padding:90px 20px 40px;
+padding:40px 20px 30px;
 }
 
 .hero h1{
 margin:0;
-font-size:42px;
+font-size:34px;
 }
 
 .hero p{
 margin-top:10px;
-font-size:18px;
+font-size:17px;
 opacity:.9;
-max-width:620px;
+max-width:600px;
 margin-left:auto;
 margin-right:auto;
 }
@@ -92,9 +92,10 @@ margin-right:auto;
 .container{
 max-width:760px;
 margin:auto;
-margin-top:-30px;
+margin-top:0;
 background:white;
-padding:30px;
+padding:24px;
+padding-bottom:50px;
 border-radius:18px;
 box-shadow:0 20px 50px rgba(0,0,0,.08);
 }
@@ -115,14 +116,15 @@ border:none;
 border-radius:12px;
 cursor:pointer;
 font-size:16px;
-padding:15px;
+padding:16px;
+min-height:50px;
 }
 
 .check{
 width:100%;
 background:#3b82f6;
 color:white;
-margin-top:10px;
+margin-top:12px;
 font-weight:600;
 box-shadow:0 8px 20px rgba(59,130,246,.25);
 }
@@ -157,7 +159,7 @@ border:1px solid #e5e7eb;
 }
 
 .risk{
-font-size:28px;
+font-size:26px;
 font-weight:800;
 margin-bottom:14px;
 padding:10px 14px;
@@ -315,8 +317,9 @@ Scam Check Now © 2026 • AI-powered scam detection • Not legal or financial 
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
 function showUpgrade(){
-document.getElementById("upgrade").style.display="block"
-document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+const el=document.getElementById("upgrade");
+el.style.display="block";
+setTimeout(()=>el.scrollIntoView({behavior:"smooth"}),100);
 }
 
 function parseSections(text){
@@ -359,6 +362,7 @@ const result=document.getElementById("result")
 
 if(!text){
 result.innerText="Paste a message, email, or link to analyze."
+result.style.display="block"
 return
 }
 
