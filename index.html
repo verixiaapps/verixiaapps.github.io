@@ -1,122 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="google-site-verification" content="lMPvt6ITvzoUXis8kQRRl_p3hif3LTkyYb9o_1TlTDU" />
-
-<title>Verixia Apps</title>
-
-<meta name="description" content="AI-powered safety tools including scam detection and crypto risk analysis.">
-
+<title>Scam Check Now – Free AI Scam Detector</title>
+<meta name="description" content="Check if a message, email, website, or job offer is a scam instantly. Free AI scam detector with real risk analysis and warning signs.">
 <meta name="robots" content="index, follow">
 
+<link rel="canonical" href="https://verixiaapps.com/">
+
+<meta property="og:title" content="Scam Check Now – Free AI Scam Detector">
+<meta property="og:description" content="Instantly detect scams using AI. Analyze suspicious messages, emails, links, and job offers.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://verixiaapps.com/">
+
 <style>
-
-body{
-margin:0;
-font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:radial-gradient(circle at top,#111,#000);
-color:white;
+body {
+  font-family: system-ui, -apple-system, Arial;
+  margin: 0;
+  background: #f4f7fb;
+  color: #111;
+  line-height: 1.6;
 }
 
-.container{
-max-width:900px;
-margin:auto;
-padding:40px 24px;
+.hero {
+  background: linear-gradient(135deg,#0066ff,#3c8cff);
+  color: white;
+  padding: 120px 20px 80px;
+  text-align: center;
 }
 
-h1{
-font-size:38px;
-margin-bottom:10px;
+.hero h1 {
+  font-size: 44px;
+  margin-bottom: 12px;
 }
 
-.sub{
-color:#bbb;
-margin-bottom:40px;
+.hero p {
+  font-size: 20px;
+  max-width: 700px;
+  margin: auto;
+  opacity: 0.95;
 }
 
-.card{
-background:#111;
-border:1px solid #222;
-border-radius:16px;
-padding:24px;
-margin-bottom:20px;
+.container {
+  max-width: 760px;
+  margin: -60px auto 40px;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
 }
 
-.title{
-font-size:22px;
-font-weight:700;
-margin-bottom:6px;
+textarea, input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
 
-.desc{
-color:#bbb;
-margin-bottom:14px;
+textarea {
+  height: 160px;
+  margin-bottom: 12px;
+  resize: none;
 }
 
-.btn{
-display:inline-block;
-background:#e6c15a;
-color:black;
-padding:12px 18px;
-border-radius:10px;
-font-weight:700;
-text-decoration:none;
+input {
+  margin-top: 10px;
 }
 
-.footer{
-margin-top:60px;
-text-align:center;
-color:#777;
-font-size:12px;
+button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #0066ff;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
 }
 
+button:hover {
+  background: #004fd1;
+}
+
+#result {
+  margin-top: 20px;
+  background: #f1f4ff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.section {
+  max-width: 760px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.section h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.footer {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 14px;
+}
 </style>
-
 </head>
 
 <body>
 
+<header class="hero">
+<h1>Check If Something Is a Scam</h1>
+<p>Paste a message, email, link, or job offer and instantly detect scam risk using AI.</p>
+</header>
+
 <div class="container">
+<textarea id="text" placeholder="Paste suspicious message, email, website or job offer..."></textarea>
+<input id="email" placeholder="Enter your email (optional)">
+<button onclick="check()">Check Scam Risk</button>
 
-<h1>Verixia Apps</h1>
-
-<div class="sub">
-AI tools designed to help users detect scams, evaluate risk, and make safer decisions online.
+<div id="result"></div>
 </div>
 
-<div class="card">
+<section class="section">
+<h2>How It Works</h2>
+<p>Our AI analyzes suspicious messages, emails, and links to detect scam patterns, urgency signals, impersonation tactics, and fraud indicators.</p>
+</section>
 
-<div class="title">🛡 Scam Check Now</div>
+<section class="section">
+<h2>Common Scams We Detect</h2>
+<p>We help identify scams related to payments, crypto, jobs, social media, shipping, banking, and more. If something feels off, it probably is—check it instantly.</p>
+</section>
 
-<div class="desc">
-Analyze suspicious messages, emails, and links to detect scams instantly.
-</div>
+<section class="section">
+<h2>Start Checking Now</h2>
+<p>Use the free scam checker above to analyze anything suspicious before you click, reply, or send money.</p>
+</section>
 
-<a class="btn" href="/scam-check-now/">Open Tool</a>
+<footer class="footer">
+<div>By using this site you agree to our <a href="/website-policies/scam-check/">Terms and Privacy Policy</a>.</div>
+<div style="margin-top:10px;">Scam Check Now © 2026</div>
+</footer>
 
-</div>
+<script>
+const API = "https://awake-integrity-production-faa0.up.railway.app";
 
-<div class="card">
+async function check(){
+  const text = document.getElementById("text").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const result = document.getElementById("result");
 
-<div class="title">💰 Token Risk Checker</div>
+  if(!text){
+    result.innerText = "Paste something to analyze.";
+    return;
+  }
 
-<div class="desc">
-Check crypto tokens and contracts for potential scams and red flags.
-</div>
+  result.innerText = "Analyzing...";
 
-<a class="btn" href="/token-risk/">Open Tool</a>
+  try{
+    const response = await fetch(API + "/analyze", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ text, email })
+    });
 
-</div>
+    const data = await response.json();
+    result.innerText = data.result;
 
-<div class="footer">
-Verixia Apps © 2026
-</div>
-
-</div>
+  } catch(e){
+    result.innerText = "Error analyzing. Try again.";
+  }
+}
+</script>
 
 </body>
 </html>
