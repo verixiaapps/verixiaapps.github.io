@@ -9,6 +9,15 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="{{CANONICAL_URL}}">
 
+<!-- GOOGLE ADS -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'AW-17956428385');
+</script>
+
 <style>
 body { font-family:system-ui,-apple-system,Arial; margin:0; background:#f0f3f8; color:#111; }
 
@@ -144,7 +153,6 @@ display:inline-block;
 
 <div id="result"></div>
 
-<!-- PAYWALL -->
 <div id="upgradeBox" class="upgrade">
 <h2>⚠️ This Message Shows Real Scam Signals</h2>
 <p>Scammers rely on urgency and confusion. Check again before you click, reply, or send money.</p>
@@ -183,41 +191,64 @@ const API = "https://awake-integrity-production-faa0.up.railway.app";
 /* restore email */
 document.getElementById("email").value = localStorage.getItem("email") || "";
 
-/* 🔥 AUTO UNLOCK AFTER STRIPE RETURN */
+/* 🔥 LOAD HANDLER */
 window.addEventListener("load", async () => {
+
   const params = new URLSearchParams(window.location.search);
+
+  /* ✅ GOOGLE CONVERSION */
+  if(params.get("conversion") === "1"){
+    if(!sessionStorage.getItem("ads_conversion")){
+      setTimeout(function(){
+        gtag('event','conversion',{
+          'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC',
+          'value':10.0,
+          'currency':'USD'
+        });
+        sessionStorage.setItem("ads_conversion","1");
+      },300);
+    }
+  }
+
+  /* 🔥 AUTO UNLOCK */
   const sessionId = params.get("session_id");
 
-  if(!sessionId) return;
+  if(sessionId){
+    try{
+      const res = await fetch(API + "/verify-session", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ sessionId })
+      });
 
-  try{
-    const res = await fetch(API + "/verify-session", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ sessionId })
-    });
+      const data = await res.json();
 
-    const data = await res.json();
+      if(data.subscribed && data.email){
+        localStorage.setItem("email", data.email);
+        document.getElementById("email").value = data.email;
 
-    if(data.subscribed){
-      localStorage.setItem("email", data.email);
-      document.getElementById("email").value = data.email;
-    }
+        document.getElementById("result").innerHTML = `
+        <div style="font-weight:700;color:#166534;">
+        ✅ Payment successful — unlimited protection is now active
+        </div>`;
+      }
 
-    window.history.replaceState({}, document.title, window.location.pathname);
+    }catch(e){}
+  }
 
-  }catch(e){}
+  /* clean URL AFTER everything */
+  window.history.replaceState({}, document.title, window.location.pathname);
+
 });
 
 function scrollToUpgrade(){
-const el = document.getElementById("upgradeBox");
-el.scrollIntoView({behavior:"smooth", block:"center"});
+document.getElementById("upgradeBox").scrollIntoView({behavior:"smooth", block:"center"});
 }
 
 function showUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.style.display = "block";
-setTimeout(scrollToUpgrade, 50);
+setTimeout(scrollToUpgrade,50);
 }
 
 function parseSections(text){
@@ -246,39 +277,30 @@ const email = document.getElementById("email").value.trim().toLowerCase();
 const result = document.getElementById("result");
 
 if(!text){
-result.innerText = "Paste a message, email, or link to analyze.";
+result.innerText="Paste a message, email, or link to analyze.";
 return;
 }
 
-result.innerText = "Analyzing...";
+result.innerText="Analyzing...";
 
 try{
-const res = await fetch(API + "/analyze", {
+const res = await fetch(API + "/analyze",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({text, email})
+body:JSON.stringify({text,email})
 });
 
 const data = await res.json();
 
 if(data.limit){
-result.innerHTML = `
-<div style="font-weight:700;margin-bottom:8px;">
-⚠️ Scam Risk Detected
-</div>
-<div>
-This message shows patterns commonly used in scams. Most people check multiple messages before taking action.
-</div>
-`;
+result.innerHTML="Free checks used. Unlock unlimited protection.";
 showUpgrade();
 return;
 }
 
-result.innerHTML = formatResult(data.result);
+result.innerHTML=formatResult(data.result);
 
-const textResult = data.result.toLowerCase();
-
-if(textResult.includes("high") || textResult.includes("scam")){
+if(data.result.toLowerCase().includes("high") || data.result.toLowerCase().includes("scam")){
 showUpgrade();
 }
 
@@ -287,21 +309,21 @@ localStorage.setItem("email", email);
 }
 
 }catch(e){
-result.innerText = "Error analyzing message. Please try again.";
+result.innerText="Error analyzing message.";
 }
 }
 
-/* 🔥 STRIPE = NO FRICTION */
+/* 🔥 STRIPE */
 async function checkout(priceId){
 
 const pageUrl = window.location.origin + window.location.pathname;
 
-const response = await fetch(API + "/create-checkout", {
+const response = await fetch(API + "/create-checkout",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
-successUrl:pageUrl+"?session_id={CHECKOUT_SESSION_ID}",
+successUrl:pageUrl+"?session_id={CHECKOUT_SESSION_ID}&conversion=1",
 cancelUrl:pageUrl
 })
 });
@@ -311,7 +333,7 @@ const data = await response.json();
 if(data.url){
 window.location = data.url;
 }else{
-alert("Checkout failed. Please try again.");
+alert("Checkout failed.");
 }
 }
 </script>
