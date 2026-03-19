@@ -37,7 +37,6 @@ window.addEventListener("load", function(){
 
   if(params.get("subscribed") === "true"){
     document.getElementById("postPurchase").style.display = "block";
-    document.getElementById("cta").innerText = "Check Scam Risk";
   }
 
 });
@@ -49,31 +48,40 @@ body{
 font-family:system-ui,-apple-system,Arial;
 background:linear-gradient(180deg,#eef2ff,#f8fafc);
 margin:0;
-padding-top:90px;
+padding-top:100px;
 color:#1f2937;
 line-height:1.6;
 }
 
-/* TOP BUTTONS (SAFE + NON-BLOCKING) */
-.app-top, .upgrade-top{
+/* TRUE HEADER (fixes everything) */
+.top-bar{
 position:fixed;
-top:10px;
+top:0;
+left:0;
+width:100%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 12px;
+z-index:1000;
+pointer-events:none;
+}
+
+.app-top, .upgrade-top{
+pointer-events:auto;
 padding:8px 12px;
 font-size:14px;
 border-radius:10px;
-z-index:1000;
 box-shadow:0 6px 18px rgba(0,0,0,.12);
 }
 
 .app-top{
-left:10px;
 background:#3b82f6;
 color:white;
 text-decoration:none;
 }
 
 .upgrade-top{
-right:10px;
 background:#1f2937;
 color:white;
 border:none;
@@ -242,8 +250,10 @@ font-size:14px;
 
 <body>
 
-<a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
-<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+<div class="top-bar">
+  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
+  <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+</div>
 
 <div class="hero">
 <h1>Think This Might Be a Scam?</h1>
@@ -271,7 +281,7 @@ Use the same email you entered during checkout
 ✅ Payment successful — your unlimited access is ready
 </div>
 
-<button id="cta" class="check" onclick="check()">Check Scam Risk</button>
+<button class="check" onclick="check()">Check Scam Risk</button>
 
 <div class="note">
 Get a clear risk level, key warning signs, and what to do next
