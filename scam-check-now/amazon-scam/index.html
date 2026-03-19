@@ -135,9 +135,10 @@ display:inline-block;
 
 <textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
 
-<input id="email" placeholder="Enter your email to unlock unlimited protection">
+<input id="email" placeholder="Already subscribed? Enter your email to continue with unlimited checks">
 
-<div class="note">3 free checks • unlimited protection available</div>
+<div class="note">3 free checks • high-risk results may require upgrade</div>
+<div class="note">Use the same email you used during checkout</div>
 
 <button class="check" onclick="check()">Check Scam Risk</button>
 
@@ -163,15 +164,27 @@ Secure payments powered by Stripe • Cancel anytime
 <h2>About amazon scam</h2>
 <div>
 <h2>Is Amazon Scam a Scam?</h2>
-<p>Amazon scam schemes can take a variety of forms, often leaving victims feeling confused and frustrated. These scams typically involve fraudulent communications or offers that make it seem like they are affiliated with Amazon in some way. Scammers may reach out via email, phone calls, texts, or even create fake websites that resemble the official Amazon site, aiming to trick consumers into providing sensitive personal information or making payments for nonexistent products. 
+<p>### Understanding Amazon Scam Scams: A Comprehensive Guide
 
-One common type of scam involves emails claiming that a user's Amazon account has been suspended or compromised. These messages often contain alarming language designed to provoke immediate action, urging the recipient to click on a link to "verify" their account. However, the link usually leads to a fake site that captures login credentials. Another prevalent strategy involves fake sellers promoting products at unrealistically low prices on websites like Facebook or Craigslist, only for customers to lose money when the products are never delivered. Lastly, some scams take the form of unsolicited calls claiming to offer support or guarantees that the victim needs to verify their account or provide payment for services that are often unnecessary.
+In recent years, counterfeit activities posing as legitimate Amazon transactions have surged, leading many users to fall prey to these fraudulent schemes. These scams can take various forms, but the most common involve deceptive emails, phone calls, and fake websites designed to steal personal information or money. Recognizing the red flags and knowing how to respond can significantly protect individuals from falling victim to these scams.
 
-Several warning signs can help you identify these deceitful schemes. Firstly, look for poor grammar and spelling errors, which are common in scam communications. Legitimate companies like Amazon typically maintain high standards for their correspondence. Secondly, be cautious of pressure tactics. Scammers often create a sense of urgency, implying that immediate action is required to prevent account closure or loss of funds. If an email or call demands personal account information, payment, or something that appears too good to be true, it is likely a scam. Legitimate requests for information typically come through established, secure channels with a clear identification of the requester.
+One of the prevalent types of these scams is the phishing email. In this scenario, you might receive an email that appears to be from Amazon, complete with the company's logos and branding. The email may claim there's an issue with your account, such as unusual activity or recent purchases that you did not make. The message often urges you to click a link to verify your account information. Once you click the link, it takes you to a fraudulent website that looks strikingly similar to the actual Amazon site. Here, you may be prompted to enter your personal details, including passwords, credit card numbers, or social security numbers. 
 
-If you encounter any communication you suspect to be a scam, it is vital to proceed with caution. First, do not click on any links or download attachments from unsolicited emails. Instead, independently navigate to the official Amazon website by typing the URL directly into your browser. Check for any alerts or notifications on your account. If you receive a suspicious call, hang up and do not provide any information over the phone. You can reach Amazon’s customer service directly through their official contact information to verify if the communication was legitimate.
+Another common scenario involves scam phone calls. In these instances, you may receive a call claiming to be from Amazon's customer service. The caller might inform you that there are problems with your account, such as a pending order that needs your immediate attention. They may even threaten to suspend your account if you do not cooperate. Often, these callers will ask you to provide personal information or payment to "resolve" the issue. 
 
-Additionally, it is wise to monitor your bank and credit card statements regularly for any unauthorized charges. Should you ever believe you have been a victim of a scam, report it to the Federal Trade Commission (FTC) and your local authorities. Staying informed about the latest scams and understanding how they operate is your best defense. Always remember that if something feels off or too good to be true, it likely is. Protecting your personal information is paramount in the digital age, so approach offers and communications with a healthy dose of skepticism.</p>
+### Warning Signs of Fraudulent Activities
+
+It’s essential to remain vigilant and alert for specific warning signs. If you receive an email or message with poor spelling and grammar, that’s a substantial red flag. Many scammers do not take the time to create professionally written communications. Furthermore, if the email address does not match Amazon's official domain (usually ending in "@amazon.com"), that’s a clear indication of a potential scam. 
+
+Another warning sign is urgency. Scammers often create a sense of panic, urging you to act quickly to avoid consequences. Legitimate companies won’t pressure you into making rash decisions. If a phone call feels suspicious—especially if the caller uses aggressive tactics—it's best to hang up and verify the situation independently.
+
+### What to Do If You Encounter Such Scams
+
+If you suspect you’ve encountered a scam, it’s crucial to act quickly and decisively. First, do not respond to the email or engage with the caller. Instead, directly log into your Amazon account by typing the URL into your browser rather than clicking on any links from the suspicious email. Check if there are any alerts or issues present in your account. 
+
+Additionally, report any phishing attempts or scam calls to Amazon’s customer service. They may help monitor any potential misuse of your account. For emails, forward the suspicious message to Amazon’s official email address, which is usually found on their Help pages. Moreover, consider changing your password and enabling two-factor authentication on your Amazon account for added security.
+
+Lastly, educate yourself about common scams. Being informed is one of the best defenses against fraud. By staying aware and following these guidelines, you can significantly reduce your risks of becoming a victim of deceitful practices. Always prioritize your online safety and trust your instincts—if something seems off, it probably is.</p>
 
 <h2>Common Warning Signs</h2>
 <ul>
@@ -201,8 +214,34 @@ Scam Check Now © 2026
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
-/* restore email if exists */
+/* restore email */
 document.getElementById("email").value = localStorage.getItem("email") || "";
+
+/* 🔥 AUTO UNLOCK AFTER STRIPE RETURN */
+window.addEventListener("load", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
+
+  if(!sessionId) return;
+
+  try{
+    const res = await fetch(API + "/verify-session", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ sessionId })
+    });
+
+    const data = await res.json();
+
+    if(data.subscribed){
+      localStorage.setItem("email", data.email);
+      document.getElementById("email").value = data.email;
+    }
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+  }catch(e){}
+});
 
 function scrollToUpgrade(){
 const el = document.getElementById("upgradeBox");
@@ -212,10 +251,7 @@ el.scrollIntoView({behavior:"smooth", block:"center"});
 function showUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.style.display = "block";
-
-setTimeout(() => {
-scrollToUpgrade();
-}, 50);
+setTimeout(scrollToUpgrade, 50);
 }
 
 function parseSections(text){
@@ -280,7 +316,6 @@ if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
 }
 
-/* store email */
 if(email){
 localStorage.setItem("email", email);
 }
@@ -290,41 +325,25 @@ result.innerText = "Error analyzing message. Please try again.";
 }
 }
 
+/* 🔥 STRIPE = NO FRICTION */
 async function checkout(priceId){
 
-const emailInput = document.getElementById("email");
-const email = emailInput.value.trim().toLowerCase();
+const pageUrl = window.location.origin + window.location.pathname;
 
-if(!email){
-emailInput.focus();
-emailInput.style.border = "2px solid #ef4444";
-
-setTimeout(()=>{
-emailInput.style.border = "1px solid #ccc";
-},2000);
-
-return;
-}
-
-localStorage.setItem("email", email);
-
-const pageUrl=window.location.origin+window.location.pathname;
-
-const response=await fetch(API+"/create-checkout",{
+const response = await fetch(API + "/create-checkout", {
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
-email,
-successUrl:pageUrl+"?subscribed=true",
+successUrl:pageUrl+"?session_id={CHECKOUT_SESSION_ID}",
 cancelUrl:pageUrl
 })
 });
 
-const data=await response.json();
+const data = await response.json();
 
 if(data.url){
-window.location=data.url;
+window.location = data.url;
 }else{
 alert("Checkout failed. Please try again.");
 }
