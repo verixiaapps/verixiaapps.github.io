@@ -44,8 +44,9 @@ jobs:
           echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
 
-          # SEO generated pages (folder-based)
+          # SEO generated pages (folder-based, only valid pages)
           for dir in scam-check-now/*/; do
+            [ -f "${dir}index.html" ] || continue
             slug=$(basename "$dir")
             echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           done
