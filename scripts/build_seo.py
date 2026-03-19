@@ -57,12 +57,11 @@ with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
 keywords = load_keywords()
-
 pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
 
 
 # -----------------------------
-# GENERATE PAGES
+# GENERATE PAGES (ALWAYS REBUILD)
 # -----------------------------
 for page in pages:
     slug = page["slug"]
@@ -76,11 +75,6 @@ for page in pages:
     folder = f"{OUTPUT_DIR}/{slug}"
     path = f"{folder}/index.html"
     os.makedirs(folder, exist_ok=True)
-
-    # Skip if already exists (no overwrite)
-    if os.path.exists(path):
-        print("Skipping existing page:", slug)
-        continue
 
     title = build_title(keyword)
     description = build_description(keyword)
@@ -120,7 +114,7 @@ Avoid clicking unknown links or sending funds. Always verify through official so
     html = html.replace("{{RELATED_LINKS}}", links_html)
     html = html.replace("{{CANONICAL_URL}}", canonical)
 
-    # Save file
+    # 🔥 ALWAYS overwrite (this is the key change)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
