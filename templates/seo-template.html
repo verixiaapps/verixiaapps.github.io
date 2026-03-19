@@ -20,7 +20,7 @@ body { font-family:system-ui,-apple-system,Arial; margin:0; background:#f0f3f8; 
   border-radius:12px;
   font-weight:600;
 }
-.app-top { left:12px; background:#2563eb; color:#fff; }
+.app-top { left:12px; background:#2563eb; color:#fff; opacity:.9; }
 .upgrade-top { right:12px; background:#111; color:#fff; }
 
 .hero {
@@ -90,8 +90,8 @@ display:inline-block;
   margin-top:20px;
   background:#111;
   color:#fff;
-  padding:22px;
-  border-radius:14px;
+  padding:24px;
+  border-radius:16px;
   text-align:center;
 }
 
@@ -145,8 +145,8 @@ display:inline-block;
 
 <!-- PAYWALL -->
 <div id="upgradeBox" class="upgrade">
-<h2>⚠️ Stay Protected Before You Take Action</h2>
-<p>This message shows real scam signals. One mistake can cost thousands.</p>
+<h2>⚠️ This Message Shows Real Scam Signals</h2>
+<p>Scammers rely on urgency and confusion. Check again before you click, reply, or send money.</p>
 
 <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Protect Me — Weekly</button>
 <button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Best Value — Monthly ⭐</button>
@@ -179,8 +179,19 @@ Scam Check Now © 2026
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
+function scrollToUpgrade(){
+const el = document.getElementById("upgradeBox");
+el.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
 function showUpgrade(){
-document.getElementById("upgradeBox").style.display="block";
+const el = document.getElementById("upgradeBox");
+el.style.display = "block";
+
+/* smoother + more reliable scroll */
+setTimeout(() => {
+scrollToUpgrade();
+}, 50);
 }
 
 function parseSections(text){
@@ -225,7 +236,14 @@ body:JSON.stringify({text, email})
 const data = await res.json();
 
 if(data.limit){
-result.innerText = "You've used your free checks. Unlock unlimited protection.";
+result.innerHTML = `
+<div style="font-weight:700;margin-bottom:8px;">
+⚠️ Scam Risk Detected
+</div>
+<div>
+This message shows patterns commonly used in scams. Most people check multiple messages before taking action.
+</div>
+`;
 showUpgrade();
 return;
 }
@@ -234,7 +252,7 @@ result.innerHTML = formatResult(data.result);
 
 const textResult = data.result.toLowerCase();
 
-/* 🔥 PRINT LOGIC */
+/* 🔥 TRIGGER PAYWALL */
 if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
 }
