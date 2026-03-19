@@ -15,6 +15,9 @@ ALL_PAGES_FILE = f"{OUTPUT_DIR}/all-pages.html"
 SITEMAP_FILE = f"{OUTPUT_DIR}/sitemap.xml"
 RELATED_LINKS_COUNT = 5
 
+# 🔒 PROTECTED SLUGS (DO NOT TOUCH)
+PROTECTED_SLUGS = {"is-this-a-scam"}
+
 # -----------------------------
 # UTILITIES
 # -----------------------------
@@ -40,7 +43,6 @@ def build_canonical(slug):
 
 def load_keywords():
     with open(KEYWORD_FILE, encoding="utf-8") as f:
-        # dedupe + normalize
         return list(dict.fromkeys([k.strip().lower() for k in f if k.strip()]))
 
 # -----------------------------
@@ -52,7 +54,13 @@ with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
 keywords = load_keywords()
-pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
+
+# 🚫 Filter out protected slugs EARLY
+pages = [
+    {"keyword": k, "slug": slugify(k)}
+    for k in keywords
+    if slugify(k) not in PROTECTED_SLUGS
+]
 
 # -----------------------------
 # GENERATE PAGES
@@ -62,6 +70,11 @@ generated = []
 for page in pages:
     slug = page["slug"]
     keyword = page["keyword"]
+
+    # 🔒 Double protection (never touch it)
+    if slug in PROTECTED_SLUGS:
+        print("Skipping protected page:", slug)
+        continue
 
     folder = f"{OUTPUT_DIR}/{slug}"
     path = f"{folder}/index.html"
@@ -75,7 +88,6 @@ for page in pages:
     description = build_description(keyword)
     canonical = build_canonical(slug)
 
-    # Generate AI content with fallback
     try:
         ai_text = generate_content(keyword)
     except Exception as e:
@@ -86,7 +98,7 @@ for page in pages:
 Avoid clicking unknown links or sending money. Always verify through official sources.</p>
 """
 
-    # Internal linking (random but stable count)
+    # Internal linking (exclude protected pages automatically)
     related_candidates = [p for p in pages if p["slug"] != slug]
     random.shuffle(related_candidates)
     related_pages = related_candidates[:RELATED_LINKS_COUNT]
@@ -96,7 +108,6 @@ Avoid clicking unknown links or sending money. Always verify through official so
         for r in related_pages
     ])
 
-    # Fill template
     html = template
     html = html.replace("{{TITLE}}", title)
     html = html.replace("{{DESCRIPTION}}", description)
@@ -105,7 +116,6 @@ Avoid clicking unknown links or sending money. Always verify through official so
     html = html.replace("{{RELATED_LINKS}}", links_html)
     html = html.replace("{{CANONICAL_URL}}", canonical)
 
-    # Write page
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
@@ -113,7 +123,7 @@ Avoid clicking unknown links or sending money. Always verify through official so
     print("Generated:", slug)
 
 # -----------------------------
-# ALL-PAGES LIST (noindex to avoid thin page issues)
+# ALL-PAGES LIST
 # -----------------------------
 all_links = "".join([
     f'<div><a href="/scam-check-now/{p["slug"]}/">{p["keyword"].title()}</a></div>\n'
@@ -140,7 +150,7 @@ with open(ALL_PAGES_FILE, "w", encoding="utf-8") as f:
 print("Updated all-pages.html")
 
 # -----------------------------
-# SITEMAP (clean + consistent URLs)
+# SITEMAP (protected pages excluded)
 # -----------------------------
 today = datetime.utcnow().strftime("%Y-%m-%d")
 
