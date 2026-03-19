@@ -15,7 +15,6 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{CANONICAL_URL}}">
 
-<!-- basic schema (SEO boost) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -27,32 +26,31 @@
 </script>
 
 <style>
-/* ===== BASE ===== */
 body { font-family:'Inter',system-ui,-apple-system,Arial,sans-serif; margin:0; background:#f0f3f8; color:#111; line-height:1.7; }
 a{text-decoration:none;}
-h1,h2,h3,h4,h5,h6{margin:0;}
+h1,h2,h3{margin:0;}
 button{outline:none;}
 
-/* ===== MODAL OVERLAY ===== */
 .modal-overlay {
     position: fixed; top:0; left:0; width:100%; height:100%;
     background: rgba(0,0,0,0.4); display:none; z-index:998;
 }
 
-/* ===== BUTTONS ===== */
-.app-top, .upgrade-top, .check, .plan, .resultAction button {
-  border:none; border-radius:12px; cursor:pointer; font-weight:600; transition:all 0.2s ease;
+/* 🔥 Sticky top buttons */
+.app-top, .upgrade-top {
+  position:fixed;
+  top:12px;
+  z-index:1000;
+  border:none; border-radius:12px; cursor:pointer; font-weight:600;
+  padding:12px 18px;
 }
-.app-top, .resultAction button { padding:12px 20px; background:#0066ff; color:#fff; box-shadow:0 4px 15px rgba(0,0,0,0.2); }
-.app-top:hover, .resultAction button:hover{background:#004fd1;}
-.upgrade-top { padding:12px 20px; background:#111; color:#fff; box-shadow:0 4px 15px rgba(0,0,0,0.2); }
-.upgrade-top:hover { background:#222; }
-.check { width:100%; background:#0066ff; color:#fff; padding:16px; font-size:17px; margin-top:12px; }
-.check:hover{background:#004fd1;}
-.plan { width:100%; padding:16px; margin-top:12px; background:#635bff; color:#fff; font-size:16px; }
-.plan:hover { background:#5249d8; }
+.app-top { left:12px; background:#0066ff; color:#fff; }
+.upgrade-top { right:12px; background:#111; color:#fff; }
 
-/* ===== HERO ===== */
+.check { width:100%; background:#0066ff; color:#fff; padding:16px; font-size:17px; margin-top:12px; border-radius:12px; cursor:pointer; }
+
+.plan { width:100%; padding:16px; margin-top:12px; background:#635bff; color:#fff; border-radius:12px; cursor:pointer; }
+
 .hero {
   background: linear-gradient(135deg,#0066ff,#3c8cff);
   color:#fff;
@@ -61,43 +59,36 @@ button{outline:none;}
   border-bottom-left-radius:60px;
   border-bottom-right-radius:60px;
 }
-.hero h1 { font-size:48px; }
-.hero p { font-size:21px; margin-top:18px; opacity:0.95; max-width:720px; margin:auto; }
+.hero h1 { font-size:42px; }
+.hero p { font-size:20px; margin-top:18px; max-width:700px; margin:auto; }
 
-/* ===== CONTAINER ===== */
-.container { max-width:780px; margin:auto; margin-top:-80px; background:#fff; padding:45px; border-radius:28px; box-shadow:0 25px 50px rgba(0,0,0,0.15); }
-textarea,input { width:100%; padding:16px; font-size:16px; border-radius:14px; border:1px solid #ccc; outline:none; }
-textarea{height:190px;margin-bottom:16px;resize:none;} input{margin-top:16px;}
+.container { max-width:780px; margin:auto; margin-top:-80px; background:#fff; padding:40px; border-radius:28px; box-shadow:0 25px 50px rgba(0,0,0,0.15); }
 
-/* ===== RESULT ===== */
-#result { margin-top:28px; font-size:17px; background:#f5f7ff; padding:28px; border-radius:14px; }
+textarea,input { width:100%; padding:16px; font-size:16px; border-radius:14px; border:1px solid #ccc; }
+textarea{height:180px;margin-bottom:16px;}
+
+.note{font-size:14px;color:#666;margin-top:10px;text-align:center;}
+
+#result { margin-top:24px; font-size:17px; background:#f5f7ff; padding:24px; border-radius:14px; }
+
 .resultAction { display:none; margin-top:20px; text-align:center; }
 
-/* ===== CONTENT FIX ===== */
-.content-block h2 { margin-top:24px; }
-.content-block ul { padding-left:20px; }
-.content-block li { margin-bottom:8px; }
-
-/* ===== UPGRADE MODAL ===== */
 .upgrade {
   position: fixed;
   top:50%; left:50%; transform:translate(-50%,-50%);
   width:90%; max-width:420px;
   display:none;
-  padding:35px;
+  padding:30px;
   background:#fff;
-  border-radius:24px;
+  border-radius:20px;
   text-align:center;
   z-index:999;
 }
 
-/* ===== SECTIONS ===== */
 .section { max-width:780px; margin:auto; margin-top:80px; padding:0 20px; }
-.section h2{font-size:28px;margin-bottom:16px;}
-.section p{margin-bottom:20px;font-size:17px; line-height:1.8;}
-.scanBlock { max-width:780px; margin:60px auto; background:#fff; padding:45px; border-radius:28px; box-shadow:0 20px 50px rgba(0,0,0,0.15); text-align:center; }
 
-/* ===== FOOTER ===== */
+.scanBlock { max-width:780px; margin:60px auto; background:#fff; padding:40px; border-radius:28px; text-align:center; }
+
 .footer { text-align:center; margin-top:100px; padding:50px; color:#666; font-size:15px; }
 .footer a { color:#666; text-decoration:underline; }
 </style>
@@ -112,29 +103,45 @@ textarea{height:190px;margin-bottom:16px;resize:none;} input{margin-top:16px;}
 
 <header class="hero">
 <h1>Is {{KEYWORD}} a Scam?</h1>
-<p>AI scam checker — analyze suspicious messages, emails, websites, job offers, and links instantly.</p>
+<p>Instantly check messages, emails, or links and detect scams before you click or send money.</p>
 </header>
 
 <main>
+
 <div class="container">
-<textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here..."></textarea>
+
+<textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
+
 <input id="email" placeholder="Enter your email (used to verify subscription)">
-<div class="note">Includes 3 free scam checks • upgrade anytime for unlimited scans</div>
+
+<div class="note">3 free scam checks • upgrade for unlimited protection</div>
+
 <button class="check" onclick="check()">Check Scam Risk</button>
+
+<div class="note">
+Scams are increasing daily — check before you click or send money
+</div>
+
 <div id="result"></div>
 
 <div id="resultAction" class="resultAction">
-<p style="margin-bottom:12px;font-weight:700;">Scan suspicious messages instantly on your phone</p>
-<a href="https://apps.apple.com/app/id6759490910" target="_blank"><button>📱 Get the Scam Check App</button></a>
-</div>
+<p style="margin-bottom:12px;font-weight:700;">
+This message shows real scam signals — protect yourself by scanning future messages instantly on your phone
+</p>
+<a href="https://apps.apple.com/app/id6759490910" target="_blank">
+<button>📱 Get the Scam Check App</button>
+</a>
 </div>
 
-<section class="section content-block">
+<div class="note">
+Used to detect phishing, fraud, and suspicious messages in real time
+</div>
+
+</div>
+
+<section class="section">
 <h2>About {{KEYWORD}}</h2>
-
-<div>
-{{AI_CONTENT}}
-</div>
+<div>{{AI_CONTENT}}</div>
 
 <h3>Related Scam Checks</h3>
 <ul>{{RELATED_LINKS}}</ul>
@@ -142,9 +149,10 @@ textarea{height:190px;margin-bottom:16px;resize:none;} input{margin-top:16px;}
 
 <section class="scanBlock">
 <h2>Still unsure if this is a scam?</h2>
-<p>Paste the suspicious message, email, or link into the AI scam checker above.</p>
-<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">Scan a Message Now</button>
+<p>Paste your message above and get an instant risk analysis.</p>
+<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">Scan Now</button>
 </section>
+
 </main>
 
 <footer class="footer">
@@ -159,6 +167,20 @@ Scam Check Now © 2026 • AI-powered scam detection
 </div>
 </footer>
 
+<!-- UPGRADE MODAL -->
+<div id="upgrade" class="upgrade">
+<h2>Unlock Unlimited Scam Checks</h2>
+<p style="margin-top:10px;">Protect yourself from scams in real-time</p>
+
+<a href="https://apps.apple.com/app/id6759490910" target="_blank">
+<button class="plan">Upgrade in App</button>
+</a>
+
+<p style="margin-top:10px;font-size:13px;color:#666;">
+Secure payment handled in the app
+</p>
+</div>
+
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
@@ -166,6 +188,7 @@ function showUpgrade() {
     document.getElementById("overlay").style.display="block";
     document.getElementById("upgrade").style.display="block";
 }
+
 document.getElementById("overlay").addEventListener("click",()=>{
     document.getElementById("upgrade").style.display="none";
     document.getElementById("overlay").style.display="none";
@@ -193,7 +216,7 @@ async function check() {
         const data=await response.json();
 
         if(data.limit){
-            result.innerText="Free checks used. Upgrade for unlimited scam detection.";
+            result.innerText="You've reached your free limit. Scams are increasing daily — unlock unlimited protection now.";
             showUpgrade();
             return;
         }
