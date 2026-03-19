@@ -33,21 +33,27 @@ jobs:
         run: |
           python scripts/build_seo.py
 
-      - name: Build ROOT sitemap (single sitemap only)
+      - name: Build ROOT sitemap (skip protected pages)
         run: |
           TODAY=$(date +%F)
 
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
           echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
 
-          # Root pages
+          # Root pages (manually controlled)
           echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
 
-          # SEO generated pages (folder-based, only valid pages)
+          # SEO generated pages (skip protected slug)
           for dir in scam-check-now/*/; do
             [ -f "${dir}index.html" ] || continue
             slug=$(basename "$dir")
+
+            # Skip ads / protected page
+            if [ "$slug" = "is-this-a-scam" ]; then
+              continue
+            fi
+
             echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           done
 
@@ -59,4 +65,4 @@ jobs:
           git config --global user.email "bot@users.noreply.github.com"
           git add .
           git diff --cached --quiet || git commit -m "Auto SEO page generation"
-          git push 
+          git push
