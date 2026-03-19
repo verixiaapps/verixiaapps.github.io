@@ -135,7 +135,7 @@ display:inline-block;
 
 <textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
 
-<input id="email" placeholder="Enter your email to unlock full protection">
+<input id="email" placeholder="Enter your email to unlock unlimited protection">
 
 <div class="note">3 free checks • unlimited protection available</div>
 
@@ -179,6 +179,9 @@ Scam Check Now © 2026
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
+/* restore email if exists */
+document.getElementById("email").value = localStorage.getItem("email") || "";
+
 function scrollToUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.scrollIntoView({behavior:"smooth", block:"center"});
@@ -188,7 +191,6 @@ function showUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.style.display = "block";
 
-/* smoother + more reliable scroll */
 setTimeout(() => {
 scrollToUpgrade();
 }, 50);
@@ -252,9 +254,13 @@ result.innerHTML = formatResult(data.result);
 
 const textResult = data.result.toLowerCase();
 
-/* 🔥 TRIGGER PAYWALL */
 if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
+}
+
+/* store email */
+if(email){
+localStorage.setItem("email", email);
 }
 
 }catch(e){
@@ -264,12 +270,21 @@ result.innerText = "Error analyzing message. Please try again.";
 
 async function checkout(priceId){
 
-const email=document.getElementById("email").value.trim().toLowerCase();
+const emailInput = document.getElementById("email");
+const email = emailInput.value.trim().toLowerCase();
 
 if(!email){
-alert("Enter your email to activate your protection.");
+emailInput.focus();
+emailInput.style.border = "2px solid #ef4444";
+
+setTimeout(()=>{
+emailInput.style.border = "1px solid #ccc";
+},2000);
+
 return;
 }
+
+localStorage.setItem("email", email);
 
 const pageUrl=window.location.origin+window.location.pathname;
 
