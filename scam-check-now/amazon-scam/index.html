@@ -20,7 +20,7 @@ body { font-family:system-ui,-apple-system,Arial; margin:0; background:#f0f3f8; 
   border-radius:12px;
   font-weight:600;
 }
-.app-top { left:12px; background:#2563eb; color:#fff; }
+.app-top { left:12px; background:#2563eb; color:#fff; opacity:.9; }
 .upgrade-top { right:12px; background:#111; color:#fff; }
 
 .hero {
@@ -90,8 +90,8 @@ display:inline-block;
   margin-top:20px;
   background:#111;
   color:#fff;
-  padding:22px;
-  border-radius:14px;
+  padding:24px;
+  border-radius:16px;
   text-align:center;
 }
 
@@ -145,8 +145,8 @@ display:inline-block;
 
 <!-- PAYWALL -->
 <div id="upgradeBox" class="upgrade">
-<h2>⚠️ Stay Protected Before You Take Action</h2>
-<p>This message shows real scam signals. One mistake can cost thousands.</p>
+<h2>⚠️ This Message Shows Real Scam Signals</h2>
+<p>Scammers rely on urgency and confusion. Check again before you click, reply, or send money.</p>
 
 <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Protect Me — Weekly</button>
 <button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Best Value — Monthly ⭐</button>
@@ -163,17 +163,17 @@ Secure payments powered by Stripe • Cancel anytime
 <h2>About amazon scam</h2>
 <div>
 <h2>Is Amazon Scam a Scam?</h2>
-<p>As online shopping continues to grow in popularity, scams pretending to be associated with reputable brands, such as Amazon, have also surged. These scams typically trick unsuspecting consumers into providing sensitive information or making payments for items that do not exist. Understanding what these scams look like, recognizing common warning signs, and knowing how to react if you encounter one can keep you safe while shopping online.
+<p>Scams that involve the online retail giant can take many forms, but they typically exploit the trust that consumers have in the platform. Several types of fraudulent activities can mislead buyers, and understanding their characteristics is crucial for staying safe while shopping online.
 
-One of the most prevalent types of this scam involves fraudulent emails or text messages claiming to be from Amazon. These messages often claim that there is an issue with an order or that a payment cannot be processed. To resolve the problem, victims are asked to click on a link that leads to a fake website mimicking Amazon's official site. Here, the scammer tries to extract personal details, like credit card numbers or account logins. Some scams even involve phone calls from individuals impersonating Amazon customer service representatives, urging victims to provide sensitive information to resolve an urgent issue.
+One common variation of this type of fraud entails impersonating the shopping platform itself through phishing attacks. In this scenario, individuals may receive unsolicited emails or text messages claiming to be from the platform about account issues or promotions. These messages often contain links that direct recipients to fake websites designed to look like the official site. Once users unwittingly enter personal information—such as login credentials, payment details, or social security numbers—the scammers can use this data to commit identity theft or make fraudulent purchases. 
 
-Warning signs of these scams are relatively straightforward. First, be skeptical of any unsolicited communication that asks you to take immediate action, especially if it's about your account. Legitimate companies typically do not request personal or financial information through email or unsolicited phone calls. Look out for spelling mistakes or poor grammar in messages; these are often red flags indicating a scam. Additionally, if the sender’s email address does not closely resemble a legitimate Amazon domain (such as amazon.com), or if the phone number does not match Amazon’s official customer service lines, chances are you are facing a scam.
+Another form involves fake listings for products. Scammers might create listings for high-demand items at unrealistically low prices to draw in unsuspecting buyers. After completing the payment, the buyer may receive nothing or a counterfeit product that does not match the description. These fraudulent listings often occur on auction sites or classified ads, and victims frequently discover the issue too late to regain their money.
 
-If you find yourself dealing with such a situation, the first step is to stop any interaction with the scammer immediately. Do not click on links or provide any requested details. To confirm whether the communication you received is genuine, log into your Amazon account directly by typing the URL into your browser—do not use links provided in suspicious messages. Check your order history or account notifications for any alerts that may have triggered the email or message.
+To identify these scams, be vigilant for several warning signs. Suspicious emails often contain generic salutations, grammatical errors, or misspellings. If an email pressures you into acting quickly, it's likely not genuine. Additionally, verify the sender's email address or phone number; scammers often use addresses that resemble real ones but contain slight alterations. When it comes to product listings, be cautious of prices that seem too good to be true, and always research the seller’s ratings and reviews. A lack of contact information or a newly created account can also be red flags.
 
-For added security, consider enabling two-factor authentication on your Amazon account to add an additional layer of protection. Regularly monitor your financial statements for unauthorized charges, and report any suspicious activity immediately. If you ever suspect you have encountered a scam or have fallen victim to one, report it to Amazon’s official customer service and local authorities. 
+If you encounter these types of scams, the most important thing to do is not to engage further. Do not provide any personal information or make any payments. Instead, report the phishing email or message directly to the shopping platform and your email provider. Many platforms have a dedicated section for reporting spam and scams, which helps protect other consumers from falling victim.
 
-In conclusion, while shopping online offers convenience, it is essential to remain vigilant. By recognizing the signs of fraud and knowing how to respond, you can protect yourself and your personal information from falling into the hands of scammers. Always exercise caution when it comes to unsolicited communications and prioritize your online safety.</p>
+To enhance your safety while shopping online, regularly update your passwords and enable two-factor authentication when available. Consider using a virtual payment method or a credit card with consumer protections to minimize your financial risk. Always scrutinize the URLs of websites before entering your details—genuine sites will start with 'https://' and include recognizable domain names. By staying informed and careful, you can significantly reduce your risk of falling victim to scams targeting online shoppers.</p>
 
 <h2>Common Warning Signs</h2>
 <ul>
@@ -203,8 +203,19 @@ Scam Check Now © 2026
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
+function scrollToUpgrade(){
+const el = document.getElementById("upgradeBox");
+el.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
 function showUpgrade(){
-document.getElementById("upgradeBox").style.display="block";
+const el = document.getElementById("upgradeBox");
+el.style.display = "block";
+
+/* smoother + more reliable scroll */
+setTimeout(() => {
+scrollToUpgrade();
+}, 50);
 }
 
 function parseSections(text){
@@ -249,7 +260,14 @@ body:JSON.stringify({text, email})
 const data = await res.json();
 
 if(data.limit){
-result.innerText = "You've used your free checks. Unlock unlimited protection.";
+result.innerHTML = `
+<div style="font-weight:700;margin-bottom:8px;">
+⚠️ Scam Risk Detected
+</div>
+<div>
+This message shows patterns commonly used in scams. Most people check multiple messages before taking action.
+</div>
+`;
 showUpgrade();
 return;
 }
@@ -258,7 +276,7 @@ result.innerHTML = formatResult(data.result);
 
 const textResult = data.result.toLowerCase();
 
-/* 🔥 PRINT LOGIC */
+/* 🔥 TRIGGER PAYWALL */
 if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
 }
