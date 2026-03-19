@@ -135,7 +135,7 @@ display:inline-block;
 
 <textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
 
-<input id="email" placeholder="Enter your email to unlock full protection">
+<input id="email" placeholder="Enter your email to unlock unlimited protection">
 
 <div class="note">3 free checks • unlimited protection available</div>
 
@@ -163,17 +163,15 @@ Secure payments powered by Stripe • Cancel anytime
 <h2>About amazon scam</h2>
 <div>
 <h2>Is Amazon Scam a Scam?</h2>
-<p>Scams that involve the online retail giant can take many forms, but they typically exploit the trust that consumers have in the platform. Several types of fraudulent activities can mislead buyers, and understanding their characteristics is crucial for staying safe while shopping online.
+<p>Amazon scam schemes can take a variety of forms, often leaving victims feeling confused and frustrated. These scams typically involve fraudulent communications or offers that make it seem like they are affiliated with Amazon in some way. Scammers may reach out via email, phone calls, texts, or even create fake websites that resemble the official Amazon site, aiming to trick consumers into providing sensitive personal information or making payments for nonexistent products. 
 
-One common variation of this type of fraud entails impersonating the shopping platform itself through phishing attacks. In this scenario, individuals may receive unsolicited emails or text messages claiming to be from the platform about account issues or promotions. These messages often contain links that direct recipients to fake websites designed to look like the official site. Once users unwittingly enter personal information—such as login credentials, payment details, or social security numbers—the scammers can use this data to commit identity theft or make fraudulent purchases. 
+One common type of scam involves emails claiming that a user's Amazon account has been suspended or compromised. These messages often contain alarming language designed to provoke immediate action, urging the recipient to click on a link to "verify" their account. However, the link usually leads to a fake site that captures login credentials. Another prevalent strategy involves fake sellers promoting products at unrealistically low prices on websites like Facebook or Craigslist, only for customers to lose money when the products are never delivered. Lastly, some scams take the form of unsolicited calls claiming to offer support or guarantees that the victim needs to verify their account or provide payment for services that are often unnecessary.
 
-Another form involves fake listings for products. Scammers might create listings for high-demand items at unrealistically low prices to draw in unsuspecting buyers. After completing the payment, the buyer may receive nothing or a counterfeit product that does not match the description. These fraudulent listings often occur on auction sites or classified ads, and victims frequently discover the issue too late to regain their money.
+Several warning signs can help you identify these deceitful schemes. Firstly, look for poor grammar and spelling errors, which are common in scam communications. Legitimate companies like Amazon typically maintain high standards for their correspondence. Secondly, be cautious of pressure tactics. Scammers often create a sense of urgency, implying that immediate action is required to prevent account closure or loss of funds. If an email or call demands personal account information, payment, or something that appears too good to be true, it is likely a scam. Legitimate requests for information typically come through established, secure channels with a clear identification of the requester.
 
-To identify these scams, be vigilant for several warning signs. Suspicious emails often contain generic salutations, grammatical errors, or misspellings. If an email pressures you into acting quickly, it's likely not genuine. Additionally, verify the sender's email address or phone number; scammers often use addresses that resemble real ones but contain slight alterations. When it comes to product listings, be cautious of prices that seem too good to be true, and always research the seller’s ratings and reviews. A lack of contact information or a newly created account can also be red flags.
+If you encounter any communication you suspect to be a scam, it is vital to proceed with caution. First, do not click on any links or download attachments from unsolicited emails. Instead, independently navigate to the official Amazon website by typing the URL directly into your browser. Check for any alerts or notifications on your account. If you receive a suspicious call, hang up and do not provide any information over the phone. You can reach Amazon’s customer service directly through their official contact information to verify if the communication was legitimate.
 
-If you encounter these types of scams, the most important thing to do is not to engage further. Do not provide any personal information or make any payments. Instead, report the phishing email or message directly to the shopping platform and your email provider. Many platforms have a dedicated section for reporting spam and scams, which helps protect other consumers from falling victim.
-
-To enhance your safety while shopping online, regularly update your passwords and enable two-factor authentication when available. Consider using a virtual payment method or a credit card with consumer protections to minimize your financial risk. Always scrutinize the URLs of websites before entering your details—genuine sites will start with 'https://' and include recognizable domain names. By staying informed and careful, you can significantly reduce your risk of falling victim to scams targeting online shoppers.</p>
+Additionally, it is wise to monitor your bank and credit card statements regularly for any unauthorized charges. Should you ever believe you have been a victim of a scam, report it to the Federal Trade Commission (FTC) and your local authorities. Staying informed about the latest scams and understanding how they operate is your best defense. Always remember that if something feels off or too good to be true, it likely is. Protecting your personal information is paramount in the digital age, so approach offers and communications with a healthy dose of skepticism.</p>
 
 <h2>Common Warning Signs</h2>
 <ul>
@@ -203,6 +201,9 @@ Scam Check Now © 2026
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
+/* restore email if exists */
+document.getElementById("email").value = localStorage.getItem("email") || "";
+
 function scrollToUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.scrollIntoView({behavior:"smooth", block:"center"});
@@ -212,7 +213,6 @@ function showUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.style.display = "block";
 
-/* smoother + more reliable scroll */
 setTimeout(() => {
 scrollToUpgrade();
 }, 50);
@@ -276,9 +276,13 @@ result.innerHTML = formatResult(data.result);
 
 const textResult = data.result.toLowerCase();
 
-/* 🔥 TRIGGER PAYWALL */
 if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
+}
+
+/* store email */
+if(email){
+localStorage.setItem("email", email);
 }
 
 }catch(e){
@@ -288,12 +292,21 @@ result.innerText = "Error analyzing message. Please try again.";
 
 async function checkout(priceId){
 
-const email=document.getElementById("email").value.trim().toLowerCase();
+const emailInput = document.getElementById("email");
+const email = emailInput.value.trim().toLowerCase();
 
 if(!email){
-alert("Enter your email to activate your protection.");
+emailInput.focus();
+emailInput.style.border = "2px solid #ef4444";
+
+setTimeout(()=>{
+emailInput.style.border = "1px solid #ccc";
+},2000);
+
 return;
 }
+
+localStorage.setItem("email", email);
 
 const pageUrl=window.location.origin+window.location.pathname;
 
