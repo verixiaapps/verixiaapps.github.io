@@ -35,15 +35,19 @@ jobs:
 
       - name: Build ROOT sitemap (single sitemap only)
         run: |
+          TODAY=$(date +%F)
+
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
           echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
 
-          echo '<url><loc>https://verixiaapps.com/</loc></url>' >> sitemap.xml
-          echo '<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc></url>' >> sitemap.xml
+          # Root pages
+          echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
+          echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
 
-          for page in $(ls scam-check-now/pages/*.html); do
-            slug=$(basename "$page")
-            echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug</loc></url>" >> sitemap.xml
+          # SEO generated pages (folder-based)
+          for dir in scam-check-now/*/; do
+            slug=$(basename "$dir")
+            echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           done
 
           echo '</urlset>' >> sitemap.xml
