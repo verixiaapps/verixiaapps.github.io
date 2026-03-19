@@ -31,7 +31,7 @@ body { font-family:system-ui,-apple-system,Arial; margin:0; background:#f0f3f8; 
 }
 
 .hero h1 { font-size:40px; }
-.hero p { margin-top:16px; font-size:18px; }
+.hero p { margin-top:16px; font-size:18px; opacity:.95; }
 
 .container {
   max-width:720px;
@@ -68,6 +68,7 @@ textarea { height:160px; margin-bottom:12px; }
   background:#f5f7ff;
   padding:20px;
   border-radius:12px;
+  min-height:60px;
 }
 
 .upgrade {
@@ -87,6 +88,7 @@ textarea { height:160px; margin-bottom:12px; }
   padding:14px;
   width:100%;
   border-radius:10px;
+  font-weight:600;
 }
 
 .section {
@@ -111,7 +113,7 @@ textarea { height:160px; margin-bottom:12px; }
 
 <header class="hero">
 <h1>Is {{KEYWORD}} a Scam?</h1>
-<p>Check messages, emails, and links instantly before you click or send money.</p>
+<p>Analyze messages, emails, and links instantly before you click or send money.</p>
 </header>
 
 <div class="container">
@@ -126,12 +128,12 @@ textarea { height:160px; margin-bottom:12px; }
 
 <div id="result"></div>
 
-<!-- 🔥 INLINE PAYWALL -->
+<!-- PAYWALL -->
 <div id="upgradeBox" class="upgrade">
-<h2>Unlock Unlimited Scam Checks</h2>
-<p>Scams are increasing daily. Protect yourself before it's too late.</p>
+<h2>Unlimited Scam Protection</h2>
+<p>Scams are rising fast. Continue scanning messages and stay protected.</p>
 
-<button onclick="startCheckout()">Upgrade Now</button>
+<button onclick="startCheckout()">Unlock Unlimited Checks</button>
 
 <div style="margin-top:8px;font-size:13px;opacity:.7;">
 Secure checkout • Cancel anytime
@@ -162,39 +164,45 @@ const API = "https://awake-integrity-production-faa0.up.railway.app";
 
 function showUpgrade(){
 document.getElementById("upgradeBox").style.display="block";
-window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 }
 
 async function check(){
 
-const text=document.getElementById("text").value.trim();
-const result=document.getElementById("result");
+const text = document.getElementById("text").value.trim();
+const result = document.getElementById("result");
 
 if(!text){
-result.innerText="Paste something to analyze.";
+result.innerText = "Paste a message, email, or link to analyze.";
 return;
 }
 
-result.innerText="Analyzing...";
+result.innerText = "Analyzing...";
 
 try{
-const res=await fetch(API+"/analyze",{
+const res = await fetch(API + "/analyze", {
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({text})
 });
 
-const data=await res.json();
+const data = await res.json();
 
-result.innerText=data.result;
+if(!data || !data.result){
+result.innerText = "Unable to analyze. Please try again.";
+return;
+}
 
-/* 🔥 MONEY MOMENT */
-if(data.limit || data.result.toLowerCase().includes("high")){
+result.innerText = data.result;
+
+/* 🔥 MONETIZATION TRIGGER */
+const textResult = data.result.toLowerCase();
+
+if(data.limit || textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
 }
 
 }catch(e){
-result.innerText="Error analyzing message.";
+result.innerText = "Error analyzing message. Please try again.";
 }
 }
 
