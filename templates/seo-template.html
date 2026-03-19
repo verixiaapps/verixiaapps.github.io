@@ -7,134 +7,135 @@
 <title>{{TITLE}}</title>
 <meta name="description" content="{{DESCRIPTION}}">
 <meta name="robots" content="index, follow">
-
 <link rel="canonical" href="{{CANONICAL_URL}}">
 
-<meta property="og:title" content="{{TITLE}}">
-<meta property="og:description" content="{{DESCRIPTION}}">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{CANONICAL_URL}}">
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "{{TITLE}}",
-  "description": "{{DESCRIPTION}}",
-  "url": "{{CANONICAL_URL}}"
-}
-</script>
-
 <style>
-body { font-family:'Inter',system-ui,-apple-system,Arial,sans-serif; margin:0; background:#f0f3f8; color:#111; line-height:1.7; }
-a{text-decoration:none;}
-h1,h2,h3{margin:0;}
-button{outline:none;}
+body { font-family:system-ui,-apple-system,Arial; margin:0; background:#f0f3f8; color:#111; }
 
-.modal-overlay {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.4); display:none; z-index:998;
-}
-
-/* 🔥 Sticky top buttons */
 .app-top, .upgrade-top {
   position:fixed;
   top:12px;
   z-index:1000;
-  border:none; border-radius:12px; cursor:pointer; font-weight:600;
   padding:12px 18px;
+  border-radius:12px;
+  font-weight:600;
 }
-.app-top { left:12px; background:#0066ff; color:#fff; }
+.app-top { left:12px; background:#2563eb; color:#fff; }
 .upgrade-top { right:12px; background:#111; color:#fff; }
 
-.check { width:100%; background:#0066ff; color:#fff; padding:16px; font-size:17px; margin-top:12px; border-radius:12px; cursor:pointer; }
-
-.plan { width:100%; padding:16px; margin-top:12px; background:#635bff; color:#fff; border-radius:12px; cursor:pointer; }
-
 .hero {
-  background: linear-gradient(135deg,#0066ff,#3c8cff);
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
   color:#fff;
-  padding:140px 20px 100px;
+  padding:130px 20px 90px;
   text-align:center;
-  border-bottom-left-radius:60px;
-  border-bottom-right-radius:60px;
 }
-.hero h1 { font-size:42px; }
-.hero p { font-size:20px; margin-top:18px; max-width:700px; margin:auto; }
 
-.container { max-width:780px; margin:auto; margin-top:-80px; background:#fff; padding:40px; border-radius:28px; box-shadow:0 25px 50px rgba(0,0,0,0.15); }
+.hero h1 { font-size:40px; }
+.hero p { margin-top:16px; font-size:18px; }
 
-textarea,input { width:100%; padding:16px; font-size:16px; border-radius:14px; border:1px solid #ccc; }
-textarea{height:180px;margin-bottom:16px;}
+.container {
+  max-width:720px;
+  margin:-60px auto 0;
+  background:#fff;
+  padding:32px;
+  border-radius:20px;
+}
 
-.note{font-size:14px;color:#666;margin-top:10px;text-align:center;}
+textarea,input {
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
 
-#result { margin-top:24px; font-size:17px; background:#f5f7ff; padding:24px; border-radius:14px; }
+textarea { height:160px; margin-bottom:12px; }
 
-.resultAction { display:none; margin-top:20px; text-align:center; }
+.check {
+  width:100%;
+  background:#2563eb;
+  color:#fff;
+  padding:16px;
+  border-radius:12px;
+  margin-top:10px;
+  font-weight:600;
+}
+
+.note { text-align:center; font-size:14px; color:#666; margin-top:10px; }
+
+#result {
+  margin-top:20px;
+  background:#f5f7ff;
+  padding:20px;
+  border-radius:12px;
+}
 
 .upgrade {
-  position: fixed;
-  top:50%; left:50%; transform:translate(-50%,-50%);
-  width:90%; max-width:420px;
   display:none;
-  padding:30px;
-  background:#fff;
-  border-radius:20px;
+  margin-top:20px;
+  background:#111;
+  color:#fff;
+  padding:22px;
+  border-radius:14px;
   text-align:center;
-  z-index:999;
 }
 
-.section { max-width:780px; margin:auto; margin-top:80px; padding:0 20px; }
+.upgrade button {
+  background:#3b82f6;
+  color:#fff;
+  margin-top:12px;
+  padding:14px;
+  width:100%;
+  border-radius:10px;
+}
 
-.scanBlock { max-width:780px; margin:60px auto; background:#fff; padding:40px; border-radius:28px; text-align:center; }
+.section {
+  max-width:720px;
+  margin:60px auto;
+  padding:0 20px;
+}
 
-.footer { text-align:center; margin-top:100px; padding:50px; color:#666; font-size:15px; }
-.footer a { color:#666; text-decoration:underline; }
+.footer {
+  text-align:center;
+  padding:40px;
+  color:#666;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="modal-overlay" id="overlay"></div>
-
-<a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
+<a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">Get App</a>
 <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 
 <header class="hero">
 <h1>Is {{KEYWORD}} a Scam?</h1>
-<p>Instantly check messages, emails, or links and detect scams before you click or send money.</p>
+<p>Check messages, emails, and links instantly before you click or send money.</p>
 </header>
-
-<main>
 
 <div class="container">
 
 <textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
 
-<input id="email" placeholder="Enter your email (used to verify subscription)">
+<input id="email" placeholder="Enter your email">
 
-<div class="note">3 free scam checks • upgrade for unlimited protection</div>
+<div class="note">3 free checks • unlimited protection available</div>
 
 <button class="check" onclick="check()">Check Scam Risk</button>
 
-<div class="note">
-Scams are increasing daily — check before you click or send money
-</div>
-
 <div id="result"></div>
 
-<div id="resultAction" class="resultAction">
-<p style="margin-bottom:12px;font-weight:700;">
-This message shows real scam signals — protect yourself by scanning future messages instantly on your phone
-</p>
-<a href="https://apps.apple.com/app/id6759490910" target="_blank">
-<button>📱 Get the Scam Check App</button>
-</a>
-</div>
+<!-- 🔥 INLINE PAYWALL -->
+<div id="upgradeBox" class="upgrade">
+<h2>Unlock Unlimited Scam Checks</h2>
+<p>Scams are increasing daily. Protect yourself before it's too late.</p>
 
-<div class="note">
-Used to detect phishing, fraud, and suspicious messages in real time
+<button onclick="startCheckout()">Upgrade Now</button>
+
+<div style="margin-top:8px;font-size:13px;opacity:.7;">
+Secure checkout • Cancel anytime
+</div>
 </div>
 
 </div>
@@ -147,86 +148,58 @@ Used to detect phishing, fraud, and suspicious messages in real time
 <ul>{{RELATED_LINKS}}</ul>
 </section>
 
-<section class="scanBlock">
-<h2>Still unsure if this is a scam?</h2>
-<p>Paste your message above and get an instant risk analysis.</p>
-<button class="check" onclick="window.scrollTo({top:0,behavior:'smooth'})">Scan Now</button>
-</section>
-
-</main>
-
 <footer class="footer">
-<div>
 By using this website you agree to our 
 <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank">
-Terms, Privacy Policy, and User Agreement
+Terms and Privacy Policy
 </a>.
-</div>
-<div style="margin-top:12px">
-Scam Check Now © 2026 • AI-powered scam detection
-</div>
+<br><br>
+Scam Check Now © 2026
 </footer>
-
-<!-- UPGRADE MODAL -->
-<div id="upgrade" class="upgrade">
-<h2>Unlock Unlimited Scam Checks</h2>
-<p style="margin-top:10px;">Protect yourself from scams in real-time</p>
-
-<a href="https://apps.apple.com/app/id6759490910" target="_blank">
-<button class="plan">Upgrade in App</button>
-</a>
-
-<p style="margin-top:10px;font-size:13px;color:#666;">
-Secure payment handled in the app
-</p>
-</div>
 
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
-function showUpgrade() {
-    document.getElementById("overlay").style.display="block";
-    document.getElementById("upgrade").style.display="block";
+function showUpgrade(){
+document.getElementById("upgradeBox").style.display="block";
+window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 }
 
-document.getElementById("overlay").addEventListener("click",()=>{
-    document.getElementById("upgrade").style.display="none";
-    document.getElementById("overlay").style.display="none";
+async function check(){
+
+const text=document.getElementById("text").value.trim();
+const result=document.getElementById("result");
+
+if(!text){
+result.innerText="Paste something to analyze.";
+return;
+}
+
+result.innerText="Analyzing...";
+
+try{
+const res=await fetch(API+"/analyze",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({text})
 });
 
-async function check() {
-    const text=document.getElementById("text").value.trim();
-    const email=document.getElementById("email").value.trim().toLowerCase();
-    const result=document.getElementById("result");
+const data=await res.json();
 
-    if(!text){
-        result.innerText="Paste a message, email, or link to analyze.";
-        return;
-    }
+result.innerText=data.result;
 
-    result.innerText="Analyzing...";
+/* 🔥 MONEY MOMENT */
+if(data.limit || data.result.toLowerCase().includes("high")){
+showUpgrade();
+}
 
-    try{
-        const response=await fetch(API+"/analyze",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({text,email})
-        });
+}catch(e){
+result.innerText="Error analyzing message.";
+}
+}
 
-        const data=await response.json();
-
-        if(data.limit){
-            result.innerText="You've reached your free limit. Scams are increasing daily — unlock unlimited protection now.";
-            showUpgrade();
-            return;
-        }
-
-        result.innerText=data.result;
-        document.getElementById("resultAction").style.display="block";
-
-    }catch(e){
-        result.innerText="Error analyzing message. Please try again.";
-    }
+function startCheckout(){
+window.location.href="https://buy.stripe.com/YOUR_LINK";
 }
 </script>
 
