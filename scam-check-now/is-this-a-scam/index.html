@@ -1,3 +1,6 @@
+Template
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,22 +24,23 @@ window.addEventListener("load", function(){
 
   const params = new URLSearchParams(window.location.search);
 
-  if(
-    params.get("conversion") === "1" &&
-    !sessionStorage.getItem("ads_conversion")
-  ){
-    gtag('event','conversion',{
-      'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC',
-      'value':10.0,
-      'currency':'USD'
-    });
-
-    sessionStorage.setItem("ads_conversion","1");
+  if(params.get("conversion") === "1"){
+    if(!sessionStorage.getItem("ads_conversion")){
+      setTimeout(function(){
+        gtag('event','conversion',{
+          'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC',
+          'value':10.0,
+          'currency':'USD'
+        });
+        sessionStorage.setItem("ads_conversion","1");
+      }, 300);
+    }
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   if(params.get("subscribed") === "true"){
-    document.getElementById("postPurchase").style.display = "block";
+    const el = document.getElementById("postPurchase");
+    if(el) el.style.display = "block";
   }
 
 });
@@ -452,4 +456,4 @@ alert("Checkout failed. Please try again.")
 </script>
 
 </body>
-</html> 
+</html>
