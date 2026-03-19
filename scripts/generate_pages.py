@@ -17,7 +17,8 @@ def slugify(text):
 
 def load_keywords():
     with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
-        return [k.strip() for k in f if k.strip()]
+        # remove duplicates + normalize
+        return list(dict.fromkeys([k.strip().lower() for k in f if k.strip()]))
 
 
 def load_template():
@@ -29,30 +30,45 @@ def build_title(keyword):
     kw = keyword.lower().strip()
     if kw.endswith(" scam"):
         kw = kw.replace(" scam", "")
-    return f"Is {kw.title()} a Scam? | Scam Check Now"
+    return f"Is {kw.title()} a Scam? (Real Check & Warning Signs)"
 
 
 def build_description(keyword):
-    return f"Is {keyword.title()} a scam? Use this free AI scam checker to analyze suspicious messages, emails, links, or job offers related to {keyword}."
+    return (
+        f"Is {keyword.title()} a scam or legit? Check real risk signals, warning signs, "
+        f"and what to do next. Free AI scam checker for {keyword} messages, emails, or links."
+    )
+
+
+def build_canonical(slug):
+    return f"{SITE}/scam-check-now/{slug}/"
 
 
 def build_page(keyword, template, all_pages):
     slug = slugify(keyword)
 
-    # Generate AI content with fallback
+    # AI content with stronger fallback
     try:
         content = generate_content(keyword)
     except:
-        content = f"{keyword.title()} scams often involve messages requesting payment, personal information, or urgent action. If you receive a suspicious message related to {keyword}, verify the sender and avoid clicking unknown links or sending money."
+        content = (
+            f"{keyword.title()} scams are commonly used to trick people into sending money or sharing sensitive information. "
+            f"If you receive a message related to {keyword}, avoid clicking unknown links, do not send payments, "
+            f"and verify the source through official channels. Scammers often create urgency or impersonate trusted brands."
+        )
 
     title = build_title(keyword)
     description = build_description(keyword)
+    canonical = build_canonical(slug)
 
-    # Select related links
+    # Better related linking (SEO boost)
     related_candidates = [p for p in all_pages if p["slug"] != slug]
-    related_pages = random.sample(related_candidates, min(5, len(related_candidates)))
+    random.shuffle(related_candidates)
+    related_pages = related_candidates[:5]
+
     related_links = "\n".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">{r["keyword"].title()}</a></li>' for r in related_pages
+        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {r["keyword"].title()} a Scam?</a></li>'
+        for r in related_pages
     )
 
     html = template
@@ -61,6 +77,7 @@ def build_page(keyword, template, all_pages):
     html = html.replace("{{KEYWORD}}", keyword)
     html = html.replace("{{AI_CONTENT}}", content)
     html = html.replace("{{RELATED_LINKS}}", related_links)
+    html = html.replace("{{CANONICAL_URL}}", canonical)
 
     return slug, html
 
@@ -69,6 +86,7 @@ def save_page(slug, html):
     folder = os.path.join(OUTPUT_DIR, slug)
     os.makedirs(folder, exist_ok=True)
     file_path = os.path.join(folder, "index.html")
+
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(html)
 
@@ -79,7 +97,7 @@ def main():
     keywords = load_keywords()
     template = load_template()
 
-    # Prepare all pages for related links
+    # prepare for internal linking
     all_pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
 
     for keyword in keywords:
