@@ -1,12 +1,31 @@
 import os
+import itertools
 
 SEED_FILE = "data/seed_keywords.txt"
 PATTERN_FILE = "data/patterns.txt"
 OUTPUT_FILE = "data/keywords.txt"
 
+# optional modifiers to expand search intent
+PREFIXES = [
+    "",
+    "is ",
+    "how to ",
+    "can you ",
+    "should i ",
+]
+
+SUFFIXES = [
+    "",
+    " scam",
+    " legit",
+    " safe",
+    " real",
+]
+
+MAX_KEYWORDS = 5000  # safety cap
+
 
 def load_lines(path):
-    """Load non-empty lines from a file, lowercase and stripped."""
     if not os.path.exists(path):
         print(f"File not found: {path}")
         return []
@@ -14,8 +33,23 @@ def load_lines(path):
         return [line.strip().lower() for line in f if line.strip()]
 
 
+def clean_phrase(text):
+    text = " ".join(text.split())  # remove extra spaces
+    return text.strip()
+
+
+def is_valid(phrase):
+    # basic filters to avoid junk
+    if len(phrase) < 5:
+        return False
+    if phrase.count("{") > 0:
+        return False
+    if "  " in phrase:
+        return False
+    return True
+
+
 def main():
-    # Ensure data folder exists
     os.makedirs("data", exist_ok=True)
 
     seeds = load_lines(SEED_FILE)
@@ -31,12 +65,30 @@ def main():
 
     keywords = set()
 
+    # base pattern expansion
     for seed in seeds:
         for pattern in patterns:
-            phrase = pattern.replace("{keyword}", seed).strip().lower()
-            keywords.add(phrase)
+            phrase = pattern.replace("{keyword}", seed)
+            phrase = clean_phrase(phrase)
+            if is_valid(phrase):
+                keywords.add(phrase)
 
-    keywords = sorted(keywords)
+    # intent expansion (adds more real search variations)
+    expanded = set()
+
+    for kw in keywords:
+        for pre, suf in itertools.product(PREFIXES, SUFFIXES):
+            phrase = clean_phrase(f"{pre}{kw}{suf}")
+            if is_valid(phrase):
+                expanded.add(phrase)
+
+    keywords.update(expanded)
+
+    # dedupe + sort
+    keywords = sorted(list(keywords))
+
+    # cap to avoid explosion
+    keywords = keywords[:MAX_KEYWORDS]
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         for kw in keywords:
