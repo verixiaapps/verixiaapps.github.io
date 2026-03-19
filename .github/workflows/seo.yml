@@ -41,20 +41,22 @@ jobs:
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
           echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
 
-          # Core pages (manually controlled)
+          # Core pages (manual control)
           echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
 
-          # SEO pages (ONLY valid generated folders)
-          for dir in scam-check-now/*/; do
-            if [ -f "${dir}index.html" ]; then
-              slug=$(basename "$dir")
+          # SEO pages (stable + clean loop)
+          for dir in $(ls -d scam-check-now/*/ 2>/dev/null | sort); do
+            [ -f "${dir}index.html" ] || continue
 
-              # Skip protected page (already included above)
-              if [ "$slug" != "is-this-a-scam" ]; then
-                echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
-              fi
+            slug=$(basename "$dir")
+
+            # Skip protected page (already included above)
+            if [ "$slug" = "is-this-a-scam" ]; then
+              continue
             fi
+
+            echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           done
 
           echo '</urlset>' >> sitemap.xml
