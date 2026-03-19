@@ -32,8 +32,11 @@ window.addEventListener("load", function(){
     });
 
     sessionStorage.setItem("ads_conversion","1");
-
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if(params.get("subscribed") === "true"){
+    document.getElementById("postPurchase").style.display = "block";
   }
 
 });
@@ -45,60 +48,70 @@ body{
 font-family:system-ui,-apple-system,Arial;
 background:linear-gradient(180deg,#eef2ff,#f8fafc);
 margin:0;
+padding-top:100px;
 color:#1f2937;
 line-height:1.6;
 }
 
-.app-top{
+.top-bar{
 position:fixed;
-top:18px;
-left:18px;
+top:0;
+left:0;
+width:100%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 12px;
+z-index:1000;
+pointer-events:none;
+}
+
+.app-top, .upgrade-top{
+pointer-events:auto;
+padding:8px 12px;
+font-size:14px;
+border-radius:10px;
+box-shadow:0 6px 18px rgba(0,0,0,.12);
+}
+
+.app-top{
 background:#3b82f6;
 color:white;
-padding:10px 16px;
-border-radius:10px;
-font-weight:600;
-z-index:999;
-box-shadow:0 6px 18px rgba(0,0,0,.12);
 text-decoration:none;
 }
 
 .upgrade-top{
-position:fixed;
-top:18px;
-right:18px;
 background:#1f2937;
 color:white;
-padding:10px 16px;
-border-radius:10px;
-font-weight:600;
-z-index:999;
-box-shadow:0 6px 18px rgba(0,0,0,.12);
 border:none;
+cursor:pointer;
 }
 
 .hero{
 text-align:center;
-padding:90px 20px 60px;
+padding:20px 20px 30px;
 }
 
 .hero h1{
 margin:0;
-font-size:42px;
+font-size:34px;
 }
 
 .hero p{
 margin-top:10px;
-font-size:18px;
-opacity:.85;
+font-size:17px;
+opacity:.9;
+max-width:600px;
+margin-left:auto;
+margin-right:auto;
 }
 
 .container{
 max-width:760px;
 margin:auto;
-margin-top:-40px;
 background:white;
-padding:30px;
+padding:24px;
+padding-bottom:50px;
 border-radius:18px;
 box-shadow:0 20px 50px rgba(0,0,0,.08);
 }
@@ -119,14 +132,15 @@ border:none;
 border-radius:12px;
 cursor:pointer;
 font-size:16px;
-padding:15px;
+padding:16px;
+min-height:50px;
 }
 
 .check{
 width:100%;
 background:#3b82f6;
 color:white;
-margin-top:10px;
+margin-top:12px;
 font-weight:600;
 box-shadow:0 8px 20px rgba(59,130,246,.25);
 }
@@ -136,6 +150,15 @@ margin-top:12px;
 font-size:14px;
 color:#6b7280;
 text-align:center;
+}
+
+.success{
+margin-top:12px;
+font-size:14px;
+color:#166534;
+text-align:center;
+font-weight:600;
+display:none;
 }
 
 #result{
@@ -152,7 +175,7 @@ border:1px solid #e5e7eb;
 }
 
 .risk{
-font-size:28px;
+font-size:26px;
 font-weight:800;
 margin-bottom:14px;
 padding:10px 14px;
@@ -205,7 +228,7 @@ border:1px solid #e5e7eb;
 
 .plan{
 width:100%;
-margin-top:12px;
+margin-top:14px;
 background:#3b82f6;
 color:white;
 font-weight:600;
@@ -226,25 +249,38 @@ font-size:14px;
 
 <body>
 
-<a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
-<button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+<div class="top-bar">
+  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
+  <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+</div>
 
 <div class="hero">
-<h1>Is This a Scam?</h1>
-<p>Check suspicious messages instantly and get a clear answer.</p>
+<h1>Think This Might Be a Scam?</h1>
+<p>Paste the message and get an instant risk analysis before you click, reply, or send money.</p>
+<div class="note">Used to check thousands of suspicious messages every day</div>
 </div>
 
 <div class="container">
 
 <textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here..."></textarea>
 
-<input id="email" placeholder="Enter your email (used to verify access)">
+<div class="note">Examples: job offer, PayPal message, crypto link, email, text message</div>
 
 <div class="note">
-3 free checks included • continue anytime with unlimited access
+No signup required • 3 free checks included
 </div>
 
-<button class="check" onclick="check()">Analyze Scam Risk</button>
+<input id="email" placeholder="Enter your payment email to unlock access">
+
+<div class="note">
+Use the same email you entered during checkout
+</div>
+
+<div id="postPurchase" class="success">
+✅ Payment successful — your unlimited access is ready
+</div>
+
+<button class="check" onclick="check()">Check Scam Risk</button>
 
 <div class="note">
 Get a clear risk level, key warning signs, and what to do next
@@ -261,12 +297,23 @@ Get a clear risk level, key warning signs, and what to do next
 
 <div class="upgrade" id="upgrade">
 
-<h3>You’ve reached your free limit</h3>
-<div class="note">Stay protected with unlimited scam checks</div>
+<h3>⚠️ This Message Shows Real Scam Risk</h3>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+<div class="note">
+Scams like this are designed to trick you quickly. Check again before you click, reply, or send money.
+</div>
+
+<div style="margin-top:8px;font-size:13px;color:#6b7280;">
+Most people check multiple messages before taking action
+</div>
+
+<div style="margin-bottom:10px;font-size:14px;color:#6b7280;">
+Stay protected with unlimited instant scam checks • Cancel anytime
+</div>
+
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Stay Protected – Weekly</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Stay Protected – Monthly</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Stay Protected – Yearly</button>
 
 <div style="margin-top:14px;font-size:13px;color:#6b7280;">
 Secure payments powered by Stripe
@@ -284,6 +331,7 @@ By using this website you agree to our
 <div style="margin-top:10px">
 Scam Check Now © 2026 • AI-powered scam detection • Not legal or financial advice
 </div>
+<div style="margin-top:8px">Secure payments powered by Stripe • No stored messages</div>
 </footer>
 
 <script>
@@ -291,8 +339,9 @@ Scam Check Now © 2026 • AI-powered scam detection • Not legal or financial 
 const API="https://awake-integrity-production-faa0.up.railway.app"
 
 function showUpgrade(){
-document.getElementById("upgrade").style.display="block"
-document.getElementById("upgrade").scrollIntoView({behavior:"smooth"})
+const el=document.getElementById("upgrade");
+el.style.display="block";
+setTimeout(()=>el.scrollIntoView({behavior:"smooth"}),100);
 }
 
 function parseSections(text){
@@ -319,8 +368,8 @@ return `
 </div>
 
 <div class="section">
-<div class="section-title">What to Do</div>
-<div>Do not engage, avoid clicking links, and verify through official sources.</div>
+<div class="section-title">Recommended Action</div>
+<div>Do not reply, do not click links, and verify directly through official sources.</div>
 </div>
 
 </div>
@@ -335,6 +384,7 @@ const result=document.getElementById("result")
 
 if(!text){
 result.innerText="Paste a message, email, or link to analyze."
+result.style.display="block"
 return
 }
 
@@ -352,7 +402,7 @@ body:JSON.stringify({text,email})
 const data=await response.json()
 
 if(data.limit){
-result.innerHTML="You’ve reached your free limit. Continue with unlimited scam checks."
+result.innerHTML="Stay protected with unlimited scam checks."
 document.getElementById("resultAction").style.display="block"
 showUpgrade()
 return
@@ -402,4 +452,4 @@ alert("Checkout failed. Please try again.")
 </script>
 
 </body>
-</html>
+</html> 
