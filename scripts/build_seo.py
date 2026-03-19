@@ -13,7 +13,7 @@ OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
 ALL_PAGES_FILE = f"{OUTPUT_DIR}/all-pages.html"
 SITEMAP_FILE = f"{OUTPUT_DIR}/sitemap.xml"
-RELATED_LINKS_COUNT = 5  # number of internal links per page
+RELATED_LINKS_COUNT = 5
 
 # -----------------------------
 # UTILITIES
@@ -26,12 +26,22 @@ def slugify(text):
 def build_title(keyword):
     kw = keyword.lower().strip()
     if kw.endswith(" scam"):
-        brand = kw.replace(" scam", "")
-        return f"Is {brand.title()} a Scam? | Scam Check Now"
-    return f"Is {kw.title()} a Scam? | Scam Check Now"
+        kw = kw.replace(" scam", "")
+    return f"Is {kw.title()} a Scam? (Real Check & Warning Signs)"
 
 def build_description(keyword):
-    return f"Is {keyword.title()} a scam? Use this free AI scam checker to analyze messages, emails, links, or job offers related to {keyword}."
+    return (
+        f"Is {keyword.title()} a scam or legit? Check warning signs, real risks, "
+        f"and what to do next. Free AI scam checker for {keyword}."
+    )
+
+def build_canonical(slug):
+    return f"{SITE}/scam-check-now/{slug}/"
+
+def load_keywords():
+    with open(KEYWORD_FILE, encoding="utf-8") as f:
+        # dedupe + normalize
+        return list(dict.fromkeys([k.strip().lower() for k in f if k.strip()]))
 
 # -----------------------------
 # SETUP
@@ -41,9 +51,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
-with open(KEYWORD_FILE, encoding="utf-8") as f:
-    keywords = [k.strip() for k in f.readlines() if k.strip()]
-
+keywords = load_keywords()
 pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
 
 # -----------------------------
@@ -65,20 +73,28 @@ for page in pages:
 
     title = build_title(keyword)
     description = build_description(keyword)
+    canonical = build_canonical(slug)
 
     # Generate AI content with fallback
     try:
         ai_text = generate_content(keyword)
-        # Optional: break AI content into paragraphs for readability
-        ai_text = "\n\n".join([p.strip() for p in ai_text.split("\n") if p.strip()])
     except Exception as e:
         print("AI generation failed for", keyword, ":", e)
-        ai_text = f"{keyword.title()} scams often involve messages requesting payment, personal information, or urgent action. Verify senders and avoid unknown links or money requests."
+        ai_text = f"""
+<h2>Is {keyword.title()} a Scam?</h2>
+<p>{keyword.title()} scams often involve messages requesting payment, personal information, or urgent action. 
+Avoid clicking unknown links or sending money. Always verify through official sources.</p>
+"""
 
-    # Pick related links
+    # Internal linking (random but stable count)
     related_candidates = [p for p in pages if p["slug"] != slug]
-    related_pages = random.sample(related_candidates, min(RELATED_LINKS_COUNT, len(related_candidates)))
-    links_html = "".join([f'<li><a href="/scam-check-now/{r["slug"]}/">{r["keyword"].title()}</a></li>\n' for r in related_pages])
+    random.shuffle(related_candidates)
+    related_pages = related_candidates[:RELATED_LINKS_COUNT]
+
+    links_html = "".join([
+        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {r["keyword"].title()} a Scam?</a></li>\n'
+        for r in related_pages
+    ])
 
     # Fill template
     html = template
@@ -87,6 +103,7 @@ for page in pages:
     html = html.replace("{{KEYWORD}}", keyword)
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", links_html)
+    html = html.replace("{{CANONICAL_URL}}", canonical)
 
     # Write page
     with open(path, "w", encoding="utf-8") as f:
@@ -96,36 +113,46 @@ for page in pages:
     print("Generated:", slug)
 
 # -----------------------------
-# ALL-PAGES LIST
+# ALL-PAGES LIST (noindex to avoid thin page issues)
 # -----------------------------
-all_links = "".join([f'<div><a href="/scam-check-now/{p["slug"]}/">{p["keyword"].title()}</a></div>\n' for p in pages])
+all_links = "".join([
+    f'<div><a href="/scam-check-now/{p["slug"]}/">{p["keyword"].title()}</a></div>\n'
+    for p in pages
+])
+
 all_pages_html = f"""
 <!DOCTYPE html>
 <html>
 <head>
-<title>Scam Check Pages</title>
-<meta name="robots" content="index, follow">
+<title>All Scam Pages</title>
+<meta name="robots" content="noindex, follow">
 </head>
 <body>
-<h1>Scam Check Pages</h1>
+<h1>All Scam Check Pages</h1>
 {all_links}
 </body>
 </html>
 """
+
 with open(ALL_PAGES_FILE, "w", encoding="utf-8") as f:
     f.write(all_pages_html)
+
 print("Updated all-pages.html")
 
 # -----------------------------
-# SITEMAP
+# SITEMAP (clean + consistent URLs)
 # -----------------------------
 today = datetime.utcnow().strftime("%Y-%m-%d")
-sitemap_links = "".join([f"""
+
+sitemap_links = "".join([
+    f"""
 <url>
-<loc>{SITE}/scam-check-now/{p['slug']}/</loc>
-<lastmod>{today}</lastmod>
+  <loc>{SITE}/scam-check-now/{p['slug']}/</loc>
+  <lastmod>{today}</lastmod>
 </url>
-""" for p in pages])
+"""
+    for p in pages
+])
 
 sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -135,4 +162,5 @@ sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 
 with open(SITEMAP_FILE, "w", encoding="utf-8") as f:
     f.write(sitemap_xml)
+
 print("Updated sitemap.xml")
