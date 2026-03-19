@@ -63,13 +63,27 @@ textarea { height:160px; margin-bottom:12px; }
 
 .note { text-align:center; font-size:14px; color:#666; margin-top:10px; }
 
-#result {
-  margin-top:20px;
-  background:#f5f7ff;
-  padding:20px;
-  border-radius:12px;
-  min-height:60px;
+#result { margin-top:20px; }
+
+.result-card{
+background:white;
+border-radius:16px;
+padding:20px;
+border:1px solid #e5e7eb;
 }
+
+.risk{
+font-size:22px;
+font-weight:800;
+margin-bottom:12px;
+padding:8px 12px;
+border-radius:10px;
+display:inline-block;
+}
+
+.risk.high{background:#fee2e2;color:#b91c1c;}
+.risk.medium{background:#fef3c7;color:#92400e;}
+.risk.low{background:#dcfce7;color:#166534;}
 
 .upgrade {
   display:none;
@@ -81,12 +95,12 @@ textarea { height:160px; margin-bottom:12px; }
   text-align:center;
 }
 
-.upgrade button {
+.plan {
+  width:100%;
+  margin-top:12px;
   background:#3b82f6;
   color:#fff;
-  margin-top:12px;
   padding:14px;
-  width:100%;
   border-radius:10px;
   font-weight:600;
 }
@@ -133,10 +147,12 @@ textarea { height:160px; margin-bottom:12px; }
 <h2>Unlimited Scam Protection</h2>
 <p>Scams are rising fast. Continue scanning messages and stay protected.</p>
 
-<button onclick="startCheckout()">Unlock Unlimited Checks</button>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
 
-<div style="margin-top:8px;font-size:13px;opacity:.7;">
-Secure checkout • Cancel anytime
+<div style="margin-top:10px;font-size:13px;opacity:.7;">
+Secure payments powered by Stripe • Cancel anytime
 </div>
 </div>
 
@@ -166,9 +182,29 @@ function showUpgrade(){
 document.getElementById("upgradeBox").style.display="block";
 }
 
+function parseSections(text){
+return text.split(/\n|\./).map(l=>l.trim()).filter(l=>l.length>20).slice(0,5);
+}
+
+function formatResult(text){
+let risk="low";
+if(text.toLowerCase().includes("high")) risk="high";
+else if(text.toLowerCase().includes("medium")) risk="medium";
+
+const bullets = parseSections(text).map(l=>`<li>${l}</li>`).join("");
+
+return `
+<div class="result-card">
+<div class="risk ${risk}">Risk Level: ${risk.toUpperCase()}</div>
+<ul>${bullets}</ul>
+</div>
+`;
+}
+
 async function check(){
 
 const text = document.getElementById("text").value.trim();
+const email = document.getElementById("email").value.trim().toLowerCase();
 const result = document.getElementById("result");
 
 if(!text){
@@ -182,22 +218,21 @@ try{
 const res = await fetch(API + "/analyze", {
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({text})
+body:JSON.stringify({text, email})
 });
 
 const data = await res.json();
 
-if(!data || !data.result){
-result.innerText = "Unable to analyze. Please try again.";
+if(data.limit){
+result.innerText = "Free checks used. Unlock unlimited protection.";
+showUpgrade();
 return;
 }
 
-result.innerText = data.result;
+result.innerHTML = formatResult(data.result);
 
-/* 🔥 MONETIZATION TRIGGER */
-const textResult = data.result.toLowerCase();
-
-if(data.limit || textResult.includes("high") || textResult.includes("scam")){
+/* 🔥 SEO monetization boost */
+if(data.result.toLowerCase().includes("high")){
 showUpgrade();
 }
 
@@ -206,8 +241,35 @@ result.innerText = "Error analyzing message. Please try again.";
 }
 }
 
-function startCheckout(){
-window.location.href="https://buy.stripe.com/YOUR_LINK";
+async function checkout(priceId){
+
+const email=document.getElementById("email").value.trim().toLowerCase();
+
+if(!email){
+alert("Please enter your email to continue.");
+return;
+}
+
+const pageUrl=window.location.origin+window.location.pathname;
+
+const response=await fetch(API+"/create-checkout",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+priceId,
+email,
+successUrl:pageUrl+"?subscribed=true",
+cancelUrl:pageUrl
+})
+});
+
+const data=await response.json();
+
+if(data.url){
+window.location=data.url;
+}else{
+alert("Checkout failed. Please try again.");
+}
 }
 </script>
 
