@@ -35,6 +35,7 @@ jobs:
 
       - name: Build ROOT sitemap (authoritative)
         run: |
+          set -e
           TODAY=$(date +%F)
 
           # Reset sitemap
@@ -45,8 +46,9 @@ jobs:
           echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
           echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
 
-          # SEO pages (stable + clean loop)
-          for dir in $(ls -d scam-check-now/*/ 2>/dev/null | sort); do
+          # SEO pages (safe loop, no ls)
+          for dir in scam-check-now/*/; do
+            [ -d "$dir" ] || continue
             [ -f "${dir}index.html" ] || continue
 
             slug=$(basename "$dir")
