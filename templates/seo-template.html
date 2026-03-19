@@ -135,9 +135,10 @@ display:inline-block;
 
 <textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
 
-<input id="email" placeholder="Enter your email to unlock unlimited protection">
+<input id="email" placeholder="Already subscribed? Enter your email to continue with unlimited checks">
 
-<div class="note">3 free checks • unlimited protection available</div>
+<div class="note">3 free checks • high-risk results may require upgrade</div>
+<div class="note">Use the same email you used during checkout</div>
 
 <button class="check" onclick="check()">Check Scam Risk</button>
 
@@ -179,8 +180,34 @@ Scam Check Now © 2026
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 
-/* restore email if exists */
+/* restore email */
 document.getElementById("email").value = localStorage.getItem("email") || "";
+
+/* 🔥 AUTO UNLOCK AFTER STRIPE RETURN */
+window.addEventListener("load", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
+
+  if(!sessionId) return;
+
+  try{
+    const res = await fetch(API + "/verify-session", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ sessionId })
+    });
+
+    const data = await res.json();
+
+    if(data.subscribed){
+      localStorage.setItem("email", data.email);
+      document.getElementById("email").value = data.email;
+    }
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+  }catch(e){}
+});
 
 function scrollToUpgrade(){
 const el = document.getElementById("upgradeBox");
@@ -190,10 +217,7 @@ el.scrollIntoView({behavior:"smooth", block:"center"});
 function showUpgrade(){
 const el = document.getElementById("upgradeBox");
 el.style.display = "block";
-
-setTimeout(() => {
-scrollToUpgrade();
-}, 50);
+setTimeout(scrollToUpgrade, 50);
 }
 
 function parseSections(text){
@@ -258,7 +282,6 @@ if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
 }
 
-/* store email */
 if(email){
 localStorage.setItem("email", email);
 }
@@ -268,41 +291,25 @@ result.innerText = "Error analyzing message. Please try again.";
 }
 }
 
+/* 🔥 STRIPE = NO FRICTION */
 async function checkout(priceId){
 
-const emailInput = document.getElementById("email");
-const email = emailInput.value.trim().toLowerCase();
+const pageUrl = window.location.origin + window.location.pathname;
 
-if(!email){
-emailInput.focus();
-emailInput.style.border = "2px solid #ef4444";
-
-setTimeout(()=>{
-emailInput.style.border = "1px solid #ccc";
-},2000);
-
-return;
-}
-
-localStorage.setItem("email", email);
-
-const pageUrl=window.location.origin+window.location.pathname;
-
-const response=await fetch(API+"/create-checkout",{
+const response = await fetch(API + "/create-checkout", {
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
-email,
-successUrl:pageUrl+"?subscribed=true",
+successUrl:pageUrl+"?session_id={CHECKOUT_SESSION_ID}",
 cancelUrl:pageUrl
 })
 });
 
-const data=await response.json();
+const data = await response.json();
 
 if(data.url){
-window.location=data.url;
+window.location = data.url;
 }else{
 alert("Checkout failed. Please try again.");
 }
