@@ -127,14 +127,15 @@ display:inline-block;
 
 <header class="hero">
 <h1>Is {{KEYWORD}} a Scam?</h1>
-<p>Analyze messages, emails, and links instantly before you click or send money.</p>
+<p>Check messages, emails, and links instantly before you click or send money.</p>
+<div class="note">Used to analyze thousands of suspicious messages daily</div>
 </header>
 
 <div class="container">
 
 <textarea id="text" placeholder="Paste a suspicious message, email, or link here..."></textarea>
 
-<input id="email" placeholder="Enter your email">
+<input id="email" placeholder="Enter your email to unlock full protection">
 
 <div class="note">3 free checks • unlimited protection available</div>
 
@@ -144,12 +145,12 @@ display:inline-block;
 
 <!-- PAYWALL -->
 <div id="upgradeBox" class="upgrade">
-<h2>Unlimited Scam Protection</h2>
-<p>Scams are rising fast. Continue scanning messages and stay protected.</p>
+<h2>⚠️ Stay Protected Before You Take Action</h2>
+<p>This message shows real scam signals. One mistake can cost thousands.</p>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
-<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Protect Me — Weekly</button>
+<button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Best Value — Monthly ⭐</button>
+<button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Full Protection — Yearly</button>
 
 <div style="margin-top:10px;font-size:13px;opacity:.7;">
 Secure payments powered by Stripe • Cancel anytime
@@ -224,15 +225,17 @@ body:JSON.stringify({text, email})
 const data = await res.json();
 
 if(data.limit){
-result.innerText = "Free checks used. Unlock unlimited protection.";
+result.innerText = "You've used your free checks. Unlock unlimited protection.";
 showUpgrade();
 return;
 }
 
 result.innerHTML = formatResult(data.result);
 
-/* 🔥 SEO monetization boost */
-if(data.result.toLowerCase().includes("high")){
+const textResult = data.result.toLowerCase();
+
+/* 🔥 PRINT LOGIC */
+if(textResult.includes("high") || textResult.includes("scam")){
 showUpgrade();
 }
 
@@ -246,7 +249,7 @@ async function checkout(priceId){
 const email=document.getElementById("email").value.trim().toLowerCase();
 
 if(!email){
-alert("Please enter your email to continue.");
+alert("Enter your email to activate your protection.");
 return;
 }
 
