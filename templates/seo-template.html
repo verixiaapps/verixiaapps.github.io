@@ -281,7 +281,7 @@ font-size:14px;
 <body>
 
 <div class="top-bar">
-  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
+  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
   <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 </div>
 
@@ -345,7 +345,7 @@ font-size:14px;
 
   <div id="resultAction" class="resultAction">
     <p style="margin-bottom:10px;font-weight:600;">Check messages anytime on your phone</p>
-    <a href="https://apps.apple.com/app/id6759490910" target="_blank">
+    <a href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">
       <button>📱 Get the App</button>
     </a>
   </div>
@@ -356,14 +356,14 @@ font-size:14px;
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
-  <h3 style="margin-top:28px;">Related Scam Checks</h3>
-  <ul class="related-links">{{RELATED_LINKS}}</ul>
+  <h3 id="relatedHeading" style="margin-top:28px;">Related Scam Checks</h3>
+  <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
 </section>
 
 <footer class="footer">
   <div>
     By using this website you agree to our
-    <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank">Terms and Privacy Policy</a>.
+    <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
   </div>
   <div style="margin-top:10px">
     Scam Check Now © 2026 • AI-powered scam detection
@@ -371,28 +371,29 @@ font-size:14px;
 </footer>
 
 <script>
-const API="https://awake-integrity-production-faa0.up.railway.app";
-const RAW_KEYWORD="{{KEYWORD}}";
+const API = "https://awake-integrity-production-faa0.up.railway.app";
+const RAW_KEYWORD = "{{KEYWORD}}";
 
-window.addEventListener("load", function(){
+window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
-  if(params.get("subscribed") === "true"){
+  if (params.get("subscribed") === "true") {
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   setKeywordHeadings();
   cleanSeoContent();
+  cleanRelatedLinks();
 });
 
-function toTitleCase(str){
-  return str.replace(/\w\S*/g, function(txt){
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function (txt) {
     return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
   });
 }
 
-function setKeywordHeadings(){
+function setKeywordHeadings() {
   const keywordRaw = RAW_KEYWORD || "this message";
   const keyword = toTitleCase(keywordRaw);
 
@@ -400,16 +401,31 @@ function setKeywordHeadings(){
   document.getElementById("contentHeading").textContent = `How ${keyword} Scams Work`;
 }
 
-function cleanSeoContent(){
+function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
-  if(!seoContent) return;
+  if (!seoContent) return;
 
   seoContent.innerHTML = seoContent.innerHTML
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "");
 }
 
-function formatResult(raw){
+function cleanRelatedLinks() {
+  const relatedLinks = document.getElementById("relatedLinks");
+  const relatedHeading = document.getElementById("relatedHeading");
+  if (!relatedLinks || !relatedHeading) return;
+
+  relatedLinks.innerHTML = relatedLinks.innerHTML.replace(/\*\*/g, "").trim();
+
+  const links = relatedLinks.querySelectorAll("li a");
+
+  if (links.length === 0) {
+    relatedLinks.style.display = "none";
+    relatedHeading.style.display = "none";
+  }
+}
+
+function formatResult(raw) {
   const lines = raw.split("\n").filter(l => l.trim());
 
   let risk = "";
@@ -420,15 +436,15 @@ function formatResult(raw){
   lines.forEach(line => {
     const trimmed = line.trim();
 
-    if(trimmed.toLowerCase().includes("risk level")){
+    if (trimmed.toLowerCase().includes("risk level")) {
       risk = trimmed.split(":").slice(1).join(":").trim();
-    }else if(trimmed.toLowerCase().includes("key signals")){
+    } else if (trimmed.toLowerCase().includes("key signals")) {
       mode = "signals";
-    }else if(trimmed.toLowerCase().includes("recommended action")){
+    } else if (trimmed.toLowerCase().includes("recommended action")) {
       mode = "actions";
-    }else if(trimmed.startsWith("-")){
-      if(mode === "signals") signals.push(trimmed.replace(/^-+\s*/, ""));
-      if(mode === "actions") actions.push(trimmed.replace(/^-+\s*/, ""));
+    } else if (trimmed.startsWith("-")) {
+      if (mode === "signals") signals.push(trimmed.replace(/^-+\s*/, ""));
+      if (mode === "actions") actions.push(trimmed.replace(/^-+\s*/, ""));
     }
   });
 
@@ -451,24 +467,24 @@ function formatResult(raw){
   `;
 }
 
-function showUpgrade(){
+function showUpgrade() {
   const el = document.getElementById("upgrade");
   el.style.display = "block";
-  setTimeout(() => el.scrollIntoView({behavior:"smooth"}), 100);
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
 }
 
-function scrollToEmail(){
+function scrollToEmail() {
   const emailField = document.getElementById("email");
-  emailField.scrollIntoView({behavior:"smooth", block:"center"});
+  emailField.scrollIntoView({ behavior: "smooth", block: "center" });
   setTimeout(() => emailField.focus(), 250);
 }
 
-async function check(){
+async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
   const result = document.getElementById("result");
 
-  if(!text){
+  if (!text) {
     result.innerText = "Paste a message to analyze.";
     result.style.display = "block";
     return;
@@ -477,16 +493,16 @@ async function check(){
   result.style.display = "block";
   result.innerText = "Analyzing...";
 
-  try{
+  try {
     const response = await fetch(API + "/analyze", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({text,email})
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, email })
     });
 
     const data = await response.json();
 
-    if(data.limit){
+    if (data.limit) {
       result.innerHTML = "Unlimited scam checks available.";
       showUpgrade();
       return;
@@ -494,33 +510,33 @@ async function check(){
 
     result.innerHTML = formatResult(data.result);
 
-    if(data.result && data.result.toLowerCase().includes("risk level: high")){
+    if (data.result && data.result.toLowerCase().includes("risk level: high")) {
       showUpgrade();
     }
-  }catch(e){
+  } catch (e) {
     result.innerText = "Unable to analyze right now. Please try again.";
   }
 }
 
-async function checkout(priceId){
+async function checkout(priceId) {
   const pageUrl = window.location.origin + window.location.pathname;
 
   const response = await fetch(API + "/create-checkout", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       priceId,
-      email:null,
-      successUrl:pageUrl + "?subscribed=true",
-      cancelUrl:pageUrl
+      email: null,
+      successUrl: pageUrl + "?subscribed=true",
+      cancelUrl: pageUrl
     })
   });
 
   const data = await response.json();
 
-  if(data.url){
+  if (data.url) {
     window.location = data.url;
-  }else{
+  } else {
     alert("Checkout failed.");
   }
 }
