@@ -1,6 +1,5 @@
 import os
 import re
-import random
 from generate_content import generate_content
 
 # -----------------------------
@@ -62,6 +61,40 @@ def load_keywords():
         return list(dict.fromkeys([normalize_keyword(k) for k in f if k.strip()]))
 
 
+def keyword_tokens(text):
+    return set(normalize_keyword(text).split())
+
+
+def get_related_pages(current_page, all_pages, limit):
+    current_slug = current_page["slug"]
+    current_keyword = current_page["keyword"]
+    current_tokens = keyword_tokens(current_keyword)
+
+    candidates = [
+        p for p in all_pages
+        if p["slug"] != current_slug and p["slug"] not in PROTECTED_SLUGS
+    ]
+
+    def score(page):
+        other_tokens = keyword_tokens(page["keyword"])
+        shared = len(current_tokens & other_tokens)
+        same_root = 1 if current_keyword.split()[0] == page["keyword"].split()[0] else 0
+        length_diff = abs(len(page["keyword"]) - len(current_keyword))
+        return (-same_root, -shared, length_diff, page["keyword"])
+
+    ranked = sorted(candidates, key=score)
+
+    if ranked:
+        return ranked[:limit]
+
+    # emergency fallback so there is always at least something if any page exists
+    fallback = [
+        p for p in all_pages
+        if p["slug"] not in PROTECTED_SLUGS and p["slug"] != current_slug
+    ]
+    return fallback[:limit]
+
+
 # -----------------------------
 # SETUP
 # -----------------------------
@@ -101,23 +134,20 @@ for page in pages:
     except Exception as e:
         print("AI generation failed for", keyword, ":", e)
         ai_text = f"""
-<p>{title_case(normalize_keyword(keyword))} scams often involve requests for money, personal information, or urgent action.
-Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
+<p>{title_case(display_keyword(keyword))} scams often involve requests for money, personal information, or urgent action. Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
 """
 
-    # Related links (exclude itself + protected)
-    related_candidates = [
-        p for p in pages
-        if p["slug"] != slug and p["slug"] not in PROTECTED_SLUGS
-    ]
-
-    random.shuffle(related_candidates)
-    related_pages = related_candidates[:RELATED_LINKS_COUNT]
+    # Related links (always internal, always regenerated)
+    related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
 
     links_html = "".join([
         f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>\n'
         for r in related_pages
     ])
+
+    # Final fallback so the template never gets an empty related-links section
+    if not links_html:
+        links_html = '<li><a href="/scam-check-now/is-this-a-scam/">Check Another Scam Message</a></li>\n'
 
     # Fill template
     html = template
