@@ -9,7 +9,7 @@ KEYWORD_FILE = "data/keywords.txt"
 TEMPLATE_FILE = "templates/seo-template.html"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
-RELATED_LINKS_COUNT = 5
+RELATED_LINKS_COUNT = 6
 
 # 🔒 PROTECTED PAGES (DO NOT GENERATE / OVERWRITE)
 PROTECTED_SLUGS = {"is-this-a-scam"}
@@ -69,6 +69,7 @@ def get_related_pages(current_page, all_pages, limit):
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
+    current_root = current_keyword.split()[0]
 
     candidates = [
         p for p in all_pages
@@ -76,23 +77,15 @@ def get_related_pages(current_page, all_pages, limit):
     ]
 
     def score(page):
-        other_tokens = keyword_tokens(page["keyword"])
+        other_keyword = page["keyword"]
+        other_tokens = keyword_tokens(other_keyword)
+        same_root = 1 if other_keyword.split()[0] == current_root else 0
         shared = len(current_tokens & other_tokens)
-        same_root = 1 if current_keyword.split()[0] == page["keyword"].split()[0] else 0
-        length_diff = abs(len(page["keyword"]) - len(current_keyword))
-        return (-same_root, -shared, length_diff, page["keyword"])
+        length_diff = abs(len(other_keyword) - len(current_keyword))
+        return (-same_root, -shared, length_diff, other_keyword)
 
     ranked = sorted(candidates, key=score)
-
-    if ranked:
-        return ranked[:limit]
-
-    # emergency fallback so there is always at least something if any page exists
-    fallback = [
-        p for p in all_pages
-        if p["slug"] not in PROTECTED_SLUGS and p["slug"] != current_slug
-    ]
-    return fallback[:limit]
+    return ranked[:limit]
 
 
 # -----------------------------
@@ -104,7 +97,11 @@ with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
 keywords = load_keywords()
-pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
+pages = [
+    {"keyword": k, "slug": slugify(k)}
+    for k in keywords
+    if slugify(k) not in PROTECTED_SLUGS
+]
 
 
 # -----------------------------
@@ -140,14 +137,10 @@ for page in pages:
     # Related links (always internal, always regenerated)
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
 
-    links_html = "".join([
+    links_html = "".join(
         f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>\n'
         for r in related_pages
-    ])
-
-    # Final fallback so the template never gets an empty related-links section
-    if not links_html:
-        links_html = '<li><a href="/scam-check-now/is-this-a-scam/">Check Another Scam Message</a></li>\n'
+    )
 
     # Fill template
     html = template
