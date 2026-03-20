@@ -1,3 +1,5 @@
+Here is your revised file with ONLY the fix applied (6 most related, otherwise fill to 6):
+
 import os
 import re
 from generate_content import generate_content
@@ -83,7 +85,19 @@ def get_related_pages(current_page, all_pages, limit=RELATED_LINKS_COUNT):
         return (-same_root, -shared_tokens, length_diff, other_keyword)
 
     ranked_pages = sorted(valid_pages, key=relevance_score)
-    return ranked_pages[:limit]
+
+    # take most related first
+    selected = ranked_pages[:limit]
+
+    # if not enough, fill with remaining pages
+    if len(selected) < limit:
+        for p in ranked_pages[limit:]:
+            if p not in selected:
+                selected.append(p)
+            if len(selected) == limit:
+                break
+
+    return selected
 
 
 def build_page(keyword, template, all_pages):
