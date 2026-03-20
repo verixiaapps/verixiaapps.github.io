@@ -1,17 +1,19 @@
 import os
 import re
-import random
 from generate_content import generate_content
 
 KEYWORDS_FILE = "data/keywords.txt"
 TEMPLATE_FILE = "templates/seo-template.html"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
+RELATED_LINKS_COUNT = 6
+
+PROTECTED_SLUGS = {"is-this-a-scam"}
 
 
 def slugify(text):
     text = text.lower()
-    text = re.sub(r'[^a-z0-9]+', '-', text)
+    text = re.sub(r"[^a-z0-9]+", "-", text)
     return text.strip("-")
 
 
@@ -28,6 +30,10 @@ def display_keyword(text):
 
 def title_case(text):
     return " ".join(word.capitalize() for word in text.split())
+
+
+def keyword_tokens(text):
+    return set(normalize_keyword(text).split())
 
 
 def load_keywords():
@@ -57,6 +63,29 @@ def build_canonical(slug):
     return f"{SITE}/scam-check-now/{slug}/"
 
 
+def get_related_pages(current_page, all_pages, limit=RELATED_LINKS_COUNT):
+    current_slug = current_page["slug"]
+    current_keyword = current_page["keyword"]
+    current_tokens = keyword_tokens(current_keyword)
+    current_root = current_keyword.split()[0]
+
+    valid_pages = [
+        p for p in all_pages
+        if p["slug"] != current_slug and p["slug"] not in PROTECTED_SLUGS
+    ]
+
+    def relevance_score(page):
+        other_keyword = page["keyword"]
+        other_tokens = keyword_tokens(other_keyword)
+        same_root = 1 if other_keyword.split()[0] == current_root else 0
+        shared_tokens = len(current_tokens & other_tokens)
+        length_diff = abs(len(other_keyword) - len(current_keyword))
+        return (-same_root, -shared_tokens, length_diff, other_keyword)
+
+    ranked_pages = sorted(valid_pages, key=relevance_score)
+    return ranked_pages[:limit]
+
+
 def build_page(keyword, template, all_pages):
     slug = slugify(keyword)
     keyword_display = display_keyword(keyword)
@@ -74,9 +103,8 @@ def build_page(keyword, template, all_pages):
     description = build_description(keyword)
     canonical = build_canonical(slug)
 
-    related_candidates = [p for p in all_pages if p["slug"] != slug]
-    random.shuffle(related_candidates)
-    related_pages = related_candidates[:5]
+    current_page = {"keyword": keyword, "slug": slug}
+    related_pages = get_related_pages(current_page, all_pages, RELATED_LINKS_COUNT)
 
     related_links = "\n".join(
         f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>'
@@ -109,14 +137,17 @@ def main():
     keywords = load_keywords()
     template = load_template()
 
-    all_pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
+    all_pages = [
+        {"keyword": k, "slug": slugify(k)}
+        for k in keywords
+        if slugify(k) not in PROTECTED_SLUGS
+    ]
 
     for keyword in keywords:
         slug = slugify(keyword)
-        page_path = os.path.join(OUTPUT_DIR, slug, "index.html")
 
-        if os.path.exists(page_path):
-            print(f"skipped existing page: {keyword}")
+        if slug in PROTECTED_SLUGS:
+            print(f"skipped protected page: {keyword}")
             continue
 
         try:
