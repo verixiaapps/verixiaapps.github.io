@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{CANONICAL_URL}}">
+
+<style>
+body{
+  font-family:system-ui,-apple-system,Arial;
+  background:linear-gradient(180deg,#eef2ff,#f8fafc);
+  margin:0;
+  padding-top:100px;
+  color:#1f2937;
+  line-height:1.6;
+}
+
+/* Top Bar */
+.top-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 18px;
+  z-index:1000;
+  pointer-events:none;
+  opacity:0.95;
+}
+.app-top, .upgrade-top{
+  pointer-events:auto;
+  padding:10px 18px;
+  font-size:15px;
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.app-top{background:#3b82f6;color:white;text-decoration:none;margin-left:8px;}
+.upgrade-top{background:#1f2937;color:white;border:none;cursor:pointer;margin-right:28px;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;}
+
+/* Hero Section */
+.hero{
+  text-align:center;
+  padding:50px 24px 60px;
+}
+.hero h1{
+  margin:0;
+  font-size:40px;
+  font-weight:900;
+  line-height:1.2;
+}
+.hero p{
+  margin-top:16px;
+  font-size:20px;
+  opacity:.95;
+  max-width:720px;
+  margin:auto;
+}
+.hero .subline{
+  margin-top:12px;
+  font-size:17px;
+  color:#4b5563;
+  line-height:1.5;
+}
+.hero .note{
+  margin-top:10px;
+  font-size:15px;
+  color:#4b5563;
+  font-weight:500;
+}
+
+/* Container */
+.container{
+  max-width:800px;
+  margin:auto;
+  background:white;
+  padding:36px;
+  padding-bottom:64px;
+  border-radius:26px;
+  box-shadow:0 45px 110px rgba(0,0,0,.14),0 15px 40px rgba(0,0,0,.07);
+  animation: fadeSlide 0.45s ease-out;
+}
+@keyframes fadeSlide {from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);}}
+
+/* Inputs & Buttons */
+textarea,input{
+  width:100%;
+  padding:20px;
+  margin-top:14px;
+  border-radius:18px;
+  border:1px solid #d1d5db;
+  font-size:18px;
+  box-shadow:0 6px 24px rgba(0,0,0,.06);
+}
+textarea{height:200px;resize:none;}
+textarea:focus,input:focus{border-color:#3b82f6;box-shadow:0 0 0 6px rgba(59,130,246,.2);outline:none;}
+
+button{
+  border:none;
+  border-radius:18px;
+  cursor:pointer;
+  font-size:18px;
+  padding:20px;
+  min-height:60px;
+}
+.check{
+  width:100%;
+  background: linear-gradient(90deg,#3b82f6,#1d4ed8);
+  color:white;
+  margin-top:16px;
+  font-weight:800;
+  box-shadow:0 16px 48px rgba(59,130,246,.42);
+  transition: transform 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
+}
+.check:hover{
+  transform:scale(1.045);
+  box-shadow:0 18px 60px rgba(59,130,246,.52);
+}
+
+/* Notes, Results */
+.note{margin-top:14px;font-size:16px;color:#6b7280;text-align:center;}
+.success{margin-top:16px;font-size:16px;color:#166534;text-align:center;font-weight:700;display:none;}
+#result{margin-top:32px;display:none;}
+.result-card{
+  background:white;
+  border-radius:22px;
+  padding:32px;
+  box-shadow:0 35px 80px rgba(0,0,0,.1);
+  border:1px solid #e5e7eb;
+}
+.risk{
+  font-size:30px;
+  font-weight:900;
+  margin-bottom:18px;
+  padding:14px 18px;
+  border-radius:14px;
+  display:inline-block;
+}
+.risk.high{background:#fee2e2;color:#b91c1c;}
+.risk.medium{background:#fef3c7;color:#92400e;}
+.risk.low{background:#dcfce7;color:#166534;}
+
+.section{margin-top:22px;}
+.section-title{font-weight:900;margin-bottom:10px;}
+ul{margin:0;padding-left:22px;}
+
+.resultAction{display:none;margin-top:24px;text-align:center;}
+.resultAction button{background:#3b82f6;color:white;padding:18px 28px;border-radius:14px;font-weight:800;}
+
+.upgrade{
+  display:none;
+  margin-top:32px;
+  padding:34px;
+  background:white;
+  border-radius:22px;
+  text-align:center;
+  box-shadow:0 40px 90px rgba(0,0,0,.1);
+  border:1px solid #e5e7eb;
+}
+.plan{
+  width:100%;
+  margin-top:18px;
+  background:#3b82f6;
+  color:white;
+  font-weight:800;
+  padding:18px;
+  border-radius:16px;
+}
+
+.footer{text-align:center;margin-top:80px;padding:48px;color:#6b7280;font-size:16px;}
+
+/* Social proof */
+.social-proof{
+  margin-top:28px;
+  text-align:center;
+  font-size:14px;
+  color:#4b5563;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+  <a class="app-top" href="#" target="_blank">📱 Get App</a>
+  <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+</div>
+
+<div class="hero">
+  <h1 id="heroKeyword">{{HERO_KEYWORD}}</h1>
+  <p>Check a suspicious message before you click, reply, or send money.</p>
+  <div class="note">Used by thousands daily to stay safe</div>
+</div>
+
+<div class="container">
+
+  <textarea id="text" placeholder="Paste a suspicious message, email, website, or job offer..."></textarea>
+
+  <div class="note">Examples: delivery text, PayPal alert, crypto message, job offer</div>
+
+  <div class="note">No signup required • 3 free checks</div>
+
+  <input id="email" placeholder="Already subscribed? Enter your email for unlimited checks">
+
+  <div id="postPurchase" class="success">✅ Payment successful — unlimited access is active</div>
+
+  <button class="check">Check Scam Risk</button>
+
+  <div class="note">Instant risk level, key warning signs, and actionable steps</div>
+
+  <div id="result"></div>
+
+  <div class="upgrade" id="upgrade">
+    <h3>⚠️ High Risk Detected</h3>
+    <div class="note">Messages like this often try to steal money, accounts, or personal information.</div>
+    <div style="margin-top:8px;font-size:13px;color:#6b7280;">Scammers often send follow-up messages after the first one</div>
+    <div style="margin-bottom:10px;font-size:14px;color:#6b7280;">Stay protected with unlimited checks • Cancel anytime</div>
+
+    <button class="plan">Weekly Access</button>
+    <button class="plan">Monthly (Best Value)</button>
+    <button class="plan">Yearly</button>
+
+    <div style="margin-top:14px;font-size:14px;color:#6b7280;">Secure payments via Stripe</div>
+
+    <div class="subscriber-link">
+      <button type="button">Already subscribed? Continue</button>
+    </div>
+  </div>
+
+  <div id="resultAction" class="resultAction">
+    <p style="margin-bottom:10px;font-weight:600;">Check messages anytime on your phone</p>
+    <a href="#" target="_blank">
+      <button>📱 Get the App</button>
+    </a>
+  </div>
+
+  <div class="social-proof">Trusted by 50,000+ users daily</div>
+
+</div>
+
+<section class="content-section">
+  <h2>{{CONTENT_HEADING}}</h2>
+  <div class="content-body">{{AI_CONTENT}}</div>
+
+  <h3 style="margin-top:28px;">Related Scam Checks</h3>
+  <ul class="related-links">{{RELATED_LINKS}}</ul>
+</section>
+
+<footer class="footer">
+  <div>
+    By using this website you agree to our <a href="#" target="_blank">Terms and Privacy Policy</a>.
+  </div>
+  <div style="margin-top:10px">
+    Scam Check Now © 2026 • AI-powered scam detection
+  </div>
+</footer>
+
+<script>
+function showUpgrade() {
+  const el = document.getElementById("upgrade");
+  el.style.display = "block";
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
+}
+</script>
+
+</body>
+</html> 
