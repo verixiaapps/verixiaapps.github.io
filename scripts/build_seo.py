@@ -85,7 +85,20 @@ def get_related_pages(current_page, all_pages, limit):
         return (-same_root, -shared, length_diff, other_keyword)
 
     ranked = sorted(candidates, key=score)
-    return ranked[:limit]
+
+    # First try relevant pages
+    related = ranked[:limit]
+
+    # If not enough relevant pages, fill with any other valid pages from scam-check-now
+    if len(related) < limit:
+        used_slugs = {p["slug"] for p in related}
+        remaining = [
+            p for p in candidates
+            if p["slug"] not in used_slugs
+        ]
+        related.extend(remaining[: limit - len(related)])
+
+    return related
 
 
 # -----------------------------
