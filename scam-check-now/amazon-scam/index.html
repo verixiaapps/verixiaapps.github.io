@@ -298,7 +298,6 @@ font-size:14px;
   <div id="result"></div>
 
   <div class="upgrade" id="upgrade">
-
     <h3>⚠️ High Risk Detected</h3>
 
     <div class="note">
@@ -324,7 +323,6 @@ font-size:14px;
     <div class="subscriber-link">
       <button type="button" onclick="scrollToEmail()">Already subscribed? Continue</button>
     </div>
-
   </div>
 
   <div id="resultAction" class="resultAction">
@@ -340,22 +338,39 @@ font-size:14px;
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">
 <h2>Is Amazon Scam a Scam?</h2>
-<p><h3>What This Scam Usually Looks Like</h3>
-<p>Amazon scams typically arrive as emails or text messages claiming there is an issue with your account, order, or payment method. These messages often create a sense of urgency, stating that your account has been compromised, your order is on hold, or immediate action is required to avoid account suspension.</p>
-<p>The message usually contains a link that appears legitimate but directs you to a fraudulent website designed to capture your login credentials or personal information. The intention is to trick you into providing sensitive data before you have a chance to verify the legitimacy of the communication.</p>
+<p>### Understanding Amazon Scams: What You Need to Know
 
-<h3>Warning Signs</h3>
-<p>Scam messages often share common traits that can help you identify them quickly.</p>
-<ul>
-<li>The message urges you to click a link to resolve an urgent issue</li>
-<li>The sender's email address or phone number looks suspicious or unfamiliar</li>
-<li>The message contains threats of account suspension or cancellation</li>
-<li>You are prompted to enter sensitive information, such as passwords or credit card details</li>
-</ul>
+In today's digital age, online shopping has become a convenient way to purchase goods and services. However, this convenience has also opened the door for various scams, particularly those that target users of popular platforms like Amazon. These scams can take many forms, and being aware of what they look like is crucial for protecting yourself and your finances.
 
-<h3>What To Do Next</h3>
-<p>If you receive a suspicious message, do not click any links. Instead, go directly to the official Amazon website or app to check your account status. If there is a legitimate issue, it will be reflected in your account notifications.</p>
-<p>If you have already interacted with the message, change your password immediately and review your account for any unauthorized transactions. Report the suspicious message to Amazon's customer service and consider enabling two-factor authentication for added security.</p></p>
+#### What Do Amazon Scams Look Like?
+
+Amazon scams typically involve fraudulent communications that impersonate the legitimate company. Common scenarios include phishing emails, fake websites, and scam phone calls. For instance, you might receive an email that appears to be from Amazon, claiming there is an issue with your account, such as a failed payment or a need to verify your identity. These emails often include links that direct you to a counterfeit website designed to look like Amazon's official site. Once there, you may be prompted to enter personal information, such as your password, credit card details, or other sensitive data.
+
+Another common type of scam involves fake sellers on Amazon itself. Scammers may list products at unbelievably low prices to lure unsuspecting buyers. Once a purchase is made, the buyer may receive a counterfeit item, or nothing at all. In some cases, the scammer may ask for payment outside of the Amazon platform, which is a significant red flag.
+
+#### Common Warning Signs
+
+Recognizing the warning signs of a potential scam can help you avoid falling victim. Here are some key indicators to watch for:
+
+1. **Unsolicited Communication**: Be cautious of unexpected emails, texts, or phone calls claiming to be from Amazon. Legitimate companies typically do not reach out to customers unless there has been prior communication.
+
+2. **Urgent Language**: Scammers often create a sense of urgency to prompt quick action. Phrases like "immediate action required" or "your account will be suspended" are common tactics used to scare you into compliance.
+
+3. **Poor Grammar and Spelling**: Many scam communications contain grammatical errors or awkward phrasing. If an email looks unprofessional, it’s likely not from a reputable source.
+
+4. **Suspicious Links**: Hover over any links in emails to see the actual URL. If it doesn’t lead to an official Amazon domain (like amazon.com), do not click on it.
+
+5. **Unrealistic Deals**: If a product is being offered at a price that seems too good to be true, it probably is. Always compare prices with other sellers on the platform.
+
+#### What to Do If You Encounter a Scam
+
+If you suspect that you have encountered a scam, it’s essential to take immediate action. First, do not click on any links or provide any personal information. Instead, report the email or message to Amazon directly through their official website. They have specific procedures in place to handle such reports and can help you determine if the communication is legitimate.
+
+Additionally, change your Amazon password and enable two-factor authentication for added security. This extra layer of protection can help safeguard your account from unauthorized access.
+
+Finally, consider monitoring your bank and credit card statements for any unauthorized transactions. If you notice anything suspicious, contact your financial institution immediately to report the issue.
+
+By staying informed and vigilant, you can protect yourself from scams that target online shoppers. Always remember to verify the source of any communication and trust your instincts—if something feels off, it’s better to err on the side of caution.</p>
 
 <h2>Common Warning Signs</h2>
 <ul>
@@ -399,8 +414,16 @@ window.addEventListener("load", function(){
   cleanSeoContent();
 });
 
+function toTitleCase(str){
+  return str.replace(/\w\S*/g, function(txt){
+    return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
+  });
+}
+
 function setKeywordHeadings(){
-  const keyword = RAW_KEYWORD || "this message";
+  const keywordRaw = RAW_KEYWORD || "this message";
+  const keyword = toTitleCase(keywordRaw);
+
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam?`;
   document.getElementById("contentHeading").textContent = `How ${keyword} Scams Work`;
 }
@@ -414,86 +437,129 @@ function cleanSeoContent(){
     .replace(/<p>\s*<\/p>/g, "");
 }
 
+function formatResult(raw){
+
+  const lines = raw.split("\n").filter(l => l.trim());
+
+  let risk = "";
+  let signals = [];
+  let actions = [];
+  let mode = "";
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+
+    if(trimmed.toLowerCase().includes("risk level")){
+      risk = trimmed.split(":").slice(1).join(":").trim();
+    }else if(trimmed.toLowerCase().includes("key signals")){
+      mode = "signals";
+    }else if(trimmed.toLowerCase().includes("recommended action")){
+      mode = "actions";
+    }else if(trimmed.startsWith("-")){
+      if(mode === "signals") signals.push(trimmed.replace(/^-+\s*/, ""));
+      if(mode === "actions") actions.push(trimmed.replace(/^-+\s*/, ""));
+    }
+  });
+
+  const riskClass = risk.trim().toLowerCase();
+
+  return `
+  <div class="result-card">
+    <div class="risk ${riskClass}">${risk}</div>
+
+    <div class="result-section">
+      <div class="section-title">Key Signals</div>
+      <ul>${signals.map(s => `<li>${s}</li>`).join("")}</ul>
+    </div>
+
+    <div class="result-section">
+      <div class="section-title">Recommended Action</div>
+      <ul>${actions.map(a => `<li>${a}</li>`).join("")}</ul>
+    </div>
+  </div>
+  `;
+}
+
 function showUpgrade(){
-  const el=document.getElementById("upgrade");
-  el.style.display="block";
-  setTimeout(()=>el.scrollIntoView({behavior:"smooth"}),100);
+  const el = document.getElementById("upgrade");
+  el.style.display = "block";
+  setTimeout(() => el.scrollIntoView({behavior:"smooth"}), 100);
 }
 
 function scrollToEmail(){
-  const emailField=document.getElementById("email");
+  const emailField = document.getElementById("email");
   emailField.scrollIntoView({behavior:"smooth", block:"center"});
-  setTimeout(()=>emailField.focus(),250);
+  setTimeout(() => emailField.focus(), 250);
 }
 
 async function check(){
 
-  const text=document.getElementById("text").value.trim()
-  const email=document.getElementById("email").value.trim().toLowerCase()
-  const result=document.getElementById("result")
+  const text = document.getElementById("text").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const result = document.getElementById("result");
 
   if(!text){
-    result.innerText="Paste a message to analyze."
-    result.style.display="block"
-    return
+    result.innerText = "Paste a message to analyze.";
+    result.style.display = "block";
+    return;
   }
 
-  result.style.display="block"
-  result.innerText="Analyzing..."
+  result.style.display = "block";
+  result.innerText = "Analyzing...";
 
   try{
 
-    const response=await fetch(API+"/analyze",{
+    const response = await fetch(API + "/analyze", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({text,email})
-    })
+    });
 
-    const data=await response.json()
+    const data = await response.json();
 
     if(data.limit){
-      result.innerHTML="Unlimited scam checks available."
-      showUpgrade()
-      return
+      result.innerHTML = "Unlimited scam checks available.";
+      showUpgrade();
+      return;
     }
 
-    result.innerHTML=data.result
+    result.innerHTML = formatResult(data.result);
 
-    if(data.result && data.result.toLowerCase().includes("high")){
-      showUpgrade()
+    if(data.result && data.result.toLowerCase().includes("risk level: high")){
+      showUpgrade();
     }
 
   }catch(e){
-    result.innerText="Unable to analyze right now. Please try again."
+    result.innerText = "Unable to analyze right now. Please try again.";
   }
 
 }
 
 async function checkout(priceId){
 
-  const pageUrl=window.location.origin+window.location.pathname
+  const pageUrl = window.location.origin + window.location.pathname;
 
-  const response=await fetch(API+"/create-checkout",{
+  const response = await fetch(API + "/create-checkout", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       priceId,
       email:null,
-      successUrl:pageUrl+"?subscribed=true",
+      successUrl:pageUrl + "?subscribed=true",
       cancelUrl:pageUrl
     })
-  })
+  });
 
-  const data=await response.json()
+  const data = await response.json();
 
   if(data.url){
-    window.location=data.url
+    window.location = data.url;
   }else{
-    alert("Checkout failed. Please try again.")
+    alert("Checkout failed.");
   }
 
 }
 </script>
 
 </body>
-</html>
+</html> 
