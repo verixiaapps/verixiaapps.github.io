@@ -250,6 +250,24 @@ margin:0 0 16px;
 padding-left:20px;
 }
 
+.related-links{
+margin:0;
+padding-left:20px;
+}
+
+.related-links li{
+margin-bottom:8px;
+}
+
+.related-links a{
+color:#2563eb;
+text-decoration:none;
+}
+
+.related-links a:hover{
+text-decoration:underline;
+}
+
 .footer{
 text-align:center;
 margin-top:70px;
@@ -338,10 +356,10 @@ font-size:14px;
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">
 <div class="content-block">
-<p>Amazon scams often manifest as emails or text messages that claim there is an issue with your account, such as a failed payment or a need for verification. These messages typically include links that appear to direct you to the official Amazon website but actually lead to fraudulent sites designed to harvest your login credentials. Some scams may even come in the form of phone calls from individuals posing as Amazon representatives, further complicating the situation by creating a sense of urgency and authority.</p>
-<p>The main tactic behind these scams is to exploit your trust in Amazon and create a sense of panic. Messages often state that your account will be suspended or that immediate action is required to avoid losing access to your purchases. This urgency can cloud your judgment, making you more likely to click on links or provide personal information without taking the time to verify the source. Scammers know that the fear of losing access to your account can lead to hasty decisions.</p>
-<p>Variations of Amazon scams can include fake product listings on third-party websites that promise unbelievable deals, only to take your money without delivering any goods. Some scams may involve phishing attempts where you receive an email claiming you’ve won a gift card or a refund, prompting you to click a link that leads to a malicious site. Others may involve social media ads that mimic Amazon promotions, luring you into providing sensitive information under the guise of a legitimate transaction.</p>
-<p>The dangers of falling for an Amazon scam are significant. Victims may find themselves facing unauthorized charges, loss of access to their accounts, or even identity theft. Once scammers have your personal information, they can exploit it in various ways, leading to financial loss and emotional distress. Because these scams closely mimic legitimate communications from Amazon, many individuals only realize they’ve been duped after it’s too late, making awareness and vigilance crucial in protecting oneself.</p>
+<p>You might receive a message claiming there’s an issue with your Amazon account, perhaps saying your subscription has been canceled or that there’s a problem with a recent order. The email or text often mimics Amazon's official style, complete with logos and familiar language. It may include a link that seems legitimate, directing you to a page that looks just like the real Amazon site, designed to trick you into entering your login credentials or payment information.</p>
+<p>These scams often create a sense of urgency to manipulate your response. You might read that your account will be suspended unless you verify your information immediately. This pressure can cloud your judgment, making you feel like you need to act quickly without taking the time to think it through or check the details. The fear of losing access to your account can push you to click without hesitation.</p>
+<p>Variations of this scam can appear in different ways. You might get a call from someone claiming to be Amazon customer service, offering a refund or asking for verification of your account details. Some scams come as fake order confirmations or notifications about a delivery that never existed, prompting you to click on links or provide personal information. The language may change, but the intent remains the same: to extract your sensitive information.</p>
+<p>If you fall for one of these scams, the consequences can be severe. Scammers could gain access to your Amazon account, allowing them to make unauthorized purchases or even steal your payment information. This can lead to financial loss, identity theft, and a long, frustrating process to regain control of your accounts. Many people only realize they’ve been scammed after it’s too late, leaving them vulnerable to further exploitation.</p>
 </div>
 
 <h2>Common Warning Signs</h2>
@@ -357,7 +375,8 @@ font-size:14px;
 </div>
 
   <h3 style="margin-top:28px;">Related Scam Checks</h3>
-  <ul class="related-links"></ul>
+  <ul class="related-links"><li><a href="/scam-check-now/is-this-a-scam/">Check Another Scam Message</a></li>
+</ul>
 </section>
 
 <footer class="footer">
@@ -371,8 +390,8 @@ font-size:14px;
 </footer>
 
 <script>
-const API="https://awake-integrity-production-faa0.up.railway.app"
-const RAW_KEYWORD="amazon"
+const API="https://awake-integrity-production-faa0.up.railway.app";
+const RAW_KEYWORD="amazon";
 
 window.addEventListener("load", function(){
   const params = new URLSearchParams(window.location.search);
@@ -410,7 +429,6 @@ function cleanSeoContent(){
 }
 
 function formatResult(raw){
-
   const lines = raw.split("\n").filter(l => l.trim());
 
   let risk = "";
@@ -465,7 +483,6 @@ function scrollToEmail(){
 }
 
 async function check(){
-
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
   const result = document.getElementById("result");
@@ -480,7 +497,6 @@ async function check(){
   result.innerText = "Analyzing...";
 
   try{
-
     const response = await fetch(API + "/analyze", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
@@ -500,15 +516,12 @@ async function check(){
     if(data.result && data.result.toLowerCase().includes("risk level: high")){
       showUpgrade();
     }
-
   }catch(e){
     result.innerText = "Unable to analyze right now. Please try again.";
   }
-
 }
 
 async function checkout(priceId){
-
   const pageUrl = window.location.origin + window.location.pathname;
 
   const response = await fetch(API + "/create-checkout", {
@@ -529,9 +542,8 @@ async function checkout(priceId){
   }else{
     alert("Checkout failed.");
   }
-
 }
 </script>
 
 </body>
-</html> 
+</html>
