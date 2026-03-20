@@ -15,10 +15,24 @@ def slugify(text):
     return text.strip("-")
 
 
+def normalize_keyword(text):
+    return re.sub(r"\s+", " ", text.strip().lower())
+
+
+def display_keyword(text):
+    kw = normalize_keyword(text)
+    if kw.endswith(" scam"):
+        kw = kw[:-5].strip()
+    return kw
+
+
+def title_case(text):
+    return " ".join(word.capitalize() for word in text.split())
+
+
 def load_keywords():
     with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
-        # remove duplicates + normalize
-        return list(dict.fromkeys([k.strip().lower() for k in f if k.strip()]))
+        return list(dict.fromkeys([normalize_keyword(k) for k in f if k.strip()]))
 
 
 def load_template():
@@ -27,16 +41,15 @@ def load_template():
 
 
 def build_title(keyword):
-    kw = keyword.lower().strip()
-    if kw.endswith(" scam"):
-        kw = kw.replace(" scam", "")
-    return f"Is {kw.title()} a Scam? (Real Check & Warning Signs)"
+    kw = title_case(display_keyword(keyword))
+    return f"Is {kw} a Scam? (Real Check & Warning Signs)"
 
 
 def build_description(keyword):
+    keyword_title = title_case(normalize_keyword(keyword))
     return (
-        f"Is {keyword.title()} a scam or legit? Check real risk signals, warning signs, "
-        f"and what to do next. Free AI scam checker for {keyword} messages, emails, or links."
+        f"Is {keyword_title} a scam or legit? Check real risk signals, warning signs, "
+        f"and what to do next. Free AI scam checker for {normalize_keyword(keyword)} messages, emails, or links."
     )
 
 
@@ -46,35 +59,34 @@ def build_canonical(slug):
 
 def build_page(keyword, template, all_pages):
     slug = slugify(keyword)
+    keyword_display = display_keyword(keyword)
 
-    # AI content with stronger fallback
     try:
         content = generate_content(keyword)
-    except:
+    except Exception:
         content = (
-            f"{keyword.title()} scams are commonly used to trick people into sending money or sharing sensitive information. "
-            f"If you receive a message related to {keyword}, avoid clicking unknown links, do not send payments, "
-            f"and verify the source through official channels. Scammers often create urgency or impersonate trusted brands."
+            f"<p>{title_case(normalize_keyword(keyword))} scams are commonly used to trick people into sending money or sharing sensitive information. "
+            f"If you receive a message related to {normalize_keyword(keyword)}, avoid clicking unknown links, do not send payments, "
+            f"and verify the source through official channels. Scammers often create urgency or impersonate trusted brands.</p>"
         )
 
     title = build_title(keyword)
     description = build_description(keyword)
     canonical = build_canonical(slug)
 
-    # Better related linking (SEO boost)
     related_candidates = [p for p in all_pages if p["slug"] != slug]
     random.shuffle(related_candidates)
     related_pages = related_candidates[:5]
 
     related_links = "\n".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {r["keyword"].title()} a Scam?</a></li>'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>'
         for r in related_pages
     )
 
     html = template
     html = html.replace("{{TITLE}}", title)
     html = html.replace("{{DESCRIPTION}}", description)
-    html = html.replace("{{KEYWORD}}", keyword)
+    html = html.replace("{{KEYWORD}}", keyword_display)
     html = html.replace("{{AI_CONTENT}}", content)
     html = html.replace("{{RELATED_LINKS}}", related_links)
     html = html.replace("{{CANONICAL_URL}}", canonical)
@@ -97,7 +109,6 @@ def main():
     keywords = load_keywords()
     template = load_template()
 
-    # prepare for internal linking
     all_pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
 
     for keyword in keywords:
