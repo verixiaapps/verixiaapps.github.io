@@ -9,17 +9,14 @@ OUTPUT_FILE = "data/keywords.txt"
 PREFIXES = [
     "",
     "is ",
-    "how to ",
-    "can you ",
-    "should i ",
+    "is this ",
+    "how to spot ",
 ]
 
 SUFFIXES = [
     "",
     " scam",
     " legit",
-    " safe",
-    " real",
 ]
 
 MAX_KEYWORDS = 5000  # safety cap
@@ -43,8 +40,6 @@ def is_valid(phrase):
     if len(phrase) < 5:
         return False
     if phrase.count("{") > 0:
-        return False
-    if "  " in phrase:
         return False
     return True
 
