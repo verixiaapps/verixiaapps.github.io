@@ -1,320 +1,3 @@
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
-import Stripe from "stripe";
-
-const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-app.use(cors());
-app.use(express.json());
-
-/* -------------------------
-   STORAGE (free usage only)
--------------------------- */
-
-const freeChecks = {};
-const FREE_LIMIT = 3;
-
-/* -------------------------
-   STRIPE WEBHOOK
--------------------------- */
-
-app.post(
-  "/stripe-webhook",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
-    try {
-      const event = JSON.parse(req.body.toString());
-      console.log("Stripe event:", event.type);
-      res.status(200).json({ received: true });
-    } catch (err) {
-      console.log("Webhook error:", err);
-      res.status(400).send("Webhook failed");
-    }
-  }
-);
-
-/* -------------------------
-   CHECK ACTIVE SUBSCRIPTION
--------------------------- */
-
-async function hasActiveSubscription(email) {
-  try {
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    if (customers.data.length === 0) return false;
-
-    const customerId = customers.data[0].id;
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
-
-    return subscriptions.data.length > 0;
-  } catch (error) {
-    console.log("Stripe subscription check error:", error);
-    return false;
-  }
-}
-
-/* -------------------------
-   ROOT
--------------------------- */
-
-app.get("/", (req, res) => {
-  res.send("Scam Check API running");
-});
-
-/* -------------------------
-   SEO CONTENT GENERATION
--------------------------- */
-
-app.post("/seo-content", async (req, res) => {
-  const keyword = req.body.keyword;
-  if (!keyword) return res.status(400).json({ error: "Missing keyword" });
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.4,
-        messages: [
-          {
-            role: "system",
-            content: `
-You write direct, high-intent scam-awareness content for users who are actively checking suspicious messages.
-
-Your writing must:
-- sound practical, clear, and trustworthy
-- avoid fluff and generic phrases like "in today's digital age"
-- avoid sounding academic, robotic, or repetitive
-- focus on what the scam looks like, why it is risky, and what the user should do next
-- be easy to scan on mobile
-- use proper capitalization for brand names and common services
-- never use markdown symbols such as #, ##, ###, *, or **
-- never output a title that repeats the exact page H1
-- never include introductory filler or broad history of scams
-- never mention that the article is SEO-friendly or educational
-
-Return clean HTML only.
-Allowed tags: <p>, <h3>, <ul>, <li>, <strong>
-Do not wrap the answer in <html>, <body>, or <section>.
-`
-          },
-          {
-            role: "user",
-            content: `
-Write clean HTML content about "${keyword}" scams.
-
-Use this EXACT structure and order:
-
-<h3>What This Scam Usually Looks Like</h3>
-- 2 short paragraphs explaining how this scam usually appears, what the message often says, and what it tries to get the user to do
-
-<h3>Warning Signs</h3>
-- 1 short paragraph
-- then 4 concise bullet points
-
-<h3>What To Do Next</h3>
-- 2 short paragraphs telling the reader exactly what to do if they receive this kind of message
-
-Rules:
-- 320 to 450 words total
-- short paragraphs only
-- no markdown
-- no repeated headings
-- no phrase like "understanding scams"
-- no filler
-- keep it specific, practical, and urgent without sounding alarmist
-- refer to the scam naturally based on the keyword
-- do not repeat the keyword excessively
-`
-          }
-        ]
-      })
-    });
-
-    const data = await response.json();
-
-    res.json({
-      content: data.choices?.[0]?.message?.content || ""
-    });
-  } catch (error) {
-    console.log("SEO content error:", error);
-    res.status(500).json({ error: "SEO generation failed" });
-  }
-});
-
-/* -------------------------
-   SCAM ANALYSIS
--------------------------- */
-
-app.post("/analyze", async (req, res) => {
-  const ip =
-    req.headers["x-forwarded-for"]?.split(",")[0] ||
-    req.socket.remoteAddress;
-
-  const email = req.body.email?.trim().toLowerCase() || null;
-  const text = req.body.text;
-
-  if (!text) return res.status(400).json({ error: "No text provided" });
-
-  let allowCheck = true;
-
-  if (email) {
-    const active = await hasActiveSubscription(email);
-
-    if (!active) {
-      if (!freeChecks[ip]) freeChecks[ip] = 0;
-      if (freeChecks[ip] >= FREE_LIMIT) allowCheck = false;
-      else freeChecks[ip]++;
-    }
-  } else {
-    if (!freeChecks[ip]) freeChecks[ip] = 0;
-    if (freeChecks[ip] >= FREE_LIMIT) allowCheck = false;
-    else freeChecks[ip]++;
-  }
-
-  if (!allowCheck) {
-    return res.json({
-      limit: true,
-      message: "Free checks used. Upgrade for unlimited scam detection."
-    });
-  }
-
-  try {
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `
-You are a scam detection system.
-
-Analyze the message and return output in this EXACT format:
-
-Risk Level: HIGH / MEDIUM / LOW
-
-Key Signals:
-- (max 3 short bullet points describing why this is risky or suspicious)
-
-Recommended Action:
-- (max 3 short bullet points telling the user what to do next)
-
-Rules:
-- plain text only
-- no JSON
-- no markdown bold
-- keep bullets short
-- do not put actions inside Key Signals
-- HIGH means clear scam traits like urgency, impersonation, suspicious links, account threats, payment pressure, or credential theft risk
-- MEDIUM means mixed or unclear signals that still require caution
-- LOW means limited obvious scam signals, but still recommend verification through official sources
-`
-            },
-            {
-              role: "user",
-              content: text
-            }
-          ],
-          temperature: 0.2
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    let result =
-      data.choices?.[0]?.message?.content ||
-      "Unable to analyze message.";
-
-    result = result.replace(/\*\*/g, "").trim();
-
-    if (!result.toLowerCase().includes("risk level")) {
-      result = `Risk Level: MEDIUM
-
-Key Signals:
-- Unable to verify sender
-- Message is unclear or incomplete
-- There may be hidden risk
-
-Recommended Action:
-- Do not click any links
-- Verify through official sources
-- Wait before taking action`;
-    }
-
-    res.json({ result });
-  } catch (error) {
-    console.log("Analysis error:", error);
-    res.status(500).json({ error: "Analysis failed" });
-  }
-});
-
-/* -------------------------
-   STRIPE CHECKOUT (FIXED)
--------------------------- */
-
-app.post("/create-checkout", async (req, res) => {
-  const { priceId, email, successUrl, cancelUrl } = req.body;
-
-  if (!priceId) return res.status(400).json({ error: "Missing priceId" });
-
-  const safeEmail = email || undefined;
-
-  let successRedirect = successUrl;
-  let cancelRedirect = cancelUrl;
-
-  if (!successRedirect || !cancelRedirect) {
-    let referer =
-      req.headers.referer ||
-      "https://verixiaapps.com/scam-check-now/is-this-a-scam/";
-
-    referer = referer.split("?")[0];
-
-    successRedirect = `${referer}?subscribed=true&conversion=1`;
-    cancelRedirect = referer;
-  }
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      ...(safeEmail && { customer_email: safeEmail }),
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successRedirect,
-      cancel_url: cancelRedirect
-    });
-
-    res.json({ url: session.url });
-  } catch (error) {
-    console.log("Checkout error:", error);
-    res.status(500).json({ error: "Checkout failed" });
-  }
-});
-
-/* -------------------------
-   SERVER
--------------------------- */
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -376,16 +59,9 @@ overflow:hidden;
 text-overflow:ellipsis;
 }
 
-@supports (padding: max(0px)) {
-  .top-bar{
-    padding-left:max(12px, env(safe-area-inset-left));
-    padding-right:max(12px, env(safe-area-inset-right));
-  }
-}
-
 .hero{
 text-align:center;
-padding:20px 20px 30px;
+padding:20px 20px 28px;
 }
 
 .hero h1{
@@ -440,7 +116,7 @@ min-height:50px;
 width:100%;
 background:#3b82f6;
 color:white;
-margin-top:12px;
+margin-top:14px;
 font-weight:600;
 box-shadow:0 8px 20px rgba(59,130,246,.25);
 }
@@ -546,10 +222,8 @@ border:none;
 padding:0;
 min-height:auto;
 font-size:13px;
-font-weight:500;
 color:#6b7280;
 text-decoration:underline;
-box-shadow:none;
 }
 
 .content-section{
@@ -571,22 +245,9 @@ color:#111827;
 margin:0 0 14px;
 }
 
-.content-body ul,
-.content-body ol{
+.content-body ul{
 margin:0 0 16px;
 padding-left:20px;
-}
-
-.content-body li{
-margin-bottom:8px;
-}
-
-.related-links{
-margin-top:14px;
-}
-
-.related-links li{
-margin-bottom:10px;
 }
 
 .footer{
@@ -608,72 +269,68 @@ font-size:14px;
 
 <div class="hero">
   <h1 id="heroKeyword"></h1>
-  <p>Paste the message below before you click, reply, send money, or share personal information.</p>
-  <div class="note">Used to check thousands of suspicious messages every day</div>
+  <p>Check a suspicious message before you click, reply, or send money.</p>
+  <div class="note">Used to check thousands of suspicious messages daily</div>
 </div>
 
 <div class="container">
 
-  <textarea id="text" placeholder="Paste a suspicious message, email, website or job offer here..."></textarea>
+  <textarea id="text" placeholder="Paste a suspicious message, email, website, or job offer..."></textarea>
 
-  <div class="note">Examples: job offer, PayPal message, crypto link, email, text message</div>
-
-  <div class="note">
-    No signup required • 3 free checks included
-  </div>
-
-  <input id="email" placeholder="Already subscribed? Enter your email to continue with unlimited checks">
+  <div class="note">Examples: delivery text, PayPal alert, crypto message, job offer</div>
 
   <div class="note">
-    Use the same email you entered during checkout
+    No signup required • 3 free checks
   </div>
+
+  <input id="email" placeholder="Already subscribed? Enter your email for unlimited checks">
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — your unlimited access is ready
+    ✅ Payment successful — unlimited access is active
   </div>
 
   <button class="check" onclick="check()">Check Scam Risk</button>
 
   <div class="note">
-    Get a clear risk level, warning signs, and what to do next
+    Instant risk level, key warning signs, and what to do next
   </div>
 
   <div id="result"></div>
 
   <div class="upgrade" id="upgrade">
 
-    <h3>⚠️ This Message Shows High Scam Risk</h3>
+    <h3>⚠️ High Risk Detected</h3>
 
     <div class="note">
-      Messages like this are designed to steal money, personal details, or account access. Check again before you click, reply, or send anything.
+      Messages like this often try to steal money, accounts, or personal information.
     </div>
 
     <div style="margin-top:8px;font-size:13px;color:#6b7280;">
-      Scammers often send follow-up texts and emails after the first message
+      Scammers often send follow-up messages after the first one
     </div>
 
     <div style="margin-bottom:10px;font-size:14px;color:#6b7280;">
-      Stay protected with unlimited instant scam checks • Cancel anytime
+      Stay protected with unlimited checks • Cancel anytime
     </div>
 
-    <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Stay Protected – Weekly</button>
-    <button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Best Value – Monthly ⭐</button>
-    <button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Stay Protected – Yearly</button>
+    <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+    <button class="plan" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly (Best Value)</button>
+    <button class="plan" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly</button>
 
     <div style="margin-top:14px;font-size:13px;color:#6b7280;">
-      Secure payments powered by Stripe
+      Secure payments via Stripe
     </div>
 
     <div class="subscriber-link">
-      <button type="button" onclick="scrollToEmail()">Already subscribed? Continue here</button>
+      <button type="button" onclick="scrollToEmail()">Already subscribed? Continue</button>
     </div>
 
   </div>
 
   <div id="resultAction" class="resultAction">
-    <p style="margin-bottom:10px;font-weight:600;">Check suspicious messages anytime from your phone</p>
+    <p style="margin-bottom:10px;font-weight:600;">Check messages anytime on your phone</p>
     <a href="https://apps.apple.com/app/id6759490910" target="_blank">
-      <button>📱 Get the Scam Check App</button>
+      <button>📱 Get the App</button>
     </a>
   </div>
 
@@ -684,21 +341,21 @@ font-size:14px;
   <div id="seoContent" class="content-body">
 <h2>Is Amazon Scam a Scam?</h2>
 <p><h3>What This Scam Usually Looks Like</h3>
-<p>Amazon scams often come in the form of emails or text messages that claim there is an issue with your account. These messages may state that your account has been compromised or that an order you didn’t place is pending. They typically include a link that directs you to a fake website designed to look like the official Amazon site.</p>
-<p>The goal of these messages is to trick you into entering your personal information, such as your password or credit card details. Once the scammers have this information, they can access your real account or make unauthorized purchases.</p>
+<p>Amazon scams frequently appear as emails or text messages claiming there’s an issue with your account, such as a payment failure, a suspicious login attempt, or a delivery problem. These messages often create a sense of urgency, suggesting that immediate action is required to avoid account suspension or to ensure your package is delivered.</p>
+<p>Typically, the message includes a link that directs you to a fraudulent website designed to mimic Amazon’s official site. The goal is to trick you into entering your login credentials or personal information, allowing scammers to gain unauthorized access to your account or steal your identity.</p>
 
 <h3>Warning Signs</h3>
-<p>Be cautious if you receive any communication that seems off, especially if it creates a sense of urgency. Here are some common indicators:</p>
+<p>Recognizing the common traits of these scams can help you avoid falling victim to them.</p>
 <ul>
-<li>The sender's email address does not match Amazon's official domain.</li>
-<li>The message contains grammatical errors or awkward phrasing.</li>
-<li>It asks you to click on a link to resolve an issue.</li>
-<li>The message threatens account suspension if you do not act immediately.</li>
+<li>The message urges you to click a link to resolve an urgent issue</li>
+<li>The sender’s email address or phone number appears suspicious or unfamiliar</li>
+<li>The message contains threats of account suspension or immediate action required</li>
+<li>You are prompted to provide sensitive information, such as passwords or credit card details</li>
 </ul>
 
 <h3>What To Do Next</h3>
-<p>If you receive a suspicious message claiming to be from Amazon, do not click any links or provide personal information. Instead, visit the official Amazon website directly by typing the URL into your browser. Check your account settings and recent orders for any unauthorized activity.</p>
-<p>If you confirm that the message was a scam, report it to Amazon through their official channels. You can also forward the email or message to their phishing email address. Taking these steps helps protect your account and others from similar scams.</p></p>
+<p>If you receive a suspicious message claiming to be from Amazon, do not click any links. Instead, directly log into your Amazon account through the official app or website to check for any notifications or issues. This ensures you’re accessing the legitimate site and not a scam.</p>
+<p>If you have already clicked on a link or entered your information, change your password immediately and review your account for any unauthorized transactions. Additionally, consider enabling two-factor authentication for added security. If you remain uncertain about the message, report it to Amazon’s customer service for verification.</p></p>
 
 <h2>Common Warning Signs</h2>
 <ul>
@@ -722,9 +379,8 @@ font-size:14px;
     <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank">Terms and Privacy Policy</a>.
   </div>
   <div style="margin-top:10px">
-    Scam Check Now © 2026 • AI-powered scam detection • Not legal or financial advice
+    Scam Check Now © 2026 • AI-powered scam detection
   </div>
-  <div style="margin-top:8px">Secure payments powered by Stripe • No stored messages</div>
 </footer>
 
 <script>
@@ -743,33 +399,8 @@ window.addEventListener("load", function(){
   cleanSeoContent();
 });
 
-function normalizeKeyword(raw){
-  if(!raw) return "this message";
-
-  let keyword = raw
-    .replace(/\s+/g, " ")
-    .trim();
-
-  keyword = keyword.replace(/\bamazon\b/gi, "Amazon");
-  keyword = keyword.replace(/\bpaypal\b/gi, "PayPal");
-  keyword = keyword.replace(/\busps\b/gi, "USPS");
-  keyword = keyword.replace(/\bups\b/gi, "UPS");
-  keyword = keyword.replace(/\busaa\b/gi, "USAA");
-  keyword = keyword.replace(/\bcash app\b/gi, "Cash App");
-  keyword = keyword.replace(/\bfacebook\b/gi, "Facebook");
-  keyword = keyword.replace(/\binstagram\b/gi, "Instagram");
-  keyword = keyword.replace(/\bwhatsapp\b/gi, "WhatsApp");
-  keyword = keyword.replace(/\bapple\b/gi, "Apple");
-  keyword = keyword.replace(/\bamazon scam\b/gi, "Amazon");
-  keyword = keyword.replace(/\bpaypal scam\b/gi, "PayPal");
-  keyword = keyword.replace(/\busps scam\b/gi, "USPS");
-  keyword = keyword.replace(/\bcash app scam\b/gi, "Cash App");
-
-  return keyword;
-}
-
 function setKeywordHeadings(){
-  const keyword = normalizeKeyword(RAW_KEYWORD);
+  const keyword = RAW_KEYWORD || "this message";
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam?`;
   document.getElementById("contentHeading").textContent = `How ${keyword} Scams Work`;
 }
@@ -779,9 +410,7 @@ function cleanSeoContent(){
   if(!seoContent) return;
 
   seoContent.innerHTML = seoContent.innerHTML
-    .replace(/(^|>|\n)\s*#{1,6}\s*/g, "$1")
     .replace(/\*\*/g, "")
-    .replace(/<h3>\s*Is .*? a Scam\?\s*<\/h3>/gi, "")
     .replace(/<p>\s*<\/p>/g, "");
 }
 
@@ -797,41 +426,6 @@ function scrollToEmail(){
   setTimeout(()=>emailField.focus(),250);
 }
 
-function parseSections(text){
-  const sections = text
-    .split(/\n|\./)
-    .map(l=>l.trim())
-    .filter(l=>l.length>20);
-
-  return sections.slice(0,3);
-}
-
-function formatResult(text){
-
-  let risk="unknown"
-  if(text.toLowerCase().includes("high")) risk="high"
-  else if(text.toLowerCase().includes("medium")) risk="medium"
-  else if(text.toLowerCase().includes("low")) risk="low"
-
-  const bullets=parseSections(text).map(l=>`<li>${l}</li>`).join("")
-
-  return `
-  <div class="result-card">
-    <div class="risk ${risk}">Risk Level: ${risk.toUpperCase()}</div>
-
-    <div class="result-section">
-      <div class="section-title">Key Signals</div>
-      <ul>${bullets}</ul>
-    </div>
-
-    <div class="result-section">
-      <div class="section-title">Recommended Action</div>
-      <div>Avoid clicking, replying, or sending money until you verify through official sources.</div>
-    </div>
-  </div>
-  `
-}
-
 async function check(){
 
   const text=document.getElementById("text").value.trim()
@@ -839,7 +433,7 @@ async function check(){
   const result=document.getElementById("result")
 
   if(!text){
-    result.innerText="Paste a message, email, or link to analyze."
+    result.innerText="Paste a message to analyze."
     result.style.display="block"
     return
   }
@@ -858,19 +452,16 @@ async function check(){
     const data=await response.json()
 
     if(data.limit){
-      result.innerHTML="Stay protected with unlimited scam checks."
+      result.innerHTML="Unlimited scam checks available."
       showUpgrade()
-      document.getElementById("resultAction").style.display="block"
       return
     }
 
-    result.innerHTML=formatResult(data.result)
+    result.innerHTML=data.result
 
     if(data.result && data.result.toLowerCase().includes("high")){
       showUpgrade()
     }
-
-    document.getElementById("resultAction").style.display="block"
 
   }catch(e){
     result.innerText="Unable to analyze right now. Please try again."
