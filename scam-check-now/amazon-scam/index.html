@@ -281,7 +281,7 @@ font-size:14px;
 <body>
 
 <div class="top-bar">
-  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank">📱 Get App</a>
+  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
   <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 </div>
 
@@ -345,7 +345,7 @@ font-size:14px;
 
   <div id="resultAction" class="resultAction">
     <p style="margin-bottom:10px;font-weight:600;">Check messages anytime on your phone</p>
-    <a href="https://apps.apple.com/app/id6759490910" target="_blank">
+    <a href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">
       <button>📱 Get the App</button>
     </a>
   </div>
@@ -356,10 +356,10 @@ font-size:14px;
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">
 <div class="content-block">
-<p>You might receive a message that claims there’s an issue with your Amazon account, often appearing in your email or as a text. The sender may use official Amazon logos and language to make it seem legitimate. The message could say something like your payment didn’t go through or that there’s a suspicious login attempt. It usually includes a link that directs you to a website that looks just like Amazon’s, but it’s designed to capture your login credentials or personal information.</p>
-<p>These scams often create a sense of urgency to push you into action. You may read that your account will be suspended unless you verify your information immediately. This tactic plays on your fear of losing access to your purchases or missing out on important orders. The pressure to act quickly can cloud your judgment, making it harder to pause and think critically about the situation.</p>
-<p>Variations of this scam can come in many forms. You might get a call from someone claiming to be Amazon customer service, offering assistance with a supposed issue. Alternatively, you could see ads for incredible deals on popular items that require you to provide personal information upfront. Some scammers may even send fake refund notifications, asking for your bank details to process a nonexistent refund. While the details may differ, the underlying goal remains the same: to trick you into giving away your information.</p>
-<p>If you fall victim to this scam, the consequences can be severe. Scammers may gain access to your Amazon account, leading to unauthorized purchases that could drain your bank account. They might also harvest your personal information for identity theft, which can take months or even years to resolve. The emotional toll of realizing you’ve been deceived can be just as damaging, leaving you feeling vulnerable and mistrustful of future communications.</p>
+<p>You might receive a message claiming there’s an issue with your Amazon account, perhaps stating that your payment method has been declined or that your recent order can’t be processed. The email or text often includes Amazon’s logo and a link that seems legitimate, making it easy to mistake for an official communication. If you click on that link, you could be directed to a counterfeit website that looks just like Amazon’s, designed to capture your login credentials or credit card information.</p>
+<p>These scams thrive on urgency and fear. You might read that your account will be suspended unless you verify your information immediately. This tactic is meant to provoke a quick response, pushing you to act without thinking. The language is often alarming, suggesting that your account is at risk or that you need to resolve a payment issue right away. In that moment, the pressure can make it hard to pause and assess the situation clearly.</p>
+<p>Variations of this scam are everywhere. You might get a phone call from someone claiming to be Amazon customer service, insisting they need to verify your account details. Other times, you could see ads on social media offering gift cards or discounts that require you to provide personal information. Some messages may even ask you to confirm a one-time code sent to your phone, all under the guise of protecting your account. While the specifics may differ, the underlying intent remains the same: to trick you into giving away sensitive information.</p>
+<p>If you fall for one of these scams, the consequences can be severe. Scammers could gain access to your Amazon account, allowing them to make unauthorized purchases or change your account settings. Beyond financial loss, there’s the risk of identity theft, where your personal information could be sold or used for further fraudulent activities. Many people only realize they’ve been scammed when they notice unfamiliar charges or receive alerts about changes to their accounts, often feeling helpless and frustrated after the fact.</p>
 </div>
 
 <h2>Common Warning Signs</h2>
@@ -374,15 +374,15 @@ font-size:14px;
 <p>If you receive a message related to Amazon, do not click links or send money. Verify directly through official sources and report suspicious activity.</p>
 </div>
 
-  <h3 style="margin-top:28px;">Related Scam Checks</h3>
-  <ul class="related-links"><li><a href="/scam-check-now/is-this-a-scam/">Check Another Scam Message</a></li>
+  <h3 id="relatedHeading" style="margin-top:28px;">Related Scam Checks</h3>
+  <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-this-a-scam/">Check Another Scam Message</a></li>
 </ul>
 </section>
 
 <footer class="footer">
   <div>
     By using this website you agree to our
-    <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank">Terms and Privacy Policy</a>.
+    <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
   </div>
   <div style="margin-top:10px">
     Scam Check Now © 2026 • AI-powered scam detection
@@ -390,28 +390,29 @@ font-size:14px;
 </footer>
 
 <script>
-const API="https://awake-integrity-production-faa0.up.railway.app";
-const RAW_KEYWORD="amazon";
+const API = "https://awake-integrity-production-faa0.up.railway.app";
+const RAW_KEYWORD = "amazon";
 
-window.addEventListener("load", function(){
+window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
-  if(params.get("subscribed") === "true"){
+  if (params.get("subscribed") === "true") {
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   setKeywordHeadings();
   cleanSeoContent();
+  cleanRelatedLinks();
 });
 
-function toTitleCase(str){
-  return str.replace(/\w\S*/g, function(txt){
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function (txt) {
     return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
   });
 }
 
-function setKeywordHeadings(){
+function setKeywordHeadings() {
   const keywordRaw = RAW_KEYWORD || "this message";
   const keyword = toTitleCase(keywordRaw);
 
@@ -419,16 +420,31 @@ function setKeywordHeadings(){
   document.getElementById("contentHeading").textContent = `How ${keyword} Scams Work`;
 }
 
-function cleanSeoContent(){
+function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
-  if(!seoContent) return;
+  if (!seoContent) return;
 
   seoContent.innerHTML = seoContent.innerHTML
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "");
 }
 
-function formatResult(raw){
+function cleanRelatedLinks() {
+  const relatedLinks = document.getElementById("relatedLinks");
+  const relatedHeading = document.getElementById("relatedHeading");
+  if (!relatedLinks || !relatedHeading) return;
+
+  relatedLinks.innerHTML = relatedLinks.innerHTML.replace(/\*\*/g, "").trim();
+
+  const links = relatedLinks.querySelectorAll("li a");
+
+  if (links.length === 0) {
+    relatedLinks.style.display = "none";
+    relatedHeading.style.display = "none";
+  }
+}
+
+function formatResult(raw) {
   const lines = raw.split("\n").filter(l => l.trim());
 
   let risk = "";
@@ -439,15 +455,15 @@ function formatResult(raw){
   lines.forEach(line => {
     const trimmed = line.trim();
 
-    if(trimmed.toLowerCase().includes("risk level")){
+    if (trimmed.toLowerCase().includes("risk level")) {
       risk = trimmed.split(":").slice(1).join(":").trim();
-    }else if(trimmed.toLowerCase().includes("key signals")){
+    } else if (trimmed.toLowerCase().includes("key signals")) {
       mode = "signals";
-    }else if(trimmed.toLowerCase().includes("recommended action")){
+    } else if (trimmed.toLowerCase().includes("recommended action")) {
       mode = "actions";
-    }else if(trimmed.startsWith("-")){
-      if(mode === "signals") signals.push(trimmed.replace(/^-+\s*/, ""));
-      if(mode === "actions") actions.push(trimmed.replace(/^-+\s*/, ""));
+    } else if (trimmed.startsWith("-")) {
+      if (mode === "signals") signals.push(trimmed.replace(/^-+\s*/, ""));
+      if (mode === "actions") actions.push(trimmed.replace(/^-+\s*/, ""));
     }
   });
 
@@ -470,24 +486,24 @@ function formatResult(raw){
   `;
 }
 
-function showUpgrade(){
+function showUpgrade() {
   const el = document.getElementById("upgrade");
   el.style.display = "block";
-  setTimeout(() => el.scrollIntoView({behavior:"smooth"}), 100);
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
 }
 
-function scrollToEmail(){
+function scrollToEmail() {
   const emailField = document.getElementById("email");
-  emailField.scrollIntoView({behavior:"smooth", block:"center"});
+  emailField.scrollIntoView({ behavior: "smooth", block: "center" });
   setTimeout(() => emailField.focus(), 250);
 }
 
-async function check(){
+async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
   const result = document.getElementById("result");
 
-  if(!text){
+  if (!text) {
     result.innerText = "Paste a message to analyze.";
     result.style.display = "block";
     return;
@@ -496,16 +512,16 @@ async function check(){
   result.style.display = "block";
   result.innerText = "Analyzing...";
 
-  try{
+  try {
     const response = await fetch(API + "/analyze", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({text,email})
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, email })
     });
 
     const data = await response.json();
 
-    if(data.limit){
+    if (data.limit) {
       result.innerHTML = "Unlimited scam checks available.";
       showUpgrade();
       return;
@@ -513,33 +529,33 @@ async function check(){
 
     result.innerHTML = formatResult(data.result);
 
-    if(data.result && data.result.toLowerCase().includes("risk level: high")){
+    if (data.result && data.result.toLowerCase().includes("risk level: high")) {
       showUpgrade();
     }
-  }catch(e){
+  } catch (e) {
     result.innerText = "Unable to analyze right now. Please try again.";
   }
 }
 
-async function checkout(priceId){
+async function checkout(priceId) {
   const pageUrl = window.location.origin + window.location.pathname;
 
   const response = await fetch(API + "/create-checkout", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       priceId,
-      email:null,
-      successUrl:pageUrl + "?subscribed=true",
-      cancelUrl:pageUrl
+      email: null,
+      successUrl: pageUrl + "?subscribed=true",
+      cancelUrl: pageUrl
     })
   });
 
   const data = await response.json();
 
-  if(data.url){
+  if (data.url) {
     window.location = data.url;
-  }else{
+  } else {
     alert("Checkout failed.");
   }
 }
