@@ -1,3 +1,320 @@
+import express from "express";
+import fetch from "node-fetch";
+import cors from "cors";
+import Stripe from "stripe";
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+app.use(cors());
+app.use(express.json());
+
+/* -------------------------
+   STORAGE (free usage only)
+-------------------------- */
+
+const freeChecks = {};
+const FREE_LIMIT = 3;
+
+/* -------------------------
+   STRIPE WEBHOOK
+-------------------------- */
+
+app.post(
+  "/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    try {
+      const event = JSON.parse(req.body.toString());
+      console.log("Stripe event:", event.type);
+      res.status(200).json({ received: true });
+    } catch (err) {
+      console.log("Webhook error:", err);
+      res.status(400).send("Webhook failed");
+    }
+  }
+);
+
+/* -------------------------
+   CHECK ACTIVE SUBSCRIPTION
+-------------------------- */
+
+async function hasActiveSubscription(email) {
+  try {
+    const customers = await stripe.customers.list({ email, limit: 1 });
+    if (customers.data.length === 0) return false;
+
+    const customerId = customers.data[0].id;
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "active",
+      limit: 1,
+    });
+
+    return subscriptions.data.length > 0;
+  } catch (error) {
+    console.log("Stripe subscription check error:", error);
+    return false;
+  }
+}
+
+/* -------------------------
+   ROOT
+-------------------------- */
+
+app.get("/", (req, res) => {
+  res.send("Scam Check API running");
+});
+
+/* -------------------------
+   SEO CONTENT GENERATION
+-------------------------- */
+
+app.post("/seo-content", async (req, res) => {
+  const keyword = req.body.keyword;
+  if (!keyword) return res.status(400).json({ error: "Missing keyword" });
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.4,
+        messages: [
+          {
+            role: "system",
+            content: `
+You write direct, high-intent scam-awareness content for users who are actively checking suspicious messages.
+
+Your writing must:
+- sound practical, clear, and trustworthy
+- avoid fluff and generic phrases like "in today's digital age"
+- avoid sounding academic, robotic, or repetitive
+- focus on what the scam looks like, why it is risky, and what the user should do next
+- be easy to scan on mobile
+- use proper capitalization for brand names and common services
+- never use markdown symbols such as #, ##, ###, *, or **
+- never output a title that repeats the exact page H1
+- never include introductory filler or broad history of scams
+- never mention that the article is SEO-friendly or educational
+
+Return clean HTML only.
+Allowed tags: <p>, <h3>, <ul>, <li>, <strong>
+Do not wrap the answer in <html>, <body>, or <section>.
+`
+          },
+          {
+            role: "user",
+            content: `
+Write clean HTML content about "${keyword}" scams.
+
+Use this EXACT structure and order:
+
+<h3>What This Scam Usually Looks Like</h3>
+- 2 short paragraphs explaining how this scam usually appears, what the message often says, and what it tries to get the user to do
+
+<h3>Warning Signs</h3>
+- 1 short paragraph
+- then 4 concise bullet points
+
+<h3>What To Do Next</h3>
+- 2 short paragraphs telling the reader exactly what to do if they receive this kind of message
+
+Rules:
+- 320 to 450 words total
+- short paragraphs only
+- no markdown
+- no repeated headings
+- no phrase like "understanding scams"
+- no filler
+- keep it specific, practical, and urgent without sounding alarmist
+- refer to the scam naturally based on the keyword
+- do not repeat the keyword excessively
+`
+          }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    res.json({
+      content: data.choices?.[0]?.message?.content || ""
+    });
+  } catch (error) {
+    console.log("SEO content error:", error);
+    res.status(500).json({ error: "SEO generation failed" });
+  }
+});
+
+/* -------------------------
+   SCAM ANALYSIS
+-------------------------- */
+
+app.post("/analyze", async (req, res) => {
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.socket.remoteAddress;
+
+  const email = req.body.email?.trim().toLowerCase() || null;
+  const text = req.body.text;
+
+  if (!text) return res.status(400).json({ error: "No text provided" });
+
+  let allowCheck = true;
+
+  if (email) {
+    const active = await hasActiveSubscription(email);
+
+    if (!active) {
+      if (!freeChecks[ip]) freeChecks[ip] = 0;
+      if (freeChecks[ip] >= FREE_LIMIT) allowCheck = false;
+      else freeChecks[ip]++;
+    }
+  } else {
+    if (!freeChecks[ip]) freeChecks[ip] = 0;
+    if (freeChecks[ip] >= FREE_LIMIT) allowCheck = false;
+    else freeChecks[ip]++;
+  }
+
+  if (!allowCheck) {
+    return res.json({
+      limit: true,
+      message: "Free checks used. Upgrade for unlimited scam detection."
+    });
+  }
+
+  try {
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `
+You are a scam detection system.
+
+Analyze the message and return output in this EXACT format:
+
+Risk Level: HIGH / MEDIUM / LOW
+
+Key Signals:
+- (max 3 short bullet points describing why this is risky or suspicious)
+
+Recommended Action:
+- (max 3 short bullet points telling the user what to do next)
+
+Rules:
+- plain text only
+- no JSON
+- no markdown bold
+- keep bullets short
+- do not put actions inside Key Signals
+- HIGH means clear scam traits like urgency, impersonation, suspicious links, account threats, payment pressure, or credential theft risk
+- MEDIUM means mixed or unclear signals that still require caution
+- LOW means limited obvious scam signals, but still recommend verification through official sources
+`
+            },
+            {
+              role: "user",
+              content: text
+            }
+          ],
+          temperature: 0.2
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    let result =
+      data.choices?.[0]?.message?.content ||
+      "Unable to analyze message.";
+
+    result = result.replace(/\*\*/g, "").trim();
+
+    if (!result.toLowerCase().includes("risk level")) {
+      result = `Risk Level: MEDIUM
+
+Key Signals:
+- Unable to verify sender
+- Message is unclear or incomplete
+- There may be hidden risk
+
+Recommended Action:
+- Do not click any links
+- Verify through official sources
+- Wait before taking action`;
+    }
+
+    res.json({ result });
+  } catch (error) {
+    console.log("Analysis error:", error);
+    res.status(500).json({ error: "Analysis failed" });
+  }
+});
+
+/* -------------------------
+   STRIPE CHECKOUT (FIXED)
+-------------------------- */
+
+app.post("/create-checkout", async (req, res) => {
+  const { priceId, email, successUrl, cancelUrl } = req.body;
+
+  if (!priceId) return res.status(400).json({ error: "Missing priceId" });
+
+  const safeEmail = email || undefined;
+
+  let successRedirect = successUrl;
+  let cancelRedirect = cancelUrl;
+
+  if (!successRedirect || !cancelRedirect) {
+    let referer =
+      req.headers.referer ||
+      "https://verixiaapps.com/scam-check-now/is-this-a-scam/";
+
+    referer = referer.split("?")[0];
+
+    successRedirect = `${referer}?subscribed=true&conversion=1`;
+    cancelRedirect = referer;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      ...(safeEmail && { customer_email: safeEmail }),
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: successRedirect,
+      cancel_url: cancelRedirect
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.log("Checkout error:", error);
+    res.status(500).json({ error: "Checkout failed" });
+  }
+});
+
+/* -------------------------
+   SERVER
+-------------------------- */
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -290,7 +607,7 @@ font-size:14px;
 </div>
 
 <div class="hero">
-  <h1>Is {{KEYWORD}} a Scam?</h1>
+  <h1 id="heroKeyword"></h1>
   <p>Paste the message below before you click, reply, send money, or share personal information.</p>
   <div class="note">Used to check thousands of suspicious messages every day</div>
 </div>
@@ -363,7 +680,7 @@ font-size:14px;
 </div>
 
 <section class="content-section">
-  <h2>How {{KEYWORD}} Scams Work</h2>
+  <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
   <h3 style="margin-top:28px;">Related Scam Checks</h3>
@@ -383,6 +700,7 @@ font-size:14px;
 
 <script>
 const API="https://awake-integrity-production-faa0.up.railway.app"
+const RAW_KEYWORD="{{KEYWORD}}"
 
 window.addEventListener("load", function(){
   const params = new URLSearchParams(window.location.search);
@@ -392,8 +710,40 @@ window.addEventListener("load", function(){
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
+  setKeywordHeadings();
   cleanSeoContent();
 });
+
+function normalizeKeyword(raw){
+  if(!raw) return "this message";
+
+  let keyword = raw
+    .replace(/\s+/g, " ")
+    .trim();
+
+  keyword = keyword.replace(/\bamazon\b/gi, "Amazon");
+  keyword = keyword.replace(/\bpaypal\b/gi, "PayPal");
+  keyword = keyword.replace(/\busps\b/gi, "USPS");
+  keyword = keyword.replace(/\bups\b/gi, "UPS");
+  keyword = keyword.replace(/\busaa\b/gi, "USAA");
+  keyword = keyword.replace(/\bcash app\b/gi, "Cash App");
+  keyword = keyword.replace(/\bfacebook\b/gi, "Facebook");
+  keyword = keyword.replace(/\binstagram\b/gi, "Instagram");
+  keyword = keyword.replace(/\bwhatsapp\b/gi, "WhatsApp");
+  keyword = keyword.replace(/\bapple\b/gi, "Apple");
+  keyword = keyword.replace(/\bamazon scam\b/gi, "Amazon");
+  keyword = keyword.replace(/\bpaypal scam\b/gi, "PayPal");
+  keyword = keyword.replace(/\busps scam\b/gi, "USPS");
+  keyword = keyword.replace(/\bcash app scam\b/gi, "Cash App");
+
+  return keyword;
+}
+
+function setKeywordHeadings(){
+  const keyword = normalizeKeyword(RAW_KEYWORD);
+  document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam?`;
+  document.getElementById("contentHeading").textContent = `How ${keyword} Scams Work`;
+}
 
 function cleanSeoContent(){
   const seoContent = document.getElementById("seoContent");
@@ -401,7 +751,9 @@ function cleanSeoContent(){
 
   seoContent.innerHTML = seoContent.innerHTML
     .replace(/(^|>|\n)\s*#{1,6}\s*/g, "$1")
-    .replace(/<\/p>\s*<p>\s*<\/p>/g, "</p>");
+    .replace(/\*\*/g, "")
+    .replace(/<h3>\s*Is .*? a Scam\?\s*<\/h3>/gi, "")
+    .replace(/<p>\s*<\/p>/g, "");
 }
 
 function showUpgrade(){
@@ -417,8 +769,12 @@ function scrollToEmail(){
 }
 
 function parseSections(text){
-  const lines=text.split(/\n|\./).map(l=>l.trim()).filter(l=>l.length>20)
-  return lines.slice(0,4)
+  const sections = text
+    .split(/\n|\./)
+    .map(l=>l.trim())
+    .filter(l=>l.length>20);
+
+  return sections.slice(0,3);
 }
 
 function formatResult(text){
