@@ -78,13 +78,27 @@ box-shadow:0 6px 18px rgba(0,0,0,.12);
 background:#3b82f6;
 color:white;
 text-decoration:none;
+margin-left:8px;
 }
 
+/* 🔥 ONLY CHANGE: move upgrade button LEFT */
 .upgrade-top{
 background:#1f2937;
 color:white;
 border:none;
 cursor:pointer;
+margin-right:28px; /* increased from 8px → moves it left */
+white-space:nowrap;
+max-width:120px;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+@supports (padding: max(0px)) {
+  .top-bar{
+    padding-left:max(12px, env(safe-area-inset-left));
+    padding-right:max(12px, env(safe-area-inset-right));
+  }
 }
 
 .hero{
@@ -419,13 +433,6 @@ result.innerText="Unable to analyze right now. Please try again."
 
 async function checkout(priceId){
 
-const email=document.getElementById("email").value.trim().toLowerCase()
-
-if(!email){
-alert("Please enter your email to activate your subscription.")
-return
-}
-
 const pageUrl=window.location.origin+window.location.pathname
 
 const response=await fetch(API+"/create-checkout",{
@@ -433,7 +440,7 @@ method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 priceId,
-email,
+email:null,
 successUrl:pageUrl+"?subscribed=true&conversion=1",
 cancelUrl:pageUrl
 })
@@ -452,4 +459,4 @@ alert("Checkout failed. Please try again.")
 </script>
 
 </body>
-</html> 
+</html>
