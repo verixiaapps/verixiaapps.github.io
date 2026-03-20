@@ -21,21 +21,35 @@ PROTECTED_SLUGS = {"is-this-a-scam"}
 # -----------------------------
 def slugify(text):
     text = text.lower()
-    text = re.sub(r'[^a-z0-9]+', '-', text)
+    text = re.sub(r"[^a-z0-9]+", "-", text)
     return text.strip("-")
 
 
-def build_title(keyword):
-    kw = keyword.lower().strip()
+def normalize_keyword(text):
+    return re.sub(r"\s+", " ", text.strip().lower())
+
+
+def display_keyword(text):
+    kw = normalize_keyword(text)
     if kw.endswith(" scam"):
-        kw = kw.replace(" scam", "")
-    return f"Is {kw.title()} a Scam? (Real Check & Warning Signs)"
+        kw = kw[:-5].strip()
+    return kw
+
+
+def title_case(text):
+    return " ".join(word.capitalize() for word in text.split())
+
+
+def build_title(keyword):
+    kw = title_case(display_keyword(keyword))
+    return f"Is {kw} a Scam? (Real Check & Warning Signs)"
 
 
 def build_description(keyword):
+    keyword_title = title_case(normalize_keyword(keyword))
     return (
-        f"Is {keyword.title()} a scam or legit? Check warning signs, real risks, "
-        f"and what to do next. Free AI scam checker for {keyword}."
+        f"Is {keyword_title} a scam or legit? Check warning signs, real risks, "
+        f"and what to do next. Free AI scam checker for {normalize_keyword(keyword)}."
     )
 
 
@@ -45,7 +59,7 @@ def build_canonical(slug):
 
 def load_keywords():
     with open(KEYWORD_FILE, encoding="utf-8") as f:
-        return list(dict.fromkeys([k.strip().lower() for k in f if k.strip()]))
+        return list(dict.fromkeys([normalize_keyword(k) for k in f if k.strip()]))
 
 
 # -----------------------------
@@ -66,6 +80,7 @@ pages = [{"keyword": k, "slug": slugify(k)} for k in keywords]
 for page in pages:
     slug = page["slug"]
     keyword = page["keyword"]
+    keyword_display = display_keyword(keyword)
 
     # 🔒 Never touch protected page
     if slug in PROTECTED_SLUGS:
@@ -86,8 +101,7 @@ for page in pages:
     except Exception as e:
         print("AI generation failed for", keyword, ":", e)
         ai_text = f"""
-<h2>Is {keyword.title()} a Scam?</h2>
-<p>{keyword.title()} scams often involve requests for money, personal information, or urgent action.
+<p>{title_case(normalize_keyword(keyword))} scams often involve requests for money, personal information, or urgent action.
 Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
 """
 
@@ -101,7 +115,7 @@ Avoid clicking unknown links or sending funds. Always verify through official so
     related_pages = related_candidates[:RELATED_LINKS_COUNT]
 
     links_html = "".join([
-        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {r["keyword"].title()} a Scam?</a></li>\n'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>\n'
         for r in related_pages
     ])
 
@@ -109,12 +123,12 @@ Avoid clicking unknown links or sending funds. Always verify through official so
     html = template
     html = html.replace("{{TITLE}}", title)
     html = html.replace("{{DESCRIPTION}}", description)
-    html = html.replace("{{KEYWORD}}", keyword)
+    html = html.replace("{{KEYWORD}}", keyword_display)
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", links_html)
     html = html.replace("{{CANONICAL_URL}}", canonical)
 
-    # 🔥 ALWAYS overwrite (this is the key change)
+    # 🔥 ALWAYS overwrite
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
