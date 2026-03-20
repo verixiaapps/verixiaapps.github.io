@@ -20,6 +20,9 @@ logging.basicConfig(
 def clean_text(text: str) -> str:
     text = text.strip()
 
+    # remove markdown headings like ### ####
+    text = re.sub(r'#{1,6}\s*', '', text)
+
     # remove excessive whitespace
     text = re.sub(r'\n{3,}', '\n\n', text)
 
@@ -31,14 +34,16 @@ def clean_text(text: str) -> str:
 
 def enforce_structure(keyword: str, content: str) -> str:
     """
-    Ensures consistent SEO structure across all pages
+    Keeps structure consistent without duplicating the main page heading
+    or wrapping already formatted content inside a single paragraph.
     """
 
-    keyword_title = keyword.title()
+    keyword_clean = keyword.strip()
 
     return f"""
-<h2>Is {keyword_title} a Scam?</h2>
-<p>{content}</p>
+<div class="content-block">
+{content}
+</div>
 
 <h2>Common Warning Signs</h2>
 <ul>
@@ -49,16 +54,15 @@ def enforce_structure(keyword: str, content: str) -> str:
 </ul>
 
 <h2>What Should You Do?</h2>
-<p>If you receive a message related to {keyword}, do not click links or send money. Verify directly through official sources and report suspicious activity.</p>
+<p>If you receive a message related to {keyword_clean}, do not click links or send money. Verify directly through official sources and report suspicious activity.</p>
 """
 
 
 def fallback_content(keyword: str) -> str:
-    keyword_title = keyword.title()
+    keyword_clean = keyword.strip()
 
     return f"""
-<h2>Is {keyword_title} a Scam?</h2>
-<p>{keyword_title} scams are commonly used to trick people into sending money or sharing sensitive information. Scammers often impersonate trusted brands or create urgency.</p>
+<p>{keyword_clean} scams are commonly used to trick people into sending money or sharing sensitive information. Scammers often impersonate trusted brands or create urgency.</p>
 
 <h2>Common Warning Signs</h2>
 <ul>
