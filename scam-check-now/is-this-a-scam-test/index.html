@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Suspect a Scam? Instantly Know</title>
+<title>Is This a Scam? Free AI Scam Checker</title>
 <meta name="description" content="Paste a suspicious message, email, website, or job offer and instantly check if it may be a scam. Identify risk signals, understand the situation, and know what to do next.">
 <meta name="robots" content="index,follow">
 
@@ -31,213 +31,48 @@ window.addEventListener("load", function(){
 </script>
 
 <style>
-body {
-  font-family: system-ui,-apple-system,Arial;
-  background: linear-gradient(180deg,#eef2ff,#f8fafc);
-  margin: 0;
-  padding-top: 100px;
-  color: #1f2937;
-  line-height: 1.6;
+body{
+  font-family:system-ui,-apple-system,Arial;
+  background:linear-gradient(180deg,#eef2ff,#f8fafc);
+  margin:0;
+  padding-top:100px;
+  color:#1f2937;
+  line-height:1.6;
 }
-
-/* Top Bar */
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 18px;
-  z-index: 1000;
-  pointer-events: none;
-  opacity: 0.95;
-}
-.app-top, .upgrade-top {
-  pointer-events: auto;
-  padding: 10px 18px;
-  font-size: 15px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
-}
-.app-top {
-  background: #3b82f6;
-  color: white;
-  text-decoration: none;
-  margin-left: 8px;
-}
-.upgrade-top {
-  background: #1f2937;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-right: 28px;
-  white-space: nowrap;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Hero */
-.hero {
-  text-align: center;
-  padding: 50px 24px 60px;
-}
-.hero h1 {
-  margin: 0;
-  font-size: 40px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-.hero p {
-  margin-top: 16px;
-  font-size: 20px;
-  opacity: .95;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.hero .subline {
-  margin-top: 12px;
-  font-size: 17px;
-  color: #4b5563;
-  line-height: 1.5;
-}
-.hero .note {
-  margin-top: 10px;
-  font-size: 15px;
-  color: #4b5563;
-  font-weight: 500;
-}
-
-/* Container */
-.container {
-  max-width: 800px;
-  margin: auto;
-  background: white;
-  padding: 36px;
-  padding-bottom: 64px;
-  border-radius: 26px;
-  box-shadow: 0 45px 110px rgba(0,0,0,.14), 0 15px 40px rgba(0,0,0,.07);
-  animation: fadeSlide 0.45s ease-out;
-}
+.top-bar{position:fixed;top:0;left:0;width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 18px;z-index:1000;pointer-events:none;opacity:0.95;}
+.app-top, .upgrade-top{pointer-events:auto;padding:10px 18px;font-size:15px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);}
+.app-top{background:#3b82f6;color:white;text-decoration:none;margin-left:8px;}
+.upgrade-top{background:#1f2937;color:white;border:none;cursor:pointer;margin-right:28px;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;}
+.hero{text-align:center;padding:50px 24px 60px;}
+.hero h1{margin:0;font-size:40px;font-weight:900;line-height:1.2;}
+.hero p{margin-top:16px;font-size:20px;opacity:.95;max-width:720px;margin-left:auto;margin-right:auto;}
+.hero .subline{margin-top:12px;font-size:17px;color:#4b5563;line-height:1.5;}
+.hero .note{margin-top:10px;font-size:15px;color:#4b5563;font-weight:500;}
+.hero .social-proof{margin-top:12px;font-size:16px;color:#2563eb;font-weight:600;}
+.container{max-width:800px;margin:auto;background:white;padding:36px;padding-bottom:64px;border-radius:26px;box-shadow:0 45px 110px rgba(0,0,0,.14),0 15px 40px rgba(0,0,0,.07);animation: fadeSlide 0.45s ease-out;}
 @keyframes fadeSlide {from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);}}
-
-/* Inputs & Buttons */
-textarea,input {
-  width: 100%;
-  padding: 20px;
-  margin-top: 14px;
-  border-radius: 18px;
-  border: 1px solid #d1d5db;
-  font-size: 18px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.06);
-}
-textarea {height: 200px; resize: none;}
-textarea:focus,input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 6px rgba(59,130,246,.2);
-  outline: none;
-}
-button {
-  border: none;
-  border-radius: 18px;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 20px;
-  min-height: 60px;
-}
-.check {
-  width: 100%;
-  background: linear-gradient(90deg,#3b82f6,#1d4ed8);
-  color: white;
-  margin-top: 16px;
-  font-weight: 800;
-  box-shadow: 0 16px 48px rgba(59,130,246,.42);
-  transition: transform 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
-}
-.check:hover {
-  transform: scale(1.045);
-  box-shadow: 0 18px 60px rgba(59,130,246,.52);
-}
-
-/* Result & Upgrade Section */
-.note {
-  margin-top: 14px;
-  font-size: 16px;
-  color: #6b7280;
-  text-align: center;
-}
-.success {
-  margin-top: 16px;
-  font-size: 16px;
-  color: #166534;
-  text-align: center;
-  font-weight: 700;
-  display: none;
-}
-#result {margin-top: 32px; display: none;}
-.result-card {
-  background: white;
-  border-radius: 22px;
-  padding: 32px;
-  box-shadow: 0 35px 80px rgba(0,0,0,.1);
-  border: 1px solid #e5e7eb;
-}
-.risk {
-  font-size: 30px;
-  font-weight: 900;
-  margin-bottom: 18px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  display: inline-block;
-}
-.risk.high {background: #fee2e2; color: #b91c1c;}
-.risk.medium {background: #fef3c7; color: #92400e;}
-.risk.low {background: #dcfce7; color: #166534;}
-
-.resultAction {
-  display: none;
-  margin-top: 24px;
-  text-align: center;
-}
-.resultAction button {
-  background: #3b82f6;
-  color: white;
-  padding: 18px 28px;
-  border-radius: 14px;
-  font-weight: 800;
-}
-
-.upgrade {
-  display: none;
-  margin-top: 32px;
-  padding: 34px;
-  background: white;
-  border-radius: 22px;
-  text-align: center;
-  box-shadow: 0 40px 90px rgba(0,0,0,.1);
-  border: 1px solid #e5e7eb;
-}
-.plan {
-  width: 100%;
-  margin-top: 18px;
-  background: #3b82f6;
-  color: white;
-  font-weight: 800;
-  padding: 18px;
-  border-radius: 16px;
-}
-
-/* Footer */
-.footer {
-  text-align: center;
-  margin-top: 80px;
-  padding: 48px;
-  color: #6b7280;
-  font-size: 16px;
-}
+textarea,input{width:100%;padding:20px;margin-top:14px;border-radius:18px;border:1px solid #d1d5db;font-size:18px;box-shadow:0 6px 24px rgba(0,0,0,.06);}
+textarea{height:200px;resize:none;}
+textarea:focus,input:focus{border-color:#3b82f6;box-shadow:0 0 0 6px rgba(59,130,246,.2);outline:none;}
+button{border:none;border-radius:18px;cursor:pointer;font-size:18px;padding:20px;min-height:60px;}
+.check{width:100%;background: linear-gradient(90deg,#3b82f6,#1d4ed8);color:white;margin-top:16px;font-weight:800;box-shadow:0 16px 48px rgba(59,130,246,.42);transition: transform 0.18s ease-in-out, box-shadow 0.18s ease-in-out;}
+.check:hover{transform:scale(1.045);box-shadow:0 18px 60px rgba(59,130,246,.52);}
+.note{margin-top:14px;font-size:16px;color:#6b7280;text-align:center;}
+.success{margin-top:16px;font-size:16px;color:#166534;text-align:center;font-weight:700;display:none;}
+#result{margin-top:32px;display:none;}
+.result-card{background:white;border-radius:22px;padding:32px;box-shadow:0 35px 80px rgba(0,0,0,.1);border:1px solid #e5e7eb;}
+.risk{font-size:30px;font-weight:900;margin-bottom:18px;padding:14px 18px;border-radius:14px;display:inline-block;}
+.risk.high{background:#fee2e2;color:#b91c1c;}
+.risk.medium{background:#fef3c7;color:#92400e;}
+.risk.low{background:#dcfce7;color:#166534;}
+.section{margin-top:22px;}
+.section-title{font-weight:900;margin-bottom:10px;}
+ul{margin:0;padding-left:22px;}
+.resultAction{display:none;margin-top:24px;text-align:center;}
+.resultAction button{background:#3b82f6;color:white;padding:18px 28px;border-radius:14px;font-weight:800;}
+.upgrade{display:none;margin-top:32px;padding:34px;background:white;border-radius:22px;text-align:center;box-shadow:0 40px 90px rgba(0,0,0,.1);border:1px solid #e5e7eb;}
+.plan{width:100%;margin-top:18px;background:#3b82f6;color:white;font-weight:800;padding:18px;border-radius:16px;}
+.footer{text-align:center;margin-top:80px;padding:48px;color:#6b7280;font-size:16px;}
 </style>
 </head>
 
@@ -249,21 +84,22 @@ button {
 </div>
 
 <div class="hero">
-<h1>Suspect a Scam? Instantly Know</h1>
-<p>Paste your message and get an <strong>instant AI-powered risk analysis</strong> before you click, reply, or send money.</p>
-<div class="subline">Detect phishing, fake jobs, crypto scams, and impersonation attempts in seconds — act fast.</div>
-<div class="note">50,000+ people use this daily ✅ Trusted by thousands daily — stay protected worldwide</div>
+<h1>Think This Might Be a Scam?</h1>
+<p>Paste the message and get an instant AI-powered risk analysis before you click, reply, or send money.</p>
+<div class="subline">Detects phishing, fake job offers, crypto scams, and impersonation attempts in seconds.</div>
+<div class="note">Trusted by thousands daily to stay safe worldwide</div>
+<div class="social-proof">Join 50,000+ people checking messages, emails, and links daily for scam protection.</div>
 </div>
 
 <div class="container">
 <textarea id="text" placeholder="Paste a suspicious message, email, website, or job offer here..."></textarea>
-<div class="note">Examples: job offers, PayPal messages, crypto links, emails, or texts</div>
-<div class="note">✅ No signup required — 3 free checks included</div>
+<div class="note">Examples: job offer, PayPal message, crypto link, email, text message</div>
+<div class="note">No signup required • 3 free checks included</div>
 <input id="email" placeholder="Enter your payment email to unlock access" style="display:none">
 <div id="postPurchase" class="success">✅ Payment successful — your unlimited access is ready</div>
 
-<button class="check" onclick="check()">🔎 Check This Message Now & See Risk Level Instantly</button>
-<div class="note">See the <strong>risk level</strong>, <strong>key warning signs</strong>, and <strong>exact steps</strong> to protect yourself instantly.</div>
+<button class="check" onclick="check()">🔎 Check This Message Now</button>
+<div class="note">Get a clear risk level, key warning signs, and actionable steps</div>
 
 <div id="result"></div>
 
@@ -294,89 +130,11 @@ button {
 <script>
 const API="https://awake-integrity-production-faa0.up.railway.app";
 
-function showUpgrade() {
-  const el = document.getElementById("upgrade");
-  if(el) {
-    el.style.display = "block";
-    setTimeout(() => el.scrollIntoView({behavior:"smooth"}), 100);
-  } else {
-    console.error("Upgrade container not found");
-  }
-}
-
-function parseSections(text){
-  const lines = text.split(/\n|\./).map(l => l.trim()).filter(l => l.length > 20);
-  return lines.slice(0,5);
-}
-
-function formatResult(text){
-  let risk="unknown";
-  if(text.toLowerCase().includes("high")) risk="high";
-  else if(text.toLowerCase().includes("medium")) risk="medium";
-  else if(text.toLowerCase().includes("low")) risk="low";
-  const bullets=parseSections(text).map(l=>`<li>${l}</li>`).join("");
-  return `<div class="result-card">
-    <div class="risk ${risk}">Risk Level: ${risk.toUpperCase()}</div>
-    <div class="section">
-      <div class="section-title">Key Signals</div>
-      <ul>${bullets}</ul>
-    </div>
-    <div class="section">
-      <div class="section-title">Recommended Action</div>
-      <div>Do not reply, do not click links, and verify directly through official sources.</div>
-    </div>
-  </div>`;
-}
-
-async function check(){
-  const text=document.getElementById("text").value.trim();
-  const result=document.getElementById("result");
-  if(!text){
-    result.innerText="Paste a message, email, or link to analyze.";
-    result.style.display="block";
-    return;
-  }
-  result.style.display="block";
-  result.innerText="Analyzing...";
-  try{
-    const response = await fetch(API+"/analyze",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({text})
-    });
-    const data = await response.json();
-    if(data.limit){
-      result.innerHTML="Stay protected with unlimited scam checks.";
-      document.getElementById("resultAction").style.display="block";
-      showUpgrade();
-      return;
-    }
-    result.innerHTML = formatResult(data.result);
-    document.getElementById("resultAction").style.display="block";
-  }catch(e){
-    result.innerText="Unable to analyze right now. Please try again.";
-  }
-}
-
-async function checkout(priceId){
-  const pageUrl = window.location.origin + window.location.pathname;
-  const response = await fetch(API+"/create-checkout",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      priceId,
-      email:null,
-      successUrl: pageUrl+"?subscribed=true&conversion=1",
-      cancelUrl: pageUrl
-    })
-  });
-  const data = await response.json();
-  if(data.url){
-    window.location=data.url;
-  } else {
-    alert("Checkout failed. Please try again");
-  }
-}
+function showUpgrade(){const el=document.getElementById("upgrade");el.style.display="block";setTimeout(()=>el.scrollIntoView({behavior:"smooth"}),100);}
+function parseSections(text){const lines=text.split(/\n|\./).map(l=>l.trim()).filter(l=>l.length>20);return lines.slice(0,5);}
+function formatResult(text){let risk="unknown";if(text.toLowerCase().includes("high")) risk="high";else if(text.toLowerCase().includes("medium")) risk="medium";else if(text.toLowerCase().includes("low")) risk="low";const bullets=parseSections(text).map(l=>`<li>${l}</li>`).join("");return `<div class="result-card"><div class="risk ${risk}">Risk Level: ${risk.toUpperCase()}</div><div class="section"><div class="section-title">Key Signals</div><ul>${bullets}</ul></div><div class="section"><div class="section-title">Recommended Action</div><div>Do not reply, do not click links, and verify directly through official sources.</div></div></div>`;}
+async function check(){const text=document.getElementById("text").value.trim();const result=document.getElementById("result");if(!text){result.innerText="Paste a message, email, or link to analyze.";result.style.display="block";return;} result.style.display="block";result.innerText="Analyzing...";try{const response=await fetch(API+"/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});const data=await response.json();if(data.limit){result.innerHTML="Stay protected with unlimited scam checks.";document.getElementById("resultAction").style.display="block";showUpgrade();return;} result.innerHTML=formatResult(data.result);document.getElementById("resultAction").style.display="block";}catch(e){result.innerText="Unable to analyze right now. Please try again.";}}
+async function checkout(priceId){const pageUrl=window.location.origin+window.location.pathname;const response=await fetch(API+"/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId,email:null,successUrl:pageUrl+"?subscribed=true&conversion=1",cancelUrl:pageUrl})});const data=await response.json();if(data.url){window.location=data.url;}else{alert("Checkout failed. Please try again");}}
 </script>
 
 </body>
