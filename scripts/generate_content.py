@@ -15,6 +15,24 @@ logging.basicConfig(
 )
 
 # -----------------------------
+# KEYWORD HELPERS
+# -----------------------------
+def normalize_keyword(text: str) -> str:
+    return re.sub(r"\s+", " ", text.strip().lower())
+
+
+def display_keyword(text: str) -> str:
+    kw = normalize_keyword(text)
+    if kw.endswith(" scam"):
+        kw = kw[:-5].strip()
+    return kw
+
+
+def title_case(text: str) -> str:
+    return " ".join(word.capitalize() for word in text.split())
+
+
+# -----------------------------
 # CLEANING + STRUCTURE
 # -----------------------------
 def clean_text(text: str) -> str:
@@ -23,22 +41,33 @@ def clean_text(text: str) -> str:
     # remove markdown headings like ### ####
     text = re.sub(r'#{1,6}\s*', '', text)
 
-    # remove excessive whitespace
+    # normalize line endings
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+
+    # remove excessive blank lines
     text = re.sub(r'\n{3,}', '\n\n', text)
 
-    # basic cleanup
-    text = re.sub(r'[ \t]+', ' ', text)
+    # split into paragraphs on blank lines
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
 
-    return text
+    # collapse single-line breaks and extra spaces inside each paragraph
+    cleaned_paragraphs = []
+    for p in paragraphs:
+        p = p.replace("\n", " ")
+        p = re.sub(r'[ \t]+', ' ', p).strip()
+        if p:
+            cleaned_paragraphs.append(f"<p>{p}</p>")
+
+    return "\n".join(cleaned_paragraphs)
 
 
 def enforce_structure(keyword: str, content: str) -> str:
     """
-    Keeps structure consistent without duplicating the main page heading
-    or wrapping already formatted content inside a single paragraph.
+    Keeps structure consistent and renders AI output as real HTML paragraphs.
     """
 
-    keyword_clean = keyword.strip()
+    keyword_display = display_keyword(keyword)
+    keyword_title = title_case(keyword_display)
 
     return f"""
 <div class="content-block">
@@ -54,15 +83,16 @@ def enforce_structure(keyword: str, content: str) -> str:
 </ul>
 
 <h2>What Should You Do?</h2>
-<p>If you receive a message related to {keyword_clean}, do not click links or send money. Verify directly through official sources and report suspicious activity.</p>
+<p>If you receive a message related to {keyword_title}, do not click links or send money. Verify directly through official sources and report suspicious activity.</p>
 """
 
 
 def fallback_content(keyword: str) -> str:
-    keyword_clean = keyword.strip()
+    keyword_display = display_keyword(keyword)
+    keyword_title = title_case(keyword_display)
 
     return f"""
-<p>{keyword_clean} scams are commonly used to trick people into sending money or sharing sensitive information. Scammers often impersonate trusted brands or create urgency.</p>
+<p>{keyword_title} scams are commonly used to trick people into sending money or sharing sensitive information. Scammers often impersonate trusted brands or create urgency.</p>
 
 <h2>Common Warning Signs</h2>
 <ul>
