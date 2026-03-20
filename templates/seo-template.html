@@ -298,7 +298,6 @@ font-size:14px;
   <div id="result"></div>
 
   <div class="upgrade" id="upgrade">
-
     <h3>⚠️ High Risk Detected</h3>
 
     <div class="note">
@@ -324,7 +323,6 @@ font-size:14px;
     <div class="subscriber-link">
       <button type="button" onclick="scrollToEmail()">Already subscribed? Continue</button>
     </div>
-
   </div>
 
   <div id="resultAction" class="resultAction">
@@ -370,8 +368,16 @@ window.addEventListener("load", function(){
   cleanSeoContent();
 });
 
+function toTitleCase(str){
+  return str.replace(/\w\S*/g, function(txt){
+    return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
+  });
+}
+
 function setKeywordHeadings(){
-  const keyword = RAW_KEYWORD || "this message";
+  const keywordRaw = RAW_KEYWORD || "this message";
+  const keyword = toTitleCase(keywordRaw);
+
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam?`;
   document.getElementById("contentHeading").textContent = `How ${keyword} Scams Work`;
 }
@@ -385,82 +391,125 @@ function cleanSeoContent(){
     .replace(/<p>\s*<\/p>/g, "");
 }
 
+function formatResult(raw){
+
+  const lines = raw.split("\n").filter(l => l.trim());
+
+  let risk = "";
+  let signals = [];
+  let actions = [];
+  let mode = "";
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+
+    if(trimmed.toLowerCase().includes("risk level")){
+      risk = trimmed.split(":").slice(1).join(":").trim();
+    }else if(trimmed.toLowerCase().includes("key signals")){
+      mode = "signals";
+    }else if(trimmed.toLowerCase().includes("recommended action")){
+      mode = "actions";
+    }else if(trimmed.startsWith("-")){
+      if(mode === "signals") signals.push(trimmed.replace(/^-+\s*/, ""));
+      if(mode === "actions") actions.push(trimmed.replace(/^-+\s*/, ""));
+    }
+  });
+
+  const riskClass = risk.trim().toLowerCase();
+
+  return `
+  <div class="result-card">
+    <div class="risk ${riskClass}">${risk}</div>
+
+    <div class="result-section">
+      <div class="section-title">Key Signals</div>
+      <ul>${signals.map(s => `<li>${s}</li>`).join("")}</ul>
+    </div>
+
+    <div class="result-section">
+      <div class="section-title">Recommended Action</div>
+      <ul>${actions.map(a => `<li>${a}</li>`).join("")}</ul>
+    </div>
+  </div>
+  `;
+}
+
 function showUpgrade(){
-  const el=document.getElementById("upgrade");
-  el.style.display="block";
-  setTimeout(()=>el.scrollIntoView({behavior:"smooth"}),100);
+  const el = document.getElementById("upgrade");
+  el.style.display = "block";
+  setTimeout(() => el.scrollIntoView({behavior:"smooth"}), 100);
 }
 
 function scrollToEmail(){
-  const emailField=document.getElementById("email");
+  const emailField = document.getElementById("email");
   emailField.scrollIntoView({behavior:"smooth", block:"center"});
-  setTimeout(()=>emailField.focus(),250);
+  setTimeout(() => emailField.focus(), 250);
 }
 
 async function check(){
 
-  const text=document.getElementById("text").value.trim()
-  const email=document.getElementById("email").value.trim().toLowerCase()
-  const result=document.getElementById("result")
+  const text = document.getElementById("text").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const result = document.getElementById("result");
 
   if(!text){
-    result.innerText="Paste a message to analyze."
-    result.style.display="block"
-    return
+    result.innerText = "Paste a message to analyze.";
+    result.style.display = "block";
+    return;
   }
 
-  result.style.display="block"
-  result.innerText="Analyzing..."
+  result.style.display = "block";
+  result.innerText = "Analyzing...";
 
   try{
 
-    const response=await fetch(API+"/analyze",{
+    const response = await fetch(API + "/analyze", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({text,email})
-    })
+    });
 
-    const data=await response.json()
+    const data = await response.json();
 
     if(data.limit){
-      result.innerHTML="Unlimited scam checks available."
-      showUpgrade()
-      return
+      result.innerHTML = "Unlimited scam checks available.";
+      showUpgrade();
+      return;
     }
 
-    result.innerHTML=data.result
+    result.innerHTML = formatResult(data.result);
 
-    if(data.result && data.result.toLowerCase().includes("high")){
-      showUpgrade()
+    if(data.result && data.result.toLowerCase().includes("risk level: high")){
+      showUpgrade();
     }
 
   }catch(e){
-    result.innerText="Unable to analyze right now. Please try again."
+    result.innerText = "Unable to analyze right now. Please try again.";
   }
 
 }
 
 async function checkout(priceId){
 
-  const pageUrl=window.location.origin+window.location.pathname
+  const pageUrl = window.location.origin + window.location.pathname;
 
-  const response=await fetch(API+"/create-checkout",{
+  const response = await fetch(API + "/create-checkout", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       priceId,
       email:null,
-      successUrl:pageUrl+"?subscribed=true",
+      successUrl:pageUrl + "?subscribed=true",
       cancelUrl:pageUrl
     })
-  })
+  });
 
-  const data=await response.json()
+  const data = await response.json();
 
   if(data.url){
-    window.location=data.url
+    window.location = data.url;
   }else{
-    alert("Checkout failed. Please try again.")
+    alert("Checkout failed.");
   }
 
 }
