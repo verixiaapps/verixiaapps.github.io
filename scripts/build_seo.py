@@ -11,8 +11,15 @@ OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
 RELATED_LINKS_COUNT = 6
 
-# 🔒 PROTECTED PAGES (DO NOT GENERATE / OVERWRITE)
 PROTECTED_SLUGS = {"is-this-a-scam"}
+
+CLUSTER_TERMS = {
+    "amazon", "paypal", "zelle", "cash", "venmo", "facebook", "instagram",
+    "tiktok", "whatsapp", "telegram", "snapchat", "discord", "crypto",
+    "bitcoin", "ethereum", "usps", "fedex", "ups", "bank", "chase",
+    "wells", "america", "job", "loan", "credit", "romance", "gift",
+    "irs", "social", "verification", "phishing", "login", "account"
+}
 
 
 # -----------------------------
@@ -65,10 +72,15 @@ def keyword_tokens(text):
     return set(normalize_keyword(text).split())
 
 
+def keyword_cluster_tokens(text):
+    return {token for token in keyword_tokens(text) if token in CLUSTER_TERMS}
+
+
 def get_related_pages(current_page, all_pages, limit):
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
+    current_cluster_tokens = keyword_cluster_tokens(current_keyword)
     current_root = current_keyword.split()[0]
 
     candidates = [
@@ -79,24 +91,42 @@ def get_related_pages(current_page, all_pages, limit):
     def score(page):
         other_keyword = page["keyword"]
         other_tokens = keyword_tokens(other_keyword)
+        other_cluster_tokens = keyword_cluster_tokens(other_keyword)
+
         same_root = 1 if other_keyword.split()[0] == current_root else 0
-        shared = len(current_tokens & other_tokens)
-        length_diff = abs(len(other_keyword) - len(current_keyword))
-        return (-same_root, -shared, length_diff, other_keyword)
+        shared_cluster = len(current_cluster_tokens & other_cluster_tokens)
+        shared_tokens = len(current_tokens & other_tokens)
+        length_diff = abs(len(other_keyword.split()) - len(current_keyword.split()))
+
+        return (
+            -same_root,
+            -shared_cluster,
+            -shared_tokens,
+            length_diff,
+            other_keyword
+        )
 
     ranked = sorted(candidates, key=score)
 
-    # First try relevant pages
-    related = ranked[:limit]
+    related = []
+    used_slugs = set()
 
-    # If not enough relevant pages, fill with any other valid pages from scam-check-now
+    for page in ranked:
+        if page["slug"] in used_slugs:
+            continue
+        related.append(page)
+        used_slugs.add(page["slug"])
+        if len(related) == limit:
+            break
+
     if len(related) < limit:
-        used_slugs = {p["slug"] for p in related}
-        remaining = [
-            p for p in candidates
-            if p["slug"] not in used_slugs
-        ]
-        related.extend(remaining[: limit - len(related)])
+        for page in candidates:
+            if page["slug"] in used_slugs:
+                continue
+            related.append(page)
+            used_slugs.add(page["slug"])
+            if len(related) == limit:
+                break
 
     return related
 
@@ -125,7 +155,6 @@ for page in pages:
     keyword = page["keyword"]
     keyword_display = display_keyword(keyword)
 
-    # 🔒 Never touch protected page
     if slug in PROTECTED_SLUGS:
         print("Skipping protected page:", slug)
         continue
@@ -138,16 +167,14 @@ for page in pages:
     description = build_description(keyword)
     canonical = build_canonical(slug)
 
-    # Generate AI content
     try:
         ai_text = generate_content(keyword)
     except Exception as e:
         print("AI generation failed for", keyword, ":", e)
         ai_text = f"""
 <p>{title_case(display_keyword(keyword))} scams often involve requests for money, personal information, or urgent action. Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
-"""
+""".strip()
 
-    # Related links (always internal, always regenerated)
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
 
     links_html = "".join(
@@ -155,7 +182,6 @@ for page in pages:
         for r in related_pages
     )
 
-    # Fill template
     html = template
     html = html.replace("{{TITLE}}", title)
     html = html.replace("{{DESCRIPTION}}", description)
@@ -164,7 +190,6 @@ for page in pages:
     html = html.replace("{{RELATED_LINKS}}", links_html)
     html = html.replace("{{CANONICAL_URL}}", canonical)
 
-    # 🔥 ALWAYS overwrite
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
