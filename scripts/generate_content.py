@@ -15,6 +15,64 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
+WARNING_SECTION_TITLES = [
+    "Common Warning Signs",
+    "Red Flags To Watch For",
+    "Signs This Might Be A Scam",
+]
+
+ACTION_SECTION_TITLES = [
+    "What Should You Do?",
+    "What To Do Next",
+    "How To Respond Safely",
+]
+
+WARNING_BULLET_SETS = [
+    [
+        "Unexpected messages asking for money, codes, or personal information",
+        "Pressure to act quickly before you can verify the message",
+        "Links, websites, or senders that do not fully match the official source",
+        "Requests for payment by crypto, gift card, wire transfer, or other hard-to-reverse methods",
+    ],
+    [
+        "A sudden message that creates urgency without clear proof",
+        "Requests to click a link, log in, or confirm sensitive details",
+        "Sender names, websites, or contact details that do not fully match",
+        "Payment instructions that are hard to reverse or verify",
+    ],
+    [
+        "Warnings or alerts that push you to act before checking",
+        "Requests for verification codes, personal details, or payment",
+        "Suspicious links, fake support pages, or mismatched domains",
+        "Pressure to move off trusted platforms or official apps",
+    ],
+]
+
+ACTION_PARAGRAPHS = [
+    "If you received something related to {keyword}, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.",
+    "Before you respond to anything related to {keyword}, pause and verify it through an official source you find yourself. Do not rely on the message, caller, or link that contacted you.",
+    "If this appears to involve {keyword}, do not click links, send money, or share details until you confirm the situation through the official website, app, or customer support channel.",
+]
+
+FALLBACK_PARAGRAPH_SETS = [
+    [
+        "{keyword} messages are often designed to feel real at first glance. They may mention a payment issue, account problem, security alert, delivery update, job offer, or urgent request that pushes you to act before you stop and verify what you are seeing.",
+        "Many of these scams work by creating pressure. The message may tell you to click a link immediately, confirm personal details, send money, connect a wallet, or respond before a deadline. That urgency is often meant to stop you from checking whether the sender, website, or offer is legitimate.",
+        "Scammers also change the format depending on the situation. The same scam can show up as a text, email, job message, customer support alert, website pop-up, or payment request. The wording may change, but the goal is usually the same: get access to your money, account, or personal information.",
+    ],
+    [
+        "A {keyword} message can look routine at first, especially if it mentions an account issue, payment problem, verification request, or delivery update. The goal is usually to make the message feel familiar enough that you respond before stopping to question it.",
+        "These scams often create urgency fast. You may be told something is locked, delayed, suspended, rejected, or at risk unless you act right away. That pressure is meant to reduce the chance that you independently verify the sender or website.",
+        "The same basic scam can appear in different formats depending on the target. It may arrive as a text, email, direct message, support alert, pop-up, or fake website. Even when the wording changes, the message usually pushes you toward the same result: sharing information, clicking a risky link, or sending money.",
+    ],
+    [
+        "Messages related to {keyword} often work because they sound specific. They may reference a payment, account notice, security issue, order problem, support request, or other situation that makes the message feel immediately relevant.",
+        "A common pattern is speed and pressure. Instead of giving you time to think, the message may demand fast action, claim there is a deadline, or suggest something will go wrong if you do not respond immediately. That urgency is part of the scam.",
+        "Scammers also adapt the format to what feels most believable. You might see the same basic trick in a text, email, fake website, job message, customer support conversation, or payment request. The format changes, but the objective stays the same: get you to trust the message before you verify it.",
+    ],
+]
+
+
 # -----------------------------
 # KEYWORD HELPERS
 # -----------------------------
@@ -33,26 +91,26 @@ def title_case(text: str) -> str:
     return " ".join(word.capitalize() for word in text.split())
 
 
+def variant_index(keyword: str, count: int) -> int:
+    if count <= 0:
+        return 0
+    return sum(ord(char) for char in normalize_keyword(keyword)) % count
+
+
 # -----------------------------
 # CLEANING + STRUCTURE
 # -----------------------------
 def strip_markdown_artifacts(text: str) -> str:
     text = text.strip()
 
-    # remove code fences
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
-
-    # remove markdown headings
     text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
 
-    # normalize line endings
     text = text.replace("\r\n", "\n").replace("\r", "\n")
 
-    # convert markdown bullets into plain lines so they do not become junk paragraphs
     text = re.sub(r"^\s*[-*]\s+", "", text, flags=re.MULTILINE)
     text = re.sub(r"^\s*\d+\.\s+", "", text, flags=re.MULTILINE)
 
-    # remove excess blank lines
     text = re.sub(r"\n{3,}", "\n\n", text)
 
     return text.strip()
@@ -62,16 +120,26 @@ def split_paragraphs(text: str) -> list[str]:
     paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
     cleaned = []
 
+    skip_lines = {
+        "key signals",
+        "recommended action",
+        "common warning signs",
+        "what should you do?",
+        "red flags to watch for",
+        "signs this might be a scam",
+        "what to do next",
+        "how to respond safely",
+    }
+
     for p in paragraphs:
         p = p.replace("\n", " ")
         p = re.sub(r"[ \t]+", " ", p).strip()
 
-        # skip obvious junk lines
         if not p:
             continue
         if len(p) < 30:
             continue
-        if p.lower() in {"key signals", "recommended action", "common warning signs", "what should you do?"}:
+        if p.lower() in skip_lines:
             continue
 
         cleaned.append(p)
@@ -86,51 +154,61 @@ def clean_text(text: str) -> str:
 
 
 def is_usable_content(html: str) -> bool:
-    paragraph_count = html.count("<p>")
-    return paragraph_count >= MIN_PARAGRAPHS
+    return html.count("<p>") >= MIN_PARAGRAPHS
 
 
 def enforce_structure(keyword: str, content: str) -> str:
     keyword_title = title_case(display_keyword(keyword))
+    idx = variant_index(keyword, len(WARNING_SECTION_TITLES))
+
+    warning_title = WARNING_SECTION_TITLES[idx]
+    action_title = ACTION_SECTION_TITLES[idx]
+    warning_bullets = WARNING_BULLET_SETS[idx]
+    action_paragraph = ACTION_PARAGRAPHS[idx].format(keyword=keyword_title)
+
+    bullet_html = "\n".join(f"<li>{item}</li>" for item in warning_bullets)
 
     return f"""
 <div class="content-block">
 {content}
 </div>
 
-<h2>Common Warning Signs</h2>
+<h2>{warning_title}</h2>
 <ul>
-<li>Unexpected messages asking for money, codes, or personal information</li>
-<li>Pressure to act quickly before you can verify the message</li>
-<li>Links, websites, or senders that do not fully match the official source</li>
-<li>Requests for payment by crypto, gift card, wire transfer, or other hard-to-reverse methods</li>
+{bullet_html}
 </ul>
 
-<h2>What Should You Do?</h2>
-<p>If you received something related to {keyword_title}, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.</p>
+<h2>{action_title}</h2>
+<p>{action_paragraph}</p>
 """.strip()
 
 
 def fallback_content(keyword: str) -> str:
     keyword_title = title_case(display_keyword(keyword))
+    idx = variant_index(keyword, len(FALLBACK_PARAGRAPH_SETS))
+
+    paragraphs = "\n\n".join(
+        f"<p>{paragraph.format(keyword=keyword_title)}</p>"
+        for paragraph in FALLBACK_PARAGRAPH_SETS[idx]
+    )
+
+    warning_title = WARNING_SECTION_TITLES[idx]
+    action_title = ACTION_SECTION_TITLES[idx]
+    warning_bullets = WARNING_BULLET_SETS[idx]
+    action_paragraph = ACTION_PARAGRAPHS[idx].format(keyword=keyword_title)
+
+    bullet_html = "\n".join(f"<li>{item}</li>" for item in warning_bullets)
 
     return f"""
-<p>{keyword_title} messages are often designed to feel real at first glance. They may mention a payment issue, account problem, security alert, delivery update, job offer, or urgent request that pushes you to act before you stop and verify what you are seeing.</p>
+{paragraphs}
 
-<p>Many of these scams work by creating pressure. The message may tell you to click a link immediately, confirm personal details, send money, connect a wallet, or respond before a deadline. That urgency is often meant to stop you from checking whether the sender, website, or offer is legitimate.</p>
-
-<p>Scammers also change the format depending on the situation. The same scam can show up as a text, email, job message, customer support alert, website pop-up, or payment request. The wording may change, but the goal is usually the same: get access to your money, account, or personal information.</p>
-
-<h2>Common Warning Signs</h2>
+<h2>{warning_title}</h2>
 <ul>
-<li>Unexpected requests for money, codes, or personal information</li>
-<li>Urgent language that pushes immediate action</li>
-<li>Suspicious links, senders, or websites that are hard to verify</li>
-<li>Payment requests through crypto, gift cards, or wire transfer</li>
+{bullet_html}
 </ul>
 
-<h2>What Should You Do?</h2>
-<p>Do not click links, send money, or share information until you verify the message through an official source. If something feels rushed, mismatched, or hard to confirm, treat it cautiously until you can verify it independently.</p>
+<h2>{action_title}</h2>
+<p>{action_paragraph}</p>
 """.strip()
 
 
