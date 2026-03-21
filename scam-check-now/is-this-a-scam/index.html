@@ -17,6 +17,12 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'AW-17956428385');
 
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
+
+function isBrowserSubscribed(){
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
+
 window.addEventListener("load", function(){
 
   const params = new URLSearchParams(window.location.search);
@@ -32,11 +38,19 @@ window.addEventListener("load", function(){
     });
 
     sessionStorage.setItem("ads_conversion","1");
-    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   if(params.get("subscribed") === "true"){
+    localStorage.setItem(BROWSER_SUB_KEY,"true");
     document.getElementById("postPurchase").style.display = "block";
+  }
+
+  if(isBrowserSubscribed()){
+    document.getElementById("postPurchase").style.display = "block";
+  }
+
+  if(params.get("conversion") === "1" || params.get("subscribed") === "true"){
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
 });
@@ -424,7 +438,7 @@ font-size:24px;
 <div class="note">Use the same email you entered during checkout</div>
 
 <div id="postPurchase" class="success">
-✅ Payment successful — your unlimited protection is ready
+✅ Payment successful — unlimited protection is active on this browser
 </div>
 
 <div class="note">Get a clear risk verdict, the biggest red flags, and what to do before you act</div>
@@ -474,7 +488,7 @@ Scam Check Now © 2026 • Real-time scam detection engine • Not legal or fina
 
 <script>
 
-const API="https://awake-integrity-production-faa0.up.railway.app"
+const API="https://awake-integrity-production-faa0.up.railway.app";
 
 function escapeHtml(str){
 return String(str)
@@ -553,10 +567,15 @@ return `
 `;
 }
 
+function isBrowserSubscribed(){
+return localStorage.getItem("scam_check_browser_subscribed")==="true";
+}
+
 async function check(){
 
 const text=document.getElementById("text").value.trim();
 const email=document.getElementById("email").value.trim().toLowerCase();
+const subscribed=isBrowserSubscribed();
 const result=document.getElementById("result");
 
 if(!text){
@@ -573,7 +592,7 @@ try{
 const response=await fetch(API+"/analyze",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({text,email})
+body:JSON.stringify({text,email,subscribed})
 });
 
 const data=await response.json();
@@ -617,7 +636,6 @@ alert("Checkout failed. Please try again.");
 }
 
 }
-
 </script>
 
 </body>
