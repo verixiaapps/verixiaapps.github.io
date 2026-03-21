@@ -27,29 +27,29 @@ width:100%;
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:10px 12px;
+padding:10px 16px;
 z-index:1000;
 pointer-events:none;
 box-sizing:border-box;
 }
 
-.app-top,.upgrade-top{
+.logo{
+pointer-events:auto;
+font-size:14px;
+font-weight:600;
+color:#374151;
+margin-left:8px;
+letter-spacing:-.01em;
+opacity:.82;
+}
+
+.upgrade-top{
 pointer-events:auto;
 padding:8px 12px;
 font-size:14px;
 border-radius:10px;
 box-shadow:0 6px 18px rgba(0,0,0,.12);
 font-weight:600;
-}
-
-.app-top{
-background:#3b82f6;
-color:#fff;
-text-decoration:none;
-margin-left:8px;
-}
-
-.upgrade-top{
 background:#1f2937;
 color:#fff;
 border:none;
@@ -63,8 +63,8 @@ text-overflow:ellipsis;
 
 @supports (padding: max(0px)) {
   .top-bar{
-    padding-left:max(12px, env(safe-area-inset-left));
-    padding-right:max(12px, env(safe-area-inset-right));
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
   }
 }
 
@@ -86,7 +86,7 @@ color:#111827;
 .hero p{
 margin-top:14px;
 font-size:18px;
-max-width:700px;
+max-width:720px;
 margin-left:auto;
 margin-right:auto;
 color:#374151;
@@ -215,6 +215,17 @@ font-size:15px;
 color:#374151;
 }
 
+.result-payline{
+margin-top:14px;
+padding:14px 16px;
+background:#f8fafc;
+border:1px solid #e5e7eb;
+border-radius:12px;
+font-size:14px;
+color:#374151;
+font-weight:600;
+}
+
 .section-title{
 font-weight:700;
 margin-bottom:8px;
@@ -234,21 +245,6 @@ li{
 margin-bottom:8px;
 }
 
-.resultAction{
-display:none;
-margin-top:18px;
-text-align:center;
-}
-
-.resultAction button{
-background:#3b82f6;
-color:#fff;
-padding:14px 20px;
-border-radius:10px;
-font-weight:700;
-box-shadow:0 8px 20px rgba(59,130,246,.2);
-}
-
 .upgrade{
 display:none;
 margin-top:25px;
@@ -262,14 +258,14 @@ border:1px solid #e5e7eb;
 
 .upgrade h3{
 margin:0 0 8px;
-font-size:26px;
+font-size:28px;
 line-height:1.2;
 color:#111827;
 }
 
 .upgrade-copy{
 margin:0 auto;
-max-width:560px;
+max-width:580px;
 color:#4b5563;
 font-size:15px;
 }
@@ -312,7 +308,7 @@ cursor:pointer;
 
 .content-section{
 max-width:760px;
-margin:40px auto 0;
+margin:28px auto 0;
 background:#fff;
 padding:24px;
 border-radius:18px;
@@ -325,6 +321,16 @@ box-sizing:border-box;
 margin-top:0;
 color:#111827;
 line-height:1.25;
+}
+
+.content-bridge{
+margin:0 0 18px;
+padding:16px 18px;
+background:#f8fafc;
+border:1px solid #e5e7eb;
+border-radius:14px;
+font-size:15px;
+color:#374151;
 }
 
 .content-body p{
@@ -393,12 +399,18 @@ padding:20px;
 .top-bar{
 padding:10px 10px;
 }
-.app-top,.upgrade-top{
+.logo{
+font-size:13px;
+margin-left:2px;
+opacity:.78;
+}
+.upgrade-top{
 font-size:13px;
 padding:8px 10px;
+margin-right:0;
 }
 .upgrade h3{
-font-size:23px;
+font-size:24px;
 }
 }
 </style>
@@ -407,7 +419,7 @@ font-size:23px;
 <body>
 
 <div class="top-bar">
-  <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
+  <div class="logo">Scam Check</div>
   <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 </div>
 
@@ -419,13 +431,13 @@ font-size:23px;
 
 <div class="container">
 
-  <textarea id="text" placeholder="Paste a suspicious message, email, website, or job offer here..."></textarea>
+  <textarea id="text" placeholder="Paste the message, email, website, link, or job offer you're unsure about..."></textarea>
 
   <div class="input-help">Examples: delivery text, PayPal alert, crypto message, job offer, account warning</div>
 
   <button class="check" onclick="check()">🔍 Check Scam Risk</button>
 
-  <div class="note">No signup required • 3 free checks • Takes 3 seconds</div>
+  <div class="note">No signup • Instant result • Nothing is stored</div>
 
   <input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited checks">
 
@@ -440,14 +452,14 @@ font-size:23px;
   <div id="result"></div>
 
   <div class="upgrade" id="upgrade">
-    <h3>⚠️ High Scam Risk Detected</h3>
+    <h3>⚠️ One Missed Scam Can Cost Real Money</h3>
 
     <div class="upgrade-copy">
-      Run unlimited checks, stay protected from new scams in real time, and check suspicious messages before you act.
+      Scammers do not stop at one message. Fake jobs, payment requests, crypto traps, impersonation attempts, and risky links often lead to follow-up messages. One wrong click, reply, or payment can be expensive.
     </div>
 
     <div style="margin-top:10px;font-size:13px;color:#6b7280;">
-      Scammers often send follow-up messages after the first one
+      Stay protected before you click, reply, send money, or connect anything
     </div>
 
     <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
@@ -467,16 +479,10 @@ font-size:23px;
     </div>
   </div>
 
-  <div id="resultAction" class="resultAction">
-    <p style="margin-bottom:10px;font-weight:600;">Check messages anytime on your phone</p>
-    <a href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">
-      <button>📱 Get the App</button>
-    </a>
-  </div>
-
 </div>
 
 <section class="content-section">
+  <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
@@ -531,8 +537,9 @@ function setKeywordHeadings() {
   const keyword = toTitleCase(keywordRaw);
 
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `Paste a suspicious message, email, link, or job offer related to ${keyword} and instantly see if it looks safe, suspicious, or like a scam.`;
-  document.getElementById("contentHeading").textContent = `How ${keyword} Scam Reports and Warning Signs Work`;
+  document.getElementById("heroSubheading").textContent = `If you received a ${keyword} message, email, link, website alert, or job offer, paste it below to check scam risk before you act.`;
+  document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
+  document.getElementById("contentBridge").textContent = `If you're looking at a ${keyword} message or offer right now, use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function cleanSeoContent() {
@@ -565,12 +572,25 @@ function summaryForRisk(riskClass) {
     return "This shows multiple scam warning signs. Do not click links, reply, or send money until you verify it directly.";
   }
   if (riskClass === "medium") {
-    return "This shows some suspicious signals. Be cautious and verify the sender, company, or website before taking action.";
+    return "This shows suspicious signals. Be cautious and verify the sender, company, or website before taking action.";
   }
   if (riskClass === "low") {
-    return "This shows fewer obvious scam signals, but you should still verify anything involving links, payments, or personal information.";
+    return "This shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information.";
   }
   return "We could not determine a clear risk level. Review the sender, links, payment requests, and urgency before taking action.";
+}
+
+function paylineForRisk(riskClass) {
+  if (riskClass === "high") {
+    return "If another message like this shows up tomorrow, guessing wrong could cost you.";
+  }
+  if (riskClass === "medium") {
+    return "Suspicious messages often come in waves. Check the next one before you act.";
+  }
+  if (riskClass === "low") {
+    return "Even lower-risk messages can turn costly if money, links, or logins are involved.";
+  }
+  return "When a message is unclear, the safest move is to verify before you act.";
 }
 
 function formatResult(raw) {
@@ -632,6 +652,8 @@ function formatResult(raw) {
       <div class="section-title">What To Do Next</div>
       <ul>${actions.map(a => `<li>${escapeHtml(a)}</li>`).join("")}</ul>
     </div>
+
+    <div class="result-payline">${escapeHtml(paylineForRisk(safeRiskClass))}</div>
   </div>
   `;
 }
@@ -657,7 +679,7 @@ async function check() {
     result.innerHTML = `
       <div class="result-card">
         <div class="risk unknown">Paste Something To Check</div>
-        <div class="result-summary">Paste a suspicious message, email, website, or link to analyze scam risk.</div>
+        <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to analyze scam risk.</div>
       </div>
     `;
     result.style.display = "block";
@@ -668,7 +690,7 @@ async function check() {
   result.innerHTML = `
     <div class="result-card">
       <div class="risk unknown">Analyzing...</div>
-      <div class="result-summary">Checking for scam signals, suspicious patterns, and risk indicators.</div>
+      <div class="result-summary">Checking for scam signals, risky patterns, payment traps, impersonation, and suspicious links.</div>
     </div>
   `;
 
@@ -685,20 +707,15 @@ async function check() {
       result.innerHTML = `
         <div class="result-card">
           <div class="risk medium">Free Checks Used</div>
-          <div class="result-summary">Stay protected with unlimited scam checks, faster decisions, and ongoing access whenever a suspicious message appears.</div>
+          <div class="result-summary">Stay protected with unlimited scam checks, faster decisions, and ongoing access whenever another suspicious message, link, or offer appears.</div>
         </div>
       `;
-      document.getElementById("resultAction").style.display = "block";
       showUpgrade();
       return;
     }
 
     result.innerHTML = formatResult(data.result || "");
-    document.getElementById("resultAction").style.display = "block";
-
-    if (String(data.result || "").toLowerCase().includes("risk level: high")) {
-      showUpgrade();
-    }
+    showUpgrade();
   } catch (e) {
     result.innerHTML = `
       <div class="result-card">
