@@ -1,0 +1,93 @@
+name: SEO Page Generator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    env:
+      START_DATE: "2026-03-22"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install openai requests
+
+      - name: Set phase and daily limit
+        run: |
+          TODAY=$(date -u +%F)
+          DAY_DIFF=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
+
+          if [ "$DAY_DIFF" -le 3 ]; then
+            echo "PHASE=phase_1" >> $GITHUB_ENV
+            echo "DAILY_LIMIT=30" >> $GITHUB_ENV
+          elif [ "$DAY_DIFF" -le 10 ]; then
+            echo "PHASE=phase_2" >> $GITHUB_ENV
+            echo "DAILY_LIMIT=50" >> $GITHUB_ENV
+          else
+            echo "PHASE=phase_3" >> $GITHUB_ENV
+            echo "DAILY_LIMIT=100" >> $GITHUB_ENV
+          fi
+
+          echo "TODAY=$TODAY" >> $GITHUB_ENV
+          echo "DAY_DIFF=$DAY_DIFF" >> $GITHUB_ENV
+
+          echo "Running $PHASE on day $DAY_DIFF with DAILY_LIMIT=$DAILY_LIMIT"
+
+      - name: Generate AI content
+        run: |
+          python scripts/generate_content.py
+
+      - name: Build SEO pages incrementally
+        run: |
+          python scripts/build_seo_incremental.py
+        env:
+          DAILY_LIMIT: ${{ env.DAILY_LIMIT }}
+
+      - name: Build ROOT sitemap (authoritative)
+        run: |
+          set -e
+
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
+
+          echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
+          echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
+
+          for dir in scam-check-now/*/; do
+            [ -d "$dir" ] || continue
+            [ -f "${dir}index.html" ] || continue
+
+            slug=$(basename "$dir")
+
+            if [ "$slug" = "is-this-a-scam" ]; then
+              continue
+            fi
+
+            echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
+          done
+
+          echo '</urlset>' >> sitemap.xml
+
+      - name: Commit generated pages and sitemap
+        run: |
+          git config --global user.name "seo-bot"
+          git config --global user.email "bot@users.noreply.github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "Auto SEO generation + sitemap update"
+          git push
