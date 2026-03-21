@@ -485,30 +485,30 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text that appears to be from your bank, claiming there's been suspicious activity on your Zelle account. The message includes a link to "verify" your information and urges you to act quickly to avoid account suspension. It looks legitimate, complete with your bank's logo and a professional tone. You might even notice that the sender's number closely resembles your bank's official contact, making it feel even more authentic. The urgency in the message makes you feel like you need to respond immediately, creating a sense of panic that can cloud your judgment.</p>
-<p>The text plays on your emotions by suggesting that your account is at risk. It emphasizes the need for immediate action, making you feel like you could be responsible for any potential loss if you don’t comply. The language is designed to build trust, often using phrases like "your security is our priority." This manipulation can make it hard to think clearly, pushing you to click the link without taking a moment to consider the consequences. You might feel that responding quickly is the only way to protect your finances, which is exactly what the scammer wants.</p>
-<p>Variations of this scam can come in different forms, such as an email that looks like an official bank communication or even a phone call from someone claiming to be a bank representative. In some cases, the message may offer a "limited-time promotion" for Zelle users, enticing you to click a link or provide personal information. Each version is crafted to look convincing, often using familiar logos and language that mimic your bank's communications. The goal is the same: to get you to act without thinking, making it easy for the scammer to exploit your trust.</p>
-<p>Falling for this scam can have serious consequences. If you provide your personal information or click on the link, you risk losing access to your bank account, and your financial information could be compromised. Scammers can drain your funds or use your identity for further fraudulent activities. The emotional toll can also be significant, leaving you feeling violated and anxious about your financial security. Once the trust is broken, it can take time to rebuild your confidence in online transactions, affecting how you manage your finances in the future.</p>
+<p>You receive a text that looks like it’s from your bank, claiming there’s an issue with your Zelle account. The message is urgent, stating that you need to verify your identity immediately to avoid being locked out. It includes a link that appears legitimate, perhaps even mimicking your bank’s website design. The sender may use a phone number that seems familiar, making it easy to mistake this for a genuine communication. You might feel a pang of anxiety as you read it, thinking about the potential consequences of not acting quickly.</p>
+<p>The text creates a sense of urgency by suggesting that your account is at risk. It plays on your fear of losing access to your funds or being unable to make important payments. The message might even include a friendly tone, addressing you by name and assuring you that this is a routine verification process. This combination of urgency and a personal touch can make it difficult to pause and think critically about the situation. You may feel compelled to click the link and provide your information, believing you’re doing the right thing to protect your finances.</p>
+<p>You might also encounter variations of this scam that come through email or even direct messages on social media. Some versions may claim that a payment you made was flagged as suspicious, urging you to confirm your details to resolve the issue. Others might promise a reward or bonus for using Zelle, enticing you to click on a link that leads to a fake login page. Each variation is designed to exploit your trust and prompt immediate action, making it easy to overlook the signs that something is off.</p>
+<p>Falling for this scam can have serious consequences. Once you provide your information, scammers can access your bank account, draining your funds or making unauthorized transactions. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. Additionally, recovering lost funds can be a long and frustrating process, often with no guarantee of success. The danger lies not just in the immediate financial loss, but in the lasting impact it can have on your trust in digital transactions.</p>
 </div>
 
-<h2>Common Warning Signs</h2>
+<h2>Red Flags To Watch For</h2>
 <ul>
-<li>Unexpected messages asking for money, codes, or personal information</li>
-<li>Pressure to act quickly before you can verify the message</li>
-<li>Links, websites, or senders that do not fully match the official source</li>
-<li>Requests for payment by crypto, gift card, wire transfer, or other hard-to-reverse methods</li>
+<li>A sudden message that creates urgency without clear proof</li>
+<li>Requests to click a link, log in, or confirm sensitive details</li>
+<li>Sender names, websites, or contact details that do not fully match</li>
+<li>Payment instructions that are hard to reverse or verify</li>
 </ul>
 
-<h2>What Should You Do?</h2>
-<p>If you received something related to Zelle Scam Text, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.</p></div>
+<h2>What To Do Next</h2>
+<p>Before you respond to anything related to Zelle Scam Text, pause and verify it through an official source you find yourself. Do not rely on the message, caller, or link that contacted you.</p></div>
 
   <h3 id="relatedHeading" style="margin-top:28px;">Related Scam Checks</h3>
   <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/zelle-payment-scam/">Is Zelle Payment a Scam?</a></li>
 <li><a href="/scam-check-now/zelle-fraud-alert-scam/">Is Zelle Fraud Alert a Scam?</a></li>
-<li><a href="/scam-check-now/venmo-scam-text/">Is Venmo Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/amazon-text-scam/">Is Amazon Text a Scam?</a></li>
-<li><a href="/scam-check-now/paypal-text-scam/">Is Paypal Text a Scam?</a></li>
 <li><a href="/scam-check-now/bitcoin-scam-text/">Is Bitcoin Scam Text a Scam?</a></li>
+<li><a href="/scam-check-now/paypal-text-scam/">Is Paypal Text a Scam?</a></li>
+<li><a href="/scam-check-now/venmo-scam-text/">Is Venmo Scam Text a Scam?</a></li>
 </ul>
 </section>
 
@@ -554,14 +554,37 @@ function toTitleCase(str) {
   });
 }
 
+function cleanKeywordForSentence(keyword) {
+  return String(keyword || "")
+    .replace(/\bmessage\b/gi, "")
+    .replace(/\bemail\b/gi, "")
+    .replace(/\btext\b/gi, "")
+    .replace(/\blink\b/gi, "")
+    .replace(/\bwebsite\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function chooseBridgeIntro(baseKeyword) {
+  const variants = [
+    `If this ${baseKeyword} just showed up,`,
+    `If you're unsure about this ${baseKeyword},`,
+    `If you're looking at this ${baseKeyword} right now,`
+  ];
+  const index = baseKeyword.length % variants.length;
+  return variants[index];
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
   const keyword = toTitleCase(keywordRaw);
+  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
+  const readableKeyword = toTitleCase(cleanKeyword);
 
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received a ${keyword} message, email, link, website alert, or job offer, paste it below to check scam risk before you act.`;
+  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
   document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `If you're looking at a ${keyword} message or offer right now, use the checker above before you click links, reply, send money, or share information.`;
+  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function cleanSeoContent() {

@@ -485,30 +485,30 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text that looks like it’s from Venmo, complete with the app’s logo and familiar language. It says there’s a problem with your account, urging you to click a link to verify your information. The message might even mention a recent transaction you made, making it seem legitimate. You might feel a rush of anxiety, thinking about your funds and the security of your account. The sender's number appears to be a legitimate Venmo contact, which adds to the sense of urgency and authenticity.</p>
-<p>The message plays on your emotions, creating a sense of immediate danger. It might say something like, “Your account will be suspended unless you verify your identity within the next hour.” This kind of pressure can make you act quickly without thinking. You might feel compelled to click the link and provide your personal information, convinced that you need to resolve the issue before it escalates. The fear of losing access to your money can cloud your judgment, making it easy to overlook red flags.</p>
-<p>Variations of this scam can appear in different forms. You might receive an email that looks like it’s from Venmo, complete with official branding, or even a direct message on social media. Some scammers might impersonate a friend, claiming they accidentally sent you money and need you to verify your account. Each version is designed to exploit your trust and urgency, making it harder to recognize the deception. The more familiar the communication feels, the easier it is to fall for it.</p>
-<p>If you fall for this scam, the consequences can be severe. You could end up giving away your login credentials, allowing scammers to access your account and drain your funds. Even if you think you’re just verifying your identity, you might inadvertently hand over sensitive information that can lead to identity theft. The aftermath can be stressful and time-consuming, as you scramble to recover your money and secure your accounts. The emotional toll can linger long after the incident, leaving you feeling vulnerable and anxious about future transactions.</p>
+<p>You receive a text that appears to be from Venmo, complete with their logo and a message that claims there’s an issue with your account. The sender might say something like, “Your account has been temporarily suspended. Click this link to verify your identity.” The link looks legitimate at first glance, but it leads to a website that mimics the real Venmo site. This message feels alarming because it taps into your concerns about your finances and the security of your transactions, making it hard to ignore.</p>
+<p>The urgency in the message is palpable. You might feel a rush of anxiety, fearing that your money is at risk. The text often emphasizes that immediate action is required to avoid losing access to your account or that your funds could be compromised. This pressure can cloud your judgment, making you more likely to click the link without thinking it through. The sender’s tone is designed to instill fear, pushing you to act quickly, which is exactly what they want.</p>
+<p>Variations of this scam can include messages that claim you’ve received a payment from someone you don’t recognize or that your account has been flagged for suspicious activity. Sometimes, the scammer might even impersonate a friend or family member who claims they accidentally sent you money and need you to verify your account. Each variation is crafted to exploit your trust and familiarity with the Venmo platform, making it increasingly difficult to discern what’s real and what’s not.</p>
+<p>Falling for this scam can lead to serious consequences. If you enter your information on the fake site, the scammers gain access to your account, potentially draining your funds or making unauthorized transactions. Beyond financial loss, there’s the added risk of identity theft, as they may collect personal information that can be used against you later. The emotional toll can be significant too, leaving you feeling violated and anxious about your financial security.</p>
 </div>
 
-<h2>Common Warning Signs</h2>
+<h2>Red Flags To Watch For</h2>
 <ul>
-<li>Unexpected messages asking for money, codes, or personal information</li>
-<li>Pressure to act quickly before you can verify the message</li>
-<li>Links, websites, or senders that do not fully match the official source</li>
-<li>Requests for payment by crypto, gift card, wire transfer, or other hard-to-reverse methods</li>
+<li>A sudden message that creates urgency without clear proof</li>
+<li>Requests to click a link, log in, or confirm sensitive details</li>
+<li>Sender names, websites, or contact details that do not fully match</li>
+<li>Payment instructions that are hard to reverse or verify</li>
 </ul>
 
-<h2>What Should You Do?</h2>
-<p>If you received something related to Venmo Scam Text, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.</p></div>
+<h2>What To Do Next</h2>
+<p>Before you respond to anything related to Venmo Scam Text, pause and verify it through an official source you find yourself. Do not rely on the message, caller, or link that contacted you.</p></div>
 
   <h3 id="relatedHeading" style="margin-top:28px;">Related Scam Checks</h3>
   <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/venmo-payment-scam/">Is Venmo Payment a Scam?</a></li>
-<li><a href="/scam-check-now/zelle-scam-text/">Is Zelle Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/amazon-text-scam/">Is Amazon Text a Scam?</a></li>
-<li><a href="/scam-check-now/paypal-text-scam/">Is Paypal Text a Scam?</a></li>
 <li><a href="/scam-check-now/bitcoin-scam-text/">Is Bitcoin Scam Text a Scam?</a></li>
-<li><a href="/scam-check-now/usps-tracking-scam-text/">Is Usps Tracking Scam Text a Scam?</a></li>
+<li><a href="/scam-check-now/paypal-text-scam/">Is Paypal Text a Scam?</a></li>
+<li><a href="/scam-check-now/zelle-scam-text/">Is Zelle Scam Text a Scam?</a></li>
+<li><a href="/scam-check-now/amazon-delivery-scam-text/">Is Amazon Delivery Scam Text a Scam?</a></li>
 </ul>
 </section>
 
@@ -554,14 +554,37 @@ function toTitleCase(str) {
   });
 }
 
+function cleanKeywordForSentence(keyword) {
+  return String(keyword || "")
+    .replace(/\bmessage\b/gi, "")
+    .replace(/\bemail\b/gi, "")
+    .replace(/\btext\b/gi, "")
+    .replace(/\blink\b/gi, "")
+    .replace(/\bwebsite\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function chooseBridgeIntro(baseKeyword) {
+  const variants = [
+    `If this ${baseKeyword} just showed up,`,
+    `If you're unsure about this ${baseKeyword},`,
+    `If you're looking at this ${baseKeyword} right now,`
+  ];
+  const index = baseKeyword.length % variants.length;
+  return variants[index];
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
   const keyword = toTitleCase(keywordRaw);
+  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
+  const readableKeyword = toTitleCase(cleanKeyword);
 
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received a ${keyword} message, email, link, website alert, or job offer, paste it below to check scam risk before you act.`;
+  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
   document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `If you're looking at a ${keyword} message or offer right now, use the checker above before you click links, reply, send money, or share information.`;
+  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function cleanSeoContent() {

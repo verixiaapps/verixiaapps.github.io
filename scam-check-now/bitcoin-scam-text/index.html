@@ -485,30 +485,30 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a text message that claims to be from a well-known cryptocurrency exchange or investment platform. The message often includes a link that promises you can double your Bitcoin investment in just a few hours. It may even reference a recent surge in Bitcoin prices, urging you to act quickly to take advantage of this “exclusive” opportunity. The sender might use a familiar name or even a fake customer service number to make it seem legitimate, creating a sense of familiarity that can easily draw you in.</p>
-<p>The urgency in these texts is palpable. You may notice phrases like “limited time offer” or “act now before it’s too late,” designed to push you into making a hasty decision. This pressure can make you feel like you’re missing out on something big, especially if you’ve been following the cryptocurrency market. The message may also include testimonials or images of supposed successful investors, making it seem like a trustworthy opportunity that you can’t afford to ignore.</p>
-<p>These scams can take on various forms. One common variation might come from a text that claims your account has been compromised, urging you to click a link to verify your identity. Another could be a message from someone posing as a friend or colleague, claiming they’ve made a fortune and want to share their secret with you. Each version is crafted to exploit your trust and curiosity, making it easy to overlook the red flags.</p>
-<p>Falling for one of these scams can lead to significant financial loss. Once you click the link and provide your information, scammers can drain your cryptocurrency wallet or steal your personal data. This isn’t just about losing money; it can also lead to identity theft and ongoing harassment from fraudsters. The emotional toll can be just as damaging, leaving you feeling violated and regretful for not recognizing the warning signs sooner.</p>
+<p>You might receive a text that seems to come from a trusted source, like a friend or a well-known company, claiming you've won a significant amount of Bitcoin or that you can double your investment instantly. The message often includes a link that promises to take you to a secure website where you can claim your winnings or make a quick investment. The language is casual and friendly, making it feel personal and legitimate, as if someone you know is genuinely looking out for you.</p>
+<p>The urgency in these texts is palpable. They often say that you need to act fast to secure your winnings or that the offer is only available for a limited time. This pressure can make you feel like you’re missing out on a golden opportunity, pushing you to click the link without thinking twice. The sender may even include a countdown timer or mention that others are already claiming their rewards, making you feel like you’re in a race against time.</p>
+<p>Variations of this scam can include texts that claim to be from cryptocurrency exchanges or investment platforms, offering you exclusive access to new coins or investment opportunities. Some messages may appear to be from tech support, alerting you to suspicious activity on your account and urging you to verify your identity by clicking a link. Each version is designed to exploit your trust and curiosity, often using familiar logos or language to seem credible.</p>
+<p>If you fall for one of these scams, you could end up losing your hard-earned money or having your personal information compromised. Clicking on a malicious link can lead to your device being infected with malware or your accounts being hacked. The emotional toll can be just as damaging, leaving you feeling embarrassed or anxious about your financial security. It's crucial to recognize these tactics before they lead to potentially devastating consequences.</p>
 </div>
 
-<h2>Common Warning Signs</h2>
+<h2>Red Flags To Watch For</h2>
 <ul>
-<li>Unexpected messages asking for money, codes, or personal information</li>
-<li>Pressure to act quickly before you can verify the message</li>
-<li>Links, websites, or senders that do not fully match the official source</li>
-<li>Requests for payment by crypto, gift card, wire transfer, or other hard-to-reverse methods</li>
+<li>A sudden message that creates urgency without clear proof</li>
+<li>Requests to click a link, log in, or confirm sensitive details</li>
+<li>Sender names, websites, or contact details that do not fully match</li>
+<li>Payment instructions that are hard to reverse or verify</li>
 </ul>
 
-<h2>What Should You Do?</h2>
-<p>If you received something related to Bitcoin Scam Text, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.</p></div>
+<h2>What To Do Next</h2>
+<p>Before you respond to anything related to Bitcoin Scam Text, pause and verify it through an official source you find yourself. Do not rely on the message, caller, or link that contacted you.</p></div>
 
   <h3 id="relatedHeading" style="margin-top:28px;">Related Scam Checks</h3>
   <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/amazon-text-scam/">Is Amazon Text a Scam?</a></li>
 <li><a href="/scam-check-now/paypal-text-scam/">Is Paypal Text a Scam?</a></li>
 <li><a href="/scam-check-now/venmo-scam-text/">Is Venmo Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/zelle-scam-text/">Is Zelle Scam Text a Scam?</a></li>
-<li><a href="/scam-check-now/usps-tracking-scam-text/">Is Usps Tracking Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/amazon-delivery-scam-text/">Is Amazon Delivery Scam Text a Scam?</a></li>
+<li><a href="/scam-check-now/usps-tracking-scam-text/">Is Usps Tracking Scam Text a Scam?</a></li>
 </ul>
 </section>
 
@@ -554,14 +554,37 @@ function toTitleCase(str) {
   });
 }
 
+function cleanKeywordForSentence(keyword) {
+  return String(keyword || "")
+    .replace(/\bmessage\b/gi, "")
+    .replace(/\bemail\b/gi, "")
+    .replace(/\btext\b/gi, "")
+    .replace(/\blink\b/gi, "")
+    .replace(/\bwebsite\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function chooseBridgeIntro(baseKeyword) {
+  const variants = [
+    `If this ${baseKeyword} just showed up,`,
+    `If you're unsure about this ${baseKeyword},`,
+    `If you're looking at this ${baseKeyword} right now,`
+  ];
+  const index = baseKeyword.length % variants.length;
+  return variants[index];
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
   const keyword = toTitleCase(keywordRaw);
+  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
+  const readableKeyword = toTitleCase(cleanKeyword);
 
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received a ${keyword} message, email, link, website alert, or job offer, paste it below to check scam risk before you act.`;
+  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
   document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `If you're looking at a ${keyword} message or offer right now, use the checker above before you click links, reply, send money, or share information.`;
+  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function cleanSeoContent() {

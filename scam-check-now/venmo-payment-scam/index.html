@@ -485,30 +485,30 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a message that looks like it’s from a friend or a family member, claiming they accidentally sent you money on Venmo and need you to send it back. The message often includes a friendly tone, maybe even a joke, making it feel casual and trustworthy. They might include a link that appears to lead to a Venmo login page or ask you to confirm your account details to “process” the refund. The familiarity of the sender's name can make it easy to overlook any red flags, especially when the urgency of the situation is emphasized.</p>
-<p>Scammers thrive on creating a sense of urgency. They might say they need the money back immediately due to an unexpected expense or that they’ll be in trouble if you don’t act fast. This pressure can make you feel like you’re helping a friend in need, pushing you to respond quickly without taking the time to think things through. The emotional pull of wanting to assist someone you care about can cloud your judgment, making it easier for them to manipulate you into sending money or sharing personal information.</p>
-<p>You might also encounter variations of this scam where the message claims to be from a customer service representative or even a random user who mistakenly sent you funds. Sometimes, they might even threaten to report you for theft if you don’t comply. Some scammers might use fake profiles or create elaborate stories about needing help with a payment issue. Each version is designed to exploit your trust and urgency, making it harder to spot the deception until it’s too late.</p>
-<p>Falling for this scam can lead to significant financial loss. Once you send money back, it’s often gone for good, and the scammer disappears without a trace. In some cases, they may gain access to your personal information, putting you at risk for identity theft or further scams. The emotional toll can be just as damaging, leaving you feeling embarrassed or violated. It’s crucial to take a moment to verify any unexpected requests for money, no matter how convincing they may seem.</p>
+<p>You might receive a message that looks like it’s from a friend or family member, claiming they accidentally sent you money through Venmo and need you to send it back immediately. The message often includes a sense of familiarity, using your contact's name and a casual tone that makes it feel genuine. They may even provide a link that appears to lead to the Venmo app, urging you to act quickly before the transaction is reversed. This setup can feel harmless, but it’s a common tactic used by scammers to exploit your trust.</p>
+<p>Scammers create a sense of urgency by suggesting that the money was sent in error and that you need to act fast to rectify the situation. They might say they’re in a tight spot or that they need the funds for an emergency, which can tug at your heartstrings and make you feel obligated to help. This pressure often leads you to act without thinking, as you might feel that your friend is in a bind and you want to assist them. The emotional manipulation is a key element in making you feel compelled to respond quickly.</p>
+<p>You might also encounter variations of this scam, such as receiving a text or email that claims to be from Venmo itself, stating there’s an issue with your account that requires immediate attention. In these cases, the message might ask you to click a link to verify your information or update your payment details. Some scammers even impersonate customer service representatives, claiming they need to confirm a recent transaction. Each version is designed to look legitimate and create a sense of trust, making it easy to overlook the red flags.</p>
+<p>Falling for this scam can lead to serious consequences. If you send money back to the scammer, you may never see that money again, leaving you out of pocket. Additionally, if you provide any personal information, such as your Venmo login or bank details, you could be opening the door to identity theft or further financial loss. The emotional toll can also be significant, as realizing you’ve been duped can lead to feelings of embarrassment and distrust, impacting your future interactions online.</p>
 </div>
 
-<h2>Common Warning Signs</h2>
+<h2>Signs This Might Be A Scam</h2>
 <ul>
-<li>Unexpected messages asking for money, codes, or personal information</li>
-<li>Pressure to act quickly before you can verify the message</li>
-<li>Links, websites, or senders that do not fully match the official source</li>
-<li>Requests for payment by crypto, gift card, wire transfer, or other hard-to-reverse methods</li>
+<li>Warnings or alerts that push you to act before checking</li>
+<li>Requests for verification codes, personal details, or payment</li>
+<li>Suspicious links, fake support pages, or mismatched domains</li>
+<li>Pressure to move off trusted platforms or official apps</li>
 </ul>
 
-<h2>What Should You Do?</h2>
-<p>If you received something related to Venmo Payment, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.</p></div>
+<h2>How To Respond Safely</h2>
+<p>If this appears to involve Venmo Payment, do not click links, send money, or share details until you confirm the situation through the official website, app, or customer support channel.</p></div>
 
   <h3 id="relatedHeading" style="margin-top:28px;">Related Scam Checks</h3>
   <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/venmo-scam-text/">Is Venmo Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/zelle-payment-scam/">Is Zelle Payment a Scam?</a></li>
 <li><a href="/scam-check-now/cash-app-payment-scam/">Is Cash App Payment a Scam?</a></li>
 <li><a href="/scam-check-now/cash-app-pending-payment-scam/">Is Cash App Pending Payment a Scam?</a></li>
-<li><a href="/scam-check-now/paypal-refund-scam/">Is Paypal Refund a Scam?</a></li>
 <li><a href="/scam-check-now/amazon-email-scam/">Is Amazon Email a Scam?</a></li>
+<li><a href="/scam-check-now/amazon-text-scam/">Is Amazon Text a Scam?</a></li>
 </ul>
 </section>
 
@@ -554,14 +554,37 @@ function toTitleCase(str) {
   });
 }
 
+function cleanKeywordForSentence(keyword) {
+  return String(keyword || "")
+    .replace(/\bmessage\b/gi, "")
+    .replace(/\bemail\b/gi, "")
+    .replace(/\btext\b/gi, "")
+    .replace(/\blink\b/gi, "")
+    .replace(/\bwebsite\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function chooseBridgeIntro(baseKeyword) {
+  const variants = [
+    `If this ${baseKeyword} just showed up,`,
+    `If you're unsure about this ${baseKeyword},`,
+    `If you're looking at this ${baseKeyword} right now,`
+  ];
+  const index = baseKeyword.length % variants.length;
+  return variants[index];
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
   const keyword = toTitleCase(keywordRaw);
+  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
+  const readableKeyword = toTitleCase(cleanKeyword);
 
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received a ${keyword} message, email, link, website alert, or job offer, paste it below to check scam risk before you act.`;
+  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
   document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `If you're looking at a ${keyword} message or offer right now, use the checker above before you click links, reply, send money, or share information.`;
+  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function cleanSeoContent() {

@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text message that looks like it’s from PayPal, complete with their logo and a sense of urgency. The message claims there’s been suspicious activity on your account and urges you to click a link to verify your identity. The link leads to a website that closely resembles PayPal’s official site, where you’re prompted to enter your login credentials. The familiarity of the message makes it easy to overlook the red flags, especially when it appears to come from a trusted source.</p>
-<p>The scam creates a sense of urgency by suggesting immediate action is required to protect your account. Phrases like "Your account will be suspended" or "Immediate verification needed" play on your fears of losing access to your funds. This pressure can cloud your judgment, making you more likely to act without thinking. The message often feels personal, using your name and referencing recent transactions, which adds to the illusion of legitimacy and makes it harder to dismiss.</p>
-<p>Variations of this scam can be subtle yet effective. You might receive a similar message claiming to be from a different financial service or even an unexpected refund notification. Some scams may come via email or social media, but they all share the same tactics of urgency and familiarity. The links may lead to different fake websites, but the goal remains the same: to capture your login information or personal details. The more convincing the message, the more likely you are to fall for it.</p>
-<p>If you fall for this scam, the consequences can be severe. Your PayPal account could be compromised, leading to unauthorized transactions and loss of funds. Beyond financial loss, your personal information may be used for identity theft, causing long-term damage to your credit and reputation. The emotional toll can be just as significant, leaving you feeling violated and anxious about your online security. Recognizing these scams is crucial to protecting yourself and your finances.</p>
+<p>You receive a text message that appears to be from PayPal, complete with their logo and a familiar tone. The message claims that there’s an issue with your account, urging you to click a link to verify your information. The link leads to a website that looks remarkably like PayPal’s official site, complete with the same colors and layout. It feels legitimate, and you might even notice that the sender's number seems to match previous communications you've had with PayPal, making it all the more convincing.</p>
+<p>The urgency in the message is palpable. It warns that your account will be suspended if you don’t act immediately, creating a sense of panic. You might feel that you need to resolve this issue quickly to avoid losing access to your funds. The text could even include a friendly reminder about a recent transaction, which makes it seem like they’re genuinely looking out for you. This combination of urgency and familiarity can easily lead you to overlook any red flags.</p>
+<p>Variations of this scam can pop up in different forms. You might receive an email that looks just like a PayPal notification, or a phone call from someone claiming to be a customer service representative. They might ask for your login details or personal information to "verify" your identity. Some scams even use fake invoices or transaction confirmations to lure you in, making it hard to distinguish between a real message and a fraudulent one.</p>
+<p>Falling for this scam can have serious consequences. If you provide your information, the scammers can access your PayPal account and drain your funds. They may also use your personal details for identity theft, leading to further financial loss and complications. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s crucial to remain vigilant and skeptical when faced with unexpected messages, especially those that create a sense of urgency.</p>
 </div>
 
 <h2>Common Warning Signs</h2>
@@ -554,14 +554,37 @@ function toTitleCase(str) {
   });
 }
 
+function cleanKeywordForSentence(keyword) {
+  return String(keyword || "")
+    .replace(/\bmessage\b/gi, "")
+    .replace(/\bemail\b/gi, "")
+    .replace(/\btext\b/gi, "")
+    .replace(/\blink\b/gi, "")
+    .replace(/\bwebsite\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function chooseBridgeIntro(baseKeyword) {
+  const variants = [
+    `If this ${baseKeyword} just showed up,`,
+    `If you're unsure about this ${baseKeyword},`,
+    `If you're looking at this ${baseKeyword} right now,`
+  ];
+  const index = baseKeyword.length % variants.length;
+  return variants[index];
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
   const keyword = toTitleCase(keywordRaw);
+  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
+  const readableKeyword = toTitleCase(cleanKeyword);
 
   document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received a ${keyword} message, email, link, website alert, or job offer, paste it below to check scam risk before you act.`;
+  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
   document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `If you're looking at a ${keyword} message or offer right now, use the checker above before you click links, reply, send money, or share information.`;
+  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function cleanSeoContent() {
