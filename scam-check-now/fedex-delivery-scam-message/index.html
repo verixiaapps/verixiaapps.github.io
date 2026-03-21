@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a message that looks like it’s from FedEx, telling you that there’s an issue with your package delivery. The text or email often includes your name and a tracking number, making it seem legitimate. It may say something like, “Your package cannot be delivered due to an incomplete address. Click here to resolve the issue.” The link may lead to a website that mimics the FedEx site, designed to trick you into entering personal information or payment details.</p>
-<p>The urgency in these messages is palpable. They often state that your package will be returned or lost if you don’t act immediately. This sense of impending loss can make you feel anxious and compelled to click the link without thinking twice. The message may also include reassuring phrases like, “We value your business,” or “Your satisfaction is our priority,” which are designed to build trust and make you feel safe while you’re about to share sensitive information.</p>
-<p>You might also encounter variations of this scam, such as phone calls claiming to be from FedEx customer service. The caller may provide a fake tracking number and ask for your address to “confirm” your identity. Some messages may even claim that you’ve won a prize and need to pay a shipping fee, using the FedEx name to lend credibility. Each variation plays on the same themes of urgency and trust, making it easy to fall for the trap.</p>
-<p>If you end up providing your information, the consequences can be severe. Scammers can use your personal details to commit identity theft, drain your bank account, or even make unauthorized purchases in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your security. It’s a reminder that what seems like a simple delivery issue can quickly escalate into a much larger problem.</p>
+<p>You might receive a message that looks like it’s from FedEx, claiming that your package is on hold due to an address issue. The text or email often includes a link that says you need to verify your shipping details to avoid delays. The sender's email may mimic FedEx's official address closely, making it easy to overlook the subtle differences. The message might even include a tracking number that seems legitimate, making you feel like it’s a genuine communication about a delivery you’re expecting.</p>
+<p>The urgency in these messages is palpable. They often say that your package will be returned to the sender if you don’t act immediately. This pressure can make you feel anxious, especially if you’ve been waiting for an important delivery. The scammers know how to play on your emotions, making you believe that a simple click on their link is all that stands between you and your package. This tactic is designed to bypass your usual skepticism, leading you to act quickly without thinking.</p>
+<p>You might also see variations of this scam that appear as a missed delivery notification or even a voicemail that prompts you to call a number. Some messages may suggest that your package is stuck in customs or that additional fees are required for delivery. Each version aims to catch you off guard, using familiar branding and language that makes it seem credible. Even if you think you’re being cautious, the familiarity of the FedEx name can make it easy to let your guard down.</p>
+<p>Falling for this scam can lead to serious consequences. Clicking the link could direct you to a fake website designed to steal your personal information, including credit card details or login credentials. In some cases, the scammers may install malware on your device, compromising your security further. Beyond the immediate financial risks, you could also find yourself dealing with identity theft or unauthorized transactions, leaving you to pick up the pieces long after the initial message has faded from your inbox.</p>
 </div>
 
 <h2>Common Warning Signs</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "fedex delivery scam message";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

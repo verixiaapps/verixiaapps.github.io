@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text message that appears to be from USPS, claiming that there’s an issue with your package delivery. The message includes a link that urges you to click to resolve the problem. It looks legitimate, complete with official logos and a tracking number that seems to match your recent orders. You might even notice that the sender's number resembles the official USPS contact, making it hard to question its authenticity. The message creates a sense of urgency, suggesting that your package will be returned if you don’t act quickly.</p>
-<p>The text is designed to make you feel anxious and concerned about your delivery. It plays on your expectations of reliable service, tapping into your need to stay informed about your packages. By presenting a time-sensitive issue, the scam compels you to click the link without thinking twice. You might feel a rush of panic, believing that you could miss out on an important delivery, which makes it easier for the scammer to manipulate your emotions and prompt immediate action.</p>
-<p>Variations of this scam can appear in different forms, such as emails or even phone calls. You might receive an email that looks like it’s from USPS, complete with tracking details and a similar urgent message. Some scammers might even go as far as to create fake websites that mimic the USPS site, making it difficult to distinguish between the real and the fraudulent. Each version is crafted to exploit your trust in established shipping services, presenting a familiar scenario that feels all too real.</p>
-<p>Falling for this scam can lead to serious consequences. If you click the link, you may unknowingly download malware onto your device, compromising your personal information. Scammers can gain access to your financial details, leading to identity theft or unauthorized transactions. Beyond the immediate financial risks, the emotional toll can be significant as well, leaving you feeling violated and anxious about your security. It’s crucial to remain vigilant and recognize these tactics before they cause harm.</p>
+<p>You receive a text message that appears to be from USPS, complete with their logo and a seemingly legitimate tracking link. The message informs you that there’s an issue with a package delivery and urges you to click the link to resolve it. The urgency is palpable; it states that your package will be returned to the sender if you don’t act immediately. The sender’s number looks official, making it easy to mistake this for a genuine communication from the postal service.</p>
+<p>The text plays on your emotions, creating a sense of panic about a package you may or may not be expecting. You might feel compelled to click the link without thinking twice, convinced that you need to resolve the issue quickly. The message often includes phrases like “urgent action required” or “your immediate response is needed,” which can cloud your judgment and push you to act before verifying the source.</p>
+<p>Variations of this scam can include messages claiming to be from other delivery services or even local courier companies. Some may use slightly different wording or even reference a package that you never ordered, making it feel more personalized. Others might include fake tracking numbers or suggest that you need to confirm your address. Each version is designed to look credible, exploiting your trust in well-known shipping services.</p>
+<p>Falling for this scam can lead to serious consequences. By clicking the link, you might unwittingly download malware onto your device or provide personal information that can be used for identity theft. Your financial information could be at risk, and you may find yourself facing unauthorized transactions or even having your accounts compromised. The emotional toll of realizing you’ve been deceived can linger long after the incident, leaving you feeling vulnerable and anxious about future communications.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "usps tracking scam text";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

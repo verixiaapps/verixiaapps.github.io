@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You open your email to find a message that looks legitimate at first glance. It appears to be from UPS, complete with their logo and branding. The subject line reads, “Your Package is Delayed: Action Required.” Inside, there’s a brief message indicating that there’s an issue with your shipment, along with a link to “track your package.” The email even contains your name and a tracking number, making it seem like it’s truly from the delivery service you trust. Everything about it feels convincing, and you might feel a slight twinge of concern about your delivery.</p>
-<p>As you read further, the email creates a sense of urgency that makes you want to act quickly. It warns that if you don’t click the link and resolve the issue immediately, your package could be returned to the sender or even lost. This pressure to act fast can cloud your judgment, pushing you to click the link without thinking twice. The email may also include a friendly tone, suggesting that UPS is there to help you, which builds a false sense of trust and makes it harder to recognize the red flags.</p>
-<p>You might encounter variations of this scam that look slightly different but carry the same deceptive intent. Some emails may claim to be from other delivery services, like FedEx or DHL, while others might use a different subject line, such as “Delivery Update” or “Action Needed: Verify Your Address.” They may even include fake customer service numbers or links to websites that mimic the official UPS site. Each version is designed to lure you in, making it easy to overlook the signs that something isn’t right.</p>
-<p>Falling for this scam can have serious consequences. If you click the link, you could be taken to a phishing site designed to steal your personal information, such as credit card numbers or login credentials. Even worse, you might inadvertently download malware that compromises your device. This not only puts your financial information at risk but can also lead to identity theft, leaving you to deal with the aftermath long after the initial email has been deleted. The danger is real, and recognizing these scams is crucial to protecting yourself.</p>
+<p>You might receive an email that looks like it’s from UPS, complete with their logo and branding, claiming that there’s an issue with your package delivery. The subject line could read something like “Action Required: Your UPS Package is Delayed,” and it may include a tracking number that seems legitimate. The email will likely have a link that prompts you to click for more details, leading you to a website that mimics UPS’s official site. Everything about it feels authentic, making it easy to overlook the red flags.</p>
+<p>The urgency in these emails is palpable. They often state that your package will be returned to the sender if you don’t act immediately, creating a sense of panic. The message may suggest that you need to verify your shipping information or pay a fee to avoid losing your package. This pressure can cloud your judgment, making you more likely to click the link without thinking twice. The design and tone of the email are crafted to build trust, making it harder to recognize it as a scam.</p>
+<p>You might also encounter variations of this scam, such as texts or even phone calls that claim to be from UPS. The text could say something like “Your package is on hold. Click here to resolve,” while the phone call may feature a robotic voice instructing you to provide personal information. Some scams may even use fake tracking numbers that appear valid at first glance. These variations are designed to catch you off guard, using familiar language and scenarios that make it easy to fall into the trap.</p>
+<p>If you end up clicking on the link and providing your information, the consequences can be severe. Scammers can steal your personal data, leading to identity theft or unauthorized charges on your accounts. They might even use your information to commit further fraud, leaving you to deal with the aftermath. The emotional toll of realizing you’ve been scammed can be just as damaging as the financial repercussions, making it crucial to stay vigilant against these deceptive tactics.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "ups tracking scam email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

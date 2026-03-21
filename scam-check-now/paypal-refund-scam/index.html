@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive an email that looks just like a legitimate PayPal message, complete with their logo and familiar layout. The subject line reads, “Your Refund Is Ready!” Inside, the message states that there’s been an error with a recent transaction, and you’re entitled to a refund. It includes a link that claims to take you to your account to process the refund. The urgency in the tone makes it hard to ignore, suggesting that you need to act quickly to avoid losing your funds. You might even see a phone number to call for immediate assistance, adding an extra layer of credibility.</p>
-<p>The email creates a sense of urgency by stating that your account will be temporarily suspended if you don’t respond within 24 hours. This pressure can make you feel anxious, prompting you to click the link without fully thinking it through. The message may also include phrases like “We value your business” or “Your security is our priority,” which are designed to build trust and make you feel safe providing your information. The combination of urgency and familiarity can easily lead you to overlook the red flags.</p>
-<p>You might encounter variations of this scam that appear on social media or through text messages, all mimicking the PayPal brand. Some may claim you’ve won a prize and need to verify your account to claim it, while others might say there’s a problem with your payment method. Each version typically uses similar tactics to create urgency and trust, often featuring links that lead to fake login pages designed to steal your credentials. The consistency in their approach makes it easy to mistake these messages for genuine communications.</p>
-<p>Falling for this scam can have serious consequences. If you enter your login information on a fraudulent site, scammers can gain access to your PayPal account, draining your funds or making unauthorized transactions. Even if you think you’re just getting a refund, you might unknowingly provide sensitive information that can lead to identity theft. The emotional and financial fallout can be significant, leaving you feeling violated and vulnerable. It’s a reminder of how quickly a seemingly innocent message can turn into a dangerous situation.</p>
+<p>You might receive a message that looks like it’s from PayPal, claiming there’s an issue with your account or a recent transaction. It could be an email that includes PayPal’s logo, complete with a sense of urgency, stating that you need to click a link to confirm your identity or claim a refund. Alternatively, you might get a text message that says your recent purchase is being refunded, urging you to act quickly to avoid losing your funds. The message often mimics official communication, making it easy to mistake for something legitimate.</p>
+<p>The urgency in these messages is palpable. They often mention a limited time to respond or a looming deadline, which can make you feel anxious about your account security. You might find yourself thinking, “I can’t afford to lose my money,” prompting you to click on the provided link without a second thought. The scammer’s goal is to create a sense of panic, pushing you to act quickly rather than carefully. This pressure can cloud your judgment, making it easier for them to exploit your trust.</p>
+<p>These scams can take on various forms, with some claiming to offer refunds for canceled transactions, while others may say you’ve been overcharged. You might see different variations of the same message, such as a phone call from someone posing as a PayPal representative, asking for your personal information to process a refund. Even social media platforms can be used to spread these scams, with fake accounts reaching out to you with similar messages. Each variation is designed to look credible, making it harder to spot the deception.</p>
+<p>Falling for this scam can lead to serious consequences. If you provide your personal information or login credentials, the scammer can gain access to your PayPal account, potentially draining your funds or making unauthorized transactions. Beyond just financial loss, it can take time and effort to recover your account and secure your information. The emotional toll of realizing you’ve been scammed can be significant, leaving you feeling vulnerable and distrustful in your online interactions.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "paypal refund";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

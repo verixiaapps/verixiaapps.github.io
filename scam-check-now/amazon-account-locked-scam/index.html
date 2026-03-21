@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive an email that looks like it’s from Amazon, claiming your account has been locked due to suspicious activity. The message often features the Amazon logo and uses official language to make it seem legitimate. It may instruct you to click on a link to verify your identity or reset your password. The link takes you to a website that closely resembles the real Amazon site, where you’re prompted to enter personal information such as your email, password, and even credit card details.</p>
-<p>The urgency in these messages is palpable. They may say that you have only 24 hours to resolve the issue to avoid losing access to your account or that your order will be canceled. This pressure can make you act quickly, bypassing your usual caution. The email may also contain a friendly message, reassuring you that Amazon is there to help, which creates a false sense of trust. You might feel compelled to act immediately, thinking you’re protecting your account.</p>
-<p>Variations of this scam can appear in different forms. You might get a text message instead of an email, or a phone call claiming to be from Amazon customer service. Some scams even use fake social media accounts that mimic Amazon’s official pages. The language might change slightly, but the core message remains the same: your account is in jeopardy, and you need to act fast. Each version is designed to catch you off guard, making it easy to overlook the signs that something is off.</p>
-<p>Falling for this scam can have serious consequences. If you provide your information, scammers can access your Amazon account, make unauthorized purchases, or even steal your identity. Beyond financial loss, it can lead to a lengthy process of reclaiming your account and securing your personal data. The emotional toll can also be significant, leaving you feeling violated and anxious about your online security. It’s crucial to stay vigilant and recognize these tactics before it’s too late.</p>
+<p>You might receive an email or text that appears to be from Amazon, telling you that your account has been locked due to suspicious activity. The message usually includes a link that directs you to a website that looks almost identical to Amazon’s official site. It might even feature your name and recent order details to make it seem more legitimate. The urgency in the message is palpable, often warning you that you must act immediately to avoid losing access to your account or to prevent unauthorized purchases.</p>
+<p>This type of scam plays on your emotions, creating a sense of panic and urgency. The message may state that your account will be permanently suspended if you don’t verify your information right away. By instilling fear of losing access to your account or missing out on a delivery, the scammer aims to compel you to click the link and provide your login credentials without thinking twice. The familiarity of the Amazon brand adds a layer of trust, making it easier for you to overlook any red flags.</p>
+<p>Variations of this scam can pop up in different forms. You might see a phone call claiming to be from Amazon’s customer service, urging you to confirm your identity due to a supposed security breach. Alternatively, you could encounter a pop-up on a website that mimics Amazon, prompting you to enter your login details. Each version is designed to look credible, using official logos and language that mirrors Amazon’s communications, making it challenging to discern what is real and what is a trap.</p>
+<p>Falling for this scam can lead to serious consequences. If you provide your login information, scammers can gain access to your Amazon account, potentially leading to unauthorized purchases or even identity theft. Your personal information could be sold on the dark web, and recovering your account may take considerable time and effort. The emotional toll of realizing you’ve been scammed can be overwhelming, leaving you feeling vulnerable and anxious about your online security.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "amazon account locked";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

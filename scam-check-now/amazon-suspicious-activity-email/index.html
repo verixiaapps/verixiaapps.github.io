@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You open your inbox and see an email that looks like it’s from Amazon, complete with their logo and familiar layout. The subject line reads, “Suspicious Activity Detected on Your Account.” Inside, the message claims that someone has tried to access your account from an unfamiliar location and urges you to verify your identity immediately. It includes a link that supposedly leads to Amazon’s website, where you can confirm your account details. The email feels legitimate, almost too real, making you pause for a moment as you consider whether you should act quickly.</p>
-<p>The email creates a sense of urgency that’s hard to ignore. It warns you that if you don’t verify your account within a specific timeframe, your account may be suspended or locked. This pressure to act fast can cloud your judgment, pushing you to click on the link without thinking twice. The message is crafted to instill fear, making it seem like a genuine security measure. You may feel a rush of anxiety, convincing you that this is a necessary step to protect your personal information and hard-earned purchases.</p>
-<p>Variations of this scam can appear in different forms, each designed to catch you off guard. You might receive a text message that mimics Amazon’s tone, alerting you to a “problem” with your recent order. Alternatively, a phone call could come from someone claiming to be an Amazon representative, asking for your account details to resolve an urgent issue. Each variation plays on your trust and familiarity with the brand, making it easy to overlook the red flags that indicate something is off.</p>
-<p>If you fall for this scam, the consequences can be severe. By clicking the link and entering your information, you may unknowingly hand over your login credentials to cybercriminals. This could lead to unauthorized purchases, identity theft, or even financial loss. Once they have access to your account, they can wreak havoc, changing your password and locking you out, leaving you to deal with the aftermath. The emotional toll and financial implications can be overwhelming, making it crucial to remain vigilant against these deceptive tactics.</p>
+<p>You might receive an email that looks like it’s from Amazon, claiming there’s suspicious activity on your account. The message often includes your name and a sense of urgency, stating that you must verify your account immediately to avoid suspension. The email may have the Amazon logo and even a link that appears to lead to the official site. However, if you look closely, the URL may be slightly misspelled or have an unusual domain. This seemingly legitimate email can easily catch you off guard, especially if you frequently shop online.</p>
+<p>The email typically creates a sense of panic, urging you to act fast. It might say something like, “Your account will be locked in 24 hours if you don’t respond.” This pressure can make you feel like you have no choice but to click the link and provide your information. The sender may even include a reassuring message about how important your security is to them, which can further build trust. This combination of urgency and familiarity can make it hard to think clearly and question the legitimacy of the message.</p>
+<p>You may also encounter variations of this scam, such as text messages or phone calls that mimic Amazon’s customer service. A text might inform you of a suspicious login attempt, while a call could claim to be from Amazon’s fraud department, asking for verification of your account details. These variations often use similar tactics, like impersonating Amazon’s branding or using official-sounding language. The goal remains the same: to make you feel compelled to act quickly without double-checking the source.</p>
+<p>Falling for this scam can lead to serious consequences. If you provide your login information, the scammers can access your Amazon account, potentially leading to unauthorized purchases or identity theft. Your personal information could be sold on the dark web, and recovering your account may take considerable time and effort. The emotional toll can be just as significant, leaving you feeling violated and anxious about your online safety. It’s crucial to remain vigilant and question any unexpected messages, especially when they invoke fear or urgency.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "amazon suspicious activity email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

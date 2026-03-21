@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text that looks like it’s from your bank, claiming there’s an issue with your Zelle account. The message is urgent, stating that you need to verify your identity immediately to avoid being locked out. It includes a link that appears legitimate, perhaps even mimicking your bank’s website design. The sender may use a phone number that seems familiar, making it easy to mistake this for a genuine communication. You might feel a pang of anxiety as you read it, thinking about the potential consequences of not acting quickly.</p>
-<p>The text creates a sense of urgency by suggesting that your account is at risk. It plays on your fear of losing access to your funds or being unable to make important payments. The message might even include a friendly tone, addressing you by name and assuring you that this is a routine verification process. This combination of urgency and a personal touch can make it difficult to pause and think critically about the situation. You may feel compelled to click the link and provide your information, believing you’re doing the right thing to protect your finances.</p>
-<p>You might also encounter variations of this scam that come through email or even direct messages on social media. Some versions may claim that a payment you made was flagged as suspicious, urging you to confirm your details to resolve the issue. Others might promise a reward or bonus for using Zelle, enticing you to click on a link that leads to a fake login page. Each variation is designed to exploit your trust and prompt immediate action, making it easy to overlook the signs that something is off.</p>
-<p>Falling for this scam can have serious consequences. Once you provide your information, scammers can access your bank account, draining your funds or making unauthorized transactions. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. Additionally, recovering lost funds can be a long and frustrating process, often with no guarantee of success. The danger lies not just in the immediate financial loss, but in the lasting impact it can have on your trust in digital transactions.</p>
+<p>You receive a text that appears to be from your bank, complete with their logo and official-sounding language. The message claims there’s a problem with your Zelle account, urging you to click on a link to verify your identity. The link takes you to a website that looks almost identical to your bank’s official site, complete with familiar colors and fonts. You might even notice a phone number at the bottom that seems legitimate, making it all the more convincing. It feels like a routine security check, and you might think nothing of it as you proceed.</p>
+<p>The urgency of the message is palpable. It states that if you don’t act immediately, your account will be locked or you could lose access to your funds. This creates a sense of panic, pushing you to respond quickly without thinking it through. The text might even include a friendly greeting, making it feel personal and trustworthy. It’s designed to catch you off guard, making you feel like you need to resolve the issue before it escalates, which is exactly what the scammer wants.</p>
+<p>Variations of this scam can pop up in different forms. You might receive a call from someone claiming to be a bank representative, or an email that looks just like a legitimate notification. Sometimes, the message will mention a recent transaction you didn’t make, or it could even reference a friend who supposedly sent you money through Zelle. Each version is crafted to exploit your trust, making it harder to spot the deception. The more familiar the message feels, the more likely you are to act without hesitation.</p>
+<p>If you fall for this scam, the consequences can be severe. You may unknowingly provide your personal information, allowing the scammer to access your bank account and drain your funds. Once the money is gone, it can be incredibly difficult to recover, and your financial security may be compromised. Beyond the immediate loss, there’s also the emotional toll of realizing you’ve been deceived. It can leave you feeling vulnerable and anxious, questioning every future transaction and interaction.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "zelle scam text";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

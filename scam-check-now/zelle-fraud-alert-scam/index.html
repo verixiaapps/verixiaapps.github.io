@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a text or email that looks like it’s coming from your bank, claiming there’s an issue with your Zelle account. The message often includes your name and may even reference a recent transaction to make it feel legitimate. It might say something like, “Your account has been compromised. Please verify your identity immediately.” The sender’s email address may resemble your bank’s, and the urgency in the message can make you feel anxious, prompting you to act quickly without thinking.</p>
-<p>These scams thrive on creating a sense of panic. The message often implies that your funds are at risk or that you need to act fast to prevent unauthorized transactions. You might feel a rush of anxiety, fearing that your money is in jeopardy. The scammer’s goal is to establish trust, making you believe that they are there to help you resolve a serious issue. They may even include a phone number that seems legitimate, further convincing you to reach out for assistance.</p>
-<p>Variations of this scam can include fake customer service calls where the scammer impersonates a bank representative. They might ask you to provide personal information or even direct you to a website that looks just like your bank's login page. Some might send you a link to "verify" your account, which leads to a phishing site designed to steal your credentials. Others may use social media platforms to reach out, posing as a friend or family member who “accidentally” sent money through Zelle and needs your help.</p>
-<p>Falling for this scam can have serious consequences. If you provide your personal information or log in to a fake site, you risk losing access to your bank accounts and potentially your identity. Scammers can drain your accounts, leaving you with financial losses that can take weeks or months to recover. The emotional toll can be just as damaging, leaving you feeling violated and distrustful of future communications. It’s crucial to recognize these tactics to protect yourself from becoming a victim.</p>
+<p>You might receive a text or email that looks like it’s from your bank, claiming there’s a problem with your Zelle account. The message could say something like, “Your Zelle transaction was flagged for suspicious activity. Click here to verify your identity.” The link often leads to a site that mimics your bank’s official page, where you’re prompted to enter sensitive information like your login credentials or personal details. The message may even include a phone number to call, where someone will answer with a friendly tone, making it feel legitimate.</p>
+<p>The urgency in these messages is designed to make you act quickly. You might read that your account will be locked if you don’t respond immediately, creating a sense of panic. The sender often uses language that makes you feel secure, mentioning your bank by name and including specific details that seem to validate their claim. This combination of urgency and trust can easily cloud your judgment, pushing you to take action without thinking it through.</p>
+<p>Variations of this scam can appear in different forms, such as fake emails that look like they’re from Zelle itself, or even phone calls where the scammer pretends to be a customer service representative. Some might send you a fake invoice for a transaction you never made, urging you to confirm your payment information. Others might use social media to reach out, posing as a friend who needs help with their Zelle account. Each variation is crafted to exploit your trust and urgency in different ways.</p>
+<p>If you fall for this scam, the consequences can be severe. You might unknowingly give away your banking credentials, allowing the scammer to drain your account or make unauthorized transactions. Once your information is compromised, it can lead to identity theft, leaving you to deal with the aftermath of financial loss and the stress of reclaiming your identity. The emotional toll can be just as damaging, as you may feel embarrassed or violated, questioning your ability to recognize a scam in the future.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "zelle fraud alert";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

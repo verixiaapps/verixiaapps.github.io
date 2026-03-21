@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You open your email to find a message that seems too good to be true: a job offer from a reputable company you’ve always admired. The email is professionally formatted, complete with the company logo and a signature from a hiring manager. It outlines an attractive salary, benefits, and even mentions a quick start date. As you read through the details, you notice they want to move fast, asking you to respond within 48 hours to secure your position. The excitement builds as you consider the possibilities, but something feels off.</p>
-<p>The urgency in the email is palpable. They emphasize that there are limited spots available and that you need to act quickly to avoid missing out on this incredible opportunity. The sender’s tone is friendly and encouraging, making you feel like you’re already part of the team. They may even include a personal touch, mentioning your recent application or a referral from a mutual connection. This creates a false sense of trust, making it easy to overlook the red flags and dive headfirst into what seems like a dream job.</p>
-<p>You might see variations of this scam in different formats, such as a text message or even a LinkedIn message. Sometimes, the email might come from a slightly altered email address that looks legitimate at first glance. Other times, they might ask you to complete a quick online form or pay for a background check to secure your position. Regardless of the format, the core elements remain the same: a shiny offer wrapped in urgency and trust, designed to lure you in.</p>
-<p>Falling for this scam can lead to serious consequences. You could end up sharing personal information, like your social security number or bank details, with complete strangers. In some cases, you might even be asked to pay upfront for training materials or equipment, only to find that the job doesn’t exist. The emotional toll can be significant, leaving you feeling embarrassed and vulnerable. It’s not just about losing money; it’s about the trust you placed in a situation that was never real.</p>
+<p>You open your inbox to find an enticing email titled “Exciting Job Opportunity Just for You!” The message is professionally formatted, complete with a company logo and a signature from a recruiter. It mentions your impressive qualifications, which they claim to have found on a job site. The email outlines a position that seems tailor-made for you, offering a generous salary and benefits. All you need to do is click a link to complete your application or provide some personal information. It feels like a dream come true, but something about it feels off.</p>
+<p>The email creates an overwhelming sense of urgency, stating that the position is in high demand and that you need to respond quickly to secure your spot. Phrases like “limited time offer” or “we’ve already shortlisted candidates” make you feel pressured to act fast. The sender may even include testimonials from supposed employees who rave about the company culture and how they landed their dream jobs. This carefully crafted message is designed to build trust and make you feel like you’re missing out if you don’t respond immediately.</p>
+<p>You might see variations of this scam that appear in different forms. Some emails might come from free email accounts rather than corporate domains, while others might include phone numbers for you to call. Occasionally, you might receive a text message instead, directing you to a website that looks legitimate but is designed to collect your personal information. The job descriptions can vary widely, from administrative roles to tech positions, but they all share the same goal: to lure you into providing sensitive data.</p>
+<p>Falling for this scam can lead to serious consequences. If you share your personal information, it could be used for identity theft, leading to financial loss and damage to your credit. Even if you don’t provide sensitive data, the scammer may ask for payment for a background check or training materials, leaving you out of pocket. The emotional toll of realizing you’ve been duped can be significant, leading to feelings of embarrassment and distrust in future job opportunities.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "fake job offer email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

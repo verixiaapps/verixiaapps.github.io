@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive an email that looks remarkably professional, complete with a company logo and a signature from a hiring manager. The subject line could read something enticing like “Your Application Status” or “Exciting Job Opportunity.” As you read through the message, it outlines a remote job that seems tailor-made for your skills, offering a salary that feels too good to be true. The email might even include a link to a polished website where you can learn more about the company and its mission, making it all feel legitimate.</p>
-<p>The urgency in these emails is palpable. You may notice phrases like “Act fast—limited positions available!” or “We’re eager to fill this role within the week!” This pressure can make you feel like you’re on the brink of missing out on a golden opportunity. They often include testimonials from supposed employees, painting a picture of a supportive work environment. This carefully crafted narrative builds trust, making it easier for you to overlook any red flags.</p>
-<p>Variations of this scam can pop up in your inbox with different job titles or companies, but the core elements remain the same. You might see emails claiming to be from well-known companies or even startups that seem to be gaining traction. Some might ask you to complete a quick online assessment or even request personal information under the guise of a background check. Each version is designed to lure you in with the promise of a fulfilling remote job while masking their true intentions.</p>
-<p>Falling for this scam can lead to serious consequences. You might find yourself sharing sensitive personal information, which could lead to identity theft or financial loss. Even if you don’t provide any personal details, the emotional toll of realizing you’ve been duped can be significant. It can shake your confidence and make you wary of legitimate opportunities in the future. The allure of a dream job should never come at the cost of your security and peace of mind.</p>
+<p>You might receive an email claiming you've been selected for a remote job that sounds too good to be true. The sender often uses a professional-looking email address and includes a company logo, making it seem legitimate. The message may promise high pay for minimal work, like data entry or customer service, and often includes phrases like "immediate start" or "limited positions available." They may even attach a job offer letter or ask you to fill out a quick application form, which appears harmless at first glance.</p>
+<p>The urgency in these emails is palpable. You may notice phrases urging you to act quickly, suggesting that the opportunity will be gone if you don’t respond immediately. This pressure can make you feel like you’re missing out on a golden opportunity, pushing you to overlook any red flags. The sender may also include testimonials or fake reviews to build trust, making you believe that this is a genuine chance to earn money from home.</p>
+<p>Variations of this scam can come in different forms, such as a text message or a direct message on social media. Some may even impersonate well-known companies or use names that sound similar to reputable businesses. They might offer different job titles or responsibilities, but the core message remains the same: a promise of easy money for little effort. You might find similar messages in your spam folder or even in your professional network, making it hard to distinguish between a real opportunity and a scam.</p>
+<p>Falling for this scam can lead to serious consequences. You may end up providing personal information, such as your Social Security number or bank details, under the guise of a background check or direct deposit setup. This can lead to identity theft, financial loss, or even being drawn into a larger scheme that could involve money laundering. What starts as an enticing job offer can quickly spiral into a situation that leaves you feeling violated and vulnerable.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "remote job scam email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a text that seems to come from a trusted source, like a friend or a well-known company, claiming you've won a significant amount of Bitcoin or that you can double your investment instantly. The message often includes a link that promises to take you to a secure website where you can claim your winnings or make a quick investment. The language is casual and friendly, making it feel personal and legitimate, as if someone you know is genuinely looking out for you.</p>
-<p>The urgency in these texts is palpable. They often say that you need to act fast to secure your winnings or that the offer is only available for a limited time. This pressure can make you feel like you’re missing out on a golden opportunity, pushing you to click the link without thinking twice. The sender may even include a countdown timer or mention that others are already claiming their rewards, making you feel like you’re in a race against time.</p>
-<p>Variations of this scam can include texts that claim to be from cryptocurrency exchanges or investment platforms, offering you exclusive access to new coins or investment opportunities. Some messages may appear to be from tech support, alerting you to suspicious activity on your account and urging you to verify your identity by clicking a link. Each version is designed to exploit your trust and curiosity, often using familiar logos or language to seem credible.</p>
-<p>If you fall for one of these scams, you could end up losing your hard-earned money or having your personal information compromised. Clicking on a malicious link can lead to your device being infected with malware or your accounts being hacked. The emotional toll can be just as damaging, leaving you feeling embarrassed or anxious about your financial security. It's crucial to recognize these tactics before they lead to potentially devastating consequences.</p>
+<p>You might receive a text message that looks like it’s coming from a reputable cryptocurrency exchange or a well-known financial service. It may say something like, “Your account has been compromised! Click here to verify your identity and secure your funds.” The link provided often leads to a website that closely resembles the legitimate site, complete with logos and familiar layouts. The urgency in the message can make it feel real, especially if you’ve recently been involved in any cryptocurrency transactions.</p>
+<p>The sender often creates a sense of panic or urgency, making you feel like immediate action is necessary to protect your assets. Phrases like “limited time offer” or “your account will be locked if you don’t respond” are common tactics. This pressure can cloud your judgment, pushing you to act quickly without thinking through the situation. You might feel reassured by the professional tone and the apparent authority of the message, which can make it even harder to recognize the red flags.</p>
+<p>Scammers are skilled at adapting their tactics, so you might see variations of this text that claim to offer investment opportunities, promising high returns on your Bitcoin. Some messages may even impersonate a friend or family member who claims they’ve made a fortune through a new investment scheme. Others might offer “exclusive access” to a new cryptocurrency that’s supposedly about to skyrocket in value. Each variation is designed to exploit your trust and curiosity, making it easy to overlook the signs that something is off.</p>
+<p>If you fall for one of these scams, the consequences can be severe. You could end up giving away sensitive personal information, such as your account login details or even your private keys, which can lead to losing your entire investment. Once the scammers have your information, it’s often impossible to recover your funds. Beyond the financial loss, there’s also the emotional toll of realizing you’ve been deceived, which can leave you feeling vulnerable and anxious about future transactions.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "bitcoin scam text";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

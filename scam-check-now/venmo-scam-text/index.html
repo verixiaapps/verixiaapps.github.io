@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text that appears to be from Venmo, complete with their logo and a message that claims there’s an issue with your account. The sender might say something like, “Your account has been temporarily suspended. Click this link to verify your identity.” The link looks legitimate at first glance, but it leads to a website that mimics the real Venmo site. This message feels alarming because it taps into your concerns about your finances and the security of your transactions, making it hard to ignore.</p>
-<p>The urgency in the message is palpable. You might feel a rush of anxiety, fearing that your money is at risk. The text often emphasizes that immediate action is required to avoid losing access to your account or that your funds could be compromised. This pressure can cloud your judgment, making you more likely to click the link without thinking it through. The sender’s tone is designed to instill fear, pushing you to act quickly, which is exactly what they want.</p>
-<p>Variations of this scam can include messages that claim you’ve received a payment from someone you don’t recognize or that your account has been flagged for suspicious activity. Sometimes, the scammer might even impersonate a friend or family member who claims they accidentally sent you money and need you to verify your account. Each variation is crafted to exploit your trust and familiarity with the Venmo platform, making it increasingly difficult to discern what’s real and what’s not.</p>
-<p>Falling for this scam can lead to serious consequences. If you enter your information on the fake site, the scammers gain access to your account, potentially draining your funds or making unauthorized transactions. Beyond financial loss, there’s the added risk of identity theft, as they may collect personal information that can be used against you later. The emotional toll can be significant too, leaving you feeling violated and anxious about your financial security.</p>
+<p>You receive a text that looks like it’s from Venmo, complete with their logo and a friendly tone. The message says there’s an issue with your account, urging you to click a link to verify your information. It might even mention that your recent transaction was flagged for suspicious activity, prompting you to act quickly. The sender uses your name and includes details that make it feel legitimate, like referencing your last transaction or the last four digits of your linked bank account. It feels personal and urgent, making you think twice before dismissing it.</p>
+<p>The text creates a sense of urgency that’s hard to ignore. It tells you that your account will be suspended if you don’t respond immediately, playing on your fear of losing access to your funds. The friendly language makes it seem like they’re there to help you, building a false sense of trust. You might feel compelled to click the link, believing you’re just taking necessary steps to secure your account. This psychological pressure can easily lead you to act without thinking it through.</p>
+<p>You might also encounter variations of this scam, such as emails or direct messages on social media that mimic Venmo’s branding. Some messages might claim you’ve won a prize or are eligible for a special promotion, again prompting you to click a link. Others may come from fake customer support numbers, where the scammer pretends to assist you with a problem. Each version is designed to look authentic, making it difficult to discern what’s real and what’s not, especially when you’re busy or distracted.</p>
+<p>Falling for this scam can have serious consequences. If you provide your personal information, scammers can drain your Venmo account, access your bank details, or even steal your identity. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. You might also face the hassle of trying to recover lost funds or dealing with the aftermath of identity theft. The consequences extend beyond just money; they can affect your peace of mind and trust in digital transactions.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "venmo scam text";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

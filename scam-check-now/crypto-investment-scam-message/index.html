@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might have received an enticing message claiming you can double your investment in just a few days through a new cryptocurrency opportunity. The sender often presents themselves as a financial expert or a friend who has had incredible success with this investment. They might include flashy graphics or links to a polished website that looks legitimate, showcasing testimonials from supposed satisfied investors. The message often promises high returns with minimal risk, making it hard to resist the allure of easy money.</p>
-<p>The urgency in these messages is palpable. You might notice phrases like “limited time offer” or “act now to secure your spot,” pushing you to make quick decisions without fully thinking it through. They may even create a sense of trust by sharing personal stories or claiming to have insider knowledge about the next big cryptocurrency. This tactic makes you feel like you’re missing out on something exclusive, compelling you to act before it’s too late.</p>
-<p>These scams can take on various forms. You might see them as direct messages on social media, emails from seemingly reputable sources, or even pop-up ads while browsing the web. Some might impersonate well-known figures in the crypto space, claiming they’ve partnered with a new platform. Others may use fake news articles or videos to lend credibility to their claims. Each variation is designed to catch your attention and exploit your desire for financial gain.</p>
-<p>Falling for this type of scam can have serious consequences. You could end up losing your hard-earned money, leaving you in a precarious financial situation. Beyond the immediate loss, there’s the emotional toll of realizing you’ve been deceived, which can lead to feelings of shame or regret. In some cases, scammers may even use your personal information for identity theft, leading to further complications down the line. The risks are real, and the impact can linger long after the initial encounter.</p>
+<p>You might receive a message that seems to come from a reputable source, perhaps a well-known investment platform or even a friend’s account that’s been hacked. It promises incredible returns on cryptocurrency investments, claiming that a new coin is about to skyrocket in value. The message might include a link to a polished website that looks legitimate, complete with testimonials and charts showing rapid growth. The sender might urge you to act fast, suggesting that this opportunity is time-sensitive and that others are already investing.</p>
+<p>The urgency in these messages is palpable. You may feel a rush of excitement as they emphasize that this is a once-in-a-lifetime chance, often accompanied by phrases like “Don’t miss out!” or “Act now to secure your future!” This pressure can cloud your judgment, making you feel as though you need to jump in immediately. The sender may even offer to guide you through the process, creating a false sense of trust and making it seem like you’re part of an exclusive group that’s in the know.</p>
+<p>These scams can take on various forms, each designed to catch you off guard. You might see similar messages on social media platforms, where fake accounts impersonate influencers or financial experts. Sometimes, they come as unsolicited emails or texts that appear to be from your bank, urging you to verify your account details for a “special investment opportunity.” Regardless of the format, the core message remains the same: a promise of quick and easy wealth that plays on your hopes and dreams.</p>
+<p>Falling for this kind of scam can have devastating consequences. You could end up losing not just your investment but also your personal information, which can lead to identity theft. The emotional toll can be significant as well; feelings of regret and embarrassment often follow. It’s not just about the money lost; it’s about the trust that gets shattered and the realization that you were misled. The impact can linger long after the initial incident, affecting your financial decisions and relationships with others.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "crypto investment scam message";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might have recently received an email that looks just like a legitimate PayPal notification, complete with the familiar logo and color scheme. The message claims that you have received a payment or that there’s an issue with your account that requires immediate attention. The sender’s email address may appear to be from PayPal, but a closer look reveals subtle differences. The email often includes a link that prompts you to log in to your account or verify your details, making it seem urgent and necessary.</p>
-<p>The urgency in these emails is crafted to make you act quickly without thinking. Phrases like “Your account will be suspended” or “Immediate action required” are designed to instill fear and prompt you to click the link right away. This pressure can cloud your judgment, pushing you to enter your login credentials or personal information without considering the consequences. The message often feels personalized, making it easier to trust, as it may reference your name or recent transactions.</p>
-<p>These fake PayPal emails can come in various forms, each designed to exploit different fears or concerns. Some may claim that a recent transaction was flagged for fraud, while others might offer a refund for a purchase you never made. The language can vary, but the goal remains the same: to trick you into providing sensitive information. Even text messages or social media messages can mimic this style, making it harder to distinguish between genuine communication and a scam.</p>
-<p>If you fall for this scam, the consequences can be severe. Your PayPal account could be compromised, leading to unauthorized transactions or identity theft. Scammers may use your information to drain your bank account or make purchases in your name, leaving you to deal with the fallout. The emotional toll can be just as damaging, as the realization that you’ve been deceived can lead to stress and anxiety. Protecting yourself starts with recognizing these tactics and staying vigilant.</p>
+<p>You might receive an email that looks just like a legitimate PayPal notification, complete with the familiar logo and formatting. It may claim that you've received a payment or that your account has been charged for a recent transaction. The email often includes a link that prompts you to click for more details or to resolve an issue. The sender's address may seem authentic at first glance, but a closer look might reveal subtle discrepancies. This kind of message can easily trick you into thinking it’s a genuine communication from PayPal.</p>
+<p>The urgency in these emails is palpable. They often state that immediate action is required, such as confirming your account details or disputing a charge, creating a sense of panic. You might feel compelled to click the link right away, fearing that your account could be compromised. The email may even include phrases like "Your account will be limited" or "Act now to avoid suspension," which can push you to respond without thinking. This pressure can cloud your judgment and lead you to make hasty decisions.</p>
+<p>Scammers are crafty and often customize their approach. You might see variations where the email claims to be from a different payment service or even a well-known retailer, but the core tactic remains the same. Some emails may suggest that you need to verify your identity due to suspicious activity, while others might offer refunds for purchases you never made. Regardless of the specifics, the goal is to get you to click a link or provide personal information, making it easy for them to exploit your trust.</p>
+<p>If you fall for this scam, the consequences can be severe. Clicking on the link could lead to a phishing site designed to capture your login credentials, giving scammers access to your PayPal account and potentially your bank information. Even if you don’t provide any information, malware could be installed on your device, compromising your security. The emotional toll of realizing you’ve been duped can be just as damaging, leaving you feeling vulnerable and anxious about future online interactions.</p>
 </div>
 
 <h2>Common Warning Signs</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "paypal fake payment email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a message that looks like it’s from a friend or family member, claiming they accidentally sent you money through Venmo and need you to send it back immediately. The message often includes a sense of familiarity, using your contact's name and a casual tone that makes it feel genuine. They may even provide a link that appears to lead to the Venmo app, urging you to act quickly before the transaction is reversed. This setup can feel harmless, but it’s a common tactic used by scammers to exploit your trust.</p>
-<p>Scammers create a sense of urgency by suggesting that the money was sent in error and that you need to act fast to rectify the situation. They might say they’re in a tight spot or that they need the funds for an emergency, which can tug at your heartstrings and make you feel obligated to help. This pressure often leads you to act without thinking, as you might feel that your friend is in a bind and you want to assist them. The emotional manipulation is a key element in making you feel compelled to respond quickly.</p>
-<p>You might also encounter variations of this scam, such as receiving a text or email that claims to be from Venmo itself, stating there’s an issue with your account that requires immediate attention. In these cases, the message might ask you to click a link to verify your information or update your payment details. Some scammers even impersonate customer service representatives, claiming they need to confirm a recent transaction. Each version is designed to look legitimate and create a sense of trust, making it easy to overlook the red flags.</p>
-<p>Falling for this scam can lead to serious consequences. If you send money back to the scammer, you may never see that money again, leaving you out of pocket. Additionally, if you provide any personal information, such as your Venmo login or bank details, you could be opening the door to identity theft or further financial loss. The emotional toll can also be significant, as realizing you’ve been duped can lead to feelings of embarrassment and distrust, impacting your future interactions online.</p>
+<p>You receive a text that looks like it's from a friend, complete with their name and profile picture. The message says they accidentally sent you money on Venmo and need you to send it back immediately. They provide a link that appears to lead to the Venmo app, urging you to act fast. The tone is casual, almost friendly, making it easy to assume this is a genuine mistake. You might even feel a sense of obligation to help out, especially if you trust the person who supposedly sent the message.</p>
+<p>The pressure builds as the message emphasizes that they need the money back right away to avoid overdraft fees or to settle a bill. It might mention that they are in a hurry or that they’re dealing with a financial emergency. This urgency can cloud your judgment, making you feel like you have to respond quickly without taking the time to verify the situation. The friendly tone and sense of urgency create a false sense of security, making it easy to overlook any red flags.</p>
+<p>Variations of this scam can pop up in different forms. You might receive an email that looks like an official Venmo notification, claiming that your account has been compromised and you need to verify your identity by clicking a link. Alternatively, a phone call from someone pretending to be customer support could lead you to a similar trap. Each version plays on the same theme of urgency and trust, making it difficult to discern what's real and what's not.</p>
+<p>Falling for this scam can have serious consequences. If you send money back, you might lose your hard-earned cash without any way to recover it. Your personal information could also be compromised, leading to identity theft or unauthorized transactions. The emotional toll can be significant, leaving you feeling embarrassed or violated. It’s a reminder that even the most familiar platforms can be exploited, and what seems like a simple mistake can quickly escalate into a financial nightmare.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "venmo payment";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

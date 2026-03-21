@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might have recently received an email that looks like it’s from Amazon, complete with the familiar logo and layout. The subject line might read something like “Your Account Has Been Suspended” or “Action Required: Verify Your Purchase.” Inside, the message urges you to click on a link to resolve an issue or confirm your information. The urgency in the tone makes it feel legitimate, as if your account is at risk, and you need to act fast to avoid losing access to your purchases or personal data.</p>
-<p>The email often creates a sense of panic, suggesting that your account has been compromised or that there’s a problem with a recent order. This pressure to act quickly can cloud your judgment, making you more likely to click the link without thinking twice. The message may even include a friendly greeting, personalized with your name, which adds an extra layer of trust. It feels like a genuine communication from a company you know and rely on, compelling you to respond immediately.</p>
-<p>Variations of this scam can appear in different formats, such as text messages or even fake websites that mimic Amazon’s design. You might receive a text claiming there’s an issue with your delivery, prompting you to click a link to track your package. Alternatively, you could encounter a pop-up while browsing that claims to offer a special deal or a survey, asking for your Amazon credentials. Each version plays on your familiarity with Amazon, making it harder to distinguish between a real message and a scam.</p>
-<p>Falling for this scam can lead to serious consequences, including identity theft or unauthorized purchases on your account. Once you provide your login details, scammers can access your personal information, making it easy for them to exploit your financial data. The aftermath can be stressful, as you may find yourself dealing with fraudulent charges or a compromised account. Protecting yourself means being aware of these tactics and taking a moment to verify any unexpected communications before taking action.</p>
+<p>You might have recently received an email that looks just like an official Amazon message, complete with their logo and familiar layout. It may claim that there’s an issue with your account, such as a failed payment or a suspicious login attempt. The email usually includes a link that urges you to verify your account information or reset your password. The language is often urgent, suggesting that immediate action is required to avoid account suspension or loss of access to your purchases.</p>
+<p>The email creates a sense of urgency by stating that your account is at risk and that you need to act quickly to secure it. Phrases like “immediate action required” or “your account will be suspended” are common, making you feel anxious and compelled to click the link. This tactic is designed to bypass your usual skepticism, as the fear of losing access to your account can cloud your judgment and push you to act without thinking.</p>
+<p>You might also encounter variations of this scam, such as text messages or even phone calls that mimic Amazon’s customer service. These could claim that you’ve won a gift card or that there’s a problem with your recent order. Each version aims to exploit your trust in Amazon, using familiar branding and language to make you feel secure while leading you into a trap. The message may even include a phone number that appears legitimate, further blurring the lines between real and fake.</p>
+<p>Falling for this scam can have serious consequences. If you provide your login details, the scammer can access your account, potentially leading to unauthorized purchases or identity theft. Your personal information can be sold on the dark web, putting you at risk for further scams and financial loss. The emotional toll can be significant as well, leaving you feeling violated and anxious about your online security. It’s crucial to recognize these tactics to protect yourself and your information.</p>
 </div>
 
 <h2>Common Warning Signs</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "amazon email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

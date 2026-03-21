@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You receive a text that appears to be from Amazon, complete with their logo and a familiar tone. It states that there’s a problem with your recent order, urging you to click a link to resolve the issue immediately. The message might mention a specific item you recently purchased, making it feel personal and relevant. The urgency in the text is palpable, suggesting that your account will be suspended if you don’t act fast. This creates a sense of panic, prompting you to click the link without a second thought.</p>
-<p>The text plays on your emotions by creating a scenario that feels real and pressing. It might say something like, “Your order is on hold! Click here to verify your information.” This kind of messaging is designed to instill fear and urgency, making you feel like you must respond right away to avoid losing access to your account or missing out on your purchase. The familiarity of the brand adds a layer of trust, making it easier to overlook any red flags.</p>
-<p>Variations of this scam can come in different forms, such as emails or even phone calls that mimic Amazon's customer service. You might receive an email that looks like an official Amazon communication, complete with links to fake websites that look almost identical to the real Amazon site. Sometimes, the scammer might even call you, claiming to be from Amazon support, asking for your account details to “fix” an issue. Each of these variations is crafted to catch you off guard, making it difficult to discern what’s genuine and what’s not.</p>
-<p>Falling for this scam can lead to serious consequences. If you provide your personal information or login credentials, scammers can gain access to your Amazon account, leading to unauthorized purchases or even identity theft. Your financial details could be compromised, resulting in unexpected charges or loss of funds. Beyond the immediate financial impact, the emotional toll of realizing you’ve been scammed can linger, leaving you feeling violated and anxious about future online interactions.</p>
+<p>You receive a text that looks like it’s from Amazon, complete with their logo and a friendly greeting. The message claims there’s an issue with your recent order, urging you to click on a link to confirm your account details. The link leads to a website that closely resembles the official Amazon site, making it easy to mistake for the real thing. It might even include specific details about your order, making it feel more legitimate and personal.</p>
+<p>The text creates a sense of urgency, suggesting that your account will be suspended if you don’t act immediately. You might feel a rush of anxiety, thinking about the hassle of dealing with customer service or losing access to your account. This pressure can cloud your judgment, pushing you to click the link without taking a moment to verify its authenticity. The message is crafted to build trust, using familiar branding and language that makes you feel secure.</p>
+<p>Variations of this scam can pop up in different forms. You might receive an email instead of a text, or the message could claim to be from a different retailer, but the tactics remain the same. Some might even offer a discount or a gift card as a lure, enticing you to click the link. Regardless of the format, the goal is to trick you into providing personal information or login credentials, often by mimicking legitimate communication.</p>
+<p>Falling for this scam can lead to serious consequences. If you enter your information, scammers can gain access to your Amazon account, making unauthorized purchases or stealing your payment information. This breach can extend beyond just one account, potentially compromising your personal data across various platforms. The emotional fallout can be just as damaging, leaving you feeling violated and anxious about your online security.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "amazon text";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

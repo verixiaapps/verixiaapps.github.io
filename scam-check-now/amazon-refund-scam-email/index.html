@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You open your email to find a message that looks just like it’s from Amazon, complete with their logo and familiar formatting. The subject line reads, “Your Refund Is Ready!” Inside, the email claims there was an issue with your recent order, and they need you to confirm your account details to process a refund. The language is friendly yet urgent, making it feel like a legitimate communication from a trusted source. You might even notice a link that appears to lead to the Amazon website, urging you to act quickly to secure your funds.</p>
-<p>The email creates a sense of urgency by stating that your refund will expire if you don’t respond within a specific timeframe. This pressure can make you feel like you need to act fast, bypassing your usual caution. The message may also include a reassuring note about Amazon’s commitment to customer satisfaction, which can further build trust. You might find yourself thinking, “I don’t want to miss out on my refund,” making it easier to overlook any red flags.</p>
-<p>Scammers often tweak these emails to keep them fresh and relevant. You might receive a message claiming to be from Amazon Prime, stating that your subscription is about to renew, and you need to verify your payment information to avoid being charged. Alternatively, you might see a notification about a package delivery issue, with a link to “resolve” the problem. Each variation is designed to catch your eye and elicit a response, making it harder to recognize the scam.</p>
-<p>Falling for this scam can lead to serious consequences. If you provide your personal information, you risk having your account hacked or your financial details stolen. Scammers can use this data to make unauthorized purchases or even sell your information on the dark web. The aftermath can be stressful, leaving you to deal with the fallout of identity theft or financial loss. It’s a situation that can escalate quickly, turning a simple email into a significant threat to your security.</p>
+<p>You open your inbox to find an email that looks just like it’s from Amazon, complete with the familiar logo and a subject line that reads, “Your Refund is Processed.” The message claims that there was an issue with your recent order, and you’re entitled to a refund. It urges you to click a link to confirm your details to receive the money back. The email is crafted to appear legitimate, featuring official-looking formatting and even a customer service number that seems real at first glance.</p>
+<p>As you read through the email, a sense of urgency washes over you. It states that you must act quickly to avoid losing your refund, creating a pressure that feels all too familiar. The message emphasizes that your account may be suspended if you don’t respond promptly. This tactic is designed to make you feel anxious and compelled to click the link without thinking twice, as if your account is at risk and you need to resolve the issue immediately.</p>
+<p>You might also encounter variations of this scam that come through text messages or even phone calls. Some messages may claim that your account has been compromised, while others might suggest that you need to verify your payment method. Each version is tailored to mimic Amazon's communication style, making it easy to overlook the signs that something is off. They often use different tactics, such as fake customer service numbers or links that redirect to counterfeit websites, but the core message remains the same: you need to act fast.</p>
+<p>Falling for this scam can lead to serious consequences. If you click the link and provide your personal information, you risk having your Amazon account compromised, along with any linked financial accounts. Scammers can use your details to make unauthorized purchases or even steal your identity. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your online security. It’s crucial to recognize these tactics to protect yourself and your information.</p>
 </div>
 
 <h2>Red Flags To Watch For</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "amazon refund scam email";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();

@@ -444,7 +444,7 @@ font-size:24px;
   <div class="note">Use the same email you entered during checkout</div>
 
   <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active
+    ✅ Payment successful — unlimited access is active on this browser
   </div>
 
   <div class="note">Get a clear risk level, key red flags, and what to do next</div>
@@ -485,10 +485,10 @@ font-size:24px;
   <div id="contentBridge" class="content-bridge"></div>
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body"><div class="content-block">
-<p>You might receive a text or email claiming to be from Cash App, saying there’s a problem with your account. The message could include a link that looks legitimate, urging you to click it to verify your information. It may even mention a recent transaction that you didn’t make, creating a sense of alarm. The sender often uses official-looking logos and language to make it seem credible, making it easy to overlook the signs that something is off. If you’re not careful, you could find yourself in a situation where you’re sharing sensitive information without realizing it.</p>
-<p>The urgency in these messages is palpable. They often state that your account will be frozen or that you’ll lose access unless you act immediately. The pressure to resolve the issue quickly can cloud your judgment, making you more likely to click on the link or provide personal details. Scammers know how to exploit your fear of losing money or access to your funds, and they craft their messages to push you into a hasty decision. You might feel compelled to respond right away, thinking you’re protecting your financial interests.</p>
-<p>These scams can take on various forms, from fake customer service calls to social media messages that appear to come from friends or family. You might see a post claiming that Cash App is giving away free money, only to be directed to a site that asks for your login credentials. Sometimes, scammers impersonate Cash App support, offering help but ultimately leading you to share sensitive information. Each variation is designed to look legitimate, making it difficult to discern the real from the fake.</p>
-<p>Falling for one of these scams can have serious consequences. You could end up losing money directly from your Cash App account or, worse, have your identity stolen. Once scammers have your personal information, they can use it for fraudulent transactions or even open new accounts in your name. The aftermath can be overwhelming, as you may face financial loss and the stress of trying to reclaim your identity. It’s crucial to stay vigilant and recognize the signs before it’s too late.</p>
+<p>You might receive a message that looks like it’s coming from a friend or a family member, claiming they need help with a Cash App payment. The message may include a link that appears legitimate, urging you to click and send money to resolve an urgent issue. It could even mention that they accidentally sent money to the wrong account and need you to help them out by sending funds back. The sender’s profile may look familiar, making it easy to trust the request without a second thought.</p>
+<p>The urgency in these messages is palpable. They often imply that time is of the essence, suggesting that failing to act quickly could result in a lost opportunity or a financial setback for the sender. You might feel a sense of obligation to help, especially if the message is framed as an emergency. This pressure can cloud your judgment, making you less likely to scrutinize the details or verify the request before taking action.</p>
+<p>Variations of this scam can appear in different forms. You might encounter a fake customer service number claiming to be Cash App, where the caller insists that your account is compromised and that you need to send money to secure it. Alternatively, you could receive an email that looks like an official Cash App notification, prompting you to log in through a link that leads to a phishing site. Each variation is designed to exploit your trust, often using familiar names or logos to make the scam seem legitimate.</p>
+<p>Falling for this type of scam can lead to significant financial loss, as the money you send is often unrecoverable. Once you transfer funds, they can vanish quickly, leaving you with no way to trace them back. The emotional toll can also be heavy, as you may feel guilt or embarrassment for being deceived. Beyond the immediate financial impact, it can erode your trust in online transactions, making you hesitant to use services you once relied on.</p>
 </div>
 
 <h2>Signs This Might Be A Scam</h2>
@@ -525,19 +525,29 @@ font-size:24px;
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const RAW_KEYWORD = "cash app payment";
+const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
 
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
 
   if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
     document.getElementById("postPurchase").style.display = "block";
     window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
   }
 
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
 });
+
+function isBrowserSubscribed() {
+  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -718,6 +728,7 @@ function scrollToEmail() {
 async function check() {
   const text = document.getElementById("text").value.trim();
   const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!text) {
@@ -743,7 +754,7 @@ async function check() {
     const response = await fetch(API + "/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email })
+      body: JSON.stringify({ text, email, subscribed })
     });
 
     const data = await response.json();
