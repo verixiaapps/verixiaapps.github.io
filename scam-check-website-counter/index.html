@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Daily Hits</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Website Hits</title>
 
 <style>
 body{
   font-family:system-ui,-apple-system,Arial,sans-serif;
-  background:linear-gradient(180deg,#eef2ff,#f8fafc);
+  background:#f8fafc;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -24,14 +24,13 @@ body{
   text-align:center;
 }
 
-h1{
-  margin:0;
-  font-size:22px;
-  color:#374151;
+.title{
+  font-size:18px;
+  color:#6b7280;
 }
 
 .count{
-  margin-top:16px;
+  margin-top:12px;
   font-size:48px;
   font-weight:800;
   color:#111827;
@@ -42,21 +41,17 @@ h1{
 <body>
 
 <div class="card">
-  <h1>Hits Today</h1>
+  <div class="title">Total Hits</div>
   <div class="count" id="count">...</div>
 </div>
 
 <script>
-// Create a unique key per day (resets daily)
-const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
-const namespace = "verixiaapps";
-const key = "check-" + today;
-
-// Increment + get value
-fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+// READ ONLY (no increment)
+fetch("https://api.countapi.xyz/get/verixiaapps/check")
   .then(res => res.json())
   .then(data => {
-    document.getElementById("count").innerText = data.value.toLocaleString();
+    document.getElementById("count").innerText =
+      (data.value || 0).toLocaleString();
   });
 </script>
 
