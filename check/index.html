@@ -64,7 +64,7 @@ window.addEventListener("load", function(){
 
 body{
 font-family:system-ui,-apple-system,Arial,sans-serif;
-background:linear-gradient(180deg,#eef2ff,#f8fafc);
+background:linear-gradient(180deg,#eef2ff 0%,#f8fafc 100%);
 margin:0;
 padding-top:96px;
 color:#1f2937;
@@ -88,20 +88,20 @@ box-sizing:border-box;
 .logo{
 pointer-events:auto;
 font-size:14px;
-font-weight:600;
+font-weight:700;
 color:#374151;
 margin-left:8px;
 letter-spacing:-.01em;
-opacity:.82;
+opacity:.9;
 }
 
 .upgrade-top{
 pointer-events:auto;
 padding:8px 12px;
 font-size:14px;
-border-radius:10px;
-box-shadow:0 6px 18px rgba(0,0,0,.12);
-font-weight:600;
+border-radius:12px;
+box-shadow:0 10px 24px rgba(0,0,0,.12);
+font-weight:700;
 background:#1f2937;
 color:#fff;
 border:none;
@@ -122,7 +122,7 @@ text-overflow:ellipsis;
 
 .hero{
 text-align:center;
-padding:22px 20px 30px;
+padding:22px 20px 24px;
 max-width:900px;
 margin:0 auto;
 }
@@ -149,25 +149,110 @@ opacity:1;
 margin-top:14px;
 font-size:14px;
 color:#4b5563;
-font-weight:600;
+font-weight:700;
 }
 
 .container{
 max-width:760px;
 margin:auto;
-background:#fff;
+background:rgba(255,255,255,.86);
+backdrop-filter:blur(8px);
 padding:24px;
 padding-bottom:42px;
-border-radius:18px;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
+border-radius:24px;
+box-shadow:0 24px 60px rgba(15,23,42,.10);
 box-sizing:border-box;
+border:1px solid rgba(255,255,255,.8);
+}
+
+.preview-card{
+margin-bottom:18px;
+padding:18px;
+border-radius:20px;
+background:linear-gradient(180deg,#fff1f2 0%,#ffffff 100%);
+border:1px solid #fecdd3;
+box-shadow:0 18px 40px rgba(239,68,68,.10);
+}
+
+.preview-top{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap;
+}
+
+.preview-badge{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:10px 14px;
+border-radius:999px;
+background:#fee2e2;
+color:#b91c1c;
+font-size:13px;
+font-weight:800;
+letter-spacing:.02em;
+}
+
+.preview-score{
+padding:10px 14px;
+border-radius:999px;
+background:#fff;
+border:1px solid #fecaca;
+font-size:13px;
+font-weight:800;
+color:#991b1b;
+box-shadow:0 8px 18px rgba(239,68,68,.08);
+}
+
+.preview-domain{
+margin-top:14px;
+font-size:20px;
+font-weight:800;
+line-height:1.2;
+color:#111827;
+letter-spacing:-.02em;
+word-break:break-word;
+}
+
+.preview-sub{
+margin-top:6px;
+font-size:14px;
+color:#6b7280;
+font-weight:600;
+}
+
+.preview-signals{
+margin-top:14px;
+display:grid;
+gap:10px;
+}
+
+.preview-signal{
+display:flex;
+align-items:flex-start;
+gap:10px;
+padding:12px 14px;
+border-radius:14px;
+background:rgba(255,255,255,.92);
+border:1px solid #fee2e2;
+font-size:14px;
+font-weight:700;
+color:#7f1d1d;
+}
+
+.preview-signal-icon{
+flex:0 0 auto;
+font-size:15px;
+line-height:1.2;
 }
 
 textarea,input{
 width:100%;
 padding:14px;
 margin-top:10px;
-border-radius:12px;
+border-radius:14px;
 border:1px solid #d1d5db;
 font-size:16px;
 box-sizing:border-box;
@@ -188,7 +273,7 @@ box-shadow:0 0 0 4px rgba(59,130,246,.12);
 
 button{
 border:none;
-border-radius:12px;
+border-radius:14px;
 cursor:pointer;
 font-size:16px;
 padding:16px;
@@ -198,17 +283,17 @@ font-family:inherit;
 
 .check{
 width:100%;
-background:#3b82f6;
+background:linear-gradient(180deg,#3b82f6 0%,#2563eb 100%);
 color:#fff;
 margin-top:16px;
-font-weight:700;
-box-shadow:0 8px 20px rgba(59,130,246,.25);
+font-weight:800;
+box-shadow:0 12px 26px rgba(59,130,246,.25);
 transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .check:hover{
 transform:translateY(-1px);
-box-shadow:0 12px 24px rgba(59,130,246,.28);
+box-shadow:0 14px 28px rgba(59,130,246,.28);
 }
 
 .note{
@@ -240,20 +325,55 @@ display:none;
 }
 
 .result-card{
-background:#fff;
-border-radius:16px;
-padding:24px;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
+background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+border-radius:22px;
+padding:22px;
+box-shadow:0 24px 54px rgba(15,23,42,.12);
 border:1px solid #e5e7eb;
+overflow:hidden;
+}
+
+.result-card.high{
+background:linear-gradient(180deg,#fff1f2 0%,#ffffff 100%);
+border-color:#fecdd3;
+box-shadow:0 24px 54px rgba(239,68,68,.10);
+}
+
+.result-card.medium{
+background:linear-gradient(180deg,#fffbeb 0%,#ffffff 100%);
+border-color:#fde68a;
+box-shadow:0 24px 54px rgba(245,158,11,.10);
+}
+
+.result-card.low{
+background:linear-gradient(180deg,#ecfdf5 0%,#ffffff 100%);
+border-color:#bbf7d0;
+box-shadow:0 24px 54px rgba(34,197,94,.10);
+}
+
+.result-card.unknown{
+background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%);
+border-color:#e5e7eb;
+}
+
+.result-top{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap;
 }
 
 .risk{
-font-size:26px;
-font-weight:800;
-margin-bottom:14px;
-padding:10px 14px;
-border-radius:10px;
-display:inline-block;
+font-size:22px;
+font-weight:900;
+margin-bottom:0;
+padding:12px 16px;
+border-radius:999px;
+display:inline-flex;
+align-items:center;
+gap:8px;
+letter-spacing:.01em;
 }
 
 .risk.high{background:#fee2e2;color:#b91c1c;}
@@ -261,31 +381,121 @@ display:inline-block;
 .risk.low{background:#dcfce7;color:#166534;}
 .risk.unknown{background:#e5e7eb;color:#374151;}
 
-.result-summary{
-margin:2px 0 0;
-font-size:15px;
+.result-chip{
+padding:10px 14px;
+border-radius:999px;
+font-size:13px;
+font-weight:800;
+background:#fff;
+border:1px solid #e5e7eb;
 color:#374151;
+box-shadow:0 8px 18px rgba(15,23,42,.06);
 }
 
-.result-payline{
-margin-top:14px;
-padding:14px 16px;
-background:#f8fafc;
-border:1px solid #e5e7eb;
-border-radius:12px;
-font-size:14px;
+.result-summary{
+margin:14px 0 0;
+font-size:15px;
 color:#374151;
 font-weight:600;
 }
 
 .section{
 margin-top:18px;
+padding:16px;
+border-radius:18px;
+background:rgba(255,255,255,.82);
+border:1px solid rgba(229,231,235,.95);
 }
 
 .section-title{
-font-weight:700;
-margin-bottom:8px;
+font-weight:800;
+margin-bottom:10px;
 color:#111827;
+font-size:15px;
+}
+
+.signal-list{
+list-style:none;
+padding:0;
+margin:0;
+display:grid;
+gap:10px;
+}
+
+.signal-item{
+display:flex;
+align-items:flex-start;
+gap:10px;
+padding:12px 14px;
+border-radius:14px;
+background:#fff;
+border:1px solid #e5e7eb;
+font-size:14px;
+font-weight:700;
+color:#374151;
+}
+
+.result-card.high .signal-item{
+background:#fff7f7;
+border-color:#fecaca;
+color:#7f1d1d;
+}
+
+.result-card.medium .signal-item{
+background:#fffbeb;
+border-color:#fde68a;
+color:#92400e;
+}
+
+.result-card.low .signal-item{
+background:#f0fdf4;
+border-color:#bbf7d0;
+color:#166534;
+}
+
+.signal-icon{
+flex:0 0 auto;
+font-size:15px;
+line-height:1.2;
+}
+
+.action-box{
+padding:14px 16px;
+border-radius:14px;
+background:#eff6ff;
+border:1px solid #bfdbfe;
+font-size:14px;
+font-weight:700;
+color:#1e3a8a;
+}
+
+.result-payline{
+margin-top:16px;
+padding:15px 16px;
+background:#f8fafc;
+border:1px solid #e5e7eb;
+border-radius:16px;
+font-size:14px;
+color:#374151;
+font-weight:800;
+}
+
+.result-card.high .result-payline{
+background:#fff7f7;
+border-color:#fecaca;
+color:#7f1d1d;
+}
+
+.result-card.medium .result-payline{
+background:#fffbeb;
+border-color:#fde68a;
+color:#92400e;
+}
+
+.result-card.low .result-payline{
+background:#f0fdf4;
+border-color:#bbf7d0;
+color:#166534;
 }
 
 ul{
@@ -301,10 +511,10 @@ margin-bottom:8px;
 display:none;
 margin-top:25px;
 padding:25px;
-background:#fff;
-border-radius:16px;
+background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+border-radius:22px;
 text-align:center;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
+box-shadow:0 24px 54px rgba(15,23,42,.10);
 border:1px solid #e5e7eb;
 }
 
@@ -325,28 +535,29 @@ font-size:15px;
 .plan{
 width:100%;
 margin-top:14px;
-background:#3b82f6;
+background:linear-gradient(180deg,#3b82f6 0%,#2563eb 100%);
 color:#fff;
-font-weight:700;
+font-weight:800;
 padding:14px;
-box-shadow:0 8px 20px rgba(59,130,246,.2);
+box-shadow:0 12px 26px rgba(59,130,246,.18);
 }
 
 .plan.secondary{
-background:#2563eb;
+background:linear-gradient(180deg,#2563eb 0%,#1d4ed8 100%);
 }
 
 .plan.tertiary{
-background:#1d4ed8;
+background:linear-gradient(180deg,#1d4ed8 0%,#1e40af 100%);
 }
 
 .app-link-card{
 margin-top:16px;
 padding:18px;
-background:#f8fafc;
-border:1px solid #e5e7eb;
-border-radius:14px;
+background:linear-gradient(180deg,#eef2ff 0%,#f8fafc 100%);
+border:1px solid #c7d2fe;
+border-radius:18px;
 text-align:center;
+box-shadow:0 16px 34px rgba(99,102,241,.08);
 }
 
 .app-link-card h4{
@@ -368,9 +579,9 @@ text-decoration:none;
 text-align:center;
 background:#1f2937;
 color:#fff;
-font-weight:700;
+font-weight:800;
 padding:14px;
-border-radius:12px;
+border-radius:14px;
 box-sizing:border-box;
 }
 
@@ -386,7 +597,7 @@ padding:0;
 min-height:auto;
 font-size:14px;
 color:#2563eb;
-font-weight:600;
+font-weight:700;
 text-decoration:underline;
 box-shadow:none;
 cursor:pointer;
@@ -426,6 +637,7 @@ font-size:17px;
 margin-left:12px;
 margin-right:12px;
 padding:20px;
+border-radius:22px;
 }
 .top-bar{
 padding:10px 10px;
@@ -442,6 +654,16 @@ margin-right:0;
 }
 .upgrade h3{
 font-size:24px;
+}
+.preview-top,
+.result-top{
+align-items:flex-start;
+}
+.preview-domain{
+font-size:18px;
+}
+.risk{
+font-size:20px;
 }
 }
 </style>
@@ -462,6 +684,21 @@ font-size:24px;
 </div>
 
 <div class="container">
+
+<div class="preview-card">
+  <div class="preview-top">
+    <div class="preview-badge">🔴 HIGH RISK DETECTED</div>
+    <div class="preview-score">Trust Score: 18 / 100</div>
+  </div>
+  <div class="preview-domain">amazon-gift-card-message.com</div>
+  <div class="preview-sub">Example scan result shown before you run your own check</div>
+
+  <div class="preview-signals">
+    <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Suspicious domain mismatch</span></div>
+    <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgent language detected</span></div>
+    <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Payment request via gift card</span></div>
+  </div>
+</div>
 
 <textarea id="text" placeholder="Paste a suspicious message, email, website, job offer, or investment pitch here..."></textarea>
 
@@ -564,6 +801,27 @@ const lines=text
 return lines.slice(0,5);
 }
 
+function cardClassForRisk(risk){
+if(risk === "high") return "high";
+if(risk === "medium") return "medium";
+if(risk === "low") return "low";
+return "unknown";
+}
+
+function iconForRisk(risk){
+if(risk === "high") return "🔴";
+if(risk === "medium") return "🟠";
+if(risk === "low") return "🟢";
+return "⚪";
+}
+
+function signalIconForRisk(risk){
+if(risk === "high") return "⚠️";
+if(risk === "medium") return "⚠️";
+if(risk === "low") return "✔️";
+return "•";
+}
+
 function formatResult(text){
 
 const lower=text.toLowerCase();
@@ -573,8 +831,12 @@ if(lower.includes("high")) risk="high";
 else if(lower.includes("medium")) risk="medium";
 else if(lower.includes("low")) risk="low";
 
+const safeRisk = cardClassForRisk(risk);
+const signalIcon = signalIconForRisk(safeRisk);
+
 const bullets=parseSections(text)
-.map(l=>`<li>${escapeHtml(l)}</li>`)
+.slice(0,5)
+.map(l=>`<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>${escapeHtml(l)}</span></li>`)
 .join("");
 
 const summaryByRisk={
@@ -591,23 +853,33 @@ low:"Even lower-risk messages can become expensive when new links, payments, or 
 unknown:"When the risk is unclear, the safest step is to verify this one and the next one before you act."
 };
 
+const chipByRisk={
+high:"Pattern Match: Strong",
+medium:"Pattern Match: Moderate",
+low:"Pattern Match: Lower Risk",
+unknown:"Pattern Match: Review Needed"
+};
+
 return `
-<div class="result-card">
-<div class="risk ${risk}">${risk === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + risk.toUpperCase()}</div>
-<div class="result-summary">${summaryByRisk[risk]}</div>
+<div class="result-card ${safeRisk}">
+  <div class="result-top">
+    <div class="risk ${safeRisk}">${iconForRisk(safeRisk)} ${risk === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + risk.toUpperCase()}</div>
+    <div class="result-chip">${chipByRisk[safeRisk]}</div>
+  </div>
 
-<div class="section">
-<div class="section-title">Key Signals</div>
-<ul>${bullets || "<li>Review the sender, links, and any requests for money, urgency, or personal information.</li>"}</ul>
-</div>
+  <div class="result-summary">${summaryByRisk[safeRisk]}</div>
 
-<div class="section">
-<div class="section-title">What To Do Next</div>
-<div>Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action.</div>
-</div>
+  <div class="section">
+    <div class="section-title">Detected Signals</div>
+    <ul class="signal-list">${bullets || `<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>Review the sender, links, and any requests for money, urgency, or personal information.</span></li>`}</ul>
+  </div>
 
-<div class="result-payline">${paylineByRisk[risk]}</div>
+  <div class="section">
+    <div class="section-title">Recommended Actions</div>
+    <div class="action-box">Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action.</div>
+  </div>
 
+  <div class="result-payline">${paylineByRisk[safeRisk]}</div>
 </div>
 `;
 }
@@ -624,13 +896,27 @@ const subscribed=isBrowserSubscribed();
 const result=document.getElementById("result");
 
 if(!text){
-result.innerHTML='<div class="result-card"><div class="risk unknown">Paste Something To Review</div><div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to review potential scam signals.</div></div>';
+result.innerHTML=`
+<div class="result-card unknown">
+  <div class="result-top">
+    <div class="risk unknown">⚪ Paste Something To Review</div>
+    <div class="result-chip">Awaiting Input</div>
+  </div>
+  <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to review potential scam signals.</div>
+</div>`;
 result.style.display="block";
 return;
 }
 
 result.style.display="block";
-result.innerHTML='<div class="result-card"><div class="risk unknown">Analyzing...</div><div class="result-summary">Reviewing for common scam signals, risky patterns, impersonation, suspicious links, and payment requests.</div></div>';
+result.innerHTML=`
+<div class="result-card unknown">
+  <div class="result-top">
+    <div class="risk unknown">⚪ Analyzing...</div>
+    <div class="result-chip">Scan In Progress</div>
+  </div>
+  <div class="result-summary">Reviewing for common scam signals, risky patterns, impersonation, suspicious links, and payment requests.</div>
+</div>`;
 
 try{
 
@@ -643,7 +929,14 @@ body:JSON.stringify({text,email,subscribed})
 const data=await response.json();
 
 if(data.limit){
-result.innerHTML='<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlock unlimited scam checks so you can review the next suspicious message, link, or offer the moment it shows up.</div></div>';
+result.innerHTML=`
+<div class="result-card medium">
+  <div class="result-top">
+    <div class="risk medium">🟠 Free Check Used</div>
+    <div class="result-chip">Upgrade Available</div>
+  </div>
+  <div class="result-summary">Unlock unlimited scam checks so you can review the next suspicious message, link, or offer the moment it shows up.</div>
+</div>`;
 showUpgrade();
 return;
 }
@@ -652,7 +945,14 @@ result.innerHTML=formatResult(data.result || "");
 showUpgrade();
 
 }catch(e){
-result.innerHTML='<div class="result-card"><div class="risk unknown">Unable To Analyze</div><div class="result-summary">We could not analyze this right now. Please try again in a moment.</div></div>';
+result.innerHTML=`
+<div class="result-card unknown">
+  <div class="result-top">
+    <div class="risk unknown">⚪ Unable To Analyze</div>
+    <div class="result-chip">Try Again</div>
+  </div>
+  <div class="result-summary">We could not analyze this right now. Please try again in a moment.</div>
+</div>`;
 }
 
 }
