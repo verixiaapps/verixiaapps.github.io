@@ -33,21 +33,13 @@ jobs:
           TODAY=$(date -u +%F)
           DAY_DIFF=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
 
-          if [ "$DAY_DIFF" -le 3 ]; then
-            echo "PHASE=phase_1" >> $GITHUB_ENV
-            echo "DAILY_LIMIT=30" >> $GITHUB_ENV
-          elif [ "$DAY_DIFF" -le 10 ]; then
-            echo "PHASE=phase_2" >> $GITHUB_ENV
-            echo "DAILY_LIMIT=50" >> $GITHUB_ENV
-          else
-            echo "PHASE=phase_3" >> $GITHUB_ENV
-            echo "DAILY_LIMIT=100" >> $GITHUB_ENV
-          fi
+          echo "PHASE=phase_3" >> $GITHUB_ENV
+          echo "DAILY_LIMIT=100" >> $GITHUB_ENV
 
           echo "TODAY=$TODAY" >> $GITHUB_ENV
           echo "DAY_DIFF=$DAY_DIFF" >> $GITHUB_ENV
 
-          echo "Running $PHASE on day $DAY_DIFF with DAILY_LIMIT=$DAILY_LIMIT"
+          echo "Running phase_3 on day $DAY_DIFF with DAILY_LIMIT=100"
 
       - name: Build SEO pages incrementally
         run: |
