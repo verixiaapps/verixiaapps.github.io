@@ -43,6 +43,30 @@ letter-spacing:-.01em;
 opacity:.82;
 }
 
+.top-actions{
+pointer-events:auto;
+display:flex;
+align-items:center;
+gap:10px;
+margin-right:28px;
+}
+
+.app-top{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:8px 12px;
+font-size:14px;
+border-radius:10px;
+box-shadow:0 6px 18px rgba(0,0,0,.08);
+font-weight:700;
+background:#fff;
+color:#111827;
+border:1px solid #d1d5db;
+text-decoration:none;
+white-space:nowrap;
+}
+
 .upgrade-top{
 pointer-events:auto;
 padding:8px 12px;
@@ -54,7 +78,6 @@ background:#1f2937;
 color:#fff;
 border:none;
 cursor:pointer;
-margin-right:28px;
 white-space:nowrap;
 max-width:120px;
 overflow:hidden;
@@ -404,6 +427,14 @@ font-size:13px;
 margin-left:2px;
 opacity:.78;
 }
+.top-actions{
+gap:8px;
+margin-right:0;
+}
+.app-top{
+font-size:13px;
+padding:8px 10px;
+}
 .upgrade-top{
 font-size:13px;
 padding:8px 10px;
@@ -420,7 +451,10 @@ font-size:24px;
 
 <div class="top-bar">
   <div class="logo">Scam Check</div>
-  <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+  <div class="top-actions">
+    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
+    <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+  </div>
 </div>
 
 <div class="hero">
@@ -559,230 +593,4 @@ function chooseBridgeIntro(baseKeyword) {
     `If you're unsure about this ${baseKeyword},`,
     `If you're looking at this ${baseKeyword} right now,`
   ];
-  const index = baseKeyword.length % variants.length;
-  return variants[index];
-}
-
-function setKeywordHeadings() {
-  const keywordRaw = (RAW_KEYWORD || "this message").trim();
-  const keyword = toTitleCase(keywordRaw);
-  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
-  const readableKeyword = toTitleCase(cleanKeyword);
-
-  document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
-  document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
-}
-
-function cleanSeoContent() {
-  const seoContent = document.getElementById("seoContent");
-  if (!seoContent) return;
-
-  seoContent.innerHTML = seoContent.innerHTML
-    .replace(/\*\*/g, "")
-    .replace(/<p>\s*<\/p>/g, "")
-    .trim();
-}
-
-function cleanRelatedLinks() {
-  const relatedLinks = document.getElementById("relatedLinks");
-  const relatedHeading = document.getElementById("relatedHeading");
-  if (!relatedLinks || !relatedHeading) return;
-
-  relatedLinks.innerHTML = relatedLinks.innerHTML.replace(/\*\*/g, "").trim();
-
-  const links = relatedLinks.querySelectorAll("li a");
-
-  if (links.length === 0) {
-    relatedLinks.style.display = "none";
-    relatedHeading.style.display = "none";
-  }
-}
-
-function summaryForRisk(riskClass) {
-  if (riskClass === "high") {
-    return "This shows multiple scam warning signs. Do not click links, reply, or send money until you verify it directly.";
-  }
-  if (riskClass === "medium") {
-    return "This shows suspicious signals. Be cautious and verify the sender, company, or website before taking action.";
-  }
-  if (riskClass === "low") {
-    return "This shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information.";
-  }
-  return "We could not determine a clear risk level. Review the sender, links, payment requests, and urgency before taking action.";
-}
-
-function paylineForRisk(riskClass) {
-  if (riskClass === "high") {
-    return "If another message like this shows up tomorrow, guessing wrong could cost you.";
-  }
-  if (riskClass === "medium") {
-    return "Suspicious messages often come in waves. Check the next one before you act.";
-  }
-  if (riskClass === "low") {
-    return "Even lower-risk messages can turn costly if money, links, or logins are involved.";
-  }
-  return "When a message is unclear, the safest move is to verify before you act.";
-}
-
-function formatResult(raw) {
-  const lines = String(raw || "").split("\n").map(l => l.trim()).filter(Boolean);
-
-  let risk = "";
-  let signals = [];
-  let actions = [];
-  let mode = "";
-
-  lines.forEach(line => {
-    const lower = line.toLowerCase();
-
-    if (lower.includes("risk level")) {
-      risk = line.split(":").slice(1).join(":").trim();
-      return;
-    }
-
-    if (lower.includes("key signals")) {
-      mode = "signals";
-      return;
-    }
-
-    if (lower.includes("recommended action")) {
-      mode = "actions";
-      return;
-    }
-
-    if (line.startsWith("-")) {
-      const cleaned = line.replace(/^-+\s*/, "");
-      if (mode === "signals") signals.push(cleaned);
-      if (mode === "actions") actions.push(cleaned);
-    }
-  });
-
-  const riskClass = (risk || "review").trim().toLowerCase();
-  const safeRiskClass = ["high","medium","low"].includes(riskClass) ? riskClass : "unknown";
-  const riskLabel = ["high","medium","low"].includes(riskClass) ? `Risk Level: ${risk.toUpperCase()}` : "Risk Level: REVIEW";
-
-  if (signals.length === 0) {
-    signals = ["Review the sender, links, payment requests, urgency, and any request for personal information."];
-  }
-
-  if (actions.length === 0) {
-    actions = ["Do not reply, click links, or send money until you verify through the official website, app, or company."];
-  }
-
-  return `
-  <div class="result-card">
-    <div class="risk ${safeRiskClass}">${escapeHtml(riskLabel)}</div>
-    <div class="result-summary">${escapeHtml(summaryForRisk(safeRiskClass))}</div>
-
-    <div class="result-section">
-      <div class="section-title">Key Signals</div>
-      <ul>${signals.map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul>
-    </div>
-
-    <div class="result-section">
-      <div class="section-title">What To Do Next</div>
-      <ul>${actions.map(a => `<li>${escapeHtml(a)}</li>`).join("")}</ul>
-    </div>
-
-    <div class="result-payline">${escapeHtml(paylineForRisk(safeRiskClass))}</div>
-  </div>
-  `;
-}
-
-function showUpgrade() {
-  const el = document.getElementById("upgrade");
-  el.style.display = "block";
-  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-}
-
-function scrollToEmail() {
-  const emailField = document.getElementById("email");
-  emailField.scrollIntoView({ behavior: "smooth", block: "center" });
-  setTimeout(() => emailField.focus(), 150);
-}
-
-async function check() {
-  const text = document.getElementById("text").value.trim();
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const subscribed = isBrowserSubscribed();
-  const result = document.getElementById("result");
-
-  if (!text) {
-    result.innerHTML = `
-      <div class="result-card">
-        <div class="risk unknown">Paste Something To Check</div>
-        <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to analyze scam risk.</div>
-      </div>
-    `;
-    result.style.display = "block";
-    return;
-  }
-
-  result.style.display = "block";
-  result.innerHTML = `
-    <div class="result-card">
-      <div class="risk unknown">Analyzing...</div>
-      <div class="result-summary">Checking for scam signals, risky patterns, payment traps, impersonation, and suspicious links.</div>
-    </div>
-  `;
-
-  try {
-    const response = await fetch(API + "/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, email, subscribed })
-    });
-
-    const data = await response.json();
-
-    if (data.limit) {
-      result.innerHTML = `
-        <div class="result-card">
-          <div class="risk medium">Free Check Used</div>
-          <div class="result-summary">Your free check has been used. Unlock unlimited scam checks anytime another suspicious message, link, or offer appears.</div>
-        </div>
-      `;
-      showUpgrade();
-      return;
-    }
-
-    result.innerHTML = formatResult(data.result || "");
-    showUpgrade();
-  } catch (e) {
-    result.innerHTML = `
-      <div class="result-card">
-        <div class="risk unknown">Unable To Analyze</div>
-        <div class="result-summary">We could not analyze this right now. Please try again in a moment.</div>
-      </div>
-    `;
-  }
-}
-
-async function checkout(priceId) {
-  const pageUrl = window.location.origin + window.location.pathname;
-
-  const response = await fetch(API + "/create-checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      priceId,
-      email: null,
-      successUrl: pageUrl + "?subscribed=true",
-      cancelUrl: pageUrl
-    })
-  });
-
-  const data = await response.json();
-
-  if (data.url) {
-    window.location = data.url;
-  } else {
-    alert("Checkout failed.");
-  }
-}
-</script>
-
-</body>
-</html>
+  const index = baseKeyword.length % variants
