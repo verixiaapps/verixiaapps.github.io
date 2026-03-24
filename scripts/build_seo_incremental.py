@@ -10,7 +10,7 @@ TEMPLATE_FILE = "templates/seo-template.html"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
 RELATED_LINKS_COUNT = 6
-DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "30"))
+DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
 
