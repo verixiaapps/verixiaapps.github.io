@@ -50,16 +50,168 @@ def title_case(text):
 
 
 def build_title(keyword):
-    kw = title_case(display_keyword(keyword))
-    return f"Is {kw} a Scam? (Real Check & Warning Signs)"
+    kw_raw = normalize_keyword(keyword)
+    kw_display = title_case(display_keyword(keyword))
+
+    if kw_raw.startswith("how to "):
+        return f"{title_case(kw_raw)}: Safety Tips, Warning Signs & What To Do"
+
+    if kw_raw.startswith("what to do after "):
+        return f"{title_case(kw_raw)}: Recovery Steps & What To Do Next"
+
+    if kw_raw.startswith("how to recover after "):
+        return f"{title_case(kw_raw)}: What To Do Next"
+
+    if kw_raw.startswith("how to secure "):
+        return f"{title_case(kw_raw)}: Safety Steps & What To Do Next"
+
+    if kw_raw.startswith("how to block "):
+        return f"{title_case(kw_raw)}: Protection Tips & Warning Signs"
+
+    if kw_raw.startswith("how to avoid "):
+        return f"{title_case(kw_raw)}: Warning Signs & Safety Tips"
+
+    if kw_raw.startswith("did i get scammed"):
+        return f"{title_case(kw_raw)}? Signs, Risks & What To Do Next"
+
+    if kw_raw.startswith("can scammers"):
+        return f"{title_case(kw_raw)}? Risks, Warning Signs & What To Do"
+
+    if kw_raw.startswith("can someone"):
+        return f"{title_case(kw_raw)}? Risks, Warning Signs & What To Do"
+
+    if kw_raw.startswith("almost "):
+        return f"{title_case(kw_raw)}? Warning Signs & Safety Steps"
+
+    if kw_raw.startswith("is ") and " legit" in kw_raw:
+        clean = title_case(kw_raw.replace(" legit", ""))
+        return f"{clean} Legit or a Scam? Warning Signs & What To Do"
+
+    if kw_raw.startswith("is this "):
+        return f"{title_case(kw_raw)}? Check Warning Signs & What To Do"
+
+    if kw_raw.startswith("is "):
+        return f"{title_case(kw_raw)}? Warning Signs & What To Do"
+
+    if kw_raw.startswith("what happens after "):
+        return f"{title_case(kw_raw)}? Risks, Warning Signs & Next Steps"
+
+    return f"Is {kw_display} a Scam? Warning Signs & What To Do"
 
 
 def build_description(keyword):
-    keyword_title = title_case(normalize_keyword(keyword))
+    kw_raw = normalize_keyword(keyword)
+    kw_display = title_case(display_keyword(keyword))
+
+    if kw_raw.startswith("how to "):
+        return (
+            f"Learn {kw_raw} with practical safety tips, warning signs, and what to do next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("what to do after "):
+        return (
+            f"Learn {kw_raw}, the warning signs to watch for, and the next steps to protect yourself. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("did i get scammed"):
+        return (
+            f"Find out {kw_raw}, review warning signs, understand the risks, and see what to do next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("can scammers") or kw_raw.startswith("can someone"):
+        return (
+            f"Find out {kw_raw}, review the risks and warning signs, and see what steps to take next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("almost "):
+        return (
+            f"Find out whether it is safe, review warning signs, and learn what steps to take next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("is ") and " legit" in kw_raw:
+        clean = kw_raw.replace(" legit", "")
+        return (
+            f"Is {clean} legit or a scam? Review warning signs, real risks, and what to do next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("is this "):
+        return (
+            f"Check whether this looks like a scam, review warning signs, real risks, and what to do next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("is "):
+        return (
+            f"Is {kw_display} a scam? Review warning signs, real risks, and what to do next. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
+    if kw_raw.startswith("what happens after "):
+        return (
+            f"Learn what happens next, the risks to watch for, and what steps to take after a phishing or scam event. "
+            f"Use our free AI scam checker for suspicious messages, emails, and links."
+        )
+
     return (
-        f"Is {keyword_title} a scam or legit? Check warning signs, real risks, "
-        f"and what to do next. Free AI scam checker for {normalize_keyword(keyword)}."
+        f"Is {kw_display} a scam or legit? Check warning signs, real risks, and what to do next. "
+        f"Use our free AI scam checker for suspicious messages, emails, and links."
     )
+
+
+def build_related_anchor(keyword):
+    kw_raw = normalize_keyword(keyword)
+    kw_display = title_case(display_keyword(keyword))
+
+    if kw_raw.startswith("how to "):
+        return title_case(kw_raw)
+
+    if kw_raw.startswith("what to do after "):
+        return title_case(kw_raw)
+
+    if kw_raw.startswith("how to recover after "):
+        return title_case(kw_raw)
+
+    if kw_raw.startswith("how to secure "):
+        return title_case(kw_raw)
+
+    if kw_raw.startswith("how to block "):
+        return title_case(kw_raw)
+
+    if kw_raw.startswith("how to avoid "):
+        return title_case(kw_raw)
+
+    if kw_raw.startswith("did i get scammed"):
+        return title_case(kw_raw) + "?"
+
+    if kw_raw.startswith("can scammers"):
+        return title_case(kw_raw) + "?"
+
+    if kw_raw.startswith("can someone"):
+        return title_case(kw_raw) + "?"
+
+    if kw_raw.startswith("almost "):
+        return title_case(kw_raw) + "?"
+
+    if kw_raw.startswith("is ") and " legit" in kw_raw:
+        clean = title_case(kw_raw.replace(" legit", ""))
+        return f"{clean} Legit or a Scam?"
+
+    if kw_raw.startswith("is this "):
+        return title_case(kw_raw) + "?"
+
+    if kw_raw.startswith("is "):
+        return title_case(kw_raw) + "?"
+
+    if kw_raw.startswith("what happens after "):
+        return title_case(kw_raw) + "?"
+
+    return f"Is {kw_display} a Scam?"
 
 
 def build_canonical(slug):
@@ -169,8 +321,11 @@ def page_exists(slug):
 
 
 def fallback_ai_text(keyword):
+    kw = title_case(display_keyword(keyword))
     return f"""
-<p>{title_case(display_keyword(keyword))} scams often involve requests for money, personal information, or urgent action. Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
+<p>{kw} scams often involve impersonation, urgency, or requests for money and sensitive information.</p>
+<p>Common warning signs include unexpected messages, pressure to act quickly, suspicious links, and unusual payment requests.</p>
+<p>If you are unsure, avoid clicking links, replying, or sending money until you verify through official sources.</p>
 """.strip()
 
 
@@ -271,7 +426,7 @@ for page in pages:
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
 
     links_html = "".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>\n'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">{build_related_anchor(r["keyword"])}</a></li>\n'
         for r in related_pages
     )
 
