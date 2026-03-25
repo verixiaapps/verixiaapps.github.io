@@ -7,7 +7,7 @@ import re
 # CONFIG
 # -----------------------------
 RAILWAY_API = "https://awake-integrity-production-faa0.up.railway.app"
-TIMEOUT = 60  # seconds
+TIMEOUT = 60
 MIN_PARAGRAPHS = 3
 
 logging.basicConfig(
@@ -49,32 +49,79 @@ WARNING_BULLET_SETS = [
 ]
 
 ACTION_PARAGRAPHS = [
-    "If you received something related to {keyword}, slow down before clicking, replying, or paying. Verify through the official website, app, or company contact information instead of using the message itself.",
-    "Before you respond to anything related to {keyword}, pause and verify it through an official source you find yourself. Do not rely on the message, caller, or link that contacted you.",
-    "If this appears to involve {keyword}, do not click links, send money, or share details until you confirm the situation through the official website, app, or customer support channel.",
+    "If you received something related to {keyword}, slow down before clicking, replying, or paying. Always verify through the official website or app instead of using the message itself.",
+    "Before you respond to anything related to {keyword}, pause and verify it through a trusted source you find yourself.",
+    "If this involves {keyword}, avoid clicking links or sending money until you confirm it through the official platform.",
 ]
 
-FALLBACK_PARAGRAPH_SETS = [
-    [
-        "{keyword} messages are often designed to feel real at first glance. They may mention a payment issue, account problem, security alert, delivery update, job offer, or urgent request that pushes you to act before you stop and verify what you are seeing.",
-        "Many of these scams work by creating pressure. The message may tell you to click a link immediately, confirm personal details, send money, connect a wallet, or respond before a deadline. That urgency is often meant to stop you from checking whether the sender, website, or offer is legitimate.",
-        "Scammers also change the format depending on the situation. The same scam can show up as a text, email, job message, customer support alert, website pop-up, or payment request. The wording may change, but the goal is usually the same: get access to your money, account, or personal information.",
-    ],
-    [
-        "A {keyword} message can look routine at first, especially if it mentions an account issue, payment problem, verification request, or delivery update. The goal is usually to make the message feel familiar enough that you respond before stopping to question it.",
-        "These scams often create urgency fast. You may be told something is locked, delayed, suspended, rejected, or at risk unless you act right away. That pressure is meant to reduce the chance that you independently verify the sender or website.",
-        "The same basic scam can appear in different formats depending on the target. It may arrive as a text, email, direct message, support alert, pop-up, or fake website. Even when the wording changes, the message usually pushes you toward the same result: sharing information, clicking a risky link, or sending money.",
-    ],
-    [
-        "Messages related to {keyword} often work because they sound specific. They may reference a payment, account notice, security issue, order problem, support request, or other situation that makes the message feel immediately relevant.",
-        "A common pattern is speed and pressure. Instead of giving you time to think, the message may demand fast action, claim there is a deadline, or suggest something will go wrong if you do not respond immediately. That urgency is part of the scam.",
-        "Scammers also adapt the format to what feels most believable. You might see the same basic trick in a text, email, fake website, job message, customer support conversation, or payment request. The format changes, but the objective stays the same: get you to trust the message before you verify it.",
-    ],
-]
+# -----------------------------
+# INTENT DETECTION (🔥 NEW)
+# -----------------------------
+def detect_intent(keyword: str) -> str:
+    kw = keyword.lower()
+
+    if kw.startswith("is ") or kw.startswith("can ") or kw.startswith("did "):
+        return "question"
+    if "how to" in kw or "what to do" in kw:
+        return "action"
+    return "entity"
+
+
+def detect_context(keyword: str) -> str:
+    kw = keyword.lower()
+
+    if any(x in kw for x in ["amazon", "paypal", "bank", "zelle", "venmo"]):
+        return "payment"
+    if any(x in kw for x in ["job", "hiring", "offer"]):
+        return "job"
+    if any(x in kw for x in ["crypto", "bitcoin", "ethereum"]):
+        return "crypto"
+    if any(x in kw for x in ["usps", "fedex", "ups", "delivery"]):
+        return "delivery"
+
+    return "general"
 
 
 # -----------------------------
-# KEYWORD HELPERS
+# SMART INTRO (🔥 BIG SEO WIN)
+# -----------------------------
+def intro_paragraph(keyword: str) -> str:
+    keyword_title = title_case(display_keyword(keyword))
+    intent = detect_intent(keyword)
+
+    if intent == "question":
+        return f"<p>{keyword_title} is a question many people ask when something feels off. In most cases, the answer depends on warning signs like urgency, suspicious links, or unusual requests.</p>"
+
+    if intent == "action":
+        return f"<p>If you're trying to handle {keyword_title}, it's important to move carefully. Scams often rely on quick reactions, so taking a moment to verify details can prevent mistakes.</p>"
+
+    return f"<p>{keyword_title} scams are designed to look believable at first glance. They often appear as normal messages, alerts, or requests, but are meant to push you into acting quickly.</p>"
+
+
+# -----------------------------
+# SCENARIO (context aware)
+# -----------------------------
+def scenario_paragraph(keyword: str) -> str:
+    keyword_title = title_case(display_keyword(keyword))
+    context = detect_context(keyword)
+
+    if context == "payment":
+        return f"<p>A common {keyword_title} scenario involves a message about a payment issue or account problem. You may be asked to log in, confirm details, or send money to resolve it.</p>"
+
+    if context == "job":
+        return f"<p>A typical {keyword_title} case includes a job offer that feels unusually fast or high-paying. It may request personal details, fees, or moving off-platform.</p>"
+
+    if context == "crypto":
+        return f"<p>Many {keyword_title} scams involve fake investments, wallet connections, or promises of guaranteed returns designed to get access to your funds.</p>"
+
+    if context == "delivery":
+        return f"<p>A common {keyword_title} message claims there is a delivery issue and asks you to click a link or pay a small fee.</p>"
+
+    return f"<p>In many {keyword_title} situations, the message is designed to create urgency and trust at the same time.</p>"
+
+
+# -----------------------------
+# HELPERS
 # -----------------------------
 def normalize_keyword(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
@@ -92,84 +139,50 @@ def title_case(text: str) -> str:
 
 
 def variant_index(keyword: str, count: int) -> int:
-    if count <= 0:
-        return 0
-    return sum(ord(char) for char in normalize_keyword(keyword)) % count
+    return sum(ord(c) for c in keyword) % count if count else 0
 
 
 # -----------------------------
-# CLEANING + STRUCTURE
+# CLEANING
 # -----------------------------
-def strip_markdown_artifacts(text: str) -> str:
-    text = text.strip()
-
+def clean_text(text: str) -> str:
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
     text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
 
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    paragraphs = [
+        p.strip()
+        for p in text.split("\n\n")
+        if len(p.strip()) > 40
+    ]
 
-    text = re.sub(r"^\s*[-*]\s+", "", text, flags=re.MULTILINE)
-    text = re.sub(r"^\s*\d+\.\s+", "", text, flags=re.MULTILINE)
-
-    text = re.sub(r"\n{3,}", "\n\n", text)
-
-    return text.strip()
-
-
-def split_paragraphs(text: str) -> list[str]:
-    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
-    cleaned = []
-
-    skip_lines = {
-        "key signals",
-        "recommended action",
-        "common warning signs",
-        "what should you do?",
-        "red flags to watch for",
-        "signs this might be a scam",
-        "what to do next",
-        "how to respond safely",
-    }
-
-    for p in paragraphs:
-        p = p.replace("\n", " ")
-        p = re.sub(r"[ \t]+", " ", p).strip()
-
-        if not p:
-            continue
-        if len(p) < 30:
-            continue
-        if p.lower() in skip_lines:
-            continue
-
-        cleaned.append(p)
-
-    return cleaned
-
-
-def clean_text(text: str) -> str:
-    text = strip_markdown_artifacts(text)
-    paragraphs = split_paragraphs(text)
-    return "\n".join(f"<p>{p}</p>" for p in paragraphs)
+    return "\n".join(f"<p>{p}</p>" for p in paragraphs[:4])
 
 
 def is_usable_content(html: str) -> bool:
     return html.count("<p>") >= MIN_PARAGRAPHS
 
 
+# -----------------------------
+# STRUCTURE
+# -----------------------------
 def enforce_structure(keyword: str, content: str) -> str:
     keyword_title = title_case(display_keyword(keyword))
     idx = variant_index(keyword, len(WARNING_SECTION_TITLES))
 
+    intro = intro_paragraph(keyword)
+    scenario = scenario_paragraph(keyword)
+
     warning_title = WARNING_SECTION_TITLES[idx]
     action_title = ACTION_SECTION_TITLES[idx]
-    warning_bullets = WARNING_BULLET_SETS[idx]
-    action_paragraph = ACTION_PARAGRAPHS[idx].format(keyword=keyword_title)
+    bullets = WARNING_BULLET_SETS[idx]
+    action = ACTION_PARAGRAPHS[idx].format(keyword=keyword_title)
 
-    bullet_html = "\n".join(f"<li>{item}</li>" for item in warning_bullets)
+    bullet_html = "\n".join(f"<li>{b}</li>" for b in bullets)
 
     return f"""
 <div class="content-block">
+{intro}
+{scenario}
 {content}
 </div>
 
@@ -179,88 +192,74 @@ def enforce_structure(keyword: str, content: str) -> str:
 </ul>
 
 <h2>{action_title}</h2>
-<p>{action_paragraph}</p>
+<p>{action}</p>
 """.strip()
 
 
 def fallback_content(keyword: str) -> str:
     keyword_title = title_case(display_keyword(keyword))
-    idx = variant_index(keyword, len(FALLBACK_PARAGRAPH_SETS))
+    idx = variant_index(keyword, len(WARNING_BULLET_SETS))
 
-    paragraphs = "\n\n".join(
-        f"<p>{paragraph.format(keyword=keyword_title)}</p>"
-        for paragraph in FALLBACK_PARAGRAPH_SETS[idx]
-    )
+    intro = intro_paragraph(keyword)
+    scenario = scenario_paragraph(keyword)
 
-    warning_title = WARNING_SECTION_TITLES[idx]
-    action_title = ACTION_SECTION_TITLES[idx]
-    warning_bullets = WARNING_BULLET_SETS[idx]
-    action_paragraph = ACTION_PARAGRAPHS[idx].format(keyword=keyword_title)
+    bullets = WARNING_BULLET_SETS[idx]
+    action = ACTION_PARAGRAPHS[idx].format(keyword=keyword_title)
 
-    bullet_html = "\n".join(f"<li>{item}</li>" for item in warning_bullets)
+    bullet_html = "\n".join(f"<li>{b}</li>" for b in bullets)
 
     return f"""
-{paragraphs}
+{intro}
+{scenario}
 
-<h2>{warning_title}</h2>
+<p>{keyword_title} scams often rely on urgency and impersonation.</p>
+<p>They may appear as normal messages, emails, or websites.</p>
+<p>Always verify independently before taking action.</p>
+
+<h2>{WARNING_SECTION_TITLES[idx]}</h2>
 <ul>
 {bullet_html}
 </ul>
 
-<h2>{action_title}</h2>
-<p>{action_paragraph}</p>
+<h2>{ACTION_SECTION_TITLES[idx]}</h2>
+<p>{action}</p>
 """.strip()
 
 
 # -----------------------------
-# MAIN GENERATION
+# MAIN
 # -----------------------------
 def generate_content(keyword: str) -> str:
     keyword = keyword.strip()
-    if not keyword:
-        raise ValueError("Keyword cannot be empty")
-
-    payload = {"keyword": keyword}
-    logging.info("Generating SEO content for: '%s'", keyword)
+    logging.info("Generating content for: %s", keyword)
 
     try:
-        response = requests.post(
+        res = requests.post(
             f"{RAILWAY_API}/seo-content",
-            json=payload,
+            json={"keyword": keyword},
             timeout=TIMEOUT
         )
-        response.raise_for_status()
-        data = response.json()
+        res.raise_for_status()
 
-        raw_text = str(data.get("content", "")).strip()
-        if not raw_text:
-            raise ValueError("Empty content from API")
+        raw = str(res.json().get("content", "")).strip()
+        if not raw:
+            raise ValueError("Empty content")
 
-        cleaned = clean_text(raw_text)
+        cleaned = clean_text(raw)
+
         if not is_usable_content(cleaned):
-            raise ValueError("Content did not meet minimum quality threshold")
+            raise ValueError("Low quality")
 
-        final_content = enforce_structure(keyword, cleaned)
-        logging.info("Content generated successfully for '%s'", keyword)
-        return final_content
+        return enforce_structure(keyword, cleaned)
 
-    except requests.RequestException as e:
-        logging.warning("Request failed for '%s': %s", keyword, e)
-        return fallback_content(keyword)
     except Exception as e:
-        logging.warning("Falling back for '%s' due to: %s", keyword, e)
+        logging.warning("Fallback for %s: %s", keyword, e)
         return fallback_content(keyword)
 
 
 # -----------------------------
-# SCRIPT ENTRY
+# ENTRY
 # -----------------------------
 if __name__ == "__main__":
     keyword = sys.argv[1] if len(sys.argv) > 1 else "amazon scam"
-
-    try:
-        content = generate_content(keyword)
-        print(content)
-    except Exception as e:
-        logging.error("Fatal error: %s", e)
-        sys.exit(1)
+    print(generate_content(keyword))
