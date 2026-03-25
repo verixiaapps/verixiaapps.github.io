@@ -6,6 +6,8 @@ from generate_content import generate_content
 # CONFIG
 # -----------------------------
 KEYWORD_FILE = "data/keywords.txt"
+GENERATED_SLUGS_FILE = "data/generated_slugs.txt"
+GENERATED_KEYWORDS_FILE = "data/generated_keywords.txt"
 TEMPLATE_FILE = "templates/seo-template.html"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
@@ -65,8 +67,37 @@ def build_canonical(slug):
 
 
 def load_keywords():
+    if not os.path.exists(KEYWORD_FILE):
+        return []
     with open(KEYWORD_FILE, encoding="utf-8") as f:
         return list(dict.fromkeys([normalize_keyword(k) for k in f if k.strip()]))
+
+
+def load_generated_slugs():
+    if not os.path.exists(GENERATED_SLUGS_FILE):
+        return set()
+    with open(GENERATED_SLUGS_FILE, encoding="utf-8") as f:
+        return {line.strip() for line in f if line.strip()}
+
+
+def load_generated_keywords():
+    if not os.path.exists(GENERATED_KEYWORDS_FILE):
+        return set()
+    with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
+        return {normalize_keyword(line) for line in f if line.strip()}
+
+
+def append_line_if_missing(filepath, value):
+    value = value.strip()
+    if not value:
+        return
+    existing = set()
+    if os.path.exists(filepath):
+        with open(filepath, encoding="utf-8") as f:
+            existing = {line.strip() for line in f if line.strip()}
+    if value not in existing:
+        with open(filepath, "a", encoding="utf-8") as f:
+            f.write(value + "\n")
 
 
 def keyword_tokens(text):
@@ -148,15 +179,38 @@ def fallback_ai_text(keyword):
 # -----------------------------
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+for required_file in [GENERATED_SLUGS_FILE, GENERATED_KEYWORDS_FILE]:
+    if not os.path.exists(required_file):
+        open(required_file, "a", encoding="utf-8").close()
+
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
 keywords = load_keywords()
-pages = [
-    {"keyword": k, "slug": slugify(k)}
-    for k in keywords
-    if slugify(k) not in PROTECTED_SLUGS
-]
+generated_slugs = load_generated_slugs()
+generated_keywords = load_generated_keywords()
+
+# keep queue unique by slug too
+seen_queue_slugs = set()
+pages = []
+duplicate_queue_count = 0
+
+for k in keywords:
+    slug = slugify(k)
+    if slug in PROTECTED_SLUGS:
+        continue
+    if slug in seen_queue_slugs:
+        duplicate_queue_count += 1
+        continue
+    seen_queue_slugs.add(slug)
+    pages.append({"keyword": k, "slug": slug})
+
+print(f"Loaded {len(keywords)} keywords from queue.")
+print(f"Unique queued pages after slug dedupe: {len(pages)}")
+print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
+print(f"Known generated slugs: {len(generated_slugs)}")
+print(f"Known generated keywords: {len(generated_keywords)}")
+print(f"Daily limit: {DAILY_LIMIT}")
 
 
 # -----------------------------
@@ -164,6 +218,9 @@ pages = [
 # -----------------------------
 generated_count = 0
 skipped_existing_count = 0
+skipped_known_slug_count = 0
+skipped_known_keyword_count = 0
+built_keywords = []
 
 for page in pages:
     if generated_count >= DAILY_LIMIT:
@@ -177,11 +234,26 @@ for page in pages:
         print("Skipping protected page:", slug)
         continue
 
+    if keyword in generated_keywords:
+        skipped_known_keyword_count += 1
+        built_keywords.append(keyword)
+        continue
+
+    if slug in generated_slugs:
+        skipped_known_slug_count += 1
+        built_keywords.append(keyword)
+        continue
+
     folder = os.path.join(OUTPUT_DIR, slug)
     path = os.path.join(folder, "index.html")
 
     if page_exists(slug):
         skipped_existing_count += 1
+        append_line_if_missing(GENERATED_SLUGS_FILE, slug)
+        append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
+        generated_slugs.add(slug)
+        generated_keywords.add(keyword)
+        built_keywords.append(keyword)
         continue
 
     os.makedirs(folder, exist_ok=True)
@@ -214,7 +286,27 @@ for page in pages:
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
+    append_line_if_missing(GENERATED_SLUGS_FILE, slug)
+    append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
+    generated_slugs.add(slug)
+    generated_keywords.add(keyword)
+    built_keywords.append(keyword)
+
     generated_count += 1
     print(f"Generated: {slug} ({generated_count}/{DAILY_LIMIT})")
 
-print(f"Done. Generated {generated_count} new pages. Skipped {skipped_existing_count} existing pages.")
+# rewrite queue with only leftovers
+built_keyword_set = set(built_keywords)
+remaining_keywords = [k for k in keywords if k not in built_keyword_set]
+
+with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
+    for k in remaining_keywords:
+        f.write(k + "\n")
+
+print(
+    f"Done. Generated {generated_count} new pages. "
+    f"Skipped {skipped_existing_count} existing pages, "
+    f"{skipped_known_slug_count} known slugs, "
+    f"{skipped_known_keyword_count} known keywords."
+)
+print(f"Remaining keywords in queue: {len(remaining_keywords)}")
