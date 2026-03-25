@@ -37,7 +37,7 @@ HUB_INTROS = {
     "government-scams": "Government scams often impersonate the IRS, Social Security, tax agencies, or benefits programs to scare people into acting quickly.",
     "unknown-number-scams": "Unknown number scams often begin with unexpected texts or calls designed to spark curiosity, urgency, or a quick reply.",
     "verification-code-scams": "Verification code scams often try to trick people into sharing one-time codes, security codes, or login approvals.",
-    "phishing-scams": "Phishing scams often use fake login pages, email warnings, security alerts, or account verification requests to steal credentials."
+    "phishing-scams": "Phishing scams often use fake login pages, email warnings, security alerts, or account verification requests to steal credentials.",
 }
 
 HUB_TITLES = {
@@ -66,7 +66,7 @@ HUB_TITLES = {
     "government-scams": "Government Scams: Warning Signs, Related Checks & What To Do",
     "unknown-number-scams": "Unknown Number Scams: Warning Signs, Related Checks & What To Do",
     "verification-code-scams": "Verification Code Scams: Warning Signs, Related Checks & What To Do",
-    "phishing-scams": "Phishing Scams: Warning Signs, Related Checks & What To Do"
+    "phishing-scams": "Phishing Scams: Warning Signs, Related Checks & What To Do",
 }
 
 
@@ -327,7 +327,7 @@ p,li{{font-size:16px;}}
 <div class="tool-cta-card">
   <h3>Not sure if this is a scam?</h3>
   <p>Paste the suspicious message, email, website, or link into the scam checker and review the risk before you click, reply, or send money.</p>
-  <a class="tool-cta-button" href="https://verixiaapps.com/">Check a Suspicious Message Now</a>
+  <a class="tool-cta-button" href="https://verixiaapps.com/check">Check a Suspicious Message Now</a>
   <div class="tool-cta-note">No signup required • 1 free check • Takes seconds</div>
 </div>
 
