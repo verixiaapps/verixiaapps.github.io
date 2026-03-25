@@ -1,5 +1,8 @@
 import os
 import re
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from generate_content import generate_content
 from data.cluster_map import CLUSTERS
