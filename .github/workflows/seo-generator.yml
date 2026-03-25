@@ -47,6 +47,10 @@ jobs:
         env:
           DAILY_LIMIT: ${{ env.DAILY_LIMIT }}
 
+      - name: Build hub pages
+        run: |
+          python scripts/build_hubs.py
+
       - name: Build ROOT sitemap (authoritative)
         run: |
           set -e
@@ -77,5 +81,11 @@ jobs:
           git config --global user.name "seo-bot"
           git config --global user.email "bot@users.noreply.github.com"
           git add .
-          git diff --cached --quiet || git commit -m "Auto SEO generation + sitemap update"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto SEO generation + sitemap update"
+            git push
+            echo "Changes committed and pushed"
+          fi
