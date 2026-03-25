@@ -608,6 +608,36 @@ font-weight:800;
 line-height:1.55;
 }
 
+.result-continuation{
+margin-top:14px;
+padding:14px 15px;
+border-radius:16px;
+font-size:14px;
+font-weight:900;
+line-height:1.55;
+background:#f8fafc;
+border:1px solid var(--line);
+color:#334155;
+}
+
+.result-card.high .result-continuation{
+background:#fff8f8;
+border-color:#f3c5cf;
+color:#7f1d1d;
+}
+
+.result-card.medium .result-continuation{
+background:#fffdf5;
+border-color:var(--amber-line);
+color:var(--amber);
+}
+
+.result-card.unknown .result-continuation{
+background:#f8fafc;
+border-color:var(--line);
+color:#334155;
+}
+
 .section{
 margin-top:18px;
 padding:18px;
@@ -1027,7 +1057,7 @@ font-size:14px;
   <div id="result"></div>
 
   <div class="upgrade" id="upgrade">
-    <h3>⚠️ Scam attempts rarely stop at one message</h3>
+    <h3>⚠️ One check isn’t enough if you’re being targeted</h3>
 
     <div class="upgrade-copy">
       Fake jobs, phishing emails, payment requests, impersonation attempts, fake support, and risky links keep showing up. Unlimited access helps you check the next suspicious message before you click, reply, send money, or connect anything.
@@ -1459,6 +1489,9 @@ function formatResult(raw) {
   const riskClass = (risk || "review").trim().toLowerCase();
   const safeRiskClass = cardClassForRisk(riskClass);
   const signalIcon = signalIconForRisk(safeRiskClass);
+  const continuationLine = safeRiskClass !== "low"
+    ? `<div class="result-continuation">If this reached you, similar messages may already be on the way.</div>`
+    : "";
 
   if (signals.length === 0) {
     signals = ["Review the sender, links, and any requests for money, urgency, or personal information."];
@@ -1476,6 +1509,7 @@ function formatResult(raw) {
     </div>
 
     <div class="result-summary">${escapeHtml(summaryForRisk(safeRiskClass))}</div>
+    ${continuationLine}
 
     <div class="section">
       <div class="section-title">Detected Signals</div>
