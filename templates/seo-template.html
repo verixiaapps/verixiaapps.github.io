@@ -964,16 +964,165 @@ function chooseBridgeIntro(baseKeyword) {
   return variants[index];
 }
 
+function buildHeroTitle(keywordRaw) {
+  const kw = String(keywordRaw || "").trim();
+  const lower = kw.toLowerCase();
+  const title = toTitleCase(kw);
+
+  if (lower.startsWith("how to ")) {
+    return `${title}: Safety Tips, Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("what to do after ")) {
+    return `${title}: Recovery Steps & What To Do Next`;
+  }
+
+  if (lower.startsWith("how to recover after ")) {
+    return `${title}: What To Do Next`;
+  }
+
+  if (lower.startsWith("how to secure ")) {
+    return `${title}: Safety Steps & What To Do Next`;
+  }
+
+  if (lower.startsWith("how to block ")) {
+    return `${title}: Protection Tips & Warning Signs`;
+  }
+
+  if (lower.startsWith("how to avoid ")) {
+    return `${title}: Warning Signs & Safety Tips`;
+  }
+
+  if (lower.startsWith("did i get scammed")) {
+    return `${title}? Signs, Risks & What To Do Next`;
+  }
+
+  if (lower.startsWith("can scammers")) {
+    return `${title}? Risks, Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("can someone")) {
+    return `${title}? Risks, Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("almost ")) {
+    return `${title}? Warning Signs & Safety Steps`;
+  }
+
+  if (lower.startsWith("is ") && lower.includes(" legit")) {
+    const clean = toTitleCase(lower.replace(" legit", ""));
+    return `${clean} Legit or a Scam? Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("is this ")) {
+    return `${title}? Check Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("is ")) {
+    return `${title}? Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("what happens after ")) {
+    return `${title}? Risks, Warning Signs & Next Steps`;
+  }
+
+  return `Is ${title} a Scam? Check Before You Click or Send Money`;
+}
+
+function buildHeroSubheading(keywordRaw) {
+  const kw = String(keywordRaw || "").trim();
+  const lower = kw.toLowerCase();
+  const readableKeyword = toTitleCase(cleanKeywordForSentence(kw) || kw);
+
+  if (
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do after ") ||
+    lower.startsWith("how to recover after ") ||
+    lower.startsWith("how to secure ") ||
+    lower.startsWith("how to block ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what happens after ")
+  ) {
+    return `Use the checker below to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.`;
+  }
+
+  if (
+    lower.startsWith("did i get scammed") ||
+    lower.startsWith("can scammers") ||
+    lower.startsWith("can someone") ||
+    lower.startsWith("almost ")
+  ) {
+    return `Check suspicious messages, emails, links, and offers below to review scam risk, warning signs, and what to do next.`;
+  }
+
+  return `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
+}
+
+function buildContentHeading(keywordRaw) {
+  const kw = String(keywordRaw || "").trim();
+  const lower = kw.toLowerCase();
+  const title = toTitleCase(kw);
+
+  if (
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do after ") ||
+    lower.startsWith("how to recover after ") ||
+    lower.startsWith("how to secure ") ||
+    lower.startsWith("how to block ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what happens after ")
+  ) {
+    return `${title}`;
+  }
+
+  if (
+    lower.startsWith("did i get scammed") ||
+    lower.startsWith("can scammers") ||
+    lower.startsWith("can someone") ||
+    lower.startsWith("almost ")
+  ) {
+    return `${title}`;
+  }
+
+  return `What ${title} Messages, Links, and Offers Often Look Like`;
+}
+
+function buildContentBridge(keywordRaw) {
+  const kw = String(keywordRaw || "").trim();
+  const lower = kw.toLowerCase();
+  const cleanKeyword = cleanKeywordForSentence(kw) || kw;
+
+  if (
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do after ") ||
+    lower.startsWith("how to recover after ") ||
+    lower.startsWith("how to secure ") ||
+    lower.startsWith("how to block ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what happens after ")
+  ) {
+    return `Use the checker above to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.`;
+  }
+
+  if (
+    lower.startsWith("did i get scammed") ||
+    lower.startsWith("can scammers") ||
+    lower.startsWith("can someone") ||
+    lower.startsWith("almost ")
+  ) {
+    return `If you are unsure what happened, use the checker above to review suspicious messages, emails, links, and offers before taking action.`;
+  }
+
+  return `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
-  const keyword = toTitleCase(keywordRaw);
-  const cleanKeyword = cleanKeywordForSentence(keywordRaw) || keywordRaw;
-  const readableKeyword = toTitleCase(cleanKeyword);
 
-  document.getElementById("heroKeyword").textContent = `Is ${keyword} a Scam? Check Before You Click or Send Money`;
-  document.getElementById("heroSubheading").textContent = `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
-  document.getElementById("contentHeading").textContent = `What ${keyword} Messages, Links, and Offers Often Look Like`;
-  document.getElementById("contentBridge").textContent = `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
+  document.getElementById("heroKeyword").textContent = buildHeroTitle(keywordRaw);
+  document.getElementById("heroSubheading").textContent = buildHeroSubheading(keywordRaw);
+  document.getElementById("contentHeading").textContent = buildContentHeading(keywordRaw);
+  document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
 function cleanSeoContent() {
