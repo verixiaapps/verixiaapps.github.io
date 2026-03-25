@@ -121,6 +121,30 @@ def matches_cluster(keyword, match_terms):
     return False
 
 
+def score_keyword(keyword, hub_terms):
+    kw = normalize_keyword(keyword)
+    score = 0
+
+    for term in hub_terms:
+        term_norm = normalize_keyword(term)
+        if term_norm and term_norm in kw:
+            score += 2
+
+    if "scam" in kw:
+        score += 1
+
+    if "email" in kw or "text" in kw:
+        score += 1
+
+    if "message" in kw or "link" in kw:
+        score += 1
+
+    if kw.startswith("is ") or kw.startswith("is this "):
+        score += 1
+
+    return (-score, len(kw), kw)
+
+
 def build_related_links(cluster_keywords):
     links = []
     seen = set()
@@ -131,7 +155,7 @@ def build_related_links(cluster_keywords):
             continue
 
         seen.add(slug)
-        anchor = title_case(keyword)
+        anchor = f"{title_case(keyword)} Scam Check"
         links.append(
             f'<li><a href="/scam-check-now/{slug}/">{escape_html(anchor)}</a></li>'
         )
@@ -304,7 +328,11 @@ def main():
             print(f"Skipped hub: {hub_slug} (no matching generated keywords)")
             continue
 
-        matched = sorted(dict.fromkeys(matched))[:MAX_LINKS_PER_HUB]
+        matched = sorted(
+            dict.fromkeys(matched),
+            key=lambda k: score_keyword(k, match_terms)
+        )[:MAX_LINKS_PER_HUB]
+
         links_html = build_related_links(matched)
 
         if not links_html.strip():
