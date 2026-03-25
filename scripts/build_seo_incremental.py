@@ -1,6 +1,8 @@
 import os
 import re
+
 from generate_content import generate_content
+from data.cluster_map import CLUSTERS
 
 # -----------------------------
 # CONFIG
@@ -11,7 +13,9 @@ GENERATED_KEYWORDS_FILE = "data/generated_keywords.txt"
 TEMPLATE_FILE = "templates/seo-template.html"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
+
 RELATED_LINKS_COUNT = 6
+MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
@@ -35,7 +39,7 @@ def slugify(text):
 
 
 def normalize_keyword(text):
-    return re.sub(r"\s+", " ", text.strip().lower())
+    return re.sub(r"\s+", " ", str(text).strip().lower())
 
 
 def display_keyword(text):
@@ -46,7 +50,17 @@ def display_keyword(text):
 
 
 def title_case(text):
-    return " ".join(word.capitalize() for word in text.split())
+    return " ".join(word.capitalize() for word in str(text).split())
+
+
+def escape_html(text):
+    return (
+        str(text)
+        .replace("&", "&amp;")
+        .replace('"', "&quot;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
 
 
 def build_title(keyword):
@@ -260,7 +274,9 @@ def keyword_cluster_tokens(text):
     return {token for token in keyword_tokens(text) if token in CLUSTER_TERMS}
 
 
-def get_related_pages(current_page, all_pages, limit):
+def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
+    exclude_slugs = set(exclude_slugs or set())
+
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
@@ -269,7 +285,9 @@ def get_related_pages(current_page, all_pages, limit):
 
     candidates = [
         p for p in all_pages
-        if p["slug"] != current_slug and p["slug"] not in PROTECTED_SLUGS
+        if p["slug"] != current_slug
+        and p["slug"] not in PROTECTED_SLUGS
+        and p["slug"] not in exclude_slugs
     ]
 
     def score(page):
@@ -327,6 +345,47 @@ def fallback_ai_text(keyword):
 <p>Common warning signs include unexpected messages, pressure to act quickly, suspicious links, and unusual payment requests.</p>
 <p>If you are unsure, avoid clicking links, replying, or sending money until you verify through official sources.</p>
 """.strip()
+
+
+def find_best_hub_slug(keyword):
+    keyword_norm = normalize_keyword(keyword)
+
+    best_hub_slug = None
+    best_score = 0
+
+    for hub_slug, match_terms in CLUSTERS.items():
+        score = 0
+        for term in match_terms:
+            term_norm = normalize_keyword(term)
+            if term_norm and term_norm in keyword_norm:
+                score += 1
+
+        if score > best_score:
+            best_score = score
+            best_hub_slug = hub_slug
+
+    return best_hub_slug
+
+
+def build_hub_link_html(keyword):
+    hub_slug = find_best_hub_slug(keyword)
+    if not hub_slug:
+        return ""
+
+    hub_title = title_case(hub_slug.replace("-", " "))
+    return (
+        f'<a class="hub-link-card" href="/scam-check-now/{hub_slug}/">'
+        f'<span class="hub-link-label">Scam Hub</span>'
+        f'<span class="hub-link-title">Browse the {escape_html(hub_title)} Hub</span>'
+        f'</a>'
+    )
+
+
+def build_links_html(pages_list):
+    return "".join(
+        f'<li><a href="/scam-check-now/{p["slug"]}/">{escape_html(build_related_anchor(p["keyword"]))}</a></li>\n'
+        for p in pages_list
+    )
 
 
 # -----------------------------
@@ -424,11 +483,18 @@ for page in pages:
         ai_text = fallback_ai_text(keyword)
 
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
+    related_slugs = {p["slug"] for p in related_pages}
 
-    links_html = "".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">{build_related_anchor(r["keyword"])}</a></li>\n'
-        for r in related_pages
+    more_pages = get_related_pages(
+        page,
+        pages,
+        MORE_LINKS_COUNT,
+        exclude_slugs=related_slugs
     )
+
+    links_html = build_links_html(related_pages)
+    more_links_html = build_links_html(more_pages)
+    hub_link_html = build_hub_link_html(keyword)
 
     html = template
     html = html.replace("{{TITLE}}", title)
@@ -436,6 +502,8 @@ for page in pages:
     html = html.replace("{{KEYWORD}}", keyword_display)
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", links_html)
+    html = html.replace("{{MORE_LINKS}}", more_links_html)
+    html = html.replace("{{HUB_LINK}}", hub_link_html)
     html = html.replace("{{CANONICAL_URL}}", canonical)
 
     with open(path, "w", encoding="utf-8") as f:
