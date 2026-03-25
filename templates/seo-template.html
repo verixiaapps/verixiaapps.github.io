@@ -863,6 +863,49 @@ padding-left:22px;
 margin-bottom:10px;
 }
 
+.hub-link-wrap{
+margin:0 0 24px;
+}
+
+.hub-link-card{
+display:block;
+padding:18px;
+border-radius:20px;
+background:linear-gradient(180deg,#f8fbff 0%,#f3f8ff 100%);
+border:1.5px solid #c7d2fe;
+text-decoration:none;
+box-shadow:0 12px 30px rgba(79,125,243,.08);
+}
+
+.hub-link-label{
+display:block;
+font-size:13px;
+font-weight:900;
+color:#667085;
+margin-bottom:6px;
+}
+
+.hub-link-title{
+display:block;
+font-size:20px;
+font-weight:900;
+color:var(--ink-strong);
+line-height:1.25;
+letter-spacing:-.02em;
+}
+
+.hub-link-card:hover .hub-link-title{
+color:var(--blue-3);
+}
+
+.more-links-box{
+margin-top:8px;
+padding:18px;
+border-radius:20px;
+background:var(--blue-soft);
+border:1px solid var(--blue-line);
+}
+
 .related-links{
 margin:0;
 padding-left:22px;
@@ -960,6 +1003,9 @@ font-size:24px;
 }
 .content-body{
 font-size:16px;
+}
+.hub-link-title{
+font-size:18px;
 }
 .preview-top,
 .result-top{
@@ -1088,11 +1134,19 @@ font-size:14px;
 
 <section class="content-section">
   <div id="contentBridge" class="content-bridge"></div>
+
+  <div id="hubLinkWrap" class="hub-link-wrap">{{HUB_LINK}}</div>
+
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
   <h3 id="relatedHeading">Related Scam Checks</h3>
   <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
+
+  <h3 id="moreLinksHeading">Explore More Scam Checks</h3>
+  <div id="moreLinksBox" class="more-links-box">
+    <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+  </div>
 </section>
 
 <footer class="footer">
@@ -1128,6 +1182,8 @@ window.addEventListener("load", function () {
   setKeywordHeadings();
   cleanSeoContent();
   cleanRelatedLinks();
+  cleanHubLink();
+  cleanMoreLinks();
 });
 
 function isBrowserSubscribed() {
@@ -1399,6 +1455,35 @@ function cleanRelatedLinks() {
   }
 }
 
+function cleanHubLink() {
+  const hubLinkWrap = document.getElementById("hubLinkWrap");
+  if (!hubLinkWrap) return;
+
+  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
+
+  const link = hubLinkWrap.querySelector("a");
+  if (!link) {
+    hubLinkWrap.style.display = "none";
+  }
+}
+
+function cleanMoreLinks() {
+  const moreLinks = document.getElementById("moreLinks");
+  const moreLinksHeading = document.getElementById("moreLinksHeading");
+  const moreLinksBox = document.getElementById("moreLinksBox");
+  if (!moreLinks || !moreLinksHeading || !moreLinksBox) return;
+
+  moreLinks.innerHTML = moreLinks.innerHTML.replace(/\*\*/g, "").trim();
+
+  const links = moreLinks.querySelectorAll("li a");
+
+  if (links.length === 0) {
+    moreLinks.style.display = "none";
+    moreLinksHeading.style.display = "none";
+    moreLinksBox.style.display = "none";
+  }
+}
+
 function summaryForRisk(riskClass) {
   if (riskClass === "high") {
     return "This message shows multiple scam signals. Do not click links, reply, send money, or connect anything until you verify it directly.";
@@ -1634,4 +1719,4 @@ async function checkout(priceId) {
 </script>
 
 </body>
-</html> 
+</html>
