@@ -1126,6 +1126,7 @@ window.addEventListener("load", function () {
   }
 
   setKeywordHeadings();
+  applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
 });
@@ -1363,6 +1364,62 @@ function buildContentBridge(keywordRaw) {
   }
 
   return `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
+}
+
+function buildCheckerPrefill(keywordRaw) {
+  const kw = normalizeKeyword(keywordRaw);
+  const lower = kw.toLowerCase();
+  const clean = cleanKeywordForSentence(kw) || kw;
+
+  if (!clean) return "";
+
+  if (
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do after ") ||
+    lower.startsWith("how to recover after ") ||
+    lower.startsWith("how to secure ") ||
+    lower.startsWith("how to block ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what happens after ") ||
+    lower.startsWith("what is ") ||
+    lower.startsWith("why ") ||
+    lower.startsWith("when ") ||
+    lower.startsWith("where ") ||
+    lower.startsWith("who ") ||
+    lower.startsWith("can ") ||
+    lower.startsWith("should ") ||
+    lower.startsWith("could ") ||
+    lower.startsWith("would ") ||
+    lower.startsWith("do ") ||
+    lower.startsWith("does ") ||
+    lower.startsWith("did ") ||
+    lower.startsWith("almost ")
+  ) {
+    return "";
+  }
+
+  if (lower.startsWith("is this ")) {
+    const subject = kw.replace(/^is this\s+/i, "").trim();
+    return subject ? `I want to check if this ${subject} is a scam.` : "";
+  }
+
+  if (lower.startsWith("is ")) {
+    const subject = kw.replace(/^is\s+/i, "").trim();
+    return subject ? `I want to check if ${subject} is a scam.` : "";
+  }
+
+  return `I received a ${clean.toLowerCase()} and want to know if it is a scam.`;
+}
+
+function applyIntentToChecker() {
+  const textarea = document.getElementById("text");
+  if (!textarea) return;
+  if (textarea.value.trim()) return;
+
+  const prefill = buildCheckerPrefill(RAW_KEYWORD || "");
+  if (prefill) {
+    textarea.value = prefill;
+  }
 }
 
 function setKeywordHeadings() {
@@ -1634,4 +1691,4 @@ async function checkout(priceId) {
 </script>
 
 </body>
-</html> 
+</html>
