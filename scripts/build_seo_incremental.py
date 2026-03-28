@@ -1,3 +1,25 @@
+Yes — this is the file that still needs the real cleanup.
+
+Right now it is not aligned with your no-fallback direction because of this block:
+
+except Exception as e:
+    fallback_count += 1
+    append_line_if_missing(REJECTED_KEYWORDS_FILE, f"{keyword} | {str(e)}")
+    print("AI generation fallback for", keyword, ":", e)
+    ai_text = fallback_ai_text(keyword)
+
+That means bad AI output still turns into published filler pages.
+
+Below is the 9.5/10 version of this file:
+	•	removes hardcoded fallback publishing
+	•	rejects bad AI pages cleanly
+	•	logs them to rejected_keywords.txt
+	•	skips them without killing the batch
+	•	keeps the queue logic and core structure intact
+	•	still updates generated tracking files only for actual generated pages
+
+Replace the file with this:
+
 import os
 import re
 import sys
@@ -363,18 +385,6 @@ def build_canonical(slug):
     return f"{SITE}/scam-check-now/{slug}/"
 
 
-def fallback_ai_text(keyword):
-    readable = readable_keyword(keyword)
-    keyword_display = display_keyword(keyword)
-
-    return (
-        f"<p>{readable} scams usually use urgency, impersonation, or fake account problems to push people into acting before they verify what is real.</p>"
-        f"<p>Common versions of {escape_html(keyword_display)} include suspicious emails, texts, payment warnings, login alerts, fake support messages, refund claims, or account verification requests.</p>"
-        f"<p>If something related to {escape_html(keyword_display)} appears unexpectedly, do not click links, reply, download files, share codes, or send money until you verify it directly through the official website or app.</p>"
-        f"<p>Strong warning signs include pressure to act fast, requests for personal information, unusual payment instructions, mismatched sender details, and links that do not clearly belong to the real company or service.</p>"
-    )
-
-
 # -----------------------------
 # FILE LOADERS
 # -----------------------------
@@ -584,7 +594,7 @@ print(f"Daily limit: {DAILY_LIMIT}")
 # -----------------------------
 generated_count = 0
 skipped_existing_count = 0
-fallback_count = 0
+rejected_count = 0
 built_keywords = []
 
 for page in queue_pages:
@@ -618,10 +628,10 @@ for page in queue_pages:
     try:
         ai_text = generate_ai_text(keyword, keyword_display)
     except Exception as e:
-        fallback_count += 1
+        rejected_count += 1
         append_line_if_missing(REJECTED_KEYWORDS_FILE, f"{keyword} | {str(e)}")
-        print("AI generation fallback for", keyword, ":", e)
-        ai_text = fallback_ai_text(keyword)
+        print("AI generation rejected for", keyword, ":", e)
+        continue
 
     link_source_pages = dedupe_pages_by_slug(existing_pages + queue_pages)
 
@@ -671,6 +681,6 @@ with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing pages. "
-    f"Fallback used {fallback_count} times."
+    f"Rejected {rejected_count} keywords."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
