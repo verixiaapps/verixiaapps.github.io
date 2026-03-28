@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+from html import escape
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(BASE_DIR)
@@ -29,42 +30,146 @@ CLUSTER_TERMS = {
     "tiktok", "whatsapp", "telegram", "snapchat", "discord", "crypto",
     "bitcoin", "ethereum", "usps", "fedex", "ups", "bank", "chase",
     "wells", "america", "job", "loan", "credit", "romance", "gift",
-    "irs", "social", "verification", "phishing", "login", "account"
+    "irs", "social", "verification", "phishing", "login", "account",
+    "delivery", "package", "recruiter", "refund", "payment", "wallet",
+    "support", "number", "caller", "security", "alert"
+}
+
+BRAND_CASE = {
+    "paypal": "PayPal",
+    "whatsapp": "WhatsApp",
+    "cash app": "Cash App",
+    "tiktok": "TikTok",
+    "icloud": "iCloud",
+    "irs": "IRS",
+    "usps": "USPS",
+    "ups": "UPS",
+    "fedex": "FedEx",
+    "sms": "SMS",
+    "otp": "OTP",
+    "2fa": "2FA",
+    "dm": "DM",
+    "nft": "NFT",
+    "ceo": "CEO",
+    "binance": "Binance",
+    "coinbase": "Coinbase",
+    "metamask": "MetaMask",
+    "trust wallet": "Trust Wallet",
+    "google play": "Google Play",
+    "zelle": "Zelle",
+    "venmo": "Venmo",
+    "amazon": "Amazon",
+    "facebook": "Facebook",
+    "facebook marketplace": "Facebook Marketplace",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "snapchat": "Snapchat",
+    "discord": "Discord",
+    "crypto": "Crypto",
+    "bitcoin": "Bitcoin",
+    "ethereum": "Ethereum",
+    "bank": "Bank",
+    "bank of america": "Bank of America",
+    "chase": "Chase",
+    "wells fargo": "Wells Fargo",
+    "social security": "Social Security",
+    "google": "Google",
+    "apple": "Apple",
+    "microsoft": "Microsoft",
+    "steam": "Steam",
+    "walmart": "Walmart",
+    "target": "Target",
+    "two factor": "Two-Factor",
+}
+
+SMALL_WORDS = {
+    "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "vs", "with"
 }
 
 
 # -----------------------------
 # UTILITIES
 # -----------------------------
-def slugify(text):
-    text = str(text).lower()
-    text = re.sub(r"[^a-z0-9]+", "-", text)
-    return text.strip("-")
-
-
 def normalize_keyword(text):
     return re.sub(r"\s+", " ", str(text).strip().lower())
 
 
-def display_keyword(text):
+def slugify(text):
+    text = normalize_keyword(text)
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")
+
+
+def clean_base_keyword(text):
     kw = normalize_keyword(text)
-    if kw.endswith(" scam"):
-        kw = kw[:-5].strip()
+
+    kw = re.sub(r"^\s*is\s+", "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
+    kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
+    kw = re.sub(r"^\s*this\s+", "this ", kw)
+
+    kw = re.sub(r"\s+a\s+scam$", "", kw)
+    kw = re.sub(r"\s+or\s+legit$", "", kw)
+    kw = re.sub(r"\s+or\s+scam$", "", kw)
+    kw = re.sub(r"\s+legit$", "", kw)
+    kw = re.sub(r"\s+real$", "", kw)
+    kw = re.sub(r"\s+safe$", "", kw)
+    kw = re.sub(r"\s+scam$", "", kw)
+
+    kw = re.sub(r"\s+a$", "", kw)
+    kw = re.sub(r"\s+", " ", kw).strip()
     return kw
 
 
+def display_keyword(text):
+    return clean_base_keyword(text)
+
+
+def apply_brand_case(text):
+    result = f" {text} "
+    for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
+        pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
+        result = re.sub(pattern, proper, result, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", result).strip()
+
+
 def title_case(text):
-    return " ".join(word.capitalize() for word in str(text).split())
+    text = normalize_keyword(text)
+    if not text:
+        return ""
+
+    words = text.split()
+    titled = []
+
+    for i, word in enumerate(words):
+        if i > 0 and word in SMALL_WORDS:
+            titled.append(word)
+        else:
+            titled.append(word.capitalize())
+
+    return apply_brand_case(" ".join(titled))
+
+
+def readable_keyword(text):
+    base = display_keyword(text)
+    return title_case(base) if base else ""
+
+
+def keyword_tokens(text):
+    return set(clean_base_keyword(text).split())
+
+
+def keyword_cluster_tokens(text):
+    return {token for token in keyword_tokens(text) if token in CLUSTER_TERMS}
+
+
+def keyword_root(text):
+    base = clean_base_keyword(text)
+    return base.split()[0] if base else ""
 
 
 def escape_html(text):
-    return (
-        str(text)
-        .replace("&", "&amp;")
-        .replace('"', "&quot;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
+    return escape(str(text), quote=True)
 
 
 def page_path(slug):
@@ -75,175 +180,104 @@ def page_exists(slug):
     return os.path.exists(page_path(slug))
 
 
+def is_guidance_style_keyword(keyword):
+    kw = normalize_keyword(keyword)
+    return (
+        kw.startswith("how to ")
+        or kw.startswith("what to do")
+        or kw.startswith("what happens")
+        or kw.startswith("why ")
+        or kw.startswith("when ")
+        or kw.startswith("where ")
+        or kw.startswith("who ")
+        or kw.startswith("check ")
+        or kw.startswith("report ")
+    )
+
+
+def is_question_style_keyword(keyword):
+    kw = normalize_keyword(keyword)
+    return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
+
+
+# -----------------------------
+# SEO TEXT HELPERS
+# -----------------------------
 def build_title(keyword):
-    kw_raw = normalize_keyword(keyword)
-    kw_display = title_case(display_keyword(keyword))
+    raw = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
 
-    if kw_raw.startswith("how to "):
-        return f"{title_case(kw_raw)}: Safety Tips, Warning Signs & What To Do"
+    if not raw:
+        return "Is This a Scam? Warning Signs, Safety Tips & What To Do"
 
-    if kw_raw.startswith("what to do after "):
-        return f"{title_case(kw_raw)}: Recovery Steps & What To Do Next"
+    if is_guidance_style_keyword(raw):
+        return f"{title_case(raw)} | Warning Signs, Safety Tips & What To Do"
 
-    if kw_raw.startswith("how to recover after "):
-        return f"{title_case(kw_raw)}: What To Do Next"
+    if raw.startswith("did i get scammed"):
+        return f"{title_case(raw)}? Signs, Risks & What To Do Next"
 
-    if kw_raw.startswith("how to secure "):
-        return f"{title_case(kw_raw)}: Safety Steps & What To Do Next"
+    if raw.startswith("is this "):
+        return f"{title_case(raw)}? Warning Signs, Risks & What To Do"
 
-    if kw_raw.startswith("how to block "):
-        return f"{title_case(kw_raw)}: Protection Tips & Warning Signs"
+    if raw.startswith("is ") and " legit" in raw:
+        cleaned = re.sub(r"\s+legit\b", "", raw).strip()
+        return f"{title_case(cleaned)} Legit or a Scam? Warning Signs & What To Do"
 
-    if kw_raw.startswith("how to avoid "):
-        return f"{title_case(kw_raw)}: Warning Signs & Safety Tips"
+    if is_question_style_keyword(raw):
+        return f"{title_case(raw)}? Warning Signs, Risks & What To Know"
 
-    if kw_raw.startswith("did i get scammed"):
-        return f"{title_case(kw_raw)}? Signs, Risks & What To Do Next"
-
-    if kw_raw.startswith("can scammers"):
-        return f"{title_case(kw_raw)}? Risks, Warning Signs & What To Do"
-
-    if kw_raw.startswith("can someone"):
-        return f"{title_case(kw_raw)}? Risks, Warning Signs & What To Do"
-
-    if kw_raw.startswith("almost "):
-        return f"{title_case(kw_raw)}? Warning Signs & Safety Steps"
-
-    if kw_raw.startswith("is ") and " legit" in kw_raw:
-        clean = title_case(kw_raw.replace(" legit", ""))
-        return f"{clean} Legit or a Scam? Warning Signs & What To Do"
-
-    if kw_raw.startswith("is this "):
-        return f"{title_case(kw_raw)}? Check Warning Signs & What To Do"
-
-    if kw_raw.startswith("is "):
-        return f"{title_case(kw_raw)}? Warning Signs & What To Do"
-
-    if kw_raw.startswith("what happens after "):
-        return f"{title_case(kw_raw)}? Risks, Warning Signs & Next Steps"
-
-    return f"Is {kw_display} a Scam? Warning Signs & What To Do"
+    return f"Is {readable} a Scam? Warning Signs, Risks & What To Do"
 
 
 def build_description(keyword):
-    kw_raw = normalize_keyword(keyword)
-    kw_display = title_case(display_keyword(keyword))
+    raw = normalize_keyword(keyword)
+    clean_kw = display_keyword(keyword)
+    readable = readable_keyword(keyword)
 
-    if kw_raw.startswith("how to "):
+    if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
-            f"Learn {kw_raw} with practical safety tips, warning signs, and what to do next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("what to do after "):
-        return (
-            f"Learn {kw_raw}, the warning signs to watch for, and the next steps to protect yourself. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("did i get scammed"):
-        return (
-            f"Find out {kw_raw}, review warning signs, understand the risks, and see what to do next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("can scammers") or kw_raw.startswith("can someone"):
-        return (
-            f"Find out {kw_raw}, review the risks and warning signs, and see what steps to take next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("almost "):
-        return (
-            f"Find out whether it is safe, review warning signs, and learn what steps to take next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("is ") and " legit" in kw_raw:
-        clean = kw_raw.replace(" legit", "")
-        return (
-            f"Is {clean} legit or a scam? Review warning signs, real risks, and what to do next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("is this "):
-        return (
-            f"Check whether this looks like a scam, review warning signs, real risks, and what to do next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("is "):
-        return (
-            f"Is {kw_display} a scam? Review warning signs, real risks, and what to do next. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
-        )
-
-    if kw_raw.startswith("what happens after "):
-        return (
-            f"Learn what happens next, the risks to watch for, and what steps to take after a phishing or scam event. "
-            f"Use our free AI scam checker for suspicious messages, emails, and links."
+            f"Learn the warning signs, scam risk signals, and safest next steps for {readable}. "
+            f"Check suspicious messages, emails, links, and offers before you click, reply, or send money."
         )
 
     return (
-        f"Is {kw_display} a scam or legit? Check warning signs, real risks, and what to do next. "
-        f"Use our free AI scam checker for suspicious messages, emails, and links."
+        f"Is {readable} a scam or legit? Review warning signs, risk signals, and what to do next. "
+        f"Check suspicious {clean_kw} messages, emails, texts, links, and offers."
     )
 
 
 def build_related_anchor(keyword):
-    kw_raw = normalize_keyword(keyword)
-    kw_display = title_case(display_keyword(keyword))
+    raw = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
 
-    if kw_raw.startswith("how to "):
-        return title_case(kw_raw)
+    if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
+        if raw.startswith("is ") and " legit" in raw:
+            cleaned = re.sub(r"\s+legit\b", "", raw).strip()
+            return f"{title_case(cleaned)} Legit or a Scam?"
+        if raw.startswith("did i get scammed") or raw.startswith("what happens after ") or raw.startswith("almost "):
+            return title_case(raw) + "?"
+        return title_case(raw)
 
-    if kw_raw.startswith("what to do after "):
-        return title_case(kw_raw)
-
-    if kw_raw.startswith("how to recover after "):
-        return title_case(kw_raw)
-
-    if kw_raw.startswith("how to secure "):
-        return title_case(kw_raw)
-
-    if kw_raw.startswith("how to block "):
-        return title_case(kw_raw)
-
-    if kw_raw.startswith("how to avoid "):
-        return title_case(kw_raw)
-
-    if kw_raw.startswith("did i get scammed"):
-        return title_case(kw_raw) + "?"
-
-    if kw_raw.startswith("can scammers"):
-        return title_case(kw_raw) + "?"
-
-    if kw_raw.startswith("can someone"):
-        return title_case(kw_raw) + "?"
-
-    if kw_raw.startswith("almost "):
-        return title_case(kw_raw) + "?"
-
-    if kw_raw.startswith("is ") and " legit" in kw_raw:
-        clean = title_case(kw_raw.replace(" legit", ""))
-        return f"{clean} Legit or a Scam?"
-
-    if kw_raw.startswith("is this "):
-        return title_case(kw_raw) + "?"
-
-    if kw_raw.startswith("is "):
-        return title_case(kw_raw) + "?"
-
-    if kw_raw.startswith("what happens after "):
-        return title_case(kw_raw) + "?"
-
-    return f"Is {kw_display} a Scam?"
+    return f"Is {readable} a Scam?"
 
 
 def build_canonical(slug):
     return f"{SITE}/scam-check-now/{slug}/"
 
 
+def fallback_ai_text(keyword):
+    readable = readable_keyword(keyword)
+    keyword_display = display_keyword(keyword)
+    return (
+        f"<p>{readable} scams often involve impersonation, urgency, or requests for money and sensitive information.</p>"
+        f"<p>Common warning signs include unexpected messages, pressure to act quickly, suspicious links, and unusual payment requests.</p>"
+        f"<p>If you receive something related to {escape_html(keyword_display)}, avoid clicking links, replying, or sending money until you verify it through official sources.</p>"
+    )
+
+
+# -----------------------------
+# FILE LOADERS
+# -----------------------------
 def load_keywords():
     if not os.path.exists(KEYWORD_FILE):
         return []
@@ -280,14 +314,9 @@ def append_line_if_missing(filepath, value):
             f.write(value + "\n")
 
 
-def keyword_tokens(text):
-    return set(normalize_keyword(text).split())
-
-
-def keyword_cluster_tokens(text):
-    return {token for token in keyword_tokens(text) if token in CLUSTER_TERMS}
-
-
+# -----------------------------
+# LINKING HELPERS
+# -----------------------------
 def dedupe_pages_by_slug(pages_list):
     deduped = []
     seen = set()
@@ -308,8 +337,9 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
-    current_cluster_tokens = keyword_cluster_tokens(current_keyword)
-    current_root = current_keyword.split()[0]
+    current_cluster = keyword_cluster_tokens(current_keyword)
+    current_root = keyword_root(current_keyword)
+    current_base = clean_base_keyword(current_keyword)
 
     candidates = [
         p for p in all_pages
@@ -317,19 +347,24 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         and p["slug"] not in PROTECTED_SLUGS
         and p["slug"] not in exclude_slugs
         and page_exists(p["slug"])
+        and clean_base_keyword(p["keyword"]) != current_base
     ]
 
     def score(page):
         other_keyword = page["keyword"]
         other_tokens = keyword_tokens(other_keyword)
-        other_cluster_tokens = keyword_cluster_tokens(other_keyword)
+        other_cluster = keyword_cluster_tokens(other_keyword)
+        other_root = keyword_root(other_keyword)
+        other_base = clean_base_keyword(other_keyword)
 
-        same_root = 1 if other_keyword.split()[0] == current_root else 0
-        shared_cluster = len(current_cluster_tokens & other_cluster_tokens)
+        same_root = 1 if current_root and other_root == current_root else 0
+        shared_cluster = len(current_cluster & other_cluster)
         shared_tokens = len(current_tokens & other_tokens)
-        length_diff = abs(len(other_keyword.split()) - len(current_keyword.split()))
+        exact_base_penalty = 1 if other_base == current_base else 0
+        length_diff = abs(len(other_tokens) - len(current_tokens))
 
         return (
+            -exact_base_penalty,
             -same_root,
             -shared_cluster,
             -shared_tokens,
@@ -341,25 +376,19 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
 
     related = []
     used_slugs = set()
+    used_bases = set()
 
     for page in ranked:
-        if page["slug"] in used_slugs:
+        base = clean_base_keyword(page["keyword"])
+        if page["slug"] in used_slugs or base in used_bases:
             continue
         related.append(page)
         used_slugs.add(page["slug"])
+        used_bases.add(base)
         if len(related) == limit:
             break
 
     return related
-
-
-def fallback_ai_text(keyword):
-    kw = title_case(display_keyword(keyword))
-    return f"""
-<p>{kw} scams often involve impersonation, urgency, or requests for money and sensitive information.</p>
-<p>Common warning signs include unexpected messages, pressure to act quickly, suspicious links, and unusual payment requests.</p>
-<p>If you are unsure, avoid clicking links, replying, or sending money until you verify through official sources.</p>
-""".strip()
 
 
 def find_best_hub_slug(keyword):
@@ -513,7 +542,7 @@ for page in queue_pages:
     canonical = build_canonical(slug)
 
     try:
-        ai_text = generate_content(keyword)
+        ai_text = generate_content(keyword_display)
     except Exception as e:
         print("AI generation failed for", keyword, ":", e)
         ai_text = fallback_ai_text(keyword)
@@ -535,14 +564,14 @@ for page in queue_pages:
     hub_link_html = build_hub_link_html(keyword)
 
     html = template
-    html = html.replace("{{TITLE}}", title)
-    html = html.replace("{{DESCRIPTION}}", description)
-    html = html.replace("{{KEYWORD}}", keyword_display)
+    html = html.replace("{{TITLE}}", escape_html(title))
+    html = html.replace("{{DESCRIPTION}}", escape_html(description))
+    html = html.replace("{{KEYWORD}}", escape_html(keyword_display))
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", links_html)
     html = html.replace("{{MORE_LINKS}}", more_links_html)
     html = html.replace("{{HUB_LINK}}", hub_link_html)
-    html = html.replace("{{CANONICAL_URL}}", canonical)
+    html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
