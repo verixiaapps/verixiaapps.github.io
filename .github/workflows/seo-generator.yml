@@ -2,6 +2,17 @@ name: SEO Page Generator Auto
 
 on:
   workflow_dispatch:
+    inputs:
+      full_rebuild:
+        description: "Rebuild all generated /scam-check-now/ subfolder pages (keeps root files and is-this-a-scam)"
+        required: false
+        default: true
+        type: boolean
+      rebuild_daily_limit:
+        description: "Daily limit to use during a manual full rebuild"
+        required: false
+        default: "5000"
+        type: string
   schedule:
     - cron: "0 3 * * *"
 
@@ -15,10 +26,15 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     env:
       START_DATE: "2026-03-22"
+      KEYWORDS_FILE: "data/keywords.txt"
+      GENERATED_KEYWORDS_FILE: "data/generated_keywords.txt"
+      GENERATED_SLUGS_FILE: "data/generated_slugs.txt"
+      OUTPUT_DIR: "scam-check-now"
+      PROTECTED_SLUG: "is-this-a-scam"
 
     steps:
       - name: Checkout repo
@@ -33,15 +49,20 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
             pip install openai requests
           fi
 
-      - name: Set phase and daily limit
+      - name: Set build mode, phase, and limits
         shell: bash
         run: |
+          set -euo pipefail
+
           TODAY=$(date -u +%F)
           DAY_DIFF=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
 
@@ -56,24 +77,93 @@ jobs:
             DAILY_LIMIT="100"
           fi
 
-          echo "PHASE=$PHASE" >> "$GITHUB_ENV"
-          echo "DAILY_LIMIT=$DAILY_LIMIT" >> "$GITHUB_ENV"
+          FULL_REBUILD="false"
+          EFFECTIVE_DAILY_LIMIT="$DAILY_LIMIT"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.full_rebuild }}" = "true" ]; then
+            FULL_REBUILD="true"
+            EFFECTIVE_DAILY_LIMIT="${{ inputs.rebuild_daily_limit }}"
+          fi
+
+          if ! [[ "$EFFECTIVE_DAILY_LIMIT" =~ ^[0-9]+$ ]] || [ "$EFFECTIVE_DAILY_LIMIT" -le 0 ]; then
+            echo "Invalid EFFECTIVE_DAILY_LIMIT: $EFFECTIVE_DAILY_LIMIT"
+            exit 1
+          fi
+
           echo "TODAY=$TODAY" >> "$GITHUB_ENV"
           echo "DAY_DIFF=$DAY_DIFF" >> "$GITHUB_ENV"
+          echo "PHASE=$PHASE" >> "$GITHUB_ENV"
+          echo "DEFAULT_DAILY_LIMIT=$DAILY_LIMIT" >> "$GITHUB_ENV"
+          echo "FULL_REBUILD=$FULL_REBUILD" >> "$GITHUB_ENV"
+          echo "EFFECTIVE_DAILY_LIMIT=$EFFECTIVE_DAILY_LIMIT" >> "$GITHUB_ENV"
 
-          echo "Running $PHASE on day $DAY_DIFF with DAILY_LIMIT=$DAILY_LIMIT"
+          echo "Today: $TODAY"
+          echo "Day diff: $DAY_DIFF"
+          echo "Phase: $PHASE"
+          echo "Scheduled default daily limit: $DAILY_LIMIT"
+          echo "Full rebuild: $FULL_REBUILD"
+          echo "Effective daily limit: $EFFECTIVE_DAILY_LIMIT"
+
+      - name: Prepare manual full rebuild state
+        if: env.FULL_REBUILD == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$(dirname "$KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
+          mkdir -p "$OUTPUT_DIR"
+
+          if [ -f "$KEYWORDS_FILE" ]; then
+            cp "$KEYWORDS_FILE" "$RUNNER_TEMP/original_keywords_queue.txt"
+          fi
+
+          if [ ! -s "$GENERATED_KEYWORDS_FILE" ]; then
+            echo "generated_keywords.txt is missing or empty. Refusing full rebuild."
+            exit 1
+          fi
+
+          cp "$GENERATED_KEYWORDS_FILE" "$RUNNER_TEMP/rebuild_keywords_source.txt"
+          cp "$RUNNER_TEMP/rebuild_keywords_source.txt" "$KEYWORDS_FILE"
+
+          : > "$GENERATED_SLUGS_FILE"
+          : > "$GENERATED_KEYWORDS_FILE"
+
+          find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "$PROTECTED_SLUG" -exec rm -rf {} +
+
+          echo "Prepared full rebuild."
+          echo "Preserved:"
+          echo "- $OUTPUT_DIR/$PROTECTED_SLUG/"
+          echo "- loose files already inside $OUTPUT_DIR/"
+          echo "- root files such as sitemap.xml"
 
       - name: Build SEO pages incrementally
         shell: bash
         run: |
+          set -euo pipefail
           python scripts/build_seo_incremental.py
         env:
-          DAILY_LIMIT: ${{ env.DAILY_LIMIT }}
+          DAILY_LIMIT: ${{ env.EFFECTIVE_DAILY_LIMIT }}
 
       - name: Build hub pages
         shell: bash
         run: |
+          set -euo pipefail
           python scripts/build_hubs.py
+
+      - name: Restore original keyword queue after manual full rebuild
+        if: always() && env.FULL_REBUILD == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f "$RUNNER_TEMP/original_keywords_queue.txt" ]; then
+            cp "$RUNNER_TEMP/original_keywords_queue.txt" "$KEYWORDS_FILE"
+            echo "Original keywords queue restored."
+          else
+            echo "No original keywords queue backup found."
+          fi
 
       - name: Build ROOT sitemap (authoritative)
         shell: bash
@@ -87,12 +177,12 @@ jobs:
             echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>"
             echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>"
 
-            find scam-check-now -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
+            find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
               [ -f "$dir/index.html" ] || continue
 
               slug=$(basename "$dir")
 
-              if [ "$slug" = "is-this-a-scam" ]; then
+              if [ "$slug" = "$PROTECTED_SLUG" ]; then
                 continue
               fi
 
