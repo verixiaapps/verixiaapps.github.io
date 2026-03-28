@@ -863,49 +863,6 @@ padding-left:22px;
 margin-bottom:10px;
 }
 
-.hub-link-wrap{
-margin:0 0 24px;
-}
-
-.hub-link-card{
-display:block;
-padding:18px;
-border-radius:20px;
-background:linear-gradient(180deg,#f8fbff 0%,#f3f8ff 100%);
-border:1.5px solid #c7d2fe;
-text-decoration:none;
-box-shadow:0 12px 30px rgba(79,125,243,.08);
-}
-
-.hub-link-label{
-display:block;
-font-size:13px;
-font-weight:900;
-color:#667085;
-margin-bottom:6px;
-}
-
-.hub-link-title{
-display:block;
-font-size:20px;
-font-weight:900;
-color:var(--ink-strong);
-line-height:1.25;
-letter-spacing:-.02em;
-}
-
-.hub-link-card:hover .hub-link-title{
-color:var(--blue-3);
-}
-
-.more-links-box{
-margin-top:8px;
-padding:18px;
-border-radius:20px;
-background:var(--blue-soft);
-border:1px solid var(--blue-line);
-}
-
 .related-links{
 margin:0;
 padding-left:22px;
@@ -1004,9 +961,6 @@ font-size:24px;
 .content-body{
 font-size:16px;
 }
-.hub-link-title{
-font-size:18px;
-}
 .preview-top,
 .result-top{
 align-items:flex-start;
@@ -1060,16 +1014,16 @@ font-size:14px;
 
   <div class="preview-card">
     <div class="preview-top">
-      <div class="preview-badge">🔴 HIGH RISK DETECTED</div>
+      <div class="preview-badge" id="previewBadge">🔴 HIGH RISK DETECTED</div>
       <div class="preview-score-wrap">
-        <div class="preview-score">Trust Score: 18 / 100</div>
-        <div class="preview-score-bar"><div class="preview-score-fill"></div></div>
+        <div class="preview-score" id="previewScore">Trust Score: 18 / 100</div>
+        <div class="preview-score-bar"><div class="preview-score-fill" id="previewScoreFill"></div></div>
       </div>
     </div>
-    <div class="preview-domain">amazon-gift-card-message.com</div>
-    <div class="preview-sub">Example detection result before you run your own check</div>
+    <div class="preview-domain" id="previewDomain">Amazon Gift Card Scam Message</div>
+    <div class="preview-sub" id="previewSub">Example detection result before you run your own check</div>
 
-    <div class="preview-signals">
+    <div class="preview-signals" id="previewSignals">
       <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Suspicious domain mismatch</span></div>
       <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgent language detected</span></div>
       <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Payment request via gift card</span></div>
@@ -1134,19 +1088,11 @@ font-size:14px;
 
 <section class="content-section">
   <div id="contentBridge" class="content-bridge"></div>
-
-  <div id="hubLinkWrap" class="hub-link-wrap">{{HUB_LINK}}</div>
-
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
   <h3 id="relatedHeading">Related Scam Checks</h3>
   <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
-
-  <h3 id="moreLinksHeading">Explore More Scam Checks</h3>
-  <div id="moreLinksBox" class="more-links-box">
-    <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
-  </div>
 </section>
 
 <footer class="footer">
@@ -1180,10 +1126,10 @@ window.addEventListener("load", function () {
   }
 
   setKeywordHeadings();
+  applyPreviewCard();
+  applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
-  cleanHubLink();
-  cleanMoreLinks();
 });
 
 function isBrowserSubscribed() {
@@ -1209,10 +1155,27 @@ function normalizeKeyword(str) {
 function cleanKeywordForSentence(keyword) {
   return String(keyword || "")
     .replace(/\bmessage\b/gi, "")
+    .replace(/\bmessages\b/gi, "")
     .replace(/\bemail\b/gi, "")
+    .replace(/\bemails\b/gi, "")
     .replace(/\btext\b/gi, "")
+    .replace(/\btexts\b/gi, "")
     .replace(/\blink\b/gi, "")
+    .replace(/\blinks\b/gi, "")
     .replace(/\bwebsite\b/gi, "")
+    .replace(/\bwebsites\b/gi, "")
+    .replace(/\balert\b/gi, "")
+    .replace(/\balerts\b/gi, "")
+    .replace(/\bwarning\b/gi, "")
+    .replace(/\bwarnings\b/gi, "")
+    .replace(/\bnotification\b/gi, "")
+    .replace(/\bnotifications\b/gi, "")
+    .replace(/\brequest\b/gi, "")
+    .replace(/\brequests\b/gi, "")
+    .replace(/\boffer\b/gi, "")
+    .replace(/\boffers\b/gi, "")
+    .replace(/\bscam\b/gi, "")
+    .replace(/\bscams\b/gi, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -1233,10 +1196,272 @@ function chooseBridgeIntro(baseKeyword) {
   return variants[index];
 }
 
+function containsAny(text, phrases) {
+  return phrases.some(phrase => text.includes(phrase));
+}
+
+function getScamTypeData(keywordRaw) {
+  const kw = normalizeKeyword(keywordRaw).toLowerCase();
+
+  if (containsAny(kw, ["amazon"])) {
+    return {
+      title: "Amazon Account Alert Scam",
+      sub: "Example of an Amazon scam before you run your own check",
+      score: 18,
+      signals: [
+        "Urgent account warning language",
+        "Login or verification pressure",
+        "Suspicious link or sender mismatch"
+      ],
+      prefill: "Paste the Amazon message, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["paypal"])) {
+    return {
+      title: "PayPal Invoice Scam Email",
+      sub: "Example of a PayPal scam before you run your own check",
+      score: 19,
+      signals: [
+        "Unexpected invoice or payment request",
+        "Pressure to call, click, or cancel fast",
+        "Sender or payment details do not match"
+      ],
+      prefill: "Paste the PayPal message, email, invoice, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["cash app"])) {
+    return {
+      title: "Cash App Login Scam",
+      sub: "Example of a Cash App scam before you run your own check",
+      score: 17,
+      signals: [
+        "Fake login or unusual activity warning",
+        "Pressure to verify or secure your account",
+        "Suspicious sign-in link or sender"
+      ],
+      prefill: "Paste the Cash App message, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["venmo"])) {
+    return {
+      title: "Venmo Payment Scam",
+      sub: "Example of a Venmo scam before you run your own check",
+      score: 18,
+      signals: [
+        "Unexpected payment or refund pressure",
+        "Fake buyer, payment, or support angle",
+        "Suspicious link, sender, or screenshot"
+      ],
+      prefill: "Paste the Venmo message, email, payment note, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["zelle"])) {
+    return {
+      title: "Zelle Fraud Alert Scam",
+      sub: "Example of a Zelle scam before you run your own check",
+      score: 16,
+      signals: [
+        "Fraud or transfer alert designed to panic you",
+        "Pressure to call, verify, or reverse a payment",
+        "Suspicious sender or login request"
+      ],
+      prefill: "Paste the Zelle message, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["bank", "chase", "wells fargo"])) {
+    return {
+      title: "Bank Security Alert Scam",
+      sub: "Example of a bank scam before you run your own check",
+      score: 16,
+      signals: [
+        "Fake fraud or account lock warning",
+        "Pressure to verify your account immediately",
+        "Suspicious login, code, or payment request"
+      ],
+      prefill: "Paste the bank message, email, text, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["usps", "ups", "fedex", "delivery", "package", "shipping"])) {
+    return {
+      title: "Package Delivery Scam Text",
+      sub: "Example of a delivery scam before you run your own check",
+      score: 21,
+      signals: [
+        "Fake delivery issue or redelivery warning",
+        "Pressure to click a tracking or payment link",
+        "Suspicious domain or sender mismatch"
+      ],
+      prefill: "Paste the delivery text, email, or tracking link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["job", "recruiter", "hiring", "interview", "work from home", "onboarding"])) {
+    return {
+      title: "Fake Job Offer Scam",
+      sub: "Example of a job scam before you run your own check",
+      score: 15,
+      signals: [
+        "Too-good-to-be-true job or pay promise",
+        "Pressure to move fast or pay upfront",
+        "Suspicious recruiter details or link"
+      ],
+      prefill: "Paste the job offer, recruiter message, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["crypto", "bitcoin", "binance", "coinbase", "wallet", "metamask", "trust wallet", "nft", "ethereum"])) {
+    return {
+      title: "Crypto Wallet Scam",
+      sub: "Example of a crypto scam before you run your own check",
+      score: 12,
+      signals: [
+        "Pressure to connect a wallet or send funds",
+        "Fake support, trading, recovery, or giveaway angle",
+        "Suspicious wallet, token, or site link"
+      ],
+      prefill: "Paste the crypto message, wallet link, support message, or website you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["facebook", "instagram", "discord", "telegram", "tiktok", "snapchat", "whatsapp"])) {
+    return {
+      title: "Social Account Scam Message",
+      sub: "Example of a social media scam before you run your own check",
+      score: 20,
+      signals: [
+        "Fake login, copyright, or verification warning",
+        "Pressure to click a link or give a code",
+        "Impersonation or suspicious account language"
+      ],
+      prefill: "Paste the social media message, DM, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["gift card", "apple gift card", "steam gift card", "target gift card", "walmart gift card"])) {
+    return {
+      title: "Gift Card Payment Scam",
+      sub: "Example of a gift card scam before you run your own check",
+      score: 10,
+      signals: [
+        "Request for gift card payment or codes",
+        "Urgent pressure to buy cards immediately",
+        "Impersonation or fake refund angle"
+      ],
+      prefill: "Paste the gift card message, email, or payment request you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["irs", "social security", "government", "benefit", "stimulus", "tax"])) {
+    return {
+      title: "Government Impersonation Scam",
+      sub: "Example of a government scam before you run your own check",
+      score: 13,
+      signals: [
+        "Fake government payment, tax, or benefit warning",
+        "Pressure to act immediately or share information",
+        "Suspicious payment or verification request"
+      ],
+      prefill: "Paste the government, IRS, tax, or benefits message you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["verification", "code", "2fa", "two-factor", "one-time code", "security code"])) {
+    return {
+      title: "Verification Code Scam",
+      sub: "Example of a verification code scam before you run your own check",
+      score: 14,
+      signals: [
+        "Unexpected request for a code or login approval",
+        "Pressure to reply with a security code",
+        "Possible account takeover attempt"
+      ],
+      prefill: "Paste the code request, security alert, or verification message you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["login", "password reset", "suspicious login", "unusual login", "new device", "account locked", "account suspended"])) {
+    return {
+      title: "Fake Login Alert Scam",
+      sub: "Example of a login scam before you run your own check",
+      score: 17,
+      signals: [
+        "Unexpected login or password reset warning",
+        "Pressure to verify or secure your account",
+        "Suspicious link, sender, or device claim"
+      ],
+      prefill: "Paste the login alert, password reset message, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["romance", "dating", "wrong number"])) {
+    return {
+      title: "Romance or Wrong Number Scam",
+      sub: "Example of a relationship scam before you run your own check",
+      score: 22,
+      signals: [
+        "Fast trust-building from an unknown person",
+        "Conversation shifts toward money or investment",
+        "Manipulative emotional or personal pressure"
+      ],
+      prefill: "Paste the dating, romance, or wrong-number message you received here to check if it is a scam."
+    };
+  }
+
+  if (containsAny(kw, ["website", "link", "phishing"])) {
+    return {
+      title: "Phishing Link Scam",
+      sub: "Example of a phishing scam before you run your own check",
+      score: 18,
+      signals: [
+        "Suspicious link or fake website pattern",
+        "Pressure to log in or verify information",
+        "Sender, page, or domain does not match"
+      ],
+      prefill: "Paste the suspicious message, email, or link you received here to check if it is a scam."
+    };
+  }
+
+  return {
+    title: "Suspicious Message Scam",
+    sub: "Example detection result before you run your own check",
+    score: 18,
+    signals: [
+      "Urgent or manipulative language detected",
+      "Suspicious sender, link, or request",
+      "Pressure involving money, access, or personal information"
+    ],
+    prefill: "Paste the suspicious message, email, or link you received here to check if it is a scam."
+  };
+}
+
+function applyPreviewCard() {
+  const data = getScamTypeData(RAW_KEYWORD || "");
+  const score = Math.max(5, Math.min(95, Number(data.score) || 18));
+
+  document.getElementById("previewBadge").textContent = "🔴 HIGH RISK DETECTED";
+  document.getElementById("previewScore").textContent = `Trust Score: ${score} / 100`;
+  document.getElementById("previewScoreFill").style.width = `${score}%`;
+  document.getElementById("previewDomain").textContent = data.title;
+  document.getElementById("previewSub").textContent = data.sub;
+
+  const signalsHtml = data.signals.map(signal => {
+    return `<div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>${escapeHtml(signal)}</span></div>`;
+  }).join("");
+
+  document.getElementById("previewSignals").innerHTML = signalsHtml;
+}
+
 function buildHeroTitle(keywordRaw) {
   const kw = normalizeKeyword(keywordRaw);
   const lower = kw.toLowerCase();
   const title = displayKeyword(kw);
+  const cleanTitle = displayKeyword(cleanKeywordForSentence(kw) || kw);
 
   if (!kw) {
     return "Is this a scam? Check Before You Click or Send Money";
@@ -1305,19 +1530,28 @@ function buildHeroTitle(keywordRaw) {
   }
 
   if (lower.startsWith("is ") && lower.includes(" legit")) {
-    const clean = displayKeyword(kw.replace(/\s+legit\b/i, "").trim());
+    const clean = displayKeyword(cleanKeywordForSentence(kw.replace(/\s+legit\b/i, "").trim()) || kw.replace(/\s+legit\b/i, "").trim());
     return `${clean} Legit or a Scam? Warning Signs & What To Do`;
   }
 
   if (lower.startsWith("is this ")) {
-    return `${title}? Check Warning Signs & What To Do`;
+    const subject = kw.replace(/^is this\s+/i, "").trim();
+    const cleanSubject = displayKeyword(cleanKeywordForSentence(subject) || subject);
+    return cleanSubject
+      ? `Is ${cleanSubject} a Scam? Check Before You Click or Send Money`
+      : "Is this a scam? Check Before You Click or Send Money";
   }
 
   if (lower.startsWith("is ")) {
-    return `${title}? Warning Signs & What To Do`;
+    const subject = kw.replace(/^is\s+/i, "").trim();
+    const subjectWithoutLegit = subject.replace(/\s+legit\b/i, "").trim();
+    const cleanSubject = displayKeyword(cleanKeywordForSentence(subjectWithoutLegit) || subjectWithoutLegit);
+    return cleanSubject
+      ? `Is ${cleanSubject} a Scam? Check Before You Click or Send Money`
+      : "Is this a scam? Check Before You Click or Send Money";
   }
 
-  return `Is ${title} a Scam? Check Before You Click or Send Money`;
+  return `Is ${cleanTitle} a Scam? Check Before You Click or Send Money`;
 }
 
 function buildHeroSubheading(keywordRaw) {
@@ -1421,6 +1655,67 @@ function buildContentBridge(keywordRaw) {
   return `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
 }
 
+function buildCheckerPrefill(keywordRaw) {
+  const kw = normalizeKeyword(keywordRaw);
+  const lower = kw.toLowerCase();
+
+  if (!kw) return "";
+
+  if (
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do after ") ||
+    lower.startsWith("how to recover after ") ||
+    lower.startsWith("how to secure ") ||
+    lower.startsWith("how to block ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what happens after ") ||
+    lower.startsWith("what is ") ||
+    lower.startsWith("why ") ||
+    lower.startsWith("when ") ||
+    lower.startsWith("where ") ||
+    lower.startsWith("who ") ||
+    lower.startsWith("can ") ||
+    lower.startsWith("should ") ||
+    lower.startsWith("could ") ||
+    lower.startsWith("would ") ||
+    lower.startsWith("do ") ||
+    lower.startsWith("does ") ||
+    lower.startsWith("did ") ||
+    lower.startsWith("almost ")
+  ) {
+    return "";
+  }
+
+  if (lower.startsWith("is this ")) {
+    return "Paste the actual message, email, or link you received here so we can analyze it.";
+  }
+
+  if (lower.startsWith("is ")) {
+    return "Paste the actual message, email, or link you received here so we can analyze it.";
+  }
+
+  return getScamTypeData(keywordRaw).prefill || "Paste the actual message, email, or link you received here so we can analyze it.";
+}
+
+function applyIntentToChecker() {
+  const textarea = document.getElementById("text");
+  if (!textarea) return;
+  if (textarea.value.trim()) return;
+
+  const prefill = buildCheckerPrefill(RAW_KEYWORD || "");
+  textarea.dataset.prefill = prefill || "";
+
+  if (prefill) {
+    textarea.value = prefill;
+  }
+}
+
+function isPrefillValue(value) {
+  const textarea = document.getElementById("text");
+  const prefill = (textarea && textarea.dataset && textarea.dataset.prefill) ? textarea.dataset.prefill.trim() : "";
+  return !!prefill && value.trim() === prefill;
+}
+
 function setKeywordHeadings() {
   const keywordRaw = (RAW_KEYWORD || "this message").trim();
 
@@ -1452,35 +1747,6 @@ function cleanRelatedLinks() {
   if (links.length === 0) {
     relatedLinks.style.display = "none";
     relatedHeading.style.display = "none";
-  }
-}
-
-function cleanHubLink() {
-  const hubLinkWrap = document.getElementById("hubLinkWrap");
-  if (!hubLinkWrap) return;
-
-  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
-
-  const link = hubLinkWrap.querySelector("a");
-  if (!link) {
-    hubLinkWrap.style.display = "none";
-  }
-}
-
-function cleanMoreLinks() {
-  const moreLinks = document.getElementById("moreLinks");
-  const moreLinksHeading = document.getElementById("moreLinksHeading");
-  const moreLinksBox = document.getElementById("moreLinksBox");
-  if (!moreLinks || !moreLinksHeading || !moreLinksBox) return;
-
-  moreLinks.innerHTML = moreLinks.innerHTML.replace(/\*\*/g, "").trim();
-
-  const links = moreLinks.querySelectorAll("li a");
-
-  if (links.length === 0) {
-    moreLinks.style.display = "none";
-    moreLinksHeading.style.display = "none";
-    moreLinksBox.style.display = "none";
   }
 }
 
@@ -1639,6 +1905,20 @@ async function check() {
           <div class="result-chip">Awaiting Input</div>
         </div>
         <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to analyze scam risk.</div>
+      </div>
+    `;
+    result.style.display = "block";
+    return;
+  }
+
+  if (isPrefillValue(text)) {
+    result.innerHTML = `
+      <div class="result-card unknown">
+        <div class="result-top">
+          <div class="risk unknown">⚪ Paste The Actual Message</div>
+          <div class="result-chip">Input Needed</div>
+        </div>
+        <div class="result-summary">Paste the actual message, email, or link you received so we can analyze it.</div>
       </div>
     `;
     result.style.display = "block";
