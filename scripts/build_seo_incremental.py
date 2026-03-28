@@ -15,6 +15,7 @@ from data.cluster_map import CLUSTERS
 KEYWORD_FILE = os.path.join(BASE_DIR, "data", "keywords.txt")
 GENERATED_SLUGS_FILE = os.path.join(BASE_DIR, "data", "generated_slugs.txt")
 GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "generated_keywords.txt")
+REJECTED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "rejected_keywords.txt")
 TEMPLATE_FILE = os.path.join(BASE_DIR, "templates", "seo-template.html")
 OUTPUT_DIR = os.path.join(BASE_DIR, "scam-check-now")
 SITE = "https://verixiaapps.com"
@@ -180,6 +181,21 @@ def ensure_file(filepath):
             pass
 
 
+def append_line_if_missing(filepath, value):
+    value = str(value).strip()
+    if not value:
+        return
+
+    existing = set()
+    if os.path.exists(filepath):
+        with open(filepath, encoding="utf-8") as f:
+            existing = {line.strip() for line in f if line.strip()}
+
+    if value not in existing:
+        with open(filepath, "a", encoding="utf-8") as f:
+            f.write(value + "\n")
+
+
 def is_guidance_style_keyword(keyword):
     kw = normalize_keyword(keyword)
     return (
@@ -204,12 +220,10 @@ def is_usable_ai_text(text):
     if not text:
         return False
 
-    lowered = str(text).lower().strip()
+    raw = str(text).strip()
+    lowered = raw.lower()
 
-    if len(lowered) < 220:
-        return False
-
-    if "<p>" not in lowered and "\n" not in lowered:
+    if len(raw) < 350:
         return False
 
     weak_markers = {
@@ -217,8 +231,71 @@ def is_usable_ai_text(text):
         "as an ai",
         "here are some paragraphs",
         "let me know if you want",
+        "i can't help with that",
+        "i cannot help with that",
+        "i’m sorry",
+        "i am sorry",
+        "cannot assist",
+        "can't assist",
+        "policy",
+        "content policy",
     }
-    return not any(marker in lowered for marker in weak_markers)
+    if any(marker in lowered for marker in weak_markers):
+        return False
+
+    paragraph_like = (
+        "<p>" in lowered
+        or "</p>" in lowered
+        or "\n\n" in raw
+        or raw.count("\n") >= 3
+    )
+    if not paragraph_like:
+        return False
+
+    return True
+
+
+def generate_ai_text(keyword, keyword_display):
+    attempts = []
+    raw_keyword = normalize_keyword(keyword)
+    clean_keyword = normalize_keyword(keyword_display)
+
+    if raw_keyword:
+        attempts.append(raw_keyword)
+
+    if clean_keyword and clean_keyword != raw_keyword:
+        attempts.append(clean_keyword)
+
+    readable = readable_keyword(keyword)
+    if readable:
+        attempts.append(readable)
+
+    if clean_keyword and not clean_keyword.startswith("is "):
+        attempts.append(f"is {clean_keyword} a scam")
+
+    if clean_keyword and "legit" not in clean_keyword and "scam" not in clean_keyword:
+        attempts.append(f"{clean_keyword} legit or scam")
+
+    seen = set()
+    ordered_attempts = []
+    for item in attempts:
+        item_norm = normalize_keyword(item)
+        if item_norm and item_norm not in seen:
+            seen.add(item_norm)
+            ordered_attempts.append(item)
+
+    last_error = None
+
+    for attempt in ordered_attempts:
+        try:
+            ai_text = generate_content(attempt)
+            if is_usable_ai_text(ai_text):
+                return ai_text
+            last_error = f"thin or malformed output for prompt: {attempt}"
+        except Exception as e:
+            last_error = str(e)
+
+    raise ValueError(last_error or "AI generation failed")
 
 
 # -----------------------------
@@ -320,21 +397,6 @@ def load_generated_keywords():
         return set()
     with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
         return {normalize_keyword(line) for line in f if line.strip()}
-
-
-def append_line_if_missing(filepath, value):
-    value = value.strip()
-    if not value:
-        return
-
-    existing = set()
-    if os.path.exists(filepath):
-        with open(filepath, encoding="utf-8") as f:
-            existing = {line.strip() for line in f if line.strip()}
-
-    if value not in existing:
-        with open(filepath, "a", encoding="utf-8") as f:
-            f.write(value + "\n")
 
 
 # -----------------------------
@@ -458,6 +520,7 @@ def build_links_html(pages_list):
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 ensure_file(GENERATED_SLUGS_FILE)
 ensure_file(GENERATED_KEYWORDS_FILE)
+ensure_file(REJECTED_KEYWORDS_FILE)
 
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
@@ -521,6 +584,7 @@ print(f"Daily limit: {DAILY_LIMIT}")
 # -----------------------------
 generated_count = 0
 skipped_existing_count = 0
+fallback_count = 0
 built_keywords = []
 
 for page in queue_pages:
@@ -552,10 +616,10 @@ for page in queue_pages:
     canonical = build_canonical(slug)
 
     try:
-        ai_text = generate_content(keyword_display)
-        if not is_usable_ai_text(ai_text):
-            raise ValueError("Generated content was too thin or malformed")
+        ai_text = generate_ai_text(keyword, keyword_display)
     except Exception as e:
+        fallback_count += 1
+        append_line_if_missing(REJECTED_KEYWORDS_FILE, f"{keyword} | {str(e)}")
         print("AI generation fallback for", keyword, ":", e)
         ai_text = fallback_ai_text(keyword)
 
@@ -606,6 +670,7 @@ with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
 
 print(
     f"Done. Generated {generated_count} new pages. "
-    f"Skipped {skipped_existing_count} existing pages."
+    f"Skipped {skipped_existing_count} existing pages. "
+    f"Fallback used {fallback_count} times."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
