@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Scam Check Now | Check Suspicious Messages Before You Click, Reply, or Send Money</title>
-
-<meta name="description" content="Think this is a scam? Paste a suspicious message, email, website, job offer, or link before you click, reply, or send money. Scam attempts keep coming, so check each one before you act.">
+<title>Scam Check Now | Check Suspicious Messages, Emails, Links, and Job Offers</title>
+<meta name="description" content="Think this might be a scam? Paste a suspicious message, email, website, link, or job offer before you click, reply, send money, or share information.">
 <meta name="robots" content="index,follow">
+<link rel="canonical" href="https://verixiaapps.com/check/">
+
+<meta property="og:title" content="Scam Check Now | Check Suspicious Messages, Emails, Links, and Job Offers">
+<meta property="og:description" content="Paste a suspicious message, email, website, link, or job offer before you click, reply, send money, or share information.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://verixiaapps.com/check/">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
 <script>
@@ -28,40 +32,37 @@ function isBrowserSubscribed(){
 }
 
 window.addEventListener("load", function(){
-
   const params = new URLSearchParams(window.location.search);
+  const postPurchase = document.getElementById("postPurchase");
 
-  if(
+  if (
     params.get("conversion") === "1" &&
     !sessionStorage.getItem("ads_conversion")
   ){
-    gtag('event','conversion',{
-      'send_to':'AW-17956428385/dE43CO04_IUcEOGopfJC',
-      'value':10.0,
-      'currency':'USD'
+    gtag('event', 'conversion', {
+      send_to: 'AW-17956428385/dE43CO04_IUcEOGopfJC',
+      value: 10.0,
+      currency: 'USD'
     });
-
-    sessionStorage.setItem("ads_conversion","1");
+    sessionStorage.setItem("ads_conversion", "1");
   }
 
-  if(params.get("subscribed") === "true"){
-    localStorage.setItem(BROWSER_SUB_KEY,"true");
-    document.getElementById("postPurchase").style.display = "block";
+  if (params.get("subscribed") === "true") {
+    localStorage.setItem(BROWSER_SUB_KEY, "true");
+    if (postPurchase) postPurchase.style.display = "block";
   }
 
-  if(isBrowserSubscribed()){
-    document.getElementById("postPurchase").style.display = "block";
+  if (isBrowserSubscribed() && postPurchase) {
+    postPurchase.style.display = "block";
   }
 
-  if(params.get("conversion") === "1" || params.get("subscribed") === "true"){
+  if (params.get("conversion") === "1" || params.get("subscribed") === "true") {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
-
 });
 </script>
 
 <style>
-
 :root{
 --bg-top:#eef4ff;
 --bg-bottom:#ffffff;
@@ -69,29 +70,23 @@ window.addEventListener("load", function(){
 --ink:#1f2937;
 --ink-strong:#0f172a;
 --muted:#667085;
---muted-2:#94a3b8;
 --line:#e2e8f0;
 --line-soft:#edf2f7;
 
 --blue:#2563eb;
 --blue-2:#4f7df3;
---blue-3:#1d4ed8;
 --blue-soft:#eff6ff;
 --blue-line:#bfdbfe;
 --navy:#1e293b;
 
 --red:#dc2626;
 --red-dark:#991b1b;
---red-soft:#fef2f2;
---red-soft-2:#fff7f7;
 --red-line:#fecaca;
 
 --amber:#b45309;
---amber-soft:#fffbeb;
 --amber-line:#fde68a;
 
 --green:#15803d;
---green-soft:#f0fdf4;
 --green-line:#bbf7d0;
 
 --shadow-hero:0 26px 70px rgba(37,99,235,.08);
@@ -101,13 +96,8 @@ window.addEventListener("load", function(){
 --shadow-sm:0 8px 20px rgba(15,23,42,.05);
 }
 
-*{
-box-sizing:border-box;
-}
-
-html{
--webkit-text-size-adjust:100%;
-}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
 
 body{
 font-family:system-ui,-apple-system,Arial,sans-serif;
@@ -145,7 +135,6 @@ font-weight:900;
 color:#334155;
 margin-left:8px;
 letter-spacing:-.01em;
-opacity:.97;
 padding:10px 14px;
 border-radius:999px;
 background:rgba(255,255,255,.84);
@@ -274,8 +263,8 @@ display:flex;
 justify-content:center;
 align-items:center;
 gap:8px;
-margin-bottom:12px;
-font-size:13px;
+margin-bottom:10px;
+font-size:12px;
 font-weight:900;
 color:#667085;
 letter-spacing:.01em;
@@ -284,12 +273,12 @@ text-align:center;
 
 .preview-card{
 position:relative;
-margin-bottom:18px;
-padding:20px;
+margin-bottom:14px;
+padding:14px 14px 12px;
 border-radius:24px;
 background:linear-gradient(180deg,#fffafa 0%,#ffffff 100%);
 border:2px solid #f8d6dc;
-box-shadow:0 18px 42px rgba(220,38,38,.08);
+box-shadow:0 14px 32px rgba(220,38,38,.08);
 overflow:hidden;
 }
 
@@ -310,47 +299,50 @@ z-index:1;
 
 .preview-top{
 display:flex;
-align-items:flex-start;
+align-items:center;
 justify-content:space-between;
-gap:12px;
+gap:10px;
 flex-wrap:wrap;
 }
 
 .preview-badge{
 display:inline-flex;
 align-items:center;
-gap:9px;
-padding:11px 16px;
+gap:8px;
+padding:8px 14px;
 border-radius:999px;
 background:var(--red);
 color:#fff;
-font-size:12px;
+font-size:11px;
 font-weight:900;
 letter-spacing:.03em;
-box-shadow:0 12px 24px rgba(220,38,38,.22);
+box-shadow:0 10px 20px rgba(220,38,38,.18);
+line-height:1;
 }
 
 .preview-score-wrap{
 display:flex;
 flex-direction:column;
-gap:8px;
-min-width:170px;
+gap:6px;
+min-width:146px;
+flex:0 0 auto;
 }
 
 .preview-score{
-padding:10px 12px;
+padding:8px 10px;
 border-radius:999px;
 background:#fff;
 border:1px solid var(--red-line);
-font-size:12px;
+font-size:11px;
 font-weight:900;
 color:var(--red-dark);
 box-shadow:var(--shadow-sm);
 text-align:center;
+line-height:1.1;
 }
 
 .preview-score-bar{
-height:10px;
+height:8px;
 border-radius:999px;
 background:#fee2e2;
 overflow:hidden;
@@ -362,53 +354,55 @@ height:100%;
 width:18%;
 background:linear-gradient(90deg,#ef4444 0%,#dc2626 60%,#991b1b 100%);
 border-radius:999px;
-box-shadow:0 0 12px rgba(220,38,38,.28);
+box-shadow:0 0 12px rgba(220,38,38,.24);
 }
 
 .preview-domain{
-margin-top:14px;
-font-size:21px;
+margin-top:10px;
+font-size:18px;
 font-weight:900;
-line-height:1.1;
+line-height:1.06;
 color:var(--ink-strong);
 letter-spacing:-.03em;
 word-break:break-word;
 }
 
 .preview-sub{
-margin-top:5px;
-font-size:13px;
+margin-top:4px;
+font-size:12px;
 color:#667085;
 font-weight:800;
+line-height:1.35;
 }
 
 .preview-signals{
-margin-top:14px;
+margin-top:10px;
 display:grid;
-gap:9px;
+gap:7px;
 }
 
 .preview-signal{
 display:flex;
 align-items:center;
-gap:10px;
-padding:13px 14px;
-border-radius:16px;
+gap:8px;
+padding:9px 11px;
+border-radius:14px;
 background:#fff;
 border:1px solid #f3c5cf;
-font-size:14px;
+font-size:12px;
 font-weight:900;
 color:#7f1d1d;
+line-height:1.25;
 }
 
 .preview-signal-icon{
-width:20px;
-height:20px;
+width:16px;
+height:16px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:15px;
-flex:0 0 20px;
+font-size:12px;
+flex:0 0 16px;
 line-height:1;
 }
 
@@ -824,32 +818,18 @@ text-decoration:underline;
 }
 
 @media (max-width:640px){
-body{
-padding-top:88px;
-}
-.hero{
-padding:16px 16px 18px;
-}
-.hero h1{
-font-size:32px;
-}
-.hero p{
-margin-top:10px;
-font-size:17px;
-}
-.hero-trust{
-margin-top:10px;
-font-size:14px;
-}
+body{padding-top:88px;}
+.hero{padding:16px 16px 18px;}
+.hero h1{font-size:32px;}
+.hero p{margin-top:10px;font-size:17px;}
+.hero-trust{margin-top:10px;font-size:14px;}
 .container{
 margin-left:12px;
 margin-right:12px;
 padding:18px;
 border-radius:24px;
 }
-.top-bar{
-padding:10px 10px;
-}
+.top-bar{padding:10px 10px;}
 .logo{
 font-size:13px;
 margin-left:2px;
@@ -860,356 +840,397 @@ font-size:13px;
 padding:8px 10px;
 margin-right:0;
 }
-.upgrade h3{
-font-size:24px;
+.upgrade h3{font-size:24px;}
+
+.system-badge{
+margin-bottom:8px;
+font-size:11px;
 }
+
+.preview-card{
+padding:12px 12px 10px;
+margin-bottom:12px;
+border-radius:20px;
+}
+
 .preview-top,
 .result-top{
 align-items:flex-start;
+gap:8px;
 }
+
+.preview-badge{
+font-size:10px;
+padding:8px 12px;
+gap:6px;
+}
+
+.preview-score-wrap{
+min-width:128px;
+gap:5px;
+}
+
+.preview-score{
+font-size:10px;
+padding:7px 9px;
+}
+
+.preview-score-bar{
+height:7px;
+}
+
 .preview-domain{
-font-size:18px;
+margin-top:8px;
+font-size:15px;
+line-height:1.08;
 }
-.preview-badge,
-.preview-score,
-.result-chip{
-font-size:12px;
+
+.preview-sub{
+margin-top:3px;
+font-size:11px;
+line-height:1.3;
 }
+
+.preview-signals{
+margin-top:8px;
+gap:6px;
+}
+
+.preview-signal{
+padding:8px 10px;
+font-size:11px;
+gap:7px;
+border-radius:12px;
+}
+
+.preview-signal-icon{
+width:14px;
+height:14px;
+font-size:11px;
+flex:0 0 14px;
+}
+
+.result-chip{font-size:12px;}
 .risk{
 font-size:19px;
 padding:10px 14px;
 }
-.result-summary{
-font-size:15px;
-}
+.result-summary{font-size:15px;}
 .signal-item{
 font-size:14px;
 align-items:flex-start;
 }
 }
 </style>
-
 </head>
 
 <body>
 
 <div class="top-bar">
   <div class="logo"><span class="logo-dot"></span><span>Scam Check Now</span></div>
-  <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+  <button type="button" class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
 </div>
 
 <div class="page-shell">
 
-<div class="hero">
-<h1>Think this is a scam? Check this one before you lose money</h1>
-<p>Paste a suspicious message, email, or link before you click, reply, or send money. Scam attempts keep coming, so it helps to check each one before you act.</p>
-<div class="hero-trust">⚠️ Scam messages keep changing — one quick check now can help protect you from the next one too</div>
-</div>
+  <div class="hero">
+    <h1>Think this might be a scam? Check it before you click, reply, or send money</h1>
+    <p>Paste a suspicious message, email, website, link, or job offer and get a quick risk review before you take action.</p>
+    <div class="hero-trust">⚠️ Scam messages keep changing — checking this one now can help you handle the next one faster too</div>
+  </div>
 
-<div class="container">
+  <div class="container">
 
-<div class="system-badge">🛡️ AI Scam Detection Result (Example)</div>
+    <div class="system-badge">🛡️ AI Scam Detection Result (Example)</div>
 
-<div class="preview-card">
-  <div class="preview-top">
-    <div class="preview-badge">🔴 HIGH RISK DETECTED</div>
-    <div class="preview-score-wrap">
-      <div class="preview-score">Trust Score: 18 / 100</div>
-      <div class="preview-score-bar"><div class="preview-score-fill"></div></div>
+    <div class="preview-card">
+      <div class="preview-top">
+        <div class="preview-badge">🔴 HIGH RISK DETECTED</div>
+        <div class="preview-score-wrap">
+          <div class="preview-score">Trust Score: 18 / 100</div>
+          <div class="preview-score-bar"><div class="preview-score-fill"></div></div>
+        </div>
+      </div>
+      <div class="preview-domain">amazon-gift-card-message.com</div>
+      <div class="preview-sub">Example detection result before you run your own check</div>
+
+      <div class="preview-signals">
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Suspicious domain mismatch</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgent language detected</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Payment request via gift card</span></div>
+      </div>
     </div>
+
+    <textarea id="text" placeholder="Paste a suspicious message, email, website, link, job offer, or investment pitch here..."></textarea>
+
+    <div class="input-help">Examples: job offer, PayPal message, crypto message, delivery text, account warning, suspicious link</div>
+
+    <button class="check" onclick="check()">🔍 Check Scam Risk</button>
+
+    <div class="note">No signup required • 1 free check • Takes seconds</div>
+
+    <input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited scam checks">
+
+    <div class="note">Use the same email you entered during checkout</div>
+
+    <div id="postPurchase" class="success">
+      ✅ Payment successful — unlimited scam checks are active on this browser
+    </div>
+
+    <div class="note">Get a clear risk level, key warning signs, and what to do next</div>
+
+    <div class="app-link-card">
+      <h4>📱 Keep it on your phone</h4>
+      <p>Suspicious messages do not stop at one. Check them anytime with the app.</p>
+      <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
+    </div>
+
+    <div id="result"></div>
+
+    <div class="upgrade" id="upgrade">
+      <h3>⚠️ Scam attempts rarely stop at one message</h3>
+
+      <div class="upgrade-copy">
+        Fake jobs, phishing emails, payment requests, impersonation attempts, fake support, and risky links keep showing up. Unlimited access helps you check the next suspicious message before you click, reply, send money, or connect anything.
+      </div>
+
+      <div style="margin-top:10px;font-size:13px;color:#6b7280;">
+        Stay protected when the next suspicious message, link, or request shows up
+      </div>
+
+      <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
+        Unlimited scam checks • Cancel anytime
+      </div>
+
+      <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Start Ongoing Protection — Weekly</button>
+      <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Stay Protected — Monthly</button>
+      <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Best Value — Yearly</button>
+
+      <div style="margin-top:14px;font-size:13px;color:#6b7280;">
+        Secure payments powered by Stripe
+      </div>
+
+      <div class="subscriber-link">
+        <button type="button" onclick="focusEmail()">Already subscribed? Enter your email to unlock</button>
+      </div>
+    </div>
+
   </div>
-  <div class="preview-domain">amazon-gift-card-message.com</div>
-  <div class="preview-sub">Example detection result before you run your own check</div>
 
-  <div class="preview-signals">
-    <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Suspicious domain mismatch</span></div>
-    <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgent language detected</span></div>
-    <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Payment request via gift card</span></div>
-  </div>
-</div>
-
-<textarea id="text" placeholder="Paste a suspicious message, email, website, job offer, or investment pitch here..."></textarea>
-
-<div class="input-help">Examples: job offer, PayPal message, crypto presale, email, delivery text, account warning</div>
-
-<button class="check" onclick="check()">🔍 Check Message Now</button>
-
-<div class="note">No signup required • 1 free check • Takes seconds</div>
-
-<input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited scam checks">
-
-<div class="note">Use the same email you entered during checkout</div>
-
-<div id="postPurchase" class="success">
-✅ Payment successful — unlimited scam checks are active on this browser
-</div>
-
-<div class="note">Check this message now so you are ready for the next one too</div>
-
-<div class="app-link-card">
-  <h4>📱 Keep it on your phone</h4>
-  <p>Suspicious messages do not stop at one. Check them anytime with the app.</p>
-  <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
-</div>
-
-<div id="result"></div>
-
-<div class="upgrade" id="upgrade">
-
-<h3>⚠️ Scam attempts rarely stop at one message</h3>
-
-<div class="upgrade-copy">
-Fake jobs, phishing emails, payment requests, impersonation attempts, fake support, and risky links keep showing up. Unlimited access helps you check the next suspicious message before you click, reply, send money, or connect anything.
-</div>
-
-<div style="margin-top:10px;font-size:13px;color:#6b7280;">
-Stay protected when the next suspicious message, link, or request shows up
-</div>
-
-<div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
-Unlimited scam checks • Cancel anytime
-</div>
-
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Start Ongoing Protection — Weekly</button>
-<button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Stay Protected — Monthly</button>
-<button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Best Value — Yearly</button>
-
-<div style="margin-top:14px;font-size:13px;color:#6b7280;">
-Secure payments powered by Stripe
-</div>
-
-<div class="subscriber-link"><button onclick="focusEmail()">Already subscribed? Enter your email to unlock</button></div>
+  <footer class="footer">
+    <div>
+      By using this website you agree to our
+      <a href="/website-policies/scam-check/">Terms, Privacy Policy, and User Agreement</a>.
+    </div>
+    <div style="margin-top:10px">
+      Scam Check Now © 2026 • Message and link review tool • Not legal or financial advice
+    </div>
+    <div style="margin-top:8px">Secure payments powered by Stripe • No stored messages</div>
+  </footer>
 
 </div>
-
-</div>
-
-</div>
-
-<footer class="footer">
-<div>
-By using this website you agree to our
-<a href="/website-policies/scam-check/">Terms, Privacy Policy, and User Agreement</a>.
-</div>
-<div style="margin-top:10px">
-Scam Check Now © 2026 • Message and link review tool • Not legal or financial advice
-</div>
-<div style="margin-top:8px">Secure payments powered by Stripe • No stored messages</div>
-</footer>
 
 <script>
-
-const API="https://awake-integrity-production-faa0.up.railway.app";
-fetch("https://api.countapi.xyz/hit/scamchecknow/mainpage");
+const API = "https://awake-integrity-production-faa0.up.railway.app";
 
 function escapeHtml(str){
-return String(str)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#39;");
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
 }
 
 function focusEmail(){
-const emailInput=document.getElementById("email");
-emailInput.scrollIntoView({behavior:"smooth",block:"center"});
-setTimeout(()=>emailInput.focus(),150);
+  const emailInput = document.getElementById("email");
+  emailInput.scrollIntoView({behavior:"smooth", block:"center"});
+  setTimeout(() => emailInput.focus(), 150);
 }
 
 function showUpgrade(){
-const el=document.getElementById("upgrade");
-el.style.display="block";
-setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),100);
+  const el = document.getElementById("upgrade");
+  el.style.display = "block";
+  setTimeout(() => el.scrollIntoView({behavior:"smooth", block:"start"}), 100);
 }
 
 function parseSections(text){
-const lines=text
-.split(/\n|\./)
-.map(l=>l.trim())
-.filter(l=>l.length>20);
-return lines.slice(0,5);
+  return String(text || "")
+    .split(/\n|\./)
+    .map(l => l.trim())
+    .filter(l => l.length > 20)
+    .slice(0, 5);
 }
 
 function cardClassForRisk(risk){
-if(risk === "high") return "high";
-if(risk === "medium") return "medium";
-if(risk === "low") return "low";
-return "unknown";
+  if (risk === "high") return "high";
+  if (risk === "medium") return "medium";
+  if (risk === "low") return "low";
+  return "unknown";
 }
 
 function iconForRisk(risk){
-if(risk === "high") return "🔴";
-if(risk === "medium") return "🟠";
-if(risk === "low") return "🟢";
-return "⚪";
+  if (risk === "high") return "🔴";
+  if (risk === "medium") return "🟠";
+  if (risk === "low") return "🟢";
+  return "⚪";
 }
 
 function signalIconForRisk(risk){
-if(risk === "high") return "⚠️";
-if(risk === "medium") return "⚠️";
-if(risk === "low") return "✔️";
-return "•";
+  if (risk === "high") return "⚠️";
+  if (risk === "medium") return "⚠️";
+  if (risk === "low") return "✔️";
+  return "•";
 }
 
 function formatResult(text){
+  const lower = String(text || "").toLowerCase();
 
-const lower=text.toLowerCase();
+  let risk = "unknown";
+  if (lower.includes("high")) risk = "high";
+  else if (lower.includes("medium")) risk = "medium";
+  else if (lower.includes("low")) risk = "low";
 
-let risk="unknown";
-if(lower.includes("high")) risk="high";
-else if(lower.includes("medium")) risk="medium";
-else if(lower.includes("low")) risk="low";
+  const safeRisk = cardClassForRisk(risk);
+  const signalIcon = signalIconForRisk(safeRisk);
 
-const safeRisk = cardClassForRisk(risk);
-const signalIcon = signalIconForRisk(safeRisk);
+  const bullets = parseSections(text)
+    .map(l => `<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>${escapeHtml(l)}</span></li>`)
+    .join("");
 
-const bullets=parseSections(text)
-.slice(0,5)
-.map(l=>`<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>${escapeHtml(l)}</span></li>`)
-.join("");
+  const summaryByRisk = {
+    high: "This message shows multiple scam signals. Do not click links, reply, send money, or connect anything until you verify it directly.",
+    medium: "This message shows warning signs. Be cautious and verify the sender, offer, or website before taking action.",
+    low: "This message shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information.",
+    unknown: "We could not determine a clear risk level. Treat the message cautiously and verify through official sources."
+  };
 
-const summaryByRisk={
-high:"This message shows multiple scam signals. Do not click links, reply, send money, or connect anything until you verify it directly.",
-medium:"This message shows warning signs. Be cautious and verify the sender, offer, or website before taking action.",
-low:"This message shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information.",
-unknown:"We could not determine a clear risk level. Treat the message cautiously and verify through official sources."
-};
+  const paylineByRisk = {
+    high: "Scam attempts often come in waves. If another message like this shows up tomorrow, guessing wrong could cost you.",
+    medium: "Suspicious messages often do not stop at one. Check the next one before you click, reply, or pay.",
+    low: "Even lower-risk messages can become expensive when new links, payments, or logins are involved later.",
+    unknown: "When the risk is unclear, the safest step is to verify this one and the next one before you act."
+  };
 
-const paylineByRisk={
-high:"Scam attempts often come in waves. If another message like this shows up tomorrow, guessing wrong could cost you.",
-medium:"Suspicious messages often do not stop at one. Check the next one before you click, reply, or pay.",
-low:"Even lower-risk messages can become expensive when new links, payments, or logins are involved later.",
-unknown:"When the risk is unclear, the safest step is to verify this one and the next one before you act."
-};
+  const chipByRisk = {
+    high: "Pattern Match: Strong",
+    medium: "Pattern Match: Moderate",
+    low: "Pattern Match: Lower Risk",
+    unknown: "Pattern Match: Review Needed"
+  };
 
-const chipByRisk={
-high:"Pattern Match: Strong",
-medium:"Pattern Match: Moderate",
-low:"Pattern Match: Lower Risk",
-unknown:"Pattern Match: Review Needed"
-};
+  return `
+  <div class="result-card ${safeRisk}">
+    <div class="result-top">
+      <div class="risk ${safeRisk}">${iconForRisk(safeRisk)} ${risk === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + risk.toUpperCase()}</div>
+      <div class="result-chip">${chipByRisk[safeRisk]}</div>
+    </div>
 
-return `
-<div class="result-card ${safeRisk}">
-  <div class="result-top">
-    <div class="risk ${safeRisk}">${iconForRisk(safeRisk)} ${risk === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + risk.toUpperCase()}</div>
-    <div class="result-chip">${chipByRisk[safeRisk]}</div>
+    <div class="result-summary">${summaryByRisk[safeRisk]}</div>
+
+    <div class="section">
+      <div class="section-title">Detected Signals</div>
+      <ul class="signal-list">
+        ${bullets || `<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>Review the sender, links, and any requests for money, urgency, or personal information.</span></li>`}
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recommended Actions</div>
+      <div class="action-box">Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action.</div>
+    </div>
+
+    <div class="result-payline">${paylineByRisk[safeRisk]}</div>
   </div>
-
-  <div class="result-summary">${summaryByRisk[safeRisk]}</div>
-
-  <div class="section">
-    <div class="section-title">Detected Signals</div>
-    <ul class="signal-list">${bullets || `<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>Review the sender, links, and any requests for money, urgency, or personal information.</span></li>`}</ul>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Recommended Actions</div>
-    <div class="action-box">Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action.</div>
-  </div>
-
-  <div class="result-payline">${paylineByRisk[safeRisk]}</div>
-</div>
-`;
-}
-
-function isBrowserSubscribed(){
-return localStorage.getItem("scam_check_browser_subscribed")==="true";
+  `;
 }
 
 async function check(){
+  const text = document.getElementById("text").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
+  const result = document.getElementById("result");
 
-const text=document.getElementById("text").value.trim();
-const email=document.getElementById("email").value.trim().toLowerCase();
-const subscribed=isBrowserSubscribed();
-const result=document.getElementById("result");
+  if (!text) {
+    result.innerHTML = `
+    <div class="result-card unknown">
+      <div class="result-top">
+        <div class="risk unknown">⚪ Paste Something To Review</div>
+        <div class="result-chip">Awaiting Input</div>
+      </div>
+      <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to review potential scam signals.</div>
+    </div>`;
+    result.style.display = "block";
+    return;
+  }
 
-if(!text){
-result.innerHTML=`
-<div class="result-card unknown">
-  <div class="result-top">
-    <div class="risk unknown">⚪ Paste Something To Review</div>
-    <div class="result-chip">Awaiting Input</div>
-  </div>
-  <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to review potential scam signals.</div>
-</div>`;
-result.style.display="block";
-return;
-}
+  result.style.display = "block";
+  result.innerHTML = `
+  <div class="result-card unknown">
+    <div class="result-top">
+      <div class="risk unknown">⚪ Analyzing...</div>
+      <div class="result-chip">Scan In Progress</div>
+    </div>
+    <div class="result-summary">Reviewing for common scam signals, risky patterns, impersonation, suspicious links, and payment requests.</div>
+  </div>`;
 
-result.style.display="block";
-result.innerHTML=`
-<div class="result-card unknown">
-  <div class="result-top">
-    <div class="risk unknown">⚪ Analyzing...</div>
-    <div class="result-chip">Scan In Progress</div>
-  </div>
-  <div class="result-summary">Reviewing for common scam signals, risky patterns, impersonation, suspicious links, and payment requests.</div>
-</div>`;
+  try {
+    const response = await fetch(API + "/analyze", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ text, email, subscribed })
+    });
 
-try{
+    const data = await response.json();
 
-const response=await fetch(API+"/analyze",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({text,email,subscribed})
-});
+    if (data.limit) {
+      result.innerHTML = `
+      <div class="result-card medium">
+        <div class="result-top">
+          <div class="risk medium">🟠 Free Check Used</div>
+          <div class="result-chip">Upgrade Available</div>
+        </div>
+        <div class="result-summary">Unlock unlimited scam checks so you can review the next suspicious message, link, or offer the moment it shows up.</div>
+      </div>`;
+      showUpgrade();
+      return;
+    }
 
-const data=await response.json();
-
-if(data.limit){
-result.innerHTML=`
-<div class="result-card medium">
-  <div class="result-top">
-    <div class="risk medium">🟠 Free Check Used</div>
-    <div class="result-chip">Upgrade Available</div>
-  </div>
-  <div class="result-summary">Unlock unlimited scam checks so you can review the next suspicious message, link, or offer the moment it shows up.</div>
-</div>`;
-showUpgrade();
-return;
-}
-
-result.innerHTML=formatResult(data.result || "");
-showUpgrade();
-
-}catch(e){
-result.innerHTML=`
-<div class="result-card unknown">
-  <div class="result-top">
-    <div class="risk unknown">⚪ Unable To Analyze</div>
-    <div class="result-chip">Try Again</div>
-  </div>
-  <div class="result-summary">We could not analyze this right now. Please try again in a moment.</div>
-</div>`;
-}
-
+    result.innerHTML = formatResult(data.result || "");
+    showUpgrade();
+  } catch (e) {
+    result.innerHTML = `
+    <div class="result-card unknown">
+      <div class="result-top">
+        <div class="risk unknown">⚪ Unable To Analyze</div>
+        <div class="result-chip">Try Again</div>
+      </div>
+      <div class="result-summary">We could not analyze this right now. Please try again in a moment.</div>
+    </div>`;
+  }
 }
 
 async function checkout(priceId){
+  const pageUrl = window.location.origin + window.location.pathname;
 
-const pageUrl=window.location.origin+window.location.pathname;
+  const response = await fetch(API + "/create-checkout", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      priceId,
+      email: null,
+      successUrl: pageUrl + "?subscribed=true&conversion=1",
+      cancelUrl: pageUrl
+    })
+  });
 
-const response=await fetch(API+"/create-checkout",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-priceId,
-email:null,
-successUrl:pageUrl+"?subscribed=true&conversion=1",
-cancelUrl:pageUrl
-})
-});
+  const data = await response.json();
 
-const data=await response.json();
-
-if(data.url){
-window.location=data.url;
-}else{
-alert("Checkout failed. Please try again.");
-}
-
+  if (data.url) {
+    window.location = data.url;
+  } else {
+    alert("Checkout failed. Please try again.");
+  }
 }
 </script>
 
