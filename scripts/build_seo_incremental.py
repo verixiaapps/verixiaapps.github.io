@@ -87,19 +87,6 @@ SMALL_WORDS = {
     "or", "the", "to", "vs", "with"
 }
 
-SIMILARITY_STOPWORDS = {
-    "is", "this", "a", "an", "the", "and", "or", "to", "for", "of", "in", "on", "with", "from",
-    "scam", "scams", "legit", "real", "safe", "warning", "warnings", "risk", "risks", "sign", "signs",
-    "message", "messages", "email", "emails", "text", "texts", "link", "links", "offer", "offers",
-    "alert", "alerts", "check", "review", "suspicious", "common", "updated", "full"
-}
-
-GENERIC_BASE_TERMS = {
-    "amazon", "paypal", "zelle", "venmo", "crypto", "bank", "job", "loan", "credit", "romance",
-    "gift", "phishing", "verification", "login", "payment", "refund", "delivery", "support",
-    "caller", "number", "message", "email", "text", "link", "account", "alert"
-}
-
 
 # -----------------------------
 # UTILITIES
@@ -213,22 +200,6 @@ def is_question_style_keyword(keyword):
     return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
 
 
-def keyword_intent_type(keyword):
-    raw = normalize_keyword(keyword)
-
-    if raw.startswith("did i get scammed"):
-        return "post_event"
-    if raw.startswith("what to do") or raw.startswith("how to ") or raw.startswith("what happens"):
-        return "guidance"
-    if raw.startswith("is ") and " legit" in raw:
-        return "legit_check"
-    if raw.startswith("is this "):
-        return "specific_check"
-    if is_question_style_keyword(raw):
-        return "question"
-    return "entity_page"
-
-
 def is_usable_ai_text(text):
     if not text:
         return False
@@ -248,87 +219,6 @@ def is_usable_ai_text(text):
         "let me know if you want",
     }
     return not any(marker in lowered for marker in weak_markers)
-
-
-def normalized_similarity_tokens(text):
-    cleaned = re.sub(r"[^a-z0-9\s]+", " ", normalize_keyword(text))
-    return {t for t in cleaned.split() if t and t not in SIMILARITY_STOPWORDS}
-
-
-def jaccard_similarity(a, b):
-    if not a or not b:
-        return 0.0
-    union = a | b
-    return (len(a & b) / len(union)) if union else 0.0
-
-
-def is_thin_generic_keyword(keyword):
-    tokens = clean_base_keyword(keyword).split()
-
-    if not tokens:
-        return True
-
-    if len(tokens) == 1 and tokens[0] in GENERIC_BASE_TERMS:
-        return True
-
-    if len(tokens) == 2 and tokens[0] in GENERIC_BASE_TERMS and tokens[1] in {
-        "email", "text", "message", "alert", "link", "support"
-    }:
-        return True
-
-    return False
-
-
-def should_skip_keyword(keyword, existing_pages):
-    base = clean_base_keyword(keyword)
-    if not base:
-        return True, "empty cleaned keyword"
-
-    intent = keyword_intent_type(keyword)
-    if is_thin_generic_keyword(keyword) and intent == "entity_page":
-        return True, "thin generic keyword"
-
-    base_tokens = normalized_similarity_tokens(base)
-    root = keyword_root(keyword)
-    cluster_tokens = keyword_cluster_tokens(keyword)
-
-    for page in existing_pages:
-        other_keyword = page["keyword"]
-        other_base = clean_base_keyword(other_keyword)
-        if not other_base:
-            continue
-
-        if base == other_base:
-            return True, f"duplicate base keyword: {other_keyword}"
-
-        other_root = keyword_root(other_keyword)
-        other_intent = keyword_intent_type(other_keyword)
-        other_cluster_tokens = keyword_cluster_tokens(other_keyword)
-
-        compare_scope_match = (
-            (root and other_root == root)
-            or bool(cluster_tokens & other_cluster_tokens)
-        )
-        if not compare_scope_match:
-            continue
-
-        other_tokens = normalized_similarity_tokens(other_base)
-        similarity = jaccard_similarity(base_tokens, other_tokens)
-
-        if similarity >= 0.86 and intent == other_intent:
-            return True, f"near-duplicate of: {other_keyword}"
-
-        if similarity >= 0.92:
-            return True, f"very high overlap with: {other_keyword}"
-
-        if (
-            other_base in base
-            and intent == other_intent
-            and len(base.split()) <= len(other_base.split()) + 1
-        ):
-            return True, f"weak expansion of: {other_keyword}"
-
-    return False, ""
 
 
 # -----------------------------
@@ -399,10 +289,12 @@ def build_canonical(slug):
 def fallback_ai_text(keyword):
     readable = readable_keyword(keyword)
     keyword_display = display_keyword(keyword)
+
     return (
-        f"<p>{readable} scams often involve impersonation, urgency, or requests for money and sensitive information.</p>"
-        f"<p>Common warning signs include unexpected messages, pressure to act quickly, suspicious links, and unusual payment requests.</p>"
-        f"<p>If you receive something related to {escape_html(keyword_display)}, avoid clicking links, replying, or sending money until you verify it through official sources.</p>"
+        f"<p>{readable} scams usually use urgency, impersonation, or fake account problems to push people into acting before they verify what is real.</p>"
+        f"<p>Common versions of {escape_html(keyword_display)} include suspicious emails, texts, payment warnings, login alerts, fake support messages, refund claims, or account verification requests.</p>"
+        f"<p>If something related to {escape_html(keyword_display)} appears unexpectedly, do not click links, reply, download files, share codes, or send money until you verify it directly through the official website or app.</p>"
+        f"<p>Strong warning signs include pressure to act fast, requests for personal information, unusual payment instructions, mismatched sender details, and links that do not clearly belong to the real company or service.</p>"
     )
 
 
@@ -586,6 +478,8 @@ for keyword in keywords:
     slug = slugify(keyword)
     if slug in PROTECTED_SLUGS:
         continue
+    if not slug:
+        continue
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
         continue
@@ -597,7 +491,7 @@ existing_seen_slugs = set()
 
 for keyword in generated_keywords:
     slug = slugify(keyword)
-    if slug in PROTECTED_SLUGS or slug in existing_seen_slugs:
+    if slug in PROTECTED_SLUGS or slug in existing_seen_slugs or not slug:
         continue
     if page_exists(slug):
         existing_pages.append({"keyword": keyword, "slug": slug})
@@ -627,7 +521,6 @@ print(f"Daily limit: {DAILY_LIMIT}")
 # -----------------------------
 generated_count = 0
 skipped_existing_count = 0
-skipped_duplicate_quality_count = 0
 built_keywords = []
 
 for page in queue_pages:
@@ -650,13 +543,6 @@ for page in queue_pages:
         generated_slugs.add(slug)
         generated_keywords.add(keyword)
         built_keywords.append(keyword)
-        continue
-
-    skip_for_quality, skip_reason = should_skip_keyword(keyword, existing_pages)
-    if skip_for_quality:
-        skipped_duplicate_quality_count += 1
-        built_keywords.append(keyword)
-        print(f"Skipping weak/duplicate keyword: {keyword} ({skip_reason})")
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -720,7 +606,6 @@ with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
 
 print(
     f"Done. Generated {generated_count} new pages. "
-    f"Skipped {skipped_existing_count} existing pages, "
-    f"{skipped_duplicate_quality_count} weak/duplicate keywords."
+    f"Skipped {skipped_existing_count} existing pages."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
