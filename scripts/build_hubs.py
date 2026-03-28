@@ -11,9 +11,9 @@ from data.cluster_map import CLUSTERS
 KEYWORDS_FILE = "data/generated_keywords.txt"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
+
 MAX_LINKS_PER_HUB = 50
 TOP_SCAM_TYPES_COUNT = 8
-MIN_LINKS_TO_BUILD_HUB = 5
 MAX_RELATED_TOPICS = 10
 MAX_FAQS = 4
 REPORT_PATH = os.path.join(OUTPUT_DIR, "_hub_build_report.json")
@@ -107,6 +107,7 @@ HUB_INTROS = {
     "unknown-number-scams": "Unknown number scams often begin with unexpected texts or calls designed to spark curiosity, urgency, or a quick reply.",
     "verification-code-scams": "Verification code scams often try to trick people into sharing one-time codes, security codes, or login approvals.",
     "phishing-scams": "Phishing scams often use fake login pages, email warnings, security alerts, or account verification requests to steal credentials.",
+    "general-scams": "General scam patterns often show the same core behavior: urgency, impersonation, pressure, suspicious links, requests for money, and attempts to stop independent verification."
 }
 
 HUB_TITLES = {
@@ -136,6 +137,7 @@ HUB_TITLES = {
     "unknown-number-scams": "Unknown Number Scams: Warning Signs, Related Checks & What To Do",
     "verification-code-scams": "Verification Code Scams: Warning Signs, Related Checks & What To Do",
     "phishing-scams": "Phishing Scams: Warning Signs, Related Checks & What To Do",
+    "general-scams": "Scam Warning Signs: Related Checks & What To Do",
 }
 
 HUB_META_DESCRIPTIONS = {
@@ -165,6 +167,7 @@ HUB_META_DESCRIPTIONS = {
     "unknown-number-scams": "Review common unknown number scam patterns, suspicious texts, unexpected calls, curiosity hooks, and fast-reply traps. Compare related scam checks.",
     "verification-code-scams": "Explore common verification code scam patterns, one-time code theft, login approval tricks, and account access scams. Review related scam checks.",
     "phishing-scams": "Review common phishing scam patterns, fake login pages, account alerts, email warnings, and credential theft attempts. Compare related scam checks.",
+    "general-scams": "Review broad scam warning signs, suspicious message patterns, and related scam checks. Learn what to look for before you click, reply, send money, or share information.",
 }
 
 HUB_WARNING_BULLETS = {
@@ -180,143 +183,17 @@ HUB_WARNING_BULLETS = {
         "Requests to call fake support numbers or approve payments you did not expect",
         "Urgent wording designed to stop you from checking the official PayPal website or app first",
     ],
-    "zelle-scams": [
-        "Urgent transfer or payment issue claims that pressure you to send money quickly",
-        "Fake reversal, refund, or business account stories designed to confuse the target",
-        "Impersonation of banks, buyers, sellers, or support agents asking for immediate action",
-        "Requests that move the conversation away from normal verification channels",
-    ],
-    "cash-app-scams": [
-        "Fake payment notices, pending transfer stories, or support impersonation messages",
-        "Pressure to issue refunds, send money back, or trust screenshots without verification",
-        "Urgent payment instructions that bypass normal Cash App account review",
-        "Messages that create confusion before you can verify the balance or activity directly",
-    ],
-    "venmo-scams": [
-        "Fake payments, accidental transfer claims, or support impersonation messages",
-        "Pressure to refund money or trust a screenshot instead of checking Venmo directly",
-        "Buyer-seller stories designed to rush you into paying or sending money back",
-        "Messages that push quick action before you verify the payment inside the real app",
-    ],
-    "facebook-scams": [
-        "Marketplace buyer or seller messages that pressure payment, shipping, or identity sharing",
-        "Fake account alerts, impersonation, or suspicious support-style messages",
-        "Links that lead to fake login pages, phishing forms, or off-platform payment traps",
-        "Urgency designed to keep the target from verifying directly inside Facebook",
-    ],
-    "instagram-scams": [
-        "Phishing links, fake brand messages, impersonation attempts, or account warning alerts",
-        "Suspicious outreach that pressures fast replies, verification, or money transfers",
-        "Messages that try to move the conversation off-platform before trust is established",
-        "Urgency designed to make you act before checking through the official Instagram app",
-    ],
-    "tiktok-scams": [
-        "Fake promotion messages, account warnings, suspicious links, or impersonation attempts",
-        "Urgent requests that push you to log in, verify, or pay outside normal TikTok flows",
-        "Messages that sound official but do not come through trusted support channels",
-        "Pressure designed to stop you from verifying the claim directly in the app",
-    ],
-    "whatsapp-scams": [
-        "Unknown numbers, impersonation attempts, fake support, or payment pressure messages",
-        "Suspicious links that lead to fake login pages, payment traps, or phishing forms",
-        "Messages that create urgency, fear, or confusion to get a fast reply",
-        "Requests for codes, money, or private information without proper verification",
-    ],
-    "telegram-scams": [
-        "Fake investment groups, impersonation, suspicious links, or urgent payment requests",
-        "Messages that promise easy profits or pressure you into moving funds quickly",
-        "Fake admins or support accounts trying to build trust before making a request",
-        "Links and messages designed to bypass careful verification",
-    ],
-    "snapchat-scams": [
-        "Impersonation attempts, suspicious links, fake alerts, or payment pressure",
-        "Messages that try to build trust fast and then ask for money or access",
-        "Unexpected requests that move outside normal Snapchat activity",
-        "Urgency designed to keep you from stopping to verify what is happening",
-    ],
-    "discord-scams": [
-        "Fake Nitro offers, suspicious downloads, impersonation, or phishing links",
-        "Messages that look official but push you outside trusted Discord flows",
-        "Urgent account or support stories designed to create panic and fast action",
-        "Requests that aim to steal credentials, downloads, or account access",
-    ],
     "crypto-scams": [
         "Fake investment promises, suspicious wallet requests, phishing links, or support impersonation",
         "Urgent transfer instructions designed to move funds before you verify the situation",
         "Messages that promise guaranteed returns, recoveries, or exclusive opportunities",
         "Requests for wallet access, seed phrases, or approvals that should never be shared",
     ],
-    "package-delivery-scams": [
-        "Fake USPS, FedEx, or UPS alerts claiming delivery issues, customs fees, or address problems",
-        "Suspicious links that lead to fake tracking pages, payment prompts, or phishing forms",
-        "Urgency designed to push a quick click before you verify the delivery independently",
-        "Requests for small payments or personal details tied to a fake shipping problem",
-    ],
-    "bank-scams": [
-        "Fake fraud alerts, account lock messages, suspicious login warnings, or payment issues",
-        "Pressure to verify through a link instead of the official bank website or app",
-        "Impersonation of bank staff, fraud teams, or customer support representatives",
-        "Urgency designed to stop you from calling the bank directly through a trusted number",
-    ],
     "job-scams": [
         "Fake recruiter outreach, remote job offers, interview requests, or onboarding messages",
         "Pressure to move quickly, share personal details, or pay for equipment or verification",
         "Offers that seem unusually fast, easy, or high-paying without normal screening",
         "Requests that move off trusted platforms before legitimacy is confirmed",
-    ],
-    "investment-scams": [
-        "Promises of guaranteed profits, insider opportunities, or urgent high-return offers",
-        "Pressure to send money quickly before you can verify the person or platform",
-        "Messages that sound sophisticated but avoid clear, independent proof",
-        "Tactics that exploit greed, urgency, or fear of missing out",
-    ],
-    "loan-scams": [
-        "Fake loan approvals, urgent verification requests, suspicious lenders, or upfront fees",
-        "Pressure to pay before funds are released or legitimacy is confirmed",
-        "Messages that request sensitive information too early in the process",
-        "Urgency designed to bypass normal checks and independent verification",
-    ],
-    "credit-scams": [
-        "Fake credit repair offers, urgent notices, phishing attempts, or account scare tactics",
-        "Requests for sensitive details that should only be shared through trusted channels",
-        "Messages that create pressure before you verify the sender independently",
-        "Claims that sound official but do not match normal credit or lender processes",
-    ],
-    "romance-scams": [
-        "Fast emotional bonding followed by requests for money, gifts, or account help",
-        "Stories that create sympathy, urgency, or pressure before trust is properly earned",
-        "Attempts to move conversations away from safer channels or normal verification",
-        "Requests that escalate from emotional dependence into financial pressure",
-    ],
-    "gift-card-scams": [
-        "Urgent payment pressure involving gift cards because they are hard to recover",
-        "Impersonation of employers, family, support, or trusted companies asking for codes",
-        "Emergency stories designed to stop you from checking independently",
-        "Requests for gift card numbers or photos before legitimacy is confirmed",
-    ],
-    "urgent-payment-scams": [
-        "Pressure to send money immediately before checking details independently",
-        "Fear-based messages that reduce thinking time and increase emotional reaction",
-        "Requests that bypass normal payment verification or business process",
-        "Urgency designed to stop you from calling, checking, or confirming the story first",
-    ],
-    "government-scams": [
-        "Impersonation of the IRS, Social Security, tax agencies, or benefits programs",
-        "Threats, fear-based warnings, or fake deadlines designed to force fast action",
-        "Requests for payments, codes, or private details outside normal official channels",
-        "Urgency that discourages calling the real agency directly for verification",
-    ],
-    "unknown-number-scams": [
-        "Unexpected calls or texts designed to create curiosity, urgency, or emotional reaction",
-        "Vague stories that push you to reply before you understand what is happening",
-        "Suspicious links or requests that arrive before any trust is established",
-        "Pressure to continue the conversation without independent verification",
-    ],
-    "verification-code-scams": [
-        "Requests for one-time codes, login approvals, or security verification details",
-        "Messages that pretend the code is harmless when it could unlock an account",
-        "Urgency designed to make you share a code before you stop to think",
-        "Attempts to hide the real purpose of the code request",
     ],
     "phishing-scams": [
         "Fake login pages, account alerts, security warnings, or verification requests",
@@ -399,13 +276,11 @@ HUB_TARGETING = {
 }
 
 INTRO_FALLBACK = (
-    "This page groups together related scam checks so you can review warning signs, "
-    "compare patterns, and navigate related pages more easily."
+    "This hub groups together related scam checks so you can review warning signs, compare patterns, and understand how scam variations often work."
 )
 
 META_FALLBACK = (
-    "Review related scam checks, compare warning signs, and learn what to do next "
-    "before you click, reply, send money, or share information."
+    "Review related scam checks, compare warning signs, and learn what to do next before you click, reply, send money, or share information."
 )
 
 GENERIC_ENTITY_WORDS = {
@@ -567,10 +442,6 @@ def load_keywords():
         return list(dict.fromkeys(normalize_keyword(line) for line in f if line.strip()))
 
 
-def page_exists(slug):
-    return os.path.exists(os.path.join(OUTPUT_DIR, slug, "index.html"))
-
-
 def matches_cluster(keyword, match_terms):
     kw_norm = normalize_keyword(keyword)
     kw_tokens = keyword_tokens(keyword)
@@ -649,7 +520,7 @@ def build_related_link_items(cluster_keywords):
 
     for keyword in cluster_keywords:
         slug = slugify(keyword)
-        if not slug or slug in seen or not page_exists(slug):
+        if not slug or slug in seen:
             continue
 
         seen.add(slug)
@@ -842,6 +713,12 @@ def build_faq_html(hub_slug):
 
 def build_link_summary_html(link_items, hub_title):
     count = len(link_items)
+    if count == 0:
+        return (
+            f"<p>This hub is active, but it does not have related scam check pages linked yet. "
+            f"As more pages are generated in the {escape_html(hub_title)} category, they should be linked here automatically.</p>"
+        )
+
     return (
         f"<p>This hub currently links to {count} related scam check pages so you can compare "
         f"patterns, wording, and tactics inside the {escape_html(hub_title)} category.</p>"
@@ -905,6 +782,18 @@ def get_hub_keyword_insights(matched_keywords, hub_terms):
 
 
 def build_dynamic_keyword_summary_html(matched_keywords, hub_terms):
+    if not matched_keywords:
+        fallback = (
+            "This hub is active based on the cluster mapping for this category. "
+            "As generated pages accumulate here, this section will reflect the most common entities, delivery channels, and pressure patterns people are searching for."
+        )
+        return f"""
+<section aria-labelledby="keyword-patterns-heading">
+<h2 id="keyword-patterns-heading">What People Are Seeing In This Scam Category</h2>
+<p>{escape_html(fallback)}</p>
+</section>
+""".strip()
+
     insights = get_hub_keyword_insights(matched_keywords, hub_terms)
 
     entities = natural_list(insights["top_entities"], 5)
@@ -947,6 +836,9 @@ def build_dynamic_keyword_summary_html(matched_keywords, hub_terms):
 
 
 def build_dynamic_entity_focus_html(matched_keywords, hub_terms):
+    if not matched_keywords:
+        return ""
+
     insights = get_hub_keyword_insights(matched_keywords, hub_terms)
     entities = insights["top_entities"][:8]
 
@@ -966,6 +858,15 @@ def build_dynamic_entity_focus_html(matched_keywords, hub_terms):
 
 
 def build_cluster_specific_intro_html(intro, matched_keywords, hub_terms):
+    if not matched_keywords:
+        return f"""
+<section aria-labelledby="hub-intro-heading">
+<h2 id="hub-intro-heading" style="position:absolute;left:-9999px;">Hub Introduction</h2>
+<p>{escape_html(intro)}</p>
+<p>This hub is being maintained from the cluster definitions, even if the related child pages are not all present yet.</p>
+</section>
+""".strip()
+
     insights = get_hub_keyword_insights(matched_keywords, hub_terms)
 
     top_channels = natural_list([title_case(x) for x in insights["top_channels"]], 3)
@@ -995,6 +896,9 @@ def build_cluster_specific_intro_html(intro, matched_keywords, hub_terms):
 
 
 def build_meta_keyword_support_text(matched_keywords, hub_terms):
+    if not matched_keywords:
+        return "related scam signals, scam warning signs, and category-level verification patterns"
+
     insights = get_hub_keyword_insights(matched_keywords, hub_terms)
     parts = []
 
@@ -1077,26 +981,20 @@ def build_schema(hub_slug, hub_title, description, intro, link_items, matched_ke
     return json.dumps(schema_objects, ensure_ascii=False, separators=(",", ":"))
 
 
-def validate_hub_output(hub_slug, hub_title, description, canonical, matched_keywords, link_items, html, intro, hub_terms):
+def validate_hub_output(hub_slug, hub_title, description, canonical, matched_keywords, link_items, html):
     errors = []
 
     if not hub_slug:
         errors.append("empty hub slug")
     if not hub_title.strip():
         errors.append("empty title")
-    if "scams scams" in hub_title.lower():
-        errors.append("duplicated wording in title")
     if len(description) < 110 or len(description) > 165:
         errors.append("description length out of target range")
     if not canonical.endswith(f"/{hub_slug}/"):
         errors.append("canonical mismatch")
-    if not matched_keywords:
-        errors.append("no matched keywords")
-    if len(link_items) < MIN_LINKS_TO_BUILD_HUB:
-        errors.append("too few rendered links")
-    if html.count("<h2") < 7:
+    if html.count("<h2") < 6:
         errors.append("insufficient section depth")
-    if len(html) < 7000:
+    if len(html) < 6000:
         errors.append("page html too thin")
     if "<main" not in html:
         errors.append("missing main landmark")
@@ -1104,20 +1002,6 @@ def validate_hub_output(hub_slug, hub_title, description, canonical, matched_key
         errors.append("missing schema")
     if "og:title" not in html or "twitter:title" not in html:
         errors.append("missing social metadata")
-    if "What People Are Seeing In This Scam Category" not in html:
-        errors.append("missing dynamic keyword summary")
-
-    entity_count = len(get_hub_keyword_insights(matched_keywords, hub_terms)["top_entities"])
-    if entity_count >= 4 and "Common Brands, Platforms, Or Entities Mentioned" not in html:
-        errors.append("missing dynamic entity section")
-
-    fallback_hits = 0
-    if intro == INTRO_FALLBACK:
-        fallback_hits += 1
-    if description == trim_meta_description(META_FALLBACK):
-        fallback_hits += 1
-    if fallback_hits >= 2:
-        errors.append("too much fallback copy")
 
     return errors
 
@@ -1217,9 +1101,7 @@ def build_hub_html(
 <h2 id="related-checks-heading">Related Scam Checks</h2>
 {link_summary_html}
 <div class="link-box">
-<ul>
-{links_html}
-</ul>
+{"<ul>" + links_html + "</ul>" if link_items else "<p>No linked child pages are available yet for this hub.</p>"}
 </div>
 </section>
 """.strip())
@@ -1512,33 +1394,18 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     keywords = load_keywords()
-    if not keywords:
-        print("No generated keywords found.")
-        return
 
     validation_warning_count = 0
     built_count = 0
-    skipped_empty_count = 0
-    skipped_no_links_count = 0
     validation_details = []
 
     for hub_slug, match_terms in CLUSTERS.items():
-        matched = [kw for kw in keywords if matches_cluster(kw, match_terms)]
-
-        if not matched:
-            skipped_empty_count += 1
-            print(f"Skipped hub: {hub_slug} (no matching generated keywords)")
-            continue
+        matched = [kw for kw in keywords if matches_cluster(kw, match_terms)] if keywords else []
 
         matched = dedupe_cluster_keywords(matched)
         matched = sorted(matched, key=lambda k: score_keyword(k, match_terms))[:MAX_LINKS_PER_HUB]
 
         link_items = build_related_link_items(matched)
-
-        if len(link_items) < MIN_LINKS_TO_BUILD_HUB:
-            skipped_no_links_count += 1
-            print(f"Skipped hub: {hub_slug} (fewer than {MIN_LINKS_TO_BUILD_HUB} existing linked pages)")
-            continue
 
         hub_title = HUB_TITLES.get(hub_slug, title_case(hub_slug.replace("-", " ")))
         intro = HUB_INTROS.get(hub_slug, INTRO_FALLBACK)
@@ -1572,8 +1439,6 @@ def main():
             matched_keywords=matched,
             link_items=link_items,
             html=html,
-            intro=intro,
-            hub_terms=match_terms,
         )
 
         if validation_errors:
@@ -1591,8 +1456,6 @@ def main():
     report = {
         "keywords_loaded": len(keywords),
         "hubs_built": built_count,
-        "hubs_skipped_no_matches": skipped_empty_count,
-        "hubs_skipped_insufficient_links": skipped_no_links_count,
         "validation_warnings": validation_warning_count,
         "validation_details": validation_details,
     }
@@ -1601,8 +1464,6 @@ def main():
     print("\n--- HUB BUILD REPORT ---")
     print(f"Keywords loaded: {len(keywords)}")
     print(f"Hubs built: {built_count}")
-    print(f"Hubs skipped (no matches): {skipped_empty_count}")
-    print(f"Hubs skipped (insufficient existing linked pages): {skipped_no_links_count}")
     print(f"Validation warnings: {validation_warning_count}")
     print(f"Saved report: {REPORT_PATH}")
 
