@@ -36,54 +36,68 @@ CLUSTER_TERMS = {
 }
 
 BRAND_CASE = {
-    "paypal": "PayPal",
-    "whatsapp": "WhatsApp",
+    "facebook marketplace": "Facebook Marketplace",
+    "bank of america": "Bank of America",
+    "wells fargo": "Wells Fargo",
+    "social security": "Social Security",
+    "trust wallet": "Trust Wallet",
+    "google play": "Google Play",
     "cash app": "Cash App",
+    "two factor": "Two-Factor",
+    "metamask": "MetaMask",
+    "coinbase": "Coinbase",
+    "whatsapp": "WhatsApp",
+    "instagram": "Instagram",
+    "snapchat": "Snapchat",
+    "telegram": "Telegram",
+    "microsoft": "Microsoft",
+    "binance": "Binance",
+    "facebook": "Facebook",
+    "ethereum": "Ethereum",
+    "discord": "Discord",
+    "bitcoin": "Bitcoin",
+    "walmart": "Walmart",
+    "paypal": "PayPal",
     "tiktok": "TikTok",
-    "icloud": "iCloud",
-    "irs": "IRS",
-    "usps": "USPS",
-    "ups": "UPS",
+    "venmo": "Venmo",
+    "amazon": "Amazon",
+    "google": "Google",
+    "apple": "Apple",
+    "target": "Target",
+    "crypto": "Crypto",
+    "chase": "Chase",
+    "steam": "Steam",
+    "zelle": "Zelle",
     "fedex": "FedEx",
+    "usps": "USPS",
+    "bank": "Bank",
+    "irs": "IRS",
+    "ups": "UPS",
     "sms": "SMS",
     "otp": "OTP",
     "2fa": "2FA",
-    "dm": "DM",
     "nft": "NFT",
     "ceo": "CEO",
-    "binance": "Binance",
-    "coinbase": "Coinbase",
-    "metamask": "MetaMask",
-    "trust wallet": "Trust Wallet",
-    "google play": "Google Play",
-    "zelle": "Zelle",
-    "venmo": "Venmo",
-    "amazon": "Amazon",
-    "facebook": "Facebook",
-    "facebook marketplace": "Facebook Marketplace",
-    "instagram": "Instagram",
-    "telegram": "Telegram",
-    "snapchat": "Snapchat",
-    "discord": "Discord",
-    "crypto": "Crypto",
-    "bitcoin": "Bitcoin",
-    "ethereum": "Ethereum",
-    "bank": "Bank",
-    "bank of america": "Bank of America",
-    "chase": "Chase",
-    "wells fargo": "Wells Fargo",
-    "social security": "Social Security",
-    "google": "Google",
-    "apple": "Apple",
-    "microsoft": "Microsoft",
-    "steam": "Steam",
-    "walmart": "Walmart",
-    "target": "Target",
-    "two factor": "Two-Factor",
+    "dm": "DM",
+    "icloud": "iCloud",
 }
 
 SMALL_WORDS = {
-    "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "vs", "with"
+    "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on",
+    "or", "the", "to", "vs", "with"
+}
+
+SIMILARITY_STOPWORDS = {
+    "is", "this", "a", "an", "the", "and", "or", "to", "for", "of", "in", "on", "with", "from",
+    "scam", "scams", "legit", "real", "safe", "warning", "warnings", "risk", "risks", "sign", "signs",
+    "message", "messages", "email", "emails", "text", "texts", "link", "links", "offer", "offers",
+    "alert", "alerts", "check", "review", "suspicious", "common", "updated", "full"
+}
+
+GENERIC_BASE_TERMS = {
+    "amazon", "paypal", "zelle", "venmo", "crypto", "bank", "job", "loan", "credit", "romance",
+    "gift", "phishing", "verification", "login", "payment", "refund", "delivery", "support",
+    "caller", "number", "message", "email", "text", "link", "account", "alert"
 }
 
 
@@ -95,9 +109,7 @@ def normalize_keyword(text):
 
 
 def slugify(text):
-    text = normalize_keyword(text)
-    text = re.sub(r"[^a-z0-9]+", "-", text)
-    return text.strip("-")
+    return re.sub(r"[^a-z0-9]+", "-", normalize_keyword(text)).strip("-")
 
 
 def clean_base_keyword(text):
@@ -117,8 +129,7 @@ def clean_base_keyword(text):
     kw = re.sub(r"\s+scam$", "", kw)
 
     kw = re.sub(r"\s+a$", "", kw)
-    kw = re.sub(r"\s+", " ", kw).strip()
-    return kw
+    return re.sub(r"\s+", " ", kw).strip()
 
 
 def display_keyword(text):
@@ -138,14 +149,9 @@ def title_case(text):
     if not text:
         return ""
 
-    words = text.split()
     titled = []
-
-    for i, word in enumerate(words):
-        if i > 0 and word in SMALL_WORDS:
-            titled.append(word)
-        else:
-            titled.append(word.capitalize())
+    for i, word in enumerate(text.split()):
+        titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
 
     return apply_brand_case(" ".join(titled))
 
@@ -180,6 +186,13 @@ def page_exists(slug):
     return os.path.exists(page_path(slug))
 
 
+def ensure_file(filepath):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if not os.path.exists(filepath):
+        with open(filepath, "a", encoding="utf-8"):
+            pass
+
+
 def is_guidance_style_keyword(keyword):
     kw = normalize_keyword(keyword)
     return (
@@ -198,6 +211,124 @@ def is_guidance_style_keyword(keyword):
 def is_question_style_keyword(keyword):
     kw = normalize_keyword(keyword)
     return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
+
+
+def keyword_intent_type(keyword):
+    raw = normalize_keyword(keyword)
+
+    if raw.startswith("did i get scammed"):
+        return "post_event"
+    if raw.startswith("what to do") or raw.startswith("how to ") or raw.startswith("what happens"):
+        return "guidance"
+    if raw.startswith("is ") and " legit" in raw:
+        return "legit_check"
+    if raw.startswith("is this "):
+        return "specific_check"
+    if is_question_style_keyword(raw):
+        return "question"
+    return "entity_page"
+
+
+def is_usable_ai_text(text):
+    if not text:
+        return False
+
+    lowered = str(text).lower().strip()
+
+    if len(lowered) < 220:
+        return False
+
+    if "<p>" not in lowered and "\n" not in lowered:
+        return False
+
+    weak_markers = {
+        "lorem ipsum",
+        "as an ai",
+        "here are some paragraphs",
+        "let me know if you want",
+    }
+    return not any(marker in lowered for marker in weak_markers)
+
+
+def normalized_similarity_tokens(text):
+    cleaned = re.sub(r"[^a-z0-9\s]+", " ", normalize_keyword(text))
+    return {t for t in cleaned.split() if t and t not in SIMILARITY_STOPWORDS}
+
+
+def jaccard_similarity(a, b):
+    if not a or not b:
+        return 0.0
+    union = a | b
+    return (len(a & b) / len(union)) if union else 0.0
+
+
+def is_thin_generic_keyword(keyword):
+    tokens = clean_base_keyword(keyword).split()
+
+    if not tokens:
+        return True
+
+    if len(tokens) == 1 and tokens[0] in GENERIC_BASE_TERMS:
+        return True
+
+    if len(tokens) == 2 and tokens[0] in GENERIC_BASE_TERMS and tokens[1] in {
+        "email", "text", "message", "alert", "link", "support"
+    }:
+        return True
+
+    return False
+
+
+def should_skip_keyword(keyword, existing_pages):
+    base = clean_base_keyword(keyword)
+    if not base:
+        return True, "empty cleaned keyword"
+
+    intent = keyword_intent_type(keyword)
+    if is_thin_generic_keyword(keyword) and intent == "entity_page":
+        return True, "thin generic keyword"
+
+    base_tokens = normalized_similarity_tokens(base)
+    root = keyword_root(keyword)
+    cluster_tokens = keyword_cluster_tokens(keyword)
+
+    for page in existing_pages:
+        other_keyword = page["keyword"]
+        other_base = clean_base_keyword(other_keyword)
+        if not other_base:
+            continue
+
+        if base == other_base:
+            return True, f"duplicate base keyword: {other_keyword}"
+
+        other_root = keyword_root(other_keyword)
+        other_intent = keyword_intent_type(other_keyword)
+        other_cluster_tokens = keyword_cluster_tokens(other_keyword)
+
+        compare_scope_match = (
+            (root and other_root == root)
+            or bool(cluster_tokens & other_cluster_tokens)
+        )
+        if not compare_scope_match:
+            continue
+
+        other_tokens = normalized_similarity_tokens(other_base)
+        similarity = jaccard_similarity(base_tokens, other_tokens)
+
+        if similarity >= 0.86 and intent == other_intent:
+            return True, f"near-duplicate of: {other_keyword}"
+
+        if similarity >= 0.92:
+            return True, f"very high overlap with: {other_keyword}"
+
+        if (
+            other_base in base
+            and intent == other_intent
+            and len(base.split()) <= len(other_base.split()) + 1
+        ):
+            return True, f"weak expansion of: {other_keyword}"
+
+    return False, ""
 
 
 # -----------------------------
@@ -355,16 +486,12 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         other_tokens = keyword_tokens(other_keyword)
         other_cluster = keyword_cluster_tokens(other_keyword)
         other_root = keyword_root(other_keyword)
-        other_base = clean_base_keyword(other_keyword)
-
+        length_diff = abs(len(other_tokens) - len(current_tokens))
         same_root = 1 if current_root and other_root == current_root else 0
         shared_cluster = len(current_cluster & other_cluster)
         shared_tokens = len(current_tokens & other_tokens)
-        exact_base_penalty = 1 if other_base == current_base else 0
-        length_diff = abs(len(other_tokens) - len(current_tokens))
 
         return (
-            -exact_base_penalty,
             -same_root,
             -shared_cluster,
             -shared_tokens,
@@ -437,15 +564,17 @@ def build_links_html(pages_list):
 # SETUP
 # -----------------------------
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-for required_file in [GENERATED_SLUGS_FILE, GENERATED_KEYWORDS_FILE]:
-    if not os.path.exists(required_file):
-        open(required_file, "a", encoding="utf-8").close()
+ensure_file(GENERATED_SLUGS_FILE)
+ensure_file(GENERATED_KEYWORDS_FILE)
 
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
 keywords = load_keywords()
+if not keywords:
+    print("No keywords in queue. Nothing to generate.")
+    sys.exit(0)
+
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
 
@@ -453,15 +582,15 @@ seen_queue_slugs = set()
 queue_pages = []
 duplicate_queue_count = 0
 
-for k in keywords:
-    slug = slugify(k)
+for keyword in keywords:
+    slug = slugify(keyword)
     if slug in PROTECTED_SLUGS:
         continue
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
         continue
     seen_queue_slugs.add(slug)
-    queue_pages.append({"keyword": k, "slug": slug})
+    queue_pages.append({"keyword": keyword, "slug": slug})
 
 existing_pages = []
 existing_seen_slugs = set()
@@ -500,6 +629,7 @@ generated_count = 0
 skipped_existing_count = 0
 skipped_known_slug_count = 0
 skipped_known_keyword_count = 0
+skipped_duplicate_quality_count = 0
 built_keywords = []
 
 for page in queue_pages:
@@ -524,8 +654,6 @@ for page in queue_pages:
         built_keywords.append(keyword)
         continue
 
-    path = page_path(slug)
-
     if page_exists(slug):
         skipped_existing_count += 1
         append_line_if_missing(GENERATED_SLUGS_FILE, slug)
@@ -535,6 +663,14 @@ for page in queue_pages:
         built_keywords.append(keyword)
         continue
 
+    skip_for_quality, skip_reason = should_skip_keyword(keyword, existing_pages)
+    if skip_for_quality:
+        skipped_duplicate_quality_count += 1
+        built_keywords.append(keyword)
+        print(f"Skipping weak/duplicate keyword: {keyword} ({skip_reason})")
+        continue
+
+    path = page_path(slug)
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
     title = build_title(keyword)
@@ -543,8 +679,10 @@ for page in queue_pages:
 
     try:
         ai_text = generate_content(keyword_display)
+        if not is_usable_ai_text(ai_text):
+            raise ValueError("Generated content was too thin or malformed")
     except Exception as e:
-        print("AI generation failed for", keyword, ":", e)
+        print("AI generation fallback for", keyword, ":", e)
         ai_text = fallback_ai_text(keyword)
 
     link_source_pages = dedupe_pages_by_slug(existing_pages + queue_pages)
@@ -559,18 +697,14 @@ for page in queue_pages:
         exclude_slugs=related_slugs
     )
 
-    links_html = build_links_html(related_pages)
-    more_links_html = build_links_html(more_pages)
-    hub_link_html = build_hub_link_html(keyword)
-
     html = template
     html = html.replace("{{TITLE}}", escape_html(title))
     html = html.replace("{{DESCRIPTION}}", escape_html(description))
     html = html.replace("{{KEYWORD}}", escape_html(keyword_display))
     html = html.replace("{{AI_CONTENT}}", ai_text)
-    html = html.replace("{{RELATED_LINKS}}", links_html)
-    html = html.replace("{{MORE_LINKS}}", more_links_html)
-    html = html.replace("{{HUB_LINK}}", hub_link_html)
+    html = html.replace("{{RELATED_LINKS}}", build_links_html(related_pages))
+    html = html.replace("{{MORE_LINKS}}", build_links_html(more_pages))
+    html = html.replace("{{HUB_LINK}}", build_hub_link_html(keyword))
     html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
 
     with open(path, "w", encoding="utf-8") as f:
@@ -593,13 +727,14 @@ built_keyword_set = set(built_keywords)
 remaining_keywords = [k for k in keywords if k not in built_keyword_set]
 
 with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
-    for k in remaining_keywords:
-        f.write(k + "\n")
+    for keyword in remaining_keywords:
+        f.write(keyword + "\n")
 
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing pages, "
     f"{skipped_known_slug_count} known slugs, "
-    f"{skipped_known_keyword_count} known keywords."
+    f"{skipped_known_keyword_count} known keywords, "
+    f"{skipped_duplicate_quality_count} weak/duplicate keywords."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
