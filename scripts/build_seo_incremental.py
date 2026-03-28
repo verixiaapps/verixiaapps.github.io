@@ -205,6 +205,27 @@ def append_line_if_missing(filepath, value):
             f.write(value + "\n")
 
 
+def sanitize_ai_html(text):
+    raw = str(text).strip()
+
+    raw = re.sub(r"```(?:html)?", "", raw, flags=re.IGNORECASE)
+    raw = raw.replace("```", "").strip()
+
+    raw = re.sub(r"(?is)<!doctype.*?>", "", raw)
+    raw = re.sub(r"(?is)<html.*?>|</html>", "", raw)
+    raw = re.sub(r"(?is)<head.*?>.*?</head>", "", raw)
+    raw = re.sub(r"(?is)<body.*?>|</body>", "", raw)
+
+    raw = re.sub(r"(?is)<h1\b[^>]*>.*?</h1>", "", raw)
+
+    return raw.strip()
+
+
+def short_preview(text, length=220):
+    value = re.sub(r"\s+", " ", str(text or "")).strip()
+    return value[:length]
+
+
 def is_guidance_style_keyword(keyword):
     kw = normalize_keyword(keyword)
     return (
@@ -229,10 +250,10 @@ def is_usable_ai_text(text):
     if not text:
         return False
 
-    raw = str(text).strip()
+    raw = sanitize_ai_html(text)
     lowered = raw.lower()
 
-    if len(raw) < 350:
+    if len(raw) < 220:
         return False
 
     weak_markers = {
@@ -246,8 +267,9 @@ def is_usable_ai_text(text):
         "i am sorry",
         "cannot assist",
         "can't assist",
-        "policy",
         "content policy",
+        "i do not have enough information",
+        "i don't have enough information",
     }
     if any(marker in lowered for marker in weak_markers):
         return False
@@ -255,54 +277,86 @@ def is_usable_ai_text(text):
     paragraph_like = (
         "<p>" in lowered
         or "</p>" in lowered
+        or "<h2" in lowered
+        or "<ul" in lowered
         or "\n\n" in raw
-        or raw.count("\n") >= 3
+        or raw.count("\n") >= 2
     )
     if not paragraph_like:
+        return False
+
+    text_density = re.sub(r"<[^>]+>", " ", raw)
+    text_density = re.sub(r"\s+", " ", text_density).strip()
+    if len(text_density) < 180:
         return False
 
     return True
 
 
+def build_retry_prompt(keyword, keyword_display):
+    raw = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
+    display = readable or keyword_display or raw
+
+    return f"""
+Write a scam-check SEO content section for the search query: "{display}".
+
+Requirements:
+- Output HTML only
+- Do not include <html>, <head>, <body>, or <h1>
+- Write 4 to 6 short sections using <h2> and <p>
+- Make it specific to the query, not generic filler
+- Cover scam warning signs, why people search this query, when it may be legitimate, and what to do next
+- Mention realistic scam patterns like phishing, fake login pages, spoofed support, urgent payment requests, fake verification, suspicious links, or impersonation when relevant
+- Keep tone clear, trustworthy, and practical
+- Do not mention being an AI
+- Do not refuse
+- Do not include placeholders
+- Avoid repeating the exact keyword unnaturally
+
+Target query: {display}
+Original keyword: {raw}
+""".strip()
+
+
 def generate_ai_text(keyword, keyword_display):
-    attempts = []
     raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
+    readable = readable_keyword(keyword)
+
+    attempts = []
 
     if raw_keyword:
-        attempts.append(raw_keyword)
+        attempts.append(("primary", raw_keyword))
 
-    if clean_keyword and clean_keyword != raw_keyword:
-        attempts.append(clean_keyword)
-
-    readable = readable_keyword(keyword)
-    if readable:
-        attempts.append(readable)
-
-    if clean_keyword and not clean_keyword.startswith("is "):
-        attempts.append(f"is {clean_keyword} a scam")
-
-    if clean_keyword and "legit" not in clean_keyword and "scam" not in clean_keyword:
-        attempts.append(f"{clean_keyword} legit or scam")
+    structured_prompt = build_retry_prompt(keyword, keyword_display)
+    attempts.append(("structured", structured_prompt))
 
     seen = set()
     ordered_attempts = []
-    for item in attempts:
-        item_norm = normalize_keyword(item)
-        if item_norm and item_norm not in seen:
-            seen.add(item_norm)
-            ordered_attempts.append(item)
+    for label, prompt in attempts:
+        prompt_norm = normalize_keyword(prompt)
+        if prompt_norm and prompt_norm not in seen:
+            seen.add(prompt_norm)
+            ordered_attempts.append((label, prompt))
 
     last_error = None
 
-    for attempt in ordered_attempts:
+    for label, attempt in ordered_attempts:
         try:
             ai_text = generate_content(attempt)
+            ai_text = sanitize_ai_html(ai_text)
+
             if is_usable_ai_text(ai_text):
                 return ai_text
-            last_error = f"thin or malformed output for prompt: {attempt}"
+
+            preview = short_preview(ai_text)
+            last_error = f"rejected {label} attempt for '{clean_keyword or raw_keyword}' | preview: {preview}"
+            print(f"[reject] {last_error}")
+
         except Exception as e:
-            last_error = str(e)
+            last_error = f"{label} attempt failed for '{clean_keyword or raw_keyword}': {e}"
+            print(f"[error] {last_error}")
 
     raise ValueError(last_error or "AI generation failed")
 
@@ -396,6 +450,22 @@ def load_generated_keywords():
         return {normalize_keyword(line) for line in f if line.strip()}
 
 
+def load_rejected_keywords():
+    rejected = set()
+    if not os.path.exists(REJECTED_KEYWORDS_FILE):
+        return rejected
+
+    with open(REJECTED_KEYWORDS_FILE, encoding="utf-8") as f:
+        for line in f:
+            value = line.strip()
+            if not value:
+                continue
+            keyword_part = value.split("|", 1)[0].strip()
+            if keyword_part:
+                rejected.add(normalize_keyword(keyword_part))
+    return rejected
+
+
 # -----------------------------
 # HUB HELPERS
 # -----------------------------
@@ -446,10 +516,8 @@ def score_hub_match(keyword, hub_slug, match_terms):
 
         if exact_phrase in keyword_joined:
             score += 12 + len(term_words)
-
         elif term_words and term_words.issubset(keyword_word_set):
             score += 8 + len(term_words)
-
         elif term_norm in keyword_norm:
             score += 5
 
@@ -472,7 +540,6 @@ def find_best_hub_slug(keyword):
 
     for hub_slug, match_terms in CLUSTER_LOOKUP.items():
         score = score_hub_match(keyword, hub_slug, match_terms)
-
         if score > best_score:
             best_score = score
             best_hub_slug = hub_slug
@@ -482,9 +549,6 @@ def find_best_hub_slug(keyword):
 
 def build_hub_link_html(keyword):
     hub_slug = find_best_hub_slug(keyword)
-    if not hub_slug:
-        hub_slug = FALLBACK_HUB_SLUG
-
     hub_title = best_hub_title(hub_slug)
 
     return (
@@ -598,22 +662,30 @@ if not keywords:
 
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
+rejected_keywords = load_rejected_keywords()
 
 seen_queue_slugs = set()
 queue_pages = []
 duplicate_queue_count = 0
+already_rejected_count = 0
 
 for keyword in keywords:
+    keyword_norm = normalize_keyword(keyword)
     slug = slugify(keyword)
-    if slug in PROTECTED_SLUGS:
+
+    if keyword_norm in rejected_keywords:
+        already_rejected_count += 1
         continue
-    if not slug:
+
+    if slug in PROTECTED_SLUGS or not slug:
         continue
+
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
         continue
+
     seen_queue_slugs.add(slug)
-    queue_pages.append({"keyword": keyword, "slug": slug})
+    queue_pages.append({"keyword": keyword_norm, "slug": slug})
 
 existing_pages = []
 existing_seen_slugs = set()
@@ -639,6 +711,7 @@ queue_pages = dedupe_pages_by_slug(queue_pages)
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
 print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
+print(f"Previously rejected keywords skipped: {already_rejected_count}")
 print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(existing_pages)}")
@@ -652,7 +725,8 @@ print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 generated_count = 0
 skipped_existing_count = 0
 rejected_count = 0
-built_keywords = []
+processed_keywords = set()
+newly_rejected_keywords = set()
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
@@ -665,6 +739,7 @@ for page in queue_pages:
 
     if slug in PROTECTED_SLUGS:
         print("Skipping protected page:", slug)
+        processed_keywords.add(keyword)
         continue
 
     if page_exists(slug):
@@ -673,7 +748,7 @@ for page in queue_pages:
         append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
         generated_slugs.add(slug)
         generated_keywords.add(keyword)
-        built_keywords.append(keyword)
+        processed_keywords.add(keyword)
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -686,11 +761,13 @@ for page in queue_pages:
         ai_text = generate_ai_text(keyword, keyword_display)
     except Exception as e:
         rejected_count += 1
+        newly_rejected_keywords.add(keyword)
         append_line_if_missing(REJECTED_KEYWORDS_FILE, f"{keyword} | {str(e)}")
-        print("AI generation rejected for", keyword, ":", e)
+        processed_keywords.add(keyword)
+        print(f"[reject-final] {keyword} -> {e}")
         continue
 
-    link_source_pages = dedupe_pages_by_slug(existing_pages + queue_pages)
+    link_source_pages = existing_pages
 
     related_pages = get_related_pages(page, link_source_pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
@@ -721,7 +798,7 @@ for page in queue_pages:
     append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
     generated_slugs.add(slug)
     generated_keywords.add(keyword)
-    built_keywords.append(keyword)
+    processed_keywords.add(keyword)
 
     existing_pages.append({"keyword": keyword, "slug": slug})
     existing_pages = dedupe_pages_by_slug(existing_pages)
@@ -732,17 +809,16 @@ for page in queue_pages:
         f"-> hub: {find_best_hub_slug(keyword)}"
     )
 
-# rewrite queue with only leftovers
-built_keyword_set = set(built_keywords)
-remaining_keywords = [k for k in keywords if k not in built_keyword_set]
+remaining_keywords = [k for k in keywords if normalize_keyword(k) not in processed_keywords]
 
 with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
     for keyword in remaining_keywords:
-        f.write(keyword + "\n")
+        f.write(normalize_keyword(keyword) + "\n")
 
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing pages. "
     f"Rejected {rejected_count} keywords."
 )
+print(f"Newly rejected this run: {len(newly_rejected_keywords)}")
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
