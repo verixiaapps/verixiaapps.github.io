@@ -3,6 +3,11 @@ name: SEO Page Generator Auto
 on:
   workflow_dispatch:
     inputs:
+      manual_daily_limit:
+        description: "Pages to generate on this manual run"
+        required: false
+        default: "600"
+        type: string
       full_rebuild:
         description: "Optional manual rebuild of generated /scam-check-now/ pages only"
         required: false
@@ -26,7 +31,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     env:
       START_DATE: "2026-03-28"
@@ -91,9 +96,17 @@ jobs:
           FULL_REBUILD="false"
           EFFECTIVE_DAILY_LIMIT="$DAILY_LIMIT"
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.full_rebuild }}" = "true" ]; then
-            FULL_REBUILD="true"
-            EFFECTIVE_DAILY_LIMIT="${{ inputs.rebuild_daily_limit }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MANUAL_DAILY_LIMIT="${{ inputs.manual_daily_limit }}"
+
+            if [ -n "$MANUAL_DAILY_LIMIT" ]; then
+              EFFECTIVE_DAILY_LIMIT="$MANUAL_DAILY_LIMIT"
+            fi
+
+            if [ "${{ inputs.full_rebuild }}" = "true" ]; then
+              FULL_REBUILD="true"
+              EFFECTIVE_DAILY_LIMIT="${{ inputs.rebuild_daily_limit }}"
+            fi
           fi
 
           if ! [[ "$EFFECTIVE_DAILY_LIMIT" =~ ^[0-9]+$ ]] || [ "$EFFECTIVE_DAILY_LIMIT" -le 0 ]; then
@@ -107,13 +120,6 @@ jobs:
           echo "DEFAULT_DAILY_LIMIT=$DAILY_LIMIT" >> "$GITHUB_ENV"
           echo "FULL_REBUILD=$FULL_REBUILD" >> "$GITHUB_ENV"
           echo "EFFECTIVE_DAILY_LIMIT=$EFFECTIVE_DAILY_LIMIT" >> "$GITHUB_ENV"
-
-          echo "Today: $TODAY"
-          echo "Day diff: $DAY_DIFF"
-          echo "Phase: $PHASE"
-          echo "Scheduled default daily limit: $DAILY_LIMIT"
-          echo "Full rebuild: $FULL_REBUILD"
-          echo "Effective daily limit: $EFFECTIVE_DAILY_LIMIT"
 
       - name: Prepare manual full rebuild state
         if: env.FULL_REBUILD == 'true'
@@ -138,37 +144,24 @@ jobs:
 
           find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
-          echo "Prepared full rebuild of generated SEO folders."
-
       - name: Build SEO pages incrementally
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/build_seo_incremental.py
+        run: python scripts/build_seo_incremental.py
         env:
           DAILY_LIMIT: ${{ env.EFFECTIVE_DAILY_LIMIT }}
 
       - name: Build hub pages
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/build_hubs.py
+        run: python scripts/build_hubs.py
 
       - name: Restore original keyword queue after manual full rebuild
         if: always() && env.FULL_REBUILD == 'true'
-        shell: bash
         run: |
           set -euo pipefail
 
           if [ -f "$RUNNER_TEMP/original_keywords_queue.txt" ]; then
             cp "$RUNNER_TEMP/original_keywords_queue.txt" "$KEYWORDS_FILE"
-            echo "Original keywords queue restored."
-          else
-            echo "No original keywords queue backup found."
           fi
 
       - name: Build ROOT sitemap
-        shell: bash
         run: |
           set -euo pipefail
 
@@ -176,19 +169,18 @@ jobs:
             echo '<?xml version="1.0" encoding="UTF-8"?>'
             echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
 
-            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>"
+            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$(date -u +%F)</lastmod></url>"
 
             find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
               [ -f "$dir/index.html" ] || continue
               slug=$(basename "$dir")
-              echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>"
+              echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$(date -u +%F)</lastmod></url>"
             done
 
             echo '</urlset>'
           } > sitemap.xml
 
       - name: Commit generated pages and sitemap
-        shell: bash
         run: |
           set -euo pipefail
 
@@ -201,5 +193,4 @@ jobs:
           else
             git commit -m "Auto SEO generation + sitemap update"
             git push
-            echo "Changes committed and pushed"
           fi
