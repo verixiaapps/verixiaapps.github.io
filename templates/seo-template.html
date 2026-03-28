@@ -1200,6 +1200,50 @@ function containsAny(text, phrases) {
   return phrases.some(phrase => text.includes(phrase));
 }
 
+function isGuidanceStyleKeyword(lower) {
+  return (
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do after ") ||
+    lower.startsWith("how to recover after ") ||
+    lower.startsWith("how to secure ") ||
+    lower.startsWith("how to block ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what happens after ") ||
+    lower.startsWith("what is ") ||
+    lower.startsWith("why ") ||
+    lower.startsWith("when ") ||
+    lower.startsWith("where ") ||
+    lower.startsWith("who ") ||
+    lower.startsWith("can ") ||
+    lower.startsWith("should ") ||
+    lower.startsWith("could ") ||
+    lower.startsWith("would ") ||
+    lower.startsWith("do ") ||
+    lower.startsWith("does ") ||
+    lower.startsWith("did ") ||
+    lower.startsWith("almost ")
+  );
+}
+
+function getReadableSubject(keywordRaw) {
+  const kw = normalizeKeyword(keywordRaw);
+  const lower = kw.toLowerCase();
+
+  if (!kw) return "";
+
+  let subject = kw;
+
+  if (lower.startsWith("is this ")) {
+    subject = kw.replace(/^is this\s+/i, "").trim();
+  } else if (lower.startsWith("is ")) {
+    subject = kw.replace(/^is\s+/i, "").trim();
+  }
+
+  subject = subject.replace(/\s+legit\b/i, "").trim();
+
+  return displayKeyword(cleanKeywordForSentence(subject) || subject);
+}
+
 function getScamTypeData(keywordRaw) {
   const kw = normalizeKeyword(keywordRaw).toLowerCase();
 
@@ -1461,7 +1505,7 @@ function buildHeroTitle(keywordRaw) {
   const kw = normalizeKeyword(keywordRaw);
   const lower = kw.toLowerCase();
   const title = displayKeyword(kw);
-  const cleanTitle = displayKeyword(cleanKeywordForSentence(kw) || kw);
+  const cleanTitle = getReadableSubject(kw) || title;
 
   if (!kw) {
     return "Is this a scam? Check Before You Click or Send Money";
@@ -1530,121 +1574,63 @@ function buildHeroTitle(keywordRaw) {
   }
 
   if (lower.startsWith("is ") && lower.includes(" legit")) {
-    const clean = displayKeyword(cleanKeywordForSentence(kw.replace(/\s+legit\b/i, "").trim()) || kw.replace(/\s+legit\b/i, "").trim());
-    return `${clean} Legit or a Scam? Warning Signs & What To Do`;
-  }
-
-  if (lower.startsWith("is this ")) {
-    const subject = kw.replace(/^is this\s+/i, "").trim();
-    const cleanSubject = displayKeyword(cleanKeywordForSentence(subject) || subject);
-    return cleanSubject
-      ? `Is ${cleanSubject} a Scam? Check Before You Click or Send Money`
+    return cleanTitle
+      ? `${cleanTitle} Legit or a Scam? Warning Signs & What To Do`
       : "Is this a scam? Check Before You Click or Send Money";
   }
 
-  if (lower.startsWith("is ")) {
-    const subject = kw.replace(/^is\s+/i, "").trim();
-    const subjectWithoutLegit = subject.replace(/\s+legit\b/i, "").trim();
-    const cleanSubject = displayKeyword(cleanKeywordForSentence(subjectWithoutLegit) || subjectWithoutLegit);
-    return cleanSubject
-      ? `Is ${cleanSubject} a Scam? Check Before You Click or Send Money`
+  if (lower.startsWith("is this ") || lower.startsWith("is ")) {
+    return cleanTitle
+      ? `Is ${cleanTitle} a Scam? Check Before You Click or Send Money`
       : "Is this a scam? Check Before You Click or Send Money";
   }
 
-  return `Is ${cleanTitle} a Scam? Check Before You Click or Send Money`;
+  return cleanTitle
+    ? `Is ${cleanTitle} a Scam? Check Before You Click or Send Money`
+    : "Is this a scam? Check Before You Click or Send Money";
 }
 
 function buildHeroSubheading(keywordRaw) {
   const kw = normalizeKeyword(keywordRaw);
   const lower = kw.toLowerCase();
-  const readableKeyword = displayKeyword(cleanKeywordForSentence(kw) || kw);
+  const readableKeyword = getReadableSubject(kw) || displayKeyword(kw);
 
-  if (
-    lower.startsWith("how to ") ||
-    lower.startsWith("what to do after ") ||
-    lower.startsWith("how to recover after ") ||
-    lower.startsWith("how to secure ") ||
-    lower.startsWith("how to block ") ||
-    lower.startsWith("how to avoid ") ||
-    lower.startsWith("what happens after ") ||
-    lower.startsWith("what is ") ||
-    lower.startsWith("why ") ||
-    lower.startsWith("when ") ||
-    lower.startsWith("where ") ||
-    lower.startsWith("who ") ||
-    lower.startsWith("can ") ||
-    lower.startsWith("should ") ||
-    lower.startsWith("could ") ||
-    lower.startsWith("would ") ||
-    lower.startsWith("do ") ||
-    lower.startsWith("does ") ||
-    lower.startsWith("did ")
-  ) {
+  if (isGuidanceStyleKeyword(lower)) {
     return `Use the checker below to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.`;
   }
 
-  return `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
+  if (lower.startsWith("is this ") || lower.startsWith("is ")) {
+    return readableKeyword
+      ? `Paste the ${readableKeyword.toLowerCase()} message, email, or link you received below to check scam risk before you click, reply, send money, or share information.`
+      : `Paste the message, email, or link you received below to check scam risk before you click, reply, send money, or share information.`;
+  }
+
+  return readableKeyword
+    ? `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`
+    : `Paste the suspicious message, email, or link below to check scam risk before you click, reply, send money, or share information.`;
 }
 
 function buildContentHeading(keywordRaw) {
   const kw = normalizeKeyword(keywordRaw);
   const lower = kw.toLowerCase();
   const title = displayKeyword(kw);
+  const cleanTitle = getReadableSubject(kw) || title;
 
-  if (
-    lower.startsWith("how to ") ||
-    lower.startsWith("what to do after ") ||
-    lower.startsWith("how to recover after ") ||
-    lower.startsWith("how to secure ") ||
-    lower.startsWith("how to block ") ||
-    lower.startsWith("how to avoid ") ||
-    lower.startsWith("what happens after ") ||
-    lower.startsWith("what is ") ||
-    lower.startsWith("why ") ||
-    lower.startsWith("when ") ||
-    lower.startsWith("where ") ||
-    lower.startsWith("who ") ||
-    lower.startsWith("can ") ||
-    lower.startsWith("should ") ||
-    lower.startsWith("could ") ||
-    lower.startsWith("would ") ||
-    lower.startsWith("do ") ||
-    lower.startsWith("does ") ||
-    lower.startsWith("did ") ||
-    lower.startsWith("almost ")
-  ) {
+  if (isGuidanceStyleKeyword(lower)) {
     return title;
   }
 
-  return `What ${title} Messages, Links, and Offers Often Look Like`;
+  return cleanTitle
+    ? `What ${cleanTitle} Scam Messages, Links, and Offers Often Look Like`
+    : "What Scam Messages, Links, and Offers Often Look Like";
 }
 
 function buildContentBridge(keywordRaw) {
   const kw = normalizeKeyword(keywordRaw);
   const lower = kw.toLowerCase();
-  const cleanKeyword = displayKeyword(cleanKeywordForSentence(kw) || kw);
+  const cleanKeyword = getReadableSubject(kw) || displayKeyword(kw);
 
-  if (
-    lower.startsWith("how to ") ||
-    lower.startsWith("what to do after ") ||
-    lower.startsWith("how to recover after ") ||
-    lower.startsWith("how to secure ") ||
-    lower.startsWith("how to block ") ||
-    lower.startsWith("how to avoid ") ||
-    lower.startsWith("what happens after ") ||
-    lower.startsWith("what is ") ||
-    lower.startsWith("why ") ||
-    lower.startsWith("when ") ||
-    lower.startsWith("where ") ||
-    lower.startsWith("who ") ||
-    lower.startsWith("can ") ||
-    lower.startsWith("should ") ||
-    lower.startsWith("could ") ||
-    lower.startsWith("would ") ||
-    lower.startsWith("do ") ||
-    lower.startsWith("does ") ||
-    lower.startsWith("did ")
-  ) {
+  if (isGuidanceStyleKeyword(lower) && !lower.startsWith("almost ")) {
     return `Use the checker above to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.`;
   }
 
@@ -1652,7 +1638,15 @@ function buildContentBridge(keywordRaw) {
     return `If you are unsure what happened, use the checker above to review suspicious messages, emails, links, and offers before taking action.`;
   }
 
-  return `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`;
+  if (lower.startsWith("is this ") || lower.startsWith("is ")) {
+    return cleanKeyword
+      ? `If you received a ${cleanKeyword.toLowerCase()} message, email, or link, use the checker above before you click, reply, send money, or share information.`
+      : `Use the checker above before you click links, reply, send money, or share information.`;
+  }
+
+  return cleanKeyword
+    ? `${chooseBridgeIntro(cleanKeyword)} use the checker above before you click links, reply, send money, or share information.`
+    : `Use the checker above before you click links, reply, send money, or share information.`;
 }
 
 function buildCheckerPrefill(keywordRaw) {
@@ -1661,36 +1655,11 @@ function buildCheckerPrefill(keywordRaw) {
 
   if (!kw) return "";
 
-  if (
-    lower.startsWith("how to ") ||
-    lower.startsWith("what to do after ") ||
-    lower.startsWith("how to recover after ") ||
-    lower.startsWith("how to secure ") ||
-    lower.startsWith("how to block ") ||
-    lower.startsWith("how to avoid ") ||
-    lower.startsWith("what happens after ") ||
-    lower.startsWith("what is ") ||
-    lower.startsWith("why ") ||
-    lower.startsWith("when ") ||
-    lower.startsWith("where ") ||
-    lower.startsWith("who ") ||
-    lower.startsWith("can ") ||
-    lower.startsWith("should ") ||
-    lower.startsWith("could ") ||
-    lower.startsWith("would ") ||
-    lower.startsWith("do ") ||
-    lower.startsWith("does ") ||
-    lower.startsWith("did ") ||
-    lower.startsWith("almost ")
-  ) {
+  if (isGuidanceStyleKeyword(lower)) {
     return "";
   }
 
-  if (lower.startsWith("is this ")) {
-    return "Paste the actual message, email, or link you received here so we can analyze it.";
-  }
-
-  if (lower.startsWith("is ")) {
+  if (lower.startsWith("is this ") || lower.startsWith("is ")) {
     return "Paste the actual message, email, or link you received here so we can analyze it.";
   }
 
