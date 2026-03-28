@@ -323,6 +323,10 @@ LOW_VALUE_SENTENCES = [
     "let me know if you want",
     "as an ai",
     "i cannot verify",
+    "i can't help with that",
+    "i cannot help with that",
+    "cannot assist",
+    "content policy",
 ]
 
 # -----------------------------
@@ -335,7 +339,6 @@ def normalize_keyword(text: str) -> str:
 def clean_base_keyword(text: str) -> str:
     kw = normalize_keyword(text)
 
-    # Remove common leading wrappers that break phrasing
     kw = re.sub(r"^\s*is\s+", "", kw)
     kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+by\s+", "", kw)
@@ -343,7 +346,6 @@ def clean_base_keyword(text: str) -> str:
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+with\s+", "", kw)
     kw = re.sub(r"^\s*this\s+", "this ", kw)
 
-    # Remove common trailing wrappers
     kw = re.sub(r"\s+a\s+scam$", "", kw)
     kw = re.sub(r"\s+or\s+legit$", "", kw)
     kw = re.sub(r"\s+or\s+scam$", "", kw)
@@ -352,10 +354,8 @@ def clean_base_keyword(text: str) -> str:
     kw = re.sub(r"\s+safe$", "", kw)
     kw = re.sub(r"\s+scam$", "", kw)
 
-    # Clean malformed leftovers
     kw = re.sub(r"\s+a$", "", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
-
     return kw
 
 
@@ -380,10 +380,7 @@ def title_case(text: str) -> str:
     titled = []
 
     for i, word in enumerate(words):
-        if i > 0 and word in SMALL_WORDS:
-            titled.append(word)
-        else:
-            titled.append(word.capitalize())
+        titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
 
     return apply_brand_case(" ".join(titled))
 
@@ -624,7 +621,6 @@ def clean_text(text: str) -> str:
                 cleaned.append(p)
 
     cleaned = dedupe_preserve_order(cleaned)
-
     return "\n".join(f"<p>{p}</p>" for p in cleaned[:4])
 
 
@@ -734,41 +730,6 @@ def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
 """.strip()
 
 
-def fallback_content(raw_keyword: str, display_kw: str) -> str:
-    keyword_title = title_case(display_kw)
-    context = detect_context(raw_keyword)
-    idx = variant_index(display_kw, len(GENERIC_WARNING_BULLET_SETS))
-
-    intro = intro_paragraph(raw_keyword, display_kw)
-    scenario = scenario_paragraph(raw_keyword, display_kw)
-    detail = context_detail_paragraph(raw_keyword, display_kw)
-
-    bullets = get_warning_bullets(context, idx)
-    action_intro = ACTION_SECTION_INTROS[idx]
-    action = get_action_paragraph(context, idx, keyword_title)
-
-    bullet_html = "\n".join(f"<li>{b}</li>" for b in bullets)
-
-    return f"""
-{intro}
-{scenario}
-{detail}
-
-<p>{keyword_title} scams often rely on urgency, impersonation, and requests that push you to act before you verify what is happening.</p>
-<p>They may arrive through a text, email, website, social message, phone call, or payment request that looks routine at first.</p>
-<p>The safest move is to verify everything independently before clicking, replying, sending money, or sharing personal details.</p>
-
-<h2>{WARNING_SECTION_TITLES[idx]}</h2>
-<ul>
-{bullet_html}
-</ul>
-
-<h2>{ACTION_SECTION_TITLES[idx]}</h2>
-<p>{action_intro}</p>
-<p>{action}</p>
-""".strip()
-
-
 # -----------------------------
 # MAIN
 # -----------------------------
@@ -776,30 +737,45 @@ def generate_content(keyword: str) -> str:
     raw_keyword = normalize_keyword(keyword)
     display_kw = display_keyword(raw_keyword)
 
-    logging.info("Generating content for: %s", display_kw)
+    if not display_kw:
+        raise ValueError("Empty keyword after normalization")
 
-    try:
-        res = requests.post(
-            f"{RAILWAY_API}/seo-content",
-            json={"keyword": display_kw},
-            timeout=TIMEOUT
-        )
-        res.raise_for_status()
+    logging.info("Generating content for: %s", raw_keyword)
 
-        raw = str(res.json().get("content", "")).strip()
-        if not raw:
-            raise ValueError("Empty content")
+    payload_variants = dedupe_preserve_order([
+        raw_keyword,
+        display_kw,
+        title_case(display_kw),
+        f"is {display_kw} a scam" if display_kw and not raw_keyword.startswith("is ") else raw_keyword,
+        f"{display_kw} legit or scam" if display_kw and "legit" not in raw_keyword and "scam" not in raw_keyword else raw_keyword,
+    ])
 
-        cleaned = clean_text(raw)
+    last_error = None
 
-        if not is_usable_content(cleaned):
-            raise ValueError("Low quality")
+    for prompt_keyword in payload_variants:
+        try:
+            res = requests.post(
+                f"{RAILWAY_API}/seo-content",
+                json={"keyword": prompt_keyword},
+                timeout=TIMEOUT
+            )
+            res.raise_for_status()
 
-        return enforce_structure(raw_keyword, display_kw, cleaned)
+            raw = str(res.json().get("content", "")).strip()
+            if not raw:
+                raise ValueError(f"Empty content for prompt: {prompt_keyword}")
 
-    except Exception as e:
-        logging.warning("Fallback for %s: %s", display_kw, e)
-        return fallback_content(raw_keyword, display_kw)
+            cleaned = clean_text(raw)
+            if not is_usable_content(cleaned):
+                raise ValueError(f"Low quality content for prompt: {prompt_keyword}")
+
+            return enforce_structure(raw_keyword, display_kw, cleaned)
+
+        except Exception as e:
+            last_error = e
+            logging.warning("AI generation failed for %s using prompt '%s': %s", raw_keyword, prompt_keyword, e)
+
+    raise ValueError(f"AI generation failed for '{raw_keyword}': {last_error}")
 
 
 # -----------------------------
