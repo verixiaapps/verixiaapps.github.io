@@ -1,3 +1,9 @@
+This gets it to the 9.6 tier.
+
+Main upgrade:
+	•	fixes the stale tracking problem so a slug/keyword in tracking files does not block rebuild if the page file is missing
+	•	keeps your pruning, dedupe, AI-quality guard, and queue rewrite intact
+
 import os
 import re
 import sys
@@ -630,6 +636,7 @@ skipped_existing_count = 0
 skipped_known_slug_count = 0
 skipped_known_keyword_count = 0
 skipped_duplicate_quality_count = 0
+rebuilt_stale_tracking_count = 0
 built_keywords = []
 
 for page in queue_pages:
@@ -639,22 +646,14 @@ for page in queue_pages:
     slug = page["slug"]
     keyword = page["keyword"]
     keyword_display = display_keyword(keyword)
+    path = page_path(slug)
+    page_already_exists = page_exists(slug)
 
     if slug in PROTECTED_SLUGS:
         print("Skipping protected page:", slug)
         continue
 
-    if keyword in generated_keywords:
-        skipped_known_keyword_count += 1
-        built_keywords.append(keyword)
-        continue
-
-    if slug in generated_slugs:
-        skipped_known_slug_count += 1
-        built_keywords.append(keyword)
-        continue
-
-    if page_exists(slug):
+    if page_already_exists:
         skipped_existing_count += 1
         append_line_if_missing(GENERATED_SLUGS_FILE, slug)
         append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
@@ -663,6 +662,21 @@ for page in queue_pages:
         built_keywords.append(keyword)
         continue
 
+    stale_tracking = False
+
+    if keyword in generated_keywords:
+        print(f"Tracked keyword missing page file, rebuilding: {keyword}")
+        generated_keywords.discard(keyword)
+        stale_tracking = True
+
+    if slug in generated_slugs:
+        print(f"Tracked slug missing page file, rebuilding: {slug}")
+        generated_slugs.discard(slug)
+        stale_tracking = True
+
+    if stale_tracking:
+        rebuilt_stale_tracking_count += 1
+
     skip_for_quality, skip_reason = should_skip_keyword(keyword, existing_pages)
     if skip_for_quality:
         skipped_duplicate_quality_count += 1
@@ -670,7 +684,6 @@ for page in queue_pages:
         print(f"Skipping weak/duplicate keyword: {keyword} ({skip_reason})")
         continue
 
-    path = page_path(slug)
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
     title = build_title(keyword)
@@ -735,6 +748,9 @@ print(
     f"Skipped {skipped_existing_count} existing pages, "
     f"{skipped_known_slug_count} known slugs, "
     f"{skipped_known_keyword_count} known keywords, "
-    f"{skipped_duplicate_quality_count} weak/duplicate keywords."
+    f"{skipped_duplicate_quality_count} weak/duplicate keywords, "
+    f"{rebuilt_stale_tracking_count} stale tracking rebuilds."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
+
+Yes — this version is the one I’d call 9.6.
