@@ -1736,4 +1736,194 @@ function signalIconForRisk(risk) {
   return "•";
 }
 
-function chipByRisk(risk)
+function chipByRisk(risk) {
+  if (risk === "high") return "Pattern Match: Strong";
+  if (risk === "medium") return "Pattern Match: Moderate";
+  if (risk === "low") return "Pattern Match: Lower Risk";
+  return "Pattern Match: Review Needed";
+}
+
+function formatResult(raw) {
+  const lines = String(raw || "").split("\n").map(l => l.trim()).filter(Boolean);
+
+  let risk = "";
+  let signals = [];
+  let actions = [];
+  let mode = "";
+
+  lines.forEach(line => {
+    const lower = line.toLowerCase();
+
+    if (lower.includes("risk level")) {
+      risk = line.split(":").slice(1).join(":").trim();
+      return;
+    }
+
+    if (lower.includes("key signals")) {
+      mode = "signals";
+      return;
+    }
+
+    if (lower.includes("recommended action")) {
+      mode = "actions";
+      return;
+    }
+
+    if (line.startsWith("-")) {
+      const cleaned = line.replace(/^-+\s*/, "");
+      if (mode === "signals") signals.push(cleaned);
+      if (mode === "actions") actions.push(cleaned);
+    }
+  });
+
+  const riskClass = (risk || "review").trim().toLowerCase();
+  const safeRiskClass = cardClassForRisk(riskClass);
+  const signalIcon = signalIconForRisk(safeRiskClass);
+  const continuationLine = safeRiskClass !== "low"
+    ? `<div class="result-continuation">If this reached you, similar messages may already be on the way.</div>`
+    : "";
+
+  if (signals.length === 0) {
+    signals = ["Review the sender, links, and any requests for money, urgency, or personal information."];
+  }
+
+  if (actions.length === 0) {
+    actions = ["Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action."];
+  }
+
+  return `
+  <div class="result-card ${safeRiskClass}">
+    <div class="result-top">
+      <div class="risk ${safeRiskClass}">${iconForRisk(safeRiskClass)} ${safeRiskClass === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + safeRiskClass.toUpperCase()}</div>
+      <div class="result-chip">${chipByRisk(safeRiskClass)}</div>
+    </div>
+
+    <div class="result-summary">${escapeHtml(summaryForRisk(safeRiskClass))}</div>
+    ${continuationLine}
+
+    <div class="section">
+      <div class="section-title">Detected Signals</div>
+      <ul class="signal-list">
+        ${signals.map(s => `<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>${escapeHtml(s)}</span></li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recommended Actions</div>
+      <div class="action-box">${escapeHtml(actions[0])}</div>
+    </div>
+
+    <div class="result-payline">${escapeHtml(paylineForRisk(safeRiskClass))}</div>
+  </div>
+  `;
+}
+
+function showUpgrade() {
+  const el = document.getElementById("upgrade");
+  if (!el) return;
+  el.style.display = "block";
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+}
+
+function scrollToEmail() {
+  const emailField = document.getElementById("email");
+  if (!emailField) return;
+  emailField.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => emailField.focus(), 150);
+}
+
+async function check() {
+  const text = document.getElementById("text").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
+  const result = document.getElementById("result");
+
+  if (!text) {
+    result.innerHTML = `
+      <div class="result-card unknown">
+        <div class="result-top">
+          <div class="risk unknown">⚪ Paste Something To Check</div>
+          <div class="result-chip">Awaiting Input</div>
+        </div>
+        <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to analyze scam risk.</div>
+      </div>
+    `;
+    result.style.display = "block";
+    return;
+  }
+
+  result.style.display = "block";
+  result.innerHTML = `
+    <div class="result-card unknown">
+      <div class="result-top">
+        <div class="risk unknown">⚪ Analyzing...</div>
+        <div class="result-chip">Scan In Progress</div>
+      </div>
+      <div class="result-summary">Checking for scam signals, risky patterns, payment traps, impersonation, and suspicious links.</div>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(API + "/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, email, subscribed })
+    });
+
+    const data = await response.json();
+
+    if (data.limit) {
+      result.innerHTML = `
+        <div class="result-card medium">
+          <div class="result-top">
+            <div class="risk medium">🟠 Free Check Used</div>
+            <div class="result-chip">Upgrade Available</div>
+          </div>
+          <div class="result-summary">Unlock unlimited scam checks so you can review the next suspicious message, link, or offer the moment it shows up.</div>
+        </div>
+      `;
+      showUpgrade();
+      return;
+    }
+
+    result.innerHTML = formatResult(data.result || "");
+    showUpgrade();
+  } catch (e) {
+    result.innerHTML = `
+      <div class="result-card unknown">
+        <div class="result-top">
+          <div class="risk unknown">⚪ Unable To Analyze</div>
+          <div class="result-chip">Try Again</div>
+        </div>
+        <div class="result-summary">We could not analyze this right now. Please try again in a moment.</div>
+      </div>
+    `;
+  }
+}
+
+async function checkout(priceId) {
+  const pageUrl = window.location.origin + window.location.pathname;
+
+  const response = await fetch(API + "/create-checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      priceId,
+      email: null,
+      successUrl: pageUrl + "?subscribed=true",
+      cancelUrl: pageUrl
+    })
+  });
+
+  const data = await response.json();
+
+  if (data.url) {
+    window.location = data.url;
+  } else {
+    alert("Checkout failed.");
+  }
+}
+</script>
+
+</body>
+</html>
