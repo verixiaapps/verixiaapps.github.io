@@ -8,9 +8,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: seo-page-generator
+  cancel-in-progress: false
+
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     env:
       START_DATE: "2026-03-22"
@@ -23,61 +28,85 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
+        shell: bash
         run: |
-          pip install openai requests
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install openai requests
+          fi
 
       - name: Set phase and daily limit
+        shell: bash
         run: |
           TODAY=$(date -u +%F)
           DAY_DIFF=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
 
-          echo "PHASE=phase_3" >> $GITHUB_ENV
-          echo "DAILY_LIMIT=100" >> $GITHUB_ENV
+          if [ "$DAY_DIFF" -le 14 ]; then
+            PHASE="phase_1"
+            DAILY_LIMIT="60"
+          elif [ "$DAY_DIFF" -le 42 ]; then
+            PHASE="phase_2"
+            DAILY_LIMIT="100"
+          else
+            PHASE="phase_3"
+            DAILY_LIMIT="100"
+          fi
 
-          echo "TODAY=$TODAY" >> $GITHUB_ENV
-          echo "DAY_DIFF=$DAY_DIFF" >> $GITHUB_ENV
+          echo "PHASE=$PHASE" >> "$GITHUB_ENV"
+          echo "DAILY_LIMIT=$DAILY_LIMIT" >> "$GITHUB_ENV"
+          echo "TODAY=$TODAY" >> "$GITHUB_ENV"
+          echo "DAY_DIFF=$DAY_DIFF" >> "$GITHUB_ENV"
 
-          echo "Running phase_3 on day $DAY_DIFF with DAILY_LIMIT=100"
+          echo "Running $PHASE on day $DAY_DIFF with DAILY_LIMIT=$DAILY_LIMIT"
 
       - name: Build SEO pages incrementally
+        shell: bash
         run: |
           python scripts/build_seo_incremental.py
         env:
           DAILY_LIMIT: ${{ env.DAILY_LIMIT }}
 
       - name: Build hub pages
+        shell: bash
         run: |
           python scripts/build_hubs.py
 
       - name: Build ROOT sitemap (authoritative)
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap.xml
-          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap.xml
+          {
+            echo '<?xml version="1.0" encoding="UTF-8"?>'
+            echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
 
-          echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
-          echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
+            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>"
+            echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>"
 
-          for dir in scam-check-now/*/; do
-            [ -d "$dir" ] || continue
-            [ -f "${dir}index.html" ] || continue
+            find scam-check-now -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
+              [ -f "$dir/index.html" ] || continue
 
-            slug=$(basename "$dir")
+              slug=$(basename "$dir")
 
-            if [ "$slug" = "is-this-a-scam" ]; then
-              continue
-            fi
+              if [ "$slug" = "is-this-a-scam" ]; then
+                continue
+              fi
 
-            echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>" >> sitemap.xml
-          done
+              echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>"
+            done
 
-          echo '</urlset>' >> sitemap.xml
+            echo '</urlset>'
+          } > sitemap.xml
 
       - name: Commit generated pages and sitemap
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config --global user.name "seo-bot"
           git config --global user.email "bot@users.noreply.github.com"
           git add .
