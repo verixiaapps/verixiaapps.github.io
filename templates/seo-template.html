@@ -9,6 +9,24 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="{{CANONICAL_URL}}">
 
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{CANONICAL_URL}}">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{TITLE}}">
+<meta name="twitter:description" content="{{DESCRIPTION}}">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebPage",
+  "name":"{{TITLE}}",
+  "description":"{{DESCRIPTION}}",
+  "url":"{{CANONICAL_URL}}"
+}
+</script>
+
 <style>
 :root{
 --bg-top:#eef4ff;
@@ -868,6 +886,39 @@ padding-left:22px;
 margin-bottom:10px;
 }
 
+.inline-info-card{
+margin:0 0 22px;
+padding:16px 18px;
+border-radius:20px;
+background:#f8fbff;
+border:1px solid #dbeafe;
+box-shadow:0 10px 22px rgba(37,99,235,.05);
+}
+
+.inline-info-card p{
+margin:0;
+font-size:15px;
+font-weight:800;
+line-height:1.6;
+color:#334155;
+}
+
+.inline-info-card a{
+color:var(--blue);
+text-decoration:none;
+font-weight:900;
+}
+
+.inline-info-card a:hover{
+text-decoration:underline;
+}
+
+.link-section{
+margin-top:28px;
+padding-top:24px;
+border-top:1px solid var(--line-soft);
+}
+
 .related-links{
 margin:0;
 padding-left:22px;
@@ -885,6 +936,18 @@ font-weight:700;
 
 .related-links a:hover{
 text-decoration:underline;
+}
+
+.content-close{
+margin-top:28px;
+padding:18px;
+border-radius:20px;
+background:#f8fafc;
+border:1px solid var(--line-soft);
+font-size:15px;
+font-weight:800;
+color:#334155;
+line-height:1.7;
 }
 
 .footer{
@@ -1037,6 +1100,12 @@ font-size:15px;
 .signal-item{
 font-size:14px;
 }
+.inline-info-card{
+padding:14px 15px;
+}
+.content-close{
+padding:15px;
+}
 }
 </style>
 </head>
@@ -1142,11 +1211,27 @@ font-size:14px;
 
 <section class="content-section">
   <div id="contentBridge" class="content-bridge"></div>
+
+  <div class="inline-info-card" id="hubLinkWrap">
+    {{HUB_LINK}}
+  </div>
+
   <h2 id="contentHeading"></h2>
   <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
-  <h3 id="relatedHeading">Related Scam Checks</h3>
-  <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
+  <div class="link-section">
+    <h3 id="relatedHeading">Related Scam Checks</h3>
+    <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
+  </div>
+
+  <div class="link-section" id="moreLinksWrap">
+    <h3 id="moreLinksHeading">More Scam Checks</h3>
+    <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+  </div>
+
+  <div class="content-close">
+    Scam tactics change constantly. If something feels urgent, unusual, or asks for money, codes, login details, or personal information, verify it independently before taking action.
+  </div>
 </section>
 
 <footer class="footer">
@@ -1184,6 +1269,8 @@ window.addEventListener("load", function () {
   applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
+  cleanHubLink();
+  cleanMoreLinks();
 });
 
 function isBrowserSubscribed() {
@@ -1388,7 +1475,6 @@ function buildContentBridge(keywordRaw) {
   const raw = normalizeKeyword(keywordRaw);
   const lower = raw.toLowerCase();
   const cleanSentenceKeyword = cleanKeywordForSentence(raw) || cleanKeywordBase(raw) || raw;
-  const readableSentenceKeyword = displayKeyword(cleanSentenceKeyword);
 
   if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
     return "Use the checker above to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.";
@@ -1539,6 +1625,34 @@ function cleanRelatedLinks() {
   if (links.length === 0) {
     relatedLinks.style.display = "none";
     relatedHeading.style.display = "none";
+  }
+}
+
+function cleanHubLink() {
+  const hubLinkWrap = document.getElementById("hubLinkWrap");
+  if (!hubLinkWrap) return;
+
+  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
+
+  const hasAnchor = hubLinkWrap.querySelector("a");
+  if (!hasAnchor) {
+    hubLinkWrap.style.display = "none";
+  }
+}
+
+function cleanMoreLinks() {
+  const moreLinksWrap = document.getElementById("moreLinksWrap");
+  const moreLinks = document.getElementById("moreLinks");
+  const moreLinksHeading = document.getElementById("moreLinksHeading");
+
+  if (!moreLinksWrap || !moreLinks || !moreLinksHeading) return;
+
+  moreLinks.innerHTML = moreLinks.innerHTML.replace(/\*\*/g, "").trim();
+
+  const links = moreLinks.querySelectorAll("li a");
+  if (links.length === 0) {
+    moreLinksWrap.style.display = "none";
+    moreLinksHeading.style.display = "none";
   }
 }
 
