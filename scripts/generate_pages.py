@@ -1,5 +1,3 @@
-Here is your revised file with ONLY the fix applied (6 most related, otherwise fill to 6):
-
 import os
 import re
 from generate_content import generate_content
@@ -12,6 +10,58 @@ RELATED_LINKS_COUNT = 6
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
 
+CLUSTER_TERMS = {
+    "amazon", "paypal", "zelle", "cash", "venmo", "facebook", "instagram",
+    "tiktok", "whatsapp", "telegram", "snapchat", "discord", "crypto",
+    "bitcoin", "ethereum", "usps", "fedex", "ups", "bank", "chase",
+    "wells", "america", "job", "loan", "credit", "romance", "gift",
+    "irs", "social", "verification", "phishing", "login", "account"
+}
+
+BRAND_CASE = {
+    "paypal": "PayPal",
+    "whatsapp": "WhatsApp",
+    "cash app": "Cash App",
+    "tiktok": "TikTok",
+    "icloud": "iCloud",
+    "irs": "IRS",
+    "usps": "USPS",
+    "ups": "UPS",
+    "fedex": "FedEx",
+    "sms": "SMS",
+    "otp": "OTP",
+    "2fa": "2FA",
+    "dm": "DM",
+    "nft": "NFT",
+    "ceo": "CEO",
+    "binance": "Binance",
+    "coinbase": "Coinbase",
+    "metamask": "MetaMask",
+    "trust wallet": "Trust Wallet",
+    "google play": "Google Play",
+    "zelle": "Zelle",
+    "venmo": "Venmo",
+    "amazon": "Amazon",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "snapchat": "Snapchat",
+    "discord": "Discord",
+    "crypto": "Crypto",
+    "bitcoin": "Bitcoin",
+    "ethereum": "Ethereum",
+    "bank": "Bank",
+    "chase": "Chase",
+    "wells fargo": "Wells Fargo",
+    "social security": "Social Security",
+    "google": "Google",
+    "apple": "Apple",
+    "microsoft": "Microsoft",
+    "steam": "Steam",
+    "walmart": "Walmart",
+    "target": "Target",
+}
+
 
 def slugify(text):
     text = text.lower()
@@ -20,22 +70,57 @@ def slugify(text):
 
 
 def normalize_keyword(text):
-    return re.sub(r"\s+", " ", text.strip().lower())
+    return re.sub(r"\s+", " ", str(text).strip().lower())
 
 
-def display_keyword(text):
+def clean_base_keyword(text):
     kw = normalize_keyword(text)
-    if kw.endswith(" scam"):
-        kw = kw[:-5].strip()
+
+    kw = re.sub(r"^\s*is\s+", "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
+    kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
+    kw = re.sub(r"^\s*this\s+", "this ", kw)
+
+    kw = re.sub(r"\s+a\s+scam$", "", kw)
+    kw = re.sub(r"\s+or\s+legit$", "", kw)
+    kw = re.sub(r"\s+or\s+scam$", "", kw)
+    kw = re.sub(r"\s+legit$", "", kw)
+    kw = re.sub(r"\s+real$", "", kw)
+    kw = re.sub(r"\s+safe$", "", kw)
+    kw = re.sub(r"\s+scam$", "", kw)
+
+    kw = re.sub(r"\s+a$", "", kw)
+    kw = re.sub(r"\s+", " ", kw).strip()
+
     return kw
 
 
+def display_keyword(text):
+    return clean_base_keyword(text)
+
+
+def apply_brand_case(text):
+    result = f" {text} "
+    for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
+        pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
+        result = re.sub(pattern, proper, result, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", result).strip()
+
+
 def title_case(text):
-    return " ".join(word.capitalize() for word in text.split())
+    if not text:
+        return ""
+    words = normalize_keyword(text).split()
+    titled = [word.capitalize() for word in words]
+    return apply_brand_case(" ".join(titled))
 
 
 def keyword_tokens(text):
-    return set(normalize_keyword(text).split())
+    return set(clean_base_keyword(text).split())
+
+
+def keyword_cluster_tokens(text):
+    return {token for token in keyword_tokens(text) if token in CLUSTER_TERMS}
 
 
 def load_keywords():
@@ -54,10 +139,11 @@ def build_title(keyword):
 
 
 def build_description(keyword):
-    keyword_title = title_case(normalize_keyword(keyword))
+    clean_kw = display_keyword(keyword)
+    keyword_title = title_case(clean_kw)
     return (
         f"Is {keyword_title} a scam or legit? Check real risk signals, warning signs, "
-        f"and what to do next. Free AI scam checker for {normalize_keyword(keyword)} messages, emails, or links."
+        f"and what to do next. Free AI scam checker for {clean_kw} messages, emails, or links."
     )
 
 
@@ -69,7 +155,8 @@ def get_related_pages(current_page, all_pages, limit=RELATED_LINKS_COUNT):
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
-    current_root = current_keyword.split()[0]
+    current_cluster = keyword_cluster_tokens(current_keyword)
+    current_root = clean_base_keyword(current_keyword).split()[0] if clean_base_keyword(current_keyword) else ""
 
     valid_pages = [
         p for p in all_pages
@@ -79,21 +166,35 @@ def get_related_pages(current_page, all_pages, limit=RELATED_LINKS_COUNT):
     def relevance_score(page):
         other_keyword = page["keyword"]
         other_tokens = keyword_tokens(other_keyword)
-        same_root = 1 if other_keyword.split()[0] == current_root else 0
+        other_cluster = keyword_cluster_tokens(other_keyword)
+        other_root = clean_base_keyword(other_keyword).split()[0] if clean_base_keyword(other_keyword) else ""
+
+        same_root = 1 if other_root == current_root and current_root else 0
+        shared_cluster = len(current_cluster & other_cluster)
         shared_tokens = len(current_tokens & other_tokens)
-        length_diff = abs(len(other_keyword) - len(current_keyword))
-        return (-same_root, -shared_tokens, length_diff, other_keyword)
+        length_diff = abs(len(clean_base_keyword(other_keyword).split()) - len(clean_base_keyword(current_keyword).split()))
+
+        return (-same_root, -shared_cluster, -shared_tokens, length_diff, other_keyword)
 
     ranked_pages = sorted(valid_pages, key=relevance_score)
 
-    # take most related first
-    selected = ranked_pages[:limit]
+    selected = []
+    used_slugs = set()
 
-    # if not enough, fill with remaining pages
+    for page in ranked_pages:
+        if page["slug"] in used_slugs:
+            continue
+        selected.append(page)
+        used_slugs.add(page["slug"])
+        if len(selected) == limit:
+            break
+
     if len(selected) < limit:
-        for p in ranked_pages[limit:]:
-            if p not in selected:
-                selected.append(p)
+        for page in valid_pages:
+            if page["slug"] in used_slugs:
+                continue
+            selected.append(page)
+            used_slugs.add(page["slug"])
             if len(selected) == limit:
                 break
 
@@ -105,12 +206,15 @@ def build_page(keyword, template, all_pages):
     keyword_display = display_keyword(keyword)
 
     try:
-        content = generate_content(keyword)
+        content = generate_content(keyword_display)
     except Exception:
+        readable = title_case(keyword_display)
         content = (
-            f"<p>{title_case(normalize_keyword(keyword))} scams are commonly used to trick people into sending money or sharing sensitive information. "
-            f"If you receive a message related to {normalize_keyword(keyword)}, avoid clicking unknown links, do not send payments, "
-            f"and verify the source through official channels. Scammers often create urgency or impersonate trusted brands.</p>"
+            f"<p>{readable} scams are commonly used to trick people into sending money or sharing sensitive information. "
+            f"If you receive a message related to {keyword_display}, avoid clicking unknown links, do not send payments, "
+            f"and verify the source through official channels.</p>"
+            f"<p>Scammers often create urgency, impersonate trusted brands, or ask you to confirm account details before you have time to stop and check what is happening.</p>"
+            f"<p>The safest move is to verify independently through the official website or app before replying, logging in, sending money, or sharing personal information.</p>"
         )
 
     title = build_title(keyword)
