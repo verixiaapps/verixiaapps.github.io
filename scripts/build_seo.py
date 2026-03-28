@@ -21,6 +21,51 @@ CLUSTER_TERMS = {
     "irs", "social", "verification", "phishing", "login", "account"
 }
 
+BRAND_CASE = {
+    "paypal": "PayPal",
+    "whatsapp": "WhatsApp",
+    "cash app": "Cash App",
+    "tiktok": "TikTok",
+    "icloud": "iCloud",
+    "irs": "IRS",
+    "usps": "USPS",
+    "ups": "UPS",
+    "fedex": "FedEx",
+    "sms": "SMS",
+    "otp": "OTP",
+    "2fa": "2FA",
+    "dm": "DM",
+    "nft": "NFT",
+    "ceo": "CEO",
+    "binance": "Binance",
+    "coinbase": "Coinbase",
+    "metamask": "MetaMask",
+    "trust wallet": "Trust Wallet",
+    "google play": "Google Play",
+    "cash": "Cash",
+    "zelle": "Zelle",
+    "venmo": "Venmo",
+    "amazon": "Amazon",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "snapchat": "Snapchat",
+    "discord": "Discord",
+    "crypto": "Crypto",
+    "bitcoin": "Bitcoin",
+    "ethereum": "Ethereum",
+    "bank": "Bank",
+    "chase": "Chase",
+    "wells fargo": "Wells Fargo",
+    "social security": "Social Security",
+    "google": "Google",
+    "apple": "Apple",
+    "microsoft": "Microsoft",
+    "steam": "Steam",
+    "walmart": "Walmart",
+    "target": "Target",
+}
+
 
 # -----------------------------
 # UTILITIES
@@ -32,18 +77,62 @@ def slugify(text):
 
 
 def normalize_keyword(text):
-    return re.sub(r"\s+", " ", text.strip().lower())
+    return re.sub(r"\s+", " ", str(text).strip().lower())
 
 
-def display_keyword(text):
+def clean_base_keyword(text):
     kw = normalize_keyword(text)
-    if kw.endswith(" scam"):
-        kw = kw[:-5].strip()
+
+    # Remove common question wrappers / duplicate phrasing
+    kw = re.sub(r"^\s*is\s+", "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
+    kw = re.sub(r"^\s*this\s+", "this ", kw)
+    kw = re.sub(r"\s+", " ", kw).strip()
+
+    # Remove common trailing wrappers
+    kw = re.sub(r"\s+a\s+scam$", "", kw)
+    kw = re.sub(r"\s+scam$", "", kw)
+    kw = re.sub(r"\s+legit$", "", kw)
+    kw = re.sub(r"\s+or\s+legit$", "", kw)
+    kw = re.sub(r"\s+or\s+scam$", "", kw)
+    kw = re.sub(r"\s+real$", "", kw)
+    kw = re.sub(r"\s+safe$", "", kw)
+
+    # Clean common malformed leftovers
+    kw = re.sub(r"\s+a$", "", kw)
+    kw = re.sub(r"\s+", " ", kw).strip()
+
     return kw
 
 
+def display_keyword(text):
+    return clean_base_keyword(text)
+
+
+def apply_brand_case(text):
+    result = f" {text} "
+    for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
+        pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
+        result = re.sub(pattern, proper, result, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", result).strip()
+
+
 def title_case(text):
-    return " ".join(word.capitalize() for word in text.split())
+    if not text:
+        return ""
+
+    small_words = {"a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "vs", "with"}
+    words = text.split()
+    titled = []
+
+    for i, word in enumerate(words):
+        lower = word.lower()
+        if i > 0 and lower in small_words:
+            titled.append(lower)
+        else:
+            titled.append(lower.capitalize())
+
+    return apply_brand_case(" ".join(titled))
 
 
 def build_title(keyword):
@@ -52,10 +141,11 @@ def build_title(keyword):
 
 
 def build_description(keyword):
-    keyword_title = title_case(normalize_keyword(keyword))
+    clean_kw = display_keyword(keyword)
+    keyword_title = title_case(clean_kw)
     return (
         f"Is {keyword_title} a scam or legit? Check warning signs, real risks, "
-        f"and what to do next. Free AI scam checker for {normalize_keyword(keyword)}."
+        f"and what to do next. Free AI scam checker for {clean_kw}."
     )
 
 
@@ -69,7 +159,7 @@ def load_keywords():
 
 
 def keyword_tokens(text):
-    return set(normalize_keyword(text).split())
+    return set(clean_base_keyword(text).split())
 
 
 def keyword_cluster_tokens(text):
@@ -168,11 +258,11 @@ for page in pages:
     canonical = build_canonical(slug)
 
     try:
-        ai_text = generate_content(keyword)
+        ai_text = generate_content(keyword_display)
     except Exception as e:
         print("AI generation failed for", keyword, ":", e)
         ai_text = f"""
-<p>{title_case(display_keyword(keyword))} scams often involve requests for money, personal information, or urgent action. Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
+<p>{title_case(keyword_display)} scams often involve requests for money, personal information, or urgent action. Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
 """.strip()
 
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
