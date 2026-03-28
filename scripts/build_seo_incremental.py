@@ -627,10 +627,7 @@ print(f"Daily limit: {DAILY_LIMIT}")
 # -----------------------------
 generated_count = 0
 skipped_existing_count = 0
-skipped_known_slug_count = 0
-skipped_known_keyword_count = 0
 skipped_duplicate_quality_count = 0
-rebuilt_stale_tracking_count = 0
 built_keywords = []
 
 for page in queue_pages:
@@ -641,13 +638,12 @@ for page in queue_pages:
     keyword = page["keyword"]
     keyword_display = display_keyword(keyword)
     path = page_path(slug)
-    page_already_exists = page_exists(slug)
 
     if slug in PROTECTED_SLUGS:
         print("Skipping protected page:", slug)
         continue
 
-    if page_already_exists:
+    if page_exists(slug):
         skipped_existing_count += 1
         append_line_if_missing(GENERATED_SLUGS_FILE, slug)
         append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
@@ -655,21 +651,6 @@ for page in queue_pages:
         generated_keywords.add(keyword)
         built_keywords.append(keyword)
         continue
-
-    stale_tracking = False
-
-    if keyword in generated_keywords:
-        print(f"Tracked keyword missing page file, rebuilding: {keyword}")
-        generated_keywords.discard(keyword)
-        stale_tracking = True
-
-    if slug in generated_slugs:
-        print(f"Tracked slug missing page file, rebuilding: {slug}")
-        generated_slugs.discard(slug)
-        stale_tracking = True
-
-    if stale_tracking:
-        rebuilt_stale_tracking_count += 1
 
     skip_for_quality, skip_reason = should_skip_keyword(keyword, existing_pages)
     if skip_for_quality:
@@ -740,9 +721,6 @@ with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing pages, "
-    f"{skipped_known_slug_count} known slugs, "
-    f"{skipped_known_keyword_count} known keywords, "
-    f"{skipped_duplicate_quality_count} weak/duplicate keywords, "
-    f"{rebuilt_stale_tracking_count} stale tracking rebuilds."
+    f"{skipped_duplicate_quality_count} weak/duplicate keywords."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
