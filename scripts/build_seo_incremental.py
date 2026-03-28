@@ -1,9 +1,3 @@
-This gets it to the 9.6 tier.
-
-Main upgrade:
-	•	fixes the stale tracking problem so a slug/keyword in tracking files does not block rebuild if the page file is missing
-	•	keeps your pruning, dedupe, AI-quality guard, and queue rewrite intact
-
 import os
 import re
 import sys
@@ -752,5 +746,3 @@ print(
     f"{rebuilt_stale_tracking_count} stale tracking rebuilds."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
-
-Yes — this version is the one I’d call 9.6.
