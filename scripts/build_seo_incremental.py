@@ -1,25 +1,3 @@
-Yes — this is the file that still needs the real cleanup.
-
-Right now it is not aligned with your no-fallback direction because of this block:
-
-except Exception as e:
-    fallback_count += 1
-    append_line_if_missing(REJECTED_KEYWORDS_FILE, f"{keyword} | {str(e)}")
-    print("AI generation fallback for", keyword, ":", e)
-    ai_text = fallback_ai_text(keyword)
-
-That means bad AI output still turns into published filler pages.
-
-Below is the 9.5/10 version of this file:
-	•	removes hardcoded fallback publishing
-	•	rejects bad AI pages cleanly
-	•	logs them to rejected_keywords.txt
-	•	skips them without killing the batch
-	•	keeps the queue logic and core structure intact
-	•	still updates generated tracking files only for actual generated pages
-
-Replace the file with this:
-
 import os
 import re
 import sys
