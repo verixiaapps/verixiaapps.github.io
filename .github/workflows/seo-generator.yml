@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       full_rebuild:
-        description: "Rebuild all generated /scam-check-now/ subfolder pages (keeps root files and is-this-a-scam)"
+        description: "Optional manual rebuild of generated /scam-check-now/ pages only"
         required: false
-        default: true
+        default: false
         type: boolean
       rebuild_daily_limit:
         description: "Daily limit to use during a manual full rebuild"
@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 45
 
     env:
-      START_DATE: "2026-03-22"
+      START_DATE: "2026-03-28"
       KEYWORDS_FILE: "data/keywords.txt"
       GENERATED_KEYWORDS_FILE: "data/generated_keywords.txt"
       GENERATED_SLUGS_FILE: "data/generated_slugs.txt"
@@ -57,6 +57,18 @@ jobs:
             pip install openai requests
           fi
 
+      - name: Ensure tracking files exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
+          mkdir -p "$OUTPUT_DIR"
+          touch "$KEYWORDS_FILE"
+          touch "$GENERATED_KEYWORDS_FILE"
+          touch "$GENERATED_SLUGS_FILE"
+
       - name: Set build mode, phase, and limits
         shell: bash
         run: |
@@ -65,15 +77,15 @@ jobs:
           TODAY=$(date -u +%F)
           DAY_DIFF=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
 
-          if [ "$DAY_DIFF" -le 14 ]; then
+          if [ "$DAY_DIFF" -le 7 ]; then
             PHASE="phase_1"
-            DAILY_LIMIT="60"
-          elif [ "$DAY_DIFF" -le 42 ]; then
-            PHASE="phase_2"
             DAILY_LIMIT="100"
+          elif [ "$DAY_DIFF" -le 21 ]; then
+            PHASE="phase_2"
+            DAILY_LIMIT="250"
           else
             PHASE="phase_3"
-            DAILY_LIMIT="10"
+            DAILY_LIMIT="500"
           fi
 
           FULL_REBUILD="false"
@@ -109,11 +121,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          mkdir -p "$(dirname "$KEYWORDS_FILE")"
-          mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
-          mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
-          mkdir -p "$OUTPUT_DIR"
-
           if [ -f "$KEYWORDS_FILE" ]; then
             cp "$KEYWORDS_FILE" "$RUNNER_TEMP/original_keywords_queue.txt"
           fi
@@ -129,13 +136,9 @@ jobs:
           : > "$GENERATED_SLUGS_FILE"
           : > "$GENERATED_KEYWORDS_FILE"
 
-          find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "$PROTECTED_SLUG" -exec rm -rf {} +
+          find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
-          echo "Prepared full rebuild."
-          echo "Preserved:"
-          echo "- $OUTPUT_DIR/$PROTECTED_SLUG/"
-          echo "- loose files already inside $OUTPUT_DIR/"
-          echo "- root files such as sitemap.xml"
+          echo "Prepared full rebuild of generated SEO folders."
 
       - name: Build SEO pages incrementally
         shell: bash
@@ -164,7 +167,7 @@ jobs:
             echo "No original keywords queue backup found."
           fi
 
-      - name: Build ROOT sitemap (authoritative)
+      - name: Build ROOT sitemap
         shell: bash
         run: |
           set -euo pipefail
@@ -174,17 +177,10 @@ jobs:
             echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
 
             echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$TODAY</lastmod></url>"
-            echo "<url><loc>https://verixiaapps.com/scam-check-now/is-this-a-scam/</loc><lastmod>$TODAY</lastmod></url>"
 
             find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
               [ -f "$dir/index.html" ] || continue
-
               slug=$(basename "$dir")
-
-              if [ "$slug" = "$PROTECTED_SLUG" ]; then
-                continue
-              fi
-
               echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$TODAY</lastmod></url>"
             done
 
