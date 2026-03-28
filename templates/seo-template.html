@@ -1191,7 +1191,7 @@ function isBrowserSubscribed() {
 }
 
 function escapeHtml(str) {
-  return String(str)
+  return String(str || "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
@@ -1206,8 +1206,36 @@ function normalizeKeyword(str) {
     .trim();
 }
 
+function stripLeadingQuestionPrefixes(text) {
+  return String(text || "")
+    .replace(/^\s*is\s+/i, "")
+    .replace(/^\s*can\s+i\s+trust\s+/i, "")
+    .replace(/^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+/i, "")
+    .trim();
+}
+
+function stripTrailingQuestionSuffixes(text) {
+  return String(text || "")
+    .replace(/\s+a\s+scam$/i, "")
+    .replace(/\s+or\s+legit$/i, "")
+    .replace(/\s+or\s+scam$/i, "")
+    .replace(/\s+legit$/i, "")
+    .replace(/\s+real$/i, "")
+    .replace(/\s+safe$/i, "")
+    .replace(/\s+scam$/i, "")
+    .replace(/\s+a$/i, "")
+    .trim();
+}
+
+function cleanKeywordBase(keyword) {
+  let text = normalizeKeyword(keyword);
+  text = stripLeadingQuestionPrefixes(text);
+  text = stripTrailingQuestionSuffixes(text);
+  return text.replace(/\s+/g, " ").trim();
+}
+
 function cleanKeywordForSentence(keyword) {
-  return String(keyword || "")
+  return cleanKeywordBase(keyword)
     .replace(/\bmessage\b/gi, "")
     .replace(/\bmessages\b/gi, "")
     .replace(/\bemail\b/gi, "")
@@ -1240,14 +1268,8 @@ function displayKeyword(str) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function chooseBridgeIntro(baseKeyword) {
-  const variants = [
-    `If this ${baseKeyword} just showed up,`,
-    `If you're unsure about this ${baseKeyword},`,
-    `If you're looking at this ${baseKeyword} right now,`
-  ];
-  const index = baseKeyword.length % variants.length;
-  return variants[index];
+function displayCleanKeyword(str) {
+  return displayKeyword(cleanKeywordBase(str));
 }
 
 function containsAny(text, phrases) {
@@ -1263,4 +1285,496 @@ function isGuidanceStyleKeyword(lower) {
     lower.startsWith("how to block ") ||
     lower.startsWith("how to avoid ") ||
     lower.startsWith("what happens after ") ||
-    lower
+    lower.startsWith("what is ") ||
+    lower.startsWith("why ") ||
+    lower.startsWith("when ") ||
+    lower.startsWith("where ") ||
+    lower.startsWith("who ")
+  );
+}
+
+function isQuestionStyleKeyword(lower) {
+  return (
+    lower.startsWith("is ") ||
+    lower.startsWith("can ") ||
+    lower.startsWith("should ") ||
+    lower.startsWith("could ") ||
+    lower.startsWith("would ") ||
+    lower.startsWith("do ") ||
+    lower.startsWith("does ") ||
+    lower.startsWith("did ")
+  );
+}
+
+function chooseBridgeIntro(baseKeyword) {
+  const readable = displayKeyword(baseKeyword);
+  const variants = [
+    `If this ${readable} just showed up,`,
+    `If you're unsure about this ${readable},`,
+    `If you're looking at this ${readable} right now,`
+  ];
+  const index = baseKeyword.length % variants.length;
+  return variants[index];
+}
+
+function buildHeroTitle(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+  const cleanTitle = displayCleanKeyword(keywordRaw);
+  const readableTitle = displayKeyword(raw);
+
+  if (!raw) {
+    return "Is this a scam? Check Before You Click or Send Money";
+  }
+
+  if (isGuidanceStyleKeyword(lower)) {
+    return `${readableTitle}: Safety Tips, Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("did i get scammed")) {
+    return `${readableTitle}? Signs, Risks & What To Do Next`;
+  }
+
+  if (lower.startsWith("can scammers") || lower.startsWith("can someone")) {
+    return `${readableTitle}? Risks, Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("almost ")) {
+    return `${readableTitle}? Warning Signs & Safety Steps`;
+  }
+
+  if (lower.startsWith("is this ")) {
+    return `${readableTitle}? Check Warning Signs & What To Do`;
+  }
+
+  if (lower.startsWith("is ") && lower.includes(" legit")) {
+    const withoutLegit = raw.replace(/\s+legit\b/i, "").trim();
+    return `${displayKeyword(withoutLegit)} Legit or a Scam? Warning Signs & What To Do`;
+  }
+
+  if (isQuestionStyleKeyword(lower)) {
+    return `${readableTitle}? Risks, Warning Signs & What To Know`;
+  }
+
+  return `Is ${cleanTitle} a Scam? Check Before You Click or Send Money`;
+}
+
+function buildHeroSubheading(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+  const readableKeyword = displayKeyword(cleanKeywordForSentence(raw) || cleanKeywordBase(raw) || raw);
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return "Use the checker below to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.";
+  }
+
+  return `If you received something related to ${readableKeyword}, paste it below to check scam risk before you click, reply, send money, or share information.`;
+}
+
+function buildContentHeading(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+  const readableTitle = displayKeyword(raw);
+  const cleanTitle = displayCleanKeyword(keywordRaw);
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower) || lower.startsWith("almost ")) {
+    return readableTitle;
+  }
+
+  return `What ${cleanTitle} Messages, Links, and Offers Often Look Like`;
+}
+
+function buildContentBridge(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+  const cleanSentenceKeyword = cleanKeywordForSentence(raw) || cleanKeywordBase(raw) || raw;
+  const readableSentenceKeyword = displayKeyword(cleanSentenceKeyword);
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return "Use the checker above to review suspicious messages, emails, links, and offers before you click, reply, send money, or share information.";
+  }
+
+  if (lower.startsWith("almost ")) {
+    return "If you are unsure what happened, use the checker above to review suspicious messages, emails, links, and offers before taking action.";
+  }
+
+  return `${chooseBridgeIntro(cleanSentenceKeyword)} use the checker above before you click links, reply, send money, or share information.`;
+}
+
+function setKeywordHeadings() {
+  const keywordRaw = (RAW_KEYWORD || "this message").trim();
+
+  document.getElementById("heroKeyword").textContent = buildHeroTitle(keywordRaw);
+  document.getElementById("heroSubheading").textContent = buildHeroSubheading(keywordRaw);
+  document.getElementById("contentHeading").textContent = buildContentHeading(keywordRaw);
+  document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
+}
+
+function applyPreviewCard() {
+  const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
+  const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
+  const lower = keywordRaw.toLowerCase();
+
+  const previewDomain = document.getElementById("previewDomain");
+  const previewSub = document.getElementById("previewSub");
+  const previewBadge = document.getElementById("previewBadge");
+  const previewScore = document.getElementById("previewScore");
+  const previewScoreFill = document.getElementById("previewScoreFill");
+  const previewSignals = document.getElementById("previewSignals");
+
+  if (!previewDomain || !previewSub || !previewBadge || !previewScore || !previewScoreFill || !previewSignals) {
+    return;
+  }
+
+  let riskLabel = "HIGH RISK DETECTED";
+  let trustScore = "Trust Score: 18 / 100";
+  let fillWidth = "18%";
+  let sub = "Example detection result before you run your own check";
+  let signals = [
+    "Suspicious domain mismatch",
+    "Urgent language detected",
+    "Payment request via gift card"
+  ];
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    signals = [
+      "Pressure to move quickly",
+      "Requests for personal details or fees",
+      "Offer appears unusually fast or high-paying"
+    ];
+  } else if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    signals = [
+      "Urgent transfer or wallet request",
+      "High-return or recovery promise",
+      "Support or investment impersonation risk"
+    ];
+  } else if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    signals = [
+      "Tracking or delivery pressure",
+      "Link may lead to a fake page",
+      "Small payment or verification request"
+    ];
+  } else if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    signals = [
+      "Account or payment urgency",
+      "Possible fake login or verification page",
+      "Requests for money or sensitive details"
+    ];
+  } else if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    riskLabel = "SCAM RISK CHECK";
+    trustScore = "Pattern Review: Active";
+    fillWidth = "34%";
+    signals = [
+      "Review sender, links, and urgency",
+      "Verify outside the original message",
+      "Do not send money or codes until confirmed"
+    ];
+  }
+
+  previewBadge.textContent = `🔴 ${riskLabel}`;
+  previewScore.textContent = trustScore;
+  previewScoreFill.style.width = fillWidth;
+  previewDomain.textContent = cleanTitle;
+  previewSub.textContent = sub;
+  previewSignals.innerHTML = signals.map(signal =>
+    `<div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>${escapeHtml(signal)}</span></div>`
+  ).join("");
+}
+
+function applyIntentToChecker() {
+  const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
+  const lower = keywordRaw.toLowerCase();
+  const textarea = document.getElementById("text");
+  const inputHelp = document.querySelector(".input-help");
+
+  if (!textarea || !inputHelp) return;
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    textarea.placeholder = "Paste the job message, recruiter email, interview request, or onboarding text you're unsure about...";
+    inputHelp.textContent = "Examples: recruiter email, interview request, onboarding message, job offer, payment request";
+    return;
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    textarea.placeholder = "Paste the crypto message, wallet request, token offer, or support message you're unsure about...";
+    inputHelp.textContent = "Examples: wallet connect message, token airdrop, exchange alert, support DM, recovery offer";
+    return;
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    textarea.placeholder = "Paste the delivery text, tracking update, shipping email, or package link you're unsure about...";
+    inputHelp.textContent = "Examples: USPS text, FedEx email, tracking link, customs fee message, missed delivery alert";
+    return;
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    textarea.placeholder = "Paste the payment alert, account message, refund email, or login request you're unsure about...";
+    inputHelp.textContent = "Examples: PayPal alert, bank text, Amazon refund email, Venmo request, Zelle message";
+    return;
+  }
+
+  textarea.placeholder = "Paste the message, email, website, link, or job offer you're unsure about...";
+  inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
+}
+
+function cleanSeoContent() {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  seoContent.innerHTML = seoContent.innerHTML
+    .replace(/\*\*/g, "")
+    .replace(/<p>\s*<\/p>/g, "")
+    .trim();
+}
+
+function cleanRelatedLinks() {
+  const relatedLinks = document.getElementById("relatedLinks");
+  const relatedHeading = document.getElementById("relatedHeading");
+  if (!relatedLinks || !relatedHeading) return;
+
+  relatedLinks.innerHTML = relatedLinks.innerHTML.replace(/\*\*/g, "").trim();
+
+  const links = relatedLinks.querySelectorAll("li a");
+
+  if (links.length === 0) {
+    relatedLinks.style.display = "none";
+    relatedHeading.style.display = "none";
+  }
+}
+
+function summaryForRisk(riskClass) {
+  if (riskClass === "high") {
+    return "This message shows multiple scam signals. Do not click links, reply, send money, or connect anything until you verify it directly.";
+  }
+  if (riskClass === "medium") {
+    return "This message shows warning signs. Be cautious and verify the sender, offer, or website before taking action.";
+  }
+  if (riskClass === "low") {
+    return "This message shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information.";
+  }
+  return "We could not determine a clear risk level. Treat the message cautiously and verify through official sources.";
+}
+
+function paylineForRisk(riskClass) {
+  if (riskClass === "high") {
+    return "Scam attempts often come in waves. If another message like this shows up tomorrow, guessing wrong could cost you.";
+  }
+  if (riskClass === "medium") {
+    return "Suspicious messages often do not stop at one. Check the next one before you click, reply, or pay.";
+  }
+  if (riskClass === "low") {
+    return "Even lower-risk messages can become expensive when new links, payments, or logins are involved later.";
+  }
+  return "When the risk is unclear, the safest step is to verify this one and the next one before you act.";
+}
+
+function cardClassForRisk(risk) {
+  if (risk === "high") return "high";
+  if (risk === "medium") return "medium";
+  if (risk === "low") return "low";
+  return "unknown";
+}
+
+function iconForRisk(risk) {
+  if (risk === "high") return "🔴";
+  if (risk === "medium") return "🟠";
+  if (risk === "low") return "🟢";
+  return "⚪";
+}
+
+function signalIconForRisk(risk) {
+  if (risk === "high") return "⚠️";
+  if (risk === "medium") return "⚠️";
+  if (risk === "low") return "✔️";
+  return "•";
+}
+
+function chipByRisk(risk) {
+  if (risk === "high") return "Pattern Match: Strong";
+  if (risk === "medium") return "Pattern Match: Moderate";
+  if (risk === "low") return "Pattern Match: Lower Risk";
+  return "Pattern Match: Review Needed";
+}
+
+function formatResult(raw) {
+  const lines = String(raw || "").split("\n").map(l => l.trim()).filter(Boolean);
+
+  let risk = "";
+  let signals = [];
+  let actions = [];
+  let mode = "";
+
+  lines.forEach(line => {
+    const lower = line.toLowerCase();
+
+    if (lower.includes("risk level")) {
+      risk = line.split(":").slice(1).join(":").trim();
+      return;
+    }
+
+    if (lower.includes("key signals")) {
+      mode = "signals";
+      return;
+    }
+
+    if (lower.includes("recommended action")) {
+      mode = "actions";
+      return;
+    }
+
+    if (line.startsWith("-")) {
+      const cleaned = line.replace(/^-+\s*/, "");
+      if (mode === "signals") signals.push(cleaned);
+      if (mode === "actions") actions.push(cleaned);
+    }
+  });
+
+  const riskClass = (risk || "review").trim().toLowerCase();
+  const safeRiskClass = cardClassForRisk(riskClass);
+  const signalIcon = signalIconForRisk(safeRiskClass);
+  const continuationLine = safeRiskClass !== "low"
+    ? `<div class="result-continuation">If this reached you, similar messages may already be on the way.</div>`
+    : "";
+
+  if (signals.length === 0) {
+    signals = ["Review the sender, links, and any requests for money, urgency, or personal information."];
+  }
+
+  if (actions.length === 0) {
+    actions = ["Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action."];
+  }
+
+  return `
+  <div class="result-card ${safeRiskClass}">
+    <div class="result-top">
+      <div class="risk ${safeRiskClass}">${iconForRisk(safeRiskClass)} ${safeRiskClass === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + safeRiskClass.toUpperCase()}</div>
+      <div class="result-chip">${chipByRisk(safeRiskClass)}</div>
+    </div>
+
+    <div class="result-summary">${escapeHtml(summaryForRisk(safeRiskClass))}</div>
+    ${continuationLine}
+
+    <div class="section">
+      <div class="section-title">Detected Signals</div>
+      <ul class="signal-list">
+        ${signals.map(s => `<li class="signal-item"><span class="signal-icon">${signalIcon}</span><span>${escapeHtml(s)}</span></li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recommended Actions</div>
+      <div class="action-box">${escapeHtml(actions[0])}</div>
+    </div>
+
+    <div class="result-payline">${escapeHtml(paylineForRisk(safeRiskClass))}</div>
+  </div>
+  `;
+}
+
+function showUpgrade() {
+  const el = document.getElementById("upgrade");
+  el.style.display = "block";
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+}
+
+function scrollToEmail() {
+  const emailField = document.getElementById("email");
+  emailField.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => emailField.focus(), 150);
+}
+
+async function check() {
+  const text = document.getElementById("text").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const subscribed = isBrowserSubscribed();
+  const result = document.getElementById("result");
+
+  if (!text) {
+    result.innerHTML = `
+      <div class="result-card unknown">
+        <div class="result-top">
+          <div class="risk unknown">⚪ Paste Something To Check</div>
+          <div class="result-chip">Awaiting Input</div>
+        </div>
+        <div class="result-summary">Paste a suspicious message, email, website, link, job offer, or investment pitch to analyze scam risk.</div>
+      </div>
+    `;
+    result.style.display = "block";
+    return;
+  }
+
+  result.style.display = "block";
+  result.innerHTML = `
+    <div class="result-card unknown">
+      <div class="result-top">
+        <div class="risk unknown">⚪ Analyzing...</div>
+        <div class="result-chip">Scan In Progress</div>
+      </div>
+      <div class="result-summary">Checking for scam signals, risky patterns, payment traps, impersonation, and suspicious links.</div>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(API + "/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, email, subscribed })
+    });
+
+    const data = await response.json();
+
+    if (data.limit) {
+      result.innerHTML = `
+        <div class="result-card medium">
+          <div class="result-top">
+            <div class="risk medium">🟠 Free Check Used</div>
+            <div class="result-chip">Upgrade Available</div>
+          </div>
+          <div class="result-summary">Unlock unlimited scam checks so you can review the next suspicious message, link, or offer the moment it shows up.</div>
+        </div>
+      `;
+      showUpgrade();
+      return;
+    }
+
+    result.innerHTML = formatResult(data.result || "");
+    showUpgrade();
+  } catch (e) {
+    result.innerHTML = `
+      <div class="result-card unknown">
+        <div class="result-top">
+          <div class="risk unknown">⚪ Unable To Analyze</div>
+          <div class="result-chip">Try Again</div>
+        </div>
+        <div class="result-summary">We could not analyze this right now. Please try again in a moment.</div>
+      </div>
+    `;
+  }
+}
+
+async function checkout(priceId) {
+  const pageUrl = window.location.origin + window.location.pathname;
+
+  const response = await fetch(API + "/create-checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      priceId,
+      email: null,
+      successUrl: pageUrl + "?subscribed=true",
+      cancelUrl: pageUrl
+    })
+  });
+
+  const data = await response.json();
+
+  if (data.url) {
+    window.location = data.url;
+  } else {
+    alert("Checkout failed.");
+  }
+}
+</script>
+
+</body>
+</html>
