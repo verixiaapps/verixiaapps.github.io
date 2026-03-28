@@ -2,6 +2,7 @@ import os
 import re
 from collections import defaultdict
 from html import escape
+
 from generate_content import generate_content
 
 # -----------------------------
@@ -61,48 +62,50 @@ HUB_SLUG_MAP = {
 }
 
 BRAND_CASE = {
-    "paypal": "PayPal",
-    "whatsapp": "WhatsApp",
+    "facebook marketplace": "Facebook Marketplace",
+    "bank of america": "Bank of America",
+    "wells fargo": "Wells Fargo",
+    "social security": "Social Security",
+    "trust wallet": "Trust Wallet",
+    "google play": "Google Play",
     "cash app": "Cash App",
+    "two factor": "Two-Factor",
+    "metamask": "MetaMask",
+    "coinbase": "Coinbase",
+    "whatsapp": "WhatsApp",
+    "instagram": "Instagram",
+    "snapchat": "Snapchat",
+    "telegram": "Telegram",
+    "microsoft": "Microsoft",
+    "binance": "Binance",
+    "facebook": "Facebook",
+    "ethereum": "Ethereum",
+    "discord": "Discord",
+    "bitcoin": "Bitcoin",
+    "walmart": "Walmart",
+    "paypal": "PayPal",
     "tiktok": "TikTok",
-    "icloud": "iCloud",
-    "irs": "IRS",
-    "usps": "USPS",
-    "ups": "UPS",
+    "venmo": "Venmo",
+    "amazon": "Amazon",
+    "google": "Google",
+    "apple": "Apple",
+    "target": "Target",
+    "crypto": "Crypto",
+    "chase": "Chase",
+    "steam": "Steam",
+    "zelle": "Zelle",
     "fedex": "FedEx",
+    "usps": "USPS",
+    "bank": "Bank",
+    "irs": "IRS",
+    "ups": "UPS",
     "sms": "SMS",
     "otp": "OTP",
     "2fa": "2FA",
-    "dm": "DM",
     "nft": "NFT",
     "ceo": "CEO",
-    "binance": "Binance",
-    "coinbase": "Coinbase",
-    "metamask": "MetaMask",
-    "trust wallet": "Trust Wallet",
-    "google play": "Google Play",
-    "cash": "Cash",
-    "zelle": "Zelle",
-    "venmo": "Venmo",
-    "amazon": "Amazon",
-    "facebook": "Facebook",
-    "instagram": "Instagram",
-    "telegram": "Telegram",
-    "snapchat": "Snapchat",
-    "discord": "Discord",
-    "crypto": "Crypto",
-    "bitcoin": "Bitcoin",
-    "ethereum": "Ethereum",
-    "bank": "Bank",
-    "chase": "Chase",
-    "wells fargo": "Wells Fargo",
-    "social security": "Social Security",
-    "google": "Google",
-    "apple": "Apple",
-    "microsoft": "Microsoft",
-    "steam": "Steam",
-    "walmart": "Walmart",
-    "target": "Target",
+    "dm": "DM",
+    "icloud": "iCloud",
 }
 
 SMALL_WORDS = {
@@ -120,20 +123,6 @@ LOW_VALUE_SINGLE_TERMS = {
     "scam", "message", "email", "text", "alert", "warning", "request",
     "offer", "payment", "login", "verification"
 }
-
-TITLE_PATTERNS = (
-    "Is {kw} a Scam or Legit? (Full 2026 Check)",
-    "{kw} Scam? Warning Signs, Risks & What to Do",
-    "Is {kw} Safe? Scam Check + Red Flags",
-    "{kw} Review: Scam or Legit? (Updated 2026)",
-)
-
-DESCRIPTION_PATTERNS = (
-    "Think {kw} might be a scam? Check warning signs, real risks, and what to do next. Free instant scam check.",
-    "Is {kw} legit or a scam? Review red flags, scam patterns, and safe next steps with our free AI scam checker.",
-    "Check whether {kw} looks suspicious. See common scam signs, real risks, and what to do before you click or reply.",
-    "Worried about {kw}? Learn the warning signs, risk signals, and safest next steps with a free scam check.",
-)
 
 rejected_count = 0
 deduped_keywords_count = 0
@@ -155,12 +144,6 @@ def slugify(text):
     return text.strip("-")
 
 
-def stable_index(text, count):
-    if count <= 0:
-        return 0
-    return sum(ord(c) for c in normalize_keyword(text)) % count
-
-
 def clean_base_keyword(text):
     kw = normalize_keyword(text)
 
@@ -168,15 +151,14 @@ def clean_base_keyword(text):
     kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
     kw = re.sub(r"^\s*this\s+", "this ", kw)
-    kw = re.sub(r"\s+", " ", kw).strip()
 
     kw = re.sub(r"\s+a\s+scam$", "", kw)
-    kw = re.sub(r"\s+scam$", "", kw)
-    kw = re.sub(r"\s+legit$", "", kw)
     kw = re.sub(r"\s+or\s+legit$", "", kw)
     kw = re.sub(r"\s+or\s+scam$", "", kw)
+    kw = re.sub(r"\s+legit$", "", kw)
     kw = re.sub(r"\s+real$", "", kw)
     kw = re.sub(r"\s+safe$", "", kw)
+    kw = re.sub(r"\s+scam$", "", kw)
 
     kw = re.sub(r"\s+a$", "", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
@@ -221,25 +203,9 @@ def title_case(text):
     return apply_brand_case(" ".join(titled))
 
 
-def build_title(keyword):
-    kw = title_case(display_keyword(keyword))
-    pattern = TITLE_PATTERNS[stable_index(keyword, len(TITLE_PATTERNS))]
-    return pattern.format(kw=kw)
-
-
-def build_description(keyword):
-    clean_kw = title_case(display_keyword(keyword))
-    pattern = DESCRIPTION_PATTERNS[stable_index(keyword, len(DESCRIPTION_PATTERNS))]
-    return pattern.format(kw=clean_kw)
-
-
-def build_canonical(slug):
-    return f"{SITE}/scam-check-now/{slug}/"
-
-
-def load_keywords():
-    with open(KEYWORD_FILE, encoding="utf-8") as f:
-        return list(dict.fromkeys([normalize_keyword(k) for k in f if k.strip()]))
+def readable_keyword(text):
+    base = display_keyword(text)
+    return title_case(base) if base else ""
 
 
 def keyword_tokens(text):
@@ -255,6 +221,91 @@ def keyword_root(text):
     return cleaned.split()[0] if cleaned else ""
 
 
+def escape_html(text):
+    return escape(str(text), quote=True)
+
+
+def is_guidance_style_keyword(keyword):
+    kw = normalize_keyword(keyword)
+    return (
+        kw.startswith("how to ")
+        or kw.startswith("what to do")
+        or kw.startswith("what happens")
+        or kw.startswith("why ")
+        or kw.startswith("when ")
+        or kw.startswith("where ")
+        or kw.startswith("who ")
+        or kw.startswith("check ")
+        or kw.startswith("report ")
+    )
+
+
+def is_question_style_keyword(keyword):
+    kw = normalize_keyword(keyword)
+    return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
+
+
+def build_title(keyword):
+    raw = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
+
+    if not raw:
+        return "Is This a Scam? Warning Signs, Safety Tips & What To Do"
+
+    if is_guidance_style_keyword(raw):
+        return f"{title_case(raw)} | Warning Signs, Safety Tips & What To Do"
+
+    if raw.startswith("did i get scammed"):
+        return f"{title_case(raw)}? Signs, Risks & What To Do Next"
+
+    if raw.startswith("is this "):
+        return f"{title_case(raw)}? Warning Signs, Risks & What To Do"
+
+    if raw.startswith("is ") and " legit" in raw:
+        cleaned = re.sub(r"\s+legit\b", "", raw).strip()
+        return f"{title_case(cleaned)} Legit or a Scam? Warning Signs & What To Do"
+
+    if is_question_style_keyword(raw):
+        return f"{title_case(raw)}? Warning Signs, Risks & What To Know"
+
+    return f"Is {readable} a Scam? Warning Signs, Risks & What To Do"
+
+
+def build_description(keyword):
+    raw = normalize_keyword(keyword)
+    clean_kw = display_keyword(keyword)
+    readable = readable_keyword(keyword)
+
+    if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
+        return (
+            f"Learn the warning signs, scam risk signals, and safest next steps for {readable}. "
+            f"Check suspicious messages, emails, links, and offers before you click, reply, or send money."
+        )
+
+    return (
+        f"Is {readable} a scam or legit? Review warning signs, risk signals, and what to do next. "
+        f"Check suspicious {clean_kw} messages, emails, texts, links, and offers."
+    )
+
+
+def build_canonical(slug):
+    return f"{SITE}/scam-check-now/{slug}/"
+
+
+def load_keywords():
+    if not os.path.exists(KEYWORD_FILE):
+        return []
+    with open(KEYWORD_FILE, encoding="utf-8") as f:
+        return list(dict.fromkeys(normalize_keyword(k) for k in f if k.strip()))
+
+
+def load_template():
+    if not os.path.exists(TEMPLATE_FILE):
+        raise FileNotFoundError(f"Missing template file: {TEMPLATE_FILE}")
+    with open(TEMPLATE_FILE, encoding="utf-8") as f:
+        return f.read()
+
+
 def get_hub_slug(keyword):
     root = keyword_root(keyword)
     return HUB_SLUG_MAP.get(root, "")
@@ -266,9 +317,7 @@ def build_hub_link_html(keyword):
         return ""
 
     root = keyword_root(keyword)
-    hub_label = title_case(root.replace("-", " "))
-    if not hub_label:
-        hub_label = "Scam"
+    hub_label = title_case(root.replace("-", " ")) if root else "Scam"
 
     hub_title_map = {
         "amazon": "Amazon Scam Hub",
@@ -317,6 +366,7 @@ def build_hub_link_html(keyword):
 
 def is_weak_keyword(keyword):
     tokens = canonical_keyword(keyword).split()
+
     if len(tokens) < 2:
         return True
 
@@ -462,22 +512,27 @@ def get_related_pages(current_page, all_pages, limit):
     return related
 
 
-def get_more_links(current_page, all_pages, limit):
+def get_more_links(current_page, all_pages, limit, exclude_slugs=None):
+    exclude_slugs = set(exclude_slugs or set())
+
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_hub_slug = get_hub_slug(current_keyword)
 
+    same_hub_pages = []
     if current_hub_slug:
         same_hub_pages = [
             p for p in all_pages
-            if p["slug"] != current_slug and get_hub_slug(p["keyword"]) == current_hub_slug
+            if p["slug"] != current_slug
+            and p["slug"] not in exclude_slugs
+            and get_hub_slug(p["keyword"]) == current_hub_slug
         ]
-    else:
-        same_hub_pages = []
 
     fallback_pages = [
         p for p in all_pages
-        if p["slug"] != current_slug and p not in same_hub_pages
+        if p["slug"] != current_slug
+        and p["slug"] not in exclude_slugs
+        and p not in same_hub_pages
     ]
 
     selected = []
@@ -499,22 +554,16 @@ def validate_page_output(slug, title, description, canonical, related_pages):
 
     if not slug:
         errors.append("empty slug")
-
     if "is is " in title.lower():
         errors.append("title contains 'Is Is'")
-
     if " a a " in title.lower():
         errors.append("title contains duplicated article")
-
     if not canonical.endswith(f"/{slug}/"):
         errors.append("canonical mismatch")
-
     if len(related_pages) == 0:
         errors.append("no related pages")
-
     if len(title) < 35 or len(title) > 72:
         errors.append("title length out of target range")
-
     if len(description) < 110 or len(description) > 165:
         errors.append("description length out of target range")
 
@@ -532,14 +581,115 @@ def ensure_file(filepath):
 
 def append_rejected_keyword(keyword, reason):
     global rejected_count
+
     ensure_file(REJECTED_KEYWORDS_FILE)
-    with open(REJECTED_KEYWORDS_FILE, "a", encoding="utf-8") as f:
-        f.write(f"{normalize_keyword(keyword)} | {str(reason).strip()}\n")
-    rejected_count += 1
+    entry = f"{normalize_keyword(keyword)} | {str(reason).strip()}"
+
+    existing = set()
+    with open(REJECTED_KEYWORDS_FILE, "r", encoding="utf-8") as f:
+        existing = {line.strip() for line in f if line.strip()}
+
+    if entry not in existing:
+        with open(REJECTED_KEYWORDS_FILE, "a", encoding="utf-8") as f:
+            f.write(entry + "\n")
+        rejected_count += 1
 
 
-def escape_html(text):
-    return escape(str(text), quote=True)
+def build_related_anchor(keyword):
+    raw = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
+
+    if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
+        if raw.startswith("is ") and " legit" in raw:
+            cleaned = re.sub(r"\s+legit\b", "", raw).strip()
+            return f"{title_case(cleaned)} Legit or a Scam?"
+        if raw.startswith("did i get scammed") or raw.startswith("what happens after ") or raw.startswith("almost "):
+            return title_case(raw) + "?"
+        return title_case(raw)
+
+    return f"Is {readable} a Scam?"
+
+
+def is_usable_ai_text(text):
+    if not text:
+        return False
+
+    raw = str(text).strip()
+    lowered = raw.lower()
+
+    if len(raw) < 350:
+        return False
+
+    weak_markers = {
+        "lorem ipsum",
+        "as an ai",
+        "here are some paragraphs",
+        "let me know if you want",
+        "i can't help with that",
+        "i cannot help with that",
+        "i’m sorry",
+        "i am sorry",
+        "cannot assist",
+        "can't assist",
+        "policy",
+        "content policy",
+    }
+
+    if any(marker in lowered for marker in weak_markers):
+        return False
+
+    paragraph_like = (
+        "<p>" in lowered
+        or "</p>" in lowered
+        or "\n\n" in raw
+        or raw.count("\n") >= 3
+    )
+
+    return paragraph_like
+
+
+def generate_ai_text(keyword, keyword_display):
+    attempts = []
+    raw_keyword = normalize_keyword(keyword)
+    clean_keyword = normalize_keyword(keyword_display)
+
+    if clean_keyword:
+        attempts.append(clean_keyword)
+
+    readable = readable_keyword(keyword_display)
+    if readable:
+        attempts.append(readable)
+
+    if raw_keyword and raw_keyword != clean_keyword:
+        attempts.append(raw_keyword)
+
+    if clean_keyword and not clean_keyword.startswith("is "):
+        attempts.append(f"is {clean_keyword} a scam")
+
+    if clean_keyword and "legit" not in clean_keyword and "scam" not in clean_keyword:
+        attempts.append(f"{clean_keyword} legit or scam")
+
+    seen = set()
+    ordered_attempts = []
+
+    for item in attempts:
+        item_norm = normalize_keyword(item)
+        if item_norm and item_norm not in seen:
+            seen.add(item_norm)
+            ordered_attempts.append(item)
+
+    last_error = None
+
+    for attempt in ordered_attempts:
+        try:
+            ai_text = generate_content(attempt)
+            if is_usable_ai_text(ai_text):
+                return ai_text
+            last_error = f"thin or malformed output for prompt: {attempt}"
+        except Exception as e:
+            last_error = str(e)
+
+    raise ValueError(last_error or "AI generation failed")
 
 
 # -----------------------------
@@ -548,9 +698,7 @@ def escape_html(text):
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 ensure_file(REJECTED_KEYWORDS_FILE)
 
-with open(TEMPLATE_FILE, encoding="utf-8") as f:
-    template = f.read()
-
+template = load_template()
 raw_keywords = load_keywords()
 keywords = dedupe_keywords(raw_keywords)
 
@@ -586,7 +734,7 @@ for page in pages:
     canonical = build_canonical(slug)
 
     try:
-        ai_text = generate_content(keyword)
+        ai_text = generate_ai_text(keyword, keyword_display)
     except Exception as e:
         ai_failure_count += 1
         append_rejected_keyword(keyword, e)
@@ -594,7 +742,15 @@ for page in pages:
         continue
 
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
-    more_links_pages = get_more_links(page, pages, MORE_LINKS_COUNT)
+    related_slugs = {p["slug"] for p in related_pages}
+
+    more_links_pages = get_more_links(
+        page,
+        pages,
+        MORE_LINKS_COUNT,
+        exclude_slugs=related_slugs
+    )
+
     hub_link_html = build_hub_link_html(keyword)
 
     validation_errors = validate_page_output(slug, title, description, canonical, related_pages)
@@ -603,12 +759,12 @@ for page in pages:
         print("Validation warning for", slug, ":", "; ".join(validation_errors))
 
     links_html = "".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {escape_html(title_case(display_keyword(r["keyword"])))} a Scam?</a></li>\n'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">{escape_html(build_related_anchor(r["keyword"]))}</a></li>\n'
         for r in related_pages
     )
 
     more_links_html = "".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">{escape_html(title_case(display_keyword(r["keyword"])))} Scam Check</a></li>\n'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">{escape_html(build_related_anchor(r["keyword"]))}</a></li>\n'
         for r in more_links_pages
     )
 
