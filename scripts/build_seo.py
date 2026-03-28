@@ -1,12 +1,27 @@
+Yes — for this file, here’s the 9/10 version.
+
+What changed:
+	•	removed local generic fallback content
+	•	passes the full keyword to AI instead of the stripped display keyword
+	•	logs failed AI generations and skips those pages instead of publishing weak filler
+	•	writes rejected keywords to data/rejected_keywords.txt
+	•	keeps your core structure and rebuild behavior intact
+	•	escapes key template values more safely
+	•	prevents bad pages from being counted as successful
+
+Replace the file with this:
+
 import os
 import re
 from collections import defaultdict
+from html import escape
 from generate_content import generate_content
 
 # -----------------------------
 # CONFIG
 # -----------------------------
 KEYWORD_FILE = "data/keywords.txt"
+REJECTED_KEYWORDS_FILE = "data/rejected_keywords.txt"
 TEMPLATE_FILE = "templates/seo-template.html"
 OUTPUT_DIR = "scam-check-now"
 SITE = "https://verixiaapps.com"
@@ -133,10 +148,11 @@ DESCRIPTION_PATTERNS = (
     "Worried about {kw}? Learn the warning signs, risk signals, and safest next steps with a free scam check.",
 )
 
-fallback_count = 0
+rejected_count = 0
 deduped_keywords_count = 0
 skipped_duplicate_keywords_count = 0
 skipped_weak_keywords_count = 0
+ai_failure_count = 0
 
 
 # -----------------------------
@@ -161,14 +177,12 @@ def stable_index(text, count):
 def clean_base_keyword(text):
     kw = normalize_keyword(text)
 
-    # Remove common question wrappers / duplicate phrasing
     kw = re.sub(r"^\s*is\s+", "", kw)
     kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
     kw = re.sub(r"^\s*this\s+", "this ", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
 
-    # Remove common trailing wrappers
     kw = re.sub(r"\s+a\s+scam$", "", kw)
     kw = re.sub(r"\s+scam$", "", kw)
     kw = re.sub(r"\s+legit$", "", kw)
@@ -177,7 +191,6 @@ def clean_base_keyword(text):
     kw = re.sub(r"\s+real$", "", kw)
     kw = re.sub(r"\s+safe$", "", kw)
 
-    # Clean common malformed leftovers
     kw = re.sub(r"\s+a$", "", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
 
@@ -310,7 +323,7 @@ def build_hub_link_html(keyword):
     return (
         f'<a class="hub-link-card" href="/scam-check-now/{hub_slug}/">'
         f'<span class="hub-link-label">Related scam category</span>'
-        f'<span class="hub-link-title">{hub_title}</span>'
+        f'<span class="hub-link-title">{escape_html(hub_title)}</span>'
         f'</a>'
     )
 
@@ -521,10 +534,32 @@ def validate_page_output(slug, title, description, canonical, related_pages):
     return errors
 
 
+def ensure_file(filepath):
+    folder = os.path.dirname(filepath)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+    if not os.path.exists(filepath):
+        with open(filepath, "a", encoding="utf-8"):
+            pass
+
+
+def append_rejected_keyword(keyword, reason):
+    global rejected_count
+    ensure_file(REJECTED_KEYWORDS_FILE)
+    with open(REJECTED_KEYWORDS_FILE, "a", encoding="utf-8") as f:
+        f.write(f"{normalize_keyword(keyword)} | {str(reason).strip()}\n")
+    rejected_count += 1
+
+
+def escape_html(text):
+    return escape(str(text), quote=True)
+
+
 # -----------------------------
 # SETUP
 # -----------------------------
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+ensure_file(REJECTED_KEYWORDS_FILE)
 
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
@@ -564,15 +599,12 @@ for page in pages:
     canonical = build_canonical(slug)
 
     try:
-        ai_text = generate_content(keyword_display)
+        ai_text = generate_content(keyword)
     except Exception as e:
-        fallback_count += 1
-        print("AI generation failed for", keyword, ":", e)
-        ai_text = f"""
-<p>{title_case(keyword_display)} scams often involve requests for money, personal information, or urgent action. Avoid clicking unknown links or sending funds. Always verify through official sources.</p>
-<p>Scammers often create urgency, impersonate trusted brands, or ask you to confirm account details before you have time to stop and check what is happening.</p>
-<p>The safest move is to verify independently through the official website or app before replying, logging in, sending money, or sharing personal information.</p>
-""".strip()
+        ai_failure_count += 1
+        append_rejected_keyword(keyword, e)
+        print("AI generation rejected for", keyword, ":", e)
+        continue
 
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
     more_links_pages = get_more_links(page, pages, MORE_LINKS_COUNT)
@@ -584,22 +616,22 @@ for page in pages:
         print("Validation warning for", slug, ":", "; ".join(validation_errors))
 
     links_html = "".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {title_case(display_keyword(r["keyword"]))} a Scam?</a></li>\n'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">Is {escape_html(title_case(display_keyword(r["keyword"])))} a Scam?</a></li>\n'
         for r in related_pages
     )
 
     more_links_html = "".join(
-        f'<li><a href="/scam-check-now/{r["slug"]}/">{title_case(display_keyword(r["keyword"]))} Scam Check</a></li>\n'
+        f'<li><a href="/scam-check-now/{r["slug"]}/">{escape_html(title_case(display_keyword(r["keyword"])))} Scam Check</a></li>\n'
         for r in more_links_pages
     )
 
     html = template
-    html = html.replace("{{TITLE}}", title)
-    html = html.replace("{{DESCRIPTION}}", description)
-    html = html.replace("{{KEYWORD}}", keyword_display)
+    html = html.replace("{{TITLE}}", escape_html(title))
+    html = html.replace("{{DESCRIPTION}}", escape_html(description))
+    html = html.replace("{{KEYWORD}}", escape_html(keyword_display))
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", links_html)
-    html = html.replace("{{CANONICAL_URL}}", canonical)
+    html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
     html = html.replace("{{HUB_LINK}}", hub_link_html)
     html = html.replace("{{MORE_LINKS}}", more_links_html)
 
@@ -619,6 +651,7 @@ print("Duplicate / fragmented keywords removed:", deduped_keywords_count)
 print("Duplicate slug groups skipped:", skipped_duplicate_keywords_count)
 print("Weak / low-value keywords skipped:", skipped_weak_keywords_count)
 print("Pages generated:", generated_count)
-print("Fallback content used:", fallback_count)
+print("AI generations rejected:", ai_failure_count)
+print("Rejected keywords logged:", rejected_count)
 print("Validation warnings:", validation_error_count)
 print("Write errors:", error_count)
