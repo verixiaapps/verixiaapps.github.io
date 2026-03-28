@@ -1,16 +1,3 @@
-Yes — for this file, here’s the 9/10 version.
-
-What changed:
-	•	removed local generic fallback content
-	•	passes the full keyword to AI instead of the stripped display keyword
-	•	logs failed AI generations and skips those pages instead of publishing weak filler
-	•	writes rejected keywords to data/rejected_keywords.txt
-	•	keeps your core structure and rebuild behavior intact
-	•	escapes key template values more safely
-	•	prevents bad pages from being counted as successful
-
-Replace the file with this:
-
 import os
 import re
 from collections import defaultdict
