@@ -25,6 +25,7 @@ MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
+FALLBACK_HUB_SLUG = "general-scams"
 
 CLUSTER_TERMS = {
     "amazon", "paypal", "zelle", "cash", "venmo", "facebook", "instagram",
@@ -86,6 +87,14 @@ BRAND_CASE = {
 SMALL_WORDS = {
     "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on",
     "or", "the", "to", "vs", "with"
+}
+
+GENERAL_FALLBACK_TERMS = {
+    "scam", "legit", "safe", "real", "fake", "message", "email", "text",
+    "link", "website", "alert", "warning", "notification", "request",
+    "offer", "phishing", "login", "account", "verify", "verification",
+    "support", "money", "payment", "refund", "invoice", "code", "codes",
+    "caller", "number", "contact", "suspicious", "unknown", "unexpected"
 }
 
 
@@ -388,6 +397,105 @@ def load_generated_keywords():
 
 
 # -----------------------------
+# HUB HELPERS
+# -----------------------------
+def get_cluster_lookup():
+    lookup = {}
+    for hub_slug, match_terms in CLUSTERS.items():
+        normalized_terms = []
+        for term in match_terms:
+            term_norm = normalize_keyword(term)
+            if term_norm:
+                normalized_terms.append(term_norm)
+        lookup[hub_slug] = normalized_terms
+    return lookup
+
+
+CLUSTER_LOOKUP = get_cluster_lookup()
+
+
+def ensure_fallback_hub_exists():
+    if FALLBACK_HUB_SLUG not in CLUSTER_LOOKUP:
+        CLUSTER_LOOKUP[FALLBACK_HUB_SLUG] = ["scam", "legit", "safe", "real or fake"]
+
+
+def best_hub_title(hub_slug):
+    if hub_slug == FALLBACK_HUB_SLUG:
+        return "General Scams"
+
+    label = hub_slug.replace("-", " ")
+    label = re.sub(r"\bscams\b", "", label).strip()
+    return title_case(label) if label else "General Scams"
+
+
+def score_hub_match(keyword, hub_slug, match_terms):
+    keyword_norm = normalize_keyword(keyword)
+    keyword_clean = clean_base_keyword(keyword)
+    keyword_word_set = set(re.findall(r"[a-z0-9]+", keyword_clean))
+    keyword_joined = f" {keyword_clean} "
+
+    score = 0
+
+    for term in match_terms:
+        term_norm = normalize_keyword(term)
+        if not term_norm:
+            continue
+
+        term_words = set(re.findall(r"[a-z0-9]+", term_norm))
+        exact_phrase = f" {term_norm} "
+
+        if exact_phrase in keyword_joined:
+            score += 12 + len(term_words)
+
+        elif term_words and term_words.issubset(keyword_word_set):
+            score += 8 + len(term_words)
+
+        elif term_norm in keyword_norm:
+            score += 5
+
+    root = keyword_root(keyword)
+    if root and root in hub_slug:
+        score += 3
+
+    if hub_slug == FALLBACK_HUB_SLUG:
+        generic_hits = sum(1 for token in keyword_word_set if token in GENERAL_FALLBACK_TERMS)
+        score += min(generic_hits, 4)
+
+    return score
+
+
+def find_best_hub_slug(keyword):
+    ensure_fallback_hub_exists()
+
+    best_hub_slug = FALLBACK_HUB_SLUG
+    best_score = -1
+
+    for hub_slug, match_terms in CLUSTER_LOOKUP.items():
+        score = score_hub_match(keyword, hub_slug, match_terms)
+
+        if score > best_score:
+            best_score = score
+            best_hub_slug = hub_slug
+
+    return best_hub_slug or FALLBACK_HUB_SLUG
+
+
+def build_hub_link_html(keyword):
+    hub_slug = find_best_hub_slug(keyword)
+    if not hub_slug:
+        hub_slug = FALLBACK_HUB_SLUG
+
+    hub_title = best_hub_title(hub_slug)
+
+    return (
+        f'<a class="hub-link-card" href="/scam-check-now/{hub_slug}/">'
+        f'<span class="hub-link-label">Scam Hub</span>'
+        f'<span class="hub-link-title">Browse the {escape_html(hub_title)} Hub</span>'
+        f'</a>'
+    )
+
+
+# -----------------------------
 # LINKING HELPERS
 # -----------------------------
 def dedupe_pages_by_slug(pages_list):
@@ -413,6 +521,7 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     current_cluster = keyword_cluster_tokens(current_keyword)
     current_root = keyword_root(current_keyword)
     current_base = clean_base_keyword(current_keyword)
+    current_hub = find_best_hub_slug(current_keyword)
 
     candidates = [
         p for p in all_pages
@@ -428,12 +537,15 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         other_tokens = keyword_tokens(other_keyword)
         other_cluster = keyword_cluster_tokens(other_keyword)
         other_root = keyword_root(other_keyword)
+        other_hub = find_best_hub_slug(other_keyword)
         length_diff = abs(len(other_tokens) - len(current_tokens))
         same_root = 1 if current_root and other_root == current_root else 0
+        same_hub = 1 if current_hub and other_hub == current_hub else 0
         shared_cluster = len(current_cluster & other_cluster)
         shared_tokens = len(current_tokens & other_tokens)
 
         return (
+            -same_hub,
             -same_root,
             -shared_cluster,
             -shared_tokens,
@@ -458,40 +570,6 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
             break
 
     return related
-
-
-def find_best_hub_slug(keyword):
-    keyword_norm = normalize_keyword(keyword)
-
-    best_hub_slug = None
-    best_score = 0
-
-    for hub_slug, match_terms in CLUSTERS.items():
-        score = 0
-        for term in match_terms:
-            term_norm = normalize_keyword(term)
-            if term_norm and term_norm in keyword_norm:
-                score += 1
-
-        if score > best_score:
-            best_score = score
-            best_hub_slug = hub_slug
-
-    return best_hub_slug
-
-
-def build_hub_link_html(keyword):
-    hub_slug = find_best_hub_slug(keyword)
-    if not hub_slug or not page_exists(hub_slug):
-        return ""
-
-    hub_title = title_case(hub_slug.replace("-", " "))
-    return (
-        f'<a class="hub-link-card" href="/scam-check-now/{hub_slug}/">'
-        f'<span class="hub-link-label">Scam Hub</span>'
-        f'<span class="hub-link-title">Browse the {escape_html(hub_title)} Hub</span>'
-        f'</a>'
-    )
 
 
 def build_links_html(pages_list):
@@ -565,6 +643,7 @@ print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
+print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
 
 # -----------------------------
@@ -623,6 +702,8 @@ for page in queue_pages:
         exclude_slugs=related_slugs
     )
 
+    hub_link_html = build_hub_link_html(keyword)
+
     html = template
     html = html.replace("{{TITLE}}", escape_html(title))
     html = html.replace("{{DESCRIPTION}}", escape_html(description))
@@ -630,7 +711,7 @@ for page in queue_pages:
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", build_links_html(related_pages))
     html = html.replace("{{MORE_LINKS}}", build_links_html(more_pages))
-    html = html.replace("{{HUB_LINK}}", build_hub_link_html(keyword))
+    html = html.replace("{{HUB_LINK}}", hub_link_html)
     html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
 
     with open(path, "w", encoding="utf-8") as f:
@@ -646,7 +727,10 @@ for page in queue_pages:
     existing_pages = dedupe_pages_by_slug(existing_pages)
 
     generated_count += 1
-    print(f"Generated: {slug} ({generated_count}/{DAILY_LIMIT})")
+    print(
+        f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
+        f"-> hub: {find_best_hub_slug(keyword)}"
+    )
 
 # rewrite queue with only leftovers
 built_keyword_set = set(built_keywords)
