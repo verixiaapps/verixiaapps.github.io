@@ -946,6 +946,26 @@ font-weight:900;
 text-decoration:underline;
 }
 
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:13px;
+font-weight:900;
+letter-spacing:.01em;
+text-transform:uppercase;
+color:#64748b;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+}
+
 .link-section{
 margin-top:28px;
 padding-top:24px;
@@ -1667,10 +1687,40 @@ function cleanHubLink() {
 
   hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
 
-  const hasAnchor = hubLinkWrap.querySelector("a");
-  if (!hasAnchor) {
+  const anchor = hubLinkWrap.querySelector("a");
+  if (!anchor) {
     hubLinkWrap.style.display = "none";
+    return;
   }
+
+  const anchorText = normalizeKeyword(anchor.textContent || "");
+  if (!anchorText) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  let labelText = normalizeKeyword(hubLinkWrap.textContent || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  labelText = labelText.replace(new RegExp(anchorText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "").trim();
+  labelText = labelText.replace(/[:\-\s]+$/g, "").trim();
+
+  if (!labelText) {
+    labelText = "Related scam category";
+  }
+
+  const safeHref = anchor.getAttribute("href") || "#";
+  const safeText = anchor.textContent || "";
+  const target = anchor.getAttribute("target");
+  const rel = anchor.getAttribute("rel");
+
+  hubLinkWrap.innerHTML = `
+    <div class="hub-link-block">
+      <span class="hub-link-label">${escapeHtml(labelText)}</span>
+      <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
+    </div>
+  `;
 }
 
 function cleanMoreLinks() {
