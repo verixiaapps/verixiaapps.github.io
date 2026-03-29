@@ -7,7 +7,7 @@
 
 <title>Scam Check Now | Check Suspicious Messages, Emails, Links, and Offers Before You Click</title>
 
-<meta name="description" content="Think this is a scam? Paste a suspicious message, email, website, job offer, or link before you click, reply, or send money.">
+<meta name="description" content="Paste a suspicious message, email, website, job offer, or link and check scam risk before you click, reply, or send money.">
 <meta name="robots" content="index,follow">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
@@ -58,12 +58,36 @@ window.addEventListener("load", function(){
 
 <style>
 
+:root{
+--bg-top:#edf2ff;
+--bg-bottom:#f8fafc;
+--ink:#1f2937;
+--ink-strong:#0f172a;
+--muted:#667085;
+--line:#e5e7eb;
+--line-soft:#e8eefc;
+--blue:#3b82f6;
+--blue-dark:#1f2937;
+--blue-soft:#f8fbff;
+--shadow-xl:0 20px 50px rgba(15,23,42,.08);
+--shadow-md:0 10px 24px rgba(59,130,246,.18);
+}
+
+*{
+box-sizing:border-box;
+}
+
+html{
+-webkit-text-size-adjust:100%;
+scroll-behavior:smooth;
+}
+
 body{
 font-family:system-ui,-apple-system,Arial,sans-serif;
-background:linear-gradient(180deg,#eef2ff,#f8fafc);
+background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom));
 margin:0;
 padding-top:96px;
-color:#1f2937;
+color:var(--ink);
 line-height:1.6;
 }
 
@@ -84,29 +108,49 @@ box-sizing:border-box;
 .logo{
 pointer-events:auto;
 font-size:14px;
-font-weight:600;
-color:#374151;
+font-weight:700;
+color:#334155;
 margin-left:8px;
 letter-spacing:-.01em;
-opacity:.82;
+opacity:.9;
+}
+
+.top-actions{
+display:flex;
+align-items:center;
+gap:10px;
+pointer-events:none;
+}
+
+.app-top{
+pointer-events:auto;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:8px 12px;
+font-size:14px;
+border-radius:12px;
+font-weight:700;
+background:#ffffff;
+color:#1f2937;
+border:1px solid rgba(203,213,225,.95);
+box-shadow:0 6px 18px rgba(15,23,42,.08);
+text-decoration:none;
+white-space:nowrap;
 }
 
 .upgrade-top{
 pointer-events:auto;
 padding:8px 12px;
 font-size:14px;
-border-radius:10px;
-box-shadow:0 6px 18px rgba(0,0,0,.12);
-font-weight:600;
+border-radius:12px;
+box-shadow:0 6px 18px rgba(15,23,42,.12);
+font-weight:700;
 background:#1f2937;
 color:#fff;
 border:none;
 cursor:pointer;
-margin-right:28px;
 white-space:nowrap;
-max-width:120px;
-overflow:hidden;
-text-overflow:ellipsis;
 }
 
 @supports (padding: max(0px)) {
@@ -118,34 +162,44 @@ text-overflow:ellipsis;
 
 .hero{
 text-align:center;
-padding:22px 20px 30px;
-max-width:900px;
+padding:24px 20px 28px;
+max-width:920px;
 margin:0 auto;
 }
 
 .hero h1{
 margin:0;
-font-size:38px;
-line-height:1.14;
-letter-spacing:-.02em;
-color:#111827;
+font-size:42px;
+line-height:1.12;
+letter-spacing:-.03em;
+color:var(--ink-strong);
+max-width:760px;
+margin-left:auto;
+margin-right:auto;
 }
 
 .hero p{
-margin-top:14px;
+margin-top:16px;
 font-size:18px;
 max-width:700px;
 margin-left:auto;
 margin-right:auto;
-color:#374151;
-opacity:1;
+color:#475467;
 }
 
 .hero-trust{
-margin-top:14px;
+margin-top:16px;
+display:inline-flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:8px 14px;
+padding:10px 16px;
+border-radius:999px;
+background:rgba(255,255,255,.75);
+border:1px solid rgba(226,232,240,.9);
 font-size:14px;
-color:#4b5563;
-font-weight:600;
+color:#475467;
+font-weight:700;
 }
 
 .container{
@@ -154,21 +208,50 @@ margin:auto;
 background:#fff;
 padding:24px;
 padding-bottom:42px;
-border-radius:18px;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
+border-radius:20px;
+box-shadow:var(--shadow-xl);
 box-sizing:border-box;
+border:1px solid rgba(226,232,240,.9);
+}
+
+.tool-shell{
+padding:22px;
+border-radius:18px;
+background:linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+border:1px solid var(--line-soft);
+}
+
+.tool-intro{
+text-align:center;
+margin-bottom:18px;
+}
+
+.tool-intro h2{
+margin:0;
+font-size:24px;
+line-height:1.2;
+letter-spacing:-.02em;
+color:var(--ink-strong);
+}
+
+.tool-intro p{
+margin:8px auto 0;
+font-size:15px;
+max-width:580px;
+color:#667085;
 }
 
 textarea,input{
 width:100%;
 padding:14px;
 margin-top:10px;
-border-radius:12px;
+border-radius:14px;
 border:1px solid #d1d5db;
 font-size:16px;
 box-sizing:border-box;
 background:#fff;
 color:#111827;
+font-family:inherit;
 }
 
 textarea{
@@ -184,7 +267,7 @@ box-shadow:0 0 0 4px rgba(59,130,246,.12);
 
 button{
 border:none;
-border-radius:12px;
+border-radius:14px;
 cursor:pointer;
 font-size:16px;
 padding:16px;
@@ -194,17 +277,17 @@ font-family:inherit;
 
 .check{
 width:100%;
-background:#3b82f6;
+background:linear-gradient(180deg,#4f86ff 0%, #2563eb 100%);
 color:#fff;
 margin-top:16px;
-font-weight:700;
-box-shadow:0 8px 20px rgba(59,130,246,.25);
+font-weight:800;
+box-shadow:var(--shadow-md);
 transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .check:hover{
 transform:translateY(-1px);
-box-shadow:0 12px 24px rgba(59,130,246,.28);
+box-shadow:0 14px 28px rgba(59,130,246,.24);
 }
 
 .note{
@@ -222,7 +305,11 @@ text-align:center;
 }
 
 .success{
-margin-top:12px;
+margin-top:14px;
+padding:12px 14px;
+border-radius:12px;
+background:#ecfdf3;
+border:1px solid #bbf7d0;
 font-size:14px;
 color:#166534;
 text-align:center;
@@ -230,8 +317,42 @@ font-weight:700;
 display:none;
 }
 
+.inline-subscriber{
+display:none;
+margin-top:14px;
+}
+
+.inline-subscriber button{
+background:none;
+border:none;
+padding:0;
+min-height:auto;
+font-size:14px;
+color:#2563eb;
+font-weight:700;
+text-decoration:underline;
+box-shadow:none;
+cursor:pointer;
+}
+
+#subscriberArea{
+display:none;
+margin-top:14px;
+padding:16px;
+border-radius:16px;
+background:#f8fafc;
+border:1px solid #e5e7eb;
+}
+
+.subscriber-copy{
+margin-top:8px;
+font-size:13px;
+color:#6b7280;
+text-align:center;
+}
+
 #result{
-margin-top:25px;
+margin-top:22px;
 display:none;
 }
 
@@ -239,16 +360,16 @@ display:none;
 background:#fff;
 border-radius:16px;
 padding:24px;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
+box-shadow:var(--shadow-xl);
 border:1px solid #e5e7eb;
 }
 
 .risk{
-font-size:26px;
+font-size:24px;
 font-weight:800;
 margin-bottom:14px;
 padding:10px 14px;
-border-radius:10px;
+border-radius:12px;
 display:inline-block;
 }
 
@@ -279,7 +400,7 @@ margin-top:18px;
 }
 
 .section-title{
-font-weight:700;
+font-weight:800;
 margin-bottom:8px;
 color:#111827;
 }
@@ -293,22 +414,53 @@ li{
 margin-bottom:8px;
 }
 
+.after-tool{
+margin-top:18px;
+display:grid;
+gap:16px;
+}
+
+.support-card,
+.app-link-card,
 .upgrade{
-display:none;
-margin-top:25px;
-padding:25px;
 background:#fff;
 border-radius:16px;
-text-align:center;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
 border:1px solid #e5e7eb;
+box-shadow:var(--shadow-xl);
+}
+
+.support-card{
+padding:18px;
+text-align:center;
+background:#f8fafc;
+}
+
+.support-card strong{
+display:block;
+font-size:18px;
+line-height:1.35;
+color:#111827;
+}
+
+.support-card span{
+display:block;
+margin-top:8px;
+font-size:14px;
+color:#6b7280;
+}
+
+.upgrade{
+display:none;
+padding:24px;
+text-align:center;
 }
 
 .upgrade h3{
 margin:0 0 8px;
 font-size:28px;
-line-height:1.2;
+line-height:1.15;
 color:#111827;
+letter-spacing:-.02em;
 }
 
 .upgrade-copy{
@@ -323,7 +475,7 @@ width:100%;
 margin-top:14px;
 background:#3b82f6;
 color:#fff;
-font-weight:700;
+font-weight:800;
 padding:14px;
 box-shadow:0 8px 20px rgba(59,130,246,.2);
 }
@@ -337,24 +489,24 @@ background:#1d4ed8;
 }
 
 .app-link-card{
-margin-top:16px;
 padding:18px;
-background:#f8fafc;
-border:1px solid #e5e7eb;
-border-radius:14px;
 text-align:center;
+background:#f8fbff;
 }
 
 .app-link-card h4{
 margin:0 0 6px;
-font-size:18px;
+font-size:22px;
+line-height:1.2;
 color:#111827;
+letter-spacing:-.02em;
 }
 
 .app-link-card p{
-margin:0 0 12px;
-font-size:14px;
+margin:0 auto 12px;
+font-size:15px;
 color:#4b5563;
+max-width:520px;
 }
 
 .app-link-button{
@@ -364,7 +516,7 @@ text-decoration:none;
 text-align:center;
 background:#1f2937;
 color:#fff;
-font-weight:700;
+font-weight:800;
 padding:14px;
 border-radius:12px;
 box-sizing:border-box;
@@ -382,7 +534,7 @@ padding:0;
 min-height:auto;
 font-size:14px;
 color:#2563eb;
-font-weight:600;
+font-weight:700;
 text-decoration:underline;
 box-shadow:none;
 cursor:pointer;
@@ -413,15 +565,25 @@ padding-top:88px;
 padding:18px 16px 24px;
 }
 .hero h1{
-font-size:32px;
+font-size:34px;
 }
 .hero p{
 font-size:17px;
 }
+.hero-trust{
+display:flex;
+border-radius:18px;
+padding:12px 14px;
+line-height:1.45;
+}
 .container{
 margin-left:12px;
 margin-right:12px;
-padding:20px;
+padding:18px;
+border-radius:18px;
+}
+.tool-shell{
+padding:18px;
 }
 .top-bar{
 padding:10px 10px;
@@ -429,15 +591,21 @@ padding:10px 10px;
 .logo{
 font-size:13px;
 margin-left:2px;
-opacity:.78;
+opacity:.85;
 }
+.top-actions{
+gap:8px;
+}
+.app-top,
 .upgrade-top{
 font-size:13px;
 padding:8px 10px;
-margin-right:0;
 }
 .upgrade h3{
 font-size:24px;
+}
+.tool-intro h2{
+font-size:22px;
 }
 }
 </style>
@@ -447,71 +615,95 @@ font-size:24px;
 <body>
 
 <div class="top-bar">
-  <div class="logo">Scam Check</div>
-  <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+  <div class="logo">Scam Check Now</div>
+  <div class="top-actions">
+    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
+    <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+  </div>
 </div>
 
 <div class="hero">
-<h1>Think this is a scam? Check before you lose money</h1>
-<p>Paste a suspicious message, email, or link before you click, reply, or send money.</p>
-<div class="hero-trust">⚠️ Most scams look completely normal at first — check before it’s too late</div>
+<h1>Check suspicious messages before you click, reply, or send money</h1>
+<p>Paste a suspicious message, email, website, job offer, or link and get a fast scam risk review before you take action.</p>
+<div class="hero-trust">No signup required • 1 free check • Results in seconds</div>
 </div>
 
 <div class="container">
 
-<textarea id="text" placeholder="Paste a suspicious message, email, website, job offer, or investment pitch here..."></textarea>
+  <div class="tool-shell">
 
-<div class="input-help">Examples: job offer, PayPal message, crypto presale, email, delivery text, account warning</div>
+    <div class="tool-intro">
+      <h2>Paste a suspicious message to check scam risk</h2>
+      <p>Review common warning signs, risky patterns, and what to do next before you click, reply, pay, or share information.</p>
+    </div>
 
-<button class="check" onclick="check()">🔍 Check Message Now</button>
+    <textarea id="text" placeholder="Paste a suspicious message, email, website, job offer, or investment pitch here..."></textarea>
 
-<div class="note">No signup required • 1 free check • Quick analysis</div>
+    <div class="input-help">Examples: job offer, PayPal message, crypto presale, email, delivery text, account warning</div>
 
-<input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited access">
+    <button class="check" onclick="check()">🔍 Check Scam Risk</button>
 
-<div class="note">Use the same email you entered during checkout</div>
+    <div class="note">No signup required • 1 free check • Quick analysis</div>
 
-<div id="postPurchase" class="success">
-✅ Payment successful — unlimited scam checks are active on this browser
-</div>
+    <div class="inline-subscriber" id="inlineSubscriber">
+      <button onclick="toggleSubscriberArea()">Already subscribed? Enter your payment email</button>
+    </div>
 
-<div class="note">Don’t click anything until you check this</div>
+    <div id="subscriberArea">
+      <input id="email" placeholder="Enter your payment email to unlock unlimited access">
+      <div class="subscriber-copy">Use the same email you entered during checkout</div>
+    </div>
 
-<div class="app-link-card">
-  <h4>📱 Use it on your phone</h4>
-  <p>Check messages anytime with the app</p>
-  <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
-</div>
+    <div id="postPurchase" class="success">
+      ✅ Payment successful — unlimited scam checks are active on this browser
+    </div>
 
-<div id="result"></div>
+    <div id="result"></div>
 
-<div class="upgrade" id="upgrade">
+  </div>
 
-<h3>⚠️ Scams don’t stop at one message</h3>
+  <div class="after-tool">
 
-<div class="upgrade-copy">
-Fake jobs, phishing emails, payment requests, impersonation attempts, fake support, and risky links show up every day. Unlimited access helps you check the next suspicious message before you click, reply, or send money.
-</div>
+    <div class="app-link-card">
+      <h4>Check future messages with confidence</h4>
+      <p>Use the app to review suspicious messages, links, and requests as they come in.</p>
+      <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
+    </div>
 
-<div style="margin-top:10px;font-size:13px;color:#6b7280;">
-Stay protected before you click, reply, send money, connect a wallet, or invest
-</div>
+    <div class="upgrade" id="upgrade">
 
-<div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
-Unlimited message reviews • Cancel anytime
-</div>
+      <h3>Unlimited scam checks for ongoing protection</h3>
 
-<button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Start Unlimited Reviews — Weekly</button>
-<button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Start Unlimited Reviews — Monthly</button>
-<button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Best Value — Yearly</button>
+      <div class="upgrade-copy">
+        If you review suspicious messages often, unlimited access makes it easy to keep checking emails, links, payment requests, account alerts, and offers before you act.
+      </div>
 
-<div style="margin-top:14px;font-size:13px;color:#6b7280;">
-Secure payments powered by Stripe
-</div>
+      <div style="margin-top:10px;font-size:13px;color:#6b7280;">
+        Useful for ongoing protection against scams, phishing, and impersonation attempts
+      </div>
 
-<div class="subscriber-link"><button onclick="focusEmail()">Already subscribed? Enter your email to unlock</button></div>
+      <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
+        Unlimited scam checks • Cancel anytime
+      </div>
 
-</div>
+      <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+      <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+      <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+
+      <div style="margin-top:14px;font-size:13px;color:#6b7280;">
+        Secure payments powered by Stripe
+      </div>
+
+      <div class="subscriber-link"><button onclick="toggleSubscriberArea(); focusEmail();">Already subscribed? Enter your email</button></div>
+
+    </div>
+
+    <div class="support-card">
+      <strong>When something feels off, pause and verify it through an official source before taking action.</strong>
+      <span>Do not rely on the message itself for links, payment instructions, or identity requests.</span>
+    </div>
+
+  </div>
 
 </div>
 
@@ -539,8 +731,14 @@ return String(str)
 .replace(/'/g,"&#39;");
 }
 
+function toggleSubscriberArea(){
+const el=document.getElementById("subscriberArea");
+el.style.display=el.style.display==="block" ? "none" : "block";
+}
+
 function focusEmail(){
 const emailInput=document.getElementById("email");
+document.getElementById("subscriberArea").style.display="block";
 emailInput.scrollIntoView({behavior:"smooth",block:"center"});
 setTimeout(()=>emailInput.focus(),150);
 }
@@ -588,7 +786,7 @@ unknown:"When the risk is unclear, the safest step is to verify independently be
 
 return `
 <div class="result-card">
-<div class="risk ${risk}">${risk === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + risk.toUpperCase()}</div>
+<div class="risk ${risk}">${risk === "unknown" ? "Risk Level: Review" : "Risk Level: " + risk.toUpperCase()}</div>
 <div class="result-summary">${summaryByRisk[risk]}</div>
 
 <div class="section">
@@ -638,12 +836,13 @@ body:JSON.stringify({text,email,subscribed})
 const data=await response.json();
 
 if(data.limit){
-result.innerHTML='<div class="result-card"><div class="risk medium">Free Checks Used</div><div class="result-summary">Unlock unlimited message reviews for ongoing access whenever you want to review another suspicious message, link, or offer.</div></div>';
+result.innerHTML='<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlimited access is available if you want to keep reviewing suspicious messages, links, and offers.</div></div>';
 showUpgrade();
 return;
 }
 
 result.innerHTML=formatResult(data.result || "");
+document.getElementById("inlineSubscriber").style.display="block";
 showUpgrade();
 
 }catch(e){
