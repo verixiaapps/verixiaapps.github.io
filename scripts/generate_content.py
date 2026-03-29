@@ -10,6 +10,7 @@ from html import unescape
 RAILWAY_API = "https://awake-integrity-production-faa0.up.railway.app"
 TIMEOUT = 60
 MIN_PARAGRAPHS = 3
+MIN_CONTENT_CHARS = 280
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,6 +33,14 @@ ACTION_SECTION_INTROS = [
     "The safest next step is to verify everything outside the message itself.",
     "Before you click, reply, or pay, confirm the situation through an official source you trust.",
     "A careful verification step can stop most scams before any damage happens.",
+]
+
+CONTENT_MODES = [
+    "direct",
+    "scenario",
+    "warning",
+    "comparison",
+    "breakdown",
 ]
 
 GENERIC_WARNING_BULLET_SETS = [
@@ -266,6 +275,91 @@ ACTION_PARAGRAPHS_BY_CONTEXT = {
     ],
 }
 
+CONTEXT_EXAMPLES = {
+    "payment": [
+        "a PayPal refund email",
+        "a bank fraud alert text",
+        "an Amazon payment warning",
+        "a Zelle transfer problem message",
+    ],
+    "job": [
+        "a recruiter email",
+        "a remote job offer",
+        "an interview request text",
+        "an onboarding payment request",
+    ],
+    "crypto": [
+        "a wallet verification request",
+        "a crypto recovery message",
+        "an exchange support DM",
+        "an airdrop or token claim link",
+    ],
+    "delivery": [
+        "a USPS tracking text",
+        "a FedEx delivery alert",
+        "a UPS missed package message",
+        "a customs fee link",
+    ],
+    "account-security": [
+        "a login alert email",
+        "a password reset message",
+        "an account locked warning",
+        "a two-factor code request",
+    ],
+    "government": [
+        "an IRS warning",
+        "a Social Security notice",
+        "a tax refund message",
+        "a benefits verification request",
+    ],
+    "unknown-number": [
+        "a random text from an unknown number",
+        "a strange callback request",
+        "a spoofed-number voicemail",
+        "an unexpected unknown caller message",
+    ],
+    "phishing": [
+        "a fake login page",
+        "a suspicious sign-in link",
+        "a phishing email",
+        "a copied account warning",
+    ],
+    "general": [
+        "a suspicious message",
+        "an unexpected email",
+        "a strange text",
+        "a suspicious link",
+    ],
+}
+
+MODE_INTROS = {
+    "direct": [
+        "The main question is whether the message or request can be trusted.",
+        "The safest way to evaluate it is to slow down and separate the claim from the pressure around it.",
+        "Most scam checks start with the same question: does the situation hold up when you verify it independently?",
+    ],
+    "scenario": [
+        "A common pattern starts when someone receives something that looks routine at first glance.",
+        "Many people only realize the risk after the message creates just enough urgency to interrupt normal checking.",
+        "This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush.",
+    ],
+    "warning": [
+        "This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag.",
+        "The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts.",
+        "What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one.",
+    ],
+    "comparison": [
+        "A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them.",
+        "The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently.",
+        "A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link.",
+    ],
+    "breakdown": [
+        "The easiest way to understand the risk is to break down how this scam usually unfolds step by step.",
+        "Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification.",
+        "When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot.",
+    ],
+}
+
 BRAND_CASE = {
     "paypal": "PayPal",
     "whatsapp": "WhatsApp",
@@ -389,6 +483,23 @@ def variant_index(keyword: str, count: int) -> int:
     return sum(ord(c) for c in normalize_keyword(keyword)) % count if count else 0
 
 
+def choose_mode(keyword: str) -> str:
+    idx = variant_index(keyword, len(CONTENT_MODES))
+    return CONTENT_MODES[idx]
+
+
+def context_example(context: str, keyword: str) -> str:
+    examples = CONTEXT_EXAMPLES.get(context, CONTEXT_EXAMPLES["general"])
+    idx = variant_index(keyword, len(examples))
+    return examples[idx]
+
+
+def mode_intro_sentence(mode: str, keyword: str) -> str:
+    options = MODE_INTROS.get(mode, MODE_INTROS["direct"])
+    idx = variant_index(keyword + mode, len(options))
+    return options[idx]
+
+
 def strip_html(text: str) -> str:
     text = re.sub(r"<br\s*/?>", " ", text, flags=re.IGNORECASE)
     text = re.sub(r"</p\s*>", "\n\n", text, flags=re.IGNORECASE)
@@ -408,6 +519,14 @@ def dedupe_preserve_order(items):
             seen.add(key)
             result.append(item)
     return result
+
+
+def safe_json(response: requests.Response):
+    try:
+        return response.json()
+    except ValueError as e:
+        snippet = response.text[:200].replace("\n", " ").strip()
+        raise ValueError(f"Invalid JSON response: {snippet}") from e
 
 
 # -----------------------------
@@ -463,116 +582,149 @@ def detect_context(keyword: str) -> str:
 # -----------------------------
 # SMART INTRO
 # -----------------------------
-def intro_paragraph(raw_keyword: str, display_kw: str) -> str:
+def intro_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
     keyword_title = title_case(display_kw)
     intent = detect_intent(raw_keyword)
     context = detect_context(raw_keyword)
+    example = context_example(context, raw_keyword)
+    mode_sentence = mode_intro_sentence(mode, raw_keyword)
 
     if intent == "post-action":
         return (
-            f"<p>If you already interacted with something related to {keyword_title}, the most important step is to slow down and verify what happened before taking any further action. Many scams rely on panic after a click, reply, login, or payment, so a calm check can help limit damage and keep you from taking the next risky step.</p>"
+            f"<p>If you already interacted with something related to {keyword_title}, the most important step is to slow down and verify what happened before taking any further action. {mode_sentence} Many scams rely on panic after a click, reply, login, or payment, so a calm check can help limit damage and keep you from taking the next risky step.</p>"
         )
 
     if intent == "question":
         if context == "job":
             return (
-                f"<p>{keyword_title} is a common question when a job message, recruiter outreach, or work-from-home offer feels too fast, too vague, or too good to be true. In many cases, the answer comes down to whether the sender, company, pay, and hiring process can be verified independently.</p>"
+                f"<p>{keyword_title} is a common question when something like {example} feels too fast, too vague, or too good to be true. {mode_sentence} In many cases, the answer comes down to whether the sender, company, pay, and hiring process can be verified independently.</p>"
             )
         if context == "delivery":
             return (
-                f"<p>{keyword_title} is a common question when a delivery text, shipping alert, or tracking update looks urgent but feels slightly off. The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>"
+                f"<p>{keyword_title} is a common question when something like {example} looks urgent but feels slightly off. {mode_sentence} The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>"
             )
         if context == "crypto":
             return (
-                f"<p>{keyword_title} is a common question when a wallet alert, investment message, recovery offer, or support contact creates urgency around crypto. These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>"
+                f"<p>{keyword_title} is a common question when something like {example} creates urgency around crypto. {mode_sentence} These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>"
             )
         if context == "account-security":
             return (
-                f"<p>{keyword_title} is a common question when an account alert, password reset, or login warning appears without context. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>"
+                f"<p>{keyword_title} is a common question when something like {example} appears without context. {mode_sentence} These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>"
             )
         return (
-            f"<p>{keyword_title} is a common question when a message, email, text, link, or request feels suspicious. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>"
+            f"<p>{keyword_title} is a common question when something like {example} feels suspicious. {mode_sentence} In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>"
         )
 
     if intent == "action":
         return (
-            f"<p>If you are trying to handle {keyword_title}, move carefully. Scams often work by pushing people to react fast, so taking a moment to verify the source can help you avoid clicking, replying, paying, or sharing information too soon.</p>"
+            f"<p>If you are trying to handle {keyword_title}, move carefully. {mode_sentence} Scams often work by pushing people to react fast, so taking a moment to verify the source can help you avoid clicking, replying, paying, or sharing information too soon.</p>"
         )
 
     if context == "job":
         return (
-            f"<p>{keyword_title} scams often look like ordinary recruiter outreach, remote job offers, interview requests, or onboarding messages at first glance. The real goal is usually to collect personal information, push you into paying upfront, or move you into an unofficial hiring process before you can verify the employer.</p>"
+            f"<p>{keyword_title} scams often look like ordinary recruiter outreach, remote job offers, interview requests, or onboarding messages at first glance, including things like {example}. {mode_sentence} The real goal is usually to collect personal information, push you into paying upfront, or move you into an unofficial hiring process before you can verify the employer.</p>"
         )
 
     if context == "delivery":
         return (
-            f"<p>{keyword_title} scams often arrive as normal-looking package alerts, tracking problems, or delivery updates. They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>"
+            f"<p>{keyword_title} scams often arrive as normal-looking package alerts, tracking problems, or delivery updates, such as {example}. {mode_sentence} They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>"
         )
 
     if context == "crypto":
         return (
-            f"<p>{keyword_title} scams are built to look credible to people already thinking about exchanges, wallets, investments, or account recovery. They often create urgency around access, profit, or security so you act before carefully verifying the request.</p>"
+            f"<p>{keyword_title} scams are built to look credible to people already thinking about exchanges, wallets, investments, or account recovery, including requests like {example}. {mode_sentence} They often create urgency around access, profit, or security so you act before carefully verifying the request.</p>"
         )
 
     if context == "account-security":
         return (
-            f"<p>{keyword_title} scams are designed to imitate normal account activity like login alerts, verification requests, password resets, or support messages. The real goal is often to capture credentials, one-time codes, or identity details before you check the official account directly.</p>"
+            f"<p>{keyword_title} scams are designed to imitate normal account activity like login alerts, verification requests, password resets, or support messages, including things like {example}. {mode_sentence} The real goal is often to capture credentials, one-time codes, or identity details before you check the official account directly.</p>"
         )
 
     return (
-        f"<p>{keyword_title} scams are designed to look believable at first glance. They often arrive as ordinary messages, alerts, emails, or requests, but the real goal is to create pressure and get you to act before you stop to verify the details.</p>"
+        f"<p>{keyword_title} scams are designed to look believable at first glance. Messages like {example} often arrive as ordinary alerts, emails, or requests. {mode_sentence} The real goal is to create pressure and get you to act before you stop to verify the details.</p>"
     )
 
 
 # -----------------------------
 # SCENARIO
 # -----------------------------
-def scenario_paragraph(raw_keyword: str, display_kw: str) -> str:
+def scenario_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
     keyword_title = title_case(display_kw)
     context = detect_context(raw_keyword)
+    example = context_example(context, raw_keyword)
+
+    if mode == "comparison":
+        if context == "delivery":
+            return (
+                f"<p>A legitimate delivery notice usually appears in the real carrier app or on the official tracking page, while a scam version often starts with something like {example} and pushes you toward a message link, a small fee, or a rushed address update.</p>"
+            )
+        if context == "payment":
+            return (
+                f"<p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like {example} and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>"
+            )
+        if context == "job":
+            return (
+                f"<p>A real hiring process usually includes a verifiable company, consistent recruiter identity, and normal interview steps, while a scam version often starts with something like {example} and rushes toward personal data, fees, or off-platform contact.</p>"
+            )
+        return (
+            f"<p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like {example} and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>"
+        )
+
+    if mode == "breakdown":
+        if context == "crypto":
+            return (
+                f"<p>A common {keyword_title} flow starts with attention from something like {example}, moves into urgency about access, recovery, or profit, and then ends with a request to connect a wallet, approve a transaction, or trust an unofficial support contact.</p>"
+            )
+        if context == "account-security":
+            return (
+                f"<p>A common {keyword_title} flow starts with something like {example}, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>"
+            )
+        return (
+            f"<p>A common {keyword_title} flow starts with something like {example}, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>"
+        )
 
     if context == "payment":
         return (
-            f"<p>A common {keyword_title} scenario starts with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>"
+            f"<p>A common {keyword_title} scenario starts with something like {example}, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>"
         )
 
     if context == "job":
         return (
-            f"<p>A typical {keyword_title} case may involve a job offer that feels unusually fast, easy, or high-paying. It can also involve requests for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>"
+            f"<p>A typical {keyword_title} case may involve something like {example}, a job offer that feels unusually fast, easy, or high-paying, or a request for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>"
         )
 
     if context == "crypto":
         return (
-            f"<p>Many {keyword_title} scams involve fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>"
+            f"<p>Many {keyword_title} scams involve things like {example}, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>"
         )
 
     if context == "delivery":
         return (
-            f"<p>A common {keyword_title} message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>"
+            f"<p>A common {keyword_title} message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like {example}. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>"
         )
 
     if context == "account-security":
         return (
-            f"<p>In many {keyword_title} cases, the message claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>"
+            f"<p>In many {keyword_title} cases, the message starts with something like {example} and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>"
         )
 
     if context == "government":
         return (
-            f"<p>A common {keyword_title} scenario uses fear, urgency, or the promise of money to get a fast response. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>"
+            f"<p>A common {keyword_title} scenario uses fear, urgency, or the promise of money to get a fast response, often through something like {example}. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>"
         )
 
     if context == "unknown-number":
         return (
-            f"<p>A common {keyword_title} situation begins with a text or call from a number you do not recognize. The message may stay vague at first, then quickly move toward links, callbacks, money, codes, or personal information once it gets your attention.</p>"
+            f"<p>A common {keyword_title} situation begins with something like {example}. The message may stay vague at first, then quickly move toward links, callbacks, money, codes, or personal information once it gets your attention.</p>"
         )
 
     if context == "phishing":
         return (
-            f"<p>Many {keyword_title} scams imitate a real company, account warning, delivery notice, support message, or security alert. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>"
+            f"<p>Many {keyword_title} scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like {example}. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>"
         )
 
     return (
-        f"<p>In many {keyword_title} situations, the message is written to build trust and urgency at the same time. It may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>"
+        f"<p>In many {keyword_title} situations, the message is written to build trust and urgency at the same time. Something like {example} may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>"
     )
 
 
@@ -601,9 +753,7 @@ def normalize_sentence_punctuation(text: str) -> str:
 def clean_text(text: str) -> str:
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
     text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
-    text = re.sub(r"<h1[^>]*>.*?</h1>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<h2[^>]*>.*?</h2>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<h3[^>]*>.*?</h3>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", text, flags=re.IGNORECASE | re.DOTALL)
     text = text.strip()
 
     cleaned = []
@@ -625,11 +775,14 @@ def clean_text(text: str) -> str:
 
 
 def is_usable_content(html: str) -> bool:
+    if not html:
+        return False
+
     if html.count("<p>") < MIN_PARAGRAPHS:
         return False
 
     plain = strip_html(html)
-    if len(plain) < 280:
+    if len(plain) < MIN_CONTENT_CHARS:
         return False
 
     return True
@@ -649,45 +802,61 @@ def get_action_paragraph(context: str, idx: int, keyword_title: str):
     return paragraphs[idx].format(keyword=keyword_title)
 
 
-def context_detail_paragraph(raw_keyword: str, display_kw: str) -> str:
+def context_detail_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
     keyword_title = title_case(display_kw)
     context = detect_context(raw_keyword)
+    example = context_example(context, raw_keyword)
+
+    if mode == "warning":
+        return (
+            f"<p>The strongest clue is usually not one isolated detail. With {keyword_title}, the risk often becomes clearer when something like {example} is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>"
+        )
+
+    if mode == "comparison":
+        return (
+            f"<p>That difference matters because a real notice related to {keyword_title} should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>"
+        )
+
+    if mode == "breakdown":
+        return (
+            f"<p>This is why step-by-step checking matters. Once a message related to {keyword_title} moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>"
+        )
 
     if context == "payment":
         return (
-            f"<p>Payment-related scams connected to {keyword_title} often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists.</p>"
+            f"<p>Payment-related scams connected to {keyword_title} often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like {example} is involved.</p>"
         )
     if context == "job":
         return (
-            f"<p>Job-related scams connected to {keyword_title} often break normal hiring patterns. Real employers usually have a verifiable company presence, a clear role, and a consistent interview process, while scam messages often stay vague until they ask for money, documents, or account details.</p>"
+            f"<p>Job-related scams connected to {keyword_title} often break normal hiring patterns. Real employers usually have a verifiable company presence, a clear role, and a consistent interview process, while scam messages often stay vague until they ask for money, documents, or account details, especially after something like {example} appears.</p>"
         )
     if context == "crypto":
         return (
-            f"<p>Crypto-related scams connected to {keyword_title} often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible.</p>"
+            f"<p>Crypto-related scams connected to {keyword_title} often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like {example}.</p>"
         )
     if context == "delivery":
         return (
-            f"<p>Delivery-related scams connected to {keyword_title} usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter.</p>"
+            f"<p>Delivery-related scams connected to {keyword_title} usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like {example} appears.</p>"
         )
     if context == "account-security":
         return (
-            f"<p>Account-security scams connected to {keyword_title} are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link.</p>"
+            f"<p>Account-security scams connected to {keyword_title} are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like {example}.</p>"
         )
     if context == "government":
         return (
-            f"<p>Government-related scams connected to {keyword_title} often use the appearance of authority to push fast decisions. That is why it is important to verify any claim directly through the official agency website or number instead of trusting the message on its own.</p>"
+            f"<p>Government-related scams connected to {keyword_title} often use the appearance of authority to push fast decisions. That is why it is important to verify any claim directly through the official agency website or number instead of trusting the message on its own, especially when something like {example} is used to create urgency.</p>"
         )
     if context == "unknown-number":
         return (
-            f"<p>Unknown-number scams connected to {keyword_title} often begin with very little detail because the first goal is simply to get a response. Once a person replies, scammers may shift the conversation toward links, payment requests, verification codes, or impersonation tactics.</p>"
+            f"<p>Unknown-number scams connected to {keyword_title} often begin with very little detail because the first goal is simply to get a response. Once a person replies, scammers may shift the conversation toward links, payment requests, verification codes, or impersonation tactics, especially after something like {example} gets your attention.</p>"
         )
     if context == "phishing":
         return (
-            f"<p>Phishing-related scams connected to {keyword_title} often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own.</p>"
+            f"<p>Phishing-related scams connected to {keyword_title} often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like {example} is used to build trust.</p>"
         )
 
     return (
-        f"<p>Scams connected to {keyword_title} often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details.</p>"
+        f"<p>Scams connected to {keyword_title} often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like {example} is used as the starting point.</p>"
     )
 
 
@@ -697,11 +866,12 @@ def context_detail_paragraph(raw_keyword: str, display_kw: str) -> str:
 def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
     keyword_title = title_case(display_kw)
     context = detect_context(raw_keyword)
-    idx = variant_index(display_kw, len(WARNING_SECTION_TITLES))
+    mode = choose_mode(raw_keyword)
+    idx = variant_index(display_kw + mode, len(WARNING_SECTION_TITLES))
 
-    intro = intro_paragraph(raw_keyword, display_kw)
-    scenario = scenario_paragraph(raw_keyword, display_kw)
-    detail = context_detail_paragraph(raw_keyword, display_kw)
+    intro = intro_paragraph(raw_keyword, display_kw, mode)
+    scenario = scenario_paragraph(raw_keyword, display_kw, mode)
+    detail = context_detail_paragraph(raw_keyword, display_kw, mode)
 
     warning_title = WARNING_SECTION_TITLES[idx]
     action_title = ACTION_SECTION_TITLES[idx]
@@ -711,9 +881,21 @@ def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
 
     bullet_html = "\n".join(f"<li>{b}</li>" for b in bullets)
 
+    if mode == "comparison":
+        middle_heading = "How Legitimate And Scam Versions Usually Differ"
+    elif mode == "breakdown":
+        middle_heading = "How This Scam Pattern Usually Unfolds"
+    elif mode == "warning":
+        middle_heading = "Why The Warning Signs Matter"
+    elif mode == "scenario":
+        middle_heading = "How This Situation Usually Plays Out"
+    else:
+        middle_heading = "What This Scam Pattern Usually Looks Like"
+
     return f"""
-<div class="content-block">
+<div class="content-block" data-context="{context}" data-mode="{mode}">
 {intro}
+<h2>{middle_heading}</h2>
 {scenario}
 {content}
 {detail}
@@ -761,7 +943,9 @@ def generate_content(keyword: str) -> str:
             )
             res.raise_for_status()
 
-            raw = str(res.json().get("content", "")).strip()
+            data = safe_json(res)
+            raw = str(data.get("content", "")).strip()
+
             if not raw:
                 raise ValueError(f"Empty content for prompt: {prompt_keyword}")
 
