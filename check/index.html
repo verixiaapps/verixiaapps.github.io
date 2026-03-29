@@ -367,7 +367,7 @@ border:1px solid #e5e7eb;
 .risk{
 font-size:24px;
 font-weight:800;
-margin-bottom:14px;
+margin-bottom:10px;
 padding:10px 14px;
 border-radius:12px;
 display:inline-block;
@@ -378,10 +378,24 @@ display:inline-block;
 .risk.low{background:#dcfce7;color:#166534;}
 .risk.unknown{background:#e5e7eb;color:#374151;}
 
+.result-meta{
+margin-top:2px;
+font-size:14px;
+color:#475467;
+font-weight:700;
+}
+
 .result-summary{
-margin:2px 0 0;
+margin:10px 0 0;
 font-size:15px;
 color:#374151;
+}
+
+.result-trust{
+margin-top:12px;
+font-size:14px;
+color:#475467;
+font-weight:700;
 }
 
 .result-payline{
@@ -623,7 +637,7 @@ font-size:22px;
 </div>
 
 <div class="hero">
-<h1>Check suspicious messages before you click, reply, or send money</h1>
+<h1>Is this a scam? Check before you click or send money</h1>
 <p>Paste a suspicious message, email, website, job offer, or link and get a fast scam risk review before you take action.</p>
 <div class="hero-trust">No signup required • 1 free check • Results in seconds</div>
 </div>
@@ -672,10 +686,10 @@ font-size:22px;
 
     <div class="upgrade" id="upgrade">
 
-      <h3>Unlimited scam checks for ongoing protection</h3>
+      <h3>Scam messages don’t stop. Stay protected.</h3>
 
       <div class="upgrade-copy">
-        If you review suspicious messages often, unlimited access makes it easy to keep checking emails, links, payment requests, account alerts, and offers before you act.
+        Check every message before you click, reply, or send money. Unlimited access helps you stay protected from new scams, phishing attempts, and impersonation messages.
       </div>
 
       <div style="margin-top:10px;font-size:13px;color:#6b7280;">
@@ -770,24 +784,47 @@ const bullets=parseSections(text)
 .map(l=>`<li>${escapeHtml(l)}</li>`)
 .join("");
 
+const confidenceMap={
+high:"92%",
+medium:"76%",
+low:"58%",
+unknown:"—"
+};
+
+const patternMap={
+high:"Likely Scam Pattern",
+medium:"Suspicious Message Pattern",
+low:"Low Risk Pattern",
+unknown:"Unclear Pattern"
+};
+
 const summaryByRisk={
-high:"This message shows multiple scam signals. Do not click links, reply, send money, or connect anything until you verify it directly.",
-medium:"This message shows warning signs. Be cautious and verify the sender, offer, or website before taking action.",
-low:"This message shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information.",
+high:"This message shows strong signs of a scam. It uses urgency, requests action, and lacks the kind of normal context usually seen in legitimate communication.",
+medium:"This message shows some warning signs commonly seen in scams. Review carefully before taking any action.",
+low:"This message shows fewer obvious scam indicators, but it is still important to verify before clicking links or sending information.",
 unknown:"We could not determine a clear risk level. Treat the message cautiously and verify through official sources."
 };
 
-const paylineByRisk={
-high:"Multiple warning signs were detected. Pause and verify through an official source before taking any action.",
-medium:"Several caution signals appeared. Review carefully and verify before clicking, replying, or paying.",
-low:"Fewer warning signs appeared, but it is still best to verify links, payments, and requests for personal information.",
+const trustLineByRisk={
+high:"Messages like this are commonly used in scams and follow known fraud patterns.",
+medium:"Some elements of this message match patterns often seen in scam attempts.",
+low:"This message shows fewer scam patterns but should still be verified.",
 unknown:"When the risk is unclear, the safest step is to verify independently before acting."
+};
+
+const paylineByRisk={
+high:"Multiple warning signs were detected. Do not click links, reply, or send money until you verify through an official source.",
+medium:"Several caution signals appeared. Verify the sender or request before taking action.",
+low:"Fewer warning signs appeared, but always verify links, payments, and personal information requests.",
+unknown:"Always verify through official channels before acting on uncertain messages."
 };
 
 return `
 <div class="result-card">
 <div class="risk ${risk}">${risk === "unknown" ? "Risk Level: Review" : "Risk Level: " + risk.toUpperCase()}</div>
+<div class="result-meta">Confidence: ${confidenceMap[risk]} • ${patternMap[risk]}</div>
 <div class="result-summary">${summaryByRisk[risk]}</div>
+<div class="result-trust">${trustLineByRisk[risk]}</div>
 
 <div class="section">
 <div class="section-title">Key Signals</div>
