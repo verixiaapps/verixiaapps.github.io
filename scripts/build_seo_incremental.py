@@ -1,3 +1,5 @@
+Use this full replacement.
+
 import os
 import re
 import sys
@@ -23,9 +25,21 @@ SITE = "https://verixiaapps.com"
 RELATED_LINKS_COUNT = 6
 MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
+MAX_REJECT_ATTEMPTS = int(os.getenv("MAX_REJECT_ATTEMPTS", "2"))
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
 FALLBACK_HUB_SLUG = "general-scams"
+
+REQUIRED_TEMPLATE_TAGS = {
+    "{{TITLE}}",
+    "{{DESCRIPTION}}",
+    "{{KEYWORD}}",
+    "{{AI_CONTENT}}",
+    "{{RELATED_LINKS}}",
+    "{{MORE_LINKS}}",
+    "{{HUB_LINK}}",
+    "{{CANONICAL_URL}}",
+}
 
 CLUSTER_TERMS = {
     "amazon", "paypal", "zelle", "cash", "venmo", "facebook", "instagram",
@@ -190,19 +204,24 @@ def ensure_file(filepath):
             pass
 
 
-def append_line_if_missing(filepath, value):
-    value = str(value).strip()
-    if not value:
-        return
+def normalize_line_set(values):
+    return {str(v).strip() for v in values if str(v).strip()}
 
-    existing = set()
-    if os.path.exists(filepath):
-        with open(filepath, encoding="utf-8") as f:
-            existing = {line.strip() for line in f if line.strip()}
 
-    if value not in existing:
-        with open(filepath, "a", encoding="utf-8") as f:
+def write_lines(filepath, values):
+    with open(filepath, "w", encoding="utf-8") as f:
+        for value in sorted(normalize_line_set(values)):
             f.write(value + "\n")
+
+
+def short_preview(text, length=220):
+    value = re.sub(r"\s+", " ", str(text or "")).strip()
+    return value[:length]
+
+
+def sanitize_rejected_reason(text):
+    value = re.sub(r"\s+", " ", str(text or "")).strip()
+    return value.replace("|", "/")[:500]
 
 
 def sanitize_ai_html(text):
@@ -212,18 +231,19 @@ def sanitize_ai_html(text):
     raw = raw.replace("```", "").strip()
 
     raw = re.sub(r"(?is)<!doctype.*?>", "", raw)
-    raw = re.sub(r"(?is)<html.*?>|</html>", "", raw)
-    raw = re.sub(r"(?is)<head.*?>.*?</head>", "", raw)
-    raw = re.sub(r"(?is)<body.*?>|</body>", "", raw)
-
+    raw = re.sub(r"(?is)<html\b[^>]*>", "", raw)
+    raw = re.sub(r"(?is)</html>", "", raw)
+    raw = re.sub(r"(?is)<head\b[^>]*>.*?</head>", "", raw)
+    raw = re.sub(r"(?is)<body\b[^>]*>", "", raw)
+    raw = re.sub(r"(?is)</body>", "", raw)
+    raw = re.sub(r"(?is)<title\b[^>]*>.*?</title>", "", raw)
+    raw = re.sub(r"(?is)<meta\b[^>]*>", "", raw)
+    raw = re.sub(r"(?is)<script\b[^>]*>.*?</script>", "", raw)
+    raw = re.sub(r"(?is)<style\b[^>]*>.*?</style>", "", raw)
     raw = re.sub(r"(?is)<h1\b[^>]*>.*?</h1>", "", raw)
 
+    raw = re.sub(r"\n{3,}", "\n\n", raw)
     return raw.strip()
-
-
-def short_preview(text, length=220):
-    value = re.sub(r"\s+", " ", str(text or "")).strip()
-    return value[:length]
 
 
 def is_guidance_style_keyword(keyword):
@@ -246,14 +266,16 @@ def is_question_style_keyword(keyword):
     return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
 
 
-def is_usable_ai_text(text):
+def is_usable_ai_text(text, keyword_display=""):
     if not text:
         return False
 
     raw = sanitize_ai_html(text)
     lowered = raw.lower()
+    text_only = re.sub(r"<[^>]+>", " ", raw)
+    text_only = re.sub(r"\s+", " ", text_only).strip().lower()
 
-    if len(raw) < 220:
+    if len(raw) < 260:
         return False
 
     weak_markers = {
@@ -270,29 +292,104 @@ def is_usable_ai_text(text):
         "content policy",
         "i do not have enough information",
         "i don't have enough information",
+        "placeholder",
+        "insert",
+        "example content",
     }
     if any(marker in lowered for marker in weak_markers):
         return False
 
-    paragraph_like = (
-        "<p>" in lowered
-        or "</p>" in lowered
-        or "<h2" in lowered
-        or "<ul" in lowered
-        or "\n\n" in raw
-        or raw.count("\n") >= 2
-    )
-    if not paragraph_like:
+    if "<p>" not in lowered:
         return False
 
-    text_density = re.sub(r"<[^>]+>", " ", raw)
-    text_density = re.sub(r"\s+", " ", text_density).strip()
-    if len(text_density) < 180:
+    if "<h2" not in lowered and "<ul" not in lowered and raw.count("\n") < 2:
         return False
+
+    if len(text_only) < 200:
+        return False
+
+    if keyword_display:
+        keyword_words = [w for w in re.findall(r"[a-z0-9]+", normalize_keyword(keyword_display)) if len(w) > 2]
+        if keyword_words:
+            hits = sum(1 for word in keyword_words if word in text_only)
+            if hits == 0:
+                return False
 
     return True
 
 
+def validate_template(template_text):
+    missing = sorted(tag for tag in REQUIRED_TEMPLATE_TAGS if tag not in template_text)
+    if missing:
+        raise ValueError(f"Template missing required placeholders: {', '.join(missing)}")
+
+
+# -----------------------------
+# REJECT TRACKING
+# -----------------------------
+def parse_rejected_line(line):
+    value = line.strip()
+    if not value:
+        return None
+
+    parts = [part.strip() for part in value.split("|")]
+
+    if not parts or not parts[0]:
+        return None
+
+    keyword = normalize_keyword(parts[0])
+    attempts = 1
+    reason = ""
+
+    if len(parts) >= 2:
+        if parts[1].isdigit():
+            attempts = max(1, int(parts[1]))
+            if len(parts) >= 3:
+                reason = " | ".join(parts[2:]).strip()
+        else:
+            attempts = 1
+            reason = " | ".join(parts[1:]).strip()
+
+    return keyword, attempts, reason
+
+
+def load_rejected_state():
+    state = {}
+    if not os.path.exists(REJECTED_KEYWORDS_FILE):
+        return state
+
+    with open(REJECTED_KEYWORDS_FILE, encoding="utf-8") as f:
+        for line in f:
+            parsed = parse_rejected_line(line)
+            if not parsed:
+                continue
+
+            keyword, attempts, reason = parsed
+            existing = state.get(keyword)
+
+            if not existing or attempts >= existing["attempts"]:
+                state[keyword] = {
+                    "attempts": attempts,
+                    "reason": reason,
+                }
+
+    return state
+
+
+def save_rejected_state(state):
+    with open(REJECTED_KEYWORDS_FILE, "w", encoding="utf-8") as f:
+        for keyword in sorted(state.keys()):
+            attempts = int(state[keyword].get("attempts", 1))
+            reason = sanitize_rejected_reason(state[keyword].get("reason", ""))
+            if reason:
+                f.write(f"{keyword} | {attempts} | {reason}\n")
+            else:
+                f.write(f"{keyword} | {attempts}\n")
+
+
+# -----------------------------
+# AI GENERATION
+# -----------------------------
 def build_retry_prompt(keyword, keyword_display):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
@@ -322,15 +419,11 @@ Original keyword: {raw}
 def generate_ai_text(keyword, keyword_display):
     raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
-    readable = readable_keyword(keyword)
 
     attempts = []
-
     if raw_keyword:
         attempts.append(("primary", raw_keyword))
-
-    structured_prompt = build_retry_prompt(keyword, keyword_display)
-    attempts.append(("structured", structured_prompt))
+    attempts.append(("structured", build_retry_prompt(keyword, keyword_display)))
 
     seen = set()
     ordered_attempts = []
@@ -342,12 +435,12 @@ def generate_ai_text(keyword, keyword_display):
 
     last_error = None
 
-    for label, attempt in ordered_attempts:
+    for label, prompt in ordered_attempts:
         try:
-            ai_text = generate_content(attempt)
+            ai_text = generate_content(prompt)
             ai_text = sanitize_ai_html(ai_text)
 
-            if is_usable_ai_text(ai_text):
+            if is_usable_ai_text(ai_text, keyword_display=keyword_display):
                 return ai_text
 
             preview = short_preview(ai_text)
@@ -448,22 +541,6 @@ def load_generated_keywords():
         return set()
     with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
         return {normalize_keyword(line) for line in f if line.strip()}
-
-
-def load_rejected_keywords():
-    rejected = set()
-    if not os.path.exists(REJECTED_KEYWORDS_FILE):
-        return rejected
-
-    with open(REJECTED_KEYWORDS_FILE, encoding="utf-8") as f:
-        for line in f:
-            value = line.strip()
-            if not value:
-                continue
-            keyword_part = value.split("|", 1)[0].strip()
-            if keyword_part:
-                rejected.add(normalize_keyword(keyword_part))
-    return rejected
 
 
 # -----------------------------
@@ -655,6 +732,8 @@ ensure_file(REJECTED_KEYWORDS_FILE)
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
+validate_template(template)
+
 keywords = load_keywords()
 if not keywords:
     print("No keywords in queue. Nothing to generate.")
@@ -662,26 +741,26 @@ if not keywords:
 
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
-rejected_keywords = load_rejected_keywords()
+rejected_state = load_rejected_state()
 
-seen_queue_slugs = set()
 queue_pages = []
+seen_queue_slugs = set()
 duplicate_queue_count = 0
-already_rejected_count = 0
+retry_limited_count = 0
 
 for keyword in keywords:
     keyword_norm = normalize_keyword(keyword)
-    slug = slugify(keyword)
-
-    if keyword_norm in rejected_keywords:
-        already_rejected_count += 1
-        continue
+    slug = slugify(keyword_norm)
 
     if slug in PROTECTED_SLUGS or not slug:
         continue
 
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
+        continue
+
+    if rejected_state.get(keyword_norm, {}).get("attempts", 0) >= MAX_REJECT_ATTEMPTS:
+        retry_limited_count += 1
         continue
 
     seen_queue_slugs.add(slug)
@@ -711,22 +790,20 @@ queue_pages = dedupe_pages_by_slug(queue_pages)
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
 print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
-print(f"Previously rejected keywords skipped: {already_rejected_count}")
+print(f"Retry-limited keywords skipped: {retry_limited_count}")
 print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
+print(f"Max reject attempts: {MAX_REJECT_ATTEMPTS}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
-
-# -----------------------------
-# GENERATE PAGES (INCREMENTAL ONLY)
-# -----------------------------
 generated_count = 0
 skipped_existing_count = 0
 rejected_count = 0
 processed_keywords = set()
-newly_rejected_keywords = set()
+new_generated_slugs = set(generated_slugs)
+new_generated_keywords = set(generated_keywords)
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
@@ -738,16 +815,14 @@ for page in queue_pages:
     path = page_path(slug)
 
     if slug in PROTECTED_SLUGS:
-        print("Skipping protected page:", slug)
         processed_keywords.add(keyword)
+        print("Skipping protected page:", slug)
         continue
 
     if page_exists(slug):
         skipped_existing_count += 1
-        append_line_if_missing(GENERATED_SLUGS_FILE, slug)
-        append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
-        generated_slugs.add(slug)
-        generated_keywords.add(keyword)
+        new_generated_slugs.add(slug)
+        new_generated_keywords.add(keyword)
         processed_keywords.add(keyword)
         continue
 
@@ -761,20 +836,21 @@ for page in queue_pages:
         ai_text = generate_ai_text(keyword, keyword_display)
     except Exception as e:
         rejected_count += 1
-        newly_rejected_keywords.add(keyword)
-        append_line_if_missing(REJECTED_KEYWORDS_FILE, f"{keyword} | {str(e)}")
+        prior_attempts = rejected_state.get(keyword, {}).get("attempts", 0)
+        rejected_state[keyword] = {
+            "attempts": prior_attempts + 1,
+            "reason": str(e),
+        }
         processed_keywords.add(keyword)
         print(f"[reject-final] {keyword} -> {e}")
         continue
 
-    link_source_pages = existing_pages
-
-    related_pages = get_related_pages(page, link_source_pages, RELATED_LINKS_COUNT)
+    related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
 
     more_pages = get_related_pages(
         page,
-        link_source_pages,
+        existing_pages,
         MORE_LINKS_COUNT,
         exclude_slugs=related_slugs
     )
@@ -794,11 +870,12 @@ for page in queue_pages:
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
-    append_line_if_missing(GENERATED_SLUGS_FILE, slug)
-    append_line_if_missing(GENERATED_KEYWORDS_FILE, keyword)
-    generated_slugs.add(slug)
-    generated_keywords.add(keyword)
+    new_generated_slugs.add(slug)
+    new_generated_keywords.add(keyword)
     processed_keywords.add(keyword)
+
+    if keyword in rejected_state:
+        del rejected_state[keyword]
 
     existing_pages.append({"keyword": keyword, "slug": slug})
     existing_pages = dedupe_pages_by_slug(existing_pages)
@@ -809,16 +886,20 @@ for page in queue_pages:
         f"-> hub: {find_best_hub_slug(keyword)}"
     )
 
-remaining_keywords = [k for k in keywords if normalize_keyword(k) not in processed_keywords]
+remaining_keywords = []
+for keyword in keywords:
+    keyword_norm = normalize_keyword(keyword)
+    if keyword_norm not in processed_keywords:
+        remaining_keywords.append(keyword_norm)
 
-with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
-    for keyword in remaining_keywords:
-        f.write(normalize_keyword(keyword) + "\n")
+write_lines(GENERATED_SLUGS_FILE, new_generated_slugs)
+write_lines(GENERATED_KEYWORDS_FILE, new_generated_keywords)
+save_rejected_state(rejected_state)
+write_lines(KEYWORD_FILE, remaining_keywords)
 
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing pages. "
     f"Rejected {rejected_count} keywords."
 )
-print(f"Newly rejected this run: {len(newly_rejected_keywords)}")
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
