@@ -9,8 +9,6 @@ from html import unescape
 # -----------------------------
 RAILWAY_API = "https://awake-integrity-production-faa0.up.railway.app"
 TIMEOUT = 60
-MIN_PARAGRAPHS = 3
-MIN_CONTENT_CHARS = 280
 
 logging.basicConfig(
     level=logging.INFO,
@@ -411,18 +409,6 @@ SMALL_WORDS = {
     "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "vs", "with"
 }
 
-LOW_VALUE_SENTENCES = [
-    "here are some paragraphs",
-    "here is some content",
-    "let me know if you want",
-    "as an ai",
-    "i cannot verify",
-    "i can't help with that",
-    "i cannot help with that",
-    "cannot assist",
-    "content policy",
-]
-
 # -----------------------------
 # HELPERS
 # -----------------------------
@@ -527,6 +513,13 @@ def safe_json(response: requests.Response):
     except ValueError as e:
         snippet = response.text[:200].replace("\n", " ").strip()
         raise ValueError(f"Invalid JSON response: {snippet}") from e
+
+
+def clean_text(text: str) -> str:
+    text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+    text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    return text.strip()
 
 
 # -----------------------------
@@ -729,66 +722,6 @@ def scenario_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
 
 
 # -----------------------------
-# GENERATED CONTENT CLEANING
-# -----------------------------
-def is_low_value_text(text: str) -> bool:
-    lowered = normalize_keyword(text)
-    return any(phrase in lowered for phrase in LOW_VALUE_SENTENCES)
-
-
-def split_plain_paragraphs(text: str):
-    return [
-        re.sub(r"\s+", " ", p).strip()
-        for p in re.split(r"\n\s*\n|(?<=[.!?])\s{2,}", text)
-        if len(re.sub(r"\s+", " ", p).strip()) > 40
-    ]
-
-
-def normalize_sentence_punctuation(text: str) -> str:
-    text = re.sub(r"\s+([,.;:!?])", r"\1", text)
-    text = re.sub(r"([,.;:!?])([A-Za-z])", r"\1 \2", text)
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def clean_text(text: str) -> str:
-    text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
-    text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
-    text = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = text.strip()
-
-    cleaned = []
-
-    if "<p" in text.lower():
-        paragraphs = re.findall(r"<p[^>]*>(.*?)</p>", text, flags=re.IGNORECASE | re.DOTALL)
-        for p in paragraphs:
-            p = normalize_sentence_punctuation(strip_html(p))
-            if len(p) > 40 and not is_low_value_text(p):
-                cleaned.append(p)
-    else:
-        plain_text = normalize_sentence_punctuation(strip_html(text))
-        for p in split_plain_paragraphs(plain_text):
-            if not is_low_value_text(p):
-                cleaned.append(p)
-
-    cleaned = dedupe_preserve_order(cleaned)
-    return "\n".join(f"<p>{p}</p>" for p in cleaned[:4])
-
-
-def is_usable_content(html: str) -> bool:
-    if not html:
-        return False
-
-    if html.count("<p>") < MIN_PARAGRAPHS:
-        return False
-
-    plain = strip_html(html)
-    if len(plain) < MIN_CONTENT_CHARS:
-        return False
-
-    return True
-
-
-# -----------------------------
 # STRUCTURE HELPERS
 # -----------------------------
 def get_warning_bullets(context: str, idx: int):
@@ -947,13 +880,13 @@ def generate_content(keyword: str) -> str:
             raw = str(data.get("content", "")).strip()
 
             if not raw:
-                raise ValueError(f"Empty content for prompt: {prompt_keyword}")
+                last_error = ValueError(f"Empty content for prompt: {prompt_keyword}")
+                continue
 
             cleaned = clean_text(raw)
-            if not is_usable_content(cleaned):
-                raise ValueError(f"Low quality content for prompt: {prompt_keyword}")
+            final_content = cleaned if cleaned else raw
 
-            return enforce_structure(raw_keyword, display_kw, cleaned)
+            return enforce_structure(raw_keyword, display_kw, final_content)
 
         except Exception as e:
             last_error = e
