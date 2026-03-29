@@ -16,7 +16,6 @@ from data.cluster_map import CLUSTERS
 KEYWORD_FILE = os.path.join(BASE_DIR, "data", "keywords.txt")
 GENERATED_SLUGS_FILE = os.path.join(BASE_DIR, "data", "generated_slugs.txt")
 GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "generated_keywords.txt")
-REJECTED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "rejected_keywords.txt")
 TEMPLATE_FILE = os.path.join(BASE_DIR, "templates", "seo-template.html")
 OUTPUT_DIR = os.path.join(BASE_DIR, "scam-check-now")
 SITE = "https://verixiaapps.com"
@@ -24,21 +23,9 @@ SITE = "https://verixiaapps.com"
 RELATED_LINKS_COUNT = 6
 MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
-MAX_REJECT_ATTEMPTS = int(os.getenv("MAX_REJECT_ATTEMPTS", "2"))
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
 FALLBACK_HUB_SLUG = "general-scams"
-
-REQUIRED_TEMPLATE_TAGS = {
-    "{{TITLE}}",
-    "{{DESCRIPTION}}",
-    "{{KEYWORD}}",
-    "{{AI_CONTENT}}",
-    "{{RELATED_LINKS}}",
-    "{{MORE_LINKS}}",
-    "{{HUB_LINK}}",
-    "{{CANONICAL_URL}}",
-}
 
 CLUSTER_TERMS = {
     "amazon", "paypal", "zelle", "cash", "venmo", "facebook", "instagram",
@@ -102,14 +89,6 @@ SMALL_WORDS = {
     "or", "the", "to", "vs", "with"
 }
 
-GENERAL_FALLBACK_TERMS = {
-    "scam", "legit", "safe", "real", "fake", "message", "email", "text",
-    "link", "website", "alert", "warning", "notification", "request",
-    "offer", "phishing", "login", "account", "verify", "verification",
-    "support", "money", "payment", "refund", "invoice", "code", "codes",
-    "caller", "number", "contact", "suspicious", "unknown", "unexpected"
-}
-
 HUB_TITLE_OVERRIDES = {
     "amazon-scams": "Amazon Scam Hub",
     "paypal-scams": "PayPal Scam Hub",
@@ -133,10 +112,10 @@ HUB_TITLE_OVERRIDES = {
     "gift-card-scams": "Gift Card Scam Hub",
     "government-scams": "Government Scam Hub",
     "verification-code-scams": "Verification Code Scam Hub",
+    "account-security-scams": "Account Security Scam Hub",
     "phishing-scams": "Phishing Scam Hub",
     "general-scams": "Scam Hub",
 }
-
 
 # -----------------------------
 # UTILITIES
@@ -255,12 +234,6 @@ def ensure_file(filepath):
             pass
 
 
-def validate_template(template):
-    missing = [tag for tag in REQUIRED_TEMPLATE_TAGS if tag not in template]
-    if missing:
-        raise ValueError(f"Template missing required tags: {', '.join(sorted(missing))}")
-
-
 def load_keywords():
     if not os.path.exists(KEYWORD_FILE):
         return []
@@ -280,54 +253,6 @@ def load_generated_keywords():
         return set()
     with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
         return {normalize_keyword(line) for line in f if normalize_keyword(line)}
-
-
-def load_rejected_state():
-    state = {}
-    if not os.path.exists(REJECTED_KEYWORDS_FILE):
-        return state
-
-    with open(REJECTED_KEYWORDS_FILE, encoding="utf-8") as f:
-        for raw_line in f:
-            line = raw_line.strip()
-            if not line:
-                continue
-
-            parts = [part.strip() for part in line.split("|")]
-            if len(parts) >= 3:
-                keyword = normalize_keyword(parts[0])
-                try:
-                    attempts = int(parts[1])
-                except ValueError:
-                    attempts = 1
-                reason = "|".join(parts[2:]).strip()
-            elif len(parts) == 2:
-                keyword = normalize_keyword(parts[0])
-                attempts = 1
-                reason = parts[1]
-            else:
-                keyword = normalize_keyword(parts[0])
-                attempts = 1
-                reason = "rejected"
-
-            if keyword:
-                existing_attempts = state.get(keyword, {}).get("attempts", 0)
-                state[keyword] = {
-                    "attempts": max(existing_attempts, attempts),
-                    "reason": reason,
-                }
-
-    return state
-
-
-def save_rejected_state(state):
-    lines = []
-    for keyword in sorted(state):
-        entry = state[keyword]
-        attempts = int(entry.get("attempts", 1))
-        reason = str(entry.get("reason", "")).strip()
-        lines.append(f"{keyword} | {attempts} | {reason}".strip())
-    write_lines(REJECTED_KEYWORDS_FILE, lines, preserve_input=False)
 
 
 def write_lines(filepath, values, preserve_input=True):
@@ -437,8 +362,8 @@ def find_best_hub_slug(keyword):
         ("gift", "gift-card-scams"),
         ("verification", "verification-code-scams"),
         ("phishing", "phishing-scams"),
-        ("login", "phishing-scams"),
-        ("account", "phishing-scams"),
+        ("login", "account-security-scams"),
+        ("account", "account-security-scams"),
         ("delivery", "package-delivery-scams"),
         ("package", "package-delivery-scams"),
     ]
@@ -469,7 +394,7 @@ def build_hub_link_html(keyword):
 def sanitize_ai_html(text):
     raw = str(text or "").strip()
     if not raw:
-        raise ValueError("Empty AI output")
+        return ""
 
     raw = re.sub(r"^```(?:html)?\s*", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"\s*```$", "", raw)
@@ -488,9 +413,9 @@ def sanitize_ai_html(text):
 
 
 # -----------------------------
-# AI GENERATION (300+ words)
+# AI GENERATION
 # -----------------------------
-def generate_ai_text(keyword, keyword_display, min_words=300):
+def generate_ai_text(keyword, keyword_display):
     raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
     readable = readable_keyword(keyword_display)
@@ -504,6 +429,7 @@ def generate_ai_text(keyword, keyword_display, min_words=300):
     ]
 
     seen = set()
+    last_error = None
 
     for prompt in attempts:
         prompt_norm = normalize_keyword(prompt)
@@ -513,22 +439,15 @@ def generate_ai_text(keyword, keyword_display, min_words=300):
 
         try:
             ai_text = sanitize_ai_html(generate_content(prompt))
-            word_count = len(re.sub(r"<[^>]+>", " ", ai_text).split())
-            retry_count = 0
-
-            while word_count < min_words and retry_count < 2:
-                ai_text = sanitize_ai_html(generate_content(prompt))
-                word_count = len(re.sub(r"<[^>]+>", " ", ai_text).split())
-                retry_count += 1
-
-            if word_count >= min_words:
+            if ai_text:
                 return ai_text
-
-            print(f"[warn] Generated text for '{prompt}' below {min_words} words ({word_count}).")
         except Exception as e:
+            last_error = e
             print(f"[error] AI generation failed for '{prompt}': {e}")
 
-    raise ValueError(f"AI generation failed or below {min_words} words for all prompts")
+    if last_error:
+        raise ValueError(f"AI generation failed for all prompts: {last_error}")
+    raise ValueError("AI generation failed for all prompts")
 
 
 # -----------------------------
@@ -679,12 +598,9 @@ def build_links_html(pages_list):
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 ensure_file(GENERATED_SLUGS_FILE)
 ensure_file(GENERATED_KEYWORDS_FILE)
-ensure_file(REJECTED_KEYWORDS_FILE)
 
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
-
-validate_template(template)
 
 keywords = load_keywords()
 if not keywords:
@@ -693,12 +609,10 @@ if not keywords:
 
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
-rejected_state = load_rejected_state()
 
 queue_pages = []
 seen_queue_slugs = set()
 duplicate_queue_count = 0
-retry_limited_count = 0
 
 for keyword in keywords:
     keyword_norm = normalize_keyword(keyword)
@@ -708,9 +622,6 @@ for keyword in keywords:
         continue
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
-        continue
-    if rejected_state.get(keyword_norm, {}).get("attempts", 0) >= MAX_REJECT_ATTEMPTS:
-        retry_limited_count += 1
         continue
 
     seen_queue_slugs.add(slug)
@@ -740,17 +651,15 @@ queue_pages = dedupe_pages_by_slug(queue_pages)
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
 print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
-print(f"Retry-limited keywords skipped: {retry_limited_count}")
 print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
-print(f"Max reject attempts: {MAX_REJECT_ATTEMPTS}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
 generated_count = 0
 skipped_existing_count = 0
-rejected_count = 0
+failed_count = 0
 processed_keywords = set()
 new_generated_slugs = set(generated_slugs)
 new_generated_keywords = set(generated_keywords)
@@ -782,16 +691,10 @@ for page in queue_pages:
     canonical = build_canonical(slug)
 
     try:
-        ai_text = generate_ai_text(keyword, keyword_display, min_words=300)
+        ai_text = generate_ai_text(keyword, keyword_display)
     except Exception as e:
-        rejected_count += 1
-        prior_attempts = rejected_state.get(keyword, {}).get("attempts", 0)
-        rejected_state[keyword] = {
-            "attempts": prior_attempts + 1,
-            "reason": str(e),
-        }
-        processed_keywords.add(keyword)
-        print(f"[reject-final] {keyword} -> {e}")
+        failed_count += 1
+        print(f"[failed] {keyword} -> {e}")
         continue
 
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
@@ -821,9 +724,6 @@ for page in queue_pages:
     new_generated_keywords.add(keyword)
     processed_keywords.add(keyword)
 
-    if keyword in rejected_state:
-        del rejected_state[keyword]
-
     existing_pages.append({"keyword": keyword, "slug": slug})
     existing_pages = dedupe_pages_by_slug(existing_pages)
     generated_count += 1
@@ -841,12 +741,11 @@ for keyword in keywords:
 
 write_lines(GENERATED_SLUGS_FILE, sorted(new_generated_slugs))
 write_lines(GENERATED_KEYWORDS_FILE, sorted(new_generated_keywords))
-save_rejected_state(rejected_state)
 write_lines(KEYWORD_FILE, remaining_keywords)
 
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing pages. "
-    f"Rejected {rejected_count} keywords."
+    f"Failed {failed_count} keywords."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
