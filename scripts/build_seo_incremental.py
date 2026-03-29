@@ -1,5 +1,3 @@
-Use this full replacement.
-
 import os
 import re
 import sys
@@ -111,7 +109,6 @@ GENERAL_FALLBACK_TERMS = {
     "caller", "number", "contact", "suspicious", "unknown", "unexpected"
 }
 
-
 # -----------------------------
 # UTILITIES
 # -----------------------------
@@ -214,11 +211,6 @@ def write_lines(filepath, values):
             f.write(value + "\n")
 
 
-def short_preview(text, length=220):
-    value = re.sub(r"\s+", " ", str(text or "")).strip()
-    return value[:length]
-
-
 def sanitize_rejected_reason(text):
     value = re.sub(r"\s+", " ", str(text or "")).strip()
     return value.replace("|", "/")[:500]
@@ -266,16 +258,14 @@ def is_question_style_keyword(keyword):
     return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
 
 
-def is_usable_ai_text(text, keyword_display=""):
+def is_usable_ai_text(text):
     if not text:
         return False
 
     raw = sanitize_ai_html(text)
     lowered = raw.lower()
-    text_only = re.sub(r"<[^>]+>", " ", raw)
-    text_only = re.sub(r"\s+", " ", text_only).strip().lower()
 
-    if len(raw) < 260:
+    if len(raw) < 120:
         return False
 
     weak_markers = {
@@ -290,32 +280,13 @@ def is_usable_ai_text(text, keyword_display=""):
         "cannot assist",
         "can't assist",
         "content policy",
-        "i do not have enough information",
-        "i don't have enough information",
         "placeholder",
-        "insert",
         "example content",
     }
     if any(marker in lowered for marker in weak_markers):
         return False
 
-    if "<p>" not in lowered:
-        return False
-
-    if "<h2" not in lowered and "<ul" not in lowered and raw.count("\n") < 2:
-        return False
-
-    if len(text_only) < 200:
-        return False
-
-    if keyword_display:
-        keyword_words = [w for w in re.findall(r"[a-z0-9]+", normalize_keyword(keyword_display)) if len(w) > 2]
-        if keyword_words:
-            hits = sum(1 for word in keyword_words if word in text_only)
-            if hits == 0:
-                return False
-
-    return True
+    return "<p>" in lowered
 
 
 def validate_template(template_text):
@@ -390,65 +361,38 @@ def save_rejected_state(state):
 # -----------------------------
 # AI GENERATION
 # -----------------------------
-def build_retry_prompt(keyword, keyword_display):
-    raw = normalize_keyword(keyword)
-    readable = readable_keyword(keyword)
-    display = readable or keyword_display or raw
-
-    return f"""
-Write a scam-check SEO content section for the search query: "{display}".
-
-Requirements:
-- Output HTML only
-- Do not include <html>, <head>, <body>, or <h1>
-- Write 4 to 6 short sections using <h2> and <p>
-- Make it specific to the query, not generic filler
-- Cover scam warning signs, why people search this query, when it may be legitimate, and what to do next
-- Mention realistic scam patterns like phishing, fake login pages, spoofed support, urgent payment requests, fake verification, suspicious links, or impersonation when relevant
-- Keep tone clear, trustworthy, and practical
-- Do not mention being an AI
-- Do not refuse
-- Do not include placeholders
-- Avoid repeating the exact keyword unnaturally
-
-Target query: {display}
-Original keyword: {raw}
-""".strip()
-
-
 def generate_ai_text(keyword, keyword_display):
     raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
+    readable = readable_keyword(keyword_display)
 
-    attempts = []
-    if raw_keyword:
-        attempts.append(("primary", raw_keyword))
-    attempts.append(("structured", build_retry_prompt(keyword, keyword_display)))
+    attempts = [
+        raw_keyword,
+        clean_keyword,
+        readable,
+        f"is {clean_keyword} a scam" if clean_keyword and not raw_keyword.startswith("is ") else "",
+        f"{clean_keyword} legit or scam" if clean_keyword and "legit" not in raw_keyword and "scam" not in raw_keyword else "",
+    ]
 
     seen = set()
     ordered_attempts = []
-    for label, prompt in attempts:
+    for prompt in attempts:
         prompt_norm = normalize_keyword(prompt)
         if prompt_norm and prompt_norm not in seen:
             seen.add(prompt_norm)
-            ordered_attempts.append((label, prompt))
+            ordered_attempts.append(prompt)
 
     last_error = None
 
-    for label, prompt in ordered_attempts:
+    for prompt in ordered_attempts:
         try:
-            ai_text = generate_content(prompt)
-            ai_text = sanitize_ai_html(ai_text)
-
-            if is_usable_ai_text(ai_text, keyword_display=keyword_display):
+            ai_text = sanitize_ai_html(generate_content(prompt))
+            if is_usable_ai_text(ai_text):
                 return ai_text
-
-            preview = short_preview(ai_text)
-            last_error = f"rejected {label} attempt for '{clean_keyword or raw_keyword}' | preview: {preview}"
+            last_error = f"usable html not returned for '{clean_keyword or raw_keyword}' using '{prompt}'"
             print(f"[reject] {last_error}")
-
         except Exception as e:
-            last_error = f"{label} attempt failed for '{clean_keyword or raw_keyword}': {e}"
+            last_error = f"attempt failed for '{clean_keyword or raw_keyword}' using '{prompt}': {e}"
             print(f"[error] {last_error}")
 
     raise ValueError(last_error or "AI generation failed")
