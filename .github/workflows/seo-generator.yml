@@ -44,6 +44,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -157,16 +159,31 @@ jobs:
         run: |
           set -euo pipefail
 
+          get_lastmod() {
+            local file_path="$1"
+            local commit_date
+
+            commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
+
+            if [ -n "$commit_date" ]; then
+              echo "$commit_date"
+            else
+              date -u +%F
+            fi
+          }
+
           {
             echo '<?xml version="1.0" encoding="UTF-8"?>'
             echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
 
-            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>$(date -u +%F)</lastmod></url>"
+            ROOT_LASTMOD=$(get_lastmod "index.html")
+            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>${ROOT_LASTMOD}</lastmod></url>"
 
             find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
               [ -f "$dir/index.html" ] || continue
               slug=$(basename "$dir")
-              echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>$(date -u +%F)</lastmod></url>"
+              page_lastmod=$(get_lastmod "$dir/index.html")
+              echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
             done
 
             echo '</urlset>'
