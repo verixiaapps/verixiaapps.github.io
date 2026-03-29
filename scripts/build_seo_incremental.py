@@ -110,258 +110,9 @@ GENERAL_FALLBACK_TERMS = {
 }
 
 # -----------------------------
-# UTILITIES
+# AI GENERATION (300+ words)
 # -----------------------------
-def normalize_keyword(text):
-    return re.sub(r"\s+", " ", str(text).strip().lower())
-
-
-def slugify(text):
-    return re.sub(r"[^a-z0-9]+", "-", normalize_keyword(text)).strip("-")
-
-
-def clean_base_keyword(text):
-    kw = normalize_keyword(text)
-
-    kw = re.sub(r"^\s*is\s+", "", kw)
-    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
-    kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
-    kw = re.sub(r"^\s*this\s+", "this ", kw)
-
-    kw = re.sub(r"\s+a\s+scam$", "", kw)
-    kw = re.sub(r"\s+or\s+legit$", "", kw)
-    kw = re.sub(r"\s+or\s+scam$", "", kw)
-    kw = re.sub(r"\s+legit$", "", kw)
-    kw = re.sub(r"\s+real$", "", kw)
-    kw = re.sub(r"\s+safe$", "", kw)
-    kw = re.sub(r"\s+scam$", "", kw)
-
-    kw = re.sub(r"\s+a$", "", kw)
-    return re.sub(r"\s+", " ", kw).strip()
-
-
-def display_keyword(text):
-    return clean_base_keyword(text)
-
-
-def apply_brand_case(text):
-    result = f" {text} "
-    for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
-        pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
-        result = re.sub(pattern, proper, result, flags=re.IGNORECASE)
-    return re.sub(r"\s+", " ", result).strip()
-
-
-def title_case(text):
-    text = normalize_keyword(text)
-    if not text:
-        return ""
-
-    titled = []
-    for i, word in enumerate(text.split()):
-        titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
-
-    return apply_brand_case(" ".join(titled))
-
-
-def readable_keyword(text):
-    base = display_keyword(text)
-    return title_case(base) if base else ""
-
-
-def keyword_tokens(text):
-    return set(clean_base_keyword(text).split())
-
-
-def keyword_cluster_tokens(text):
-    return {token for token in keyword_tokens(text) if token in CLUSTER_TERMS}
-
-
-def keyword_root(text):
-    base = clean_base_keyword(text)
-    return base.split()[0] if base else ""
-
-
-def escape_html(text):
-    return escape(str(text), quote=True)
-
-
-def page_path(slug):
-    return os.path.join(OUTPUT_DIR, slug, "index.html")
-
-
-def page_exists(slug):
-    return os.path.exists(page_path(slug))
-
-
-def ensure_file(filepath):
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    if not os.path.exists(filepath):
-        with open(filepath, "a", encoding="utf-8"):
-            pass
-
-
-def normalize_line_set(values):
-    return {str(v).strip() for v in values if str(v).strip()}
-
-
-def write_lines(filepath, values):
-    with open(filepath, "w", encoding="utf-8") as f:
-        for value in sorted(normalize_line_set(values)):
-            f.write(value + "\n")
-
-
-def sanitize_rejected_reason(text):
-    value = re.sub(r"\s+", " ", str(text or "")).strip()
-    return value.replace("|", "/")[:500]
-
-
-def sanitize_ai_html(text):
-    raw = str(text).strip()
-
-    raw = re.sub(r"```(?:html)?", "", raw, flags=re.IGNORECASE)
-    raw = raw.replace("```", "").strip()
-
-    raw = re.sub(r"(?is)<!doctype.*?>", "", raw)
-    raw = re.sub(r"(?is)<html\b[^>]*>", "", raw)
-    raw = re.sub(r"(?is)</html>", "", raw)
-    raw = re.sub(r"(?is)<head\b[^>]*>.*?</head>", "", raw)
-    raw = re.sub(r"(?is)<body\b[^>]*>", "", raw)
-    raw = re.sub(r"(?is)</body>", "", raw)
-    raw = re.sub(r"(?is)<title\b[^>]*>.*?</title>", "", raw)
-    raw = re.sub(r"(?is)<meta\b[^>]*>", "", raw)
-    raw = re.sub(r"(?is)<script\b[^>]*>.*?</script>", "", raw)
-    raw = re.sub(r"(?is)<style\b[^>]*>.*?</style>", "", raw)
-    raw = re.sub(r"(?is)<h1\b[^>]*>.*?</h1>", "", raw)
-
-    raw = re.sub(r"\n{3,}", "\n\n", raw)
-    return raw.strip()
-
-
-def is_guidance_style_keyword(keyword):
-    kw = normalize_keyword(keyword)
-    return (
-        kw.startswith("how to ")
-        or kw.startswith("what to do")
-        or kw.startswith("what happens")
-        or kw.startswith("why ")
-        or kw.startswith("when ")
-        or kw.startswith("where ")
-        or kw.startswith("who ")
-        or kw.startswith("check ")
-        or kw.startswith("report ")
-    )
-
-
-def is_question_style_keyword(keyword):
-    kw = normalize_keyword(keyword)
-    return kw.startswith(("is ", "can ", "did ", "should ", "was ", "could ", "would ", "do ", "does "))
-
-
-def is_usable_ai_text(text):
-    if not text:
-        return False
-
-    raw = sanitize_ai_html(text)
-    lowered = raw.lower()
-
-    if len(raw) < 120:
-        return False
-
-    weak_markers = {
-        "lorem ipsum",
-        "as an ai",
-        "here are some paragraphs",
-        "let me know if you want",
-        "i can't help with that",
-        "i cannot help with that",
-        "i’m sorry",
-        "i am sorry",
-        "cannot assist",
-        "can't assist",
-        "content policy",
-        "placeholder",
-        "example content",
-    }
-    if any(marker in lowered for marker in weak_markers):
-        return False
-
-    return "<p>" in lowered
-
-
-def validate_template(template_text):
-    missing = sorted(tag for tag in REQUIRED_TEMPLATE_TAGS if tag not in template_text)
-    if missing:
-        raise ValueError(f"Template missing required placeholders: {', '.join(missing)}")
-
-
-# -----------------------------
-# REJECT TRACKING
-# -----------------------------
-def parse_rejected_line(line):
-    value = line.strip()
-    if not value:
-        return None
-
-    parts = [part.strip() for part in value.split("|")]
-
-    if not parts or not parts[0]:
-        return None
-
-    keyword = normalize_keyword(parts[0])
-    attempts = 1
-    reason = ""
-
-    if len(parts) >= 2:
-        if parts[1].isdigit():
-            attempts = max(1, int(parts[1]))
-            if len(parts) >= 3:
-                reason = " | ".join(parts[2:]).strip()
-        else:
-            attempts = 1
-            reason = " | ".join(parts[1:]).strip()
-
-    return keyword, attempts, reason
-
-
-def load_rejected_state():
-    state = {}
-    if not os.path.exists(REJECTED_KEYWORDS_FILE):
-        return state
-
-    with open(REJECTED_KEYWORDS_FILE, encoding="utf-8") as f:
-        for line in f:
-            parsed = parse_rejected_line(line)
-            if not parsed:
-                continue
-
-            keyword, attempts, reason = parsed
-            existing = state.get(keyword)
-
-            if not existing or attempts >= existing["attempts"]:
-                state[keyword] = {
-                    "attempts": attempts,
-                    "reason": reason,
-                }
-
-    return state
-
-
-def save_rejected_state(state):
-    with open(REJECTED_KEYWORDS_FILE, "w", encoding="utf-8") as f:
-        for keyword in sorted(state.keys()):
-            attempts = int(state[keyword].get("attempts", 1))
-            reason = sanitize_rejected_reason(state[keyword].get("reason", ""))
-            if reason:
-                f.write(f"{keyword} | {attempts} | {reason}\n")
-            else:
-                f.write(f"{keyword} | {attempts}\n")
-
-
-# -----------------------------
-# AI GENERATION
-# -----------------------------
-def generate_ai_text(keyword, keyword_display):
+def generate_ai_text(keyword, keyword_display, min_words=300):
     raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
     readable = readable_keyword(keyword_display)
@@ -374,29 +125,24 @@ def generate_ai_text(keyword, keyword_display):
         f"{clean_keyword} legit or scam" if clean_keyword and "legit" not in raw_keyword and "scam" not in raw_keyword else "",
     ]
 
-    seen = set()
-    ordered_attempts = []
     for prompt in attempts:
-        prompt_norm = normalize_keyword(prompt)
-        if prompt_norm and prompt_norm not in seen:
-            seen.add(prompt_norm)
-            ordered_attempts.append(prompt)
-
-    last_error = None
-
-    for prompt in ordered_attempts:
+        if not prompt:
+            continue
         try:
             ai_text = sanitize_ai_html(generate_content(prompt))
-            if is_usable_ai_text(ai_text):
+            word_count = len(ai_text.split())
+            retry_count = 0
+            while word_count < min_words and retry_count < 2:
+                ai_text = sanitize_ai_html(generate_content(prompt))
+                word_count = len(ai_text.split())
+                retry_count += 1
+            if word_count >= min_words:
                 return ai_text
-            last_error = f"usable html not returned for '{clean_keyword or raw_keyword}' using '{prompt}'"
-            print(f"[reject] {last_error}")
+            print(f"[warn] Generated text for '{prompt}' below {min_words} words ({word_count}).")
         except Exception as e:
-            last_error = f"attempt failed for '{clean_keyword or raw_keyword}' using '{prompt}': {e}"
-            print(f"[error] {last_error}")
+            print(f"[error] AI generation failed for '{prompt}': {e}")
 
-    raise ValueError(last_error or "AI generation failed")
-
+    raise ValueError(f"AI generation failed or below {min_words} words for all prompts")
 
 # -----------------------------
 # SEO TEXT HELPERS
@@ -404,50 +150,38 @@ def generate_ai_text(keyword, keyword_display):
 def build_title(keyword):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
-
     if not raw:
         return "Is This a Scam? Warning Signs, Safety Tips & What To Do"
-
     if is_guidance_style_keyword(raw):
         return f"{title_case(raw)} | Warning Signs, Safety Tips & What To Do"
-
     if raw.startswith("did i get scammed"):
         return f"{title_case(raw)}? Signs, Risks & What To Do Next"
-
     if raw.startswith("is this "):
         return f"{title_case(raw)}? Warning Signs, Risks & What To Do"
-
     if raw.startswith("is ") and " legit" in raw:
         cleaned = re.sub(r"\s+legit\b", "", raw).strip()
         return f"{title_case(cleaned)} Legit or a Scam? Warning Signs & What To Do"
-
     if is_question_style_keyword(raw):
         return f"{title_case(raw)}? Warning Signs, Risks & What To Know"
-
     return f"Is {readable} a Scam? Warning Signs, Risks & What To Do"
-
 
 def build_description(keyword):
     raw = normalize_keyword(keyword)
     clean_kw = display_keyword(keyword)
     readable = readable_keyword(keyword)
-
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
             f"Learn the warning signs, scam risk signals, and safest next steps for {readable}. "
             f"Check suspicious messages, emails, links, and offers before you click, reply, or send money."
         )
-
     return (
         f"Is {readable} a scam or legit? Review warning signs, risk signals, and what to do next. "
         f"Check suspicious {clean_kw} messages, emails, texts, links, and offers."
     )
 
-
 def build_related_anchor(keyword):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
-
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         if raw.startswith("is ") and " legit" in raw:
             cleaned = re.sub(r"\s+legit\b", "", raw).strip()
@@ -455,130 +189,10 @@ def build_related_anchor(keyword):
         if raw.startswith("did i get scammed") or raw.startswith("what happens after ") or raw.startswith("almost "):
             return title_case(raw) + "?"
         return title_case(raw)
-
     return f"Is {readable} a Scam?"
-
 
 def build_canonical(slug):
     return f"{SITE}/scam-check-now/{slug}/"
-
-
-# -----------------------------
-# FILE LOADERS
-# -----------------------------
-def load_keywords():
-    if not os.path.exists(KEYWORD_FILE):
-        return []
-    with open(KEYWORD_FILE, encoding="utf-8") as f:
-        return list(dict.fromkeys(normalize_keyword(k) for k in f if k.strip()))
-
-
-def load_generated_slugs():
-    if not os.path.exists(GENERATED_SLUGS_FILE):
-        return set()
-    with open(GENERATED_SLUGS_FILE, encoding="utf-8") as f:
-        return {line.strip() for line in f if line.strip()}
-
-
-def load_generated_keywords():
-    if not os.path.exists(GENERATED_KEYWORDS_FILE):
-        return set()
-    with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
-        return {normalize_keyword(line) for line in f if line.strip()}
-
-
-# -----------------------------
-# HUB HELPERS
-# -----------------------------
-def get_cluster_lookup():
-    lookup = {}
-    for hub_slug, match_terms in CLUSTERS.items():
-        normalized_terms = []
-        for term in match_terms:
-            term_norm = normalize_keyword(term)
-            if term_norm:
-                normalized_terms.append(term_norm)
-        lookup[hub_slug] = normalized_terms
-    return lookup
-
-
-CLUSTER_LOOKUP = get_cluster_lookup()
-
-
-def ensure_fallback_hub_exists():
-    if FALLBACK_HUB_SLUG not in CLUSTER_LOOKUP:
-        CLUSTER_LOOKUP[FALLBACK_HUB_SLUG] = ["scam", "legit", "safe", "real or fake"]
-
-
-def best_hub_title(hub_slug):
-    if hub_slug == FALLBACK_HUB_SLUG:
-        return "General Scams"
-
-    label = hub_slug.replace("-", " ")
-    label = re.sub(r"\bscams\b", "", label).strip()
-    return title_case(label) if label else "General Scams"
-
-
-def score_hub_match(keyword, hub_slug, match_terms):
-    keyword_norm = normalize_keyword(keyword)
-    keyword_clean = clean_base_keyword(keyword)
-    keyword_word_set = set(re.findall(r"[a-z0-9]+", keyword_clean))
-    keyword_joined = f" {keyword_clean} "
-
-    score = 0
-
-    for term in match_terms:
-        term_norm = normalize_keyword(term)
-        if not term_norm:
-            continue
-
-        term_words = set(re.findall(r"[a-z0-9]+", term_norm))
-        exact_phrase = f" {term_norm} "
-
-        if exact_phrase in keyword_joined:
-            score += 12 + len(term_words)
-        elif term_words and term_words.issubset(keyword_word_set):
-            score += 8 + len(term_words)
-        elif term_norm in keyword_norm:
-            score += 5
-
-    root = keyword_root(keyword)
-    if root and root in hub_slug:
-        score += 3
-
-    if hub_slug == FALLBACK_HUB_SLUG:
-        generic_hits = sum(1 for token in keyword_word_set if token in GENERAL_FALLBACK_TERMS)
-        score += min(generic_hits, 4)
-
-    return score
-
-
-def find_best_hub_slug(keyword):
-    ensure_fallback_hub_exists()
-
-    best_hub_slug = FALLBACK_HUB_SLUG
-    best_score = -1
-
-    for hub_slug, match_terms in CLUSTER_LOOKUP.items():
-        score = score_hub_match(keyword, hub_slug, match_terms)
-        if score > best_score:
-            best_score = score
-            best_hub_slug = hub_slug
-
-    return best_hub_slug or FALLBACK_HUB_SLUG
-
-
-def build_hub_link_html(keyword):
-    hub_slug = find_best_hub_slug(keyword)
-    hub_title = best_hub_title(hub_slug)
-
-    return (
-        f'<a class="hub-link-card" href="/scam-check-now/{hub_slug}/">'
-        f'<span class="hub-link-label">Scam Hub</span>'
-        f'<span class="hub-link-title">Browse the {escape_html(hub_title)} Hub</span>'
-        f'</a>'
-    )
-
 
 # -----------------------------
 # LINKING HELPERS
@@ -586,20 +200,16 @@ def build_hub_link_html(keyword):
 def dedupe_pages_by_slug(pages_list):
     deduped = []
     seen = set()
-
     for page in pages_list:
         slug = page["slug"]
         if not slug or slug in seen or slug in PROTECTED_SLUGS:
             continue
         seen.add(slug)
         deduped.append(page)
-
     return deduped
-
 
 def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     exclude_slugs = set(exclude_slugs or set())
-
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
@@ -628,7 +238,6 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         same_hub = 1 if current_hub and other_hub == current_hub else 0
         shared_cluster = len(current_cluster & other_cluster)
         shared_tokens = len(current_tokens & other_tokens)
-
         return (
             -same_hub,
             -same_root,
@@ -639,11 +248,9 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         )
 
     ranked = sorted(candidates, key=score)
-
     related = []
     used_slugs = set()
     used_bases = set()
-
     for page in ranked:
         base = clean_base_keyword(page["keyword"])
         if page["slug"] in used_slugs or base in used_bases:
@@ -653,9 +260,7 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         used_bases.add(base)
         if len(related) == limit:
             break
-
     return related
-
 
 def build_links_html(pages_list):
     return "".join(
@@ -664,9 +269,8 @@ def build_links_html(pages_list):
         if page_exists(p["slug"])
     )
 
-
 # -----------------------------
-# SETUP
+# SETUP & GENERATION LOOP
 # -----------------------------
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 ensure_file(GENERATED_SLUGS_FILE)
@@ -695,18 +299,14 @@ retry_limited_count = 0
 for keyword in keywords:
     keyword_norm = normalize_keyword(keyword)
     slug = slugify(keyword_norm)
-
     if slug in PROTECTED_SLUGS or not slug:
         continue
-
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
         continue
-
     if rejected_state.get(keyword_norm, {}).get("attempts", 0) >= MAX_REJECT_ATTEMPTS:
         retry_limited_count += 1
         continue
-
     seen_queue_slugs.add(slug)
     queue_pages.append({"keyword": keyword_norm, "slug": slug})
 
@@ -752,32 +352,26 @@ new_generated_keywords = set(generated_keywords)
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
         break
-
     slug = page["slug"]
     keyword = page["keyword"]
     keyword_display = display_keyword(keyword)
     path = page_path(slug)
-
     if slug in PROTECTED_SLUGS:
         processed_keywords.add(keyword)
         print("Skipping protected page:", slug)
         continue
-
     if page_exists(slug):
         skipped_existing_count += 1
         new_generated_slugs.add(slug)
         new_generated_keywords.add(keyword)
         processed_keywords.add(keyword)
         continue
-
     os.makedirs(os.path.dirname(path), exist_ok=True)
-
     title = build_title(keyword)
     description = build_description(keyword)
     canonical = build_canonical(slug)
-
     try:
-        ai_text = generate_ai_text(keyword, keyword_display)
+        ai_text = generate_ai_text(keyword, keyword_display, min_words=300)
     except Exception as e:
         rejected_count += 1
         prior_attempts = rejected_state.get(keyword, {}).get("attempts", 0)
@@ -788,19 +382,15 @@ for page in queue_pages:
         processed_keywords.add(keyword)
         print(f"[reject-final] {keyword} -> {e}")
         continue
-
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
-
     more_pages = get_related_pages(
         page,
         existing_pages,
         MORE_LINKS_COUNT,
         exclude_slugs=related_slugs
     )
-
     hub_link_html = build_hub_link_html(keyword)
-
     html = template
     html = html.replace("{{TITLE}}", escape_html(title))
     html = html.replace("{{DESCRIPTION}}", escape_html(description))
@@ -810,20 +400,15 @@ for page in queue_pages:
     html = html.replace("{{MORE_LINKS}}", build_links_html(more_pages))
     html = html.replace("{{HUB_LINK}}", hub_link_html)
     html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
-
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
-
     new_generated_slugs.add(slug)
     new_generated_keywords.add(keyword)
     processed_keywords.add(keyword)
-
     if keyword in rejected_state:
         del rejected_state[keyword]
-
     existing_pages.append({"keyword": keyword, "slug": slug})
     existing_pages = dedupe_pages_by_slug(existing_pages)
-
     generated_count += 1
     print(
         f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
