@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  prepare-urls:
+  indexing:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -31,15 +31,22 @@ jobs:
       - name: Read sitemap URLs
         run: python scripts/read_sitemap_urls.py
 
-      - name: Commit refreshed URL list
+      - name: Prepare indexing batch
+        run: python scripts/prepare_indexing_batch.py
+
+      - name: Submit indexing batch
+        run: python scripts/submit_indexing_batch.py
+
+      - name: Commit indexing state
         run: |
           git config --global user.name "seo-bot"
           git config --global user.email "bot@users.noreply.github.com"
-          git add seo-indexing/urls_to_ping.txt
+
+          git add seo-indexing/*.txt seo-indexing/*.json
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Refresh SEO indexing URL list"
+            git commit -m "SEO indexing batch update"
             git push
           fi
