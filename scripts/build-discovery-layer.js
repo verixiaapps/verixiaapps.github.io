@@ -1,9 +1,3 @@
-Replace this file only:
-
-scripts/build-discovery-layer.js
-
-with this full version:
-
 import fs from "fs";
 import path from "path";
 import https from "https";
