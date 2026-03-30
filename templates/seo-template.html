@@ -106,6 +106,7 @@ box-sizing:border-box;
 
 html{
 -webkit-text-size-adjust:100%;
+scroll-behavior:smooth;
 }
 
 body{
@@ -802,6 +803,67 @@ border-color:var(--green-line);
 color:var(--green);
 }
 
+.result-actions{
+margin-top:16px;
+display:grid;
+gap:12px;
+}
+
+.result-cta{
+margin-top:0;
+}
+
+.share-wrap{
+margin-top:4px;
+padding:16px;
+border-radius:18px;
+background:#f8fafc;
+border:1px solid var(--line);
+text-align:center;
+}
+
+.share-alert{
+font-size:13px;
+font-weight:900;
+color:#b91c1c;
+margin-bottom:6px;
+}
+
+.share-copy{
+font-size:14px;
+font-weight:800;
+color:#475569;
+line-height:1.55;
+margin-bottom:12px;
+}
+
+.share-grid{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:8px;
+}
+
+.share-btn{
+min-height:auto;
+padding:11px 14px;
+border-radius:12px;
+font-size:14px;
+font-weight:900;
+box-shadow:none;
+}
+
+.share-btn.primary{
+background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+color:#fff;
+}
+
+.share-btn.light{
+background:#eef2ff;
+color:#1e293b;
+border:1px solid #dbe3f8;
+}
+
 .upgrade{
 display:none;
 margin-top:28px;
@@ -1158,6 +1220,12 @@ padding:14px 15px;
 }
 .content-close{
 padding:15px;
+}
+.share-grid{
+flex-direction:column;
+}
+.share-btn{
+width:100%;
 }
 }
 </style>
@@ -1781,6 +1849,71 @@ function chipByRisk(risk) {
   return "Pattern Match: Review Needed";
 }
 
+function scrollToTopCheck() {
+  const textarea = document.getElementById("text");
+  if (!textarea) return;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  setTimeout(() => textarea.focus(), 300);
+}
+
+function shareNative() {
+  const shareData = {
+    title: document.title,
+    text: "Check this suspicious message before clicking, replying, or sending money.",
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData).catch(() => {});
+    return;
+  }
+
+  copyLink();
+}
+
+function shareX() {
+  const text = encodeURIComponent("Check this suspicious message before clicking, replying, or sending money.");
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank", "noopener,noreferrer");
+}
+
+function shareFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "noopener,noreferrer");
+}
+
+function shareReddit() {
+  const url = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent("Check this suspicious message before you click");
+  window.open(`https://www.reddit.com/submit?url=${url}&title=${title}`, "_blank", "noopener,noreferrer");
+}
+
+function copyLink() {
+  const url = window.location.href;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert("Link copied.");
+    }).catch(() => {
+      fallbackCopyLink(url);
+    });
+    return;
+  }
+
+  fallbackCopyLink(url);
+}
+
+function fallbackCopyLink(url) {
+  const input = document.createElement("input");
+  input.value = url;
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+  alert("Link copied.");
+}
+
 function formatResult(raw) {
   const lines = String(raw || "").split("\n").map(l => l.trim()).filter(Boolean);
 
@@ -1852,6 +1985,22 @@ function formatResult(raw) {
     </div>
 
     <div class="result-payline">${escapeHtml(paylineForRisk(safeRiskClass))}</div>
+
+    <div class="result-actions">
+      <button class="check result-cta" onclick="scrollToTopCheck()">🔁 Not sure about another message? Check it now</button>
+
+      <div class="share-wrap">
+        <div class="share-alert">⚠️ Messages like this are often sent in waves</div>
+        <div class="share-copy">Know someone who could receive this same message? Send this before they click, reply, or send money.</div>
+        <div class="share-grid">
+          <button type="button" class="share-btn primary" onclick="shareNative()">📤 Share</button>
+          <button type="button" class="share-btn light" onclick="shareX()">X</button>
+          <button type="button" class="share-btn light" onclick="shareFacebook()">Facebook</button>
+          <button type="button" class="share-btn light" onclick="shareReddit()">Reddit</button>
+          <button type="button" class="share-btn light" onclick="copyLink()">Copy Link</button>
+        </div>
+      </div>
+    </div>
   </div>
   `;
 }
