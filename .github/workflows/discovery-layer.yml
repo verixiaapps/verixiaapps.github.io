@@ -1,0 +1,55 @@
+name: Discovery Layer
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: discovery-layer
+  cancel-in-progress: false
+
+jobs:
+  build-discovery-layer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run discovery layer generator
+        run: node scripts/build-discovery-layer.js
+        env:
+          SITE_URL: https://verixiaapps.com
+          SOURCE_SITEMAP_URL: https://verixiaapps.com/sitemap.xml
+          DISCOVERY_SITEMAP_PATH: discovery-sitemap.xml
+          DISCOVERY_DIR: discovery
+          MAX_LATEST_URLS: "100"
+          MAX_TODAY_URLS: "100"
+          MAX_THIS_WEEK_URLS: "700"
+          MAX_HTML_SITEMAP_URLS: "500"
+          MAX_FEED_URLS: "100"
+
+      - name: Commit and push discovery files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add discovery-sitemap.xml discovery/
+
+          if git diff --cached --quiet; then
+            echo "No discovery changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update discovery layer"
+          git push
