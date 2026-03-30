@@ -31,6 +31,11 @@ const MAX_PAGINATED_TODAY_PAGES = 5;
 const MAX_HYBRID_PAGES = 30;
 const MAX_HYBRID_PAGE_URLS = 120;
 
+const RANDOM_PAGE_SIZE = 200;
+const REVISIT_PAGE_SIZE = 300;
+const REVISIT_START_OFFSET = 200;
+const REVISIT_END_OFFSET = 1200;
+
 function fetchText(url) {
   return new Promise((resolve, reject) => {
     https
@@ -144,6 +149,10 @@ function uniqueByUrl(entries) {
   return out;
 }
 
+function uniqueStrings(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
 function toTimestamp(value) {
   if (!value) return 0;
   const t = Date.parse(value);
@@ -204,7 +213,52 @@ function titleCaseFromSlug(slug) {
     .join(" ");
 }
 
+function shuffle(values) {
+  const arr = [...values];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function pickRandomEntries(entries, count) {
+  return shuffle(entries).slice(0, count);
+}
+
+function globalRelatedDiscoverySection() {
+  const links = [
+    { href: joinSiteUrl("discovery/latest/"), label: "Latest Pages" },
+    { href: joinSiteUrl("discovery/today/"), label: "Today Pages" },
+    { href: joinSiteUrl("discovery/this-week/"), label: "This Week" },
+    { href: joinSiteUrl("discovery/html-sitemap/"), label: "HTML Sitemap" },
+    { href: joinSiteUrl("discovery/clusters/"), label: "Discovery Clusters" },
+    { href: joinSiteUrl("discovery/latest/platforms/"), label: "Latest By Platform" },
+    { href: joinSiteUrl("discovery/today/topics/"), label: "Today By Topic" },
+    { href: joinSiteUrl("discovery/runway/"), label: "Runway Pages" },
+    { href: joinSiteUrl("discovery/hybrids/"), label: "Hybrid Discovery Pages" },
+    { href: joinSiteUrl("discovery/random/"), label: "Random Discovery 1" },
+    { href: joinSiteUrl("discovery/random-2/"), label: "Random Discovery 2" },
+    { href: joinSiteUrl("discovery/random-3/"), label: "Random Discovery 3" },
+    { href: joinSiteUrl("discovery/revisit/"), label: "Revisit Pages" },
+  ];
+
+  return `<section>
+  <h2>Related Discovery Pages</h2>
+  <ul>
+    ${links
+      .map(
+        (item) =>
+          `<li><a href="${htmlEscape(item.href)}">${htmlEscape(item.label)}</a></li>`
+      )
+      .join("\n")}
+  </ul>
+</section>`;
+}
+
 function pageShell({ title, intro = "", items = [], extraSections = [] }) {
+  const sections = [...extraSections, globalRelatedDiscoverySection()].filter(Boolean);
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -224,7 +278,7 @@ function pageShell({ title, intro = "", items = [], extraSections = [] }) {
         )
         .join("\n")}
     </ul>
-    ${extraSections.join("\n")}
+    ${sections.join("\n")}
   </main>
 </body>
 </html>`;
@@ -238,9 +292,11 @@ function entriesToListItems(entries) {
 }
 
 function buildXmlSitemap(urls) {
+  const churnedUrls = shuffle(uniqueStrings(urls));
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${uniqueStrings(urls)
+${churnedUrls
   .map(
     (u) => `  <url>
     <loc>${escapeXml(u)}</loc>
@@ -559,10 +615,6 @@ function buildLinkedSection(title, basePath, groups) {
 </section>`;
 }
 
-function uniqueStrings(values) {
-  return [...new Set(values.filter(Boolean))];
-}
-
 function chunkEntries(entries, size, maxPages) {
   const pages = [];
   for (let i = 0; i < entries.length && pages.length < maxPages; i += size) {
@@ -688,6 +740,23 @@ function buildHybridGroups(entries, topicGroups, platformGroups) {
     .slice(0, MAX_HYBRID_PAGES);
 }
 
+function buildRandomSection(title, baseFolder, entries) {
+  writeFile(
+    path.join(DISCOVERY_DIR, `${baseFolder}/index.html`),
+    pageShell({
+      title,
+      intro: "Randomized crawl entry points built from the main sitemap.",
+      items: entriesToListItems(entries),
+      extraSections: [
+        `<section>
+  <h2>Why This Exists</h2>
+  <p>These links rotate each run to create additional discovery paths for older and less frequently revisited URLs.</p>
+</section>`,
+      ],
+    })
+  );
+}
+
 async function main() {
   if (!SITE_URL) throw new Error("SITE_URL is required");
   if (!SOURCE_SITEMAP_URL) throw new Error("SOURCE_SITEMAP_URL is required");
@@ -722,6 +791,13 @@ async function main() {
     topicGroups,
     platformGroups
   );
+
+  const randomEntries1 = pickRandomEntries(entries, RANDOM_PAGE_SIZE);
+  const randomEntries2 = pickRandomEntries(entries, RANDOM_PAGE_SIZE);
+  const randomEntries3 = pickRandomEntries(entries, RANDOM_PAGE_SIZE);
+
+  const revisitPool = entries.slice(REVISIT_START_OFFSET, REVISIT_END_OFFSET);
+  const revisitEntries = pickRandomEntries(revisitPool.length ? revisitPool : entries, REVISIT_PAGE_SIZE);
 
   writeFile(
     path.join(DISCOVERY_DIR, "latest/index.html"),
@@ -1014,6 +1090,25 @@ async function main() {
     );
   }
 
+  buildRandomSection("Random Discovery 1", "random", randomEntries1);
+  buildRandomSection("Random Discovery 2", "random-2", randomEntries2);
+  buildRandomSection("Random Discovery 3", "random-3", randomEntries3);
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "revisit/index.html"),
+    pageShell({
+      title: "Revisit Pages",
+      intro: "Previously published URLs re-surfaced for fresh crawl attention.",
+      items: entriesToListItems(revisitEntries),
+      extraSections: [
+        `<section>
+  <h2>Selection Window</h2>
+  <p>This page intentionally draws from older URLs rather than the newest batch.</p>
+</section>`,
+      ],
+    })
+  );
+
   const discoveryUrls = [
     joinSiteUrl("discovery/latest/"),
     joinSiteUrl("discovery/today/"),
@@ -1025,6 +1120,10 @@ async function main() {
     joinSiteUrl("discovery/latest/platforms/"),
     joinSiteUrl("discovery/runway/"),
     joinSiteUrl("discovery/hybrids/"),
+    joinSiteUrl("discovery/random/"),
+    joinSiteUrl("discovery/random-2/"),
+    joinSiteUrl("discovery/random-3/"),
+    joinSiteUrl("discovery/revisit/"),
     ...topicGroups.map((group) => joinSiteUrl(`discovery/clusters/${group.slug}/`)),
     ...todayTopicGroups.slice(0, MAX_TOPIC_GROUPS).map((group) => joinSiteUrl(`discovery/today/${group.slug}/`)),
     ...latestPlatformGroups.slice(0, MAX_PLATFORM_GROUPS).map((group) => joinSiteUrl(`discovery/latest/${group.slug}/`)),
@@ -1045,6 +1144,8 @@ async function main() {
   console.log(`Paginated latest pages created: ${paginatedLatestPages.length}`);
   console.log(`Paginated today pages created: ${paginatedTodayPages.length}`);
   console.log(`Hybrid pages created: ${hybridGroups.length}`);
+  console.log(`Random pages created: 3`);
+  console.log(`Revisit page created: 1`);
 }
 
 main().catch((error) => {
