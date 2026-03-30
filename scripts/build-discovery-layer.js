@@ -1051,5 +1051,3 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-
-Next step: run the same workflow manually once.
