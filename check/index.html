@@ -422,9 +422,26 @@ color:#374151;
 font-weight:600;
 }
 
-.share-wrap{
+.result-actions{
 margin-top:16px;
+display:grid;
+gap:12px;
+}
+
+.share-wrap{
+margin-top:0;
+padding:16px;
+border-radius:16px;
+background:#f8fafc;
+border:1px solid #e5e7eb;
 text-align:center;
+}
+
+.share-alert{
+font-size:13px;
+font-weight:800;
+color:#b91c1c;
+margin-bottom:6px;
 }
 
 .share-copy{
@@ -432,6 +449,7 @@ font-size:14px;
 color:#6b7280;
 margin-bottom:10px;
 font-weight:600;
+line-height:1.5;
 }
 
 .share-grid{
@@ -448,6 +466,11 @@ border-radius:10px;
 font-size:14px;
 font-weight:700;
 box-shadow:none;
+}
+
+.share-btn.primary{
+background:#111827;
+color:#fff;
 }
 
 .share-btn.dark{
@@ -473,6 +496,7 @@ color:#fff;
 .share-btn.copy{
 background:#e5e7eb;
 color:#111827;
+border:1px solid #d1d5db;
 }
 
 .section{
@@ -859,7 +883,7 @@ navigator.share({
 title:"Check if this is a scam",
 text:text,
 url:url
-});
+}).catch(()=>{});
 }else{
 copyLink();
 }
@@ -868,23 +892,58 @@ copyLink();
 function shareX(){
 const text=encodeURIComponent("Check this suspicious message before clicking or sending money:");
 const url=encodeURIComponent(window.location.href);
-window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank", "noopener,noreferrer");
 }
 
 function shareFacebook(){
 const url=encodeURIComponent(window.location.href);
-window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "noopener,noreferrer");
 }
 
 function shareReddit(){
 const url=encodeURIComponent(window.location.href);
 const title=encodeURIComponent("Check if this message is a scam before you click");
-window.open(`https://www.reddit.com/submit?url=${url}&title=${title}`, "_blank");
+window.open(`https://www.reddit.com/submit?url=${url}&title=${title}`, "_blank", "noopener,noreferrer");
 }
 
 function copyLink(){
-navigator.clipboard.writeText(window.location.href);
-alert("Link copied. Share it with someone.");
+const url=window.location.href;
+
+if(navigator.clipboard && navigator.clipboard.writeText){
+  navigator.clipboard.writeText(url)
+    .then(()=>alert("Link copied."))
+    .catch(()=>fallbackCopy(url, "Link copied."));
+}else{
+  fallbackCopy(url, "Link copied.");
+}
+}
+
+function copyWarningMessage(){
+const message=`This message looks suspicious and may be a scam.
+Check it before you click, reply, or send money:
+${window.location.href}`;
+
+if(navigator.clipboard && navigator.clipboard.writeText){
+  navigator.clipboard.writeText(message)
+    .then(()=>alert("Warning message copied."))
+    .catch(()=>fallbackCopy(message, "Warning message copied."));
+}else{
+  fallbackCopy(message, "Warning message copied.");
+}
+}
+
+function fallbackCopy(value, successMessage){
+const textarea=document.createElement("textarea");
+textarea.value=value;
+textarea.setAttribute("readonly","");
+textarea.style.position="absolute";
+textarea.style.left="-9999px";
+document.body.appendChild(textarea);
+textarea.select();
+textarea.setSelectionRange(0, 99999);
+document.execCommand("copy");
+document.body.removeChild(textarea);
+alert(successMessage);
 }
 
 function formatResult(text){
@@ -947,18 +1006,22 @@ ${continuationByRisk[risk] ? `<div class="result-continuation">${continuationByR
 
 <div class="result-payline">${paylineByRisk[risk]}</div>
 
-<button class="check" onclick="scrollToTopCheck()" style="margin-top:14px;">
-🔁 Not sure about another message? Check it now
-</button>
+<div class="result-actions">
+  <button class="check" onclick="scrollToTopCheck()" style="margin-top:0;">
+  🔁 Not sure about another message? Check it now
+  </button>
 
-<div class="share-wrap">
-  <div class="share-copy">Know someone who might get this message? Send this before they click or reply.</div>
-  <div class="share-grid">
-    <button onclick="shareNative()" class="share-btn dark">📤 Share</button>
-    <button onclick="shareX()" class="share-btn x">X</button>
-    <button onclick="shareFacebook()" class="share-btn facebook">Facebook</button>
-    <button onclick="shareReddit()" class="share-btn reddit">Reddit</button>
-    <button onclick="copyLink()" class="share-btn copy">Copy Link</button>
+  <div class="share-wrap">
+    <div class="share-alert">⚠️ Messages like this are often sent in waves</div>
+    <div class="share-copy">Someone you know could receive this same message. Send this before they click, reply, or send money.</div>
+    <div class="share-grid">
+      <button type="button" onclick="copyWarningMessage()" class="share-btn primary">⚠️ Copy Warning Message</button>
+      <button type="button" onclick="shareNative()" class="share-btn dark">📤 Share</button>
+      <button type="button" onclick="shareX()" class="share-btn x">X</button>
+      <button type="button" onclick="shareFacebook()" class="share-btn facebook">Facebook</button>
+      <button type="button" onclick="shareReddit()" class="share-btn reddit">Reddit</button>
+      <button type="button" onclick="copyLink()" class="share-btn copy">Copy Link</button>
+    </div>
   </div>
 </div>
 
