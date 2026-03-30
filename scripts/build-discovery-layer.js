@@ -13,6 +13,12 @@ const MAX_WEEK = parseInt(process.env.MAX_THIS_WEEK_URLS || "700", 10);
 const MAX_HTML = parseInt(process.env.MAX_HTML_SITEMAP_URLS || "500", 10);
 const MAX_FEED = parseInt(process.env.MAX_FEED_URLS || "100", 10);
 
+const MAX_CLUSTER_PAGE_URLS = 250;
+const MAX_TOPIC_PAGE_URLS = 200;
+const MAX_PLATFORM_PAGE_URLS = 150;
+const MAX_TOPIC_GROUPS = 12;
+const MAX_PLATFORM_GROUPS = 20;
+
 function fetchText(url) {
   return new Promise((resolve, reject) => {
     https
@@ -76,6 +82,15 @@ function sevenDaysAgoUtc() {
   return d;
 }
 
+function decodeXml(value) {
+  return String(value)
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
 function parseSitemapEntries(xml) {
   const urlBlocks = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)];
 
@@ -103,15 +118,6 @@ function parseSitemapEntries(xml) {
     .filter(Boolean);
 }
 
-function decodeXml(value) {
-  return String(value)
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, "&");
-}
-
 function uniqueByUrl(entries) {
   const seen = new Set();
   const out = [];
@@ -126,6 +132,12 @@ function uniqueByUrl(entries) {
   return out;
 }
 
+function toTimestamp(value) {
+  if (!value) return 0;
+  const t = Date.parse(value);
+  return Number.isNaN(t) ? 0 : t;
+}
+
 function sortNewestFirst(entries) {
   return [...entries].sort((a, b) => {
     const aTime = toTimestamp(a.lastmod);
@@ -134,12 +146,6 @@ function sortNewestFirst(entries) {
     if (aTime !== bTime) return bTime - aTime;
     return b.url.localeCompare(a.url);
   });
-}
-
-function toTimestamp(value) {
-  if (!value) return 0;
-  const t = Date.parse(value);
-  return Number.isNaN(t) ? 0 : t;
 }
 
 function filterToday(entries) {
@@ -164,6 +170,95 @@ function getPathSegments(url) {
   return getPathname(url)
     .split("/")
     .filter(Boolean);
+}
+
+function joinSiteUrl(relativePath) {
+  return `${SITE_URL}/${relativePath.replace(/^\/+/, "")}`;
+}
+
+function slugify(value) {
+  return String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "general";
+}
+
+function titleCaseFromSlug(slug) {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function pageShell({ title, intro = "", items = [], extraSections = [] }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${htmlEscape(title)}</title>
+</head>
+<body>
+  <main>
+    <h1>${htmlEscape(title)}</h1>
+    ${intro ? `<p>${htmlEscape(intro)}</p>` : ""}
+    <ul>
+      ${items
+        .map(
+          (item) =>
+            `<li><a href="${htmlEscape(item.href)}">${htmlEscape(item.label)}</a></li>`
+        )
+        .join("\n")}
+    </ul>
+    ${extraSections.join("\n")}
+  </main>
+</body>
+</html>`;
+}
+
+function entriesToListItems(entries) {
+  return entries.map((entry) => ({
+    href: entry.url,
+    label: entry.url,
+  }));
+}
+
+function buildXmlSitemap(urls) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+  .map(
+    (u) => `  <url>
+    <loc>${escapeXml(u)}</loc>
+    <lastmod>${escapeXml(nowISO())}</lastmod>
+  </url>`
+  )
+  .join("\n")}
+</urlset>`;
+}
+
+function buildFeed(entries) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Latest URLs</title>
+    <link>${escapeXml(SITE_URL)}</link>
+    <description>Latest generated URLs</description>
+    ${entries
+      .map(
+        (entry) => `    <item>
+      <title>${escapeXml(entry.url)}</title>
+      <link>${escapeXml(entry.url)}</link>
+      <pubDate>${escapeXml(
+        entry.lastmod ? new Date(entry.lastmod).toUTCString() : new Date().toUTCString()
+      )}</pubDate>
+    </item>`
+      )
+      .join("\n")}
+  </channel>
+</rss>`;
 }
 
 function inferTopics(url) {
@@ -278,7 +373,6 @@ function inferTopics(url) {
         "tiktok",
         "snapchat",
         "discord",
-        "x ",
         "twitter",
         "social media",
       ],
@@ -348,21 +442,81 @@ function inferTopics(url) {
   return topics;
 }
 
-function groupByTopics(entries) {
+function inferPlatforms(url) {
+  const pathname = getPathname(url);
+  const normalized = pathname.replace(/[-_/]+/g, " ");
+  const found = [];
+
+  const platformRules = [
+    { slug: "zelle", title: "Zelle", keywords: ["zelle"] },
+    { slug: "paypal", title: "PayPal", keywords: ["paypal"] },
+    { slug: "venmo", title: "Venmo", keywords: ["venmo"] },
+    { slug: "cash-app", title: "Cash App", keywords: ["cash app", "cashapp"] },
+    { slug: "whatsapp", title: "WhatsApp", keywords: ["whatsapp"] },
+    { slug: "telegram", title: "Telegram", keywords: ["telegram"] },
+    { slug: "tiktok", title: "TikTok", keywords: ["tiktok"] },
+    { slug: "snapchat", title: "Snapchat", keywords: ["snapchat"] },
+    { slug: "instagram", title: "Instagram", keywords: ["instagram"] },
+    { slug: "facebook", title: "Facebook", keywords: ["facebook"] },
+    { slug: "discord", title: "Discord", keywords: ["discord"] },
+    { slug: "gmail", title: "Gmail", keywords: ["gmail"] },
+    { slug: "outlook", title: "Outlook", keywords: ["outlook"] },
+    { slug: "usps", title: "USPS", keywords: ["usps"] },
+    { slug: "fedex", title: "FedEx", keywords: ["fedex"] },
+    { slug: "ups", title: "UPS", keywords: ["ups"] },
+    { slug: "coinbase", title: "Coinbase", keywords: ["coinbase"] },
+    { slug: "binance", title: "Binance", keywords: ["binance"] },
+    { slug: "metamask", title: "MetaMask", keywords: ["metamask"] },
+    { slug: "apple-pay", title: "Apple Pay", keywords: ["apple pay"] },
+    { slug: "google-pay", title: "Google Pay", keywords: ["google pay"] },
+    { slug: "bank-of-america", title: "Bank of America", keywords: ["bank of america"] },
+    { slug: "chase", title: "Chase", keywords: ["chase"] },
+    { slug: "wells-fargo", title: "Wells Fargo", keywords: ["wells fargo"] },
+  ];
+
+  for (const rule of platformRules) {
+    if (rule.keywords.some((keyword) => normalized.includes(keyword))) {
+      found.push({
+        slug: rule.slug,
+        title: rule.title,
+      });
+    }
+  }
+
+  if (found.length > 0) {
+    return found;
+  }
+
+  const segments = getPathSegments(url);
+  if (segments.length >= 2) {
+    const firstMeaningful = segments[1];
+    if (firstMeaningful && !["scam-check-now", "discovery"].includes(firstMeaningful)) {
+      return [
+        {
+          slug: slugify(firstMeaningful),
+          title: titleCaseFromSlug(slugify(firstMeaningful)),
+        },
+      ];
+    }
+  }
+
+  return [];
+}
+
+function groupEntries(entries, classifier) {
   const grouped = new Map();
 
   for (const entry of entries) {
-    const topics = inferTopics(entry.url);
-
-    for (const topic of topics) {
-      if (!grouped.has(topic.slug)) {
-        grouped.set(topic.slug, {
-          slug: topic.slug,
-          title: topic.title,
+    const labels = classifier(entry.url);
+    for (const label of labels) {
+      if (!grouped.has(label.slug)) {
+        grouped.set(label.slug, {
+          slug: label.slug,
+          title: label.title,
           entries: [],
         });
       }
-      grouped.get(topic.slug).entries.push(entry);
+      grouped.get(label.slug).entries.push(entry);
     }
   }
 
@@ -374,96 +528,34 @@ function groupByTopics(entries) {
     .sort((a, b) => b.entries.length - a.entries.length || a.title.localeCompare(b.title));
 }
 
-function pageShell({ title, intro = "", items = [], extraSections = [] }) {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${htmlEscape(title)}</title>
-</head>
-<body>
-  <main>
-    <h1>${htmlEscape(title)}</h1>
-    ${intro ? `<p>${htmlEscape(intro)}</p>` : ""}
-    <ul>
-      ${items
-        .map(
-          (item) =>
-            `<li><a href="${htmlEscape(item.href)}">${htmlEscape(item.label)}</a></li>`
-        )
-        .join("\n")}
-    </ul>
-    ${extraSections.join("\n")}
-  </main>
-</body>
-</html>`;
-}
-
-function entriesToListItems(entries) {
-  return entries.map((entry) => ({
-    href: entry.url,
-    label: entry.url,
+function buildLinkedSection(title, basePath, groups) {
+  const items = groups.map((group) => ({
+    href: joinSiteUrl(`${basePath}/${group.slug}/`),
+    label: `${group.title} (${group.entries.length})`,
   }));
-}
 
-function buildXmlSitemap(urls) {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (u) => `  <url>
-    <loc>${escapeXml(u)}</loc>
-    <lastmod>${escapeXml(nowISO())}</lastmod>
-  </url>`
-  )
-  .join("\n")}
-</urlset>`;
-}
-
-function buildFeed(entries) {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>Latest URLs</title>
-    <link>${escapeXml(SITE_URL)}</link>
-    <description>Latest generated URLs</description>
-    ${entries
+  return `<section>
+  <h2>${htmlEscape(title)}</h2>
+  <ul>
+    ${items
       .map(
-        (entry) => `    <item>
-      <title>${escapeXml(entry.url)}</title>
-      <link>${escapeXml(entry.url)}</link>
-      <pubDate>${escapeXml(
-        entry.lastmod ? new Date(entry.lastmod).toUTCString() : new Date().toUTCString()
-      )}</pubDate>
-    </item>`
+        (item) =>
+          `<li><a href="${htmlEscape(item.href)}">${htmlEscape(item.label)}</a></li>`
       )
       .join("\n")}
-  </channel>
-</rss>`;
-}
-
-function joinSiteUrl(relativePath) {
-  return `${SITE_URL}/${relativePath.replace(/^\/+/, "")}`;
+  </ul>
+</section>`;
 }
 
 async function main() {
-  if (!SITE_URL) {
-    throw new Error("SITE_URL is required");
-  }
-
-  if (!SOURCE_SITEMAP_URL) {
-    throw new Error("SOURCE_SITEMAP_URL is required");
-  }
+  if (!SITE_URL) throw new Error("SITE_URL is required");
+  if (!SOURCE_SITEMAP_URL) throw new Error("SOURCE_SITEMAP_URL is required");
 
   console.log("Fetching main sitemap...");
   const xml = await fetchText(SOURCE_SITEMAP_URL);
 
   const entries = uniqueByUrl(sortNewestFirst(parseSitemapEntries(xml)));
-
-  if (!entries.length) {
-    throw new Error("No URLs found in sitemap");
-  }
+  if (!entries.length) throw new Error("No URLs found in sitemap");
 
   const latestEntries = entries.slice(0, MAX_LATEST);
   const todayEntries = filterToday(entries).slice(0, MAX_TODAY);
@@ -471,8 +563,14 @@ async function main() {
   const htmlEntries = entries.slice(0, MAX_HTML);
   const feedEntries = entries.slice(0, MAX_FEED);
 
-  const topicGroups = groupByTopics(entries).filter((group) => group.entries.length > 0);
-  const topTopicGroups = topicGroups.slice(0, 10);
+  const topicGroupsAll = groupEntries(entries, inferTopics).filter((group) => group.entries.length > 0);
+  const topicGroups = topicGroupsAll.slice(0, MAX_TOPIC_GROUPS);
+
+  const platformGroupsAll = groupEntries(entries, inferPlatforms).filter((group) => group.entries.length > 0);
+  const platformGroups = platformGroupsAll.slice(0, MAX_PLATFORM_GROUPS);
+
+  const todayTopicGroups = groupEntries(filterToday(entries), inferTopics).filter((group) => group.entries.length > 0);
+  const latestPlatformGroups = groupEntries(entries.slice(0, 600), inferPlatforms).filter((group) => group.entries.length > 0);
 
   writeFile(
     path.join(DISCOVERY_DIR, "latest/index.html"),
@@ -480,6 +578,9 @@ async function main() {
       title: "Latest Pages",
       intro: "Newest URLs discovered from the main sitemap.",
       items: entriesToListItems(latestEntries),
+      extraSections: [
+        buildLinkedSection("Latest By Platform", "discovery/latest", latestPlatformGroups.slice(0, MAX_PLATFORM_GROUPS)),
+      ],
     })
   );
 
@@ -489,6 +590,9 @@ async function main() {
       title: `Pages Added ${todayString()}`,
       intro: "URLs with today's lastmod date from the main sitemap.",
       items: entriesToListItems(todayEntries),
+      extraSections: [
+        buildLinkedSection("Today By Topic", "discovery/today", todayTopicGroups.slice(0, MAX_TOPIC_GROUPS)),
+      ],
     })
   );
 
@@ -515,27 +619,71 @@ async function main() {
     buildFeed(feedEntries)
   );
 
-  const clusterIndexItems = topTopicGroups.map((group) => ({
-    href: joinSiteUrl(`discovery/clusters/${group.slug}/`),
-    label: `${group.title} (${group.entries.length})`,
-  }));
-
   writeFile(
     path.join(DISCOVERY_DIR, "clusters/index.html"),
     pageShell({
       title: "Discovery Clusters",
       intro: "Topic-organized discovery pages built from sitemap URL patterns.",
-      items: clusterIndexItems,
+      items: topicGroups.map((group) => ({
+        href: joinSiteUrl(`discovery/clusters/${group.slug}/`),
+        label: `${group.title} (${group.entries.length})`,
+      })),
     })
   );
 
-  for (const group of topTopicGroups) {
+  for (const group of topicGroups) {
     writeFile(
       path.join(DISCOVERY_DIR, `clusters/${group.slug}/index.html`),
       pageShell({
         title: group.title,
         intro: `Topic cluster generated from sitemap URLs: ${group.title}.`,
-        items: entriesToListItems(group.entries.slice(0, 250)),
+        items: entriesToListItems(group.entries.slice(0, MAX_CLUSTER_PAGE_URLS)),
+      })
+    );
+  }
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "today/topics/index.html"),
+    pageShell({
+      title: "Today By Topic",
+      intro: "Today's freshest URLs grouped by topic.",
+      items: todayTopicGroups.slice(0, MAX_TOPIC_GROUPS).map((group) => ({
+        href: joinSiteUrl(`discovery/today/${group.slug}/`),
+        label: `${group.title} (${group.entries.length})`,
+      })),
+    })
+  );
+
+  for (const group of todayTopicGroups.slice(0, MAX_TOPIC_GROUPS)) {
+    writeFile(
+      path.join(DISCOVERY_DIR, `today/${group.slug}/index.html`),
+      pageShell({
+        title: `${group.title} Today`,
+        intro: `Today's URLs grouped under ${group.title}.`,
+        items: entriesToListItems(group.entries.slice(0, MAX_TOPIC_PAGE_URLS)),
+      })
+    );
+  }
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "latest/platforms/index.html"),
+    pageShell({
+      title: "Latest By Platform",
+      intro: "Newest URLs grouped by platform-level patterns.",
+      items: latestPlatformGroups.slice(0, MAX_PLATFORM_GROUPS).map((group) => ({
+        href: joinSiteUrl(`discovery/latest/${group.slug}/`),
+        label: `${group.title} (${group.entries.length})`,
+      })),
+    })
+  );
+
+  for (const group of latestPlatformGroups.slice(0, MAX_PLATFORM_GROUPS)) {
+    writeFile(
+      path.join(DISCOVERY_DIR, `latest/${group.slug}/index.html`),
+      pageShell({
+        title: `${group.title} Latest`,
+        intro: `Newest URLs grouped under ${group.title}.`,
+        items: entriesToListItems(group.entries.slice(0, MAX_PLATFORM_PAGE_URLS)),
       })
     );
   }
@@ -547,14 +695,20 @@ async function main() {
     joinSiteUrl("discovery/html-sitemap/"),
     joinSiteUrl("discovery/feeds/latest.xml"),
     joinSiteUrl("discovery/clusters/"),
-    ...topTopicGroups.map((group) => joinSiteUrl(`discovery/clusters/${group.slug}/`)),
+    joinSiteUrl("discovery/today/topics/"),
+    joinSiteUrl("discovery/latest/platforms/"),
+    ...topicGroups.map((group) => joinSiteUrl(`discovery/clusters/${group.slug}/`)),
+    ...todayTopicGroups.slice(0, MAX_TOPIC_GROUPS).map((group) => joinSiteUrl(`discovery/today/${group.slug}/`)),
+    ...latestPlatformGroups.slice(0, MAX_PLATFORM_GROUPS).map((group) => joinSiteUrl(`discovery/latest/${group.slug}/`)),
   ];
 
   writeFile(DISCOVERY_SITEMAP_PATH, buildXmlSitemap(discoveryUrls));
 
   console.log("Discovery layer built successfully.");
   console.log(`Total source URLs: ${entries.length}`);
-  console.log(`Cluster pages created: ${topTopicGroups.length}`);
+  console.log(`Topic clusters created: ${topicGroups.length}`);
+  console.log(`Today-by-topic pages created: ${todayTopicGroups.slice(0, MAX_TOPIC_GROUPS).length}`);
+  console.log(`Latest-by-platform pages created: ${latestPlatformGroups.slice(0, MAX_PLATFORM_GROUPS).length}`);
 }
 
 main().catch((error) => {
