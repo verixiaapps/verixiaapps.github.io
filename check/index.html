@@ -69,6 +69,8 @@ window.addEventListener("load", function(){
 --blue:#3b82f6;
 --blue-dark:#1f2937;
 --blue-soft:#f8fbff;
+--red-soft:#fff7f7;
+--red-line:#fecaca;
 --shadow-xl:0 20px 50px rgba(15,23,42,.08);
 --shadow-md:0 10px 24px rgba(59,130,246,.18);
 }
@@ -398,6 +400,17 @@ color:#475467;
 font-weight:700;
 }
 
+.result-continuation{
+margin-top:12px;
+padding:14px 16px;
+background:var(--red-soft);
+border:1px solid var(--red-line);
+border-radius:12px;
+font-size:14px;
+color:#7f1d1d;
+font-weight:700;
+}
+
 .result-payline{
 margin-top:14px;
 padding:14px 16px;
@@ -679,30 +692,30 @@ font-size:22px;
   <div class="after-tool">
 
     <div class="app-link-card">
-      <h4>Check future messages with confidence</h4>
-      <p>Use the app to review suspicious messages, links, and requests as they come in.</p>
+      <h4>More suspicious messages may follow</h4>
+      <p>Use the app to check the next message before you click, reply, or send money.</p>
       <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
     </div>
 
     <div class="upgrade" id="upgrade">
 
-      <h3>Scam messages don’t stop. Stay protected.</h3>
+      <h3>Scam attempts don’t stop after one message</h3>
 
       <div class="upgrade-copy">
-        Check every message before you click, reply, or send money. Unlimited access helps you stay protected from new scams, phishing attempts, and impersonation messages.
+        If you received one suspicious message, more may follow. Check each one before you click, reply, or send money.
       </div>
 
       <div style="margin-top:10px;font-size:13px;color:#6b7280;">
-        Useful for ongoing protection against scams, phishing, and impersonation attempts
+        Useful for ongoing protection against scams, phishing, impersonation, and risky payment requests
       </div>
 
       <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
         Unlimited scam checks • Cancel anytime
       </div>
 
-      <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
-      <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
-      <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+      <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Protection</button>
+      <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Protection</button>
+      <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Protection</button>
 
       <div style="margin-top:14px;font-size:13px;color:#6b7280;">
         Secure payments powered by Stripe
@@ -763,6 +776,13 @@ el.style.display="block";
 setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),100);
 }
 
+function scrollToTopCheck(){
+const textarea=document.getElementById("text");
+if(!textarea)return;
+window.scrollTo({top:0,behavior:"smooth"});
+setTimeout(()=>textarea.focus(),300);
+}
+
 function parseSections(text){
 const lines=text
 .split(/\n|\./)
@@ -784,47 +804,40 @@ const bullets=parseSections(text)
 .map(l=>`<li>${escapeHtml(l)}</li>`)
 .join("");
 
-const confidenceMap={
-high:"92%",
-medium:"76%",
-low:"58%",
-unknown:"—"
-};
-
-const patternMap={
-high:"Likely Scam Pattern",
-medium:"Suspicious Message Pattern",
-low:"Low Risk Pattern",
-unknown:"Unclear Pattern"
-};
-
 const summaryByRisk={
-high:"This message shows strong signs of a scam. It uses urgency, requests action, and lacks the kind of normal context usually seen in legitimate communication.",
-medium:"This message shows some warning signs commonly seen in scams. Review carefully before taking any action.",
-low:"This message shows fewer obvious scam indicators, but it is still important to verify before clicking links or sending information.",
-unknown:"We could not determine a clear risk level. Treat the message cautiously and verify through official sources."
+high:"This message shows multiple strong scam signals. Treat it as unsafe until you verify it through an official source.",
+medium:"This message shows warning signs commonly seen in scams. Verify the sender and request before taking any action.",
+low:"This message shows fewer obvious scam signals, but still verify anything involving links, payments, or personal information before acting.",
+unknown:"We could not determine a clear risk level. Treat the message cautiously and verify through official sources before acting."
 };
 
 const trustLineByRisk={
-high:"Messages like this are commonly used in scams and follow known fraud patterns.",
-medium:"Some elements of this message match patterns often seen in scam attempts.",
-low:"This message shows fewer scam patterns but should still be verified.",
-unknown:"When the risk is unclear, the safest step is to verify independently before acting."
+high:"Pattern match based on known scam signals.",
+medium:"Pattern match based on known scam signals.",
+low:"Pattern match based on known scam signals.",
+unknown:"Pattern review needed before acting."
+};
+
+const continuationByRisk={
+high:"If this reached you once, similar messages may already be on the way. Scammers often repeat the same pattern across many people.",
+medium:"Suspicious messages often do not stop at one. If you have seen one, more may follow.",
+low:"",
+unknown:""
 };
 
 const paylineByRisk={
-high:"Multiple warning signs were detected. Do not click links, reply, or send money until you verify through an official source.",
-medium:"Several caution signals appeared. Verify the sender or request before taking action.",
-low:"Fewer warning signs appeared, but always verify links, payments, and personal information requests.",
+high:"People lose money from messages like this every day. Do not click links, reply, or send money until you verify through an official source.",
+medium:"Several caution signals appeared. Verify the sender or request before you click, reply, pay, or share information.",
+low:"Fewer warning signs appeared, but always verify links, payments, and personal information requests before acting.",
 unknown:"Always verify through official channels before acting on uncertain messages."
 };
 
 return `
 <div class="result-card">
 <div class="risk ${risk}">${risk === "unknown" ? "Risk Level: Review" : "Risk Level: " + risk.toUpperCase()}</div>
-<div class="result-meta">Confidence: ${confidenceMap[risk]} • ${patternMap[risk]}</div>
+<div class="result-meta">${trustLineByRisk[risk]}</div>
 <div class="result-summary">${summaryByRisk[risk]}</div>
-<div class="result-trust">${trustLineByRisk[risk]}</div>
+${continuationByRisk[risk] ? `<div class="result-continuation">${continuationByRisk[risk]}</div>` : ""}
 
 <div class="section">
 <div class="section-title">Key Signals</div>
@@ -837,6 +850,10 @@ return `
 </div>
 
 <div class="result-payline">${paylineByRisk[risk]}</div>
+
+<button class="check" onclick="scrollToTopCheck()" style="margin-top:14px;">
+🔁 Not sure about another message? Check it now
+</button>
 
 </div>
 `;
@@ -873,7 +890,7 @@ body:JSON.stringify({text,email,subscribed})
 const data=await response.json();
 
 if(data.limit){
-result.innerHTML='<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlimited access is available if you want to keep reviewing suspicious messages, links, and offers.</div></div>';
+result.innerHTML='<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlock unlimited protection so you can check the next suspicious message, link, or request before it costs you.</div></div>';
 showUpgrade();
 return;
 }
