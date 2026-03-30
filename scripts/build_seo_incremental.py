@@ -383,12 +383,7 @@ def build_hub_link_html(keyword):
 
     hub_title = HUB_TITLE_OVERRIDES.get(hub_slug, f"{humanize_slug(hub_slug)} Hub")
 
-    return (
-        f'<a class="hub-link-card" href="/scam-check-now/{hub_slug}/">'
-        f'<span class="hub-link-label">Related scam category</span>'
-        f'<span class="hub-link-title">{escape_html(hub_title)}</span>'
-        f'</a>'
-    )
+    return f'<a href="/scam-check-now/{hub_slug}/">{escape_html(hub_title)}</a>'
 
 
 def sanitize_ai_html(text):
