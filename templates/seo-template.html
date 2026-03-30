@@ -1693,31 +1693,19 @@ function cleanHubLink() {
     return;
   }
 
-  const anchorText = normalizeKeyword(anchor.textContent || "");
-  if (!anchorText) {
+  const safeHref = anchor.getAttribute("href") || "#";
+  const safeText = (anchor.textContent || "").trim();
+  const target = anchor.getAttribute("target");
+  const rel = anchor.getAttribute("rel");
+
+  if (!safeText) {
     hubLinkWrap.style.display = "none";
     return;
   }
 
-  let labelText = normalizeKeyword(hubLinkWrap.textContent || "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  labelText = labelText.replace(new RegExp(anchorText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "").trim();
-  labelText = labelText.replace(/[:\-\s]+$/g, "").trim();
-
-  if (!labelText) {
-    labelText = "Related scam category";
-  }
-
-  const safeHref = anchor.getAttribute("href") || "#";
-  const safeText = anchor.textContent || "";
-  const target = anchor.getAttribute("target");
-  const rel = anchor.getAttribute("rel");
-
   hubLinkWrap.innerHTML = `
     <div class="hub-link-block">
-      <span class="hub-link-label">${escapeHtml(labelText)}</span>
+      <span class="hub-link-label">Related scam category</span>
       <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
     </div>
   `;
