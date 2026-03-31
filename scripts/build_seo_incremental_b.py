@@ -8,7 +8,6 @@ if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
 from generate_content import generate_content
-from data.cluster_map import CLUSTERS
 
 # -----------------------------
 # CONFIG
@@ -25,7 +24,6 @@ MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
-FALLBACK_HUB_SLUG = "general-scams"
 
 CLUSTER_TERMS = {
     "amazon", "paypal", "zelle", "cash", "venmo", "facebook", "instagram",
@@ -89,34 +87,6 @@ SMALL_WORDS = {
     "or", "the", "to", "vs", "with"
 }
 
-HUB_TITLE_OVERRIDES = {
-    "amazon-scams": "Amazon Scam Hub",
-    "paypal-scams": "PayPal Scam Hub",
-    "zelle-scams": "Zelle Scam Hub",
-    "cash-app-scams": "Cash App Scam Hub",
-    "venmo-scams": "Venmo Scam Hub",
-    "facebook-scams": "Facebook Scam Hub",
-    "instagram-scams": "Instagram Scam Hub",
-    "tiktok-scams": "TikTok Scam Hub",
-    "whatsapp-scams": "WhatsApp Scam Hub",
-    "telegram-scams": "Telegram Scam Hub",
-    "snapchat-scams": "Snapchat Scam Hub",
-    "discord-scams": "Discord Scam Hub",
-    "crypto-scams": "Crypto Scam Hub",
-    "package-delivery-scams": "Package Delivery Scam Hub",
-    "bank-scams": "Bank Scam Hub",
-    "job-scams": "Job Scam Hub",
-    "loan-scams": "Loan Scam Hub",
-    "credit-scams": "Credit Scam Hub",
-    "romance-scams": "Romance Scam Hub",
-    "gift-card-scams": "Gift Card Scam Hub",
-    "government-scams": "Government Scam Hub",
-    "verification-code-scams": "Verification Code Scam Hub",
-    "account-security-scams": "Account Security Scam Hub",
-    "phishing-scams": "Phishing Scam Hub",
-    "general-scams": "Scam Hub",
-}
-
 # -----------------------------
 # UTILITIES
 # -----------------------------
@@ -178,7 +148,6 @@ def title_case(text):
             titled.append(word.capitalize())
 
     return apply_brand_case(" ".join(titled))
-
 
 def readable_keyword(text):
     base = display_keyword(text)
@@ -281,109 +250,47 @@ def page_exists(slug):
 def humanize_slug(slug):
     return title_case(slug.replace("-", " "))
 
+def load_output_pages_from_disk():
+    pages = []
+    seen = set()
 
-def _extract_slug_from_cluster_value(value):
-    if isinstance(value, str):
-        value = value.strip().strip("/")
-        if not value:
-            return ""
-        if value.startswith("http://") or value.startswith("https://"):
-            parts = [part for part in value.split("/") if part]
-            return parts[-1] if parts else ""
-        return value.split("/")[-1]
+    if not os.path.exists(OUTPUT_DIR):
+        return pages
 
-    if isinstance(value, dict):
-        for key in ("slug", "hub_slug", "url", "path"):
-            candidate = value.get(key)
-            extracted = _extract_slug_from_cluster_value(candidate)
-            if extracted:
-                return extracted
+    for slug in sorted(os.listdir(OUTPUT_DIR)):
+        folder = os.path.join(OUTPUT_DIR, slug)
+        index_path = os.path.join(folder, "index.html")
 
-    return ""
+        if not os.path.isdir(folder):
+            continue
+        if slug in PROTECTED_SLUGS or slug in seen or not os.path.exists(index_path):
+            continue
 
+        seen.add(slug)
+        pages.append({
+            "keyword": slug.replace("-", " "),
+            "slug": slug,
+        })
 
-def find_best_hub_slug(keyword):
-    keyword_norm = normalize_keyword(keyword)
-    base = clean_base_keyword(keyword_norm)
-    tokens = set(base.split()) if base else set()
-
-    if isinstance(CLUSTERS, dict):
-        for cluster_key, cluster_value in CLUSTERS.items():
-            cluster_tokens = set(normalize_keyword(cluster_key).replace("-", " ").split())
-            if cluster_tokens and cluster_tokens & tokens:
-                extracted = _extract_slug_from_cluster_value(cluster_value)
-                if extracted:
-                    return extracted
-
-            if isinstance(cluster_value, dict):
-                for field in ("keywords", "terms", "aliases", "tokens"):
-                    raw_terms = cluster_value.get(field, [])
-                    if isinstance(raw_terms, (list, tuple, set)):
-                        normalized_terms = {normalize_keyword(term) for term in raw_terms}
-                        if keyword_norm in normalized_terms or base in normalized_terms:
-                            extracted = _extract_slug_from_cluster_value(cluster_value)
-                            if extracted:
-                                return extracted
-
-    ordered_fallbacks = [
-        ("facebook marketplace", "facebook-scams"),
-        ("bank of america", "bank-scams"),
-        ("wells fargo", "bank-scams"),
-        ("social security", "government-scams"),
-        ("trust wallet", "crypto-scams"),
-        ("google play", "phishing-scams"),
-        ("cash app", "cash-app-scams"),
-        ("metamask", "crypto-scams"),
-        ("coinbase", "crypto-scams"),
-        ("whatsapp", "whatsapp-scams"),
-        ("instagram", "instagram-scams"),
-        ("snapchat", "snapchat-scams"),
-        ("telegram", "telegram-scams"),
-        ("facebook", "facebook-scams"),
-        ("ethereum", "crypto-scams"),
-        ("discord", "discord-scams"),
-        ("bitcoin", "crypto-scams"),
-        ("paypal", "paypal-scams"),
-        ("tiktok", "tiktok-scams"),
-        ("venmo", "venmo-scams"),
-        ("amazon", "amazon-scams"),
-        ("crypto", "crypto-scams"),
-        ("zelle", "zelle-scams"),
-        ("fedex", "package-delivery-scams"),
-        ("usps", "package-delivery-scams"),
-        ("ups", "package-delivery-scams"),
-        ("chase", "bank-scams"),
-        ("bank", "bank-scams"),
-        ("irs", "government-scams"),
-        ("job", "job-scams"),
-        ("loan", "loan-scams"),
-        ("credit", "credit-scams"),
-        ("romance", "romance-scams"),
-        ("gift", "gift-card-scams"),
-        ("verification", "verification-code-scams"),
-        ("phishing", "phishing-scams"),
-        ("login", "account-security-scams"),
-        ("account", "account-security-scams"),
-        ("delivery", "package-delivery-scams"),
-        ("package", "package-delivery-scams"),
-    ]
-
-    haystack = f" {keyword_norm} "
-    for term, slug in ordered_fallbacks:
-        if f" {term} " in haystack:
-            return slug
-
-    return FALLBACK_HUB_SLUG
+    return pages
 
 
-def build_hub_link_html(keyword):
-    hub_slug = find_best_hub_slug(keyword)
-    if not hub_slug:
-        return ""
+def merge_page_pools(*page_groups):
+    merged = []
+    seen = set()
 
-    hub_title = HUB_TITLE_OVERRIDES.get(hub_slug, f"{humanize_slug(hub_slug)} Hub")
+    for group in page_groups:
+        for page in group:
+            slug = page.get("slug", "")
+            if not slug or slug in PROTECTED_SLUGS or slug in seen:
+                continue
+            seen.add(slug)
+            merged.append({
+                "keyword": page.get("keyword", slug.replace("-", " ")),
+                "slug": slug,
+            })
 
-    return f'<a href="/scam-check-now-b/{hub_slug}/">{escape_html(hub_title)}</a>'
+    return merged
 
 
 def sanitize_ai_html(text):
@@ -444,7 +351,6 @@ def generate_ai_text(keyword, keyword_display):
         raise ValueError(f"AI generation failed for all prompts: {last_error}")
     raise ValueError("AI generation failed for all prompts")
 
-
 # -----------------------------
 # SEO TEXT HELPERS
 # -----------------------------
@@ -503,7 +409,6 @@ def build_related_anchor(keyword):
 def build_canonical(slug):
     return f"{SITE}/scam-check-now-b/{slug}/"
 
-
 # -----------------------------
 # LINKING HELPERS
 # -----------------------------
@@ -529,7 +434,6 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     current_cluster = keyword_cluster_tokens(current_keyword)
     current_root = keyword_root(current_keyword)
     current_base = clean_base_keyword(current_keyword)
-    current_hub = find_best_hub_slug(current_keyword)
 
     candidates = [
         p for p in all_pages
@@ -545,15 +449,12 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         other_tokens = keyword_tokens(other_keyword)
         other_cluster = keyword_cluster_tokens(other_keyword)
         other_root = keyword_root(other_keyword)
-        other_hub = find_best_hub_slug(other_keyword)
         length_diff = abs(len(other_tokens) - len(current_tokens))
         same_root = 1 if current_root and other_root == current_root else 0
-        same_hub = 1 if current_hub and other_hub == current_hub else 0
         shared_cluster = len(current_cluster & other_cluster)
         shared_tokens = len(current_tokens & other_tokens)
 
         return (
-            -same_hub,
             -same_root,
             -shared_cluster,
             -shared_tokens,
@@ -575,6 +476,29 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         used_bases.add(base)
         if len(related) == limit:
             break
+
+    if len(related) < limit:
+        fallback_candidates = sorted(
+            [
+                p for p in all_pages
+                if p["slug"] != current_slug
+                and p["slug"] not in PROTECTED_SLUGS
+                and p["slug"] not in exclude_slugs
+                and p["slug"] not in used_slugs
+                and page_exists(p["slug"])
+            ],
+            key=lambda p: p["slug"],
+        )
+
+        for page in fallback_candidates:
+            base = clean_base_keyword(page["keyword"])
+            if base in used_bases:
+                continue
+            related.append(page)
+            used_slugs.add(page["slug"])
+            used_bases.add(base)
+            if len(related) == limit:
+                break
 
     return related
 
@@ -604,6 +528,7 @@ if not keywords:
 
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
+disk_pages = load_output_pages_from_disk()
 
 queue_pages = []
 seen_queue_slugs = set()
@@ -642,15 +567,15 @@ for page in queue_pages:
 
 existing_pages = dedupe_pages_by_slug(existing_pages)
 queue_pages = dedupe_pages_by_slug(queue_pages)
+all_linkable_pages = merge_page_pools(existing_pages, disk_pages)
 
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
 print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
 print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
-print(f"Existing pages available for internal links: {len(existing_pages)}")
+print(f"Existing pages available for internal links: {len(all_linkable_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
-print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
 generated_count = 0
 skipped_existing_count = 0
@@ -692,16 +617,16 @@ for page in queue_pages:
         print(f"[failed] {keyword} -> {e}")
         continue
 
-    related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
+    related_pages = get_related_pages(page, all_linkable_pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
+
     more_pages = get_related_pages(
         page,
-        existing_pages,
+        all_linkable_pages,
         MORE_LINKS_COUNT,
         exclude_slugs=related_slugs,
     )
 
-    hub_link_html = build_hub_link_html(keyword)
     html = template
     html = html.replace("{{TITLE}}", escape_html(title))
     html = html.replace("{{DESCRIPTION}}", escape_html(description))
@@ -709,7 +634,6 @@ for page in queue_pages:
     html = html.replace("{{AI_CONTENT}}", ai_text)
     html = html.replace("{{RELATED_LINKS}}", build_links_html(related_pages))
     html = html.replace("{{MORE_LINKS}}", build_links_html(more_pages))
-    html = html.replace("{{HUB_LINK}}", hub_link_html)
     html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
 
     with open(path, "w", encoding="utf-8") as f:
@@ -721,11 +645,13 @@ for page in queue_pages:
 
     existing_pages.append({"keyword": keyword, "slug": slug})
     existing_pages = dedupe_pages_by_slug(existing_pages)
+    all_linkable_pages = merge_page_pools(existing_pages, disk_pages, [page])
+
     generated_count += 1
 
     print(
         f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
-        f"-> hub: {find_best_hub_slug(keyword)}"
+        f"-> related: {len(related_pages)}, more: {len(more_pages)}"
     )
 
 remaining_keywords = []
