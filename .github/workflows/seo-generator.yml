@@ -25,7 +25,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: seo-page-generator
+  group: repo-main-writer
   cancel-in-progress: false
 
 jobs:
@@ -197,11 +197,15 @@ jobs:
 
           git config --global user.name "seo-bot"
           git config --global user.email "bot@users.noreply.github.com"
+
           git add "$OUTPUT_DIR" "$KEYWORDS_FILE" "$GENERATED_KEYWORDS_FILE" "$GENERATED_SLUGS_FILE" "$REJECTED_KEYWORDS_FILE" sitemap.xml
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "Auto SEO generation + hub update + sitemap update"
-            git push
+            exit 0
           fi
+
+          git commit -m "Auto SEO generation + hub update + sitemap update"
+
+          git pull --rebase origin main
+          git push origin HEAD:main
