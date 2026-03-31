@@ -297,19 +297,6 @@ position:relative;
 z-index:1;
 }
 
-.variant-badge{
-display:flex;
-justify-content:center;
-align-items:center;
-gap:8px;
-margin-bottom:10px;
-font-size:12px;
-font-weight:900;
-color:#667085;
-letter-spacing:.01em;
-text-align:center;
-}
-
 .answer-card,
 .pattern-card,
 .warning-card,
@@ -1073,53 +1060,6 @@ padding-left:22px;
 margin-bottom:10px;
 }
 
-.inline-info-card{
-margin:0 0 22px;
-padding:16px 18px;
-border-radius:20px;
-background:#f8fbff;
-border:1px solid #dbeafe;
-box-shadow:0 10px 22px rgba(37,99,235,.05);
-}
-
-.inline-info-card p{
-margin:0;
-font-size:15px;
-font-weight:800;
-line-height:1.6;
-color:#334155;
-}
-
-.inline-info-card a{
-color:var(--blue);
-text-decoration:none;
-font-weight:900;
-}
-
-.inline-info-card a:hover{
-text-decoration:underline;
-}
-
-.hub-link-block{
-display:block;
-}
-
-.hub-link-label{
-display:block;
-margin-bottom:6px;
-font-size:13px;
-font-weight:900;
-letter-spacing:.01em;
-text-transform:uppercase;
-color:#64748b;
-}
-
-.hub-link-anchor{
-display:inline;
-font-size:15px;
-font-weight:900;
-}
-
 .link-section{
 margin-top:28px;
 padding-top:24px;
@@ -1277,8 +1217,6 @@ width:100%;
   </div>
 
   <div class="container">
-    <div class="variant-badge" id="variantBadge">Template B • Guide Style</div>
-
     <div class="answer-card" id="answerCard">
       <div class="answer-kicker">Quick answer</div>
       <h2 id="answerHeading">Should you trust this message?</h2>
@@ -1365,14 +1303,10 @@ width:100%;
   <section class="content-section">
     <div id="contentBridge" class="content-bridge"></div>
 
-    <div class="inline-info-card" id="hubLinkWrap">
-      {{HUB_LINK}}
-    </div>
-
     <h2 id="contentHeading"></h2>
     <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
-    <div class="link-section">
+    <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
       <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
     </div>
@@ -1422,8 +1356,8 @@ window.addEventListener("load", function () {
   applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
-  cleanHubLink();
   cleanMoreLinks();
+  normalizeBottomLinks();
 });
 
 function isBrowserSubscribed() {
@@ -1712,23 +1646,19 @@ function buildVariantLayout(variant, options) {
   const precheckLayout = document.getElementById("precheckLayout");
   const patternCard = document.getElementById("patternCard");
   const warningCard = document.getElementById("warningCard");
-  const variantBadge = document.getElementById("variantBadge");
 
   if (variant === 1) {
     precheckLayout.innerHTML = "";
     precheckLayout.appendChild(patternCard);
     precheckLayout.appendChild(warningCard);
-    variantBadge.textContent = "Template B • Guide Style • Variant 1";
   } else if (variant === 2) {
     precheckLayout.innerHTML = "";
     precheckLayout.appendChild(warningCard);
     precheckLayout.appendChild(patternCard);
-    variantBadge.textContent = "Template B • Guide Style • Variant 2";
   } else {
     precheckLayout.innerHTML = "";
     precheckLayout.appendChild(patternCard);
     precheckLayout.appendChild(warningCard);
-    variantBadge.textContent = "Template B • Guide Style • Variant 3";
   }
 
   document.getElementById("patternHeading").textContent = options.patternHeading;
@@ -1744,7 +1674,6 @@ function buildVariantLayout(variant, options) {
 function applyPreviewContent() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const lower = keywordRaw.toLowerCase();
-  const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
   const variant = getVariantNumber(keywordRaw);
 
   let options = {
@@ -1916,48 +1845,23 @@ function cleanSeoContent() {
 }
 
 function cleanRelatedLinks() {
+  const relatedLinksWrap = document.getElementById("relatedLinksWrap");
   const relatedLinks = document.getElementById("relatedLinks");
   const relatedHeading = document.getElementById("relatedHeading");
-  if (!relatedLinks || !relatedHeading) return;
+  if (!relatedLinksWrap || !relatedLinks || !relatedHeading) return;
 
   relatedLinks.innerHTML = relatedLinks.innerHTML.replace(/\*\*/g, "").trim();
 
   const links = relatedLinks.querySelectorAll("li a");
 
   if (links.length === 0) {
-    relatedLinks.style.display = "none";
-    relatedHeading.style.display = "none";
-  }
-}
-
-function cleanHubLink() {
-  const hubLinkWrap = document.getElementById("hubLinkWrap");
-  if (!hubLinkWrap) return;
-
-  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
-
-  const anchor = hubLinkWrap.querySelector("a");
-  if (!anchor) {
-    hubLinkWrap.style.display = "none";
+    relatedLinksWrap.style.display = "none";
     return;
   }
 
-  const safeHref = anchor.getAttribute("href") || "#";
-  const safeText = (anchor.textContent || "").trim();
-  const target = anchor.getAttribute("target");
-  const rel = anchor.getAttribute("rel");
-
-  if (!safeText) {
-    hubLinkWrap.style.display = "none";
-    return;
-  }
-
-  hubLinkWrap.innerHTML = `
-    <div class="hub-link-block">
-      <span class="hub-link-label">Related scam category</span>
-      <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
-    </div>
-  `;
+  relatedLinksWrap.style.display = "";
+  relatedLinks.style.display = "";
+  relatedHeading.style.display = "";
 }
 
 function cleanMoreLinks() {
@@ -1972,7 +1876,33 @@ function cleanMoreLinks() {
   const links = moreLinks.querySelectorAll("li a");
   if (links.length === 0) {
     moreLinksWrap.style.display = "none";
-    moreLinksHeading.style.display = "none";
+    return;
+  }
+
+  moreLinksWrap.style.display = "";
+  moreLinks.style.display = "";
+  moreLinksHeading.style.display = "";
+}
+
+function normalizeBottomLinks() {
+  const relatedLinksWrap = document.getElementById("relatedLinksWrap");
+  const relatedLinks = document.getElementById("relatedLinks");
+  const relatedHeading = document.getElementById("relatedHeading");
+  const moreLinksWrap = document.getElementById("moreLinksWrap");
+  const moreLinks = document.getElementById("moreLinks");
+  const moreLinksHeading = document.getElementById("moreLinksHeading");
+
+  if (!relatedLinksWrap || !relatedLinks || !relatedHeading || !moreLinksWrap || !moreLinks || !moreLinksHeading) return;
+
+  const relatedCount = relatedLinks.querySelectorAll("li a").length;
+  const moreCount = moreLinks.querySelectorAll("li a").length;
+
+  if (relatedCount === 0 && moreCount > 0) {
+    moreLinksHeading.textContent = "Related Scam Checks";
+  }
+
+  if (relatedCount > 0 && moreCount > 0) {
+    moreLinksHeading.textContent = "More Scam Checks";
   }
 }
 
