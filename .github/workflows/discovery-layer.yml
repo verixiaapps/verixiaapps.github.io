@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: discovery-layer
+  group: repo-main-writer
   cancel-in-progress: false
 
 jobs:
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -40,7 +42,10 @@ jobs:
           MAX_FEED_URLS: "100"
 
       - name: Commit and push discovery files
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -52,4 +57,6 @@ jobs:
           fi
 
           git commit -m "Update discovery layer"
-          git push
+
+          git pull --rebase origin main
+          git push origin HEAD:main
