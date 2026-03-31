@@ -316,7 +316,52 @@ async function main() {
   const entries = uniqueByUrl(sortNewestFirst(allEntries));
   if (!entries.length) throw new Error("No URLs found in any sitemap");
 
-  // rest unchanged
+  const latestEntries = entries.slice(0, MAX_LATEST);
+  const todayEntries = filterToday(entries).slice(0, MAX_TODAY);
+  const weekEntries = filterThisWeek(entries).slice(0, MAX_WEEK);
+  const htmlEntries = entries.slice(0, MAX_HTML);
+  const feedEntries = entries.slice(0, MAX_FEED);
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "latest/index.html"),
+    pageShell({
+      title: "Latest Pages",
+      intro: "Newest URLs discovered from all sitemaps.",
+      items: entriesToListItems(latestEntries),
+    })
+  );
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "today/index.html"),
+    pageShell({
+      title: `Pages Added ${todayString()}`,
+      intro: "Today's URLs from all sitemaps.",
+      items: entriesToListItems(todayEntries),
+    })
+  );
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "this-week/index.html"),
+    pageShell({
+      title: "Pages This Week",
+      intro: "Recent URLs from all sitemaps.",
+      items: entriesToListItems(weekEntries),
+    })
+  );
+
+  writeFile(
+    path.join(DISCOVERY_DIR, "html-sitemap/index.html"),
+    pageShell({
+      title: "HTML Sitemap",
+      intro: "Combined sitemap view.",
+      items: entriesToListItems(htmlEntries),
+    })
+  );
+
+  writeFile(DISCOVERY_SITEMAP_PATH, buildXmlSitemap(entries.map((e) => e.url)));
+
+  console.log("Discovery layer built successfully.");
+  console.log(`Total URLs: ${entries.length}`);
 }
 
 main().catch((error) => {
