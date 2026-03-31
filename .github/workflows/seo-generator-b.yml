@@ -1,0 +1,216 @@
+name: SEO Page Generator Auto B
+
+on:
+  workflow_dispatch:
+    inputs:
+      manual_daily_limit:
+        description: "Pages to generate on this manual run"
+        required: false
+        default: "1000"
+        type: string
+      full_rebuild:
+        description: "Optional manual rebuild of generated /scam-check-now-b/ pages only"
+        required: false
+        default: false
+        type: boolean
+      rebuild_daily_limit:
+        description: "Daily limit to use during a manual full rebuild"
+        required: false
+        default: "5000"
+        type: string
+  schedule:
+    - cron: "0 9 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-main-writer
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      KEYWORDS_FILE: "data/keywords_b.txt"
+      GENERATED_KEYWORDS_FILE: "data/generated_keywords_b.txt"
+      GENERATED_SLUGS_FILE: "data/generated_slugs_b.txt"
+      REJECTED_KEYWORDS_FILE: "data/rejected_keywords_b.txt"
+      OUTPUT_DIR: "scam-check-now-b"
+      SITEMAP_FILE: "sitemap-b.xml"
+      PROTECTED_SLUG: "is-this-a-scam"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install openai requests
+          fi
+
+      - name: Ensure tracking files exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
+          mkdir -p "$(dirname "$REJECTED_KEYWORDS_FILE")"
+          mkdir -p "$OUTPUT_DIR"
+
+          touch "$KEYWORDS_FILE"
+          touch "$GENERATED_KEYWORDS_FILE"
+          touch "$GENERATED_SLUGS_FILE"
+          touch "$REJECTED_KEYWORDS_FILE"
+          touch "$SITEMAP_FILE"
+
+      - name: Sync latest main before build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global user.name "seo-bot"
+          git config --global user.email "bot@users.noreply.github.com"
+          git pull --rebase origin main
+
+      - name: Set effective daily limit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FULL_REBUILD="false"
+          EFFECTIVE_DAILY_LIMIT="100"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MANUAL_DAILY_LIMIT="${{ inputs.manual_daily_limit }}"
+
+            if [ -n "$MANUAL_DAILY_LIMIT" ]; then
+              EFFECTIVE_DAILY_LIMIT="$MANUAL_DAILY_LIMIT"
+            fi
+
+            if [ "${{ inputs.full_rebuild }}" = "true" ]; then
+              FULL_REBUILD="true"
+              EFFECTIVE_DAILY_LIMIT="${{ inputs.rebuild_daily_limit }}"
+            fi
+          fi
+
+          if ! [[ "$EFFECTIVE_DAILY_LIMIT" =~ ^[0-9]+$ ]] || [ "$EFFECTIVE_DAILY_LIMIT" -le 0 ]; then
+            echo "Invalid EFFECTIVE_DAILY_LIMIT: $EFFECTIVE_DAILY_LIMIT"
+            exit 1
+          fi
+
+          echo "FULL_REBUILD=$FULL_REBUILD" >> "$GITHUB_ENV"
+          echo "EFFECTIVE_DAILY_LIMIT=$EFFECTIVE_DAILY_LIMIT" >> "$GITHUB_ENV"
+
+      - name: Prepare manual full rebuild state
+        if: env.FULL_REBUILD == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f "$KEYWORDS_FILE" ]; then
+            cp "$KEYWORDS_FILE" "$RUNNER_TEMP/original_keywords_queue_b.txt"
+          fi
+
+          if [ ! -s "$GENERATED_KEYWORDS_FILE" ]; then
+            echo "generated_keywords_b.txt is missing or empty. Refusing full rebuild."
+            exit 1
+          fi
+
+          cp "$GENERATED_KEYWORDS_FILE" "$RUNNER_TEMP/rebuild_keywords_source_b.txt"
+          cp "$RUNNER_TEMP/rebuild_keywords_source_b.txt" "$KEYWORDS_FILE"
+
+          : > "$GENERATED_SLUGS_FILE"
+          : > "$GENERATED_KEYWORDS_FILE"
+
+          find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
+
+      - name: Build SEO pages incrementally
+        id: build_seo
+        shell: bash
+        run: python scripts/build_seo_incremental_b.py
+        env:
+          DAILY_LIMIT: ${{ env.EFFECTIVE_DAILY_LIMIT }}
+
+      - name: Build hub pages
+        if: always()
+        shell: bash
+        run: python scripts/build_hubs_b.py
+
+      - name: Restore original keyword queue after manual full rebuild
+        if: always() && env.FULL_REBUILD == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f "$RUNNER_TEMP/original_keywords_queue_b.txt" ]; then
+            cp "$RUNNER_TEMP/original_keywords_queue_b.txt" "$KEYWORDS_FILE"
+          fi
+
+      - name: Build B sitemap
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          get_lastmod() {
+            local file_path="$1"
+            local commit_date
+
+            commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
+
+            if [ -n "$commit_date" ]; then
+              echo "$commit_date"
+            else
+              date -u +%F
+            fi
+          }
+
+          {
+            echo '<?xml version="1.0" encoding="UTF-8"?>'
+            echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+
+            ROOT_LASTMOD=$(get_lastmod "index.html")
+            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>${ROOT_LASTMOD}</lastmod></url>"
+
+            find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
+              [ -f "$dir/index.html" ] || continue
+              slug=$(basename "$dir")
+              page_lastmod=$(get_lastmod "$dir/index.html")
+              echo "<url><loc>https://verixiaapps.com/scam-check-now-b/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
+            done
+
+            echo '</urlset>'
+          } > "$SITEMAP_FILE"
+
+      - name: Commit generated pages and sitemap
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Auto SEO generation B + hub update + sitemap update"
+          git push origin HEAD:main
