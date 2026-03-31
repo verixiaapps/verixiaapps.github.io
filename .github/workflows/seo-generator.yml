@@ -189,6 +189,13 @@ jobs:
             echo '</urlset>'
           } > sitemap.xml
 
+      - name: Sync latest main before commit
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+
       - name: Commit generated pages and sitemap
         if: always()
         shell: bash
@@ -198,7 +205,7 @@ jobs:
           git config --global user.name "seo-bot"
           git config --global user.email "bot@users.noreply.github.com"
 
-          git add "$OUTPUT_DIR" "$KEYWORDS_FILE" "$GENERATED_KEYWORDS_FILE" "$GENERATED_SLUGS_FILE" "$REJECTED_KEYWORDS_FILE" sitemap.xml
+          git add -A
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
@@ -206,6 +213,4 @@ jobs:
           fi
 
           git commit -m "Auto SEO generation + hub update + sitemap update"
-
-          git pull --rebase origin main
           git push origin HEAD:main
