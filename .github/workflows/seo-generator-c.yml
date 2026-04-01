@@ -4,6 +4,16 @@ on:
   schedule:
     - cron: "0 */3 * * *"
   workflow_dispatch:
+    inputs:
+      page_limit:
+        description: "How many pages to generate for this manual run"
+        required: false
+        default: "50"
+      rebuild_all:
+        description: "Rebuild all C pages"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -19,6 +29,9 @@ jobs:
           python-version: "3.11"
 
       - name: Generate SEO pages (C)
+        env:
+          PAGE_LIMIT: ${{ github.event.inputs.page_limit || '50' }}
+          REBUILD_ALL: ${{ github.event.inputs.rebuild_all || 'false' }}
         run: python scripts/generate-seo-pages-c.py
 
       - name: Build hubs C
@@ -29,5 +42,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Generate SEO pages C + hubs" || echo "No changes"
+          git commit -m "Generate SEO pages C (limit=${{ github.event.inputs.page_limit || 'auto' }}, rebuild=${{ github.event.inputs.rebuild_all || 'false' }}) + hubs" || echo "No changes"
           git push
