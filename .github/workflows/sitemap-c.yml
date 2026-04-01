@@ -1,0 +1,35 @@
+name: Build Sitemap C
+
+on:
+  schedule:
+    - cron: "15 */3 * * *"  # runs every 3 hours, offset from generators
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Build sitemap C
+        run: python scripts/build-sitemap-c.py
+
+      - name: Commit and push sitemap
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sitemap-c-*.xml
+          git commit -m "Update sitemap C" || echo "No changes"
+          git pull --rebase origin main
+          git push origin main
