@@ -18,13 +18,21 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
       - name: Build discovery layer C
         run: node scripts/build-discovery-layer-c.js
+
+      - name: Build sitemap C
+        run: python scripts/build-sitemap-c.py
 
       - name: Commit and push
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Update discovery layer C" || echo "No changes"
+          git commit -m "Update discovery layer C + sitemap" || echo "No changes"
           git push
