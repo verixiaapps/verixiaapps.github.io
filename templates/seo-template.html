@@ -13,7 +13,7 @@
 <meta property="og:description" content="{{DESCRIPTION}}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{CANONICAL_URL}}">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{TITLE}}">
 <meta name="twitter:description" content="{{DESCRIPTION}}">
 
@@ -62,42 +62,45 @@
 
 <style>
 :root{
---bg-top:#eef4ff;
---bg-bottom:#ffffff;
+--bg:#07111f;
+--bg-2:#0c1728;
+--bg-3:#12203a;
+--surface:rgba(255,255,255,.06);
+--surface-2:rgba(255,255,255,.08);
+--surface-3:#ffffff;
+--card:#101c33;
+--card-2:#162541;
 
---ink:#1f2937;
---ink-strong:#0f172a;
---muted:#667085;
---muted-2:#94a3b8;
---line:#e2e8f0;
---line-soft:#edf2f7;
+--ink:#e8f0ff;
+--ink-strong:#ffffff;
+--ink-dark:#132033;
+--muted:#9eb0cf;
+--muted-2:#7e93b5;
 
---blue:#2563eb;
---blue-2:#4f7df3;
---blue-3:#1d4ed8;
---blue-soft:#eff6ff;
---blue-line:#bfdbfe;
---navy:#1e293b;
+--line:rgba(148,163,184,.20);
+--line-2:rgba(255,255,255,.10);
 
---red:#dc2626;
---red-dark:#991b1b;
---red-soft:#fef2f2;
---red-soft-2:#fff7f7;
---red-line:#fecaca;
+--cyan:#22d3ee;
+--cyan-2:#06b6d4;
+--blue:#3b82f6;
+--blue-2:#2563eb;
+--violet:#8b5cf6;
+--violet-2:#7c3aed;
+--emerald:#10b981;
+--emerald-2:#059669;
+--amber:#f59e0b;
+--red:#ef4444;
 
---amber:#b45309;
+--blue-soft:#dbeafe;
+--violet-soft:#ede9fe;
+--green-soft:#ecfdf5;
 --amber-soft:#fffbeb;
---amber-line:#fde68a;
+--red-soft:#fef2f2;
 
---green:#15803d;
---green-soft:#f0fdf4;
---green-line:#bbf7d0;
-
---shadow-hero:0 26px 70px rgba(37,99,235,.08);
---shadow-xl:0 30px 80px rgba(15,23,42,.10);
---shadow-lg:0 20px 50px rgba(15,23,42,.08);
---shadow-md:0 12px 30px rgba(15,23,42,.07);
---shadow-sm:0 8px 20px rgba(15,23,42,.05);
+--shadow-xl:0 32px 90px rgba(2,6,23,.42);
+--shadow-lg:0 20px 54px rgba(2,6,23,.30);
+--shadow-md:0 12px 30px rgba(2,6,23,.22);
+--shadow-sm:0 8px 20px rgba(2,6,23,.16);
 }
 
 *{
@@ -110,15 +113,38 @@ scroll-behavior:smooth;
 }
 
 body{
-font-family:system-ui,-apple-system,Arial,sans-serif;
-background:
-radial-gradient(circle at top center, rgba(79,125,243,.12), transparent 30%),
-radial-gradient(circle at 20% 8%, rgba(37,99,235,.06), transparent 20%),
-linear-gradient(180deg,var(--bg-top) 0%,var(--bg-bottom) 100%);
+font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
 margin:0;
-padding-top:92px;
+padding-top:90px;
 color:var(--ink);
 line-height:1.6;
+background:
+radial-gradient(circle at 14% 8%, rgba(34,211,238,.16), transparent 22%),
+radial-gradient(circle at 84% 0%, rgba(139,92,246,.20), transparent 28%),
+radial-gradient(circle at 50% 100%, rgba(16,185,129,.08), transparent 24%),
+linear-gradient(180deg,#06101b 0%, #0a1324 34%, #0e1830 100%);
+}
+
+a{
+color:#8be9ff;
+text-decoration:none;
+}
+
+a:hover{
+text-decoration:underline;
+}
+
+button,
+textarea,
+input{
+font-family:inherit;
+}
+
+@supports (padding:max(0px)) {
+  body{
+    padding-left:max(0px, env(safe-area-inset-left));
+    padding-right:max(0px, env(safe-area-inset-right));
+  }
 }
 
 .top-bar{
@@ -132,7 +158,6 @@ align-items:center;
 padding:10px 16px;
 z-index:1000;
 pointer-events:none;
-box-sizing:border-box;
 }
 
 .top-actions{
@@ -140,26 +165,25 @@ pointer-events:auto;
 display:flex;
 align-items:center;
 gap:10px;
-margin-right:28px;
+margin-right:20px;
 }
 
 .logo{
 pointer-events:auto;
 display:inline-flex;
 align-items:center;
-gap:8px;
+gap:10px;
 font-size:14px;
 font-weight:900;
-color:#334155;
+color:#eef6ff;
 margin-left:8px;
-letter-spacing:-.01em;
-opacity:.97;
-padding:10px 14px;
+padding:11px 15px;
 border-radius:999px;
-background:rgba(255,255,255,.78);
-border:1px solid rgba(226,232,240,.92);
-backdrop-filter:blur(12px);
-box-shadow:0 10px 26px rgba(15,23,42,.05);
+letter-spacing:-.01em;
+background:rgba(10,18,35,.68);
+border:1px solid rgba(255,255,255,.10);
+backdrop-filter:blur(14px);
+box-shadow:var(--shadow-sm);
 text-decoration:none;
 }
 
@@ -167,8 +191,8 @@ text-decoration:none;
 width:10px;
 height:10px;
 border-radius:50%;
-background:linear-gradient(180deg,#60a5fa 0%,#2563eb 100%);
-box-shadow:0 0 0 4px rgba(59,130,246,.12);
+background:linear-gradient(180deg,var(--cyan) 0%,var(--violet) 100%);
+box-shadow:0 0 0 4px rgba(139,92,246,.14);
 flex:0 0 10px;
 }
 
@@ -180,13 +204,12 @@ padding:11px 14px;
 font-size:14px;
 border-radius:16px;
 font-weight:900;
-background:rgba(255,255,255,.86);
-color:#111827;
-border:1px solid rgba(226,232,240,.92);
-text-decoration:none;
+color:#fff;
+border:1px solid rgba(255,255,255,.12);
 white-space:nowrap;
+background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.08) 100%);
 backdrop-filter:blur(10px);
-box-shadow:0 12px 28px rgba(15,23,42,.06);
+box-shadow:var(--shadow-sm);
 }
 
 .upgrade-top{
@@ -194,100 +217,116 @@ pointer-events:auto;
 padding:11px 15px;
 font-size:14px;
 border-radius:16px;
-box-shadow:0 14px 30px rgba(15,23,42,.14);
 font-weight:900;
-background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
 border:none;
 cursor:pointer;
 white-space:nowrap;
-max-width:120px;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-@supports (padding: max(0px)) {
-  .top-bar{
-    padding-left:max(16px, env(safe-area-inset-left));
-    padding-right:max(16px, env(safe-area-inset-right));
-  }
+box-shadow:0 16px 34px rgba(34,211,238,.16);
 }
 
 .page-shell{
-max-width:860px;
+max-width:940px;
 margin:0 auto;
-padding:0 14px;
+padding:0 14px 34px;
 }
 
 .hero{
+position:relative;
+padding:18px 8px 20px;
+max-width:980px;
+margin:0 auto 14px;
 text-align:center;
-padding:22px 20px 18px;
-max-width:940px;
-margin:0 auto 10px;
 }
 
-.hero h1{
-margin:0;
-font-size:44px;
-line-height:1.02;
-letter-spacing:-.045em;
-color:var(--ink-strong);
-font-weight:900;
-text-wrap:balance;
+.hero-badge-row{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+margin-bottom:14px;
 }
 
-.hero p{
-margin-top:14px;
-font-size:19px;
-max-width:760px;
-margin-left:auto;
-margin-right:auto;
-color:#334155;
-text-wrap:balance;
-}
-
-.hero-trust{
-margin-top:16px;
+.hero-badge{
 display:inline-flex;
 align-items:center;
 justify-content:center;
 gap:8px;
-padding:11px 16px;
+padding:9px 13px;
 border-radius:999px;
-font-size:14px;
-color:#475569;
-font-weight:800;
+font-size:13px;
+font-weight:900;
+color:#dbeafe;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.10);
+backdrop-filter:blur(10px);
+}
+
+.hero h1{
+margin:0;
+font-size:48px;
+line-height:1.02;
+letter-spacing:-.05em;
+font-weight:950;
+color:var(--ink-strong);
 text-wrap:balance;
-background:rgba(255,255,255,.82);
-border:1px solid rgba(191,219,254,.95);
-backdrop-filter:blur(8px);
-box-shadow:var(--shadow-hero);
+}
+
+.hero p{
+margin:14px auto 0;
+max-width:760px;
+font-size:19px;
+color:#c7d5eb;
+text-wrap:balance;
+}
+
+.hero-trust{
+margin-top:18px;
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+}
+
+.hero-trust-chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:10px 14px;
+border-radius:999px;
+font-size:13px;
+font-weight:900;
+color:#dce8fb;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-sm);
 }
 
 .container,
 .content-section{
-max-width:780px;
+max-width:820px;
 margin:auto;
-background:rgba(255,255,255,.96);
 padding:22px;
-padding-bottom:42px;
 border-radius:30px;
-box-shadow:var(--shadow-xl);
-border:1px solid rgba(226,232,240,.95);
 position:relative;
 overflow:hidden;
+border:1px solid rgba(255,255,255,.10);
+background:
+linear-gradient(180deg, rgba(17,28,51,.94) 0%, rgba(11,19,36,.98) 100%);
+box-shadow:var(--shadow-xl);
 }
 
 .container::before,
 .content-section::before{
 content:"";
 position:absolute;
-top:-140px;
-right:-80px;
-width:280px;
-height:280px;
+top:-120px;
+right:-90px;
+width:260px;
+height:260px;
 border-radius:50%;
-background:radial-gradient(circle, rgba(79,125,243,.10), transparent 62%);
+background:radial-gradient(circle, rgba(34,211,238,.14), transparent 65%);
 pointer-events:none;
 }
 
@@ -302,22 +341,33 @@ display:flex;
 justify-content:center;
 align-items:center;
 gap:8px;
-margin-bottom:10px;
+margin-bottom:12px;
 font-size:12px;
 font-weight:900;
-color:#667085;
-letter-spacing:.01em;
+color:#8be9ff;
+letter-spacing:.08em;
+text-transform:uppercase;
 text-align:center;
+}
+
+.preview-card,
+.tool-shell,
+.app-link-card,
+.upgrade,
+.inline-info-card{
+background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
+border-radius:24px;
+box-shadow:var(--shadow-md);
 }
 
 .preview-card{
 position:relative;
-margin-bottom:14px;
-padding:14px 14px 12px;
-border-radius:24px;
-background:linear-gradient(180deg,#fffefe 0%,#ffffff 100%);
-border:1.5px solid #fde2e2;
-box-shadow:0 14px 32px rgba(220,38,38,.06);
+margin-bottom:18px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(239,68,68,.12) 0%, rgba(139,92,246,.10) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
 overflow:hidden;
 }
 
@@ -326,8 +376,8 @@ content:"";
 position:absolute;
 inset:0;
 background:
-radial-gradient(circle at top right, rgba(220,38,38,.04), transparent 34%),
-radial-gradient(circle at bottom left, rgba(251,191,36,.03), transparent 38%);
+radial-gradient(circle at top right, rgba(239,68,68,.12), transparent 34%),
+radial-gradient(circle at bottom left, rgba(34,211,238,.10), transparent 38%);
 pointer-events:none;
 }
 
@@ -338,9 +388,9 @@ z-index:1;
 
 .preview-top{
 display:flex;
-align-items:center;
+align-items:flex-start;
 justify-content:space-between;
-gap:10px;
+gap:12px;
 flex-wrap:wrap;
 }
 
@@ -350,12 +400,12 @@ align-items:center;
 gap:8px;
 padding:8px 14px;
 border-radius:999px;
-background:#b91c1c;
+background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);
 color:#fff;
 font-size:11px;
 font-weight:900;
 letter-spacing:.03em;
-box-shadow:0 10px 20px rgba(220,38,38,.12);
+box-shadow:0 10px 20px rgba(239,68,68,.14);
 line-height:1;
 }
 
@@ -363,18 +413,18 @@ line-height:1;
 display:flex;
 flex-direction:column;
 gap:6px;
-min-width:146px;
+min-width:150px;
 flex:0 0 auto;
 }
 
 .preview-score{
 padding:8px 10px;
 border-radius:999px;
-background:#fff;
-border:1px solid #f3d2d2;
+background:rgba(255,255,255,.10);
+border:1px solid rgba(255,255,255,.12);
 font-size:11px;
 font-weight:900;
-color:#7f1d1d;
+color:#ffd8d8;
 box-shadow:var(--shadow-sm);
 text-align:center;
 line-height:1.1;
@@ -383,9 +433,9 @@ line-height:1.1;
 .preview-score-bar{
 height:8px;
 border-radius:999px;
-background:#fee2e2;
+background:rgba(255,255,255,.08);
 overflow:hidden;
-border:1px solid #fecaca;
+border:1px solid rgba(255,255,255,.10);
 }
 
 .preview-score-fill{
@@ -397,52 +447,60 @@ box-shadow:0 0 12px rgba(220,38,38,.18);
 }
 
 .preview-domain{
-margin-top:10px;
-font-size:18px;
+margin-top:12px;
+font-size:24px;
 font-weight:900;
-line-height:1.06;
-color:var(--ink-strong);
+line-height:1.08;
+color:#fff;
 letter-spacing:-.03em;
 word-break:break-word;
 }
 
 .preview-sub{
 margin-top:4px;
-font-size:12px;
-color:#667085;
+font-size:13px;
+color:#d7e4f8;
 font-weight:800;
-line-height:1.35;
+line-height:1.45;
 }
 
 .preview-signals{
-margin-top:10px;
+margin-top:12px;
 display:grid;
-gap:7px;
+gap:10px;
 }
 
 .preview-signal{
 display:flex;
-align-items:center;
-gap:8px;
-padding:9px 11px;
-border-radius:14px;
-background:#fff;
-border:1px solid #f3d7d7;
-font-size:12px;
+align-items:flex-start;
+gap:10px;
+padding:12px 13px;
+border-radius:16px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.09);
+font-size:13px;
 font-weight:900;
-color:#7f1d1d;
-line-height:1.25;
+color:#ffe1e1;
+line-height:1.4;
 }
 
 .preview-signal-icon{
-width:16px;
-height:16px;
+width:18px;
+height:18px;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:12px;
-flex:0 0 16px;
+flex:0 0 18px;
 line-height:1;
+}
+
+.tool-shell{
+padding:22px;
+margin-top:0;
+background:
+linear-gradient(135deg, rgba(34,211,238,.10) 0%, rgba(139,92,246,.10) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
 }
 
 textarea,input{
@@ -450,10 +508,10 @@ width:100%;
 padding:16px 16px;
 margin-top:12px;
 border-radius:18px;
-border:1.5px solid #dbe3f0;
+border:1.5px solid rgba(255,255,255,.12);
 font-size:16px;
-background:#ffffff;
-color:var(--ink);
+background:rgba(7,16,29,.72);
+color:#eef6ff;
 box-shadow:none;
 }
 
@@ -464,13 +522,14 @@ resize:none;
 
 textarea::placeholder,
 input::placeholder{
-color:#9aa4b2;
+color:#89a0c4;
 }
 
-textarea:focus,input:focus{
+textarea:focus,
+input:focus{
 outline:none;
-border-color:#93c5fd;
-box-shadow:0 0 0 5px rgba(59,130,246,.10);
+border-color:rgba(34,211,238,.60);
+box-shadow:0 0 0 5px rgba(34,211,238,.10);
 }
 
 button{
@@ -480,42 +539,34 @@ cursor:pointer;
 font-size:16px;
 padding:16px;
 min-height:50px;
-font-family:inherit;
 }
 
 .check{
 width:100%;
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
 margin-top:18px;
 font-weight:900;
 font-size:18px;
 letter-spacing:.2px;
-box-shadow:0 18px 38px rgba(37,99,235,.30);
+box-shadow:0 18px 40px rgba(34,211,238,.20);
 transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .check:hover{
 transform:translateY(-1px);
-box-shadow:0 20px 42px rgba(37,99,235,.34);
+box-shadow:0 22px 44px rgba(34,211,238,.24);
 }
 
 .check:active{
 transform:scale(.985);
 }
 
-.note{
-margin-top:13px;
-font-size:14px;
-color:var(--muted);
-text-align:center;
-text-wrap:balance;
-}
-
+.note,
 .input-help{
 margin-top:12px;
 font-size:14px;
-color:var(--muted);
+color:#9fb0cc;
 text-align:center;
 text-wrap:balance;
 }
@@ -523,7 +574,7 @@ text-wrap:balance;
 .success{
 margin-top:12px;
 font-size:14px;
-color:var(--green);
+color:#86efac;
 text-align:center;
 font-weight:900;
 display:none;
@@ -532,17 +583,16 @@ display:none;
 .app-link-card{
 margin-top:18px;
 padding:20px;
-background:linear-gradient(180deg,#f8fbff 0%,#f3f8ff 100%);
-border:1.5px solid #c7d2fe;
-border-radius:22px;
 text-align:center;
-box-shadow:0 14px 30px rgba(79,125,243,.08);
+background:
+linear-gradient(135deg, rgba(16,185,129,.12) 0%, rgba(34,211,238,.10) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
 }
 
 .app-link-card h4{
 margin:0 0 6px;
-font-size:18px;
-color:var(--ink-strong);
+font-size:20px;
+color:#fff;
 font-weight:900;
 letter-spacing:-.02em;
 }
@@ -550,22 +600,22 @@ letter-spacing:-.02em;
 .app-link-card p{
 margin:0 0 12px;
 font-size:14px;
-color:#4b5563;
-line-height:1.6;
+color:#c9d8ee;
+line-height:1.65;
 }
 
 .app-link-button{
 display:block;
 width:100%;
-text-decoration:none;
 text-align:center;
-background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+background:linear-gradient(135deg,var(--emerald) 0%,var(--cyan-2) 100%);
 color:#fff;
 font-weight:900;
 padding:15px;
 border-radius:16px;
 box-sizing:border-box;
-box-shadow:0 14px 30px rgba(15,23,42,.12);
+box-shadow:0 14px 30px rgba(16,185,129,.18);
+text-decoration:none;
 }
 
 #result{
@@ -574,35 +624,32 @@ display:none;
 }
 
 .result-card{
-background:#ffffff;
+background:rgba(255,255,255,.96);
 border-radius:26px;
 padding:22px;
 box-shadow:var(--shadow-lg);
-border:1px solid var(--line);
+border:1px solid rgba(15,23,42,.08);
 overflow:hidden;
+color:var(--ink-dark);
 }
 
 .result-card.high{
-background:#ffffff;
 border:2px solid #fecaca;
-box-shadow:0 22px 50px rgba(220,38,38,.10);
+box-shadow:0 22px 50px rgba(239,68,68,.12);
 }
 
 .result-card.medium{
-background:#ffffff;
-border:2px solid var(--amber-line);
-box-shadow:0 22px 50px rgba(245,158,11,.08);
+border:2px solid #fde68a;
+box-shadow:0 22px 50px rgba(245,158,11,.10);
 }
 
 .result-card.low{
-background:#ffffff;
-border:2px solid var(--green-line);
-box-shadow:0 22px 50px rgba(34,197,94,.08);
+border:2px solid #bbf7d0;
+box-shadow:0 22px 50px rgba(16,185,129,.10);
 }
 
 .result-card.unknown{
-background:#ffffff;
-border:1px solid var(--line);
+border:1px solid #dbe4f0;
 }
 
 .result-top{
@@ -629,17 +676,14 @@ box-shadow:var(--shadow-sm);
 .risk.high{
 background:var(--red);
 color:#fff;
-box-shadow:0 14px 28px rgba(220,38,38,.24);
 }
 .risk.medium{
-background:#f59e0b;
+background:var(--amber);
 color:#fff;
-box-shadow:0 14px 28px rgba(245,158,11,.22);
 }
 .risk.low{
-background:#16a34a;
+background:var(--emerald);
 color:#fff;
-box-shadow:0 14px 28px rgba(22,163,74,.18);
 }
 .risk.unknown{
 background:#e5e7eb;
@@ -652,7 +696,7 @@ border-radius:999px;
 font-size:12px;
 font-weight:900;
 background:#fff;
-border:1px solid var(--line);
+border:1px solid #d9e2ec;
 color:#334155;
 box-shadow:var(--shadow-sm);
 }
@@ -662,7 +706,7 @@ margin:16px 0 0;
 font-size:16px;
 color:#334155;
 font-weight:800;
-line-height:1.55;
+line-height:1.58;
 }
 
 .result-continuation{
@@ -673,7 +717,7 @@ font-size:14px;
 font-weight:900;
 line-height:1.55;
 background:#f8fafc;
-border:1px solid var(--line);
+border:1px solid #e2e8f0;
 color:#334155;
 }
 
@@ -685,13 +729,13 @@ color:#7f1d1d;
 
 .result-card.medium .result-continuation{
 background:#fffdf5;
-border-color:var(--amber-line);
-color:var(--amber);
+border-color:#fde68a;
+color:#92400e;
 }
 
 .result-card.unknown .result-continuation{
 background:#f8fafc;
-border-color:var(--line);
+border-color:#e2e8f0;
 color:#334155;
 }
 
@@ -700,13 +744,13 @@ margin-top:18px;
 padding:18px;
 border-radius:20px;
 background:#f8fafc;
-border:1px solid var(--line-soft);
+border:1px solid #e7eef6;
 }
 
 .section-title{
 font-weight:900;
 margin-bottom:10px;
-color:var(--ink-strong);
+color:#0f172a;
 font-size:16px;
 letter-spacing:-.01em;
 }
@@ -725,8 +769,8 @@ align-items:flex-start;
 gap:12px;
 padding:14px 15px;
 border-radius:16px;
-background:#ffffff;
-border:1px solid var(--line);
+background:#fff;
+border:1px solid #e2e8f0;
 font-size:14px;
 font-weight:800;
 color:#334155;
@@ -741,14 +785,14 @@ color:#7f1d1d;
 
 .result-card.medium .signal-item{
 background:#fffdf5;
-border-color:var(--amber-line);
-color:var(--amber);
+border-color:#fde68a;
+color:#92400e;
 }
 
 .result-card.low .signal-item{
 background:#f7fff8;
-border-color:var(--green-line);
-color:var(--green);
+border-color:#bbf7d0;
+color:#166534;
 }
 
 .signal-icon{
@@ -765,8 +809,8 @@ flex:0 0 22px;
 .action-box{
 padding:15px 16px;
 border-radius:16px;
-background:var(--blue-soft);
-border:1px solid var(--blue-line);
+background:#eef6ff;
+border:1px solid #bfdbfe;
 font-size:14px;
 font-weight:900;
 color:#1e3a8a;
@@ -777,7 +821,7 @@ line-height:1.55;
 margin-top:18px;
 padding:16px;
 background:#f8fafc;
-border:1px solid var(--line);
+border:1px solid #e2e8f0;
 border-radius:18px;
 font-size:14px;
 color:#334155;
@@ -793,14 +837,14 @@ color:#7f1d1d;
 
 .result-card.medium .result-payline{
 background:#fffdf5;
-border-color:var(--amber-line);
-color:var(--amber);
+border-color:#fde68a;
+color:#92400e;
 }
 
 .result-card.low .result-payline{
 background:#f7fff8;
-border-color:var(--green-line);
-color:var(--green);
+border-color:#bbf7d0;
+color:#166534;
 }
 
 .result-actions{
@@ -817,8 +861,8 @@ margin-top:0;
 margin-top:4px;
 padding:18px;
 border-radius:20px;
-background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
-border:1px solid var(--line);
+background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);
+border:1px solid #e2e8f0;
 text-align:center;
 box-shadow:var(--shadow-sm);
 }
@@ -826,7 +870,7 @@ box-shadow:var(--shadow-sm);
 .share-alert{
 font-size:13px;
 font-weight:900;
-color:#b91c1c;
+color:#0f172a;
 margin-bottom:6px;
 letter-spacing:.01em;
 }
@@ -858,8 +902,7 @@ padding:12px 14px;
 border-radius:14px;
 font-size:14px;
 font-weight:900;
-box-shadow:none;
-transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .share-btn:hover{
@@ -867,23 +910,15 @@ transform:translateY(-1px);
 }
 
 .share-btn.primary{
-background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
-box-shadow:0 12px 24px rgba(15,23,42,.14);
-}
-
-.share-btn.primary:hover{
-box-shadow:0 16px 30px rgba(15,23,42,.18);
+box-shadow:0 12px 24px rgba(34,211,238,.18);
 }
 
 .share-btn.dark{
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(135deg,#111827 0%,#1f2937 100%);
 color:#fff;
-box-shadow:0 12px 24px rgba(37,99,235,.18);
-}
-
-.share-btn.dark:hover{
-box-shadow:0 16px 30px rgba(37,99,235,.24);
+box-shadow:0 12px 24px rgba(15,23,42,.14);
 }
 
 .share-btn.light{
@@ -897,52 +932,51 @@ margin-top:12px;
 min-height:20px;
 font-size:13px;
 font-weight:900;
-color:var(--green);
+color:#059669;
 }
 
 .upgrade{
 display:none;
 margin-top:28px;
 padding:24px;
-background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
-border-radius:24px;
 text-align:center;
-box-shadow:var(--shadow-md);
-border:1px solid var(--line);
+background:
+linear-gradient(135deg, rgba(139,92,246,.18) 0%, rgba(34,211,238,.16) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
 }
 
 .upgrade h3{
 margin:0 0 8px;
-font-size:28px;
-line-height:1.2;
-color:var(--ink-strong);
+font-size:30px;
+line-height:1.15;
+color:#fff;
 text-wrap:balance;
 }
 
 .upgrade-copy{
 margin:0 auto;
-max-width:580px;
-color:#4b5563;
+max-width:600px;
+color:#d5e2f4;
 font-size:15px;
-line-height:1.6;
+line-height:1.68;
 }
 
 .plan{
 width:100%;
 margin-top:14px;
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
 font-weight:900;
 padding:15px;
-box-shadow:0 14px 28px rgba(59,130,246,.18);
+box-shadow:0 14px 28px rgba(34,211,238,.18);
 }
 
 .plan.secondary{
-background:linear-gradient(180deg,#2563eb 0%,#1d4ed8 100%);
+background:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
 }
 
 .plan.tertiary{
-background:linear-gradient(180deg,#1d4ed8 0%,#1e40af 100%);
+background:linear-gradient(135deg,#0f766e 0%,#10b981 100%);
 }
 
 .subscriber-link{
@@ -956,10 +990,9 @@ border:none;
 padding:0;
 min-height:auto;
 font-size:14px;
-color:var(--blue);
+color:#bff7ff;
 font-weight:800;
 text-decoration:underline;
-box-shadow:none;
 cursor:pointer;
 }
 
@@ -972,18 +1005,47 @@ padding-bottom:36px;
 margin:0 0 24px;
 padding:18px;
 border-radius:20px;
-background:#f8fafc;
-border:1px solid var(--line-soft);
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.09);
 font-size:15px;
-color:#334155;
+color:#d6e3f7;
 font-weight:800;
-line-height:1.6;
+line-height:1.66;
+}
+
+.inline-info-card{
+margin:0 0 22px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(59,130,246,.12) 0%, rgba(139,92,246,.10) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+color:#fff;
 }
 
 .content-section h2,
 .content-section h3{
 margin:0 0 14px;
-color:var(--ink-strong);
+color:#fff;
 line-height:1.08;
 letter-spacing:-.035em;
 font-weight:900;
@@ -1001,7 +1063,7 @@ margin-top:30px;
 
 .content-body{
 font-size:18px;
-color:#334155;
+color:#d7e4f8;
 }
 
 .content-body p{
@@ -1017,57 +1079,10 @@ padding-left:22px;
 margin-bottom:10px;
 }
 
-.inline-info-card{
-margin:0 0 22px;
-padding:16px 18px;
-border-radius:20px;
-background:#f8fbff;
-border:1px solid #dbeafe;
-box-shadow:0 10px 22px rgba(37,99,235,.05);
-}
-
-.inline-info-card p{
-margin:0;
-font-size:15px;
-font-weight:800;
-line-height:1.6;
-color:#334155;
-}
-
-.inline-info-card a{
-color:var(--blue);
-text-decoration:none;
-font-weight:900;
-}
-
-.inline-info-card a:hover{
-text-decoration:underline;
-}
-
-.hub-link-block{
-display:block;
-}
-
-.hub-link-label{
-display:block;
-margin-bottom:6px;
-font-size:13px;
-font-weight:900;
-letter-spacing:.01em;
-text-transform:uppercase;
-color:#64748b;
-}
-
-.hub-link-anchor{
-display:inline;
-font-size:15px;
-font-weight:900;
-}
-
 .link-section{
 margin-top:28px;
 padding-top:24px;
-border-top:1px solid var(--line-soft);
+border-top:1px solid rgba(255,255,255,.08);
 }
 
 .related-links{
@@ -1080,189 +1095,73 @@ margin-bottom:10px;
 }
 
 .related-links a{
-color:#2563eb;
-text-decoration:none;
-font-weight:700;
-}
-
-.related-links a:hover{
-text-decoration:underline;
+color:#8be9ff;
+font-weight:800;
 }
 
 .content-close{
 margin-top:28px;
 padding:18px;
 border-radius:20px;
-background:#f8fafc;
-border:1px solid var(--line-soft);
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
 font-size:15px;
 font-weight:800;
-color:#334155;
-line-height:1.7;
+color:#d7e4f8;
+line-height:1.72;
 }
 
 .footer{
 text-align:center;
 margin-top:72px;
 padding:40px 20px;
-color:var(--muted);
+color:#9fb0cc;
 font-size:14px;
 line-height:1.75;
 text-wrap:balance;
 }
 
 .footer a{
-color:var(--blue);
-text-decoration:none;
+color:#8be9ff;
 font-weight:700;
 }
 
-.footer a:hover{
-text-decoration:underline;
-}
-
 @media (max-width:640px){
-body{
-padding-top:86px;
-}
-.hero{
-padding:16px 16px 18px;
-}
-.hero h1{
-font-size:32px;
-}
-.hero p{
-margin-top:10px;
-font-size:17px;
-}
-.hero-trust{
-margin-top:10px;
-font-size:14px;
-}
-.container,
-.content-section{
-margin-left:12px;
-margin-right:12px;
-padding:18px;
-border-radius:24px;
-}
-.top-bar{
-padding:10px 10px;
-}
-.top-actions{
-gap:8px;
-margin-right:0;
-}
-.logo{
-font-size:13px;
-margin-left:2px;
-padding:9px 12px;
-}
-.app-top{
-font-size:13px;
-padding:8px 10px;
-}
-.upgrade-top{
-font-size:13px;
-padding:8px 10px;
-margin-right:0;
-}
-.upgrade h3{
-font-size:24px;
-}
-.content-section h2{
-font-size:28px;
-line-height:1.12;
-}
-.content-section h3{
-font-size:24px;
-}
-.content-body{
-font-size:16px;
-}
-.system-badge{
-margin-bottom:8px;
-font-size:11px;
-}
-.preview-card{
-padding:12px 12px 10px;
-margin-bottom:12px;
-border-radius:20px;
-}
-.preview-top{
-align-items:flex-start;
-gap:8px;
-}
-.preview-badge{
-font-size:10px;
-padding:8px 12px;
-gap:6px;
-}
-.preview-score-wrap{
-min-width:128px;
-gap:5px;
-}
-.preview-score{
-font-size:10px;
-padding:7px 9px;
-}
-.preview-score-bar{
-height:7px;
-}
-.preview-domain{
-margin-top:8px;
-font-size:15px;
-line-height:1.08;
-}
-.preview-sub{
-margin-top:3px;
-font-size:11px;
-line-height:1.3;
-}
-.preview-signals{
-margin-top:8px;
-gap:6px;
-}
-.preview-signal{
-padding:8px 10px;
-font-size:11px;
-gap:7px;
-border-radius:12px;
-}
-.preview-signal-icon{
-width:14px;
-height:14px;
-font-size:11px;
-flex:0 0 14px;
-}
-.result-top{
-align-items:flex-start;
-}
-.result-chip{
-font-size:12px;
-}
-.risk{
-font-size:19px;
-padding:10px 14px;
-}
-.result-summary{
-font-size:15px;
-}
-.signal-item{
-font-size:14px;
-}
-.inline-info-card{
-padding:14px 15px;
-}
-.content-close{
-padding:15px;
-}
-.share-grid{
-grid-template-columns:1fr;
-}
-.share-btn{
-width:100%;
-}
+body{padding-top:84px;}
+.hero{padding:14px 6px 18px;}
+.hero h1{font-size:34px;}
+.hero p{margin-top:10px;font-size:17px;}
+.container,.content-section{margin-left:12px;margin-right:12px;padding:18px;border-radius:24px;}
+.top-bar{padding:10px 10px;}
+.top-actions{gap:8px;margin-right:0;}
+.logo{font-size:13px;margin-left:2px;padding:9px 12px;}
+.app-top{font-size:13px;padding:8px 10px;}
+.upgrade-top{font-size:13px;padding:8px 10px;margin-right:0;}
+.upgrade h3{font-size:24px;}
+.content-section h2{font-size:30px;line-height:1.12;}
+.content-section h3{font-size:24px;}
+.content-body{font-size:16px;}
+.system-badge{margin-bottom:8px;font-size:11px;}
+.preview-card{padding:14px;border-radius:20px;}
+.preview-top{align-items:flex-start;gap:8px;}
+.preview-badge{font-size:10px;padding:8px 12px;gap:6px;}
+.preview-score-wrap{min-width:128px;gap:5px;}
+.preview-score{font-size:10px;padding:7px 9px;}
+.preview-score-bar{height:7px;}
+.preview-domain{margin-top:8px;font-size:18px;line-height:1.08;}
+.preview-sub{margin-top:3px;font-size:11px;line-height:1.3;}
+.preview-signals{margin-top:8px;gap:6px;}
+.preview-signal{padding:9px 10px;font-size:11px;gap:7px;border-radius:12px;}
+.preview-signal-icon{width:14px;height:14px;font-size:11px;flex:0 0 14px;}
+.result-top{align-items:flex-start;}
+.result-chip{font-size:12px;}
+.risk{font-size:19px;padding:10px 14px;}
+.result-summary{font-size:15px;}
+.signal-item{font-size:14px;}
+.inline-info-card{padding:14px 15px;}
+.content-close{padding:15px;}
+.share-grid{grid-template-columns:1fr;}
+.share-btn{width:100%;}
 }
 </style>
 </head>
@@ -1282,124 +1181,138 @@ width:100%;
 
 <div class="page-shell">
 
-<div class="hero">
-  <h1 id="heroKeyword"></h1>
-  <p id="heroSubheading"></p>
-  <div class="hero-trust">Check suspicious messages, links, and requests before you click, reply, or send money</div>
-</div>
+  <div class="hero">
+    <div class="hero-badge-row">
+      <div class="hero-badge">Live scam checking</div>
+      <div class="hero-badge">Shareable warning page</div>
+      <div class="hero-badge">Built for repeat use</div>
+    </div>
 
-<div class="container">
+    <h1 id="heroKeyword"></h1>
+    <p id="heroSubheading"></p>
 
-  <div class="system-badge">Example scam pattern (for reference)</div>
+    <div class="hero-trust">
+      <div class="hero-trust-chip">Check before you click</div>
+      <div class="hero-trust-chip">Check before you reply</div>
+      <div class="hero-trust-chip">Check before you send money</div>
+    </div>
+  </div>
 
-  <div class="preview-card">
-    <div class="preview-top">
-      <div class="preview-badge" id="previewBadge">🔴 Example Risk Pattern</div>
-      <div class="preview-score-wrap">
-        <div class="preview-score" id="previewScore">Risk Example</div>
-        <div class="preview-score-bar"><div class="preview-score-fill" id="previewScoreFill"></div></div>
+  <div class="container">
+
+    <div class="system-badge">Example scam pattern for reference</div>
+
+    <div class="preview-card">
+      <div class="preview-top">
+        <div class="preview-badge" id="previewBadge">🔴 Example Risk Pattern</div>
+        <div class="preview-score-wrap">
+          <div class="preview-score" id="previewScore">Risk Example</div>
+          <div class="preview-score-bar"><div class="preview-score-fill" id="previewScoreFill"></div></div>
+        </div>
+      </div>
+
+      <div class="preview-domain" id="previewDomain">Example suspicious message</div>
+      <div class="preview-sub" id="previewSub">Common signals found in similar scams</div>
+
+      <div class="preview-signals" id="previewSignals">
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Suspicious domain mismatch</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgent language detected</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Payment request via gift card</span></div>
       </div>
     </div>
-    <div class="preview-domain" id="previewDomain">Example suspicious message</div>
-    <div class="preview-sub" id="previewSub">Common signals found in similar scams</div>
 
-    <div class="preview-signals" id="previewSignals">
-      <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Suspicious domain mismatch</span></div>
-      <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgent language detected</span></div>
-      <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Payment request via gift card</span></div>
-    </div>
-  </div>
+    <div class="tool-shell">
+      <textarea id="text" placeholder="Paste the message, email, website, link, or job offer you're unsure about..."></textarea>
 
-  <textarea id="text" placeholder="Paste the message, email, website, link, or job offer you're unsure about..."></textarea>
+      <div class="input-help">Examples: delivery text, PayPal alert, crypto message, job offer, account warning</div>
 
-  <div class="input-help">Examples: delivery text, PayPal alert, crypto message, job offer, account warning</div>
+      <button class="check" onclick="check()">🔍 Check Scam Risk</button>
 
-  <button class="check" onclick="check()">🔍 Check Scam Risk</button>
+      <div class="note">No signup required • 1 free check • Results in seconds</div>
 
-  <div class="note">No signup required • 1 free check • Results in seconds</div>
+      <input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited checks">
 
-  <input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited checks">
+      <div class="note">Use the same email you entered during checkout</div>
 
-  <div class="note">Use the same email you entered during checkout</div>
+      <div id="postPurchase" class="success">
+        ✅ Payment successful — unlimited access is active on this browser
+      </div>
 
-  <div id="postPurchase" class="success">
-    ✅ Payment successful — unlimited access is active on this browser
-  </div>
+      <div class="note">Get a clear risk level, key red flags, and what to do next</div>
 
-  <div class="note">Get a clear risk level, key red flags, and what to do next</div>
-
-  <div class="app-link-card">
-    <h4>Check suspicious messages anytime</h4>
-    <p>Scam attempts often do not happen once. Use the app to check the next message before you click, reply, or send money.</p>
-    <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
-  </div>
-
-  <div id="result"></div>
-
-  <div class="upgrade" id="upgrade">
-    <h3>Don’t Miss the Next Scam</h3>
-
-    <div class="upgrade-copy">
-      Most scam attempts do not happen once. If you are seeing suspicious messages, links, or requests, more may follow. Check each one before it costs you.
+      <div id="result"></div>
     </div>
 
-    <div style="margin-top:10px;font-size:13px;color:#6b7280;">
-      Built for ongoing protection against scams, phishing, impersonation, and risky payment requests
+    <div class="app-link-card">
+      <h4>Check suspicious messages anytime</h4>
+      <p>Scam attempts often do not happen once. Use the app to check the next message before you click, reply, or send money.</p>
+      <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
     </div>
 
-    <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
-      Unlimited scam checks • Cancel anytime
+    <div class="upgrade" id="upgrade">
+      <h3>Don’t Miss the Next Scam</h3>
+
+      <div class="upgrade-copy">
+        Most scam attempts do not happen once. If you are seeing suspicious messages, links, or requests, more may follow. Check each one before it costs you.
+      </div>
+
+      <div style="margin-top:10px;font-size:13px;color:#d4e2f5;">
+        Built for ongoing protection against scams, phishing, impersonation, and risky payment requests
+      </div>
+
+      <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#d4e2f5;">
+        Unlimited scam checks • Cancel anytime
+      </div>
+
+      <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Protection</button>
+      <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Protection</button>
+      <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Protection</button>
+
+      <div style="margin-top:14px;font-size:13px;color:#d4e2f5;">
+        Secure payments powered by Stripe
+      </div>
+
+      <div class="subscriber-link">
+        <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
+      </div>
     </div>
 
-    <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Protection</button>
-    <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Protection</button>
-    <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Protection</button>
+  </div>
 
-    <div style="margin-top:14px;font-size:13px;color:#6b7280;">
-      Secure payments powered by Stripe
+  <section class="content-section">
+    <div id="contentBridge" class="content-bridge"></div>
+
+    <div class="inline-info-card" id="hubLinkWrap">
+      {{HUB_LINK}}
     </div>
 
-    <div class="subscriber-link">
-      <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
+    <h2 id="contentHeading"></h2>
+    <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
+
+    <div class="link-section">
+      <h3 id="relatedHeading">Check Similar Messages</h3>
+      <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
     </div>
-  </div>
 
-</div>
+    <div class="link-section" id="moreLinksWrap">
+      <h3 id="moreLinksHeading">More Scam Checks</h3>
+      <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+    </div>
 
-<section class="content-section">
-  <div id="contentBridge" class="content-bridge"></div>
+    <div class="content-close">
+      Messages like this are one of the most common ways people lose money, share codes, or hand over access without realizing it. When something feels off, pause and verify it through official sources before taking action.
+    </div>
+  </section>
 
-  <div class="inline-info-card" id="hubLinkWrap">
-    {{HUB_LINK}}
-  </div>
-
-  <h2 id="contentHeading"></h2>
-  <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
-
-  <div class="link-section">
-    <h3 id="relatedHeading">Check Similar Messages</h3>
-    <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
-  </div>
-
-  <div class="link-section" id="moreLinksWrap">
-    <h3 id="moreLinksHeading">More Scam Checks</h3>
-    <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
-  </div>
-
-  <div class="content-close">
-    Messages like this are one of the most common ways people lose money, share codes, or hand over access without realizing it. When something feels off, pause and verify it through official sources before taking action.
-  </div>
-</section>
-
-<footer class="footer">
-  <div>
-    By using this website you agree to our
-    <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
-  </div>
-  <div style="margin-top:10px">
-    Scam Check Now © 2026 • Scam detection and risk analysis tool
-  </div>
-</footer>
+  <footer class="footer">
+    <div>
+      By using this website you agree to our
+      <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
+    </div>
+    <div style="margin-top:10px">
+      Scam Check Now © 2026 • Scam detection and risk analysis tool
+    </div>
+  </footer>
 
 </div>
 
