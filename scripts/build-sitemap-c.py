@@ -96,20 +96,21 @@ def write_discovery_sitemap():
 def write_sitemap_index():
     today = get_today()
 
-    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
-    xml.append('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
-    xml.append("  <sitemap>")
-    xml.append(f"    <loc>{escape(f'{BASE_URL}/{SITEMAP_PAGE_FILE}')}</loc>")
-    xml.append(f"    <lastmod>{today}</lastmod>")
-    xml.append("  </sitemap>")
-    xml.append("  <sitemap>")
-    xml.append(f"    <loc>{escape(f'{BASE_URL}/{SITEMAP_DISCOVERY_FILE}')}</loc>")
-    xml.append(f"    <lastmod>{today}</lastmod>")
-    xml.append("  </sitemap>")
-    xml.append("</sitemapindex>")
+    content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>{escape(f"{BASE_URL}/{SITEMAP_PAGE_FILE}")}</loc>
+    <lastmod>{today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>{escape(f"{BASE_URL}/{SITEMAP_DISCOVERY_FILE}")}</loc>
+    <lastmod>{today}</lastmod>
+  </sitemap>
+</sitemapindex>
+"""
 
     with open(SITEMAP_INDEX_FILE, "w", encoding="utf-8") as f:
-        f.write("\n".join(xml) + "\n")
+        f.write(content)
 
     print(f"✅ Built {SITEMAP_INDEX_FILE}")
 
