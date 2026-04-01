@@ -31,15 +31,17 @@ def get_all_html_urls(directory, base_path):
             relative = os.path.relpath(full_path, directory).replace("\\", "/")
 
             if relative.endswith("index.html"):
-                relative = relative[:-10]
+                relative = relative.replace("/index.html", "")
+                relative = relative.replace("index.html", "")
             else:
-                relative = relative[:-5]
+                relative = relative.replace(".html", "")
 
             relative = relative.strip("/")
 
-            url = f"{BASE_URL}/{base_path}/"
             if relative:
                 url = f"{BASE_URL}/{base_path}/{relative}/"
+            else:
+                url = f"{BASE_URL}/{base_path}/"
 
             urls.append(url)
 
