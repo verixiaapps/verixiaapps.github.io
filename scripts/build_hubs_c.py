@@ -1,5 +1,3 @@
-Use this version:
-
 import os
 from collections import defaultdict
 
