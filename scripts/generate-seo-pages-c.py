@@ -6,7 +6,9 @@ KEYWORD_FILE = "data/keywords_c.txt"
 GENERATED_KEYWORDS_FILE = "data/generated_keywords_c.txt"
 GENERATED_SLUGS_FILE = "data/generated_slugs_c.txt"
 
-OUTPUT_LIMIT = 50
+OUTPUT_LIMIT = int(os.getenv("PAGE_LIMIT", "50"))
+REBUILD_ALL = os.getenv("REBUILD_ALL", "false").lower() == "true"
+
 TEMPLATE_PATH = "templates/seo-template-c.html"
 SITE = "https://verixiaapps.com"
 URL_PREFIX = "/scam-check-now-c"
@@ -20,6 +22,7 @@ def load_file_lines(path):
 
 
 def save_file_lines(path, lines):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         if lines:
             f.write("\n".join(lines) + "\n")
@@ -28,13 +31,22 @@ def save_file_lines(path, lines):
 
 
 def append_file_line(path, line):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
         f.write(line + "\n")
+
+
+def ensure_file_exists(path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    if not os.path.exists(path):
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("")
 
 
 def load_template():
     with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
         return f.read()
+
 
 def slugify(text):
     return (
@@ -79,6 +91,7 @@ def build_internal_links(existing_slugs, current_slug, limit=12):
 
     return "\n".join(links)
 
+
 def build_page(template, keyword, ai_content, related_links, more_links):
     slug = slugify(keyword)
 
@@ -101,12 +114,21 @@ def save_page(slug, html):
     with open(os.path.join(path, "index.html"), "w", encoding="utf-8") as f:
         f.write(html)
 
+
 def main():
+    ensure_file_exists(GENERATED_KEYWORDS_FILE)
+    ensure_file_exists(GENERATED_SLUGS_FILE)
+
     keywords = load_file_lines(KEYWORD_FILE)
+    template = load_template()
+
+    if REBUILD_ALL:
+        print("REBUILD_ALL=true -> resetting generated tracking files")
+        save_file_lines(GENERATED_KEYWORDS_FILE, [])
+        save_file_lines(GENERATED_SLUGS_FILE, [])
+
     generated_keywords = set(load_file_lines(GENERATED_KEYWORDS_FILE))
     generated_slugs = load_file_lines(GENERATED_SLUGS_FILE)
-
-    template = load_template()
 
     if not keywords:
         print("No keywords found.")
@@ -120,12 +142,15 @@ def main():
             remaining_keywords.append(keyword)
             continue
 
-        if keyword in generated_keywords:
+        if not REBUILD_ALL and keyword in generated_keywords:
             continue
 
         slug = slugify(keyword)
 
-        if not slug or slug in generated_slugs:
+        if not slug:
+            continue
+
+        if not REBUILD_ALL and slug in generated_slugs:
             continue
 
         try:
@@ -145,11 +170,13 @@ def main():
 
             save_page(slug, html)
 
-            append_file_line(GENERATED_KEYWORDS_FILE, keyword)
-            append_file_line(GENERATED_SLUGS_FILE, slug)
+            if keyword not in generated_keywords:
+                append_file_line(GENERATED_KEYWORDS_FILE, keyword)
+                generated_keywords.add(keyword)
 
-            generated_keywords.add(keyword)
-            generated_slugs.append(slug)
+            if slug not in generated_slugs:
+                append_file_line(GENERATED_SLUGS_FILE, slug)
+                generated_slugs.append(slug)
 
             count += 1
 
