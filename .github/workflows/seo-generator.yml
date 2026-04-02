@@ -1,6 +1,6 @@
 name: SEO Page Generator Auto
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       manual_daily_limit:
@@ -110,6 +110,12 @@ jobs:
       - name: Set effective limits
         id: limits
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_MANUAL_DAILY_LIMIT: ${{ github.event.inputs.manual_daily_limit }}
+          INPUT_FULL_REBUILD: ${{ github.event.inputs.full_rebuild }}
+          INPUT_REBUILD_DAILY_LIMIT: ${{ github.event.inputs.rebuild_daily_limit }}
+          INPUT_REBUILD_BATCH_SIZE: ${{ github.event.inputs.rebuild_batch_size }}
         run: |
           set -euo pipefail
 
@@ -118,17 +124,21 @@ jobs:
           REBUILD_BATCH_SIZE="50"
           REBUILD_ALL_REMAINING="false"
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            MANUAL_DAILY_LIMIT="${{ github.event.inputs.manual_daily_limit || '' }}"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            MANUAL_DAILY_LIMIT="${INPUT_MANUAL_DAILY_LIMIT:-}"
 
             if [ -n "$MANUAL_DAILY_LIMIT" ]; then
               EFFECTIVE_DAILY_LIMIT="$MANUAL_DAILY_LIMIT"
             fi
 
-            if [ "${{ github.event.inputs.full_rebuild || 'false' }}" = "true" ]; then
+            if [ "${INPUT_FULL_REBUILD:-false}" = "true" ]; then
               FULL_REBUILD="true"
-              REBUILD_BATCH_SIZE="${{ github.event.inputs.rebuild_batch_size || '50' }}"
-              REBUILD_DAILY_LIMIT="${{ github.event.inputs.rebuild_daily_limit || '' }}"
+
+              if [ -n "${INPUT_REBUILD_BATCH_SIZE:-}" ]; then
+                REBUILD_BATCH_SIZE="$INPUT_REBUILD_BATCH_SIZE"
+              fi
+
+              REBUILD_DAILY_LIMIT="${INPUT_REBUILD_DAILY_LIMIT:-}"
 
               if [ -n "$REBUILD_DAILY_LIMIT" ]; then
                 EFFECTIVE_DAILY_LIMIT="$REBUILD_DAILY_LIMIT"
@@ -544,4 +554,4 @@ PY
         shell: bash
         run: |
           set -euo pipefail
-          rm -f "$RUNNER_TEMP/current_batch_slugs.txt" 
+          rm -f "$RUNNER_TEMP/current_batch_slugs.txt"
