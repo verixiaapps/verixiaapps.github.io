@@ -102,7 +102,7 @@ jobs:
           git reset --hard origin/main
           git clean -fd
 
-      - name: Validate max URLs input
+      - name: Validate inputs
         shell: bash
         run: |
           set -euo pipefail
@@ -111,6 +111,22 @@ jobs:
             echo "Invalid MAX_URLS_TO_REFRESH: $MAX_URLS_TO_REFRESH"
             exit 1
           fi
+
+          case "$TARGET_TEMPLATE" in
+            a|b|c|all) ;;
+            *)
+              echo "Invalid TARGET_TEMPLATE: $TARGET_TEMPLATE"
+              exit 1
+              ;;
+          esac
+
+          case "$REFRESH_SCOPE" in
+            pages|internal-links|metadata|mixed) ;;
+            *)
+              echo "Invalid REFRESH_SCOPE: $REFRESH_SCOPE"
+              exit 1
+              ;;
+          esac
 
       - name: Ensure isolated workflow directories exist
         shell: bash
@@ -123,11 +139,20 @@ jobs:
 
           touch "$GSC_STATE_DIR/.gitkeep"
 
-      - name: Run isolated GSC refresh script
+      - name: Ensure refresh script exists
         shell: bash
         run: |
           set -euo pipefail
 
+          if [ ! -f "scripts/gsc_refresh_isolated.py" ]; then
+            echo "Missing script: scripts/gsc_refresh_isolated.py"
+            exit 1
+          fi
+
+      - name: Run isolated GSC refresh script
+        shell: bash
+        run: |
+          set -euo pipefail
           python scripts/gsc_refresh_isolated.py
         env:
           TARGET_TEMPLATE: ${{ env.TARGET_TEMPLATE }}
