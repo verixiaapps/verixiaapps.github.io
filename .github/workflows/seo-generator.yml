@@ -1,5 +1,3 @@
-Use this revised version:
-
 name: SEO Page Generator Auto
 
 on:
@@ -216,7 +214,7 @@ jobs:
           git status --short
 
       - name: Commit generated pages and sitemap
-        if: always()
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -231,7 +229,7 @@ jobs:
           git commit -m "Auto SEO generation + hub update + sitemap update"
 
       - name: Rebase on latest main before push
-        if: always()
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -246,7 +244,7 @@ jobs:
           git pull --rebase origin main
 
       - name: Push generated pages and sitemap
-        if: always()
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
