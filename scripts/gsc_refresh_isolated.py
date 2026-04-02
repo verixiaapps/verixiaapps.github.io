@@ -1,5 +1,3 @@
-Yes — add a TARGET_SLUG env input so you can test one exact page first, and if it is blank it will run the full today list.
-
 import os
 import re
 from typing import List, Optional
