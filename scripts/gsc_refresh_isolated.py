@@ -1,5 +1,6 @@
 import os
 import re
+import html
 from typing import List, Optional, Set
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
@@ -166,11 +167,8 @@ def get_target_files() -> List[str]:
     files: List[str] = []
     seen: Set[str] = set()
 
-    target_dirs = get_target_dirs()
-    target_slugs = get_target_slugs()
-
-    for base_dir in target_dirs:
-        for slug in target_slugs:
+    for base_dir in get_target_dirs():
+        for slug in get_target_slugs():
             candidate = os.path.join(base_dir, slug, "index.html")
             normalized_candidate = candidate.replace("\\", "/")
             if (
@@ -225,10 +223,48 @@ def build_content_bridge(slug: str) -> str:
     )
 
 
+def build_internal_link_targets(slug: str) -> List[str]:
+    category_keywords = [part for part in slug.split("-") if part and part not in STRIP_WORDS]
+    preferred: List[str] = []
+    fallback: List[str] = []
+
+    for candidate in TODAY_TARGET_SLUGS:
+        if candidate == slug:
+            continue
+
+        if any(keyword in candidate for keyword in category_keywords[:3]):
+            preferred.append(candidate)
+        else:
+            fallback.append(candidate)
+
+    ordered = preferred + fallback
+    return ordered[:10]
+
+
+def build_link_items_html(slugs: List[str]) -> str:
+    items = []
+    for slug in slugs:
+        href = f"/{slug}/"
+        label = slug_to_topic_phrase(slug)
+        items.append(f'<li><a href="{html.escape(href, quote=True)}">{html.escape(label)}</a></li>')
+    return "".join(items)
+
+
+def replace_list_by_id(content: str, list_id: str, items_html: str) -> str:
+    pattern = rf'(<ul\s+id="{re.escape(list_id)}"\s+class="related-links">)(.*?)(</ul>)'
+    return re.sub(
+        pattern,
+        lambda match: f"{match.group(1)}{items_html}{match.group(3)}",
+        content,
+        count=1,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
+
 def replace_title(content: str, new_title: str) -> str:
     return re.sub(
         r"<title>.*?</title>",
-        f"<title>{new_title}</title>",
+        f"<title>{html.escape(new_title)}</title>",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -238,7 +274,7 @@ def replace_title(content: str, new_title: str) -> str:
 def replace_meta_description(content: str, new_description: str) -> str:
     return re.sub(
         r'<meta\s+name="description"\s+content=".*?">',
-        f'<meta name="description" content="{new_description}">',
+        f'<meta name="description" content="{html.escape(new_description, quote=True)}">',
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -248,7 +284,7 @@ def replace_meta_description(content: str, new_description: str) -> str:
 def replace_answer_summary(content: str, new_text: str) -> str:
     return re.sub(
         r'(<p\s+id="answerSummary">)(.*?)(</p>)',
-        lambda match: f"{match.group(1)}{new_text}{match.group(3)}",
+        lambda match: f"{match.group(1)}{html.escape(new_text)}{match.group(3)}",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -258,11 +294,21 @@ def replace_answer_summary(content: str, new_text: str) -> str:
 def replace_content_bridge(content: str, new_text: str) -> str:
     return re.sub(
         r'(<div\s+id="contentBridge"\s+class="content-bridge">)(.*?)(</div>)',
-        lambda match: f"{match.group(1)}{new_text}{match.group(3)}",
+        lambda match: f"{match.group(1)}{html.escape(new_text)}{match.group(3)}",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
     )
+
+
+def update_internal_links(content: str, slug: str) -> str:
+    targets = build_internal_link_targets(slug)
+    related_items = build_link_items_html(targets[:5])
+    more_items = build_link_items_html(targets[5:10])
+
+    updated = replace_list_by_id(content, "relatedLinks", related_items)
+    updated = replace_list_by_id(updated, "moreLinks", more_items)
+    return updated
 
 
 def process_file(path: str) -> bool:
@@ -283,6 +329,7 @@ def process_file(path: str) -> bool:
     updated = replace_meta_description(updated, build_description(slug))
     updated = replace_answer_summary(updated, build_answer_summary(slug))
     updated = replace_content_bridge(updated, build_content_bridge(slug))
+    updated = update_internal_links(updated, slug)
 
     if updated == original:
         print(f"NO CHANGE: {path}")
