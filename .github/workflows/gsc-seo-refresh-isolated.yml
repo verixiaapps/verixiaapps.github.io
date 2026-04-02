@@ -1,225 +1,365 @@
-name: GSC SEO Refresh Isolated
+Use this cleaned version:
 
-on:
-  workflow_dispatch:
-    inputs:
-      target_template:
-        description: "Which template set to refresh"
-        required: true
-        default: "a"
-        type: choice
-        options:
-          - a
-          - b
-          - c
-          - all
-      target_slug:
-        description: "Optional exact slug to refresh for testing. Leave blank to run today's full GSC target list."
-        required: false
-        default: ""
-        type: string
-      refresh_scope:
-        description: "What kind of GSC optimization refresh to run"
-        required: true
-        default: "pages"
-        type: choice
-        options:
-          - pages
-          - internal-links
-          - metadata
-          - mixed
-      max_urls_to_refresh:
-        description: "Unused by current script. Safe to leave as-is for now."
-        required: true
-        default: "100"
-        type: string
-      dry_run:
-        description: "Run without committing changes"
-        required: true
-        default: false
-        type: boolean
-      commit_message:
-        description: "Optional custom commit message"
-        required: false
-        default: ""
-        type: string
+import os
+import html
+from typing import List, Set
 
-permissions:
-  contents: write
+TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
+REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "metadata").strip().lower()
+MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "1"))
+DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
-concurrency:
-  group: gsc-seo-refresh-isolated
-  cancel-in-progress: false
+TEMPLATE_PATHS = {
+    "a": "scam-check-now",
+    "b": "scam-check-now-b",
+    "c": "scam-check-now-c",
+}
 
-jobs:
-  refresh:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+TODAY_TARGET_SLUGS = [
+    "is-amazon-refund-message-legit-or-scam",
+    "is-google-account-disabled-email-legit-or-scam",
+    "is-fedex-customs-charge-email-legit-or-scam",
+    "is-venmo-verification-code-text-real-or-fake",
+    "is-bank-debit-card-suspension-email-legit-or-scam",
+    "is-whatsapp-unusual-login-email-legit-or-scam",
+    "is-telegram-suspicious-activity-message-legit-or-scam",
+    "is-usps-tracking-text-legit-or-scam",
+    "is-venmo-security-alert-email-legit-or-scam",
+    "is-bank-account-closure-email-legit-or-scam",
+    "is-apple-account-verification-email-legit-or-scam",
+    "snapchat-scams",
+    "is-fedex-delivery-legit-or-scam",
+    "is-security-alert-message-legit-or-scam",
+]
 
-    env:
-      GSC_REFRESH_ROOT: "gsc-refresh"
-      GSC_INPUT_DIR: "gsc-refresh/input"
-      GSC_OUTPUT_DIR: "gsc-refresh/output"
-      GSC_STATE_DIR: "gsc-refresh/state"
-      DEFAULT_COMMIT_MESSAGE: "Isolated GSC SEO refresh"
-      TARGET_TEMPLATE: ${{ inputs.target_template }}
-      TARGET_SLUG: ${{ inputs.target_slug }}
-      REFRESH_SCOPE: ${{ inputs.refresh_scope }}
-      MAX_URLS_TO_REFRESH: ${{ inputs.max_urls_to_refresh }}
-      DRY_RUN: ${{ inputs.dry_run }}
+SPECIAL_REPLACEMENTS = {
+    "usps": "USPS",
+    "ups": "UPS",
+    "fedex": "FedEx",
+    "amazon": "Amazon",
+    "google": "Google",
+    "apple": "Apple",
+    "id": "ID",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram",
+    "snapchat": "Snapchat",
+    "venmo": "Venmo",
+    "paypal": "PayPal",
+    "zelle": "Zelle",
+}
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
+STRIP_WORDS = {
+    "is",
+    "this",
+    "a",
+    "an",
+    "the",
+    "or",
+    "and",
+    "legit",
+    "scam",
+    "real",
+    "fake",
+}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+LOWERCASE_LINK_WORDS = {"a", "an", "and", "or", "the"}
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
+TITLE_MAP = {
+    "is-amazon-refund-message-legit-or-scam": "Amazon Refund Message Scam? Warning Signs and What to Do",
+    "is-google-account-disabled-email-legit-or-scam": "Google Account Disabled Email Scam? How to Spot the Warning Signs",
+    "is-fedex-customs-charge-email-legit-or-scam": "FedEx Customs Charge Email Scam? What to Check First",
+    "is-venmo-verification-code-text-real-or-fake": "Venmo Verification Code Text Scam? Real or Fake Warning Signs",
+    "is-bank-debit-card-suspension-email-legit-or-scam": "Bank Debit Card Suspension Email Scam? Warning Signs and What to Do",
+    "is-whatsapp-unusual-login-email-legit-or-scam": "WhatsApp Unusual Login Email Scam? How to Check Safely",
+    "is-telegram-suspicious-activity-message-legit-or-scam": "Telegram Suspicious Activity Message Scam? Warning Signs and What to Do",
+    "is-usps-tracking-text-legit-or-scam": "USPS Tracking Text Scam? What to Check Before You Click",
+    "is-venmo-security-alert-email-legit-or-scam": "Venmo Security Alert Email Scam? How to Spot the Warning Signs",
+    "is-bank-account-closure-email-legit-or-scam": "Bank Account Closure Email Scam? Warning Signs and What to Do",
+    "is-apple-account-verification-email-legit-or-scam": "Apple Account Verification Email Scam? How to Spot the Warning Signs",
+    "snapchat-scams": "Snapchat Scams: Common Warning Signs and What to Do",
+    "is-fedex-delivery-legit-or-scam": "FedEx Delivery Message Scam? What to Check First",
+    "is-security-alert-message-legit-or-scam": "Security Alert Message Scam? Warning Signs and What to Do",
+}
 
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            pip install requests
-          fi
+DESCRIPTION_MAP = {
+    "is-amazon-refund-message-legit-or-scam": "Got an Amazon refund message? Learn the scam warning signs, suspicious link risks, and what to do before you click, reply, or send information.",
+    "is-google-account-disabled-email-legit-or-scam": "Received a Google account disabled email? Learn the warning signs of fake account alerts and how to verify the message safely.",
+    "is-fedex-customs-charge-email-legit-or-scam": "Got a FedEx customs charge email? Review the scam signs, payment risks, and what to do before clicking or paying anything.",
+    "is-venmo-verification-code-text-real-or-fake": "Received a Venmo verification code text? Learn how to spot scam signs, fake urgency, and risky requests before taking action.",
+    "is-bank-debit-card-suspension-email-legit-or-scam": "Received a bank debit card suspension email? Learn the common warning signs, suspicious link risks, and how to verify it safely.",
+    "is-whatsapp-unusual-login-email-legit-or-scam": "Got a WhatsApp unusual login email? Review the scam warning signs and what to do before you click or share information.",
+    "is-telegram-suspicious-activity-message-legit-or-scam": "Received a Telegram suspicious activity message? Learn the warning signs of fake security alerts and risky login links.",
+    "is-usps-tracking-text-legit-or-scam": "Got a USPS tracking text? Review the scam warning signs, fake tracking link risks, and what to do before clicking.",
+    "is-venmo-security-alert-email-legit-or-scam": "Received a Venmo security alert email? Learn the warning signs of fake account alerts and how to verify it safely.",
+    "is-bank-account-closure-email-legit-or-scam": "Got a bank account closure email? Review the scam warning signs, suspicious link risks, and what to do before taking action.",
+    "is-apple-account-verification-email-legit-or-scam": "Received an Apple account verification email? Learn the scam signs, suspicious link risks, and how to verify it safely.",
+    "snapchat-scams": "Learn common Snapchat scam warning signs, fake account risks, and what to do before replying, clicking, or sharing information.",
+    "is-fedex-delivery-legit-or-scam": "Got a FedEx delivery message? Review the scam signs, fake tracking link risks, and what to do before clicking.",
+    "is-security-alert-message-legit-or-scam": "Received a security alert message? Learn the warning signs of fake alerts, suspicious links, and what to do next.",
+}
 
-      - name: Configure git
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config --global user.name "gsc-refresh-bot"
-          git config --global user.email "bot@users.noreply.github.com"
 
-      - name: Sync latest main before run
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-          git clean -fd
+def get_target_dirs() -> List[str]:
+    if TARGET_TEMPLATE == "all":
+        return [TEMPLATE_PATHS["a"], TEMPLATE_PATHS["b"], TEMPLATE_PATHS["c"]]
+    if TARGET_TEMPLATE not in TEMPLATE_PATHS:
+        raise ValueError(f"Invalid TARGET_TEMPLATE: {TARGET_TEMPLATE}")
+    return [TEMPLATE_PATHS[TARGET_TEMPLATE]]
 
-      - name: Validate inputs
-        shell: bash
-        run: |
-          set -euo pipefail
 
-          if ! [[ "$MAX_URLS_TO_REFRESH" =~ ^[0-9]+$ ]] || [ "$MAX_URLS_TO_REFRESH" -le 0 ]; then
-            echo "Invalid MAX_URLS_TO_REFRESH: $MAX_URLS_TO_REFRESH"
-            exit 1
-          fi
+def get_target_slugs() -> List[str]:
+    if MAX_URLS <= 0:
+        raise ValueError(f"Invalid MAX_URLS_TO_REFRESH: {MAX_URLS}")
+    return TODAY_TARGET_SLUGS[:MAX_URLS]
 
-          case "$TARGET_TEMPLATE" in
-            a|b|c|all) ;;
-            *)
-              echo "Invalid TARGET_TEMPLATE: $TARGET_TEMPLATE"
-              exit 1
-              ;;
-          esac
 
-          case "$REFRESH_SCOPE" in
-            pages|internal-links|metadata|mixed) ;;
-            *)
-              echo "Invalid REFRESH_SCOPE: $REFRESH_SCOPE"
-              exit 1
-              ;;
-          esac
+def is_allowed_seo_page(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized.startswith("scam-check-now/")
+        or normalized.startswith("scam-check-now-b/")
+        or normalized.startswith("scam-check-now-c/")
+    ) and normalized.endswith("/index.html")
 
-      - name: Ensure isolated workflow directories exist
-        shell: bash
-        run: |
-          set -euo pipefail
 
-          mkdir -p "$GSC_INPUT_DIR"
-          mkdir -p "$GSC_OUTPUT_DIR"
-          mkdir -p "$GSC_STATE_DIR"
+def slug_from_path(path: str) -> str | None:
+    normalized = path.replace("\\", "/").strip("/")
+    parts = normalized.split("/")
+    if len(parts) < 2:
+        return None
+    return parts[-2].strip() or None
 
-          touch "$GSC_STATE_DIR/.gitkeep"
 
-      - name: Ensure refresh script exists
-        shell: bash
-        run: |
-          set -euo pipefail
+def get_target_files() -> List[str]:
+    files: List[str] = []
+    seen: Set[str] = set()
 
-          if [ ! -f "scripts/gsc_refresh_isolated.py" ]; then
-            echo "Missing script: scripts/gsc_refresh_isolated.py"
-            exit 1
-          fi
+    for base_dir in get_target_dirs():
+        for slug in get_target_slugs():
+            candidate = os.path.join(base_dir, slug, "index.html")
+            normalized_candidate = candidate.replace("\\", "/")
+            if (
+                os.path.exists(candidate)
+                and is_allowed_seo_page(candidate)
+                and normalized_candidate not in seen
+            ):
+                files.append(candidate)
+                seen.add(normalized_candidate)
 
-      - name: Run isolated GSC refresh script
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/gsc_refresh_isolated.py
-        env:
-          TARGET_TEMPLATE: ${{ env.TARGET_TEMPLATE }}
-          TARGET_SLUG: ${{ env.TARGET_SLUG }}
-          REFRESH_SCOPE: ${{ env.REFRESH_SCOPE }}
-          MAX_URLS_TO_REFRESH: ${{ env.MAX_URLS_TO_REFRESH }}
-          GSC_INPUT_DIR: ${{ env.GSC_INPUT_DIR }}
-          GSC_OUTPUT_DIR: ${{ env.GSC_OUTPUT_DIR }}
-          GSC_STATE_DIR: ${{ env.GSC_STATE_DIR }}
-          DRY_RUN: ${{ env.DRY_RUN }}
+    return files
 
-      - name: Show changed files
-        shell: bash
-        run: |
-          set -euo pipefail
-          git status --short
 
-      - name: Stop on dry run
-        if: inputs.dry_run == true
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Dry run complete. No commit or push performed."
+def humanize_word(word: str) -> str:
+    lower = word.lower()
+    if lower in SPECIAL_REPLACEMENTS:
+        return SPECIAL_REPLACEMENTS[lower]
+    return lower.capitalize()
 
-      - name: Commit isolated GSC refresh changes
-        if: inputs.dry_run != true
-        shell: bash
-        run: |
-          set -euo pipefail
 
-          git add -A
+def slug_to_topic_phrase(slug: str) -> str:
+    words = [w for w in slug.split("-") if w]
+    cleaned = [humanize_word(w) for w in words if w.lower() not in STRIP_WORDS]
+    if not cleaned:
+        cleaned = [humanize_word(w) for w in words]
+    return " ".join(cleaned).strip() or "Suspicious message"
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
 
-          FINAL_COMMIT_MESSAGE="${{ inputs.commit_message }}"
+def slug_to_question_label(slug: str) -> str:
+    if slug == "snapchat-scams":
+        return "Snapchat Scams"
 
-          if [ -z "$FINAL_COMMIT_MESSAGE" ]; then
-            if [ -n "$TARGET_SLUG" ]; then
-              FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=${TARGET_TEMPLATE} | slug=${TARGET_SLUG}"
-            else
-              FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=${TARGET_TEMPLATE} | scope=${REFRESH_SCOPE}"
-            fi
-          fi
+    words = [w for w in slug.split("-") if w]
+    rendered: List[str] = []
 
-          git commit -m "$FINAL_COMMIT_MESSAGE"
+    for index, word in enumerate(words):
+        lower = word.lower()
+        if lower in SPECIAL_REPLACEMENTS:
+            rendered.append(SPECIAL_REPLACEMENTS[lower])
+        elif index == 0 and lower == "is":
+            rendered.append("Is")
+        elif lower in LOWERCASE_LINK_WORDS:
+            rendered.append(lower)
+        elif lower == "scam":
+            rendered.append("Scam")
+        else:
+            rendered.append(lower.capitalize())
 
-      - name: Rebase on latest main and push
-        if: inputs.dry_run != true
-        shell: bash
-        run: |
-          set -euo pipefail
+    label = " ".join(rendered).strip()
+    if label.startswith("Is ") and not label.endswith("?"):
+        label = f"{label}?"
+    label = label.replace(" Legit Or Scam?", " Legit or a Scam?")
+    label = label.replace(" Real Or Fake?", " Real or Fake?")
+    label = label.replace(" Legit Or Scam", " Legit or a Scam")
+    label = label.replace(" Real Or Fake", " Real or Fake")
+    return label
 
-          git fetch origin main
 
-          if [ -z "$(git log origin/main..HEAD --oneline 2>/dev/null || true)" ]; then
-            echo "No local commit to push"
-            exit 0
-          fi
+def build_title(slug: str) -> str:
+    return TITLE_MAP.get(slug, f"{slug_to_topic_phrase(slug)} Scam? Warning Signs and What to Do")
 
-          git rebase origin/main
-          git push origin HEAD:main
+
+def build_description(slug: str) -> str:
+    return DESCRIPTION_MAP.get(
+        slug,
+        f"Check whether {slug_to_topic_phrase(slug)} is a scam. Review warning signs, suspicious link risks, and what to do before acting.",
+    )
+
+
+def build_internal_link_targets(slug: str) -> List[str]:
+    category_keywords = [part for part in slug.split("-") if part and part not in STRIP_WORDS]
+    preferred: List[str] = []
+    fallback: List[str] = []
+
+    for candidate in TODAY_TARGET_SLUGS:
+        if candidate == slug:
+            continue
+        if any(keyword in candidate for keyword in category_keywords[:3]):
+            preferred.append(candidate)
+        else:
+            fallback.append(candidate)
+
+    return (preferred + fallback)[:10]
+
+
+def build_link_items_html(slugs: List[str]) -> str:
+    items: List[str] = []
+    for target_slug in slugs:
+        href = f"/{target_slug}/"
+        label = slug_to_question_label(target_slug)
+        items.append(
+            f'<li><a href="{html.escape(href, quote=True)}">{html.escape(label)}</a></li>'
+        )
+    return "".join(items)
+
+
+def replace_title(content: str, new_title: str) -> str:
+    import re
+
+    return re.sub(
+        r"<title>.*?</title>",
+        f"<title>{html.escape(new_title)}</title>",
+        content,
+        count=1,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
+
+def replace_meta_description(content: str, new_description: str) -> str:
+    import re
+
+    return re.sub(
+        r'<meta[^>]*name=["\']description["\'][^>]*content=["\'].*?["\'][^>]*>',
+        f'<meta name="description" content="{html.escape(new_description, quote=True)}">',
+        content,
+        count=1,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
+
+def replace_list_by_id(content: str, list_id: str, items_html: str) -> str:
+    import re
+
+    patterns = [
+        rf'(<ul[^>]*id="{re.escape(list_id)}"[^>]*>)(.*?)(</ul>)',
+        rf"(<ul[^>]*id='{re.escape(list_id)}'[^>]*>)(.*?)(</ul>)",
+    ]
+
+    updated = content
+    for pattern in patterns:
+        updated, count = re.subn(
+            pattern,
+            lambda match: f"{match.group(1)}{items_html}{match.group(3)}",
+            updated,
+            count=1,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        if count:
+            return updated
+    return updated
+
+
+def update_internal_links_only(content: str, slug: str) -> str:
+    targets = build_internal_link_targets(slug)
+    updated = replace_list_by_id(content, "relatedLinks", build_link_items_html(targets[:5]))
+    updated = replace_list_by_id(updated, "moreLinks", build_link_items_html(targets[5:10]))
+    return updated
+
+
+def normalize_whitespace(content: str) -> str:
+    import re
+
+    return re.sub(r"\n{3,}", "\n\n", content).strip() + "\n"
+
+
+def should_update_metadata_only() -> bool:
+    return REFRESH_SCOPE == "metadata"
+
+
+def should_update_internal_links_only() -> bool:
+    return REFRESH_SCOPE == "internal-links"
+
+
+def process_file(path: str) -> bool:
+    if not is_allowed_seo_page(path):
+        print(f"SKIPPED (not allowed): {path}")
+        return False
+
+    slug = slug_from_path(path)
+    if not slug:
+        print(f"SKIPPED (no slug): {path}")
+        return False
+
+    with open(path, "r", encoding="utf-8") as file:
+        original = file.read()
+
+    if should_update_metadata_only():
+        updated = original
+        updated = replace_title(updated, build_title(slug))
+        updated = replace_meta_description(updated, build_description(slug))
+        updated = normalize_whitespace(updated)
+    elif should_update_internal_links_only():
+        updated = update_internal_links_only(original, slug)
+        updated = normalize_whitespace(updated)
+    else:
+        raise ValueError(f"Invalid REFRESH_SCOPE: {REFRESH_SCOPE}")
+
+    if updated == original:
+        print(f"NO CHANGE: {path}")
+        return False
+
+    print(f"UPDATED: {path}")
+
+    if not DRY_RUN:
+        with open(path, "w", encoding="utf-8") as file:
+            file.write(updated)
+
+    return True
+
+
+def main() -> None:
+    if REFRESH_SCOPE not in {"metadata", "internal-links"}:
+        raise ValueError(f"Invalid REFRESH_SCOPE: {REFRESH_SCOPE}")
+
+    target_files = get_target_files()
+
+    if not target_files:
+        print("No matching GSC target SEO pages found.")
+        return
+
+    print(f"TARGET_TEMPLATE={TARGET_TEMPLATE}")
+    print(f"REFRESH_SCOPE={REFRESH_SCOPE}")
+    print(f"MAX_URLS_TO_REFRESH={MAX_URLS}")
+    print(f"DRY_RUN={DRY_RUN}")
+    print(f"Processing {len(target_files)} exact GSC target SEO pages...")
+
+    updated_count = 0
+    for file_path in target_files:
+        if process_file(file_path):
+            updated_count += 1
+
+    print(f"Updated {updated_count} file(s).")
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()
