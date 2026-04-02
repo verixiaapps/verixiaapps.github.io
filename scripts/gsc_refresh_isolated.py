@@ -12,7 +12,7 @@ TEMPLATE_PATHS = {
     "a": "scam-check-now",
     "b": "scam-check-now-b",
     "c": "scam-check-now-c",
-}
+} 
 
 TODAY_TARGET_SLUGS = [
     "is-amazon-refund-message-legit-or-scam",
