@@ -1,5 +1,3 @@
-Use this cleaned version:
-
 import os
 import html
 from typing import List, Set
