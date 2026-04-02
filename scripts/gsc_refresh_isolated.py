@@ -3,14 +3,14 @@ import re
 from typing import List, Optional
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
-TARGET_SLUG = os.getenv("TARGET_SLUG", "").strip().lower()
+MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "1"))
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
 TEMPLATE_PATHS = {
     "a": "scam-check-now",
     "b": "scam-check-now-b",
     "c": "scam-check-now-c",
-} 
+}
 
 TODAY_TARGET_SLUGS = [
     "is-amazon-refund-message-legit-or-scam",
@@ -71,9 +71,9 @@ def get_target_dirs() -> List[str]:
 
 
 def get_target_slugs() -> List[str]:
-    if TARGET_SLUG:
-        return [TARGET_SLUG]
-    return TODAY_TARGET_SLUGS
+    if MAX_URLS <= 0:
+        raise ValueError(f"Invalid MAX_URLS_TO_REFRESH: {MAX_URLS}")
+    return TODAY_TARGET_SLUGS[:MAX_URLS]
 
 
 def is_allowed_seo_page(path: str) -> bool:
@@ -97,11 +97,9 @@ def slug_from_path(path: str) -> Optional[str]:
 def get_target_files() -> List[str]:
     files: List[str] = []
     seen = set()
-    target_dirs = get_target_dirs()
-    target_slugs = get_target_slugs()
 
-    for base_dir in target_dirs:
-        for slug in target_slugs:
+    for base_dir in get_target_dirs():
+        for slug in get_target_slugs():
             candidate = os.path.join(base_dir, slug, "index.html")
             normalized_candidate = candidate.replace("\\", "/")
             if (
@@ -291,14 +289,12 @@ def process_file(path: str) -> None:
 def main() -> None:
     target_files = get_target_files()
 
-    if TARGET_SLUG:
-        print(f"TARGET_SLUG={TARGET_SLUG}")
-
     if not target_files:
         print("No matching GSC target SEO pages found.")
         return
 
     print(f"TARGET_TEMPLATE={TARGET_TEMPLATE}")
+    print(f"MAX_URLS_TO_REFRESH={MAX_URLS}")
     print(f"DRY_RUN={DRY_RUN}")
     print(f"Processing {len(target_files)} exact GSC target SEO pages...")
 
