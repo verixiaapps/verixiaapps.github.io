@@ -454,43 +454,49 @@ jobs:
               rm -rf "$OUTPUT_DIR/$slug"
             done < "$RUNNER_TEMP/current_batch_slugs.txt"
 
-            python << 'PY'
-import os
+            if [ ! -f "$GENERATED_SLUGS_FILE" ] || [ ! -f "$GENERATED_KEYWORDS_FILE" ]; then
+              echo "Generated tracking files missing during rebuild."
+              exit 1
+            fi
 
-current_batch_slugs_path = os.path.join(os.environ["RUNNER_TEMP"], "current_batch_slugs.txt")
-generated_slugs_file = os.environ["GENERATED_SLUGS_FILE"]
-generated_keywords_file = os.environ["GENERATED_KEYWORDS_FILE"]
-protected_slug = os.environ["PROTECTED_SLUG"]
+            if [ "$(wc -l < "$GENERATED_SLUGS_FILE" | tr -d ' ')" -ne "$(wc -l < "$GENERATED_KEYWORDS_FILE" | tr -d ' ')" ]; then
+              echo "generated_slugs.txt and generated_keywords.txt are not line-aligned."
+              exit 1
+            fi
 
-with open(current_batch_slugs_path, "r", encoding="utf-8") as f:
-    current_batch_slugs = {
-        line.strip() for line in f
-        if line.strip() and line.strip() != protected_slug
-    }
+            paste "$GENERATED_SLUGS_FILE" "$GENERATED_KEYWORDS_FILE" > "$RUNNER_TEMP/generated_pairs.tsv"
 
-with open(generated_slugs_file, "r", encoding="utf-8") as f:
-    all_slugs = [line.rstrip("\n") for line in f]
+            awk -F '\t' '
+              NR==FNR {
+                drop[$0]=1
+                next
+              }
+              !($1 in drop) {
+                print $1 >> slugs_out
+                print $2 >> keywords_out
+              }
+            ' \
+              "$RUNNER_TEMP/current_batch_slugs.txt" \
+              slugs_out="$RUNNER_TEMP/generated_slugs_kept.txt" \
+              keywords_out="$RUNNER_TEMP/generated_keywords_kept.txt" \
+              "$RUNNER_TEMP/generated_pairs.tsv"
 
-with open(generated_keywords_file, "r", encoding="utf-8") as f:
-    all_keywords = [line.rstrip("\n") for line in f]
+            : > "$RUNNER_TEMP/generated_slugs_kept.txt"
+            : > "$RUNNER_TEMP/generated_keywords_kept.txt"
 
-if len(all_slugs) != len(all_keywords):
-    raise SystemExit("generated_slugs.txt and generated_keywords.txt are not line-aligned.")
+            awk -F '\t' -v slugs_out="$RUNNER_TEMP/generated_slugs_kept.txt" -v keywords_out="$RUNNER_TEMP/generated_keywords_kept.txt" '
+              NR==FNR {
+                drop[$0]=1
+                next
+              }
+              !($1 in drop) {
+                print $1 >> slugs_out
+                print $2 >> keywords_out
+              }
+            ' "$RUNNER_TEMP/current_batch_slugs.txt" "$RUNNER_TEMP/generated_pairs.tsv"
 
-kept_pairs = [
-    (slug, keyword)
-    for slug, keyword in zip(all_slugs, all_keywords)
-    if slug not in current_batch_slugs
-]
-
-with open(generated_slugs_file, "w", encoding="utf-8") as f:
-    for slug, _ in kept_pairs:
-        f.write(slug + "\n")
-
-with open(generated_keywords_file, "w", encoding="utf-8") as f:
-    for _, keyword in kept_pairs:
-        f.write(keyword + "\n")
-PY
+            mv "$RUNNER_TEMP/generated_slugs_kept.txt" "$GENERATED_SLUGS_FILE"
+            mv "$RUNNER_TEMP/generated_keywords_kept.txt" "$GENERATED_KEYWORDS_FILE"
 
             DAILY_LIMIT="$current_batch_size" python scripts/build_seo_incremental.py
             python scripts/build_hubs.py
@@ -554,4 +560,7 @@ PY
         shell: bash
         run: |
           set -euo pipefail
-          rm -f "$RUNNER_TEMP/current_batch_slugs.txt"
+          rm -f "$RUNNER_TEMP/current_batch_slugs.txt" \
+                "$RUNNER_TEMP/generated_pairs.tsv" \
+                "$RUNNER_TEMP/generated_slugs_kept.txt" \
+                "$RUNNER_TEMP/generated_keywords_kept.txt"
