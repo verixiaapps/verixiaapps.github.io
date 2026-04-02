@@ -35,15 +35,24 @@ jobs:
               sys.exit(1)
 
           def fix_content(content: str) -> str:
+              # Fix duplicated visible text inside anchor/body text
               content = re.sub(
-                  r"Related scam category\s*([^\n<]+)",
-                  r"Related scam category: \1",
+                  r"(>?)Related scam category:?\s*Related scam category\s*",
+                  r"\1Related scam category: ",
                   content,
               )
 
+              # Fix glued form like "Related scam categoryCrypto Scam Hub"
               content = re.sub(
-                  r"Related scam category([A-Z])",
-                  r"Related scam category: \1",
+                  r"(>?)Related scam category:?(?!\s*:)\s*([A-Z][^<\n]+)",
+                  r"\1Related scam category: \2",
+                  content,
+              )
+
+              # Collapse accidental double colon spacing
+              content = re.sub(
+                  r"Related scam category:\s*:",
+                  r"Related scam category:",
                   content,
               )
 
