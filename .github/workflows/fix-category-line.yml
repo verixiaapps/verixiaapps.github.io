@@ -1,7 +1,12 @@
-name: Fix legacy category line (scam-check-now only)
+name: Fix legacy related category line (scam-check-now only)
 
 on:
   workflow_dispatch:
+    inputs:
+      max_files:
+        description: "Maximum files to update. Use 1 for testing, 0 for all matching files."
+        required: true
+        default: "1"
 
 permissions:
   contents: write
@@ -17,8 +22,10 @@ jobs:
         with:
           ref: main
 
-      - name: "Fix legacy category line in scam-check-now (TEST MODE: 1 file)"
+      - name: Fix legacy related category line in scam-check-now
         shell: bash
+        env:
+          MAX_FILES: ${{ github.event.inputs.max_files }}
         run: |
           set -euo pipefail
 
@@ -28,39 +35,78 @@ jobs:
           import sys
 
           BASE_DIR = "scam-check-now"
-          MAX_FILES = 1
+          raw_max = os.environ.get("MAX_FILES", "1").strip()
+
+          try:
+              max_files = int(raw_max)
+          except ValueError:
+              print(f"Invalid MAX_FILES value: {raw_max}")
+              sys.exit(1)
+
+          if max_files < 0:
+              print(f"MAX_FILES must be 0 or greater. Got: {max_files}")
+              sys.exit(1)
 
           if not os.path.isdir(BASE_DIR):
               print(f"Missing directory: {BASE_DIR}")
               sys.exit(1)
 
-          def fix_content(content: str) -> str:
-              # Fix duplicated visible text inside anchor/body text
-              content = re.sub(
-                  r"(>?)Related scam category:?\s*Related scam category\s*",
-                  r"\1Related scam category: ",
-                  content,
+          def fix_related_category_fragment(fragment: str) -> str:
+              updated = fragment
+
+              # Fix duplicated label
+              updated = re.sub(
+                  r"Related scam category:?\s*Related scam category\s*",
+                  "Related scam category: ",
+                  updated,
               )
 
-              # Fix glued form like "Related scam categoryCrypto Scam Hub"
-              content = re.sub(
-                  r"(>?)Related scam category:?(?!\s*:)\s*([A-Z][^<\n]+)",
-                  r"\1Related scam category: \2",
-                  content,
+              # Fix glued anchor form: Related scam category<a ...>
+              updated = re.sub(
+                  r"Related scam category\s*(<a\b)",
+                  r"Related scam category: \1",
+                  updated,
               )
 
-              # Collapse accidental double colon spacing
-              content = re.sub(
+              # Fix glued plain-text form:
+              # Related scam categoryVerification Code Scam Hub
+              updated = re.sub(
+                  r"Related scam category(?::)?\s*([A-Z][A-Za-z0-9&/\-,'() ]{2,120}?(?: Scam Hub| Hub))(?=<|$)",
+                  r"Related scam category: \1",
+                  updated,
+              )
+
+              # Collapse accidental double colon
+              updated = re.sub(
                   r"Related scam category:\s*:",
-                  r"Related scam category:",
-                  content,
+                  "Related scam category:",
+                  updated,
               )
 
-              return content
+              return updated
+
+          def fix_content(content: str) -> str:
+              marker_match = re.search(r"RELATED SCAM CATEGORY", content)
+              if not marker_match:
+                  return content
+
+              start = marker_match.start()
+              window_end = min(len(content), start + 3000)
+
+              before = content[:start]
+              target = content[start:window_end]
+              after = content[window_end:]
+
+              fixed_target = fix_related_category_fragment(target)
+              return before + fixed_target + after
 
           updated_files = 0
+          changed_paths = []
 
-          for root, _, files in os.walk(BASE_DIR):
+          for root, dirs, files in os.walk(BASE_DIR):
+              dirs.sort()
+              files.sort()
+
               for file in files:
                   if file != "index.html":
                       continue
@@ -75,15 +121,24 @@ jobs:
                   if updated != original:
                       with open(path, "w", encoding="utf-8") as f:
                           f.write(updated)
-                      print(f"UPDATED: {path}")
-                      updated_files += 1
 
-                      if updated_files >= MAX_FILES:
-                          print("\nTest limit reached. Stopping early.")
+                      updated_files += 1
+                      changed_paths.append(path)
+                      print(f"UPDATED: {path}")
+
+                      if max_files != 0 and updated_files >= max_files:
+                          print("\nReached max_files limit. Stopping early.")
                           print(f"Total updated files: {updated_files}")
+                          print("Changed files:")
+                          for p in changed_paths:
+                              print(f" - {p}")
                           sys.exit(0)
 
           print(f"\nTotal updated files: {updated_files}")
+          if changed_paths:
+              print("Changed files:")
+              for p in changed_paths:
+                  print(f" - {p}")
           PY
 
       - name: Show changed files
@@ -94,6 +149,8 @@ jobs:
 
       - name: Commit changes
         shell: bash
+        env:
+          MAX_FILES: ${{ github.event.inputs.max_files }}
         run: |
           set -euo pipefail
 
@@ -107,5 +164,13 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Fix legacy category line formatting (test 1 file)"
-          git push origin HEAD:main 
+          if [ "${MAX_FILES}" = "1" ]; then
+            COMMIT_MSG="Fix legacy related category line in scam-check-now (test 1 file)"
+          elif [ "${MAX_FILES}" = "0" ]; then
+            COMMIT_MSG="Fix legacy related category line in scam-check-now"
+          else
+            COMMIT_MSG="Fix legacy related category line in scam-check-now (limited run: ${MAX_FILES} files)"
+          fi
+
+          git commit -m "$COMMIT_MSG"
+          git push origin HEAD:main
