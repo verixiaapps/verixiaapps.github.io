@@ -17,7 +17,7 @@ jobs:
         with:
           ref: main
 
-      - name: Fix legacy category line in scam-check-now
+      - name: Fix legacy category line in scam-check-now (TEST MODE: 1 file)
         shell: bash
         run: |
           set -euo pipefail
@@ -28,29 +28,23 @@ jobs:
           import sys
 
           BASE_DIR = "scam-check-now"
+          MAX_FILES = 1
 
           if not os.path.isdir(BASE_DIR):
               print(f"Missing directory: {BASE_DIR}")
               sys.exit(1)
 
           def fix_content(content: str) -> str:
-              # Fix patterns like:
-              # "Related scam categoryAmazon Scam Hub"
-              # "Related scam categoryAccount Security Scam Hub"
-              # "Related scam category Amazon Scam Hub"
               content = re.sub(
-                  r"Related scam category\s*([A-Z][A-Za-z& ]+Scam Hub)",
+                  r"Related scam category\s*([^\n<]+)",
                   r"Related scam category: \1",
                   content,
-                  flags=re.IGNORECASE,
               )
 
-              # Extra safety for glued form like "categoryAmazon"
               content = re.sub(
                   r"Related scam category([A-Z])",
                   r"Related scam category: \1",
                   content,
-                  flags=re.IGNORECASE,
               )
 
               return content
@@ -74,6 +68,11 @@ jobs:
                           f.write(updated)
                       print(f"UPDATED: {path}")
                       updated_files += 1
+
+                      if updated_files >= MAX_FILES:
+                          print("\nTest limit reached. Stopping early.")
+                          print(f"Total updated files: {updated_files}")
+                          sys.exit(0)
 
           print(f"\nTotal updated files: {updated_files}")
           PY
@@ -99,5 +98,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Fix legacy category line formatting"
+          git commit -m "Fix legacy category line formatting (test 1 file)"
           git push origin HEAD:main
