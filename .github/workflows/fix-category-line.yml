@@ -1,0 +1,103 @@
+name: Fix legacy category line (scam-check-now only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-category-line:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Fix legacy category line in scam-check-now
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - << 'PY'
+          import os
+          import re
+          import sys
+
+          BASE_DIR = "scam-check-now"
+
+          if not os.path.isdir(BASE_DIR):
+              print(f"Missing directory: {BASE_DIR}")
+              sys.exit(1)
+
+          def fix_content(content: str) -> str:
+              # Fix patterns like:
+              # "Related scam categoryAmazon Scam Hub"
+              # "Related scam categoryAccount Security Scam Hub"
+              # "Related scam category Amazon Scam Hub"
+              content = re.sub(
+                  r"Related scam category\s*([A-Z][A-Za-z& ]+Scam Hub)",
+                  r"Related scam category: \1",
+                  content,
+                  flags=re.IGNORECASE,
+              )
+
+              # Extra safety for glued form like "categoryAmazon"
+              content = re.sub(
+                  r"Related scam category([A-Z])",
+                  r"Related scam category: \1",
+                  content,
+                  flags=re.IGNORECASE,
+              )
+
+              return content
+
+          updated_files = 0
+
+          for root, _, files in os.walk(BASE_DIR):
+              for file in files:
+                  if file != "index.html":
+                      continue
+
+                  path = os.path.join(root, file)
+
+                  with open(path, "r", encoding="utf-8") as f:
+                      original = f.read()
+
+                  updated = fix_content(original)
+
+                  if updated != original:
+                      with open(path, "w", encoding="utf-8") as f:
+                          f.write(updated)
+                      print(f"UPDATED: {path}")
+                      updated_files += 1
+
+          print(f"\nTotal updated files: {updated_files}")
+          PY
+
+      - name: Show changed files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short scam-check-now
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add scam-check-now
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Fix legacy category line formatting"
+          git push origin HEAD:main
