@@ -1,9 +1,11 @@
+Yes — add a TARGET_SLUG env input so you can test one exact page first, and if it is blank it will run the full today list.
+
 import os
 import re
 from typing import List, Optional
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
-MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "100"))
+TARGET_SLUG = os.getenv("TARGET_SLUG", "").strip().lower()
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
 TEMPLATE_PATHS = {
@@ -12,46 +14,22 @@ TEMPLATE_PATHS = {
     "c": "scam-check-now-c",
 }
 
-ALLOWED_FIELDS = (
-    "title",
-    "meta_description",
-    "answer_summary",
-    "content_bridge",
-)
-
-QUERY_TERMS_TO_STRIP = {
-    "is",
-    "this",
-    "a",
-    "an",
-    "the",
-    "message",
-    "messages",
-    "email",
-    "emails",
-    "text",
-    "texts",
-    "notification",
-    "notifications",
-    "alert",
-    "alerts",
-    "real",
-    "fake",
-    "legit",
-    "scam",
-    "safe",
-    "or",
-    "and",
-    "can",
-    "i",
-    "trust",
-    "did",
-    "get",
-    "scammed",
-    "by",
-    "on",
-    "with",
-}
+TODAY_TARGET_SLUGS = [
+    "is-amazon-refund-message-legit-or-scam",
+    "is-google-account-disabled-email-legit-or-scam",
+    "is-fedex-customs-charge-email-legit-or-scam",
+    "is-venmo-verification-code-text-real-or-fake",
+    "is-bank-debit-card-suspension-email-legit-or-scam",
+    "is-whatsapp-unusual-login-email-legit-or-scam",
+    "is-telegram-suspicious-activity-message-legit-or-scam",
+    "is-usps-tracking-text-legit-or-scam",
+    "is-venmo-security-alert-email-legit-or-scam",
+    "is-bank-account-closure-email-legit-or-scam",
+    "is-apple-account-verification-email-legit-or-scam",
+    "snapchat-scams",
+    "is-fedex-delivery-legit-or-scam",
+    "is-security-alert-message-legit-or-scam",
+]
 
 SPECIAL_REPLACEMENTS = {
     "usps": "USPS",
@@ -67,20 +45,20 @@ SPECIAL_REPLACEMENTS = {
     "venmo": "Venmo",
     "paypal": "PayPal",
     "zelle": "Zelle",
-    "crypto": "crypto",
-    "bank": "bank",
-    "account": "account",
-    "verification": "verification",
-    "security": "security",
-    "refund": "refund",
-    "delivery": "delivery",
-    "tracking": "tracking",
-    "customs": "customs",
-    "charge": "charge",
-    "disabled": "disabled",
-    "login": "login",
-    "unusual": "unusual",
-    "activity": "activity",
+}
+
+STRIP_WORDS = {
+    "is",
+    "this",
+    "a",
+    "an",
+    "the",
+    "or",
+    "and",
+    "legit",
+    "scam",
+    "real",
+    "fake",
 }
 
 
@@ -94,13 +72,10 @@ def get_target_dirs() -> List[str]:
     return [TEMPLATE_PATHS[TARGET_TEMPLATE]]
 
 
-def get_index_files(folder: str) -> List[str]:
-    files: List[str] = []
-    for root, _, filenames in os.walk(folder):
-        for filename in filenames:
-            if filename == "index.html":
-                files.append(os.path.join(root, filename))
-    return sorted(files)
+def get_target_slugs() -> List[str]:
+    if TARGET_SLUG:
+        return [TARGET_SLUG]
+    return TODAY_TARGET_SLUGS
 
 
 def is_allowed_seo_page(path: str) -> bool:
@@ -110,9 +85,7 @@ def is_allowed_seo_page(path: str) -> bool:
         "scam-check-now-b/",
         "scam-check-now-c/",
     )
-    if not normalized.endswith("/index.html"):
-        return False
-    return normalized.startswith(allowed_prefixes)
+    return normalized.startswith(allowed_prefixes) and normalized.endswith("/index.html")
 
 
 def slug_from_path(path: str) -> Optional[str]:
@@ -120,10 +93,28 @@ def slug_from_path(path: str) -> Optional[str]:
     parts = normalized.split("/")
     if len(parts) < 2:
         return None
-    slug = parts[-2].strip()
-    if not slug:
-        return None
-    return slug
+    return parts[-2].strip() or None
+
+
+def get_target_files() -> List[str]:
+    files: List[str] = []
+    seen = set()
+    target_dirs = get_target_dirs()
+    target_slugs = get_target_slugs()
+
+    for base_dir in target_dirs:
+        for slug in target_slugs:
+            candidate = os.path.join(base_dir, slug, "index.html")
+            normalized_candidate = candidate.replace("\\", "/")
+            if (
+                os.path.exists(candidate)
+                and is_allowed_seo_page(candidate)
+                and normalized_candidate not in seen
+            ):
+                files.append(candidate)
+                seen.add(normalized_candidate)
+
+    return files
 
 
 def humanize_word(word: str) -> str:
@@ -133,84 +124,101 @@ def humanize_word(word: str) -> str:
     return lower.capitalize()
 
 
-def slug_to_display_phrase(slug: str) -> str:
-    words = [w for w in slug.strip().split("-") if w]
-    cleaned_words = []
-    for word in words:
-        if word.lower() in QUERY_TERMS_TO_STRIP:
-            continue
-        cleaned_words.append(humanize_word(word))
-
-    if not cleaned_words:
-        cleaned_words = [humanize_word(w) for w in words if w]
-
-    return " ".join(cleaned_words).strip()
-
-
 def slug_to_topic_phrase(slug: str) -> str:
-    phrase = slug_to_display_phrase(slug)
-    if not phrase:
-        return "Suspicious message"
-    return phrase
+    words = [w for w in slug.split("-") if w]
+    cleaned = [humanize_word(w) for w in words if w.lower() not in STRIP_WORDS]
+    if not cleaned:
+        cleaned = [humanize_word(w) for w in words]
+    phrase = " ".join(cleaned).strip()
+    return phrase or "Suspicious message"
 
 
 def build_title(slug: str) -> str:
-    topic = slug_to_topic_phrase(slug)
-
-    if any(term in slug for term in ("refund",)):
-        return f"Is {topic} a Scam? Warning Signs and What to Do"
-
-    if any(term in slug for term in ("tracking", "delivery", "customs", "charge")):
-        return f"Is {topic} Legit or a Scam? What to Check First"
-
-    if any(term in slug for term in ("verification", "security", "login", "disabled", "account")):
-        return f"Is {topic} a Scam? How to Spot the Warning Signs"
-
-    return f"Is {topic} a Scam? Warning Signs and What to Do"
+    mapping = {
+        "is-amazon-refund-message-legit-or-scam": "Amazon Refund Message Scam? Warning Signs and What to Do",
+        "is-google-account-disabled-email-legit-or-scam": "Google Account Disabled Email Scam? How to Spot the Warning Signs",
+        "is-fedex-customs-charge-email-legit-or-scam": "FedEx Customs Charge Email Scam? What to Check First",
+        "is-venmo-verification-code-text-real-or-fake": "Venmo Verification Code Text Scam? Real or Fake Warning Signs",
+        "is-bank-debit-card-suspension-email-legit-or-scam": "Bank Debit Card Suspension Email Scam? Warning Signs and What to Do",
+        "is-whatsapp-unusual-login-email-legit-or-scam": "WhatsApp Unusual Login Email Scam? How to Check Safely",
+        "is-telegram-suspicious-activity-message-legit-or-scam": "Telegram Suspicious Activity Message Scam? Warning Signs and What to Do",
+        "is-usps-tracking-text-legit-or-scam": "USPS Tracking Text Scam? What to Check Before You Click",
+        "is-venmo-security-alert-email-legit-or-scam": "Venmo Security Alert Email Scam? How to Spot the Warning Signs",
+        "is-bank-account-closure-email-legit-or-scam": "Bank Account Closure Email Scam? Warning Signs and What to Do",
+        "is-apple-account-verification-email-legit-or-scam": "Apple Account Verification Email Scam? How to Spot the Warning Signs",
+        "snapchat-scams": "Snapchat Scams: Common Warning Signs and What to Do",
+        "is-fedex-delivery-legit-or-scam": "FedEx Delivery Message Scam? What to Check First",
+        "is-security-alert-message-legit-or-scam": "Security Alert Message Scam? Warning Signs and What to Do",
+    }
+    return mapping.get(slug, f"{slug_to_topic_phrase(slug)} Scam? Warning Signs and What to Do")
 
 
 def build_description(slug: str) -> str:
-    topic = slug_to_topic_phrase(slug)
-
-    if any(term in slug for term in ("refund",)):
-        return (
-            f"Got a {topic}? Learn the common scam warning signs, fake link risks, "
-            f"and what to do before clicking, replying, or sending information."
-        )
-
-    if any(term in slug for term in ("tracking", "delivery", "customs", "charge")):
-        return (
-            f"Received a {topic}? Review the scam signs, payment risks, and what to do "
-            f"before clicking a tracking link or paying anything."
-        )
-
-    if any(term in slug for term in ("verification", "security", "login", "disabled", "account")):
-        return (
-            f"Received a {topic}? Learn the warning signs of fake account alerts, "
-            f"suspicious links, and how to verify the message safely."
-        )
-
-    return (
-        f"Check whether {topic} is a scam. Review warning signs, suspicious link risks, "
-        f"and what to do before you click, reply, or send money."
+    mapping = {
+        "is-amazon-refund-message-legit-or-scam": "Got an Amazon refund message? Learn the scam warning signs, suspicious link risks, and what to do before you click, reply, or send information.",
+        "is-google-account-disabled-email-legit-or-scam": "Received a Google account disabled email? Learn the warning signs of fake account alerts and how to verify the message safely.",
+        "is-fedex-customs-charge-email-legit-or-scam": "Got a FedEx customs charge email? Review the scam signs, payment risks, and what to do before clicking or paying anything.",
+        "is-venmo-verification-code-text-real-or-fake": "Received a Venmo verification code text? Learn how to spot scam signs, fake urgency, and risky requests before taking action.",
+        "is-bank-debit-card-suspension-email-legit-or-scam": "Received a bank debit card suspension email? Learn the common warning signs, suspicious link risks, and how to verify it safely.",
+        "is-whatsapp-unusual-login-email-legit-or-scam": "Got a WhatsApp unusual login email? Review the scam warning signs and what to do before you click or share information.",
+        "is-telegram-suspicious-activity-message-legit-or-scam": "Received a Telegram suspicious activity message? Learn the warning signs of fake security alerts and risky login links.",
+        "is-usps-tracking-text-legit-or-scam": "Got a USPS tracking text? Review the scam warning signs, fake tracking link risks, and what to do before clicking.",
+        "is-venmo-security-alert-email-legit-or-scam": "Received a Venmo security alert email? Learn the warning signs of fake account alerts and how to verify it safely.",
+        "is-bank-account-closure-email-legit-or-scam": "Got a bank account closure email? Review the scam warning signs, suspicious link risks, and what to do before taking action.",
+        "is-apple-account-verification-email-legit-or-scam": "Received an Apple account verification email? Learn the scam signs, suspicious link risks, and how to verify it safely.",
+        "snapchat-scams": "Learn common Snapchat scam warning signs, fake account risks, and what to do before replying, clicking, or sharing information.",
+        "is-fedex-delivery-legit-or-scam": "Got a FedEx delivery message? Review the scam signs, fake tracking link risks, and what to do before clicking.",
+        "is-security-alert-message-legit-or-scam": "Received a security alert message? Learn the warning signs of fake alerts, suspicious links, and what to do next.",
+    }
+    return mapping.get(
+        slug,
+        f"Check whether {slug_to_topic_phrase(slug)} is a scam. Review warning signs, suspicious link risks, and what to do before acting.",
     )
 
 
 def build_answer_summary(slug: str) -> str:
-    topic = slug_to_topic_phrase(slug)
-    return (
-        f"Use the checker below before you trust {topic.lower()}, click links, reply, "
-        f"send money, or share personal information. Messages like this often use urgency, "
-        f"fake authority, and misleading details to push fast decisions."
+    mapping = {
+        "is-amazon-refund-message-legit-or-scam": "Use the checker below before you trust an Amazon refund message, click links, reply, or share personal information. Messages like this often use fake urgency and refund confusion to push fast decisions.",
+        "is-google-account-disabled-email-legit-or-scam": "Use the checker below before you trust a Google account disabled email, click links, or enter account details. Messages like this often use fear and fake account warnings to trigger fast action.",
+        "is-fedex-customs-charge-email-legit-or-scam": "Use the checker below before you trust a FedEx customs charge email, click a payment link, or send information. Messages like this often use delivery pressure and small-fee requests to push fast decisions.",
+        "is-venmo-verification-code-text-real-or-fake": "Use the checker below before you trust a Venmo verification code text, share a code, or reply. Messages like this often use fake urgency and account access tricks to push fast decisions.",
+        "is-bank-debit-card-suspension-email-legit-or-scam": "Use the checker below before you trust a bank debit card suspension email, click links, or enter account details. Messages like this often use fake account threats to pressure quick action.",
+        "is-whatsapp-unusual-login-email-legit-or-scam": "Use the checker below before you trust a WhatsApp unusual login email, click links, or share account information. Messages like this often use fake security pressure to trigger fast decisions.",
+        "is-telegram-suspicious-activity-message-legit-or-scam": "Use the checker below before you trust a Telegram suspicious activity message, click links, or enter login details. Messages like this often use fake security alerts to pressure quick action.",
+        "is-usps-tracking-text-legit-or-scam": "Use the checker below before you trust a USPS tracking text, click a tracking link, or pay anything. Messages like this often use delivery urgency and fake tracking pages to push fast decisions.",
+        "is-venmo-security-alert-email-legit-or-scam": "Use the checker below before you trust a Venmo security alert email, click links, or enter account information. Messages like this often use fake warnings and misleading details to push fast action.",
+        "is-bank-account-closure-email-legit-or-scam": "Use the checker below before you trust a bank account closure email, click links, or share personal information. Messages like this often use fake urgency and account threats to push fast decisions.",
+        "is-apple-account-verification-email-legit-or-scam": "Use the checker below before you trust an Apple account verification email, click links, or enter login details. Messages like this often use fake authority and misleading details to push fast action.",
+        "snapchat-scams": "Use the checker below before you trust suspicious Snapchat messages, links, or account requests. Scams like this often rely on urgency, impersonation, and misleading details to push quick decisions.",
+        "is-fedex-delivery-legit-or-scam": "Use the checker below before you trust a FedEx delivery message, click links, or send information. Messages like this often use fake shipping pressure and misleading tracking details to push quick action.",
+        "is-security-alert-message-legit-or-scam": "Use the checker below before you trust a security alert message, click links, or enter account details. Messages like this often use fear and fake warnings to pressure fast decisions.",
+    }
+    return mapping.get(
+        slug,
+        f"Use the checker below before you trust {slug_to_topic_phrase(slug).lower()}, click links, reply, send money, or share personal information.",
     )
 
 
 def build_content_bridge(slug: str) -> str:
-    topic = slug_to_topic_phrase(slug)
-    return (
-        f"If you are unsure about {topic.lower()}, use the checker above before clicking links, "
-        f"replying, sending money, or sharing personal information. Pages like this help you slow down, "
-        f"spot warning signs, and avoid costly mistakes before taking action."
+    mapping = {
+        "is-amazon-refund-message-legit-or-scam": "If you are unsure about an Amazon refund message, use the checker above before clicking links, replying, or sharing information. Pages like this help you spot refund scam warning signs early and avoid costly mistakes.",
+        "is-google-account-disabled-email-legit-or-scam": "If you are unsure about a Google account disabled email, use the checker above before clicking links or entering login details. Pages like this help you slow down, verify safely, and avoid fake account alert scams.",
+        "is-fedex-customs-charge-email-legit-or-scam": "If you are unsure about a FedEx customs charge email, use the checker above before clicking payment links or sending information. Pages like this help you spot delivery-payment scams before taking action.",
+        "is-venmo-verification-code-text-real-or-fake": "If you are unsure about a Venmo verification code text, use the checker above before replying or sharing any code. Pages like this help you catch account access scams before they turn into a bigger problem.",
+        "is-bank-debit-card-suspension-email-legit-or-scam": "If you are unsure about a bank debit card suspension email, use the checker above before clicking links or entering account details. Pages like this help you catch fake banking alerts before taking action.",
+        "is-whatsapp-unusual-login-email-legit-or-scam": "If you are unsure about a WhatsApp unusual login email, use the checker above before clicking links or sharing information. Pages like this help you slow down and spot fake security alerts early.",
+        "is-telegram-suspicious-activity-message-legit-or-scam": "If you are unsure about a Telegram suspicious activity message, use the checker above before clicking links or entering login details. Pages like this help you catch fake security messages before they cost you access.",
+        "is-usps-tracking-text-legit-or-scam": "If you are unsure about a USPS tracking text, use the checker above before clicking links or paying anything. Pages like this help you spot fake delivery messages and risky tracking pages early.",
+        "is-venmo-security-alert-email-legit-or-scam": "If you are unsure about a Venmo security alert email, use the checker above before clicking links or entering account details. Pages like this help you spot fake payment-app warnings before taking action.",
+        "is-bank-account-closure-email-legit-or-scam": "If you are unsure about a bank account closure email, use the checker above before clicking links or sharing information. Pages like this help you catch fake banking alerts and avoid costly mistakes.",
+        "is-apple-account-verification-email-legit-or-scam": "If you are unsure about an Apple account verification email, use the checker above before clicking links or entering login details. Pages like this help you catch fake account verification scams early.",
+        "snapchat-scams": "If you are dealing with suspicious Snapchat messages or account requests, use the checker above before clicking links, replying, or sharing information. Pages like this help you spot common Snapchat scam patterns early.",
+        "is-fedex-delivery-legit-or-scam": "If you are unsure about a FedEx delivery message, use the checker above before clicking links or sending information. Pages like this help you spot fake delivery messages before taking action.",
+        "is-security-alert-message-legit-or-scam": "If you are unsure about a security alert message, use the checker above before clicking links or entering account details. Pages like this help you slow down, verify safely, and avoid fake alert scams.",
+    }
+    return mapping.get(
+        slug,
+        f"If you are unsure about {slug_to_topic_phrase(slug).lower()}, use the checker above before clicking links, replying, or sending information.",
     )
 
 
@@ -237,7 +245,7 @@ def replace_meta_description(content: str, new_description: str) -> str:
 def replace_answer_summary(content: str, new_text: str) -> str:
     return re.sub(
         r'(<p\s+id="answerSummary">)(.*?)(</p>)',
-        rf"\1{new_text}\3",
+        lambda m: f"{m.group(1)}{new_text}{m.group(3)}",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -247,7 +255,7 @@ def replace_answer_summary(content: str, new_text: str) -> str:
 def replace_content_bridge(content: str, new_text: str) -> str:
     return re.sub(
         r'(<div\s+id="contentBridge"\s+class="content-bridge">)(.*?)(</div>)',
-        rf"\1{new_text}\3",
+        lambda m: f"{m.group(1)}{new_text}{m.group(3)}",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -268,16 +276,10 @@ def process_file(path: str) -> None:
         original = file.read()
 
     updated = original
-
-    new_title = build_title(slug)
-    new_description = build_description(slug)
-    new_answer_summary = build_answer_summary(slug)
-    new_content_bridge = build_content_bridge(slug)
-
-    updated = replace_title(updated, new_title)
-    updated = replace_meta_description(updated, new_description)
-    updated = replace_answer_summary(updated, new_answer_summary)
-    updated = replace_content_bridge(updated, new_content_bridge)
+    updated = replace_title(updated, build_title(slug))
+    updated = replace_meta_description(updated, build_description(slug))
+    updated = replace_answer_summary(updated, build_answer_summary(slug))
+    updated = replace_content_bridge(updated, build_content_bridge(slug))
 
     if updated != original:
         print(f"UPDATED: {path}")
@@ -289,29 +291,20 @@ def process_file(path: str) -> None:
 
 
 def main() -> None:
-    if MAX_URLS <= 0:
-        raise ValueError(f"Invalid MAX_URLS_TO_REFRESH: {MAX_URLS}")
+    target_files = get_target_files()
 
-    target_dirs = get_target_dirs()
+    if TARGET_SLUG:
+        print(f"TARGET_SLUG={TARGET_SLUG}")
 
-    all_files: List[str] = []
-    for directory in target_dirs:
-        if os.path.exists(directory):
-            all_files.extend(get_index_files(directory))
-
-    all_files = [path for path in all_files if is_allowed_seo_page(path)]
-
-    if not all_files:
-        print("No allowed SEO page index.html files found.")
+    if not target_files:
+        print("No matching GSC target SEO pages found.")
         return
-
-    selected_files = all_files[:MAX_URLS]
 
     print(f"TARGET_TEMPLATE={TARGET_TEMPLATE}")
     print(f"DRY_RUN={DRY_RUN}")
-    print(f"Processing {len(selected_files)} SEO page files...")
+    print(f"Processing {len(target_files)} exact GSC target SEO pages...")
 
-    for file_path in selected_files:
+    for file_path in target_files:
         process_file(file_path)
 
     print("Done.")
