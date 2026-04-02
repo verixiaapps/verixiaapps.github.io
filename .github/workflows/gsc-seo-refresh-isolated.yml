@@ -16,13 +16,11 @@ on:
       refresh_scope:
         description: "What kind of GSC optimization refresh to run"
         required: true
-        default: "pages"
+        default: "metadata"
         type: choice
         options:
-          - pages
           - internal-links
           - metadata
-          - mixed
       max_urls_to_refresh:
         description: "How many top exact GSC pages to update this run"
         required: true
@@ -121,7 +119,7 @@ jobs:
           esac
 
           case "$REFRESH_SCOPE" in
-            pages|internal-links|metadata|mixed) ;;
+            internal-links|metadata) ;;
             *)
               echo "Invalid REFRESH_SCOPE: $REFRESH_SCOPE"
               exit 1
