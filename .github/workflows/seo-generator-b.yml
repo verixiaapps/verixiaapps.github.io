@@ -47,6 +47,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -65,6 +66,22 @@ jobs:
             pip install openai requests
           fi
 
+      - name: Configure git
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global user.name "seo-bot"
+          git config --global user.email "bot@users.noreply.github.com"
+
+      - name: Sync latest main before build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+          git clean -fd
+
       - name: Ensure tracking files exist
         shell: bash
         run: |
@@ -80,14 +97,6 @@ jobs:
           touch "$GENERATED_SLUGS_FILE"
           touch "$REJECTED_KEYWORDS_FILE"
           touch "$SITEMAP_FILE"
-
-      - name: Sync latest main before build
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config --global user.name "seo-bot"
-          git config --global user.email "bot@users.noreply.github.com"
-          git pull --rebase origin main
 
       - name: Set effective daily limit
         shell: bash
@@ -142,29 +151,16 @@ jobs:
           find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
       - name: Build SEO pages incrementally
-        id: build_seo
         shell: bash
         run: python scripts/build_seo_incremental_b.py
         env:
           DAILY_LIMIT: ${{ env.EFFECTIVE_DAILY_LIMIT }}
 
       - name: Build hub pages
-        if: always()
         shell: bash
         run: python scripts/build_hubs_b.py
 
-      - name: Restore original keyword queue after manual full rebuild
-        if: always() && env.FULL_REBUILD == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ -f "$RUNNER_TEMP/original_keywords_queue_b.txt" ]; then
-            cp "$RUNNER_TEMP/original_keywords_queue_b.txt" "$KEYWORDS_FILE"
-          fi
-
       - name: Build B sitemap
-        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -199,8 +195,17 @@ jobs:
             echo '</urlset>'
           } > "$SITEMAP_FILE"
 
+      - name: Restore original keyword queue after manual full rebuild
+        if: always() && env.FULL_REBUILD == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f "$RUNNER_TEMP/original_keywords_queue_b.txt" ]; then
+            cp "$RUNNER_TEMP/original_keywords_queue_b.txt" "$KEYWORDS_FILE"
+          fi
+
       - name: Commit generated pages and sitemap
-        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -213,4 +218,18 @@ jobs:
           fi
 
           git commit -m "Auto SEO generation B + hub update + sitemap update"
+
+      - name: Rebase on latest main and push
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin main
+
+          if [ -z "$(git log origin/main..HEAD --oneline 2>/dev/null || true)" ]; then
+            echo "No local commit to push"
+            exit 0
+          fi
+
+          git rebase origin/main
           git push origin HEAD:main
