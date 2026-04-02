@@ -4,6 +4,7 @@ import html
 from typing import List, Optional, Set
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
+REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "pages").strip().lower()
 MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "1"))
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
@@ -59,6 +60,8 @@ STRIP_WORDS = {
     "real",
     "fake",
 }
+
+LOWERCASE_LINK_WORDS = {"a", "an", "and", "or", "the"}
 
 TITLE_MAP = {
     "is-amazon-refund-message-legit-or-scam": "Amazon Refund Message Scam? Warning Signs and What to Do",
@@ -132,10 +135,8 @@ CONTENT_BRIDGE_MAP = {
 def get_target_dirs() -> List[str]:
     if TARGET_TEMPLATE == "all":
         return [TEMPLATE_PATHS["a"], TEMPLATE_PATHS["b"], TEMPLATE_PATHS["c"]]
-
     if TARGET_TEMPLATE not in TEMPLATE_PATHS:
         raise ValueError(f"Invalid TARGET_TEMPLATE: {TARGET_TEMPLATE}")
-
     return [TEMPLATE_PATHS[TARGET_TEMPLATE]]
 
 
@@ -147,12 +148,11 @@ def get_target_slugs() -> List[str]:
 
 def is_allowed_seo_page(path: str) -> bool:
     normalized = path.replace("\\", "/")
-    allowed_prefixes = (
-        "scam-check-now/",
-        "scam-check-now-b/",
-        "scam-check-now-c/",
-    )
-    return normalized.startswith(allowed_prefixes) and normalized.endswith("/index.html")
+    return (
+        normalized.startswith("scam-check-now/")
+        or normalized.startswith("scam-check-now-b/")
+        or normalized.startswith("scam-check-now-c/")
+    ) and normalized.endswith("/index.html")
 
 
 def slug_from_path(path: str) -> Optional[str]:
@@ -194,8 +194,37 @@ def slug_to_topic_phrase(slug: str) -> str:
     cleaned = [humanize_word(w) for w in words if w.lower() not in STRIP_WORDS]
     if not cleaned:
         cleaned = [humanize_word(w) for w in words]
-    phrase = " ".join(cleaned).strip()
-    return phrase or "Suspicious message"
+    return " ".join(cleaned).strip() or "Suspicious message"
+
+
+def slug_to_question_label(slug: str) -> str:
+    if slug == "snapchat-scams":
+        return "Snapchat Scams"
+
+    words = [w for w in slug.split("-") if w]
+    rendered: List[str] = []
+
+    for index, word in enumerate(words):
+        lower = word.lower()
+        if lower in SPECIAL_REPLACEMENTS:
+            rendered.append(SPECIAL_REPLACEMENTS[lower])
+        elif index == 0 and lower == "is":
+            rendered.append("Is")
+        elif lower in LOWERCASE_LINK_WORDS:
+            rendered.append(lower)
+        elif lower == "scam":
+            rendered.append("Scam")
+        else:
+            rendered.append(lower.capitalize())
+
+    label = " ".join(rendered).strip()
+    if label.startswith("Is ") and not label.endswith("?"):
+        label = f"{label}?"
+    label = label.replace(" Legit Or Scam?", " Legit or a Scam?")
+    label = label.replace(" Real Or Fake?", " Real or Fake?")
+    label = label.replace(" Legit Or Scam", " Legit or a Scam")
+    label = label.replace(" Real Or Fake", " Real or Fake")
+    return label
 
 
 def build_title(slug: str) -> str:
@@ -237,28 +266,39 @@ def build_internal_link_targets(slug: str) -> List[str]:
         else:
             fallback.append(candidate)
 
-    ordered = preferred + fallback
-    return ordered[:10]
+    return (preferred + fallback)[:10]
 
 
 def build_link_items_html(slugs: List[str]) -> str:
-    items = []
+    items: List[str] = []
     for slug in slugs:
         href = f"/{slug}/"
-        label = slug_to_topic_phrase(slug)
-        items.append(f'<li><a href="{html.escape(href, quote=True)}">{html.escape(label)}</a></li>')
+        label = slug_to_question_label(slug)
+        items.append(
+            f'<li><a href="{html.escape(href, quote=True)}">{html.escape(label)}</a></li>'
+        )
     return "".join(items)
 
 
 def replace_list_by_id(content: str, list_id: str, items_html: str) -> str:
-    pattern = rf'(<ul\s+id="{re.escape(list_id)}"\s+class="related-links">)(.*?)(</ul>)'
-    return re.sub(
-        pattern,
-        lambda match: f"{match.group(1)}{items_html}{match.group(3)}",
-        content,
-        count=1,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
+    patterns = [
+        rf'(<ul[^>]*id="{re.escape(list_id)}"[^>]*>)(.*?)(</ul>)',
+        rf"(<ul[^>]*id='{re.escape(list_id)}'[^>]*>)(.*?)(</ul>)",
+    ]
+
+    updated = content
+    for pattern in patterns:
+        updated, count = re.subn(
+            pattern,
+            lambda match: f"{match.group(1)}{items_html}{match.group(3)}",
+            updated,
+            count=1,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        if count:
+            return updated
+
+    return updated
 
 
 def replace_title(content: str, new_title: str) -> str:
@@ -273,7 +313,7 @@ def replace_title(content: str, new_title: str) -> str:
 
 def replace_meta_description(content: str, new_description: str) -> str:
     return re.sub(
-        r'<meta\s+name="description"\s+content=".*?">',
+        r'<meta[^>]*name=["\']description["\'][^>]*content=["\'].*?["\'][^>]*>',
         f'<meta name="description" content="{html.escape(new_description, quote=True)}">',
         content,
         count=1,
@@ -283,7 +323,7 @@ def replace_meta_description(content: str, new_description: str) -> str:
 
 def replace_answer_summary(content: str, new_text: str) -> str:
     return re.sub(
-        r'(<p\s+id="answerSummary">)(.*?)(</p>)',
+        r'(<p[^>]*id=["\']answerSummary["\'][^>]*>)(.*?)(</p>)',
         lambda match: f"{match.group(1)}{html.escape(new_text)}{match.group(3)}",
         content,
         count=1,
@@ -293,7 +333,7 @@ def replace_answer_summary(content: str, new_text: str) -> str:
 
 def replace_content_bridge(content: str, new_text: str) -> str:
     return re.sub(
-        r'(<div\s+id="contentBridge"\s+class="content-bridge">)(.*?)(</div>)',
+        r'(<div[^>]*id=["\']contentBridge["\'][^>]*>)(.*?)(</div>)',
         lambda match: f"{match.group(1)}{html.escape(new_text)}{match.group(3)}",
         content,
         count=1,
@@ -301,14 +341,44 @@ def replace_content_bridge(content: str, new_text: str) -> str:
     )
 
 
+def cleanup_legacy_category_line(content: str) -> str:
+    content = re.sub(
+        r"Related scam category\s*([A-Z][A-Za-z& ]+Scam Hub)",
+        r"Related scam category: \1",
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    content = content.replace(
+        "Related scam categoryAccount Security Scam Hub",
+        "Related scam category: Account Security Scam Hub",
+    )
+
+    return content
+
+
 def update_internal_links(content: str, slug: str) -> str:
     targets = build_internal_link_targets(slug)
-    related_items = build_link_items_html(targets[:5])
-    more_items = build_link_items_html(targets[5:10])
-
-    updated = replace_list_by_id(content, "relatedLinks", related_items)
-    updated = replace_list_by_id(updated, "moreLinks", more_items)
+    updated = replace_list_by_id(content, "relatedLinks", build_link_items_html(targets[:5]))
+    updated = replace_list_by_id(updated, "moreLinks", build_link_items_html(targets[5:10]))
     return updated
+
+
+def normalize_whitespace(content: str) -> str:
+    content = re.sub(r"\n{3,}", "\n\n", content)
+    return content
+
+
+def should_update_metadata() -> bool:
+    return REFRESH_SCOPE in {"pages", "metadata", "mixed"}
+
+
+def should_update_content() -> bool:
+    return REFRESH_SCOPE in {"pages", "mixed"}
+
+
+def should_update_internal_links() -> bool:
+    return REFRESH_SCOPE in {"pages", "internal-links", "mixed"}
 
 
 def process_file(path: str) -> bool:
@@ -325,11 +395,20 @@ def process_file(path: str) -> bool:
         original = file.read()
 
     updated = original
-    updated = replace_title(updated, build_title(slug))
-    updated = replace_meta_description(updated, build_description(slug))
-    updated = replace_answer_summary(updated, build_answer_summary(slug))
-    updated = replace_content_bridge(updated, build_content_bridge(slug))
-    updated = update_internal_links(updated, slug)
+    updated = cleanup_legacy_category_line(updated)
+
+    if should_update_metadata():
+        updated = replace_title(updated, build_title(slug))
+        updated = replace_meta_description(updated, build_description(slug))
+
+    if should_update_content():
+        updated = replace_answer_summary(updated, build_answer_summary(slug))
+        updated = replace_content_bridge(updated, build_content_bridge(slug))
+
+    if should_update_internal_links():
+        updated = update_internal_links(updated, slug)
+
+    updated = normalize_whitespace(updated)
 
     if updated == original:
         print(f"NO CHANGE: {path}")
@@ -345,6 +424,9 @@ def process_file(path: str) -> bool:
 
 
 def main() -> None:
+    if REFRESH_SCOPE not in {"pages", "metadata", "internal-links", "mixed"}:
+        raise ValueError(f"Invalid REFRESH_SCOPE: {REFRESH_SCOPE}")
+
     target_files = get_target_files()
 
     if not target_files:
@@ -352,6 +434,7 @@ def main() -> None:
         return
 
     print(f"TARGET_TEMPLATE={TARGET_TEMPLATE}")
+    print(f"REFRESH_SCOPE={REFRESH_SCOPE}")
     print(f"MAX_URLS_TO_REFRESH={MAX_URLS}")
     print(f"DRY_RUN={DRY_RUN}")
     print(f"Processing {len(target_files)} exact GSC target SEO pages...")
