@@ -61,9 +61,10 @@ jobs:
                   updated,
               )
 
-              # Fix glued anchor form: Related scam category<a ...>
+              # Fix single-string visible text:
+              # Related scam category Verification Code Scam Hub
               updated = re.sub(
-                  r"Related scam category\s*(<a\b)",
+                  r"Related scam category\s+([A-Z][A-Za-z0-9&/\-,'() ]{2,120}?(?: Scam Hub| Hub))",
                   r"Related scam category: \1",
                   updated,
               )
@@ -71,7 +72,15 @@ jobs:
               # Fix glued plain-text form:
               # Related scam categoryVerification Code Scam Hub
               updated = re.sub(
-                  r"Related scam category(?::)?\s*([A-Z][A-Za-z0-9&/\-,'() ]{2,120}?(?: Scam Hub| Hub))(?=<|$)",
+                  r"Related scam category(?::)?([A-Z][A-Za-z0-9&/\-,'() ]{2,120}?(?: Scam Hub| Hub))",
+                  r"Related scam category: \1",
+                  updated,
+              )
+
+              # Fix glued anchor form:
+              # Related scam category<a ...>
+              updated = re.sub(
+                  r"Related scam category\s*(<a\b)",
                   r"Related scam category: \1",
                   updated,
               )
