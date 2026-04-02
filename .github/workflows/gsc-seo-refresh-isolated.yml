@@ -1,3 +1,11 @@
+Almost — two fixes:
+	1.	add target_slug input
+	2.	pass TARGET_SLUG into the script
+
+Also, your current script does not use MAX_URLS_TO_REFRESH, so that input is optional noise right now. You can leave it for later, but it is not doing anything with the current script.
+
+Use this full revised workflow:
+
 name: GSC SEO Refresh Isolated
 
 on:
@@ -13,6 +21,11 @@ on:
           - b
           - c
           - all
+      target_slug:
+        description: "Optional exact slug to refresh for testing. Leave blank to run today's full GSC target list."
+        required: false
+        default: ""
+        type: string
       refresh_scope:
         description: "What kind of GSC optimization refresh to run"
         required: true
@@ -24,7 +37,7 @@ on:
           - metadata
           - mixed
       max_urls_to_refresh:
-        description: "Max URLs to refresh this run"
+        description: "Unused by current script. Safe to leave as-is for now."
         required: true
         default: "100"
         type: string
@@ -58,6 +71,7 @@ jobs:
       GSC_STATE_DIR: "gsc-refresh/state"
       DEFAULT_COMMIT_MESSAGE: "Isolated GSC SEO refresh"
       TARGET_TEMPLATE: ${{ inputs.target_template }}
+      TARGET_SLUG: ${{ inputs.target_slug }}
       REFRESH_SCOPE: ${{ inputs.refresh_scope }}
       MAX_URLS_TO_REFRESH: ${{ inputs.max_urls_to_refresh }}
       DRY_RUN: ${{ inputs.dry_run }}
@@ -156,6 +170,7 @@ jobs:
           python scripts/gsc_refresh_isolated.py
         env:
           TARGET_TEMPLATE: ${{ env.TARGET_TEMPLATE }}
+          TARGET_SLUG: ${{ env.TARGET_SLUG }}
           REFRESH_SCOPE: ${{ env.REFRESH_SCOPE }}
           MAX_URLS_TO_REFRESH: ${{ env.MAX_URLS_TO_REFRESH }}
           GSC_INPUT_DIR: ${{ env.GSC_INPUT_DIR }}
@@ -192,7 +207,11 @@ jobs:
           FINAL_COMMIT_MESSAGE="${{ inputs.commit_message }}"
 
           if [ -z "$FINAL_COMMIT_MESSAGE" ]; then
-            FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=${TARGET_TEMPLATE} | scope=${REFRESH_SCOPE} | urls=${MAX_URLS_TO_REFRESH}"
+            if [ -n "$TARGET_SLUG" ]; then
+              FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=${TARGET_TEMPLATE} | slug=${TARGET_SLUG}"
+            else
+              FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=${TARGET_TEMPLATE} | scope=${REFRESH_SCOPE}"
+            fi
           fi
 
           git commit -m "$FINAL_COMMIT_MESSAGE"
