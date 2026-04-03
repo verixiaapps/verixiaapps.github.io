@@ -1,6 +1,6 @@
 name: SEO Page Generator Auto B
 
-"on":
+on:
   workflow_dispatch:
     inputs:
       manual_daily_limit:
@@ -14,14 +14,9 @@ name: SEO Page Generator Auto B
         default: false
         type: boolean
       rebuild_daily_limit:
-        description: "Total pages to rebuild during this manual rebuild run (leave blank to rebuild all remaining pages in one run)"
+        description: "Daily limit to use during a manual full rebuild"
         required: false
-        default: ""
-        type: string
-      rebuild_batch_size:
-        description: "How many pages to rebuild per committed batch"
-        required: false
-        default: "50"
+        default: "5000"
         type: string
   schedule:
     - cron: "0 9 * * *"
@@ -36,7 +31,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
 
     env:
       KEYWORDS_FILE: "data/keywords_b.txt"
@@ -46,9 +41,6 @@ jobs:
       OUTPUT_DIR: "scam-check-now-b"
       SITEMAP_FILE: "sitemap-b.xml"
       PROTECTED_SLUG: "is-this-a-scam"
-      REBUILD_KEYWORDS_SOURCE_FILE: "data/rebuild_keywords_source_scnb_b.txt"
-      REBUILD_SLUGS_SOURCE_FILE: "data/rebuild_slugs_source_scnb_b.txt"
-      REBUILD_PROGRESS_FILE: "data/rebuild_progress_scnb_b.txt"
 
     steps:
       - name: Checkout repo
@@ -98,9 +90,6 @@ jobs:
           mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
           mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
           mkdir -p "$(dirname "$REJECTED_KEYWORDS_FILE")"
-          mkdir -p "$(dirname "$REBUILD_KEYWORDS_SOURCE_FILE")"
-          mkdir -p "$(dirname "$REBUILD_SLUGS_SOURCE_FILE")"
-          mkdir -p "$(dirname "$REBUILD_PROGRESS_FILE")"
           mkdir -p "$OUTPUT_DIR"
 
           touch "$KEYWORDS_FILE"
@@ -109,148 +98,69 @@ jobs:
           touch "$REJECTED_KEYWORDS_FILE"
           touch "$SITEMAP_FILE"
 
-      - name: Set effective limits
-        id: limits
+      - name: Set effective daily limit
         shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          INPUT_MANUAL_DAILY_LIMIT: ${{ github.event.inputs.manual_daily_limit }}
-          INPUT_FULL_REBUILD: ${{ github.event.inputs.full_rebuild }}
-          INPUT_REBUILD_DAILY_LIMIT: ${{ github.event.inputs.rebuild_daily_limit }}
-          INPUT_REBUILD_BATCH_SIZE: ${{ github.event.inputs.rebuild_batch_size }}
         run: |
           set -euo pipefail
 
           FULL_REBUILD="false"
           EFFECTIVE_DAILY_LIMIT="50"
-          REBUILD_BATCH_SIZE="50"
-          REBUILD_ALL_REMAINING="false"
 
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            MANUAL_DAILY_LIMIT="${INPUT_MANUAL_DAILY_LIMIT:-}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MANUAL_DAILY_LIMIT="${{ inputs.manual_daily_limit }}"
 
             if [ -n "$MANUAL_DAILY_LIMIT" ]; then
               EFFECTIVE_DAILY_LIMIT="$MANUAL_DAILY_LIMIT"
             fi
 
-            if [ "${INPUT_FULL_REBUILD:-false}" = "true" ]; then
+            if [ "${{ inputs.full_rebuild }}" = "true" ]; then
               FULL_REBUILD="true"
-
-              if [ -n "${INPUT_REBUILD_BATCH_SIZE:-}" ]; then
-                REBUILD_BATCH_SIZE="$INPUT_REBUILD_BATCH_SIZE"
-              fi
-
-              REBUILD_DAILY_LIMIT="${INPUT_REBUILD_DAILY_LIMIT:-}"
-
-              if [ -n "$REBUILD_DAILY_LIMIT" ]; then
-                EFFECTIVE_DAILY_LIMIT="$REBUILD_DAILY_LIMIT"
-              else
-                EFFECTIVE_DAILY_LIMIT="ALL"
-                REBUILD_ALL_REMAINING="true"
-              fi
+              EFFECTIVE_DAILY_LIMIT="${{ inputs.rebuild_daily_limit }}"
             fi
           fi
 
-          if [ "$EFFECTIVE_DAILY_LIMIT" != "ALL" ]; then
-            if ! [[ "$EFFECTIVE_DAILY_LIMIT" =~ ^[0-9]+$ ]] || [ "$EFFECTIVE_DAILY_LIMIT" -le 0 ]; then
-              echo "Invalid EFFECTIVE_DAILY_LIMIT: $EFFECTIVE_DAILY_LIMIT"
-              exit 1
-            fi
-          fi
-
-          if ! [[ "$REBUILD_BATCH_SIZE" =~ ^[0-9]+$ ]] || [ "$REBUILD_BATCH_SIZE" -le 0 ]; then
-            echo "Invalid REBUILD_BATCH_SIZE: $REBUILD_BATCH_SIZE"
+          if ! [[ "$EFFECTIVE_DAILY_LIMIT" =~ ^[0-9]+$ ]] || [ "$EFFECTIVE_DAILY_LIMIT" -le 0 ]; then
+            echo "Invalid EFFECTIVE_DAILY_LIMIT: $EFFECTIVE_DAILY_LIMIT"
             exit 1
           fi
 
-          echo "full_rebuild=$FULL_REBUILD" >> "$GITHUB_OUTPUT"
-          echo "effective_daily_limit=$EFFECTIVE_DAILY_LIMIT" >> "$GITHUB_OUTPUT"
-          echo "rebuild_batch_size=$REBUILD_BATCH_SIZE" >> "$GITHUB_OUTPUT"
-          echo "rebuild_all_remaining=$REBUILD_ALL_REMAINING" >> "$GITHUB_OUTPUT"
+          echo "FULL_REBUILD=$FULL_REBUILD" >> "$GITHUB_ENV"
+          echo "EFFECTIVE_DAILY_LIMIT=$EFFECTIVE_DAILY_LIMIT" >> "$GITHUB_ENV"
 
-      - name: Prepare rebuild source and progress state
-        if: steps.limits.outputs.full_rebuild == 'true'
+      - name: Prepare manual full rebuild state
+        if: env.FULL_REBUILD == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          cp "$KEYWORDS_FILE" "$RUNNER_TEMP/original_keywords_queue_b.txt"
+          if [ -f "$KEYWORDS_FILE" ]; then
+            cp "$KEYWORDS_FILE" "$RUNNER_TEMP/original_keywords_queue_b.txt"
+          fi
 
           if [ ! -s "$GENERATED_KEYWORDS_FILE" ]; then
-            echo "generated_keywords_b.txt is missing or empty. Refusing rebuild."
+            echo "generated_keywords_b.txt is missing or empty. Refusing full rebuild."
             exit 1
           fi
 
-          if [ ! -s "$GENERATED_SLUGS_FILE" ]; then
-            echo "generated_slugs_b.txt is missing or empty. Refusing rebuild."
-            exit 1
-          fi
+          cp "$GENERATED_KEYWORDS_FILE" "$RUNNER_TEMP/rebuild_keywords_source_b.txt"
+          cp "$RUNNER_TEMP/rebuild_keywords_source_b.txt" "$KEYWORDS_FILE"
 
-          generated_keywords_count=$(wc -l < "$GENERATED_KEYWORDS_FILE" | tr -d ' ')
-          generated_slugs_count=$(wc -l < "$GENERATED_SLUGS_FILE" | tr -d ' ')
+          : > "$GENERATED_SLUGS_FILE"
+          : > "$GENERATED_KEYWORDS_FILE"
 
-          if [ "$generated_keywords_count" -ne "$generated_slugs_count" ]; then
-            echo "generated_keywords_b.txt and generated_slugs_b.txt are not line-aligned."
-            exit 1
-          fi
+          find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
-          keywords_source_exists="false"
-          slugs_source_exists="false"
-          progress_exists="false"
-
-          [ -f "$REBUILD_KEYWORDS_SOURCE_FILE" ] && keywords_source_exists="true"
-          [ -f "$REBUILD_SLUGS_SOURCE_FILE" ] && slugs_source_exists="true"
-          [ -f "$REBUILD_PROGRESS_FILE" ] && progress_exists="true"
-
-          if [ "$keywords_source_exists" = "false" ] && [ "$slugs_source_exists" = "false" ] && [ "$progress_exists" = "false" ]; then
-            cp "$GENERATED_KEYWORDS_FILE" "$REBUILD_KEYWORDS_SOURCE_FILE"
-            cp "$GENERATED_SLUGS_FILE" "$REBUILD_SLUGS_SOURCE_FILE"
-            echo "0" > "$REBUILD_PROGRESS_FILE"
-            echo "Initialized rebuild source + progress files."
-          elif [ "$keywords_source_exists" = "true" ] && [ "$slugs_source_exists" = "true" ] && [ "$progress_exists" = "true" ]; then
-            echo "Existing rebuild source + progress files found. Resuming rebuild."
-          else
-            echo "Rebuild state files are inconsistent. Delete all three rebuild state files or keep all three."
-            exit 1
-          fi
-
-          rebuild_keywords_count=$(wc -l < "$REBUILD_KEYWORDS_SOURCE_FILE" | tr -d ' ')
-          rebuild_slugs_count=$(wc -l < "$REBUILD_SLUGS_SOURCE_FILE" | tr -d ' ')
-
-          if [ "$rebuild_keywords_count" -ne "$rebuild_slugs_count" ]; then
-            echo "Rebuild source files are not line-aligned."
-            exit 1
-          fi
-
-          progress=$(tr -d '[:space:]' < "$REBUILD_PROGRESS_FILE")
-          if [ -z "$progress" ]; then
-            progress="0"
-          fi
-
-          if ! [[ "$progress" =~ ^[0-9]+$ ]]; then
-            echo "Invalid rebuild progress value: $progress"
-            exit 1
-          fi
-
-          if [ "$progress" -gt "$rebuild_keywords_count" ]; then
-            echo "Rebuild progress exceeds available source lines."
-            exit 1
-          fi
-
-      - name: Standard incremental build
-        if: steps.limits.outputs.full_rebuild != 'true'
+      - name: Build SEO pages incrementally
         shell: bash
-        env:
-          DAILY_LIMIT: ${{ steps.limits.outputs.effective_daily_limit }}
         run: python scripts/build_seo_incremental_b.py
+        env:
+          DAILY_LIMIT: ${{ env.EFFECTIVE_DAILY_LIMIT }}
 
-      - name: Build hub pages after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+      - name: Build hub pages
         shell: bash
         run: python scripts/build_hubs_b.py
 
-      - name: Build B sitemap after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+      - name: Build B sitemap
         shell: bash
         run: |
           set -euo pipefail
@@ -258,7 +168,9 @@ jobs:
           get_lastmod() {
             local file_path="$1"
             local commit_date
+
             commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
+
             if [ -n "$commit_date" ]; then
               echo "$commit_date"
             else
@@ -283,18 +195,21 @@ jobs:
             echo '</urlset>'
           } > "$SITEMAP_FILE"
 
-      - name: Show changed files after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+      - name: Restore original keyword queue after manual full rebuild
+        if: always() && env.FULL_REBUILD == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          git status --short
 
-      - name: Commit generated pages and sitemap after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+          if [ -f "$RUNNER_TEMP/original_keywords_queue_b.txt" ]; then
+            cp "$RUNNER_TEMP/original_keywords_queue_b.txt" "$KEYWORDS_FILE"
+          fi
+
+      - name: Commit generated pages and sitemap
         shell: bash
         run: |
           set -euo pipefail
+
           git add -A
 
           if git diff --cached --quiet; then
@@ -304,250 +219,17 @@ jobs:
 
           git commit -m "Auto SEO generation B + hub update + sitemap update"
 
-      - name: Rebase on latest main before push after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+      - name: Rebase on latest main and push
         shell: bash
         run: |
           set -euo pipefail
+
           git fetch origin main
 
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
-            echo "Nothing to push"
+          if [ -z "$(git log origin/main..HEAD --oneline 2>/dev/null || true)" ]; then
+            echo "No local commit to push"
             exit 0
           fi
 
-          git pull --rebase origin main
-
-      - name: Push generated pages and sitemap after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
-            echo "Nothing to push"
-            exit 0
-          fi
-
+          git rebase origin/main
           git push origin HEAD:main
-
-      - name: Manual full rebuild in resumable batches
-        if: success() && steps.limits.outputs.full_rebuild == 'true'
-        shell: bash
-        env:
-          TOTAL_LIMIT: ${{ steps.limits.outputs.effective_daily_limit }}
-          BATCH_SIZE: ${{ steps.limits.outputs.rebuild_batch_size }}
-          REBUILD_ALL_REMAINING: ${{ steps.limits.outputs.rebuild_all_remaining }}
-        run: |
-          set -euo pipefail
-
-          get_lastmod() {
-            local file_path="$1"
-            local commit_date
-            commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
-            if [ -n "$commit_date" ]; then
-              echo "$commit_date"
-            else
-              date -u +%F
-            fi
-          }
-
-          build_b_sitemap() {
-            {
-              echo '<?xml version="1.0" encoding="UTF-8"?>'
-              echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-
-              ROOT_LASTMOD=$(get_lastmod "index.html")
-              echo "<url><loc>https://verixiaapps.com/</loc><lastmod>${ROOT_LASTMOD}</lastmod></url>"
-
-              find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
-                [ -f "$dir/index.html" ] || continue
-                slug=$(basename "$dir")
-                page_lastmod=$(get_lastmod "$dir/index.html")
-                echo "<url><loc>https://verixiaapps.com/scam-check-now-b/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
-              done
-
-              echo '</urlset>'
-            } > "$SITEMAP_FILE"
-          }
-
-          commit_and_push() {
-            local commit_message="$1"
-
-            git status --short
-            git add -A
-
-            if git diff --cached --quiet; then
-              echo "No changes to commit for: $commit_message"
-              return 0
-            fi
-
-            git commit -m "$commit_message"
-            git fetch origin main
-
-            if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
-              echo "Nothing to push for: $commit_message"
-              return 0
-            fi
-
-            git pull --rebase origin main
-            git push origin HEAD:main
-          }
-
-          total_processed_this_run=0
-          batch_number=0
-
-          while true; do
-            progress=$(tr -d '[:space:]' < "$REBUILD_PROGRESS_FILE")
-            if [ -z "$progress" ]; then
-              progress="0"
-            fi
-
-            total_source_lines=$(wc -l < "$REBUILD_KEYWORDS_SOURCE_FILE" | tr -d ' ')
-            remaining_total=$((total_source_lines - progress))
-
-            if [ "$progress" -ge "$total_source_lines" ]; then
-              echo "Rebuild source fully processed."
-              break
-            fi
-
-            if [ "$REBUILD_ALL_REMAINING" = "true" ]; then
-              remaining_this_run="$remaining_total"
-            else
-              remaining_this_run=$((TOTAL_LIMIT - total_processed_this_run))
-              if [ "$remaining_this_run" -le 0 ]; then
-                echo "Reached configured rebuild limit for this run."
-                break
-              fi
-            fi
-
-            current_batch_size="$BATCH_SIZE"
-
-            if [ "$remaining_this_run" -lt "$current_batch_size" ]; then
-              current_batch_size="$remaining_this_run"
-            fi
-
-            if [ "$remaining_total" -lt "$current_batch_size" ]; then
-              current_batch_size="$remaining_total"
-            fi
-
-            if [ "$current_batch_size" -le 0 ]; then
-              echo "Nothing left to rebuild."
-              break
-            fi
-
-            batch_number=$((batch_number + 1))
-            start_line=$((progress + 1))
-            end_line=$((progress + current_batch_size))
-
-            echo "Starting rebuild batch #$batch_number"
-            echo "Progress offset before batch: $progress"
-            echo "Processing lines $start_line to $end_line"
-
-            sed -n "${start_line},${end_line}p" "$REBUILD_KEYWORDS_SOURCE_FILE" > "$KEYWORDS_FILE"
-            sed -n "${start_line},${end_line}p" "$REBUILD_SLUGS_SOURCE_FILE" > "$RUNNER_TEMP/current_batch_slugs_b.txt"
-
-            while IFS= read -r slug; do
-              [ -n "$slug" ] || continue
-              if [ "$slug" = "$PROTECTED_SLUG" ]; then
-                continue
-              fi
-              rm -rf "$OUTPUT_DIR/$slug"
-            done < "$RUNNER_TEMP/current_batch_slugs_b.txt"
-
-            if [ ! -f "$GENERATED_SLUGS_FILE" ] || [ ! -f "$GENERATED_KEYWORDS_FILE" ]; then
-              echo "Generated tracking files missing during rebuild."
-              exit 1
-            fi
-
-            if [ "$(wc -l < "$GENERATED_SLUGS_FILE" | tr -d ' ')" -ne "$(wc -l < "$GENERATED_KEYWORDS_FILE" | tr -d ' ')" ]; then
-              echo "generated_slugs_b.txt and generated_keywords_b.txt are not line-aligned."
-              exit 1
-            fi
-
-            paste "$GENERATED_SLUGS_FILE" "$GENERATED_KEYWORDS_FILE" > "$RUNNER_TEMP/generated_pairs_b.tsv"
-
-            : > "$RUNNER_TEMP/generated_slugs_kept_b.txt"
-            : > "$RUNNER_TEMP/generated_keywords_kept_b.txt"
-
-            awk -F '\t' -v slugs_out="$RUNNER_TEMP/generated_slugs_kept_b.txt" -v keywords_out="$RUNNER_TEMP/generated_keywords_kept_b.txt" '
-              NR==FNR {
-                drop[$0]=1
-                next
-              }
-              !($1 in drop) {
-                print $1 >> slugs_out
-                print $2 >> keywords_out
-              }
-            ' "$RUNNER_TEMP/current_batch_slugs_b.txt" "$RUNNER_TEMP/generated_pairs_b.tsv"
-
-            mv "$RUNNER_TEMP/generated_slugs_kept_b.txt" "$GENERATED_SLUGS_FILE"
-            mv "$RUNNER_TEMP/generated_keywords_kept_b.txt" "$GENERATED_KEYWORDS_FILE"
-
-            DAILY_LIMIT="$current_batch_size" python scripts/build_seo_incremental_b.py
-            python scripts/build_hubs_b.py
-            build_b_sitemap
-
-            next_progress=$((progress + current_batch_size))
-            echo "$next_progress" > "$REBUILD_PROGRESS_FILE"
-
-            cp "$RUNNER_TEMP/original_keywords_queue_b.txt" "$KEYWORDS_FILE"
-
-            commit_and_push "Manual SEO full rebuild B batch #$batch_number (through source line $next_progress)"
-
-            total_processed_this_run=$((total_processed_this_run + current_batch_size))
-          done
-
-      - name: Finalize rebuild state after successful manual rebuild run
-        if: success() && steps.limits.outputs.full_rebuild == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          cp "$RUNNER_TEMP/original_keywords_queue_b.txt" "$KEYWORDS_FILE"
-
-          if [ -f "$REBUILD_PROGRESS_FILE" ] && [ -f "$REBUILD_KEYWORDS_SOURCE_FILE" ] && [ -f "$REBUILD_SLUGS_SOURCE_FILE" ]; then
-            progress=$(tr -d '[:space:]' < "$REBUILD_PROGRESS_FILE")
-            total=$(wc -l < "$REBUILD_KEYWORDS_SOURCE_FILE" | tr -d ' ')
-
-            if [ -z "$progress" ]; then
-              progress="0"
-            fi
-
-            if [ "$progress" -ge "$total" ]; then
-              rm -f "$REBUILD_PROGRESS_FILE" "$REBUILD_KEYWORDS_SOURCE_FILE" "$REBUILD_SLUGS_SOURCE_FILE"
-              echo "Rebuild completed. Reset rebuild state files."
-            else
-              echo "Rebuild not complete yet. Keeping rebuild state files for next run."
-            fi
-          fi
-
-          git status --short
-          git add "$KEYWORDS_FILE" "$REBUILD_PROGRESS_FILE" "$REBUILD_KEYWORDS_SOURCE_FILE" "$REBUILD_SLUGS_SOURCE_FILE" 2>/dev/null || true
-
-          if git diff --cached --quiet; then
-            echo "No final rebuild-state changes to commit"
-            exit 0
-          fi
-
-          git commit -m "Finalize manual rebuild state B"
-          git fetch origin main
-
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
-            echo "Nothing to push"
-            exit 0
-          fi
-
-          git pull --rebase origin main
-          git push origin HEAD:main
-
-      - name: Cleanup temp batch files
-        if: always() && steps.limits.outputs.full_rebuild == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -f "$RUNNER_TEMP/current_batch_slugs_b.txt" \
-                "$RUNNER_TEMP/generated_pairs_b.tsv" \
-                "$RUNNER_TEMP/generated_slugs_kept_b.txt" \
-                "$RUNNER_TEMP/generated_keywords_kept_b.txt"
