@@ -4,7 +4,7 @@ from typing import List, Set
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
 REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "metadata").strip().lower()
-MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "1"))
+MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "10"))
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
 TEMPLATE_PATHS = {
@@ -15,19 +15,15 @@ TEMPLATE_PATHS = {
 
 TODAY_TARGET_SLUGS = [
     "is-amazon-refund-message-legit-or-scam",
-    "is-google-account-disabled-email-legit-or-scam",
-    "is-fedex-customs-charge-email-legit-or-scam",
-    "is-venmo-verification-code-text-real-or-fake",
-    "is-bank-debit-card-suspension-email-legit-or-scam",
-    "is-whatsapp-unusual-login-email-legit-or-scam",
-    "is-telegram-suspicious-activity-message-legit-or-scam",
     "is-usps-tracking-text-legit-or-scam",
-    "is-venmo-security-alert-email-legit-or-scam",
-    "is-bank-account-closure-email-legit-or-scam",
-    "is-apple-account-verification-email-legit-or-scam",
-    "snapchat-scams",
-    "is-fedex-delivery-legit-or-scam",
+    "is-venmo-verification-code-text-real-or-fake",
     "is-security-alert-message-legit-or-scam",
+    "snapchat-scams",
+    "is-google-account-disabled-email-legit-or-scam",
+    "is-apple-account-verification-email-legit-or-scam",
+    "is-bank-account-closure-email-legit-or-scam",
+    "is-fedex-delivery-legit-or-scam",
+    "is-fedex-customs-charge-email-legit-or-scam",
 ]
 
 SPECIAL_REPLACEMENTS = {
@@ -63,37 +59,29 @@ STRIP_WORDS = {
 LOWERCASE_LINK_WORDS = {"a", "an", "and", "or", "the"}
 
 TITLE_MAP = {
-    "is-amazon-refund-message-legit-or-scam": "Amazon Refund Message Scam? Warning Signs and What to Do",
-    "is-google-account-disabled-email-legit-or-scam": "Google Account Disabled Email Scam? How to Spot the Warning Signs",
-    "is-fedex-customs-charge-email-legit-or-scam": "FedEx Customs Charge Email Scam? What to Check First",
+    "is-amazon-refund-message-legit-or-scam": "Amazon Refund Email Scam? Real or Fake Warning Signs",
+    "is-usps-tracking-text-legit-or-scam": "USPS Tracking Text Scam? Real or Fake Message Warning Signs",
     "is-venmo-verification-code-text-real-or-fake": "Venmo Verification Code Text Scam? Real or Fake Warning Signs",
-    "is-bank-debit-card-suspension-email-legit-or-scam": "Bank Debit Card Suspension Email Scam? Warning Signs and What to Do",
-    "is-whatsapp-unusual-login-email-legit-or-scam": "WhatsApp Unusual Login Email Scam? How to Check Safely",
-    "is-telegram-suspicious-activity-message-legit-or-scam": "Telegram Suspicious Activity Message Scam? Warning Signs and What to Do",
-    "is-usps-tracking-text-legit-or-scam": "USPS Tracking Text Scam? What to Check Before You Click",
-    "is-venmo-security-alert-email-legit-or-scam": "Venmo Security Alert Email Scam? How to Spot the Warning Signs",
-    "is-bank-account-closure-email-legit-or-scam": "Bank Account Closure Email Scam? Warning Signs and What to Do",
-    "is-apple-account-verification-email-legit-or-scam": "Apple Account Verification Email Scam? How to Spot the Warning Signs",
-    "snapchat-scams": "Snapchat Scams: Common Warning Signs and What to Do",
-    "is-fedex-delivery-legit-or-scam": "FedEx Delivery Message Scam? What to Check First",
-    "is-security-alert-message-legit-or-scam": "Security Alert Message Scam? Warning Signs and What to Do",
+    "is-security-alert-message-legit-or-scam": "Security Alert Message Scam? Real or Fake Warning Signs",
+    "snapchat-scams": "Snapchat Scams: Real Examples, Warning Signs and What to Do",
+    "is-google-account-disabled-email-legit-or-scam": "Google Account Disabled Email Scam? Real or Fake Warning Signs",
+    "is-apple-account-verification-email-legit-or-scam": "Apple Account Verification Email Scam? Real or Fake Warning Signs",
+    "is-bank-account-closure-email-legit-or-scam": "Bank Account Closure Email Scam? Real or Fake Warning Signs",
+    "is-fedex-delivery-legit-or-scam": "FedEx Delivery Message Scam? Real or Fake Warning Signs",
+    "is-fedex-customs-charge-email-legit-or-scam": "FedEx Customs Charge Email Scam? Real or Fake Warning Signs",
 }
 
 DESCRIPTION_MAP = {
-    "is-amazon-refund-message-legit-or-scam": "Got an Amazon refund message? Learn the scam warning signs, suspicious link risks, and what to do before you click, reply, or send information.",
-    "is-google-account-disabled-email-legit-or-scam": "Received a Google account disabled email? Learn the warning signs of fake account alerts and how to verify the message safely.",
-    "is-fedex-customs-charge-email-legit-or-scam": "Got a FedEx customs charge email? Review the scam signs, payment risks, and what to do before clicking or paying anything.",
-    "is-venmo-verification-code-text-real-or-fake": "Received a Venmo verification code text? Learn how to spot scam signs, fake urgency, and risky requests before taking action.",
-    "is-bank-debit-card-suspension-email-legit-or-scam": "Received a bank debit card suspension email? Learn the common warning signs, suspicious link risks, and how to verify it safely.",
-    "is-whatsapp-unusual-login-email-legit-or-scam": "Got a WhatsApp unusual login email? Review the scam warning signs and what to do before you click or share information.",
-    "is-telegram-suspicious-activity-message-legit-or-scam": "Received a Telegram suspicious activity message? Learn the warning signs of fake security alerts and risky login links.",
-    "is-usps-tracking-text-legit-or-scam": "Got a USPS tracking text? Review the scam warning signs, fake tracking link risks, and what to do before clicking.",
-    "is-venmo-security-alert-email-legit-or-scam": "Received a Venmo security alert email? Learn the warning signs of fake account alerts and how to verify it safely.",
-    "is-bank-account-closure-email-legit-or-scam": "Got a bank account closure email? Review the scam warning signs, suspicious link risks, and what to do before taking action.",
-    "is-apple-account-verification-email-legit-or-scam": "Received an Apple account verification email? Learn the scam signs, suspicious link risks, and how to verify it safely.",
-    "snapchat-scams": "Learn common Snapchat scam warning signs, fake account risks, and what to do before replying, clicking, or sharing information.",
-    "is-fedex-delivery-legit-or-scam": "Got a FedEx delivery message? Review the scam signs, fake tracking link risks, and what to do before clicking.",
-    "is-security-alert-message-legit-or-scam": "Received a security alert message? Learn the warning signs of fake alerts, suspicious links, and what to do next.",
+    "is-amazon-refund-message-legit-or-scam": "Got an Amazon refund email or message? Learn scam warning signs, fake link risks, and what to do before you click, reply, or send information.",
+    "is-usps-tracking-text-legit-or-scam": "Got a USPS tracking text? Learn scam warning signs, fake tracking link risks, and what to do before clicking.",
+    "is-venmo-verification-code-text-real-or-fake": "Received a Venmo verification code text? Learn scam signs, fake urgency patterns, and what to do before taking action.",
+    "is-security-alert-message-legit-or-scam": "Received a security alert message? Learn how to spot fake alerts, suspicious links, and what to do next.",
+    "snapchat-scams": "Learn common Snapchat scam warning signs, fake account risks, and what to do before replying or clicking.",
+    "is-google-account-disabled-email-legit-or-scam": "Received a Google account disabled email? Learn warning signs of fake alerts and how to verify safely.",
+    "is-apple-account-verification-email-legit-or-scam": "Received an Apple account verification email? Learn scam signs and what to check before clicking.",
+    "is-bank-account-closure-email-legit-or-scam": "Got a bank account closure email? Learn warning signs and what to do before taking action.",
+    "is-fedex-delivery-legit-or-scam": "Got a FedEx delivery message? Learn scam signs, fake tracking links, and what to do before clicking.",
+    "is-fedex-customs-charge-email-legit-or-scam": "Got a FedEx customs charge email? Learn scam warning signs, payment risks, and what to do before paying.",
 }
 
 
