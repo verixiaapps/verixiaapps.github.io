@@ -220,6 +220,17 @@ def ensure_file(filepath):
             pass
 
 
+def ensure_json_file(filepath, default_value=None):
+    if default_value is None:
+        default_value = {}
+    folder = os.path.dirname(filepath)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+    if not os.path.exists(filepath) or os.path.getsize(filepath) == 0:
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(default_value, f, indent=2, sort_keys=True)
+
+
 def load_keywords():
     if not os.path.exists(KEYWORD_FILE):
         return []
@@ -227,25 +238,35 @@ def load_keywords():
         return list(dict.fromkeys(normalize_keyword(line) for line in f if line.strip()))
 
 
-def load_generated_slugs():
+def load_generated_slug_lines():
     if not os.path.exists(GENERATED_SLUGS_FILE):
-        return set()
+        return []
     with open(GENERATED_SLUGS_FILE, encoding="utf-8") as f:
-        return {slugify(line) for line in f if slugify(line)}
+        return [slugify(line) for line in f if slugify(line)]
 
 
-def load_generated_keywords():
+def load_generated_keyword_lines():
     if not os.path.exists(GENERATED_KEYWORDS_FILE):
-        return set()
+        return []
     with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
-        return {normalize_keyword(line) for line in f if normalize_keyword(line)}
+        return [normalize_keyword(line) for line in f if normalize_keyword(line)]
 
 
 def load_slug_to_hub():
     if not os.path.exists(SLUG_TO_HUB_FILE):
         return {}
-    with open(SLUG_TO_HUB_FILE, encoding="utf-8") as f:
-        data = json.load(f)
+
+    try:
+        with open(SLUG_TO_HUB_FILE, encoding="utf-8") as f:
+            raw = f.read().strip()
+        if not raw:
+            return {}
+        data = json.loads(raw)
+        if not isinstance(data, dict):
+            return {}
+    except (json.JSONDecodeError, OSError, TypeError, ValueError):
+        return {}
+
     return {slugify(k): str(v).strip() for k, v in data.items() if slugify(k) and str(v).strip()}
 
 
@@ -340,10 +361,6 @@ def page_exists(slug):
     return os.path.exists(page_path(slug))
 
 
-def humanize_slug(slug):
-    return title_case(slug.replace("-", " "))
-
-
 def load_output_pages_from_disk():
     pages = []
     seen = set()
@@ -406,6 +423,21 @@ def sanitize_ai_html(text):
         paragraphs = [raw]
 
     return "\n".join(f"<p>{escape_html(paragraph)}</p>" for paragraph in paragraphs)
+
+
+def add_tracking_pair(slug, keyword, tracked_slugs, tracked_keywords, tracked_slug_set):
+    normalized_slug = slugify(slug)
+    normalized_keyword = normalize_keyword(keyword)
+
+    if not normalized_slug or not normalized_keyword:
+        return
+
+    if normalized_slug in tracked_slug_set:
+        return
+
+    tracked_slugs.append(normalized_slug)
+    tracked_keywords.append(normalized_keyword)
+    tracked_slug_set.add(normalized_slug)
 
 
 # -----------------------------
@@ -517,6 +549,7 @@ def build_hub_link_html(slug, keyword, slug_to_hub, available_hub_names):
         hub_name = infer_hub_name(keyword, available_hub_names)
         if hub_name:
             slug_to_hub[normalized_slug] = hub_name
+            available_hub_names.add(hub_name)
 
     if not hub_name:
         return ""
@@ -638,7 +671,7 @@ def build_links_html(pages_list):
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 ensure_file(GENERATED_SLUGS_FILE)
 ensure_file(GENERATED_KEYWORDS_FILE)
-ensure_file(SLUG_TO_HUB_FILE)
+ensure_json_file(SLUG_TO_HUB_FILE, {})
 
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
@@ -648,8 +681,20 @@ if not keywords:
     print("No keywords in queue. Nothing to generate.")
     sys.exit(0)
 
-generated_slugs = load_generated_slugs()
-generated_keywords = load_generated_keywords()
+generated_slug_lines = load_generated_slug_lines()
+generated_keyword_lines = load_generated_keyword_lines()
+
+if len(generated_slug_lines) != len(generated_keyword_lines):
+    raise ValueError(
+        "generated_slugs_b.txt and generated_keywords_b.txt are not line-aligned. "
+        "Fix those files before running this script."
+    )
+
+tracked_slugs = list(generated_slug_lines)
+tracked_keywords = list(generated_keyword_lines)
+tracked_slug_set = set(tracked_slugs)
+tracked_keyword_set = set(tracked_keywords)
+
 slug_to_hub = load_slug_to_hub()
 available_hub_names = load_available_hub_names(slug_to_hub)
 disk_pages = load_output_pages_from_disk()
@@ -674,13 +719,12 @@ for keyword in keywords:
 existing_pages = []
 existing_seen_slugs = set()
 
-for keyword in generated_keywords:
-    slug = slugify(keyword)
-    if slug in PROTECTED_SLUGS or slug in existing_seen_slugs or not slug:
+for tracked_slug, tracked_keyword in zip(tracked_slugs, tracked_keywords):
+    if tracked_slug in PROTECTED_SLUGS or tracked_slug in existing_seen_slugs or not tracked_slug:
         continue
-    if page_exists(slug):
-        existing_pages.append({"keyword": keyword, "slug": slug})
-        existing_seen_slugs.add(slug)
+    if page_exists(tracked_slug):
+        existing_pages.append({"keyword": tracked_keyword, "slug": tracked_slug})
+        existing_seen_slugs.add(tracked_slug)
 
 for page in queue_pages:
     if page["slug"] in existing_seen_slugs:
@@ -696,8 +740,8 @@ all_linkable_pages = merge_page_pools(existing_pages, disk_pages)
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
 print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
-print(f"Known generated slugs: {len(generated_slugs)}")
-print(f"Known generated keywords: {len(generated_keywords)}")
+print(f"Known generated slugs: {len(tracked_slugs)}")
+print(f"Known generated keywords: {len(tracked_keywords)}")
 print(f"Existing pages available for internal links: {len(all_linkable_pages)}")
 print(f"Loaded slug-to-hub mappings: {len(slug_to_hub)}")
 print(f"Available hub names: {len(available_hub_names)}")
@@ -707,8 +751,6 @@ generated_count = 0
 skipped_existing_count = 0
 failed_count = 0
 processed_keywords = set()
-new_generated_slugs = set(generated_slugs)
-new_generated_keywords = set(generated_keywords)
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
@@ -726,14 +768,16 @@ for page in queue_pages:
 
     if page_exists(slug):
         skipped_existing_count += 1
-        new_generated_slugs.add(slug)
-        new_generated_keywords.add(keyword)
         processed_keywords.add(keyword)
+
+        add_tracking_pair(slug, keyword, tracked_slugs, tracked_keywords, tracked_slug_set)
+        tracked_keyword_set.add(normalize_keyword(keyword))
 
         if slug not in slug_to_hub:
             inferred_hub = infer_hub_name(keyword, available_hub_names)
             if inferred_hub:
                 slug_to_hub[slug] = inferred_hub
+                available_hub_names.add(inferred_hub)
 
         continue
 
@@ -779,8 +823,8 @@ for page in queue_pages:
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
-    new_generated_slugs.add(slug)
-    new_generated_keywords.add(keyword)
+    add_tracking_pair(slug, keyword, tracked_slugs, tracked_keywords, tracked_slug_set)
+    tracked_keyword_set.add(normalize_keyword(keyword))
     processed_keywords.add(keyword)
 
     existing_pages.append({"keyword": keyword, "slug": slug})
@@ -800,8 +844,8 @@ for keyword in keywords:
     if keyword_norm not in processed_keywords:
         remaining_keywords.append(keyword_norm)
 
-write_lines(GENERATED_SLUGS_FILE, sorted(new_generated_slugs))
-write_lines(GENERATED_KEYWORDS_FILE, sorted(new_generated_keywords))
+write_lines(GENERATED_SLUGS_FILE, tracked_slugs)
+write_lines(GENERATED_KEYWORDS_FILE, tracked_keywords)
 write_lines(KEYWORD_FILE, remaining_keywords)
 
 with open(SLUG_TO_HUB_FILE, "w", encoding="utf-8") as f:
