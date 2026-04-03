@@ -1,5 +1,3 @@
-Use this full corrected build_seo_incremental_b.py file:
-
 import json
 import os
 import re
