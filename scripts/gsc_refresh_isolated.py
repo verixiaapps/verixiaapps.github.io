@@ -3,7 +3,7 @@ import html
 from typing import List, Set
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
-REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "metadata").strip().lower()
+REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "internal-links").strip().lower()
 MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "10"))
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
