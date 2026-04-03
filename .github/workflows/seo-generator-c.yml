@@ -35,14 +35,14 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
+      - name: Build hubs C
+        run: python scripts/build_hubs_c.py
+
       - name: Generate SEO pages (C)
         env:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit || '50' }}
           REBUILD_ALL: ${{ github.event.inputs.rebuild_all || 'false' }}
         run: python scripts/generate-seo-pages-c.py
-
-      - name: Build hubs C
-        run: python scripts/build_hubs_c.py
 
       - name: Commit and push
         run: |
