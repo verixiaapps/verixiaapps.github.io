@@ -1,3 +1,4 @@
+import json
 import os
 from generate_content import generate_content
 
@@ -5,6 +6,7 @@ BASE_DIR = "scam-check-now-c"
 KEYWORD_FILE = "data/keywords_c.txt"
 GENERATED_KEYWORDS_FILE = "data/generated_keywords_c.txt"
 GENERATED_SLUGS_FILE = "data/generated_slugs_c.txt"
+SLUG_TO_HUB_FILE = "data/slug_to_hub_c.json"
 
 OUTPUT_LIMIT = int(os.getenv("PAGE_LIMIT", "50"))
 REBUILD_ALL = os.getenv("REBUILD_ALL", "false").lower() == "true"
@@ -12,6 +14,7 @@ REBUILD_ALL = os.getenv("REBUILD_ALL", "false").lower() == "true"
 TEMPLATE_PATH = "templates/seo-template-c.html"
 SITE = "https://verixiaapps.com"
 URL_PREFIX = "/scam-check-now-c"
+HUB_PREFIX = "/scam-check-now-c/hubs"
 
 
 def load_file_lines(path):
@@ -48,6 +51,14 @@ def load_template():
         return f.read()
 
 
+def load_slug_to_hub():
+    if not os.path.exists(SLUG_TO_HUB_FILE):
+        return {}
+    with open(SLUG_TO_HUB_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return {str(k).strip(): str(v).strip() for k, v in data.items() if str(k).strip() and str(v).strip()}
+
+
 def slugify(text):
     return (
         str(text).lower()
@@ -65,6 +76,10 @@ def slugify(text):
     )
 
 
+def pretty_hub_title(hub_name):
+    return hub_name.replace("-", " ").title()
+
+
 def build_title(keyword):
     return f"{keyword.title()} | Scam Check Now"
 
@@ -78,7 +93,7 @@ def build_internal_links(existing_slugs, current_slug, limit=12):
     used = set()
 
     for slug in existing_slugs:
-        if slug == current_slug or slug in used:
+        if slug == current_slug or slug in used or slug == "hubs":
             continue
 
         used.add(slug)
@@ -92,7 +107,17 @@ def build_internal_links(existing_slugs, current_slug, limit=12):
     return "\n".join(links)
 
 
-def build_page(template, keyword, ai_content, related_links, more_links):
+def build_hub_link_html(slug, slug_to_hub):
+    hub_name = slug_to_hub.get(slug, "")
+    if not hub_name:
+        return ""
+
+    hub_title = pretty_hub_title(hub_name)
+    hub_url = f"{SITE}{HUB_PREFIX}/{hub_name}/"
+    return f'<a href="{hub_url}">{hub_title}</a>'
+
+
+def build_page(template, keyword, ai_content, related_links, more_links, hub_link_html):
     slug = slugify(keyword)
 
     html = template
@@ -103,6 +128,7 @@ def build_page(template, keyword, ai_content, related_links, more_links):
     html = html.replace("{{AI_CONTENT}}", ai_content)
     html = html.replace("{{RELATED_LINKS}}", related_links)
     html = html.replace("{{MORE_LINKS}}", more_links)
+    html = html.replace("{{HUB_LINK}}", hub_link_html)
 
     return html
 
@@ -121,6 +147,7 @@ def main():
 
     keywords = load_file_lines(KEYWORD_FILE)
     template = load_template()
+    slug_to_hub = load_slug_to_hub()
 
     if REBUILD_ALL:
         print("REBUILD_ALL=true -> resetting generated tracking files")
@@ -159,13 +186,15 @@ def main():
             related_links = build_internal_links(generated_slugs, slug, limit=10)
             more_links = build_internal_links(list(reversed(generated_slugs)), slug, limit=10)
             ai_content = generate_content(keyword)
+            hub_link_html = build_hub_link_html(slug, slug_to_hub)
 
             html = build_page(
                 template,
                 keyword,
                 ai_content,
                 related_links,
-                more_links
+                more_links,
+                hub_link_html
             )
 
             save_page(slug, html)
@@ -187,6 +216,7 @@ def main():
     save_file_lines(KEYWORD_FILE, remaining_keywords)
 
     print(f"Generated {count} C pages.")
+    print(f"Loaded slug-to-hub mappings: {len(slug_to_hub)}")
 
 
 if __name__ == "__main__":
