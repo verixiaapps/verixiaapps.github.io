@@ -150,15 +150,15 @@ jobs:
 
           find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
+      - name: Build hub pages
+        shell: bash
+        run: python scripts/build_hubs_b.py
+
       - name: Build SEO pages incrementally
         shell: bash
         run: python scripts/build_seo_incremental_b.py
         env:
           DAILY_LIMIT: ${{ env.EFFECTIVE_DAILY_LIMIT }}
-
-      - name: Build hub pages
-        shell: bash
-        run: python scripts/build_hubs_b.py
 
       - name: Build B sitemap
         shell: bash
@@ -188,8 +188,20 @@ jobs:
             find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
               [ -f "$dir/index.html" ] || continue
               slug=$(basename "$dir")
+
+              if [ "$slug" = "hubs" ]; then
+                continue
+              fi
+
               page_lastmod=$(get_lastmod "$dir/index.html")
               echo "<url><loc>https://verixiaapps.com/scam-check-now-b/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
+            done
+
+            find "$OUTPUT_DIR/hubs" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | while read -r dir; do
+              [ -f "$dir/index.html" ] || continue
+              hub_slug=$(basename "$dir")
+              hub_lastmod=$(get_lastmod "$dir/index.html")
+              echo "<url><loc>https://verixiaapps.com/scam-check-now-b/hubs/$hub_slug/</loc><lastmod>${hub_lastmod}</lastmod></url>"
             done
 
             echo '</urlset>'
