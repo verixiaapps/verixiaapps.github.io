@@ -345,7 +345,8 @@ z-index:1;
 .community-card,
 .tool-shell,
 .app-link-card,
-.upgrade{
+.upgrade,
+.inline-info-card{
 background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
 border:1px solid rgba(255,255,255,.10);
 border-radius:24px;
@@ -1064,6 +1065,35 @@ font-weight:800;
 line-height:1.66;
 }
 
+.inline-info-card{
+margin:0 0 24px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(59,130,246,.10) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+color:#fff;
+}
+
 .content-header-band{
 display:grid;
 gap:14px;
@@ -1405,6 +1435,10 @@ body{padding-top:84px;}
   <section class="content-section">
     <div id="contentBridge" class="content-bridge"></div>
 
+    <div class="inline-info-card" id="hubLinkWrap">
+      {{HUB_LINK}}
+    </div>
+
     <div class="content-header-band">
       <div class="content-pulse">
         <div class="pulse-card">
@@ -1496,6 +1530,7 @@ window.addEventListener("load", function () {
   applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
+  cleanHubLink();
   cleanMoreLinks();
   normalizeBottomLinks();
 });
@@ -1914,6 +1949,36 @@ function cleanRelatedLinks() {
   }
 
   relatedLinksWrap.style.display = "";
+}
+
+function cleanHubLink() {
+  const hubLinkWrap = document.getElementById("hubLinkWrap");
+  if (!hubLinkWrap) return;
+
+  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
+
+  const anchor = hubLinkWrap.querySelector("a");
+  if (!anchor) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  const safeHref = anchor.getAttribute("href") || "#";
+  const safeText = (anchor.textContent || "").trim();
+  const target = anchor.getAttribute("target");
+  const rel = anchor.getAttribute("rel");
+
+  if (!safeText) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  hubLinkWrap.innerHTML = `
+    <div class="hub-link-block">
+      <span class="hub-link-label">Related scam category</span>
+      <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
+    </div>
+  `;
 }
 
 function cleanMoreLinks() {
