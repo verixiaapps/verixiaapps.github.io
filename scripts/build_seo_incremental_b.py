@@ -1,3 +1,6 @@
+Use this full corrected build_seo_incremental_b.py file:
+
+import json
 import os
 import re
 import sys
@@ -15,6 +18,7 @@ from generate_content import generate_content
 KEYWORD_FILE = os.path.join(BASE_DIR, "data", "keywords_b.txt")
 GENERATED_SLUGS_FILE = os.path.join(BASE_DIR, "data", "generated_slugs_b.txt")
 GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "generated_keywords_b.txt")
+SLUG_TO_HUB_FILE = os.path.join(BASE_DIR, "data", "slug_to_hub_b.json")
 TEMPLATE_FILE = os.path.join(BASE_DIR, "templates", "seo-template-b.html")
 OUTPUT_DIR = os.path.join(BASE_DIR, "scam-check-now-b")
 SITE = "https://verixiaapps.com"
@@ -149,6 +153,7 @@ def title_case(text):
 
     return apply_brand_case(" ".join(titled))
 
+
 def readable_keyword(text):
     base = display_keyword(text)
     return title_case(base) if base else ""
@@ -158,7 +163,7 @@ def keyword_tokens(text):
     base = clean_base_keyword(text)
     if not base:
         base = normalize_keyword(text)
-    return set(token for token in base.split() if token)
+    return {token for token in base.split() if token}
 
 
 def keyword_cluster_tokens(text):
@@ -224,6 +229,14 @@ def load_generated_keywords():
         return {normalize_keyword(line) for line in f if normalize_keyword(line)}
 
 
+def load_slug_to_hub():
+    if not os.path.exists(SLUG_TO_HUB_FILE):
+        return {}
+    with open(SLUG_TO_HUB_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    return {slugify(k): str(v).strip() for k, v in data.items() if slugify(k) and str(v).strip()}
+
+
 def write_lines(filepath, values, preserve_input=True):
     ensure_file(filepath)
 
@@ -250,6 +263,7 @@ def page_exists(slug):
 def humanize_slug(slug):
     return title_case(slug.replace("-", " "))
 
+
 def load_output_pages_from_disk():
     pages = []
     seen = set()
@@ -263,7 +277,7 @@ def load_output_pages_from_disk():
 
         if not os.path.isdir(folder):
             continue
-        if slug in PROTECTED_SLUGS or slug in seen or not os.path.exists(index_path):
+        if slug in PROTECTED_SLUGS or slug in seen or slug == "hubs" or not os.path.exists(index_path):
             continue
 
         seen.add(slug)
@@ -281,12 +295,12 @@ def merge_page_pools(*page_groups):
 
     for group in page_groups:
         for page in group:
-            slug = page.get("slug", "")
-            if not slug or slug in PROTECTED_SLUGS or slug in seen:
+            slug = slugify(page.get("slug", ""))
+            if not slug or slug in PROTECTED_SLUGS or slug == "hubs" or slug in seen:
                 continue
             seen.add(slug)
             merged.append({
-                "keyword": page.get("keyword", slug.replace("-", " ")),
+                "keyword": normalize_keyword(page.get("keyword", slug.replace("-", " "))),
                 "slug": slug,
             })
 
@@ -351,6 +365,7 @@ def generate_ai_text(keyword, keyword_display):
         raise ValueError(f"AI generation failed for all prompts: {last_error}")
     raise ValueError("AI generation failed for all prompts")
 
+
 # -----------------------------
 # SEO TEXT HELPERS
 # -----------------------------
@@ -409,6 +424,21 @@ def build_related_anchor(keyword):
 def build_canonical(slug):
     return f"{SITE}/scam-check-now-b/{slug}/"
 
+
+def build_hub_link_html(slug, slug_to_hub):
+    hub_name = slug_to_hub.get(slugify(slug), "").strip()
+    if not hub_name:
+        return ""
+
+    hub_title = pretty_hub_title(hub_name)
+    hub_url = f"{SITE}/scam-check-now-b/hubs/{hub_name}/"
+    return f'<a href="{escape_html(hub_url)}">{escape_html(hub_title)}</a>'
+
+
+def pretty_hub_title(hub_name):
+    return title_case(hub_name.replace("-", " "))
+
+
 # -----------------------------
 # LINKING HELPERS
 # -----------------------------
@@ -417,18 +447,21 @@ def dedupe_pages_by_slug(pages_list):
     seen = set()
 
     for page in pages_list:
-        slug = page["slug"]
-        if not slug or slug in seen or slug in PROTECTED_SLUGS:
+        slug = slugify(page["slug"])
+        if not slug or slug in seen or slug in PROTECTED_SLUGS or slug == "hubs":
             continue
         seen.add(slug)
-        deduped.append(page)
+        deduped.append({
+            "keyword": normalize_keyword(page["keyword"]),
+            "slug": slug,
+        })
 
     return deduped
 
 
 def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
-    exclude_slugs = set(exclude_slugs or set())
-    current_slug = current_page["slug"]
+    exclude_slugs = {slugify(s) for s in (exclude_slugs or set())}
+    current_slug = slugify(current_page["slug"])
     current_keyword = current_page["keyword"]
     current_tokens = keyword_tokens(current_keyword)
     current_cluster = keyword_cluster_tokens(current_keyword)
@@ -437,10 +470,10 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
 
     candidates = [
         p for p in all_pages
-        if p["slug"] != current_slug
-        and p["slug"] not in PROTECTED_SLUGS
-        and p["slug"] not in exclude_slugs
-        and page_exists(p["slug"])
+        if slugify(p["slug"]) != current_slug
+        and slugify(p["slug"]) not in PROTECTED_SLUGS
+        and slugify(p["slug"]) not in exclude_slugs
+        and page_exists(slugify(p["slug"]))
         and clean_base_keyword(p["keyword"]) != current_base
     ]
 
@@ -468,11 +501,12 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     used_bases = set()
 
     for page in ranked:
+        page_slug = slugify(page["slug"])
         base = clean_base_keyword(page["keyword"])
-        if page["slug"] in used_slugs or base in used_bases:
+        if page_slug in used_slugs or base in used_bases:
             continue
         related.append(page)
-        used_slugs.add(page["slug"])
+        used_slugs.add(page_slug)
         used_bases.add(base)
         if len(related) == limit:
             break
@@ -481,13 +515,13 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         fallback_candidates = sorted(
             [
                 p for p in all_pages
-                if p["slug"] != current_slug
-                and p["slug"] not in PROTECTED_SLUGS
-                and p["slug"] not in exclude_slugs
-                and p["slug"] not in used_slugs
-                and page_exists(p["slug"])
+                if slugify(p["slug"]) != current_slug
+                and slugify(p["slug"]) not in PROTECTED_SLUGS
+                and slugify(p["slug"]) not in exclude_slugs
+                and slugify(p["slug"]) not in used_slugs
+                and page_exists(slugify(p["slug"]))
             ],
-            key=lambda p: p["slug"],
+            key=lambda p: slugify(p["slug"]),
         )
 
         for page in fallback_candidates:
@@ -495,7 +529,7 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
             if base in used_bases:
                 continue
             related.append(page)
-            used_slugs.add(page["slug"])
+            used_slugs.add(slugify(page["slug"]))
             used_bases.add(base)
             if len(related) == limit:
                 break
@@ -505,9 +539,9 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
 
 def build_links_html(pages_list):
     return "".join(
-        f'<li><a href="/scam-check-now-b/{p["slug"]}/">{escape_html(build_related_anchor(p["keyword"]))}</a></li>\n'
+        f'<li><a href="/scam-check-now-b/{slugify(p["slug"])}/">{escape_html(build_related_anchor(p["keyword"]))}</a></li>\n'
         for p in pages_list
-        if page_exists(p["slug"])
+        if page_exists(slugify(p["slug"]))
     )
 
 
@@ -528,6 +562,7 @@ if not keywords:
 
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
+slug_to_hub = load_slug_to_hub()
 disk_pages = load_output_pages_from_disk()
 
 queue_pages = []
@@ -575,6 +610,7 @@ print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
 print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(all_linkable_pages)}")
+print(f"Loaded slug-to-hub mappings: {len(slug_to_hub)}")
 print(f"Daily limit: {DAILY_LIMIT}")
 
 generated_count = 0
@@ -609,6 +645,7 @@ for page in queue_pages:
     title = build_title(keyword)
     description = build_description(keyword)
     canonical = build_canonical(slug)
+    hub_link_html = build_hub_link_html(slug, slug_to_hub)
 
     try:
         ai_text = generate_ai_text(keyword, keyword_display)
@@ -635,6 +672,7 @@ for page in queue_pages:
     html = html.replace("{{RELATED_LINKS}}", build_links_html(related_pages))
     html = html.replace("{{MORE_LINKS}}", build_links_html(more_pages))
     html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
+    html = html.replace("{{HUB_LINK}}", hub_link_html)
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
@@ -651,7 +689,7 @@ for page in queue_pages:
 
     print(
         f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
-        f"-> related: {len(related_pages)}, more: {len(more_pages)}"
+        f"-> related: {len(related_pages)}, more: {len(more_pages)}, hub: {slug_to_hub.get(slug, 'none')}"
     )
 
 remaining_keywords = []
