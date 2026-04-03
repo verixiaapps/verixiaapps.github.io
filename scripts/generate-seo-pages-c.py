@@ -1,5 +1,3 @@
-Here is your fixed full file with hub inference added (no explanations, ready to paste):
-
 import json
 import os
 from generate_content import generate_content
