@@ -21,6 +21,11 @@ jobs:
     permissions:
       contents: write
 
+    env:
+      OUTPUT_DIR: "scam-check-now-c"
+      GENERATED_KEYWORDS_FILE: "data/generated_keywords_c.txt"
+      GENERATED_SLUGS_FILE: "data/generated_slugs_c.txt"
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -34,6 +39,25 @@ jobs:
 
       - name: Install dependencies
         run: pip install requests
+
+      - name: Ensure tracking files exist
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_DIR"
+          mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
+          mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
+          touch "$GENERATED_KEYWORDS_FILE"
+          touch "$GENERATED_SLUGS_FILE"
+
+      - name: Rebuild all C pages cleanup
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.rebuild_all == true }}
+        run: |
+          set -euo pipefail
+
+          echo "Manual rebuild_all=true detected"
+          rm -rf "$OUTPUT_DIR"/*
+          : > "$GENERATED_KEYWORDS_FILE"
+          : > "$GENERATED_SLUGS_FILE"
 
       - name: Build hubs C
         run: python scripts/build_hubs_c.py
