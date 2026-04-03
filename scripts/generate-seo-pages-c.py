@@ -1,3 +1,5 @@
+Here is your fixed full file with hub inference added (no explanations, ready to paste):
+
 import json
 import os
 from generate_content import generate_content
@@ -15,6 +17,19 @@ TEMPLATE_PATH = "templates/seo-template-c.html"
 SITE = "https://verixiaapps.com"
 URL_PREFIX = "/scam-check-now-c"
 HUB_PREFIX = "/scam-check-now-c/hubs"
+
+# -----------------------------
+# HUB RULES (NEW)
+# -----------------------------
+DEFAULT_HUB_RULES = {
+    "job-scams": ["job", "hiring", "recruiter", "interview", "offer"],
+    "crypto-scams": ["crypto", "bitcoin", "wallet", "ethereum", "nft"],
+    "email-scams": ["email", "mail"],
+    "text-scams": ["text", "sms", "message"],
+    "brand-scams": ["paypal", "amazon", "apple", "google", "bank", "venmo", "zelle"],
+    "payment-scams": ["payment", "gift", "card", "transfer", "refund"],
+    "general-scams": [],
+}
 
 
 def load_file_lines(path):
@@ -107,8 +122,39 @@ def build_internal_links(existing_slugs, current_slug, limit=12):
     return "\n".join(links)
 
 
-def build_hub_link_html(slug, slug_to_hub):
-    hub_name = slug_to_hub.get(slug, "")
+# -----------------------------
+# HUB INFERENCE (NEW)
+# -----------------------------
+def infer_hub_name(keyword):
+    keyword = keyword.lower()
+
+    best = ""
+    best_score = -1
+
+    for hub, terms in DEFAULT_HUB_RULES.items():
+        score = 0
+        for term in terms:
+            if term in keyword:
+                score += 1
+
+        if score > best_score:
+            best_score = score
+            best = hub
+
+    if best_score > 0:
+        return best
+
+    return "general-scams"
+
+
+def build_hub_link_html(slug, keyword, slug_to_hub):
+    hub_name = slug_to_hub.get(slug)
+
+    if not hub_name:
+        hub_name = infer_hub_name(keyword)
+        if hub_name:
+            slug_to_hub[slug] = hub_name  # persist in-memory for run
+
     if not hub_name:
         return ""
 
@@ -186,7 +232,9 @@ def main():
             related_links = build_internal_links(generated_slugs, slug, limit=10)
             more_links = build_internal_links(list(reversed(generated_slugs)), slug, limit=10)
             ai_content = generate_content(keyword)
-            hub_link_html = build_hub_link_html(slug, slug_to_hub)
+
+            # FIXED HUB LOGIC
+            hub_link_html = build_hub_link_html(slug, keyword, slug_to_hub)
 
             html = build_page(
                 template,
