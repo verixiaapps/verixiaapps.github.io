@@ -1,3 +1,4 @@
+import json
 import os
 from collections import defaultdict
 
@@ -6,6 +7,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "generated_keywords_b.txt")
 SLUGS_FILE = os.path.join(BASE_DIR, "data", "generated_slugs_b.txt")
 OUTPUT_DIR = os.path.join(BASE_DIR, "scam-check-now-b", "hubs")
+SLUG_TO_HUB_FILE = os.path.join(BASE_DIR, "data", "slug_to_hub_b.json")
 
 SITE = "https://verixiaapps.com"
 PAGE_PREFIX = "/scam-check-now-b"
@@ -156,6 +158,16 @@ def safe_html(s):
 
 def pretty_title(hub_name):
     return hub_name.replace("-", " ").title()
+
+
+def classify_hub(keyword):
+    lower = clean_text(keyword).lower()
+
+    for hub, rules in HUB_RULES.items():
+        if any(rule in lower for rule in rules):
+            return hub
+
+    return "general-scams"
 
 
 def build_links_html(items):
@@ -767,51 +779,54 @@ p{{font-size:16px;}}
 """
 
 
-with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
-    keywords = [clean_text(x) for x in f.readlines() if x.strip()]
+def main():
+    with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
+        keywords = [clean_text(x) for x in f.readlines() if x.strip()]
 
-with open(SLUGS_FILE, "r", encoding="utf-8") as f:
-    slugs = [clean_text(x) for x in f.readlines() if x.strip()]
+    with open(SLUGS_FILE, "r", encoding="utf-8") as f:
+        slugs = [clean_text(x) for x in f.readlines() if x.strip()]
 
-if len(keywords) != len(slugs):
-    raise ValueError("generated_keywords_b.txt and generated_slugs_b.txt count mismatch")
+    if len(keywords) != len(slugs):
+        raise ValueError("generated_keywords_b.txt and generated_slugs_b.txt count mismatch")
 
-pairs = list(zip(keywords, slugs))
+    pairs = list(zip(keywords, slugs))
 
-hubs = defaultdict(list)
+    hubs = defaultdict(list)
+    slug_to_hub = {}
 
-for kw, slug in pairs:
-    lower = kw.lower()
-    matched = False
+    for kw, slug in pairs:
+        hub_name = classify_hub(kw)
+        hubs[hub_name].append((kw, slug))
+        slug_to_hub[slug] = hub_name
 
-    for hub, rules in HUB_RULES.items():
-        if any(r in lower for r in rules):
-            hubs[hub].append((kw, slug))
-            matched = True
-            break
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(os.path.dirname(SLUG_TO_HUB_FILE), exist_ok=True)
 
-    if not matched:
-        hubs["general-scams"].append((kw, slug))
+    for hub_name, items in hubs.items():
+        seen = set()
+        deduped = []
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+        for kw, slug in items:
+            if slug not in seen:
+                seen.add(slug)
+                deduped.append((kw, slug))
 
-for hub_name, items in hubs.items():
-    seen = set()
-    deduped = []
+        deduped = deduped[:MAX_LINKS_PER_HUB]
 
-    for kw, slug in items:
-        if slug not in seen:
-            seen.add(slug)
-            deduped.append((kw, slug))
+        html = build_hub_html(hub_name, deduped)
 
-    deduped = deduped[:MAX_LINKS_PER_HUB]
+        hub_path = os.path.join(OUTPUT_DIR, hub_name)
+        os.makedirs(hub_path, exist_ok=True)
 
-    html = build_hub_html(hub_name, deduped)
+        with open(os.path.join(hub_path, "index.html"), "w", encoding="utf-8") as f:
+            f.write(html)
 
-    hub_path = os.path.join(OUTPUT_DIR, hub_name)
-    os.makedirs(hub_path, exist_ok=True)
+    with open(SLUG_TO_HUB_FILE, "w", encoding="utf-8") as f:
+        json.dump(slug_to_hub, f, indent=2, sort_keys=True)
 
-    with open(os.path.join(hub_path, "index.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+    print("B hubs built successfully.")
+    print(f"Slug-to-hub mapping saved to: {SLUG_TO_HUB_FILE}")
 
-print("B hubs built successfully.")
+
+if __name__ == "__main__":
+    main()
