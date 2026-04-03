@@ -344,7 +344,8 @@ z-index:1;
 .warning-card,
 .tool-shell,
 .app-link-card,
-.upgrade{
+.upgrade,
+.inline-info-card{
 background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
 border:1px solid rgba(255,255,255,.10);
 border-radius:24px;
@@ -1049,6 +1050,35 @@ font-weight:800;
 line-height:1.66;
 }
 
+.inline-info-card{
+margin:0 0 24px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(59,130,246,.10) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+color:#fff;
+}
+
 .content-header-band{
 display:grid;
 gap:14px;
@@ -1367,6 +1397,10 @@ body{padding-top:84px;}
   <section class="content-section">
     <div id="contentBridge" class="content-bridge"></div>
 
+    <div class="inline-info-card" id="hubLinkWrap">
+      {{HUB_LINK}}
+    </div>
+
     <div class="content-header-band">
       <div class="content-pulse">
         <div class="pulse-card">
@@ -1389,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Password Reset Email is a common question when something like a login alert email appears without context. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a login alert email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You receive an email that looks just like it’s from U.S. Bank, complete with their logo and official colors. The subject line reads, “Important: Password Reset Required.” Inside, the message urges you to click a link to reset your password immediately due to suspicious activity on your account. The email is crafted to look legitimate, featuring a professional layout and even a customer service number that seems valid. It’s easy to see how this could catch your attention, especially if you’ve recently been concerned about your account security.
+You might have recently received an email claiming to be from U.S. Bank, urging you to reset your password. The message often includes their logo and looks official, with a subject line that reads something like “Immediate Action Required: Password Reset.” It may contain a link that directs you to a website that closely resembles the U.S. Bank login page. The email might even include personal details, making it seem like it’s genuinely from the bank. This is designed to catch your eye and prompt you to act quickly, especially if you’ve been using your account frequently.
 
-The email creates a sense of urgency, making you feel like you must act fast to protect your account. Phrases like “Your account will be locked if you do not respond within 24 hours” are designed to put you on edge. You might feel a rush of anxiety, prompting you to click the link without thinking twice. The message may also include reassurances, such as “We value your security,” which can make you trust the source even more, pushing you to take immediate action.
+The urgency in these emails is palpable. They often use phrases like “Your account will be locked if you don’t reset your password within 24 hours” or “Suspicious activity detected—take action now.” This pressure can make you feel anxious about your account security, pushing you to click on the link without thinking twice. The combination of urgency and the appearance of trustworthiness can easily lead you to believe that this is a legitimate request from your bank, especially if you’re already worried about your online security.
 
-Scammers often tweak their tactics, so you might see variations of this email. Sometimes, they may claim to be from a different financial institution or use a different subject line, like “Account Verification Needed.” They might even send a text message that mimics the same urgency, leading you to a fake website that looks almost identical to the U.S. Bank login page. Each variation is designed to exploit your trust and urgency, making it harder to spot the deception.
+You may also encounter variations of this scam, such as text messages or phone calls that mimic the same urgency. A text might say, “Your U.S. Bank account has been compromised. Click here to secure it.” Some scammers even go as far as creating fake customer service numbers that sound official. Each variation aims to exploit your trust and prompt you to provide sensitive information or click on malicious links, all while maintaining that familiar tone of urgency and concern.
 
-If you fall for this scam, the consequences can be severe. You could unwittingly provide your login credentials to criminals, giving them access to your bank account. This could lead to unauthorized transactions, drained savings, and a lengthy process to recover your funds. Additionally, your personal information may be sold or used for identity theft, leading to even more complications. The emotional toll of realizing you’ve been scammed can be overwhelming, leaving you feeling vulnerable and violated.
+Falling for this scam can have serious consequences. If you enter your credentials on the fake site, scammers can gain access to your actual bank account, leading to unauthorized transactions and potential identity theft. The aftermath can be devastating, not just financially but also in terms of the time and effort required to recover your accounts and restore your peace of mind. It’s crucial to take a moment to verify any unexpected communication before acting, as the repercussions of a hasty response can be far-reaching.
 <p>That difference matters because a real notice related to Us Bank Password Reset Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1498,6 +1532,7 @@ window.addEventListener("load", function () {
   applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
+  cleanHubLink();
   cleanMoreLinks();
   normalizeBottomLinks();
 });
@@ -2004,6 +2039,36 @@ function cleanRelatedLinks() {
   relatedLinksWrap.style.display = "";
   relatedLinks.style.display = "";
   relatedHeading.style.display = "";
+}
+
+function cleanHubLink() {
+  const hubLinkWrap = document.getElementById("hubLinkWrap");
+  if (!hubLinkWrap) return;
+
+  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
+
+  const anchor = hubLinkWrap.querySelector("a");
+  if (!anchor) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  const safeHref = anchor.getAttribute("href") || "#";
+  const safeText = (anchor.textContent || "").trim();
+  const target = anchor.getAttribute("target");
+  const rel = anchor.getAttribute("rel");
+
+  if (!safeText) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  hubLinkWrap.innerHTML = `
+    <div class="hub-link-block">
+      <span class="hub-link-label">Related scam category</span>
+      <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
+    </div>
+  `;
 }
 
 function cleanMoreLinks() {

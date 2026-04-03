@@ -344,7 +344,8 @@ z-index:1;
 .warning-card,
 .tool-shell,
 .app-link-card,
-.upgrade{
+.upgrade,
+.inline-info-card{
 background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
 border:1px solid rgba(255,255,255,.10);
 border-radius:24px;
@@ -1049,6 +1050,35 @@ font-weight:800;
 line-height:1.66;
 }
 
+.inline-info-card{
+margin:0 0 24px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(59,130,246,.10) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+color:#fff;
+}
+
 .content-header-band{
 display:grid;
 gap:14px;
@@ -1367,6 +1397,10 @@ body{padding-top:84px;}
   <section class="content-section">
     <div id="contentBridge" class="content-bridge"></div>
 
+    <div class="inline-info-card" id="hubLinkWrap">
+      {{HUB_LINK}}
+    </div>
+
     <div class="content-header-band">
       <div class="content-pulse">
         <div class="pulse-card">
@@ -1389,13 +1423,13 @@ body{padding-top:84px;}
 <p>Td Bank Suspicious Activity Email is a common question when something like an Amazon payment warning feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Td Bank Suspicious Activity Email scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email that appears to be from TD Bank, claiming there’s suspicious activity on your account. The message often includes your name and account details, making it seem legitimate. It may urge you to click on a link to verify your identity or to confirm recent transactions. The email design mimics official communications, complete with logos and formatting that look just like what you’d expect from your bank. This familiarity can easily lead you to believe it’s a genuine alert about your finances.
+You might have recently received an email claiming to be from TD Bank, alerting you to suspicious activity on your account. The message often includes your name, a sense of urgency, and a link that supposedly directs you to a secure site to verify your information. The email may look official, complete with the bank's logo and formatting that mimics legitimate communications. However, the language is often slightly off, with awkward phrasing or grammatical errors that might raise a red flag if you look closely.
 
-The email likely creates a sense of urgency, stating that immediate action is required to prevent unauthorized access or to secure your account. Phrases like “act now” or “your account will be locked” are common, pushing you to respond quickly. This pressure can cloud your judgment, making it harder to pause and think critically about the situation. You might feel compelled to click the link without considering the risks, especially if you’re worried about your financial security.
+The urgency in these emails is palpable. They often state that immediate action is required to prevent unauthorized transactions or to secure your account. This pressure can make you feel like you need to act quickly, bypassing your usual caution. The message may also include reassuring phrases about protecting your account, making it seem like a trustworthy communication from your bank. This tactic plays on your fears and instincts, pushing you to click the link without taking a moment to think.
 
-Variations of this scam can come in different forms, such as text messages or phone calls that claim to be from TD Bank. You could receive a text alerting you to unusual activity, prompting you to call a number that seems official but is actually a scammer's line. Sometimes, these messages will even reference specific transactions that you didn’t make, further convincing you that the alert is real. Each variation is designed to exploit your trust and concern for your financial safety.
+You might also see variations of this scam, such as texts or phone calls claiming to be from TD Bank. The text might say your account has been locked and provides a number to call, while the phone call could feature a recorded message asking you to confirm your account details. Each version is designed to elicit the same response: a rush to provide personal information without verifying the source. Scammers are constantly adapting, so even if you think you know what to look for, they can easily change their approach.
 
-Falling for this scam can lead to serious consequences. If you enter your information on a fraudulent site, scammers can gain access to your bank account, potentially draining your funds or stealing your identity. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial future. Once your information is compromised, it can take considerable time and effort to recover, and the damage may extend beyond just your bank account.
+Falling for this scam can have serious consequences. If you provide your personal information, the scammers can access your bank account, draining your funds or committing identity theft. The aftermath can be stressful and time-consuming, as you may need to work with your bank to recover lost funds and monitor your credit for any unauthorized activity. The emotional toll can linger, leaving you feeling vulnerable and anxious about future communications, making it crucial to stay vigilant.
 <p>Payment-related scams connected to Td Bank Suspicious Activity Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like an Amazon payment warning is involved.</p>
 </div>
 
@@ -1498,6 +1532,7 @@ window.addEventListener("load", function () {
   applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
+  cleanHubLink();
   cleanMoreLinks();
   normalizeBottomLinks();
 });
@@ -2004,6 +2039,36 @@ function cleanRelatedLinks() {
   relatedLinksWrap.style.display = "";
   relatedLinks.style.display = "";
   relatedHeading.style.display = "";
+}
+
+function cleanHubLink() {
+  const hubLinkWrap = document.getElementById("hubLinkWrap");
+  if (!hubLinkWrap) return;
+
+  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
+
+  const anchor = hubLinkWrap.querySelector("a");
+  if (!anchor) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  const safeHref = anchor.getAttribute("href") || "#";
+  const safeText = (anchor.textContent || "").trim();
+  const target = anchor.getAttribute("target");
+  const rel = anchor.getAttribute("rel");
+
+  if (!safeText) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  hubLinkWrap.innerHTML = `
+    <div class="hub-link-block">
+      <span class="hub-link-label">Related scam category</span>
+      <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
+    </div>
+  `;
 }
 
 function cleanMoreLinks() {

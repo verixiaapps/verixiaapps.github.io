@@ -62,42 +62,45 @@
 
 <style>
 :root{
---bg-top:#eef4ff;
---bg-bottom:#ffffff;
+--bg:#07111f;
+--bg-2:#0c1728;
+--bg-3:#12203a;
+--surface:rgba(255,255,255,.06);
+--surface-2:rgba(255,255,255,.08);
+--surface-3:#ffffff;
+--card:#101c33;
+--card-2:#162541;
 
---ink:#1f2937;
---ink-strong:#0f172a;
---muted:#667085;
---muted-2:#94a3b8;
---line:#e2e8f0;
---line-soft:#edf2f7;
+--ink:#e8f0ff;
+--ink-strong:#ffffff;
+--ink-dark:#132033;
+--muted:#9eb0cf;
+--muted-2:#7e93b5;
 
---blue:#2563eb;
---blue-2:#4f7df3;
---blue-3:#1d4ed8;
---blue-soft:#eff6ff;
---blue-line:#bfdbfe;
---navy:#1e293b;
+--line:rgba(148,163,184,.20);
+--line-2:rgba(255,255,255,.10);
 
---red:#dc2626;
---red-dark:#991b1b;
---red-soft:#fef2f2;
---red-soft-2:#fff7f7;
---red-line:#fecaca;
+--cyan:#22d3ee;
+--cyan-2:#06b6d4;
+--blue:#3b82f6;
+--blue-2:#2563eb;
+--violet:#8b5cf6;
+--violet-2:#7c3aed;
+--emerald:#10b981;
+--emerald-2:#059669;
+--amber:#f59e0b;
+--red:#ef4444;
 
---amber:#b45309;
+--blue-soft:#dbeafe;
+--violet-soft:#ede9fe;
+--green-soft:#ecfdf5;
 --amber-soft:#fffbeb;
---amber-line:#fde68a;
+--red-soft:#fef2f2;
 
---green:#15803d;
---green-soft:#f0fdf4;
---green-line:#bbf7d0;
-
---shadow-hero:0 26px 70px rgba(37,99,235,.08);
---shadow-xl:0 30px 80px rgba(15,23,42,.10);
---shadow-lg:0 20px 50px rgba(15,23,42,.08);
---shadow-md:0 12px 30px rgba(15,23,42,.07);
---shadow-sm:0 8px 20px rgba(15,23,42,.05);
+--shadow-xl:0 32px 90px rgba(2,6,23,.42);
+--shadow-lg:0 20px 54px rgba(2,6,23,.30);
+--shadow-md:0 12px 30px rgba(2,6,23,.22);
+--shadow-sm:0 8px 20px rgba(2,6,23,.16);
 }
 
 *{
@@ -110,15 +113,38 @@ scroll-behavior:smooth;
 }
 
 body{
-font-family:system-ui,-apple-system,Arial,sans-serif;
-background:
-radial-gradient(circle at top center, rgba(79,125,243,.12), transparent 30%),
-radial-gradient(circle at 20% 8%, rgba(37,99,235,.06), transparent 20%),
-linear-gradient(180deg,var(--bg-top) 0%,var(--bg-bottom) 100%);
+font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
 margin:0;
-padding-top:92px;
+padding-top:90px;
 color:var(--ink);
 line-height:1.6;
+background:
+radial-gradient(circle at 14% 8%, rgba(34,211,238,.16), transparent 22%),
+radial-gradient(circle at 84% 0%, rgba(139,92,246,.20), transparent 28%),
+radial-gradient(circle at 50% 100%, rgba(16,185,129,.08), transparent 24%),
+linear-gradient(180deg,#06101b 0%, #0a1324 34%, #0e1830 100%);
+}
+
+a{
+color:#8be9ff;
+text-decoration:none;
+}
+
+a:hover{
+text-decoration:underline;
+}
+
+button,
+textarea,
+input{
+font-family:inherit;
+}
+
+@supports (padding:max(0px)) {
+  body{
+    padding-left:max(0px, env(safe-area-inset-left));
+    padding-right:max(0px, env(safe-area-inset-right));
+  }
 }
 
 .top-bar{
@@ -132,7 +158,6 @@ align-items:center;
 padding:10px 16px;
 z-index:1000;
 pointer-events:none;
-box-sizing:border-box;
 }
 
 .top-actions{
@@ -140,26 +165,25 @@ pointer-events:auto;
 display:flex;
 align-items:center;
 gap:10px;
-margin-right:28px;
+margin-right:20px;
 }
 
 .logo{
 pointer-events:auto;
 display:inline-flex;
 align-items:center;
-gap:8px;
+gap:10px;
 font-size:14px;
 font-weight:900;
-color:#334155;
+color:#eef6ff;
 margin-left:8px;
-letter-spacing:-.01em;
-opacity:.97;
-padding:10px 14px;
+padding:11px 15px;
 border-radius:999px;
-background:rgba(255,255,255,.78);
-border:1px solid rgba(226,232,240,.92);
-backdrop-filter:blur(12px);
-box-shadow:0 10px 26px rgba(15,23,42,.05);
+letter-spacing:-.01em;
+background:rgba(10,18,35,.68);
+border:1px solid rgba(255,255,255,.10);
+backdrop-filter:blur(14px);
+box-shadow:var(--shadow-sm);
 text-decoration:none;
 }
 
@@ -167,8 +191,8 @@ text-decoration:none;
 width:10px;
 height:10px;
 border-radius:50%;
-background:linear-gradient(180deg,#60a5fa 0%,#2563eb 100%);
-box-shadow:0 0 0 4px rgba(59,130,246,.12);
+background:linear-gradient(180deg,var(--cyan) 0%,var(--violet) 100%);
+box-shadow:0 0 0 4px rgba(139,92,246,.14);
 flex:0 0 10px;
 }
 
@@ -180,13 +204,12 @@ padding:11px 14px;
 font-size:14px;
 border-radius:16px;
 font-weight:900;
-background:rgba(255,255,255,.86);
-color:#111827;
-border:1px solid rgba(226,232,240,.92);
-text-decoration:none;
+color:#fff;
+border:1px solid rgba(255,255,255,.12);
 white-space:nowrap;
+background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.08) 100%);
 backdrop-filter:blur(10px);
-box-shadow:0 12px 28px rgba(15,23,42,.06);
+box-shadow:var(--shadow-sm);
 }
 
 .upgrade-top{
@@ -194,100 +217,119 @@ pointer-events:auto;
 padding:11px 15px;
 font-size:14px;
 border-radius:16px;
-box-shadow:0 14px 30px rgba(15,23,42,.14);
 font-weight:900;
-background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
 border:none;
 cursor:pointer;
 white-space:nowrap;
-max-width:120px;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-@supports (padding: max(0px)) {
-  .top-bar{
-    padding-left:max(16px, env(safe-area-inset-left));
-    padding-right:max(16px, env(safe-area-inset-right));
-  }
+box-shadow:0 16px 34px rgba(34,211,238,.16);
+max-width:none;
+overflow:visible;
+text-overflow:unset;
 }
 
 .page-shell{
-max-width:860px;
+max-width:940px;
 margin:0 auto;
-padding:0 14px;
+padding:0 14px 34px;
 }
 
 .hero{
+position:relative;
+padding:18px 8px 20px;
+max-width:980px;
+margin:0 auto 14px;
 text-align:center;
-padding:22px 20px 18px;
-max-width:940px;
-margin:0 auto 10px;
 }
 
-.hero h1{
-margin:0;
-font-size:44px;
-line-height:1.04;
-letter-spacing:-.045em;
-color:var(--ink-strong);
-font-weight:900;
-text-wrap:balance;
+.hero-badge-row{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+margin-bottom:14px;
 }
 
-.hero p{
-margin-top:14px;
-font-size:19px;
-max-width:760px;
-margin-left:auto;
-margin-right:auto;
-color:#334155;
-text-wrap:balance;
-}
-
-.hero-trust{
-margin-top:16px;
+.hero-badge{
 display:inline-flex;
 align-items:center;
 justify-content:center;
 gap:8px;
-padding:11px 16px;
+padding:9px 13px;
 border-radius:999px;
-font-size:14px;
-color:#475569;
-font-weight:800;
+font-size:13px;
+font-weight:900;
+color:#dbeafe;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.10);
+backdrop-filter:blur(10px);
+}
+
+.hero h1{
+margin:0;
+font-size:48px;
+line-height:1.02;
+letter-spacing:-.05em;
+font-weight:950;
+color:var(--ink-strong);
 text-wrap:balance;
-background:rgba(255,255,255,.82);
-border:1px solid rgba(191,219,254,.95);
-backdrop-filter:blur(8px);
-box-shadow:var(--shadow-hero);
+}
+
+.hero p{
+margin:14px auto 0;
+max-width:760px;
+font-size:19px;
+color:#c7d5eb;
+text-wrap:balance;
+}
+
+.hero-trust{
+margin-top:18px;
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+}
+
+.hero-trust-chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:10px 14px;
+border-radius:999px;
+font-size:13px;
+font-weight:900;
+color:#dce8fb;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-sm);
 }
 
 .container,
 .content-section{
-max-width:780px;
+max-width:820px;
 margin:auto;
-background:rgba(255,255,255,.96);
 padding:22px;
-padding-bottom:42px;
 border-radius:30px;
-box-shadow:var(--shadow-xl);
-border:1px solid rgba(226,232,240,.95);
 position:relative;
 overflow:hidden;
+border:1px solid rgba(255,255,255,.10);
+background:
+linear-gradient(180deg, rgba(17,28,51,.94) 0%, rgba(11,19,36,.98) 100%);
+box-shadow:var(--shadow-xl);
 }
 
 .container::before,
 .content-section::before{
 content:"";
 position:absolute;
-top:-140px;
-right:-80px;
-width:280px;
-height:280px;
+top:-120px;
+right:-90px;
+width:260px;
+height:260px;
 border-radius:50%;
-background:radial-gradient(circle, rgba(79,125,243,.10), transparent 62%);
+background:radial-gradient(circle, rgba(34,211,238,.14), transparent 65%);
 pointer-events:none;
 }
 
@@ -302,47 +344,50 @@ z-index:1;
 .warning-card,
 .tool-shell,
 .app-link-card,
-.upgrade{
-background:#ffffff;
-border:1px solid rgba(226,232,240,.95);
+.upgrade,
+.inline-info-card{
+background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
 border-radius:24px;
 box-shadow:var(--shadow-md);
 }
 
 .answer-card{
 padding:18px;
-background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);
-border-color:#dbeafe;
+background:
+linear-gradient(135deg, rgba(34,211,238,.12) 0%, rgba(139,92,246,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.05) 100%);
 }
 
 .answer-kicker{
 font-size:12px;
 font-weight:900;
-letter-spacing:.03em;
+letter-spacing:.08em;
 text-transform:uppercase;
-color:#2563eb;
+color:#8be9ff;
 margin-bottom:8px;
 }
 
 .answer-card h2{
 margin:0;
-font-size:26px;
-line-height:1.1;
+font-size:28px;
+line-height:1.08;
 letter-spacing:-.03em;
-color:var(--ink-strong);
+color:#fff;
 }
 
 .answer-card p{
 margin:10px 0 0;
 font-size:15px;
 font-weight:800;
-color:#334155;
-line-height:1.65;
+color:#d8e5f8;
+line-height:1.7;
 }
 
 .precheck-layout{
 display:grid;
 gap:16px;
+margin-top:16px;
 margin-bottom:18px;
 }
 
@@ -353,19 +398,19 @@ padding:18px;
 
 .card-heading{
 margin:0 0 10px;
-font-size:20px;
-line-height:1.15;
+font-size:21px;
+line-height:1.14;
 letter-spacing:-.02em;
 font-weight:900;
-color:var(--ink-strong);
+color:#fff;
 }
 
 .card-copy{
 margin:0 0 12px;
 font-size:14px;
 font-weight:800;
-color:#475569;
-line-height:1.65;
+color:#b9c9e3;
+line-height:1.68;
 }
 
 .steps-grid,
@@ -381,8 +426,8 @@ align-items:flex-start;
 gap:12px;
 padding:14px 15px;
 border-radius:18px;
-background:#f8fafc;
-border:1px solid var(--line-soft);
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.09);
 }
 
 .step-number{
@@ -395,9 +440,9 @@ justify-content:center;
 flex:0 0 28px;
 font-size:13px;
 font-weight:900;
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(180deg,var(--cyan) 0%,var(--violet) 100%);
 color:#fff;
-box-shadow:0 8px 16px rgba(37,99,235,.18);
+box-shadow:0 8px 18px rgba(34,211,238,.18);
 }
 
 .warning-icon{
@@ -409,8 +454,8 @@ align-items:center;
 justify-content:center;
 flex:0 0 24px;
 font-size:14px;
-background:#fee2e2;
-color:#b91c1c;
+background:rgba(239,68,68,.16);
+color:#fecaca;
 }
 
 .step-text strong,
@@ -418,7 +463,7 @@ color:#b91c1c;
 display:block;
 font-size:14px;
 line-height:1.35;
-color:var(--ink-strong);
+color:#fff;
 margin-bottom:2px;
 }
 
@@ -426,34 +471,38 @@ margin-bottom:2px;
 .warning-text span{
 display:block;
 font-size:13px;
-line-height:1.55;
+line-height:1.58;
 font-weight:800;
-color:#475569;
+color:#bfd0ea;
 }
 
 .example-band{
 margin-top:12px;
 padding:14px 15px;
 border-radius:18px;
-background:#fff8f8;
-border:1px solid #fecaca;
+background:linear-gradient(180deg, rgba(139,92,246,.16) 0%, rgba(34,211,238,.10) 100%);
+border:1px solid rgba(139,92,246,.24);
 font-size:14px;
 font-weight:800;
-line-height:1.6;
-color:#7f1d1d;
+line-height:1.65;
+color:#efe9ff;
 }
 
 .example-band strong{
 display:block;
 margin-bottom:4px;
 font-size:13px;
-letter-spacing:.02em;
+letter-spacing:.04em;
 text-transform:uppercase;
+color:#c4b5fd;
 }
 
 .tool-shell{
 padding:22px;
-background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+margin-top:18px;
+background:
+linear-gradient(135deg, rgba(34,211,238,.10) 0%, rgba(139,92,246,.10) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
 }
 
 .tool-top{
@@ -463,19 +512,19 @@ margin-bottom:16px;
 
 .tool-top h2{
 margin:0;
-font-size:28px;
-line-height:1.12;
-letter-spacing:-.03em;
-color:var(--ink-strong);
+font-size:30px;
+line-height:1.10;
+letter-spacing:-.04em;
+color:#fff;
 }
 
 .tool-top p{
 margin:8px auto 0;
-max-width:600px;
+max-width:620px;
 font-size:15px;
-color:#667085;
+color:#c8d6ec;
 font-weight:700;
-line-height:1.65;
+line-height:1.7;
 }
 
 textarea,input{
@@ -483,12 +532,11 @@ width:100%;
 padding:16px 16px;
 margin-top:12px;
 border-radius:18px;
-border:1.5px solid #dbe3f0;
+border:1.5px solid rgba(255,255,255,.12);
 font-size:16px;
-background:#ffffff;
-color:var(--ink);
+background:rgba(7,16,29,.72);
+color:#eef6ff;
 box-shadow:none;
-font-family:inherit;
 }
 
 textarea{
@@ -498,13 +546,14 @@ resize:none;
 
 textarea::placeholder,
 input::placeholder{
-color:#9aa4b2;
+color:#89a0c4;
 }
 
-textarea:focus,input:focus{
+textarea:focus,
+input:focus{
 outline:none;
-border-color:#93c5fd;
-box-shadow:0 0 0 5px rgba(59,130,246,.10);
+border-color:rgba(34,211,238,.60);
+box-shadow:0 0 0 5px rgba(34,211,238,.10);
 }
 
 button{
@@ -514,42 +563,34 @@ cursor:pointer;
 font-size:16px;
 padding:16px;
 min-height:50px;
-font-family:inherit;
 }
 
 .check{
 width:100%;
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
 margin-top:18px;
 font-weight:900;
 font-size:18px;
 letter-spacing:.2px;
-box-shadow:0 18px 38px rgba(37,99,235,.30);
+box-shadow:0 18px 40px rgba(34,211,238,.20);
 transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .check:hover{
 transform:translateY(-1px);
-box-shadow:0 20px 42px rgba(37,99,235,.34);
+box-shadow:0 22px 44px rgba(34,211,238,.24);
 }
 
 .check:active{
 transform:scale(.985);
 }
 
-.note{
-margin-top:13px;
-font-size:14px;
-color:var(--muted);
-text-align:center;
-text-wrap:balance;
-}
-
+.note,
 .input-help{
 margin-top:12px;
 font-size:14px;
-color:var(--muted);
+color:#9fb0cc;
 text-align:center;
 text-wrap:balance;
 }
@@ -557,7 +598,7 @@ text-wrap:balance;
 .success{
 margin-top:12px;
 font-size:14px;
-color:var(--green);
+color:#86efac;
 text-align:center;
 font-weight:900;
 display:none;
@@ -567,11 +608,11 @@ display:none;
 margin-top:14px;
 padding:14px 15px;
 border-radius:18px;
-background:#f8fafc;
-border:1px solid var(--line-soft);
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
 font-size:14px;
 font-weight:800;
-color:#475569;
+color:#cbdaf0;
 line-height:1.6;
 text-align:center;
 }
@@ -579,16 +620,16 @@ text-align:center;
 .app-link-card{
 margin-top:18px;
 padding:20px;
-background:linear-gradient(180deg,#f8fbff 0%,#f3f8ff 100%);
-border:1.5px solid #c7d2fe;
 text-align:center;
-box-shadow:0 14px 30px rgba(79,125,243,.08);
+background:
+linear-gradient(135deg, rgba(16,185,129,.12) 0%, rgba(34,211,238,.10) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
 }
 
 .app-link-card h4{
 margin:0 0 6px;
-font-size:18px;
-color:var(--ink-strong);
+font-size:20px;
+color:#fff;
 font-weight:900;
 letter-spacing:-.02em;
 }
@@ -596,22 +637,22 @@ letter-spacing:-.02em;
 .app-link-card p{
 margin:0 0 12px;
 font-size:14px;
-color:#4b5563;
-line-height:1.6;
+color:#c9d8ee;
+line-height:1.65;
 }
 
 .app-link-button{
 display:block;
 width:100%;
-text-decoration:none;
 text-align:center;
-background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+background:linear-gradient(135deg,var(--emerald) 0%,var(--cyan-2) 100%);
 color:#fff;
 font-weight:900;
 padding:15px;
 border-radius:16px;
 box-sizing:border-box;
-box-shadow:0 14px 30px rgba(15,23,42,.12);
+box-shadow:0 14px 30px rgba(16,185,129,.18);
+text-decoration:none;
 }
 
 #result{
@@ -620,35 +661,32 @@ display:none;
 }
 
 .result-card{
-background:#ffffff;
+background:rgba(255,255,255,.96);
 border-radius:26px;
 padding:22px;
 box-shadow:var(--shadow-lg);
-border:1px solid var(--line);
+border:1px solid rgba(15,23,42,.08);
 overflow:hidden;
+color:var(--ink-dark);
 }
 
 .result-card.high{
-background:#ffffff;
 border:2px solid #fecaca;
-box-shadow:0 22px 50px rgba(220,38,38,.10);
+box-shadow:0 22px 50px rgba(239,68,68,.12);
 }
 
 .result-card.medium{
-background:#ffffff;
-border:2px solid var(--amber-line);
-box-shadow:0 22px 50px rgba(245,158,11,.08);
+border:2px solid #fde68a;
+box-shadow:0 22px 50px rgba(245,158,11,.10);
 }
 
 .result-card.low{
-background:#ffffff;
-border:2px solid var(--green-line);
-box-shadow:0 22px 50px rgba(34,197,94,.08);
+border:2px solid #bbf7d0;
+box-shadow:0 22px 50px rgba(16,185,129,.10);
 }
 
 .result-card.unknown{
-background:#ffffff;
-border:1px solid var(--line);
+border:1px solid #dbe4f0;
 }
 
 .result-top{
@@ -675,17 +713,14 @@ box-shadow:var(--shadow-sm);
 .risk.high{
 background:var(--red);
 color:#fff;
-box-shadow:0 14px 28px rgba(220,38,38,.24);
 }
 .risk.medium{
-background:#f59e0b;
+background:var(--amber);
 color:#fff;
-box-shadow:0 14px 28px rgba(245,158,11,.22);
 }
 .risk.low{
-background:#16a34a;
+background:var(--emerald);
 color:#fff;
-box-shadow:0 14px 28px rgba(22,163,74,.18);
 }
 .risk.unknown{
 background:#e5e7eb;
@@ -698,7 +733,7 @@ border-radius:999px;
 font-size:12px;
 font-weight:900;
 background:#fff;
-border:1px solid var(--line);
+border:1px solid #d9e2ec;
 color:#334155;
 box-shadow:var(--shadow-sm);
 }
@@ -708,7 +743,7 @@ margin:16px 0 0;
 font-size:16px;
 color:#334155;
 font-weight:800;
-line-height:1.55;
+line-height:1.58;
 }
 
 .result-continuation{
@@ -719,7 +754,7 @@ font-size:14px;
 font-weight:900;
 line-height:1.55;
 background:#f8fafc;
-border:1px solid var(--line);
+border:1px solid #e2e8f0;
 color:#334155;
 }
 
@@ -731,13 +766,13 @@ color:#7f1d1d;
 
 .result-card.medium .result-continuation{
 background:#fffdf5;
-border-color:var(--amber-line);
-color:var(--amber);
+border-color:#fde68a;
+color:#92400e;
 }
 
 .result-card.unknown .result-continuation{
 background:#f8fafc;
-border-color:var(--line);
+border-color:#e2e8f0;
 color:#334155;
 }
 
@@ -746,13 +781,13 @@ margin-top:18px;
 padding:18px;
 border-radius:20px;
 background:#f8fafc;
-border:1px solid var(--line-soft);
+border:1px solid #e7eef6;
 }
 
 .section-title{
 font-weight:900;
 margin-bottom:10px;
-color:var(--ink-strong);
+color:#0f172a;
 font-size:16px;
 letter-spacing:-.01em;
 }
@@ -771,8 +806,8 @@ align-items:flex-start;
 gap:12px;
 padding:14px 15px;
 border-radius:16px;
-background:#ffffff;
-border:1px solid var(--line);
+background:#fff;
+border:1px solid #e2e8f0;
 font-size:14px;
 font-weight:800;
 color:#334155;
@@ -787,14 +822,14 @@ color:#7f1d1d;
 
 .result-card.medium .signal-item{
 background:#fffdf5;
-border-color:var(--amber-line);
-color:var(--amber);
+border-color:#fde68a;
+color:#92400e;
 }
 
 .result-card.low .signal-item{
 background:#f7fff8;
-border-color:var(--green-line);
-color:var(--green);
+border-color:#bbf7d0;
+color:#166534;
 }
 
 .signal-icon{
@@ -811,8 +846,8 @@ flex:0 0 22px;
 .action-box{
 padding:15px 16px;
 border-radius:16px;
-background:var(--blue-soft);
-border:1px solid var(--blue-line);
+background:#eef6ff;
+border:1px solid #bfdbfe;
 font-size:14px;
 font-weight:900;
 color:#1e3a8a;
@@ -823,7 +858,7 @@ line-height:1.55;
 margin-top:18px;
 padding:16px;
 background:#f8fafc;
-border:1px solid var(--line);
+border:1px solid #e2e8f0;
 border-radius:18px;
 font-size:14px;
 color:#334155;
@@ -839,14 +874,14 @@ color:#7f1d1d;
 
 .result-card.medium .result-payline{
 background:#fffdf5;
-border-color:var(--amber-line);
-color:var(--amber);
+border-color:#fde68a;
+color:#92400e;
 }
 
 .result-card.low .result-payline{
 background:#f7fff8;
-border-color:var(--green-line);
-color:var(--green);
+border-color:#bbf7d0;
+color:#166534;
 }
 
 .result-actions{
@@ -863,8 +898,8 @@ margin-top:0;
 margin-top:4px;
 padding:18px;
 border-radius:20px;
-background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
-border:1px solid var(--line);
+background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);
+border:1px solid #e2e8f0;
 text-align:center;
 box-shadow:var(--shadow-sm);
 }
@@ -872,7 +907,7 @@ box-shadow:var(--shadow-sm);
 .share-alert{
 font-size:13px;
 font-weight:900;
-color:#b91c1c;
+color:#0f172a;
 margin-bottom:6px;
 letter-spacing:.01em;
 }
@@ -904,8 +939,7 @@ padding:12px 14px;
 border-radius:14px;
 font-size:14px;
 font-weight:900;
-box-shadow:none;
-transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .share-btn:hover{
@@ -913,23 +947,15 @@ transform:translateY(-1px);
 }
 
 .share-btn.primary{
-background:linear-gradient(180deg,#22324b 0%,var(--navy) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
-box-shadow:0 12px 24px rgba(15,23,42,.14);
-}
-
-.share-btn.primary:hover{
-box-shadow:0 16px 30px rgba(15,23,42,.18);
+box-shadow:0 12px 24px rgba(34,211,238,.18);
 }
 
 .share-btn.dark{
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(135deg,#111827 0%,#1f2937 100%);
 color:#fff;
-box-shadow:0 12px 24px rgba(37,99,235,.18);
-}
-
-.share-btn.dark:hover{
-box-shadow:0 16px 30px rgba(37,99,235,.24);
+box-shadow:0 12px 24px rgba(15,23,42,.14);
 }
 
 .share-btn.light{
@@ -943,49 +969,51 @@ margin-top:12px;
 min-height:20px;
 font-size:13px;
 font-weight:900;
-color:var(--green);
+color:#059669;
 }
 
 .upgrade{
 display:none;
 margin-top:28px;
 padding:24px;
-background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
 text-align:center;
+background:
+linear-gradient(135deg, rgba(139,92,246,.18) 0%, rgba(34,211,238,.16) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
 }
 
 .upgrade h3{
 margin:0 0 8px;
-font-size:28px;
-line-height:1.2;
-color:var(--ink-strong);
+font-size:30px;
+line-height:1.15;
+color:#fff;
 text-wrap:balance;
 }
 
 .upgrade-copy{
 margin:0 auto;
-max-width:580px;
-color:#4b5563;
+max-width:600px;
+color:#d5e2f4;
 font-size:15px;
-line-height:1.6;
+line-height:1.68;
 }
 
 .plan{
 width:100%;
 margin-top:14px;
-background:linear-gradient(180deg,var(--blue-2) 0%,var(--blue) 100%);
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
 font-weight:900;
 padding:15px;
-box-shadow:0 14px 28px rgba(59,130,246,.18);
+box-shadow:0 14px 28px rgba(34,211,238,.18);
 }
 
 .plan.secondary{
-background:linear-gradient(180deg,#2563eb 0%,#1d4ed8 100%);
+background:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
 }
 
 .plan.tertiary{
-background:linear-gradient(180deg,#1d4ed8 0%,#1e40af 100%);
+background:linear-gradient(135deg,#0f766e 0%,#10b981 100%);
 }
 
 .subscriber-link{
@@ -999,10 +1027,9 @@ border:none;
 padding:0;
 min-height:auto;
 font-size:14px;
-color:var(--blue);
+color:#bff7ff;
 font-weight:800;
 text-decoration:underline;
-box-shadow:none;
 cursor:pointer;
 }
 
@@ -1015,18 +1042,83 @@ padding-bottom:36px;
 margin:0 0 24px;
 padding:18px;
 border-radius:20px;
-background:#f8fafc;
-border:1px solid var(--line-soft);
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.09);
 font-size:15px;
-color:#334155;
+color:#d6e3f7;
+font-weight:800;
+line-height:1.66;
+}
+
+.inline-info-card{
+margin:0 0 24px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(59,130,246,.10) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+color:#fff;
+}
+
+.content-header-band{
+display:grid;
+gap:14px;
+margin:0 0 24px;
+}
+
+.content-pulse{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:12px;
+}
+
+.pulse-card{
+padding:14px;
+border-radius:20px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+}
+
+.pulse-label{
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+margin-bottom:6px;
+}
+
+.pulse-card p{
+margin:0;
+font-size:14px;
 font-weight:800;
 line-height:1.6;
+color:#d6e3f7;
 }
 
 .content-section h2,
 .content-section h3{
 margin:0 0 14px;
-color:var(--ink-strong);
+color:#fff;
 line-height:1.08;
 letter-spacing:-.035em;
 font-weight:900;
@@ -1034,7 +1126,7 @@ text-wrap:balance;
 }
 
 .content-section h2{
-font-size:38px;
+font-size:40px;
 }
 
 .content-section h3{
@@ -1044,7 +1136,7 @@ margin-top:30px;
 
 .content-body{
 font-size:18px;
-color:#334155;
+color:#d7e4f8;
 }
 
 .content-body p{
@@ -1063,7 +1155,7 @@ margin-bottom:10px;
 .link-section{
 margin-top:28px;
 padding-top:24px;
-border-top:1px solid var(--line-soft);
+border-top:1px solid rgba(255,255,255,.08);
 }
 
 .related-links{
@@ -1076,121 +1168,112 @@ margin-bottom:10px;
 }
 
 .related-links a{
-color:#2563eb;
-text-decoration:none;
-font-weight:700;
+color:#8be9ff;
+font-weight:800;
 }
 
 .related-links a:hover{
 text-decoration:underline;
 }
 
+.share-loop-panel{
+margin-top:28px;
+padding:20px;
+border-radius:24px;
+background:
+linear-gradient(135deg, rgba(16,185,129,.12) 0%, rgba(34,211,238,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-md);
+}
+
+.share-loop-panel h3{
+margin-top:0;
+}
+
+.share-loop-copy{
+font-size:15px;
+font-weight:800;
+color:#d7e4f8;
+line-height:1.68;
+margin-bottom:14px;
+}
+
+.share-loop-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:10px;
+}
+
+.loop-box{
+padding:14px;
+border-radius:18px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.08);
+}
+
+.loop-box strong{
+display:block;
+font-size:13px;
+margin-bottom:4px;
+color:#fff;
+}
+
+.loop-box span{
+display:block;
+font-size:13px;
+font-weight:800;
+line-height:1.56;
+color:#c8d7ed;
+}
+
 .content-close{
 margin-top:28px;
 padding:18px;
 border-radius:20px;
-background:#f8fafc;
-border:1px solid var(--line-soft);
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
 font-size:15px;
 font-weight:800;
-color:#334155;
-line-height:1.7;
+color:#d7e4f8;
+line-height:1.72;
 }
 
 .footer{
 text-align:center;
 margin-top:72px;
 padding:40px 20px;
-color:var(--muted);
+color:#9fb0cc;
 font-size:14px;
 line-height:1.75;
 text-wrap:balance;
 }
 
 .footer a{
-color:var(--blue);
-text-decoration:none;
+color:#8be9ff;
 font-weight:700;
 }
 
-.footer a:hover{
-text-decoration:underline;
-}
-
 @media (max-width:640px){
-body{
-padding-top:86px;
-}
-.hero{
-padding:16px 16px 18px;
-}
-.hero h1{
-font-size:32px;
-}
-.hero p{
-margin-top:10px;
-font-size:17px;
-}
-.hero-trust{
-margin-top:10px;
-font-size:14px;
-}
-.container,
-.content-section{
-margin-left:12px;
-margin-right:12px;
-padding:18px;
-border-radius:24px;
-}
-.top-bar{
-padding:10px 10px;
-}
-.top-actions{
-gap:8px;
-margin-right:0;
-}
-.logo{
-font-size:13px;
-margin-left:2px;
-padding:9px 12px;
-}
-.app-top{
-font-size:13px;
-padding:8px 10px;
-}
-.upgrade-top{
-font-size:13px;
-padding:8px 10px;
-margin-right:0;
-}
-.upgrade h3{
-font-size:24px;
-}
-.content-section h2{
-font-size:28px;
-line-height:1.12;
-}
-.content-section h3{
-font-size:24px;
-}
-.content-body{
-font-size:16px;
-}
-.answer-card h2{
-font-size:22px;
-}
-.card-heading{
-font-size:18px;
-}
-.tool-top h2{
-font-size:24px;
-}
-.share-grid{
-grid-template-columns:1fr;
-}
-.share-btn{
-width:100%;
-}
+body{padding-top:84px;}
+.hero{padding:14px 6px 18px;}
+.hero h1{font-size:34px;}
+.hero p{margin-top:10px;font-size:17px;}
+.container,.content-section{margin-left:12px;margin-right:12px;padding:18px;border-radius:24px;}
+.top-bar{padding:10px 10px;}
+.top-actions{gap:8px;margin-right:0;}
+.logo{font-size:13px;margin-left:2px;padding:9px 12px;}
+.app-top{font-size:13px;padding:8px 10px;}
+.upgrade-top{font-size:13px;padding:8px 10px;margin-right:0;}
+.upgrade h3{font-size:24px;}
+.content-section h2{font-size:30px;line-height:1.12;}
+.content-section h3{font-size:24px;}
+.content-body{font-size:16px;}
+.answer-card h2{font-size:22px;}
+.card-heading{font-size:18px;}
+.tool-top h2{font-size:24px;}
+.share-grid,.content-pulse,.share-loop-grid{grid-template-columns:1fr;}
+.share-btn{width:100%;}
 }
 </style>
 </head>
@@ -1211,9 +1294,20 @@ width:100%;
 <div class="page-shell">
 
   <div class="hero">
+    <div class="hero-badge-row">
+      <div class="hero-badge">Live scam checking</div>
+      <div class="hero-badge">Premium warning page</div>
+      <div class="hero-badge">Built for repeat use</div>
+    </div>
+
     <h1 id="heroKeyword"></h1>
     <p id="heroSubheading"></p>
-    <div class="hero-trust">Check suspicious messages, links, and requests before you click, reply, or send money</div>
+
+    <div class="hero-trust">
+      <div class="hero-trust-chip">Check before you click</div>
+      <div class="hero-trust-chip">Check before you reply</div>
+      <div class="hero-trust-chip">Check before you send money</div>
+    </div>
   </div>
 
   <div class="container">
@@ -1266,23 +1360,23 @@ width:100%;
     </div>
 
     <div class="app-link-card">
-      <h4>Check suspicious messages anytime</h4>
-      <p>Scam attempts often do not happen once. Use the app to check the next message before you click, reply, or send money.</p>
+      <h4>Keep it on your phone for the next one</h4>
+      <p>Scam attempts often do not happen once. Keep the checker ready so the next text, DM, email, or link is easier to review in seconds.</p>
       <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
     </div>
 
     <div class="upgrade" id="upgrade">
-      <h3>Don’t Miss the Next Scam</h3>
+      <h3>Stay Ready for the Next Suspicious Message</h3>
 
       <div class="upgrade-copy">
         Most scam attempts do not happen once. If you are seeing suspicious messages, links, or requests, more may follow. Check each one before it costs you.
       </div>
 
-      <div style="margin-top:10px;font-size:13px;color:#6b7280;">
+      <div style="margin-top:10px;font-size:13px;color:#d4e2f5;">
         Built for ongoing protection against scams, phishing, impersonation, and risky payment requests
       </div>
 
-      <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#6b7280;">
+      <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#d4e2f5;">
         Unlimited scam checks • Cancel anytime
       </div>
 
@@ -1290,7 +1384,7 @@ width:100%;
       <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Protection</button>
       <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Protection</button>
 
-      <div style="margin-top:14px;font-size:13px;color:#6b7280;">
+      <div style="margin-top:14px;font-size:13px;color:#d4e2f5;">
         Secure payments powered by Stripe
       </div>
 
@@ -1303,18 +1397,39 @@ width:100%;
   <section class="content-section">
     <div id="contentBridge" class="content-bridge"></div>
 
+    <div class="inline-info-card" id="hubLinkWrap">
+      {{HUB_LINK}}
+    </div>
+
+    <div class="content-header-band">
+      <div class="content-pulse">
+        <div class="pulse-card">
+          <div class="pulse-label">Trust signal</div>
+          <p>Focused pages and clearer warnings help people slow down before clicking or paying.</p>
+        </div>
+        <div class="pulse-card">
+          <div class="pulse-label">Return signal</div>
+          <p>People often come back when the next suspicious message, link, or request shows up.</p>
+        </div>
+        <div class="pulse-card">
+          <div class="pulse-label">Search signal</div>
+          <p>Clean topic coverage and strong internal links make this easier to discover and reuse.</p>
+        </div>
+      </div>
+    </div>
+
     <h2 id="contentHeading"></h2>
     <div id="seoContent" class="content-body"><div class="content-block" data-context="account-security" data-mode="breakdown">
 <p>Crypto Login Attempt Email is a common question when something like a two-factor code request appears without context. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Crypto Login Attempt Email flow starts with something like a two-factor code request, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received an email claiming there was a login attempt on your cryptocurrency account. The message often looks official, complete with your name and a logo that resembles the platform you use. It may include details like the time of the attempted login and the device used, making it seem even more credible. The email typically urges you to click a link to verify your identity or secure your account, creating a sense of urgency that makes you feel compelled to act quickly.
+You might have received an email recently that claims to be from a cryptocurrency exchange or wallet service, alerting you to a login attempt from an unfamiliar device or location. The message often includes your name, a timestamp, and a link to secure your account. It may look official, complete with branding and a professional tone, making it seem like a legitimate security measure. You might even notice a sense of familiarity in the language, as if it’s tailored just for you, which can make it hard to question its authenticity.
 
-This type of email is designed to create immediate pressure. It often states that your account will be locked or compromised if you don’t respond within a certain timeframe. The language is carefully crafted to instill fear and urgency, pushing you to click the link without thinking. You might feel a rush of anxiety, prompting you to act before it’s too late, which is exactly what the scammer wants. They rely on your instinct to protect your assets to get you to take action without questioning the legitimacy of the email.
+The urgency in these emails is palpable. They often state that your account will be locked if you don’t act immediately, pushing you to click the provided link without thinking twice. This pressure can lead you to believe that you must act quickly to protect your assets. The email might even encourage you to verify your identity or update your security settings, making it feel like a responsible action rather than a risky one. This sense of trust can be disarming, especially if you’re already concerned about your account’s security.
 
-You may also encounter variations of this scam. Some emails might claim to be from a different cryptocurrency exchange or even a wallet service, using slightly altered logos or email addresses that look similar to the real ones. Others may come as text messages or even phone calls, all with the same theme of an urgent login attempt. The message may change, but the core tactic remains the same: creating a false sense of urgency to trick you into providing sensitive information or clicking on malicious links.
+You may encounter variations of this scam that look slightly different but carry the same deceptive intent. Some emails might claim to be from a different service, like a payment processor or an investment platform, while others could come as text messages or social media alerts. The common thread is that they all aim to create a sense of urgency and fear, often using phrases like “immediate action required” or “your account is at risk.” Even if the branding changes, the tactics remain consistent, making it easy to overlook the warning signs.
 
-Falling for this scam can have serious consequences. If you enter your login credentials on a fake site, the scammers gain access to your account, potentially draining your funds or stealing your personal information. The aftermath can be devastating, not just financially but also emotionally, as you realize your hard-earned investments are at risk. The danger lies not only in the immediate loss but also in the long-term impact on your financial security and peace of mind.
+Falling for this scam can have serious consequences. If you click the link and enter your credentials, you may unknowingly hand over your account information to cybercriminals. This could lead to unauthorized transactions, loss of funds, or even identity theft. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. The aftermath can be overwhelming, as you scramble to regain control and deal with the fallout, which is why being vigilant is crucial when it comes to these seemingly urgent messages.
 <p>This is why step-by-step checking matters. Once a message related to Crypto Login Attempt Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1344,16 +1459,37 @@ Falling for this scam can have serious consequences. If you enter your login cre
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-chase-login-alert-email-legit-or-scam/">Is Chase Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-citibank-login-alert-email-legit-or-scam/">Is Citibank Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-american-express-login-alert-email-legit-or-scam/">Is American Express Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-capital-one-login-alert-email-legit-or-scam/">Is Capital One Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-bank-of-america-login-alert-email-legit-or-scam/">Is Bank of America Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-american-express-refund-email-legit-or-scam/">Is American Express Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-account-locked-email-legit-or-scam/">Is Binance Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-account-suspension-email-legit-or-scam/">Is Binance Account Suspension Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-password-reset-email-legit-or-scam/">Is Binance Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-payment-declined-email-legit-or-scam/">Is Binance Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-binance-security-alert-email-legit-or-scam/">Is Binance Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-binance-verification-code-email-legit-or-scam/">Is Binance Verification Code Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-binance-withdrawal-alert-email-legit-or-scam/">Is Binance Withdrawal Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-chase-account-locked-email-legit-or-scam/">Is Chase Account Locked Email or Scam Legit or a Scam?</a></li>
 </ul>
+    </div>
+
+    <div class="share-loop-panel">
+      <h3>Why this page works beyond one visit</h3>
+      <div class="share-loop-copy">
+        A strong warning page should not only answer one question. It should help someone pause, verify, return later, and use the checker again when the next suspicious message appears.
+      </div>
+      <div class="share-loop-grid">
+        <div class="loop-box">
+          <strong>1. Find it</strong>
+          <span>Search lands people on a focused page for the exact suspicious topic they are dealing with.</span>
+        </div>
+        <div class="loop-box">
+          <strong>2. Use it</strong>
+          <span>They run the checker before clicking links, replying, paying, or sharing personal details.</span>
+        </div>
+        <div class="loop-box">
+          <strong>3. Reuse it</strong>
+          <span>They return when another text, email, job offer, tracking alert, or payment request shows up.</span>
+        </div>
+      </div>
     </div>
 
     <div class="content-close">
@@ -1396,6 +1532,7 @@ window.addEventListener("load", function () {
   applyIntentToChecker();
   cleanSeoContent();
   cleanRelatedLinks();
+  cleanHubLink();
   cleanMoreLinks();
   normalizeBottomLinks();
 });
@@ -1902,6 +2039,36 @@ function cleanRelatedLinks() {
   relatedLinksWrap.style.display = "";
   relatedLinks.style.display = "";
   relatedHeading.style.display = "";
+}
+
+function cleanHubLink() {
+  const hubLinkWrap = document.getElementById("hubLinkWrap");
+  if (!hubLinkWrap) return;
+
+  hubLinkWrap.innerHTML = hubLinkWrap.innerHTML.replace(/\*\*/g, "").trim();
+
+  const anchor = hubLinkWrap.querySelector("a");
+  if (!anchor) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  const safeHref = anchor.getAttribute("href") || "#";
+  const safeText = (anchor.textContent || "").trim();
+  const target = anchor.getAttribute("target");
+  const rel = anchor.getAttribute("rel");
+
+  if (!safeText) {
+    hubLinkWrap.style.display = "none";
+    return;
+  }
+
+  hubLinkWrap.innerHTML = `
+    <div class="hub-link-block">
+      <span class="hub-link-label">Related scam category</span>
+      <a class="hub-link-anchor" href="${escapeHtml(safeHref)}"${target ? ` target="${escapeHtml(target)}"` : ""}${rel ? ` rel="${escapeHtml(rel)}"` : ""}>${escapeHtml(safeText)}</a>
+    </div>
+  `;
 }
 
 function cleanMoreLinks() {
