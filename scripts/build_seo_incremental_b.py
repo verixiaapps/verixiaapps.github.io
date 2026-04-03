@@ -19,6 +19,7 @@ GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "generated_keywords_b.t
 SLUG_TO_HUB_FILE = os.path.join(BASE_DIR, "data", "slug_to_hub_b.json")
 TEMPLATE_FILE = os.path.join(BASE_DIR, "templates", "seo-template-b.html")
 OUTPUT_DIR = os.path.join(BASE_DIR, "scam-check-now-b")
+HUBS_DIR = os.path.join(OUTPUT_DIR, "hubs")
 SITE = "https://verixiaapps.com"
 
 RELATED_LINKS_COUNT = 6
@@ -88,6 +89,18 @@ SMALL_WORDS = {
     "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on",
     "or", "the", "to", "vs", "with"
 }
+
+DEFAULT_HUB_RULES = {
+    "job-scams": ["job", "hiring", "recruiter", "interview", "offer", "onboarding"],
+    "crypto-scams": ["crypto", "bitcoin", "wallet", "ethereum", "eth", "nft", "airdrop", "token"],
+    "email-scams": ["email", "mail", "inbox"],
+    "text-scams": ["text", "sms", "message"],
+    "brand-scams": ["paypal", "amazon", "apple", "google", "bank", "venmo", "zelle", "cash app", "cash", "facebook", "instagram", "tiktok", "whatsapp", "telegram", "discord"],
+    "payment-scams": ["payment", "invoice", "transfer", "fee", "refund", "charge", "billing"],
+    "general-scams": [],
+}
+
+COMMON_HUB_WORDS = {"scam", "scams", "hub", "hubs"}
 
 # -----------------------------
 # UTILITIES
@@ -233,6 +246,74 @@ def load_slug_to_hub():
     with open(SLUG_TO_HUB_FILE, encoding="utf-8") as f:
         data = json.load(f)
     return {slugify(k): str(v).strip() for k, v in data.items() if slugify(k) and str(v).strip()}
+
+
+def load_available_hub_names(slug_to_hub):
+    hub_names = set(DEFAULT_HUB_RULES.keys())
+
+    for hub_name in slug_to_hub.values():
+        hub_slug = slugify(hub_name)
+        if hub_slug:
+            hub_names.add(hub_slug)
+
+    if os.path.isdir(HUBS_DIR):
+        for name in os.listdir(HUBS_DIR):
+            path = os.path.join(HUBS_DIR, name)
+            if os.path.isdir(path):
+                hub_slug = slugify(name)
+                if hub_slug:
+                    hub_names.add(hub_slug)
+
+    return hub_names
+
+
+def hub_name_tokens(hub_name):
+    return {
+        token
+        for token in slugify(hub_name).split("-")
+        if token and token not in COMMON_HUB_WORDS
+    }
+
+
+def infer_hub_name(keyword, available_hub_names):
+    keyword_lower = normalize_keyword(keyword)
+    tokens = keyword_tokens(keyword)
+
+    candidate_hubs = set(available_hub_names or set()) | set(DEFAULT_HUB_RULES.keys())
+    if not candidate_hubs:
+        return ""
+
+    best_hub = ""
+    best_score = -1
+
+    for hub_name in sorted(candidate_hubs):
+        score = 0
+        rules = DEFAULT_HUB_RULES.get(hub_name, [])
+
+        for term in rules:
+            term_norm = normalize_keyword(term)
+            if not term_norm:
+                continue
+            pattern = r"(?<![a-z0-9])" + re.escape(term_norm) + r"(?![a-z0-9])"
+            if re.search(pattern, keyword_lower):
+                score += 3
+
+        if score == 0:
+            for token in hub_name_tokens(hub_name):
+                if token in tokens:
+                    score += 1
+
+        if score > best_score:
+            best_score = score
+            best_hub = hub_name
+
+    if best_score > 0:
+        return best_hub
+
+    if "general-scams" in candidate_hubs:
+        return "general-scams"
+
+    return ""
 
 
 def write_lines(filepath, values, preserve_input=True):
@@ -423,18 +504,22 @@ def build_canonical(slug):
     return f"{SITE}/scam-check-now-b/{slug}/"
 
 
-def build_hub_link_html(slug, slug_to_hub):
+def pretty_hub_title(hub_name):
+    return title_case(hub_name.replace("-", " "))
+
+
+def build_hub_link_html(slug, keyword, slug_to_hub, available_hub_names):
     hub_name = slug_to_hub.get(slugify(slug), "").strip()
+
+    if not hub_name:
+        hub_name = infer_hub_name(keyword, available_hub_names)
+
     if not hub_name:
         return ""
 
     hub_title = pretty_hub_title(hub_name)
     hub_url = f"{SITE}/scam-check-now-b/hubs/{hub_name}/"
     return f'<a href="{escape_html(hub_url)}">{escape_html(hub_title)}</a>'
-
-
-def pretty_hub_title(hub_name):
-    return title_case(hub_name.replace("-", " "))
 
 
 # -----------------------------
@@ -561,6 +646,7 @@ if not keywords:
 generated_slugs = load_generated_slugs()
 generated_keywords = load_generated_keywords()
 slug_to_hub = load_slug_to_hub()
+available_hub_names = load_available_hub_names(slug_to_hub)
 disk_pages = load_output_pages_from_disk()
 
 queue_pages = []
@@ -609,6 +695,7 @@ print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(all_linkable_pages)}")
 print(f"Loaded slug-to-hub mappings: {len(slug_to_hub)}")
+print(f"Available hub names: {len(available_hub_names)}")
 print(f"Daily limit: {DAILY_LIMIT}")
 
 generated_count = 0
@@ -637,13 +724,26 @@ for page in queue_pages:
         new_generated_slugs.add(slug)
         new_generated_keywords.add(keyword)
         processed_keywords.add(keyword)
+
+        existing_hub = slug_to_hub.get(slug)
+        if not existing_hub:
+            inferred_hub = infer_hub_name(keyword, available_hub_names)
+            if inferred_hub:
+                slug_to_hub[slug] = inferred_hub
+
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
     title = build_title(keyword)
     description = build_description(keyword)
     canonical = build_canonical(slug)
-    hub_link_html = build_hub_link_html(slug, slug_to_hub)
+
+    effective_hub_name = slug_to_hub.get(slug) or infer_hub_name(keyword, available_hub_names)
+    if effective_hub_name:
+        slug_to_hub[slug] = effective_hub_name
+        available_hub_names.add(effective_hub_name)
+
+    hub_link_html = build_hub_link_html(slug, keyword, slug_to_hub, available_hub_names)
 
     try:
         ai_text = generate_ai_text(keyword, keyword_display)
