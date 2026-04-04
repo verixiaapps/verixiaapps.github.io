@@ -1,1005 +1,832 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Scam Detection Discovery Hub</title>
-  <meta name="description" content="Central discovery page for recent scam check URLs, grouped topics, platform collections, random discovery surfaces, and revisit pages designed to support crawl depth and return visits.">
-  <meta name="robots" content="index,follow">
+  <meta charset="utf-8">
+  <title>Discovery B | Verixia Apps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Discovery-B hub for Verixia Apps. Fresh scam-check-now-b page discovery, topics, platforms, clusters, hybrids, feed, and sitemap access.">
   <link rel="canonical" href="https://verixiaapps.com/discovery-b/">
-
-  <meta property="og:title" content="Scam Detection Discovery Hub">
-  <meta property="og:description" content="Central discovery page for recent scam check URLs, grouped topics, platform collections, random discovery surfaces, and revisit pages designed to support crawl depth and return visits.">
+  <meta property="og:title" content="Discovery B | Verixia Apps">
+  <meta property="og:description" content="Discovery-B hub for Verixia Apps. Fresh scam-check-now-b page discovery, topics, platforms, clusters, hybrids, feed, and sitemap access.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://verixiaapps.com/discovery-b/">
-
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Scam Detection Discovery Hub">
-  <meta name="twitter:description" content="Central discovery page for recent scam check URLs, grouped topics, platform collections, random discovery surfaces, and revisit pages designed to support crawl depth and return visits.">
-
+  <meta name="twitter:card" content="summary_large_image">
   <style>
     :root{
-      --bg:#07111f;
-      --bg-2:#0c1728;
-      --bg-3:#12203a;
-      --surface:rgba(255,255,255,.06);
-      --surface-2:rgba(255,255,255,.08);
-      --card:#101c33;
-      --ink:#e8f0ff;
-      --ink-strong:#ffffff;
-      --muted:#9eb0cf;
-      --line:rgba(148,163,184,.20);
-      --cyan:#22d3ee;
-      --cyan-2:#06b6d4;
-      --violet:#8b5cf6;
-      --emerald:#10b981;
-      --shadow-xl:0 32px 90px rgba(2,6,23,.42);
-      --shadow-md:0 12px 30px rgba(2,6,23,.22);
-      --shadow-sm:0 8px 20px rgba(2,6,23,.16);
+      --bg:#08111d;
+      --bg2:#0d1726;
+      --panel:#0f1c30;
+      --panel2:#12233d;
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#a9b7d0;
+      --accent:#6ea8ff;
+      --accent2:#9fd0ff;
+      --good:#7fe8c3;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+      --radius:20px;
+      --max:1200px;
     }
-
-    *{box-sizing:border-box;}
-    html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
-
-    body{
-      font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
-      margin:0;
-      padding-top:90px;
-      color:var(--ink);
-      line-height:1.6;
-      background:
-        radial-gradient(circle at 14% 8%, rgba(34,211,238,.16), transparent 22%),
-        radial-gradient(circle at 84% 0%, rgba(139,92,246,.20), transparent 28%),
-        radial-gradient(circle at 50% 100%, rgba(16,185,129,.08), transparent 24%),
-        linear-gradient(180deg,#06101b 0%, #0a1324 34%, #0e1830 100%);
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:
+      radial-gradient(circle at top left, rgba(110,168,255,.14), transparent 28%),
+      radial-gradient(circle at top right, rgba(127,232,195,.08), transparent 24%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
-
-    a{color:#8be9ff;text-decoration:none;}
-    a:hover{text-decoration:underline;}
-
-    @supports (padding:max(0px)) {
-      body{
-        padding-left:max(0px, env(safe-area-inset-left));
-        padding-right:max(0px, env(safe-area-inset-right));
-      }
+    a{color:inherit;text-decoration:none}
+    .container{max-width:var(--max);margin:0 auto;padding:0 20px}
+    .topbar{
+      position:sticky;top:0;z-index:40;
+      background:rgba(8,17,29,.78);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line);
     }
-
-    .top-bar{
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:10px 16px;
-      z-index:1000;
-      pointer-events:none;
+    .topbar-inner{
+      display:flex;align-items:center;justify-content:space-between;gap:20px;
+      min-height:72px;
     }
-
-    .top-actions{
-      pointer-events:auto;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-right:20px;
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.01em}
+    .brand-mark{
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:grid;place-items:center;color:#061120;font-weight:900;
+      box-shadow:var(--shadow);
     }
-
-    .logo{
-      pointer-events:auto;
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      font-size:14px;
-      font-weight:900;
-      color:#eef6ff;
-      margin-left:8px;
-      padding:11px 15px;
-      border-radius:999px;
-      letter-spacing:-.01em;
-      background:rgba(10,18,35,.68);
-      border:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(14px);
-      box-shadow:var(--shadow-sm);
-      text-decoration:none;
+    .top-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:44px;padding:0 16px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
+      font-weight:700;
     }
-
-    .logo-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:linear-gradient(180deg,var(--cyan) 0%,var(--violet) 100%);
-      box-shadow:0 0 0 4px rgba(139,92,246,.14);
-      flex:0 0 10px;
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#061120;border:none;
     }
-
-    .app-top{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:11px 14px;
-      font-size:14px;
-      border-radius:16px;
-      font-weight:900;
-      color:#fff;
-      border:1px solid rgba(255,255,255,.12);
-      white-space:nowrap;
-      background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.08) 100%);
-      backdrop-filter:blur(10px);
-      box-shadow:var(--shadow-sm);
+    .hero{padding:52px 0 24px}
+    .hero-panel{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:34px;
+      box-shadow:var(--shadow);
     }
-
-    .upgrade-top{
-      pointer-events:auto;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:11px 15px;
-      font-size:14px;
-      border-radius:16px;
-      font-weight:900;
-      background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
-      color:#fff;
-      white-space:nowrap;
-      box-shadow:0 16px 34px rgba(34,211,238,.16);
-      text-decoration:none;
-    }
-
-    .page-shell{
-      max-width:980px;
-      margin:0 auto;
-      padding:0 14px 34px;
-    }
-
-    .hero{
-      position:relative;
-      padding:18px 8px 20px;
-      max-width:980px;
-      margin:0 auto 14px;
-      text-align:center;
-    }
-
-    .hero-badge-row{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:10px;
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(110,168,255,.12);
+      border:1px solid rgba(110,168,255,.2);
+      color:var(--accent2);
+      font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
       margin-bottom:14px;
     }
-
-    .hero-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:9px 13px;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:900;
-      color:#dbeafe;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(10px);
-    }
-
-    .hero h1{
-      margin:0;
-      font-size:48px;
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(34px,5vw,56px);
       line-height:1.02;
-      letter-spacing:-.05em;
-      font-weight:950;
-      color:#fff;
-      text-wrap:balance;
+      letter-spacing:-.03em;
+      max-width:950px;
     }
-
     .hero p{
-      margin:14px auto 0;
-      max-width:760px;
-      font-size:19px;
-      color:#c7d5eb;
-      text-wrap:balance;
-    }
-
-    .hero-trust{
-      margin-top:18px;
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:10px;
-    }
-
-    .hero-trust-chip{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 14px;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:900;
-      color:#dce8fb;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:var(--shadow-sm);
-    }
-
-    .container{
+      margin:0;
       max-width:860px;
-      margin:auto;
-      padding:22px;
-      border-radius:30px;
-      position:relative;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      background:
-        linear-gradient(180deg, rgba(17,28,51,.94) 0%, rgba(11,19,36,.98) 100%);
-      box-shadow:var(--shadow-xl);
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.65;
     }
-
-    .container::before{
-      content:"";
-      position:absolute;
-      top:-120px;
-      right:-90px;
-      width:260px;
-      height:260px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(34,211,238,.14), transparent 65%);
-      pointer-events:none;
+    .quick-nav{
+      margin-top:22px;
+      display:flex;flex-wrap:wrap;gap:10px;
     }
-
-    .container > *{position:relative;z-index:1;}
-
-    .intro-card,
-    .stats-band,
-    .links-card,
-    .related-card,
-    .footer-note{
-      background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:24px;
-      box-shadow:var(--shadow-md);
+    .quick-nav a{
+      padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:700;font-size:14px;
     }
-
-    .intro-card{
-      padding:20px;
-      background:
-        linear-gradient(135deg, rgba(34,211,238,.12) 0%, rgba(139,92,246,.12) 100%),
-        linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.05) 100%);
+    .section{padding:12px 0 22px}
+    .section-tight{padding:0 0 6px}
+    .section-head{margin-bottom:14px}
+    .section-head h2{margin:0;font-size:28px;letter-spacing:-.02em}
+    .breadcrumbs{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      color:var(--muted);font-size:14px;
     }
-
-    .intro-kicker{
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#8be9ff;
-      margin-bottom:8px;
-    }
-
-    .intro-card h2{
-      margin:0;
-      font-size:28px;
-      line-height:1.08;
-      letter-spacing:-.03em;
-      color:#fff;
-    }
-
-    .intro-card p{
-      margin:10px 0 0;
-      font-size:15px;
-      font-weight:800;
-      color:#d8e5f8;
-      line-height:1.7;
-    }
-
-    .stats-band{
+    .breadcrumbs a{color:var(--accent2)}
+    .crumb-sep{opacity:.5}
+    .card-grid{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
-      padding:16px;
-      margin-top:18px;
-    }
-
-    .stat-box{
-      padding:14px;
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .stat-label{
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#8be9ff;
-      margin-bottom:6px;
-    }
-
-    .stat-box p{
-      margin:0;
-      font-size:14px;
-      font-weight:800;
-      line-height:1.6;
-      color:#d6e3f7;
-    }
-
-    .links-card{
-      margin-top:18px;
-      padding:22px;
-      background:
-        linear-gradient(135deg, rgba(34,211,238,.10) 0%, rgba(139,92,246,.10) 100%),
-        linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
-    }
-
-    .links-top{
-      text-align:center;
-      margin-bottom:16px;
-    }
-
-    .links-top h2{
-      margin:0;
-      font-size:30px;
-      line-height:1.10;
-      letter-spacing:-.04em;
-      color:#fff;
-    }
-
-    .links-top p{
-      margin:8px auto 0;
-      max-width:680px;
-      font-size:15px;
-      color:#c8d6ec;
-      font-weight:700;
-      line-height:1.7;
-    }
-
-    .links-list{
-      list-style:none;
-      padding:0;
-      margin:0;
-      display:grid;
-      gap:12px;
-    }
-
-    .links-list li{margin:0;}
-
-    .link-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      grid-template-columns:repeat(auto-fit,minmax(255px,1fr));
       gap:16px;
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.09);
-      transition:transform .15s ease, border-color .15s ease, background .15s ease;
-      text-decoration:none;
     }
-
-    .link-item:hover{
-      transform:translateY(-1px);
-      border-color:rgba(34,211,238,.35);
-      background:rgba(255,255,255,.07);
-      text-decoration:none;
+    .card,.panel{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
     }
-
-    .link-copy{min-width:0;}
-
-    .link-title{
-      display:block;
-      font-size:15px;
-      font-weight:900;
-      line-height:1.4;
-      color:#fff;
-      margin-bottom:3px;
-      word-break:break-word;
+    .card{
+      padding:20px;
+      transition:transform .16s ease,border-color .16s ease,background .16s ease;
+      min-height:210px;
+      display:flex;flex-direction:column;
     }
-
-    .link-sub{
-      display:block;
-      font-size:13px;
-      line-height:1.58;
-      font-weight:800;
-      color:#bfd0ea;
-      word-break:break-word;
-    }
-
-    .link-arrow{
-      flex:0 0 auto;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:34px;
-      height:34px;
-      border-radius:999px;
-      background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
-      color:#fff;
-      font-size:16px;
-      font-weight:900;
-      box-shadow:0 12px 24px rgba(34,211,238,.16);
-    }
-
-    .related-card{
-      margin-top:18px;
-      padding:22px;
-    }
-
-    .related-top{
-      text-align:center;
-      margin-bottom:16px;
-    }
-
-    .related-top h3{
-      margin:0;
-      font-size:24px;
-      line-height:1.12;
-      letter-spacing:-.03em;
-      color:#fff;
-    }
-
-    .related-top p{
-      margin:8px auto 0;
-      max-width:680px;
-      font-size:14px;
-      color:#c8d6ec;
-      font-weight:700;
-      line-height:1.68;
-    }
-
-    .related-grid{
-      list-style:none;
-      padding:0;
-      margin:0;
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .related-grid li{margin:0;}
-
-    .related-link{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 15px;
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      transition:transform .15s ease, border-color .15s ease, background .15s ease;
-      text-decoration:none;
-    }
-
-    .related-link:hover{
-      transform:translateY(-1px);
-      border-color:rgba(34,211,238,.35);
-      background:rgba(255,255,255,.07);
-      text-decoration:none;
-    }
-
-    .related-label{
-      display:block;
-      font-size:14px;
-      font-weight:900;
-      color:#fff;
-      line-height:1.45;
-    }
-
-    .related-sub{
-      display:block;
+    .card:hover{transform:translateY(-2px);border-color:rgba(110,168,255,.28)}
+    .card-static:hover{transform:none}
+    .card-eyebrow{
+      color:var(--good);
       font-size:12px;
       font-weight:800;
-      color:#bfd0ea;
-      line-height:1.5;
-      margin-top:3px;
-      word-break:break-word;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:10px;
     }
-
-    .related-arrow{
-      flex:0 0 auto;
-      color:#8be9ff;
-      font-size:15px;
-      font-weight:900;
+    .card h3{
+      margin:0 0 10px;
+      font-size:22px;
+      line-height:1.18;
+      letter-spacing:-.02em;
     }
-
-    .footer-note{
-      margin-top:18px;
-      padding:18px;
-      font-size:15px;
-      font-weight:800;
-      color:#d7e4f8;
-      line-height:1.72;
-      background:rgba(255,255,255,.05);
+    .card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      flex:1;
     }
-
-    .footer{
-      text-align:center;
-      margin-top:72px;
-      padding:40px 20px;
-      color:#9fb0cc;
-      font-size:14px;
-      line-height:1.75;
-      text-wrap:balance;
+    .card-meta{
+      margin-top:16px;
+      display:flex;flex-wrap:wrap;gap:8px 14px;
+      color:var(--muted);
+      font-size:13px;
     }
-
-    .footer a{
-      color:#8be9ff;
-      font-weight:700;
+    .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .tag{
+      display:inline-flex;align-items:center;
+      padding:6px 10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:var(--muted);font-size:12px;font-weight:700;
     }
-
-    @media (max-width:640px){
-      body{padding-top:84px;}
-      .hero{padding:14px 6px 18px;}
-      .hero h1{font-size:34px;}
-      .hero p{margin-top:10px;font-size:17px;}
-      .container{margin-left:12px;margin-right:12px;padding:18px;border-radius:24px;}
-      .top-bar{padding:10px 10px;}
-      .top-actions{gap:8px;margin-right:0;}
-      .logo{font-size:13px;margin-left:2px;padding:9px 12px;}
-      .app-top{font-size:13px;padding:8px 10px;}
-      .upgrade-top{font-size:13px;padding:8px 10px;margin-right:0;}
-      .intro-card h2{font-size:22px;}
-      .links-top h2{font-size:24px;}
-      .stats-band{grid-template-columns:1fr;}
-      .related-grid{grid-template-columns:1fr;}
-      .link-item{align-items:flex-start;}
+    .panel{padding:22px}
+    .panel h2{margin:0 0 14px;font-size:24px}
+    .html-sitemap-list{
+      list-style:none;padding:0;margin:0;
+      display:grid;grid-template-columns:1fr;gap:12px;
+    }
+    .html-sitemap-list li{
+      display:flex;flex-direction:column;gap:4px;
+      padding:12px 0;border-top:1px solid var(--line);
+    }
+    .html-sitemap-list li:first-child{border-top:none;padding-top:0}
+    .html-sitemap-list a{font-weight:700;color:var(--text)}
+    .html-sitemap-list span{color:var(--muted);font-size:13px}
+    .pager-panel{margin-top:10px}
+    .pager{display:flex;flex-wrap:wrap;gap:10px}
+    .pager-link{
+      min-width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+      border:1px solid var(--line);background:rgba(255,255,255,.03);font-weight:800;
+    }
+    .pager-link.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#061120;border:none;
+    }
+    .footer{padding:26px 0 48px}
+    .footer-panel{
+      display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+      color:var(--muted);
+    }
+    @media (max-width:700px){
+      .hero-panel{padding:24px}
+      .topbar-inner{min-height:66px}
+      .top-actions{gap:8px}
+      .btn{min-height:40px;padding:0 14px}
     }
   </style>
 </head>
 <body>
-
-  <div class="top-bar">
-    <a class="logo" href="https://verixiaapps.com/scam-check-now-b/">
-      <span class="logo-dot"></span>
-      <span>Scam Check Now</span>
-    </a>
-    <div class="top-actions">
-      <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
-      <a class="upgrade-top" href="https://verixiaapps.com/scam-check-now-b/">Run Check</a>
-    </div>
-  </div>
-
-  <div class="page-shell">
-
-    <div class="hero">
-      <div class="hero-badge-row">
-        <div class="hero-badge">Discovery hub</div>
-        <div class="hero-badge">Premium discovery pages</div>
-        <div class="hero-badge">Built for repeat use</div>
-      </div>
-
-      <h1>Scam Detection Discovery Hub</h1>
-      <p>Central discovery page for recent scam check URLs, grouped topics, platform collections, random discovery surfaces, and revisit pages designed to support crawl depth and return visits.</p>
-
-      <div class="hero-trust">
-        <div class="hero-trust-chip">Check before you click</div>
-        <div class="hero-trust-chip">Check before you reply</div>
-        <div class="hero-trust-chip">Check before you send money</div>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="https://verixiaapps.com">
+        <span class="brand-mark">V</span>
+        <span>Scam Check Now</span>
+      </a>
+      <div class="top-actions">
+        <a class="btn" href="https://verixiaapps.com/app/">📱 Get App</a>
+        <a class="btn btn-primary" href="https://verixiaapps.com/">Run Check</a>
       </div>
     </div>
+  </header>
 
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-panel">
+          <div class="eyebrow">Discovery B</div>
+          <h1>Fresh discovery pages built from scam-check-now-b</h1>
+          <p>This discovery layer reads from scam-check-now-b pages and publishes premium discovery surfaces under discovery-b only.</p>
+          <div class="quick-nav">
+            <a href="https://verixiaapps.com/discovery-b/">Hub</a><a href="https://verixiaapps.com/discovery-b/latest/">Latest (100)</a><a href="https://verixiaapps.com/discovery-b/today/">Today (100)</a><a href="https://verixiaapps.com/discovery-b/this-week/">This Week (216)</a><a href="https://verixiaapps.com/discovery-b/runway/">Runway</a><a href="https://verixiaapps.com/discovery-b/topics/">Topics (57)</a><a href="https://verixiaapps.com/discovery-b/platforms/">Platforms (5)</a><a href="https://verixiaapps.com/discovery-b/clusters/">Clusters (80)</a><a href="https://verixiaapps.com/discovery-b/hybrids/">Hybrids (60)</a><a href="https://verixiaapps.com/discovery-b/random/">Random</a><a href="https://verixiaapps.com/discovery-b/revisit/">Revisit</a><a href="https://verixiaapps.com/discovery-b/html-sitemap/">HTML Sitemap</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
     <div class="container">
-      <div class="intro-card">
-        <div class="intro-kicker">Scam discovery engine</div>
-        <h2>Browse discovery surfaces</h2>
-        <p>Use the discovery hub to move across recent scam check pages, grouped scam topics, platform collections, random discovery pages, and revisited older URLs that deserve fresh crawl attention.</p>
+      <div class="section-head">
+        <h2>Discovery surfaces</h2>
       </div>
-
-      <div class="stats-band">
-        <div class="stat-box">
-          <div class="stat-label">Central access</div>
-          <p>Structured discovery pages make it easier to browse suspicious topics without digging through clutter.</p>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Strong recirculation</div>
-          <p>These pages are built to help people move faster from uncertainty to a focused scam check page.</p>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Built for scale</div>
-          <p>Return visits matter here because suspicious messages, payment warnings, and fake alerts rarely happen once.</p>
-        </div>
-      </div>
-
-      <div class="links-card">
-        <div class="links-top">
-          <h2>Browse scam check pages</h2>
-          <p>Open a focused scam check page below to review suspicious messages, delivery alerts, account warnings, payment requests, crypto traps, and more.</p>
-        </div>
-
-        <ul class="links-list">
-          
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/latest/">
-                <span class="link-copy">
-                  <span class="link-title">Latest Pages</span>
-                  <span class="link-sub">Newest discovery URLs</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/today/">
-                <span class="link-copy">
-                  <span class="link-title">Today Pages</span>
-                  <span class="link-sub">Fresh discovery URLs</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/this-week/">
-                <span class="link-copy">
-                  <span class="link-title">This Week</span>
-                  <span class="link-sub">Recent 7-day discovery view</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/html-sitemap/">
-                <span class="link-copy">
-                  <span class="link-title">HTML Sitemap</span>
-                  <span class="link-sub">Wide browse view</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/topics/">
-                <span class="link-copy">
-                  <span class="link-title">All Topics</span>
-                  <span class="link-sub">Grouped by scam theme</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/platforms/">
-                <span class="link-copy">
-                  <span class="link-title">All Platforms</span>
-                  <span class="link-sub">Grouped by brand or service</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/clusters/">
-                <span class="link-copy">
-                  <span class="link-title">Discovery Clusters</span>
-                  <span class="link-sub">Grouped by repeated URL patterns</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/hybrids/">
-                <span class="link-copy">
-                  <span class="link-title">Hybrid Discovery Pages</span>
-                  <span class="link-sub">Combined platform plus topic pages</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/runway/">
-                <span class="link-copy">
-                  <span class="link-title">Runway Pages</span>
-                  <span class="link-sub">Paginated crawl runway</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/random/">
-                <span class="link-copy">
-                  <span class="link-title">Random Discovery 1</span>
-                  <span class="link-sub">Shuffled alternate path</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/random-2/">
-                <span class="link-copy">
-                  <span class="link-title">Random Discovery 2</span>
-                  <span class="link-sub">More shuffled discovery</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/random-3/">
-                <span class="link-copy">
-                  <span class="link-title">Random Discovery 3</span>
-                  <span class="link-sub">Third random surface</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-
-            <li>
-              <a class="link-item" href="https://verixiaapps.com/discovery-b/revisit/">
-                <span class="link-copy">
-                  <span class="link-title">Revisit Pages</span>
-                  <span class="link-sub">Resurfaced older URLs</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          
-        </ul>
-      </div>
-
-      
-    <div class="related-card">
-      <div class="related-top">
-        <h3>Discovery indexes</h3>
-        <p>Use these grouped index pages to move through discovery types faster.</p>
-      </div>
-      <ul class="related-grid">
-        
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/topics/">
-              <span>
-                <span class="related-label">Topic Index</span>
-                <span class="related-sub">4 topic groups</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/platforms/">
-              <span>
-                <span class="related-label">Platform Index</span>
-                <span class="related-sub">1 platform groups</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/clusters/">
-              <span>
-                <span class="related-label">Cluster Index</span>
-                <span class="related-sub">18 cluster groups</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/hybrids/">
-              <span>
-                <span class="related-label">Hybrid Index</span>
-                <span class="related-sub">1 hybrid pages</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-      </ul>
-    </div>
-  
-
-    <div class="related-card">
-      <div class="related-top">
-        <h3>Related discovery pages</h3>
-        <p>Move through more scam discovery surfaces, recent pages, topic collections, platform groupings, and supporting navigation hubs.</p>
-      </div>
-      <ul class="related-grid">
-        
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/">
-              <span>
-                <span class="related-label">Discovery Hub</span>
-                <span class="related-sub">verixiaapps.com/discovery-b</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/latest/">
-              <span>
-                <span class="related-label">Latest Pages</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/latest</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/today/">
-              <span>
-                <span class="related-label">Today Pages</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/today</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/this-week/">
-              <span>
-                <span class="related-label">This Week</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/this-week</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/html-sitemap/">
-              <span>
-                <span class="related-label">HTML Sitemap</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/html-sitemap</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/feed/">
-              <span>
-                <span class="related-label">Discovery Feed</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/feed</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/clusters/">
-              <span>
-                <span class="related-label">Discovery Clusters</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/clusters</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/platforms/">
-              <span>
-                <span class="related-label">All Platforms</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/platforms</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/topics/">
-              <span>
-                <span class="related-label">All Topics</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/topics</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/runway/">
-              <span>
-                <span class="related-label">Runway Pages</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/runway</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/hybrids/">
-              <span>
-                <span class="related-label">Hybrid Discovery Pages</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/hybrids</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/random/">
-              <span>
-                <span class="related-label">Random Discovery 1</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/random</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/random-2/">
-              <span>
-                <span class="related-label">Random Discovery 2</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/random-2</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/random-3/">
-              <span>
-                <span class="related-label">Random Discovery 3</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/random-3</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-
-          <li>
-            <a class="related-link" href="https://verixiaapps.com/discovery-b/revisit/">
-              <span>
-                <span class="related-label">Revisit Pages</span>
-                <span class="related-sub">verixiaapps.com/discovery-b/revisit</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        
-      </ul>
-    </div>
-  
-
-      <div class="footer-note">
-        These discovery pages are designed to help people navigate scam topics faster, compare patterns, and reach a focused warning page before clicking links, replying, sending money, or sharing personal information.
+      <div class="card-grid">
+        <a class="card" href="https://verixiaapps.com/discovery-b/latest/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>Latest</h3>
+    <p>100 fresh discovery links</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/today/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>Today</h3>
+    <p>100 pages updated today</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/this-week/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>This Week</h3>
+    <p>216 pages updated this week</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>Topics</h3>
+    <p>57 grouped topic hubs</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/platforms/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>Platforms</h3>
+    <p>5 grouped platform hubs</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>Clusters</h3>
+    <p>80 grouped pattern clusters</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>Hybrids</h3>
+    <p>60 combined intent pages</p>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/html-sitemap/">
+    <div class="card-eyebrow">Overview</div>
+    <h3>HTML Sitemap</h3>
+    <p>216 sitemap links</p>
+  </a>
       </div>
     </div>
-
-    <footer class="footer">
-      <div>
-        By using this website you agree to our
-        <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
+  </section>
+<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Freshest pages</h2>
       </div>
-      <div style="margin-top:10px">
-        Scam Check Now © 2026 • Scam detection and risk analysis tool
+      <div class="card-grid">
+        <a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-account-locked-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Account Locked Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Account Locked Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-account-locked-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Account</span><span class="tag">Locked</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-fraud-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Fraud Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Fraud Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-fraud-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Fraud</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-login-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Login Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Login Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-login-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Login</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Password Reset Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Password Reset Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Password</span><span class="tag">Reset</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-payment-declined-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Payment Declined Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Payment Declined Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-payment-declined-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Payment</span><span class="tag">Declined</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-refund-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Refund Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Refund Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-refund-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Refund</span><span class="tag">Legit</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-security-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Security Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Security Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-security-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Security</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-suspicious-activity-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Suspicious Activity Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Suspicious Activity Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-suspicious-activity-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Suspicious</span><span class="tag">Activity</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-transfer-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Transfer Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Transfer Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-transfer-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Transfer</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wise-verification-code-text-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wise Verification Code Text or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wise Verification Code Text. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wise-verification-code-text-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wise</span><span class="tag">Verification</span><span class="tag">Code</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-fraud-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Fraud Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Fraud Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-fraud-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Fraud</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-login-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Login Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Login Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-login-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Login</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-password-reset-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Password Reset Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Password Reset Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-password-reset-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Password</span><span class="tag">Reset</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-payment-declined-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Payment Declined Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Payment Declined Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-payment-declined-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Payment</span><span class="tag">Declined</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-refund-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Refund Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Refund Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-refund-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Refund</span><span class="tag">Legit</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-security-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Security Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Security Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-security-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Security</span><span class="tag">Alert</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-suspicious-activity-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Suspicious Activity Email or Scam Legit or a Scam? Warning Signs &amp; What …</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Suspicious Activity Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-suspicious-activity-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Suspicious</span><span class="tag">Activity</span></div>
+  </a>
+<a class="card" href="https://verixiaapps.com/scam-check-now-b/is-wells-fargo-transfer-alert-email-legit-or-scam/">
+    <div class="card-eyebrow">Source page</div>
+    <h3>Is Wells Fargo Transfer Alert Email or Scam Legit or a Scam? Warning Signs &amp; What To Do</h3>
+    <p>Learn the warning signs, scam risk signals, and safest next steps for Wells Fargo Transfer Alert Email. Check suspicious messages, emails, links, and offers before you click, reply, or send money.</p>
+    <div class="card-meta">
+      <span>Apr 4, 2026</span>
+      <span>/scam-check-now-b/is-wells-fargo-transfer-alert-email-legit-or-scam/</span>
+    </div>
+    <div class="tag-row"><span class="tag">Wells Fargo</span><span class="tag">Fargo</span><span class="tag">Transfer</span><span class="tag">Alert</span></div>
+  </a>
       </div>
-    </footer>
+    </div>
+  </section>
+<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Today by topic</h2>
+      </div>
+      <div class="card-grid">
+        <a class="card" href="https://verixiaapps.com/discovery-b/topics/legit/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Legit</h3>
+    <p>100 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/signs/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Signs</h3>
+    <p>100 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/warning/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Warning</h3>
+    <p>100 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/alert/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Alert</h3>
+    <p>42 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/payment/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Payment</h3>
+    <p>15 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/login/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Login</h3>
+    <p>14 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/password/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Password</h3>
+    <p>11 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/suspicious/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Suspicious</h3>
+    <p>11 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/fargo/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Fargo</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/pnc/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Pnc</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/revolut/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Revolut</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/topics/robinhood/">
+    <div class="card-eyebrow">Topic</div>
+    <h3>Robinhood</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open topic page</span>
+    </div>
+  </a>
+      </div>
+    </div>
+  </section>
+<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Latest by platform</h2>
+      </div>
+      <div class="card-grid">
+        <a class="card" href="https://verixiaapps.com/discovery-b/platforms/banking/">
+    <div class="card-eyebrow">Platform</div>
+    <h3>Banking</h3>
+    <p>32 pages</p>
+    <div class="card-meta">
+      <span>Open platform page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/platforms/wells-fargo/">
+    <div class="card-eyebrow">Platform</div>
+    <h3>Wells Fargo</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open platform page</span>
+    </div>
+  </a>
+      </div>
+    </div>
+  </section>
+<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Explore clusters</h2>
+      </div>
+      <div class="card-grid">
+        <a class="card" href="https://verixiaapps.com/discovery-b/clusters/account-legit/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Account + Legit</h3>
+    <p>15 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/account-warning/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Account + Warning</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/america-banking/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>America + Banking</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/american-express/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>American + Express</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/banking-pnc/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Banking + Pnc</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/banking-td/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Banking + Td</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/banking-us/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Banking + Us</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/capital-one/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Capital + One</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/citibank-legit/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Citibank + Legit</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/discover-legit/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Discover + Legit</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/fargo-wells-fargo/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Fargo + Wells Fargo</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/clusters/legit-metamask/">
+    <div class="card-eyebrow">Cluster</div>
+    <h3>Legit + Metamask</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open cluster page</span>
+    </div>
+  </a>
+      </div>
+    </div>
+  </section>
+<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Explore hybrids</h2>
+      </div>
+      <div class="card-grid">
+        <a class="card" href="https://verixiaapps.com/discovery-b/hybrids/banking-legit/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Banking + Legit</h3>
+    <p>24 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/banking-alert/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Banking + Alert</h3>
+    <p>16 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/crypto-legit/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Crypto + Legit</h3>
+    <p>12 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/american-express/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>American + Express</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/banking-america/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Banking + America</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/banking-pnc/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Banking + Pnc</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/binance-legit/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Binance + Legit</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/capital-one/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Capital + One</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/chase-legit/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Chase + Legit</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/wells-fargo-fargo/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Wells Fargo + Fargo</h3>
+    <p>10 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/crypto-warning/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Crypto + Warning</h3>
+    <p>5 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+<a class="card" href="https://verixiaapps.com/discovery-b/hybrids/banking-account/">
+    <div class="card-eyebrow">Hybrid</div>
+    <h3>Banking + Account</h3>
+    <p>4 pages</p>
+    <div class="card-meta">
+      <span>Open hybrid page</span>
+    </div>
+  </a>
+      </div>
+    </div>
+  </section>
+  </main>
 
-  </div>
-
+  <footer class="footer">
+    <div class="container">
+      <div class="panel footer-panel">
+        <div>Discovery-B generated from local scam-check-now-b pages.</div>
+        <div>
+          <a href="https://verixiaapps.com/discovery-b/html-sitemap/">HTML Sitemap</a>
+          ·
+          <a href="https://verixiaapps.com/discovery-b-sitemap.xml">XML Sitemap</a>
+          ·
+          <a href="https://verixiaapps.com/discovery-b/feed.xml">Feed</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
