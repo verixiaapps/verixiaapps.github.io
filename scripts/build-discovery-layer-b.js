@@ -14,10 +14,10 @@ const DISCOVERY_SITEMAP_PATH =
   process.env.DISCOVERY_SITEMAP_PATH || "discovery-b-sitemap.xml";
 
 const ROOT_DIR = path.join(process.cwd(), SITE_SECTION);
-const DISCOVERY_DIR = path.join(ROOT_DIR, DISCOVERY_DIR_NAME);
+const DISCOVERY_DIR = path.join(process.cwd(), DISCOVERY_DIR_NAME);
 const RESOLVED_DISCOVERY_SITEMAP_PATH = path.isAbsolute(DISCOVERY_SITEMAP_PATH)
   ? DISCOVERY_SITEMAP_PATH
-  : path.join(ROOT_DIR, DISCOVERY_SITEMAP_PATH);
+  : path.join(process.cwd(), DISCOVERY_SITEMAP_PATH);
 
 const MAX_LATEST = parseInt(process.env.MAX_LATEST_URLS || "100", 10);
 const MAX_TODAY = parseInt(process.env.MAX_TODAY_URLS || "100", 10);
@@ -547,9 +547,8 @@ function joinSectionUrl(relativePath = "") {
 }
 
 function joinDiscoveryUrl(relativePath = "") {
-  const pieces = [SITE_SECTION, DISCOVERY_SEGMENT, String(relativePath || "").replace(/^\/+|\/+$/g, "")]
-    .filter(Boolean)
-    .join("/");
+  const clean = String(relativePath || "").replace(/^\/+|\/+$/g, "");
+  const pieces = [DISCOVERY_SEGMENT, clean].filter(Boolean).join("/");
   return joinSiteUrl(`${pieces}/`);
 }
 
@@ -771,7 +770,7 @@ function sanitizeEntries(entries) {
 
   const sectionPrefix = `/${SITE_SECTION.toLowerCase()}/`;
   const sectionBare = `/${SITE_SECTION.toLowerCase()}`;
-  const discoveryPrefix = `/${SITE_SECTION.toLowerCase()}/${DISCOVERY_SEGMENT.toLowerCase()}/`;
+  const discoveryPrefix = `/${DISCOVERY_SEGMENT.toLowerCase()}/`;
 
   return entries.filter((entry) => {
     try {
@@ -1903,7 +1902,7 @@ function writeSegmentedDiscoverySitemaps() {
     const entries = bucketUrls[bucket] || [];
     if (!entries.length) continue;
 
-    const relativeXmlPath = path.posix.join(SITE_SECTION, DISCOVERY_SEGMENT, "sitemaps", fileName);
+    const relativeXmlPath = path.posix.join(DISCOVERY_SEGMENT, "sitemaps", fileName);
     const localXmlPath = path.join(DISCOVERY_DIR, "sitemaps", fileName);
     writeFile(localXmlPath, buildXmlSitemap(entries));
     sitemapIndexUrls.push(joinSiteUrl(relativeXmlPath));
