@@ -1,24 +1,34 @@
-name: Discovery Layer B
+name: Build Discovery B
 
 on:
-  schedule:
-    - cron: "0 */3 * * *"
   workflow_dispatch:
+  schedule:
+    - cron: "17 */3 * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: repo-main-writer
+  group: discovery-b-build
   cancel-in-progress: false
 
 jobs:
-  build-discovery-layer-b:
+  build-discovery-b:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+
+    env:
+      SITE_URL: https://verixiaapps.com
+      SOURCE_DIR: scam-check-now-b
+      DISCOVERY_DIR: discovery-b
+      DISCOVERY_SITEMAP_PATH: discovery-b-sitemap.xml
+      MAX_LATEST_URLS: 100
+      MAX_TODAY_URLS: 100
+      MAX_THIS_WEEK_URLS: 700
+      MAX_HTML_SITEMAP_URLS: 500
+      MAX_FEED_URLS: 100
 
     steps:
-      - name: Checkout repo
+      - name: Check out repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -26,37 +36,22 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
 
-      - name: Run discovery layer B generator
+      - name: Build Discovery-B
         run: node scripts/build-discovery-layer-b.js
-        env:
-          SITE_URL: https://verixiaapps.com
-          SOURCE_DIR: scam-check-now-b
-          DISCOVERY_DIR: discovery-b
-          DISCOVERY_SITEMAP_PATH: discovery-b-sitemap.xml
-          MAX_LATEST_URLS: "100"
-          MAX_TODAY_URLS: "100"
-          MAX_THIS_WEEK_URLS: "700"
-          MAX_HTML_SITEMAP_URLS: "500"
-          MAX_FEED_URLS: "100"
 
-      - name: Commit and push discovery-b files
-        shell: bash
+      - name: Commit and push generated Discovery-B files
         run: |
-          set -euo pipefail
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add discovery-b-sitemap.xml discovery-b/
+          git add discovery-b discovery-b-sitemap.xml
 
           if git diff --cached --quiet; then
-            echo "No discovery-b changes to commit."
+            echo "No Discovery-B changes to commit."
             exit 0
           fi
 
-          git commit -m "Update discovery layer B"
-
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git commit -m "Build Discovery-B"
+          git push
