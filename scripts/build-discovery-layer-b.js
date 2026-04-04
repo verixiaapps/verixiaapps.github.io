@@ -1,2633 +1,2063 @@
-const fs = require("fs");
-const path = require("path");
 
-const SITE_URL = (process.env.SITE_URL || "https://verixiaapps.com").replace(/\/+$/, "");
-const SITE_SECTION = String(process.env.SITE_SECTION || "scam-check-now-b").replace(
-  /^\/+|\/+$/g,
-  ""
-);
-const DISCOVERY_DIR_NAME = String(process.env.DISCOVERY_DIR || "discovery-b").replace(
-  /^\/+|\/+$/g,
-  ""
-);
-const DISCOVERY_SITEMAP_PATH =
-  process.env.DISCOVERY_SITEMAP_PATH || "discovery-b-sitemap.xml";
+name: Build Discovery B
 
-const ROOT_DIR = path.join(process.cwd(), SITE_SECTION);
-const DISCOVERY_DIR = path.join(process.cwd(), DISCOVERY_DIR_NAME);
-const RESOLVED_DISCOVERY_SITEMAP_PATH = path.isAbsolute(DISCOVERY_SITEMAP_PATH)
-  ? DISCOVERY_SITEMAP_PATH
-  : path.join(process.cwd(), DISCOVERY_SITEMAP_PATH);
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */3 * * *"
 
-const MAX_LATEST = parseInt(process.env.MAX_LATEST_URLS || "100", 10);
-const MAX_TODAY = parseInt(process.env.MAX_TODAY_URLS || "100", 10);
-const MAX_WEEK = parseInt(process.env.MAX_THIS_WEEK_URLS || "700", 10);
-const MAX_HTML = parseInt(process.env.MAX_HTML_SITEMAP_URLS || "500", 10);
-const MAX_FEED = parseInt(process.env.MAX_FEED_URLS || "100", 10);
+permissions:
+  contents: write
 
-const MAX_CLUSTER_PAGE_URLS = 250;
-const MAX_TOPIC_PAGE_URLS = 200;
-const MAX_PLATFORM_PAGE_URLS = 150;
-const MAX_TOPIC_GROUPS = 12;
-const MAX_PLATFORM_GROUPS = 20;
-const MAX_CLUSTER_GROUPS = 18;
+concurrency:
+  group: discovery-b-build
+  cancel-in-progress: false
 
-const MIN_TOPIC_SIZE = 10;
-const MIN_PLATFORM_SIZE = 8;
-const MIN_CLUSTER_SIZE = 10;
-const MIN_HYBRID_SIZE = 8;
+jobs:
+  build-discovery-b:
+    runs-on: ubuntu-latest
 
+    env:
+      SITE_URL: https://verixiaapps.com
+      SOURCE_DIR: scam-check-now-b
+      DISCOVERY_DIR: discovery-b
+      DISCOVERY_SITEMAP_PATH: discovery-b-sitemap.xml
+      MAX_LATEST_URLS: 100
+      MAX_TODAY_URLS: 100
+      MAX_THIS_WEEK_URLS: 700
+      MAX_HTML_SITEMAP_URLS: 500
+      MAX_FEED_URLS: 100
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Discovery-B
+        run: node scripts/build-discovery-layer-b.js
+
+      - name: Commit and push generated Discovery-B files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add discovery-b discovery-b-sitemap.xml
+
+          if git diff --cached --quiet; then
+            echo "No Discovery-B changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Build Discovery-B"
+          git push
+// scripts/build-discovery-layer-b.js
+'use strict';
+
+const fs = require('fs');
+const fsp = require('fs/promises');
+const path = require('path');
+const crypto = require('crypto');
+
+const SITE_URL = normalizeSiteUrl(process.env.SITE_URL || 'https://verixiaapps.com');
+const SOURCE_DIR = path.resolve(process.cwd(), process.env.SOURCE_DIR || 'scam-check-now-b');
+const DISCOVERY_DIR = path.resolve(process.cwd(), process.env.DISCOVERY_DIR || 'discovery-b');
+const DISCOVERY_SITEMAP_PATH = path.resolve(process.cwd(), process.env.DISCOVERY_SITEMAP_PATH || 'discovery-b-sitemap.xml');
+
+const MAX_LATEST_URLS = toInt(process.env.MAX_LATEST_URLS, 100);
+const MAX_TODAY_URLS = toInt(process.env.MAX_TODAY_URLS, 100);
+const MAX_THIS_WEEK_URLS = toInt(process.env.MAX_THIS_WEEK_URLS, 700);
+const MAX_HTML_SITEMAP_URLS = toInt(process.env.MAX_HTML_SITEMAP_URLS, 500);
+const MAX_FEED_URLS = toInt(process.env.MAX_FEED_URLS, 100);
+
+const DISCOVERY_BASE = '/discovery-b';
+const SOURCE_BASE = '/scam-check-now-b';
+const PAGE_SIZE = 60;
+const HTML_SITEMAP_PAGE_SIZE = 200;
 const RUNWAY_PAGE_SIZE = 100;
-const MAX_RUNWAY_PAGES = 10;
+const RANDOM_PAGE_SIZE = 80;
+const MAX_TOPICS = 120;
+const MAX_PLATFORMS = 40;
+const MAX_CLUSTERS = 80;
+const MAX_HYBRIDS = 120;
+const MAX_TOPIC_PAGE_ITEMS = 250;
+const MAX_PLATFORM_PAGE_ITEMS = 250;
+const MAX_CLUSTER_PAGE_ITEMS = 200;
+const MAX_HYBRID_PAGE_ITEMS = 200;
 
-const PAGINATED_LATEST_PAGE_SIZE = 100;
-const MAX_PAGINATED_LATEST_PAGES = 10;
+const NOW = new Date();
+const TODAY_KEY = formatDateUTC(NOW);
+const THIS_WEEK_START = startOfWeekUTC(NOW);
+const THIS_WEEK_END = addDaysUTC(THIS_WEEK_START, 7);
 
-const PAGINATED_TODAY_PAGE_SIZE = 100;
-const MAX_PAGINATED_TODAY_PAGES = 5;
-
-const MAX_HYBRID_PAGES = 30;
-const MAX_HYBRID_PAGE_URLS = 120;
-
-const RANDOM_PAGE_SIZE = 200;
-const REVISIT_PAGE_SIZE = 300;
-const REVISIT_START_OFFSET = 200;
-const REVISIT_END_OFFSET = 1200;
-
-const DISCOVERY_SEGMENT = String(DISCOVERY_DIR_NAME).replace(/^\/+|\/+$/g, "");
-
-const STOPWORDS = new Set([
-  "www",
-  "http",
-  "https",
-  "html",
-  "php",
-  "com",
-  "net",
-  "org",
-  "app",
-  "apps",
-  "page",
-  "pages",
-  "check",
-  "checks",
-  "scam",
-  "scams",
-  "warning",
-  "warnings",
-  "alert",
-  "alerts",
-  "message",
-  "messages",
-  "review",
-  "risk",
-  "analysis",
-  "tool",
-  "tools",
-  "now",
-  "guide",
-  "tips",
-  "what",
-  "when",
-  "why",
-  "how",
-  "with",
-  "from",
-  "into",
-  "your",
-  "this",
-  "that",
-  "have",
-  "more",
-  "less",
-  "best",
-  "new",
-  "latest",
-  "today",
-  "week",
-  "feed",
-  "info",
-  "help",
-  "learn",
-  "avoid",
-  "about",
-  "here",
-  "there",
-  "index",
-  "home",
-  "hub",
-  "topic",
-  "topics",
-  "platform",
-  "platforms",
-  "cluster",
-  "clusters",
-  "hybrid",
-  "hybrids",
-  "random",
-  "revisit",
-  "runway",
-  "all",
-  "and",
-  "for",
-  "the",
-  "you",
-  "are",
-  "can",
-  "will",
-  "was",
-  "were",
-  "been",
-  "via",
-  "use",
-  "using",
-  "look",
-  "like",
-  "over",
-  "under",
-  "before",
-  "after",
-  "during",
-  "sign",
-  "signs",
-  "fake",
-  "real",
-  "safe",
-  "official",
-  "online",
-  "site",
-  "website",
-  "web",
-  "mail",
-  "email",
-  "text",
-  "texts",
-  "sms",
-  "phone",
-  "call",
-  "calls",
-  "link",
-  "links",
-  "customer",
-  "support",
-  "service",
-  "services",
-  "accounts",
+const STOP_WORDS = new Set([
+  'a', 'an', 'and', 'are', 'as', 'at', 'be', 'before', 'best', 'by', 'can', 'check', 'checker',
+  'for', 'from', 'get', 'guide', 'how', 'if', 'in', 'into', 'is', 'it', 'its', 'may', 'more',
+  'new', 'not', 'now', 'of', 'on', 'or', 'our', 'page', 'pages', 'review', 'safe', 'scam',
+  'scams', 'should', 'site', 'sites', 'that', 'the', 'this', 'tips', 'to', 'tool', 'up',
+  'use', 'using', 'what', 'when', 'why', 'with', 'your', 'you', 'vs', 'versus', 'way', 'ways',
+  'online', 'message', 'messages', 'link', 'links', 'text', 'email', 'emails'
 ]);
 
-const TOPIC_DEFINITIONS = [
-  {
-    slug: "delivery-scams",
-    title: "Delivery Scams",
-    keywords: [
-      "delivery",
-      "package",
-      "packages",
-      "shipment",
-      "shipments",
-      "shipping",
-      "tracking",
-      "mail",
-      "postal",
-      "parcel",
-      "usps",
-      "ups",
-      "fedex",
-      "dhl",
-      "post",
-    ],
-  },
-  {
-    slug: "payment-scams",
-    title: "Payment Scams",
-    keywords: [
-      "payment",
-      "payments",
-      "invoice",
-      "invoices",
-      "charge",
-      "charged",
-      "billing",
-      "bill",
-      "refund",
-      "refunds",
-      "renewal",
-      "renewals",
-      "subscription",
-      "subscriptions",
-      "purchase",
-      "purchases",
-      "receipt",
-      "receipts",
-      "bank",
-      "wire",
-      "transfer",
-      "zelle",
-      "venmo",
-      "cashapp",
-      "cash-app",
-      "paypal",
-    ],
-  },
-  {
-    slug: "account-alerts",
-    title: "Account Alerts",
-    keywords: [
-      "account",
-      "accounts",
-      "login",
-      "signin",
-      "sign-in",
-      "verify",
-      "verification",
-      "verified",
-      "password",
-      "reset",
-      "reset-password",
-      "security",
-      "locked",
-      "suspended",
-      "suspension",
-      "disabled",
-      "confirm",
-      "confirmed",
-      "credential",
-      "credentials",
-      "access",
-    ],
-  },
-  {
-    slug: "job-scams",
-    title: "Job Scams",
-    keywords: [
-      "job",
-      "jobs",
-      "hiring",
-      "employment",
-      "career",
-      "careers",
-      "recruiter",
-      "recruiting",
-      "interview",
-      "remote",
-      "work-from-home",
-      "indeed",
-      "offer-letter",
-      "offer",
-    ],
-  },
-  {
-    slug: "crypto-scams",
-    title: "Crypto Scams",
-    keywords: [
-      "crypto",
-      "bitcoin",
-      "btc",
-      "ethereum",
-      "eth",
-      "usdt",
-      "wallet",
-      "wallets",
-      "token",
-      "tokens",
-      "coin",
-      "coins",
-      "blockchain",
-      "airdrop",
-      "presale",
-      "defi",
-      "metamask",
-      "solana",
-    ],
-  },
-  {
-    slug: "social-media-scams",
-    title: "Social Media Scams",
-    keywords: [
-      "facebook",
-      "instagram",
-      "whatsapp",
-      "telegram",
-      "snapchat",
-      "tiktok",
-      "twitter",
-      "x",
-      "discord",
-      "social",
-      "dm",
-      "direct-message",
-    ],
-  },
-  {
-    slug: "banking-scams",
-    title: "Banking Scams",
-    keywords: [
-      "bank",
-      "banking",
-      "chase",
-      "wellsfargo",
-      "wells-fargo",
-      "capitalone",
-      "capital-one",
-      "citi",
-      "citibank",
-      "boa",
-      "bankofamerica",
-      "credit-card",
-      "debit-card",
-      "fraud-department",
-    ],
-  },
-  {
-    slug: "shopping-scams",
-    title: "Shopping Scams",
-    keywords: [
-      "amazon",
-      "walmart",
-      "ebay",
-      "etsy",
-      "shop",
-      "shopify",
-      "order",
-      "orders",
-      "seller",
-      "buyer",
-      "marketplace",
-      "store",
-      "receipt",
-    ],
-  },
-  {
-    slug: "government-and-toll-scams",
-    title: "Government And Toll Scams",
-    keywords: [
-      "dmv",
-      "irs",
-      "government",
-      "gov",
-      "toll",
-      "ezpass",
-      "e-zpass",
-      "fine",
-      "fines",
-      "citation",
-      "tax",
-      "taxes",
-      "customs",
-    ],
-  },
-  {
-    slug: "tech-support-scams",
-    title: "Tech Support Scams",
-    keywords: [
-      "microsoft",
-      "apple",
-      "icloud",
-      "google",
-      "gmail",
-      "windows",
-      "mac",
-      "tech-support",
-      "support",
-      "device",
-      "computer",
-      "system",
-      "virus",
-      "malware",
-    ],
-  },
-  {
-    slug: "loan-and-finance-scams",
-    title: "Loan And Finance Scams",
-    keywords: [
-      "loan",
-      "loans",
-      "credit",
-      "lender",
-      "lending",
-      "advance",
-      "advances",
-      "payment-plan",
-      "financing",
-      "finance",
-    ],
-  },
-  {
-    slug: "romance-and-dating-scams",
-    title: "Romance And Dating Scams",
-    keywords: [
-      "dating",
-      "romance",
-      "tinder",
-      "bumble",
-      "hinge",
-      "match",
-      "dating-app",
-    ],
-  },
-];
+const PLATFORM_SYNONYMS = {
+  paypal: 'PayPal',
+  venmo: 'Venmo',
+  cashapp: 'Cash App',
+  cash: 'Cash App',
+  app: 'Cash App',
+  zelle: 'Zelle',
+  apple: 'Apple',
+  imessage: 'iMessage',
+  whatsapp: 'WhatsApp',
+  telegram: 'Telegram',
+  signal: 'Signal',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  messenger: 'Messenger',
+  meta: 'Meta',
+  x: 'X',
+  twitter: 'X',
+  tiktok: 'TikTok',
+  youtube: 'YouTube',
+  gmail: 'Gmail',
+  google: 'Google',
+  outlook: 'Outlook',
+  microsoft: 'Microsoft',
+  linkedin: 'LinkedIn',
+  amazon: 'Amazon',
+  ebay: 'eBay',
+  etsy: 'Etsy',
+  craigslist: 'Craigslist',
+  coinbase: 'Coinbase',
+  binance: 'Binance',
+  crypto: 'Crypto',
+  bitcoin: 'Bitcoin',
+  usdt: 'USDT',
+  usdc: 'USDC',
+  fedex: 'FedEx',
+  ups: 'UPS',
+  usps: 'USPS',
+  dhl: 'DHL',
+  netflix: 'Netflix',
+  spotify: 'Spotify',
+  steam: 'Steam',
+  discord: 'Discord',
+  slack: 'Slack',
+  zoom: 'Zoom',
+  teams: 'Microsoft Teams',
+  office: 'Microsoft',
+  chase: 'Chase',
+  bank: 'Banking',
+  wells: 'Wells Fargo',
+  citi: 'Citi',
+  capitalone: 'Capital One',
+  att: 'AT&T',
+  verizon: 'Verizon',
+  tmobile: 'T-Mobile',
+  ebaymotors: 'eBay',
+  airbnb: 'Airbnb',
+  uber: 'Uber',
+  lyft: 'Lyft'
+};
 
-const PLATFORM_DEFINITIONS = [
-  { slug: "paypal", title: "PayPal", keywords: ["paypal"] },
-  { slug: "amazon", title: "Amazon", keywords: ["amazon"] },
-  { slug: "apple", title: "Apple", keywords: ["apple", "icloud", "itunes"] },
-  { slug: "usps", title: "USPS", keywords: ["usps"] },
-  { slug: "ups", title: "UPS", keywords: ["ups"] },
-  { slug: "fedex", title: "FedEx", keywords: ["fedex", "fed-ex"] },
-  { slug: "dhl", title: "DHL", keywords: ["dhl"] },
-  { slug: "microsoft", title: "Microsoft", keywords: ["microsoft", "windows", "outlook", "office365"] },
-  { slug: "google", title: "Google", keywords: ["google", "gmail", "googlepay", "gpay"] },
-  { slug: "facebook", title: "Facebook", keywords: ["facebook", "meta"] },
-  { slug: "instagram", title: "Instagram", keywords: ["instagram"] },
-  { slug: "whatsapp", title: "WhatsApp", keywords: ["whatsapp"] },
-  { slug: "telegram", title: "Telegram", keywords: ["telegram"] },
-  { slug: "cash-app", title: "Cash App", keywords: ["cashapp", "cash-app"] },
-  { slug: "venmo", title: "Venmo", keywords: ["venmo"] },
-  { slug: "zelle", title: "Zelle", keywords: ["zelle"] },
-  { slug: "chase", title: "Chase", keywords: ["chase"] },
-  { slug: "walmart", title: "Walmart", keywords: ["walmart"] },
-  { slug: "ebay", title: "eBay", keywords: ["ebay"] },
-  { slug: "netflix", title: "Netflix", keywords: ["netflix"] },
-];
+async function main() {
+  assertSourceDirExists();
 
-const generatedPages = [];
+  await ensureDir(DISCOVERY_DIR);
+  await cleanDir(DISCOVERY_DIR);
 
-function ensureDir(dir) {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  const entries = await scanSourceEntries(SOURCE_DIR);
+  if (!entries.length) {
+    throw new Error(`No source pages found under ${SOURCE_DIR}. Expected nested index.html files.`);
   }
-}
 
-function removePath(targetPath) {
-  if (!targetPath || !fs.existsSync(targetPath)) return;
-  fs.rmSync(targetPath, { recursive: true, force: true });
-}
+  const uniqueEntries = dedupeEntries(entries);
+  const enrichedEntries = enrichEntries(uniqueEntries);
 
-function emptyDir(dir) {
-  ensureDir(dir);
-  for (const name of fs.readdirSync(dir)) {
-    removePath(path.join(dir, name));
-  }
-}
+  const sortedByFreshness = [...enrichedEntries].sort(sortByFreshness);
+  const latestEntries = sortedByFreshness.slice(0, Math.max(MAX_LATEST_URLS, PAGE_SIZE));
+  const todayEntries = sortedByFreshness
+    .filter((e) => e.dateKey === TODAY_KEY)
+    .slice(0, Math.max(MAX_TODAY_URLS, PAGE_SIZE));
+  const thisWeekEntries = sortedByFreshness
+    .filter((e) => e.lastmodDate >= THIS_WEEK_START && e.lastmodDate < THIS_WEEK_END)
+    .slice(0, Math.max(MAX_THIS_WEEK_URLS, PAGE_SIZE));
 
-function resetDiscoveryOutput() {
-  emptyDir(DISCOVERY_DIR);
+  const platformMap = buildPlatformMap(enrichedEntries);
+  const topicMap = buildTopicMap(enrichedEntries);
+  const clusterMap = buildClusterMap(enrichedEntries);
+  const hybridMap = buildHybridMap(enrichedEntries);
 
-  const resolvedDiscoveryDir = path.resolve(DISCOVERY_DIR);
-  const resolvedDiscoverySitemap = path.resolve(RESOLVED_DISCOVERY_SITEMAP_PATH);
+  const topicPages = selectTopTaxonomy(topicMap, MAX_TOPICS, MAX_TOPIC_PAGE_ITEMS);
+  const platformPages = selectTopTaxonomy(platformMap, MAX_PLATFORMS, MAX_PLATFORM_PAGE_ITEMS);
+  const clusterPages = selectTopTaxonomy(clusterMap, MAX_CLUSTERS, MAX_CLUSTER_PAGE_ITEMS);
+  const hybridPages = selectTopTaxonomy(hybridMap, MAX_HYBRIDS, MAX_HYBRID_PAGE_ITEMS);
 
-  if (
-    resolvedDiscoverySitemap !== resolvedDiscoveryDir &&
-    !resolvedDiscoverySitemap.startsWith(`${resolvedDiscoveryDir}${path.sep}`)
-  ) {
-    removePath(RESOLVED_DISCOVERY_SITEMAP_PATH);
-  }
-}
+  const discoveryPageRecords = [];
 
-function writeFile(filePath, content) {
-  ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, content, "utf8");
-}
+  const addPageRecord = async (relDir, html, lastmod = isoDateTimeUTC(NOW)) => {
+    await writePage(relDir, html);
+    const loc = joinUrl(SITE_URL, DISCOVERY_BASE, relDirToUrl(relDir));
+    discoveryPageRecords.push({ loc, lastmod });
+  };
 
-function escapeXml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
+  const addXmlRecord = async (relPath, content, bucket, lastmod = isoDateTimeUTC(NOW)) => {
+    const fullPath = path.join(DISCOVERY_DIR, relPath);
+    await ensureDir(path.dirname(fullPath));
+    await fsp.writeFile(fullPath, content, 'utf8');
+    const loc = joinUrl(SITE_URL, DISCOVERY_BASE, relPath.replace(/\\/g, '/'));
+    return { loc, lastmod, bucket };
+  };
 
-function htmlEscape(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+  const navigation = buildNavigation({
+    latestCount: latestEntries.length,
+    todayCount: todayEntries.length,
+    thisWeekCount: thisWeekEntries.length,
+    topicCount: topicPages.length,
+    platformCount: platformPages.length,
+    clusterCount: clusterPages.length,
+    hybridCount: hybridPages.length
+  });
 
-function nowISO() {
-  return new Date().toISOString();
-}
+  const rootCards = [
+    buildStatCard('Latest', `${latestEntries.length} fresh discovery links`, joinUrl(SITE_URL, DISCOVERY_BASE, '/latest/')),
+    buildStatCard('Today', `${todayEntries.length} pages updated today`, joinUrl(SITE_URL, DISCOVERY_BASE, '/today/')),
+    buildStatCard('This Week', `${thisWeekEntries.length} pages updated this week`, joinUrl(SITE_URL, DISCOVERY_BASE, '/this-week/')),
+    buildStatCard('Topics', `${topicPages.length} grouped topic hubs`, joinUrl(SITE_URL, DISCOVERY_BASE, '/topics/')),
+    buildStatCard('Platforms', `${platformPages.length} grouped platform hubs`, joinUrl(SITE_URL, DISCOVERY_BASE, '/platforms/')),
+    buildStatCard('Clusters', `${clusterPages.length} grouped pattern clusters`, joinUrl(SITE_URL, DISCOVERY_BASE, '/clusters/')),
+    buildStatCard('Hybrids', `${hybridPages.length} combined intent pages`, joinUrl(SITE_URL, DISCOVERY_BASE, '/hybrids/')),
+    buildStatCard('HTML Sitemap', `${Math.min(enrichedEntries.length, MAX_HTML_SITEMAP_URLS)} sitemap links`, joinUrl(SITE_URL, DISCOVERY_BASE, '/html-sitemap/'))
+  ];
 
-function todayString() {
-  return new Date().toISOString().slice(0, 10);
-}
+  const rootSections = [
+    renderCardGridSection('Discovery surfaces', rootCards),
+    renderLinkCardsSection('Freshest pages', latestEntries.slice(0, 18).map(renderEntryCard)),
+    renderLinkCardsSection('Today by topic', topTopicCardsFromEntries(todayEntries, topicPages, 12)),
+    renderLinkCardsSection('Latest by platform', topPlatformCardsFromEntries(latestEntries, platformPages, 12)),
+    renderLinkCardsSection(
+      'Explore clusters',
+      clusterPages.slice(0, 12).map((item) => renderTaxonomyCard('Cluster', item.label, item.entries.length, taxonomyUrl('clusters', item.slug)))
+    ),
+    renderLinkCardsSection(
+      'Explore hybrids',
+      hybridPages.slice(0, 12).map((item) => renderTaxonomyCard('Hybrid', item.label, item.entries.length, taxonomyUrl('hybrids', item.slug)))
+    )
+  ];
 
-function startOfTodayUtc() {
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
-}
-
-function sevenDaysAgoUtc() {
-  const d = startOfTodayUtc();
-  d.setUTCDate(d.getUTCDate() - 6);
-  return d;
-}
-
-function toTimestamp(value) {
-  if (!value) return 0;
-  const t = Date.parse(value);
-  return Number.isNaN(t) ? 0 : t;
-}
-
-function toPosix(value) {
-  return String(value).split(path.sep).join("/");
-}
-
-function joinSiteUrl(relativePath) {
-  return `${SITE_URL}/${String(relativePath).replace(/^\/+/, "")}`;
-}
-
-function joinSectionUrl(relativePath = "") {
-  const clean = String(relativePath || "").replace(/^\/+|\/+$/g, "");
-  const pieces = [SITE_SECTION, clean].filter(Boolean).join("/");
-  return joinSiteUrl(`${pieces}/`);
-}
-
-function joinDiscoveryUrl(relativePath = "") {
-  const clean = String(relativePath || "").replace(/^\/+|\/+$/g, "");
-  const pieces = [DISCOVERY_SEGMENT, clean].filter(Boolean).join("/");
-  return joinSiteUrl(`${pieces}/`);
-}
-
-function slugify(value) {
-  return (
-    String(value)
-      .toLowerCase()
-      .trim()
-      .replace(/&/g, " and ")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "general"
-  );
-}
-
-function titleCaseFromSlug(slug) {
-  return String(slug)
-    .split("-")
-    .filter(Boolean)
-    .map((part) => {
-      if (part === "usps") return "USPS";
-      if (part === "ups") return "UPS";
-      if (part === "dhl") return "DHL";
-      if (part === "dmv") return "DMV";
-      if (part === "irs") return "IRS";
-      if (part === "ebay") return "eBay";
-      if (part === "x") return "X";
-      return part.charAt(0).toUpperCase() + part.slice(1);
+  await addPageRecord(
+    '',
+    renderShell({
+      pageTitle: 'Discovery B | Verixia Apps',
+      metaDescription: 'Discovery-B hub for Verixia Apps. Fresh scam-check-now-b page discovery, topics, platforms, clusters, hybrids, feed, and sitemap access.',
+      canonicalPath: `${DISCOVERY_BASE}/`,
+      heroEyebrow: 'Discovery B',
+      heroTitle: 'Fresh discovery pages built from scam-check-now-b',
+      heroText: 'This discovery layer reads from scam-check-now-b pages and publishes premium discovery surfaces under discovery-b only.',
+      navigation,
+      sections: rootSections
     })
-    .join(" ");
-}
-
-function shuffle(values) {
-  const arr = [...values];
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function pickRandomEntries(entries, count) {
-  return shuffle(entries).slice(0, count);
-}
-
-function formatDisplayUrl(url) {
-  return String(url)
-    .replace(/^https?:\/\//, "")
-    .replace(/\/+$/, "");
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\s+/g, " ");
-}
-
-function tokenizeNormalized(value) {
-  return normalizeText(value)
-    .split(" ")
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
-function getPathname(url) {
-  try {
-    return decodeURIComponent(new URL(url).pathname.toLowerCase());
-  } catch {
-    return "";
-  }
-}
-
-function getPathSegments(url) {
-  return getPathname(url)
-    .split("/")
-    .filter(Boolean);
-}
-
-function tokenizeUrl(url) {
-  const pathname = getPathname(url);
-  return pathname
-    .split(/[^a-z0-9]+/i)
-    .map((part) => part.trim().toLowerCase())
-    .filter((part) => {
-      if (!part) return false;
-      if (part.length < 3) return false;
-      if (/^\d+$/.test(part)) return false;
-      if (STOPWORDS.has(part)) return false;
-      return true;
-    });
-}
-
-function relativeDirToSitePath(relativeDir) {
-  const clean = toPosix(relativeDir).replace(/^\/+|\/+$/g, "");
-  return clean ? `/${SITE_SECTION}/${clean}/` : `/${SITE_SECTION}/`;
-}
-
-function sitePathToAbsoluteUrl(sitePath) {
-  return `${SITE_URL}${sitePath}`;
-}
-
-function isIgnoredDirName(name) {
-  return (
-    !name ||
-    name === DISCOVERY_DIR_NAME ||
-    name.startsWith(".") ||
-    name === "node_modules"
   );
+
+  await buildLatestPages({ latestEntries, navigation, addPageRecord });
+  await buildTodayPages({ todayEntries, navigation, addPageRecord });
+  await buildThisWeekPage({ thisWeekEntries, navigation, addPageRecord });
+  await buildHtmlSitemapPages({ entries: enrichedEntries.slice(0, MAX_HTML_SITEMAP_URLS), navigation, addPageRecord });
+  await buildRunwayPages({ entries: enrichedEntries, navigation, addPageRecord });
+  await buildRandomPages({ entries: enrichedEntries, navigation, addPageRecord });
+  await buildRevisitPage({ entries: enrichedEntries, navigation, addPageRecord });
+  await buildTopicsPages({ topicPages, navigation, addPageRecord });
+  await buildTodayTopicsPage({ todayEntries, topicPages, navigation, addPageRecord });
+  await buildPlatformsPages({ platformPages, latestEntries, navigation, addPageRecord });
+  await buildLatestPlatformsPage({ latestEntries, platformPages, navigation, addPageRecord });
+  await buildClustersPages({ clusterPages, navigation, addPageRecord });
+  await buildHybridsPages({ hybridPages, navigation, addPageRecord });
+  await buildFeed({ entries: sortedByFreshness.slice(0, MAX_FEED_URLS), addXmlRecord });
+
+  const sitemapXmlRecords = [];
+  sitemapXmlRecords.push(...await buildBucketSitemaps({
+    discoveryPageRecords,
+    addXmlRecord
+  }));
+
+  await writeSitemapIndex(sitemapXmlRecords);
+
+  console.log('Discovery-B complete.');
+  console.log(`Source entries: ${enrichedEntries.length}`);
+  console.log(`Generated pages: ${discoveryPageRecords.length}`);
+  console.log(`Generated sitemap buckets: ${sitemapXmlRecords.length}`);
 }
 
-function getAllPages(rootDir) {
-  if (!fs.existsSync(rootDir)) return [];
+function normalizeSiteUrl(url) {
+  return String(url || '').trim().replace(/\/+$/, '');
+}
 
-  const pages = [];
+function toInt(value, fallback) {
+  const n = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
 
-  function walk(currentDir) {
-    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+function assertSourceDirExists() {
+  if (!fs.existsSync(SOURCE_DIR)) {
+    throw new Error(`SOURCE_DIR does not exist: ${SOURCE_DIR}`);
+  }
+  const stat = fs.statSync(SOURCE_DIR);
+  if (!stat.isDirectory()) {
+    throw new Error(`SOURCE_DIR is not a directory: ${SOURCE_DIR}`);
+  }
+}
 
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      if (isIgnoredDirName(entry.name)) continue;
+async function ensureDir(dir) {
+  await fsp.mkdir(dir, { recursive: true });
+}
 
-      const fullDir = path.join(currentDir, entry.name);
-      const indexPath = path.join(fullDir, "index.html");
-      const relativeDir = path.relative(rootDir, fullDir);
+async function cleanDir(dir) {
+  await ensureDir(dir);
+  const entries = await fsp.readdir(dir, { withFileTypes: true });
+  await Promise.all(entries.map(async (entry) => {
+    const full = path.join(dir, entry.name);
+    await fsp.rm(full, { recursive: true, force: true });
+  }));
+}
 
-      if (fs.existsSync(indexPath)) {
-        const stats = fs.statSync(indexPath);
-        const sitePath = relativeDirToSitePath(relativeDir);
+async function scanSourceEntries(rootDir) {
+  const results = [];
+  await walkDir(rootDir, async (fullPath, dirent) => {
+    if (!dirent.isFile()) return;
+    if (dirent.name !== 'index.html') return;
 
-        pages.push({
-          url: sitePathToAbsoluteUrl(sitePath),
-          lastmod: stats.mtime.toISOString(),
-        });
-      }
+    const rel = path.relative(rootDir, fullPath).replace(/\\/g, '/');
+    const slug = rel.replace(/\/index\.html$/, '').replace(/^\/+|\/+$/g, '');
+    if (!slug) return;
 
-      walk(fullDir);
+    const stat = await fsp.stat(fullPath);
+    const html = await safeReadText(fullPath);
+    const extracted = extractSourceMeta(html);
+
+    const sourcePath = `${SOURCE_BASE}/${slug}/`;
+    const sourceUrl = joinUrl(SITE_URL, sourcePath);
+
+    results.push({
+      id: sha1(sourceUrl),
+      slug,
+      sourcePath,
+      sourceUrl,
+      filePath: fullPath,
+      fileMtimeMs: stat.mtimeMs,
+      lastmod: stat.mtime.toISOString(),
+      title: extracted.title || prettifySlug(slug),
+      metaDescription: extracted.metaDescription || buildDefaultSourceDescription(slug),
+      h1: extracted.h1 || extracted.title || prettifySlug(slug)
+    });
+  });
+  return results;
+}
+
+async function walkDir(dir, onEntry) {
+  const entries = await fsp.readdir(dir, { withFileTypes: true });
+  for (const dirent of entries) {
+    const fullPath = path.join(dir, dirent.name);
+    if (dirent.isDirectory()) {
+      await walkDir(fullPath, onEntry);
+    } else {
+      await onEntry(fullPath, dirent);
     }
   }
-
-  walk(rootDir);
-
-  return pages;
 }
 
-function uniqueByUrl(entries) {
+async function safeReadText(filePath) {
+  try {
+    return await fsp.readFile(filePath, 'utf8');
+  } catch {
+    return '';
+  }
+}
+
+function extractSourceMeta(html) {
+  const title = matchTag(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
+  const h1 = matchTag(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  const metaDescription =
+    matchAttr(html, /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+    matchAttr(html, /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["'][^>]*>/i);
+
+  return {
+    title: cleanText(title),
+    h1: cleanText(h1),
+    metaDescription: cleanText(metaDescription)
+  };
+}
+
+function matchTag(html, regex) {
+  const m = String(html || '').match(regex);
+  return m ? stripHtml(m[1]) : '';
+}
+
+function matchAttr(html, regex) {
+  const m = String(html || '').match(regex);
+  return m ? stripHtml(m[1]) : '';
+}
+
+function stripHtml(input) {
+  return String(input || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function cleanText(input) {
+  return String(input || '').replace(/\s+/g, ' ').trim();
+}
+
+function buildDefaultSourceDescription(slug) {
+  return `Scam Check Now B discovery source for ${prettifySlug(slug)}.`;
+}
+
+function dedupeEntries(entries) {
   const map = new Map();
-
   for (const entry of entries) {
-    if (!entry || !entry.url) continue;
-    const existing = map.get(entry.url);
-    if (!existing) {
-      map.set(entry.url, entry);
-      continue;
-    }
-
-    const existingTime = toTimestamp(existing.lastmod);
-    const nextTime = toTimestamp(entry.lastmod);
-    if (nextTime > existingTime) {
-      map.set(entry.url, entry);
+    const key = entry.sourceUrl;
+    const existing = map.get(key);
+    if (!existing || entry.fileMtimeMs > existing.fileMtimeMs) {
+      map.set(key, entry);
     }
   }
-
   return [...map.values()];
 }
 
-function uniqueStrings(values) {
-  return [...new Set(values.filter(Boolean))];
-}
+function enrichEntries(entries) {
+  return entries.map((entry) => {
+    const normalizedSlug = entry.slug.toLowerCase();
+    const slugParts = normalizedSlug.split('/').flatMap((s) => s.split('-')).filter(Boolean);
+    const tokens = tokenize([...slugParts, entry.title, entry.h1].join(' '));
+    const uniqueTokens = [...new Set(tokens)];
 
-function sortNewestFirst(entries) {
-  return [...entries].sort((a, b) => {
-    const aTime = toTimestamp(a.lastmod);
-    const bTime = toTimestamp(b.lastmod);
+    const platformLabels = detectPlatforms(uniqueTokens);
+    const topics = detectTopics(uniqueTokens);
+    const dateObj = new Date(entry.lastmod);
 
-    if (aTime !== bTime) return bTime - aTime;
-    return a.url.localeCompare(b.url);
+    return {
+      ...entry,
+      tokens: uniqueTokens,
+      platformLabels,
+      topicLabels: topics,
+      clusterTokens: uniqueTokens.filter((t) => !STOP_WORDS.has(t)).slice(0, 20),
+      sourceLabel: entry.h1 || entry.title || prettifySlug(entry.slug),
+      dateKey: formatDateUTC(dateObj),
+      lastmodDate: dateObj,
+      discoveryLabel: normalizeDiscoveryLabel(entry)
+    };
   });
 }
 
-function filterToday(entries) {
-  const start = startOfTodayUtc().getTime();
-  return entries.filter((entry) => toTimestamp(entry.lastmod) >= start);
+function normalizeDiscoveryLabel(entry) {
+  const title = cleanText(entry.h1 || entry.title || prettifySlug(entry.slug));
+  return title.length > 90 ? `${title.slice(0, 87)}…` : title;
 }
 
-function filterThisWeek(entries) {
-  const start = sevenDaysAgoUtc().getTime();
-  return entries.filter((entry) => toTimestamp(entry.lastmod) >= start);
+function tokenize(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s/-]+/g, ' ')
+    .replace(/[\/_-]+/g, ' ')
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .filter((t) => t.length > 1 || t === 'x');
 }
 
-function annotateEntry(entry) {
-  const pathname = getPathname(entry.url);
-  const segments = getPathSegments(entry.url);
-  const tokens = uniqueStrings(tokenizeUrl(entry.url));
-  const ts = toTimestamp(entry.lastmod);
-  const normalized = normalizeText(`${pathname} ${tokens.join(" ")}`);
-  const normalizedTokens = new Set(tokenizeNormalized(normalized));
+function detectPlatforms(tokens) {
+  const labels = new Set();
 
-  return {
-    ...entry,
-    pathname,
-    segments,
-    tokens,
-    ts,
-    normalized,
-    normalizedTokens,
-  };
-}
-
-function sanitizeEntries(entries) {
-  const siteHost = (() => {
-    try {
-      return new URL(SITE_URL).host;
-    } catch {
-      return "";
+  for (const token of tokens) {
+    if (PLATFORM_SYNONYMS[token]) {
+      labels.add(PLATFORM_SYNONYMS[token]);
     }
-  })();
+  }
 
-  const sectionPrefix = `/${SITE_SECTION.toLowerCase()}/`;
-  const sectionBare = `/${SITE_SECTION.toLowerCase()}`;
-  const discoveryPrefix = `/${DISCOVERY_SEGMENT.toLowerCase()}/`;
+  const combos = tokens.join(' ');
+  if (/\bcash app\b/.test(combos)) labels.add('Cash App');
+  if (/\bapple pay\b/.test(combos)) labels.add('Apple');
+  if (/\bfacebook marketplace\b/.test(combos)) labels.add('Facebook');
+  if (/\bgoogle voice\b/.test(combos)) labels.add('Google');
+  if (/\bmicrosoft teams\b/.test(combos)) labels.add('Microsoft Teams');
 
-  return entries.filter((entry) => {
-    try {
-      const u = new URL(entry.url);
-      const pathname = (u.pathname || "").toLowerCase();
+  return [...labels].sort((a, b) => a.localeCompare(b));
+}
 
-      if (siteHost && u.host !== siteHost) return false;
-      if (!pathname || pathname === "/") return false;
-      if (!pathname.startsWith(sectionPrefix) && pathname !== sectionBare) return false;
-      if (pathname === sectionBare) return false;
-      if (pathname.includes(discoveryPrefix)) return false;
-      if (pathname.endsWith(".xml")) return false;
-      if (pathname.includes("/sitemap")) return false;
+function detectTopics(tokens) {
+  const result = new Set();
 
-      return true;
-    } catch {
-      return false;
+  for (const token of tokens) {
+    if (STOP_WORDS.has(token)) continue;
+    if (PLATFORM_SYNONYMS[token]) continue;
+    if (/^\d+$/.test(token)) continue;
+    if (token.length < 3) continue;
+    result.add(prettifyToken(token));
+  }
+
+  return [...result].slice(0, 8);
+}
+
+function buildPlatformMap(entries) {
+  const map = new Map();
+  for (const entry of entries) {
+    for (const label of entry.platformLabels) {
+      if (!map.has(label)) map.set(label, []);
+      map.get(label).push(entry);
     }
-  });
+  }
+  return map;
 }
 
-function formatEntryLabel(entry) {
-  const usefulSegments = entry.segments.filter(
-    (segment) =>
-      ![
-        SITE_SECTION.toLowerCase(),
-        "check",
-        "checks",
-        DISCOVERY_SEGMENT.toLowerCase(),
-      ].includes(segment.toLowerCase())
-  );
-
-  const tail = usefulSegments.slice(-3).map((segment) => titleCaseFromSlug(segment));
-  const candidate = tail.join(" / ").trim();
-  return candidate || formatDisplayUrl(entry.url);
-}
-
-function entriesToListItems(entries) {
-  return entries.map((entry) => ({
-    href: entry.url,
-    label: formatEntryLabel(entry),
-    sub: formatDisplayUrl(entry.url),
-  }));
-}
-
-function linksToItems(links) {
-  return links.map((link) => ({
-    href: link.href,
-    label: link.label,
-    sub: link.sub || formatDisplayUrl(link.href),
-  }));
-}
-
-function chunkEntries(entries, pageSize, maxPages) {
-  const chunks = [];
-  for (let i = 0; i < Math.min(maxPages, Math.ceil(entries.length / pageSize)); i += 1) {
-    const slice = entries.slice(i * pageSize, (i + 1) * pageSize);
-    if (!slice.length) break;
-    chunks.push(slice);
-  }
-  return chunks;
-}
-
-function buildPagerSection(basePath, totalPages, currentPage, label) {
-  if (totalPages <= 1) return "";
-
-  const links = [];
-  const start = Math.max(1, currentPage - 2);
-  const end = Math.min(totalPages, currentPage + 2);
-
-  for (let pageNum = start; pageNum <= end; pageNum += 1) {
-    const href =
-      pageNum === 1
-        ? joinDiscoveryUrl(basePath)
-        : joinDiscoveryUrl(`${basePath}/page-${pageNum}`);
-    links.push({
-      href,
-      label: pageNum === 1 ? `${label} Page 1` : `${label} Page ${pageNum}`,
-      sub: pageNum === currentPage ? "Current page" : "Browse more discovery URLs",
-    });
-  }
-
-  return buildRelatedSection({
-    title: `${label} pages`,
-    intro: "Move deeper through paginated discovery pages without losing crawl depth.",
-    links,
-  });
-}
-
-function buildRelatedSection({ title, intro, links }) {
-  if (!links || !links.length) return "";
-
-  return `
-    <div class="related-card">
-      <div class="related-top">
-        <h3>${htmlEscape(title)}</h3>
-        <p>${htmlEscape(intro)}</p>
-      </div>
-      <ul class="related-grid">
-        ${links
-          .map(
-            (item) => `
-          <li>
-            <a class="related-link" href="${htmlEscape(item.href)}">
-              <span>
-                <span class="related-label">${htmlEscape(item.label)}</span>
-                <span class="related-sub">${htmlEscape(item.sub || formatDisplayUrl(item.href))}</span>
-              </span>
-              <span class="related-arrow">→</span>
-            </a>
-          </li>
-        `
-          )
-          .join("\n")}
-      </ul>
-    </div>
-  `;
-}
-
-function getPageMeta(title, kind = "generic") {
-  if (kind === "hub") {
-    return {
-      badge: "Discovery hub",
-      kicker: "Scam discovery engine",
-      eyebrow: "Browse discovery surfaces",
-      intro:
-        "Use the discovery hub to move across recent scam check pages, grouped scam topics, platform collections, random discovery pages, and revisited older URLs that deserve fresh crawl attention.",
-      statA: "Central access",
-      statB: "Strong recirculation",
-      statC: "Built for scale",
-    };
-  }
-
-  if (kind === "latest") {
-    return {
-      badge: "Updated continuously",
-      kicker: "Latest discovery",
-      eyebrow: "Newest pages added",
-      intro:
-        "Browse the newest scam check pages discovered across the B page set. This is the fastest way to see fresh suspicious message topics, account warning pages, delivery scam pages, and payment alert coverage in one place.",
-      statA: "Newest additions",
-      statB: "Fast discovery",
-      statC: "Built for reuse",
-    };
-  }
-
-  if (kind === "today") {
-    return {
-      badge: "Fresh today",
-      kicker: "Today’s discovery",
-      eyebrow: "New pages discovered today",
-      intro:
-        "See today’s newest scam check pages in one place. This page is built for fast discovery when suspicious messages, payment alerts, or fake delivery notices start appearing right now.",
-      statA: "Today’s updates",
-      statB: "Quick scan",
-      statC: "High urgency",
-    };
-  }
-
-  if (kind === "week") {
-    return {
-      badge: "This week",
-      kicker: "Weekly discovery",
-      eyebrow: "Recent pages from this week",
-      intro:
-        "Browse scam check pages discovered over the last week. This gives you a broader view of recent scam topics, warning patterns, and message types without having to dig through individual B pages.",
-      statA: "7-day coverage",
-      statB: "Broader view",
-      statC: "Recent patterns",
-    };
-  }
-
-  if (kind === "html") {
-    return {
-      badge: "Full browse view",
-      kicker: "HTML sitemap",
-      eyebrow: "Combined scam page directory",
-      intro:
-        "Use this HTML sitemap as a broad discovery page for scam check topics. It helps people move quickly through suspicious message pages, compare patterns, and reach a focused warning page faster.",
-      statA: "Wide coverage",
-      statB: "Search-friendly",
-      statC: "Navigation hub",
-    };
-  }
-
-  if (kind === "feed") {
-    return {
-      badge: "Fast feed",
-      kicker: "Fresh scan feed",
-      eyebrow: "Quick discovery feed",
-      intro:
-        "This fast discovery feed surfaces a tight set of fresh scam check pages for quick browsing, internal recirculation, and strong repeat visits.",
-      statA: "Fast feed",
-      statB: "Quick reuse",
-      statC: "Fresh coverage",
-    };
-  }
-
-  if (kind === "runway") {
-    return {
-      badge: "Runway pages",
-      kicker: "Deeper discovery runway",
-      eyebrow: "Paginated crawl runway",
-      intro:
-        "Runway pages push more scam check URLs into the discovery layer without bloating a single page. They are designed to deepen crawl paths while staying structured and indexable.",
-      statA: "Deeper paths",
-      statB: "Large coverage",
-      statC: "Index support",
-    };
-  }
-
-  if (kind === "random") {
-    return {
-      badge: "Discovery mix",
-      kicker: "Random discovery",
-      eyebrow: "Explore different scam patterns",
-      intro:
-        "Random discovery pages surface a shuffled mix of scam check URLs, creating alternate crawl paths and exposing overlooked suspicious message pages.",
-      statA: "Mixed coverage",
-      statB: "Extra crawl paths",
-      statC: "Useful revisits",
-    };
-  }
-
-  if (kind === "revisit") {
-    return {
-      badge: "Revisit older pages",
-      kicker: "Resurfaced discovery",
-      eyebrow: "Older pages worth recrawling",
-      intro:
-        "Revisit pages bring older scam check URLs back into the discovery layer so they can gain fresh internal links and more crawl attention.",
-      statA: "Older URLs",
-      statB: "Fresh links",
-      statC: "Recrawl support",
-    };
-  }
-
-  if (kind === "topics") {
-    return {
-      badge: "Topic discovery",
-      kicker: "Grouped by scam topic",
-      eyebrow: "Browse topic collections",
-      intro:
-        "These topic discovery pages organize scam check URLs by repeated themes like payment alerts, delivery scams, job scams, crypto risks, and account warnings.",
-      statA: "Topic signals",
-      statB: "Structured browsing",
-      statC: "SEO support",
-    };
-  }
-
-  if (kind === "topic-child") {
-    return {
-      badge: "Topic page",
-      kicker: "Focused topic discovery",
-      eyebrow: title,
-      intro:
-        "Browse a focused group of scam check URLs tied together by a repeated scam theme. This page helps people compare similar warning patterns fast.",
-      statA: "Focused theme",
-      statB: "Clear grouping",
-      statC: "Related patterns",
-    };
-  }
-
-  if (kind === "platforms") {
-    return {
-      badge: "Platform discovery",
-      kicker: "Grouped by platform",
-      eyebrow: "Browse platform collections",
-      intro:
-        "These platform discovery pages organize scam check URLs around the brands, services, and platforms that show up repeatedly in suspicious messages.",
-      statA: "Brand grouping",
-      statB: "Clear navigation",
-      statC: "Repeat utility",
-    };
-  }
-
-  if (kind === "platform-child") {
-    return {
-      badge: "Platform page",
-      kicker: "Focused platform discovery",
-      eyebrow: title,
-      intro:
-        "Browse scam check URLs tied to one specific platform or brand so people can quickly compare related warning pages and suspicious message patterns.",
-      statA: "Brand focus",
-      statB: "Relevant warnings",
-      statC: "Higher intent",
-    };
-  }
-
-  if (kind === "clusters") {
-    return {
-      badge: "Cluster discovery",
-      kicker: "Grouped by repeated tokens",
-      eyebrow: "Browse repeated pattern clusters",
-      intro:
-        "Cluster pages are built from repeated URL patterns and terms found across your B page set. They help expose additional related discovery surfaces at scale.",
-      statA: "Pattern grouping",
-      statB: "Extra coverage",
-      statC: "Scale support",
-    };
-  }
-
-  if (kind === "cluster-child") {
-    return {
-      badge: "Cluster page",
-      kicker: "Repeated pattern discovery",
-      eyebrow: title,
-      intro:
-        "Browse scam check URLs connected by a repeated pattern discovered across your B URLs. This creates additional structured internal links without editing the underlying pages.",
-      statA: "Pattern signal",
-      statB: "Additional paths",
-      statC: "Discovery depth",
-    };
-  }
-
-  if (kind === "hybrids") {
-    return {
-      badge: "Hybrid discovery",
-      kicker: "Platform plus topic pages",
-      eyebrow: "Browse hybrid collections",
-      intro:
-        "Hybrid pages combine a platform or brand with a repeated scam intent, creating high-intent discovery surfaces that often match how people search.",
-      statA: "Higher intent",
-      statB: "Combined signals",
-      statC: "Strong entry points",
-    };
-  }
-
-  if (kind === "hybrid-child") {
-    return {
-      badge: "Hybrid page",
-      kicker: "Combined intent discovery",
-      eyebrow: title,
-      intro:
-        "Browse a higher-intent set of scam check URLs that combine a platform with a repeated scam topic or action pattern.",
-      statA: "Combined relevance",
-      statB: "Focused set",
-      statC: "Useful comparison",
-    };
-  }
-
-  return {
-    badge: "Discovery page",
-    kicker: "Scam detection discovery",
-    eyebrow: title,
-    intro:
-      "Use this discovery page to move through scam check topics quickly, compare suspicious message patterns, and reach a focused warning page before clicking links, replying, sending money, or sharing personal information.",
-    statA: "Clear access",
-    statB: "Structured navigation",
-    statC: "Return visits",
-  };
-}
-
-function globalRelatedDiscoverySection() {
-  const links = [
-    { href: joinDiscoveryUrl(""), label: "Discovery Hub" },
-    { href: joinDiscoveryUrl("latest"), label: "Latest Pages" },
-    { href: joinDiscoveryUrl("today"), label: "Today Pages" },
-    { href: joinDiscoveryUrl("this-week"), label: "This Week" },
-    { href: joinDiscoveryUrl("html-sitemap"), label: "HTML Sitemap" },
-    { href: joinDiscoveryUrl("feed"), label: "Discovery Feed" },
-    { href: joinDiscoveryUrl("clusters"), label: "Discovery Clusters" },
-    { href: joinDiscoveryUrl("platforms"), label: "All Platforms" },
-    { href: joinDiscoveryUrl("topics"), label: "All Topics" },
-    { href: joinDiscoveryUrl("runway"), label: "Runway Pages" },
-    { href: joinDiscoveryUrl("hybrids"), label: "Hybrid Discovery Pages" },
-    { href: joinDiscoveryUrl("random"), label: "Random Discovery 1" },
-    { href: joinDiscoveryUrl("random-2"), label: "Random Discovery 2" },
-    { href: joinDiscoveryUrl("random-3"), label: "Random Discovery 3" },
-    { href: joinDiscoveryUrl("revisit"), label: "Revisit Pages" },
-  ];
-
-  return buildRelatedSection({
-    title: "Related discovery pages",
-    intro:
-      "Move through more scam discovery surfaces, recent pages, topic collections, platform groupings, and supporting navigation hubs.",
-    links,
-  });
-}
-
-function pageShell({
-  title,
-  canonicalUrl,
-  intro = "",
-  items = [],
-  extraSections = [],
-  kind = "generic",
-}) {
-  const meta = getPageMeta(title, kind);
-  const sections = [...extraSections, globalRelatedDiscoverySection()].filter(Boolean);
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${htmlEscape(title)}</title>
-  <meta name="description" content="${htmlEscape(intro || meta.intro)}">
-  <meta name="robots" content="index,follow">
-  <link rel="canonical" href="${htmlEscape(canonicalUrl)}">
-
-  <meta property="og:title" content="${htmlEscape(title)}">
-  <meta property="og:description" content="${htmlEscape(intro || meta.intro)}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${htmlEscape(canonicalUrl)}">
-
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="${htmlEscape(title)}">
-  <meta name="twitter:description" content="${htmlEscape(intro || meta.intro)}">
-
-  <style>
-    :root{
-      --bg:#07111f;
-      --bg-2:#0c1728;
-      --bg-3:#12203a;
-      --surface:rgba(255,255,255,.06);
-      --surface-2:rgba(255,255,255,.08);
-      --card:#101c33;
-      --ink:#e8f0ff;
-      --ink-strong:#ffffff;
-      --muted:#9eb0cf;
-      --line:rgba(148,163,184,.20);
-      --cyan:#22d3ee;
-      --cyan-2:#06b6d4;
-      --violet:#8b5cf6;
-      --emerald:#10b981;
-      --shadow-xl:0 32px 90px rgba(2,6,23,.42);
-      --shadow-md:0 12px 30px rgba(2,6,23,.22);
-      --shadow-sm:0 8px 20px rgba(2,6,23,.16);
+function buildTopicMap(entries) {
+  const map = new Map();
+  for (const entry of entries) {
+    for (const label of entry.topicLabels) {
+      if (!map.has(label)) map.set(label, []);
+      map.get(label).push(entry);
     }
+  }
+  return map;
+}
 
-    *{box-sizing:border-box;}
-    html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+function buildClusterMap(entries) {
+  const map = new Map();
+  for (const entry of entries) {
+    const clusterTokens = entry.clusterTokens
+      .filter((t) => !entry.platformLabels.some((p) => slugify(p) === t))
+      .slice(0, 8);
 
-    body{
-      font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
-      margin:0;
-      padding-top:90px;
-      color:var(--ink);
-      line-height:1.6;
-      background:
-        radial-gradient(circle at 14% 8%, rgba(34,211,238,.16), transparent 22%),
-        radial-gradient(circle at 84% 0%, rgba(139,92,246,.20), transparent 28%),
-        radial-gradient(circle at 50% 100%, rgba(16,185,129,.08), transparent 24%),
-        linear-gradient(180deg,#06101b 0%, #0a1324 34%, #0e1830 100%);
+    const pairs = pickTokenPairs(clusterTokens, 3);
+    for (const pair of pairs) {
+      const label = pair.map(prettifyToken).join(' + ');
+      if (!map.has(label)) map.set(label, []);
+      map.get(label).push(entry);
     }
+  }
+  return map;
+}
 
-    a{color:#8be9ff;text-decoration:none;}
-    a:hover{text-decoration:underline;}
+function buildHybridMap(entries) {
+  const map = new Map();
+  for (const entry of entries) {
+    const topics = entry.topicLabels.slice(0, 3);
+    const platforms = entry.platformLabels.slice(0, 2);
 
-    @supports (padding:max(0px)) {
-      body{
-        padding-left:max(0px, env(safe-area-inset-left));
-        padding-right:max(0px, env(safe-area-inset-right));
+    for (const platform of platforms) {
+      for (const topic of topics) {
+        const label = `${platform} + ${topic}`;
+        if (!map.has(label)) map.set(label, []);
+        map.get(label).push(entry);
       }
     }
 
-    .top-bar{
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:10px 16px;
-      z-index:1000;
-      pointer-events:none;
+    if (!platforms.length && topics.length >= 2) {
+      const label = `${topics[0]} + ${topics[1]}`;
+      if (!map.has(label)) map.set(label, []);
+      map.get(label).push(entry);
     }
+  }
+  return map;
+}
 
-    .top-actions{
-      pointer-events:auto;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-right:20px;
+function selectTopTaxonomy(map, maxCount, maxItemsPerPage) {
+  const items = [];
+
+  for (const [label, entries] of map.entries()) {
+    const deduped = dedupeBySourceUrl(entries).sort(sortByFreshness).slice(0, maxItemsPerPage);
+    if (deduped.length < 2) continue;
+
+    items.push({
+      label,
+      slug: slugify(label),
+      entries: deduped,
+      lastmod: deduped[0].lastmod
+    });
+  }
+
+  return items
+    .sort((a, b) => {
+      if (b.entries.length !== a.entries.length) return b.entries.length - a.entries.length;
+      return a.label.localeCompare(b.label);
+    })
+    .slice(0, maxCount);
+}
+
+function dedupeBySourceUrl(entries) {
+  const seen = new Map();
+  for (const entry of entries) {
+    const existing = seen.get(entry.sourceUrl);
+    if (!existing || entry.fileMtimeMs > existing.fileMtimeMs) {
+      seen.set(entry.sourceUrl, entry);
     }
+  }
+  return [...seen.values()];
+}
 
-    .logo{
-      pointer-events:auto;
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      font-size:14px;
-      font-weight:900;
-      color:#eef6ff;
-      margin-left:8px;
-      padding:11px 15px;
-      border-radius:999px;
-      letter-spacing:-.01em;
-      background:rgba(10,18,35,.68);
-      border:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(14px);
-      box-shadow:var(--shadow-sm);
-      text-decoration:none;
+function sortByFreshness(a, b) {
+  if (b.fileMtimeMs !== a.fileMtimeMs) return b.fileMtimeMs - a.fileMtimeMs;
+  return a.sourceUrl.localeCompare(b.sourceUrl);
+}
+
+function pickTokenPairs(tokens, maxPairs) {
+  const pairs = [];
+  for (let i = 0; i < tokens.length; i += 1) {
+    for (let j = i + 1; j < tokens.length; j += 1) {
+      const a = tokens[i];
+      const b = tokens[j];
+      if (!a || !b || a === b) continue;
+      if (STOP_WORDS.has(a) || STOP_WORDS.has(b)) continue;
+      const pair = [a, b].sort();
+      const key = pair.join('|');
+      if (!pairs.some((p) => p.join('|') === key)) pairs.push(pair);
+      if (pairs.length >= maxPairs) return pairs;
     }
+  }
+  return pairs;
+}
 
-    .logo-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:linear-gradient(180deg,var(--cyan) 0%,var(--violet) 100%);
-      box-shadow:0 0 0 4px rgba(139,92,246,.14);
-      flex:0 0 10px;
+async function buildLatestPages({ latestEntries, navigation, addPageRecord }) {
+  const relBase = 'latest';
+  const pages = paginate(latestEntries, PAGE_SIZE);
+
+  await addPageRecord(
+    relBase,
+    renderListingPage({
+      pageTitle: 'Latest Discovery B Pages | Verixia Apps',
+      metaDescription: 'Latest discovery pages from scam-check-now-b.',
+      canonicalPath: `${DISCOVERY_BASE}/latest/`,
+      heroEyebrow: 'Latest',
+      heroTitle: 'Latest Discovery-B pages',
+      heroText: `${latestEntries.length} recent source pages from scam-check-now-b.`,
+      entries: pages[0] || [],
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Latest' }],
+      pager: renderPagination(`${DISCOVERY_BASE}/latest/`, pages.length, 1)
+    })
+  );
+
+  for (let i = 1; i < pages.length; i += 1) {
+    const pageNumber = i + 1;
+    await addPageRecord(
+      path.join(relBase, 'page', String(pageNumber)),
+      renderListingPage({
+        pageTitle: `Latest Discovery B Pages - Page ${pageNumber} | Verixia Apps`,
+        metaDescription: `Latest Discovery-B pages page ${pageNumber}.`,
+        canonicalPath: `${DISCOVERY_BASE}/latest/page/${pageNumber}/`,
+        heroEyebrow: 'Latest',
+        heroTitle: `Latest pages · page ${pageNumber}`,
+        heroText: `${latestEntries.length} recent source pages from scam-check-now-b.`,
+        entries: pages[i],
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Latest', href: `${DISCOVERY_BASE}/latest/` },
+          { label: `Page ${pageNumber}` }
+        ],
+        pager: renderPagination(`${DISCOVERY_BASE}/latest/`, pages.length, pageNumber)
+      })
+    );
+  }
+}
+
+async function buildTodayPages({ todayEntries, navigation, addPageRecord }) {
+  const relBase = 'today';
+  const pages = paginate(todayEntries, PAGE_SIZE);
+
+  await addPageRecord(
+    relBase,
+    renderListingPage({
+      pageTitle: 'Today Discovery B Pages | Verixia Apps',
+      metaDescription: 'Today updates in discovery-b from scam-check-now-b.',
+      canonicalPath: `${DISCOVERY_BASE}/today/`,
+      heroEyebrow: 'Today',
+      heroTitle: 'Updated today',
+      heroText: `${todayEntries.length} pages updated today.`,
+      entries: pages[0] || [],
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Today' }],
+      pager: renderPagination(`${DISCOVERY_BASE}/today/`, pages.length, 1),
+      extraSections: [
+        renderLinkCardsSection('Today by topic', topTopicCardsFromEntries(todayEntries, selectTopTaxonomy(buildTopicMap(todayEntries), 24, 200), 18))
+      ]
+    })
+  );
+
+  for (let i = 1; i < pages.length; i += 1) {
+    const pageNumber = i + 1;
+    await addPageRecord(
+      path.join(relBase, 'page', String(pageNumber)),
+      renderListingPage({
+        pageTitle: `Today Discovery B Pages - Page ${pageNumber} | Verixia Apps`,
+        metaDescription: `Today discovery-b pages page ${pageNumber}.`,
+        canonicalPath: `${DISCOVERY_BASE}/today/page/${pageNumber}/`,
+        heroEyebrow: 'Today',
+        heroTitle: `Updated today · page ${pageNumber}`,
+        heroText: `${todayEntries.length} pages updated today.`,
+        entries: pages[i],
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Today', href: `${DISCOVERY_BASE}/today/` },
+          { label: `Page ${pageNumber}` }
+        ],
+        pager: renderPagination(`${DISCOVERY_BASE}/today/`, pages.length, pageNumber)
+      })
+    );
+  }
+}
+
+async function buildThisWeekPage({ thisWeekEntries, navigation, addPageRecord }) {
+  await addPageRecord(
+    'this-week',
+    renderListingPage({
+      pageTitle: 'This Week Discovery B Pages | Verixia Apps',
+      metaDescription: 'This week updates in discovery-b from scam-check-now-b.',
+      canonicalPath: `${DISCOVERY_BASE}/this-week/`,
+      heroEyebrow: 'This Week',
+      heroTitle: 'Updated this week',
+      heroText: `${thisWeekEntries.length} pages updated this week.`,
+      entries: thisWeekEntries.slice(0, Math.max(PAGE_SIZE * 2, thisWeekEntries.length)),
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'This Week' }]
+    })
+  );
+}
+
+async function buildHtmlSitemapPages({ entries, navigation, addPageRecord }) {
+  const relBase = 'html-sitemap';
+  const pages = paginate(entries, HTML_SITEMAP_PAGE_SIZE);
+
+  await addPageRecord(
+    relBase,
+    renderHtmlSitemapPage({
+      pageTitle: 'HTML Sitemap Discovery B | Verixia Apps',
+      metaDescription: 'HTML sitemap for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/html-sitemap/`,
+      heroEyebrow: 'HTML Sitemap',
+      heroTitle: 'Browse discovery-b source links',
+      heroText: `${entries.length} source links available in the HTML sitemap.`,
+      entries: pages[0] || [],
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'HTML Sitemap' }],
+      pager: renderPagination(`${DISCOVERY_BASE}/html-sitemap/`, pages.length, 1)
+    })
+  );
+
+  for (let i = 1; i < pages.length; i += 1) {
+    const pageNumber = i + 1;
+    await addPageRecord(
+      path.join(relBase, 'page', String(pageNumber)),
+      renderHtmlSitemapPage({
+        pageTitle: `HTML Sitemap Discovery B - Page ${pageNumber} | Verixia Apps`,
+        metaDescription: `HTML sitemap page ${pageNumber} for discovery-b.`,
+        canonicalPath: `${DISCOVERY_BASE}/html-sitemap/page/${pageNumber}/`,
+        heroEyebrow: 'HTML Sitemap',
+        heroTitle: `HTML sitemap · page ${pageNumber}`,
+        heroText: `${entries.length} source links available in the HTML sitemap.`,
+        entries: pages[i],
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'HTML Sitemap', href: `${DISCOVERY_BASE}/html-sitemap/` },
+          { label: `Page ${pageNumber}` }
+        ],
+        pager: renderPagination(`${DISCOVERY_BASE}/html-sitemap/`, pages.length, pageNumber)
+      })
+    );
+  }
+}
+
+async function buildRunwayPages({ entries, navigation, addPageRecord }) {
+  const runwayEntries = [...entries].sort((a, b) => a.sourceLabel.localeCompare(b.sourceLabel));
+  const relBase = 'runway';
+  const pages = paginate(runwayEntries, RUNWAY_PAGE_SIZE);
+
+  await addPageRecord(
+    relBase,
+    renderListingPage({
+      pageTitle: 'Runway Discovery B | Verixia Apps',
+      metaDescription: 'Runway alphabetical discovery surface for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/runway/`,
+      heroEyebrow: 'Runway',
+      heroTitle: 'Alphabetical runway',
+      heroText: `${runwayEntries.length} source pages sorted alphabetically.`,
+      entries: pages[0] || [],
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Runway' }],
+      pager: renderPagination(`${DISCOVERY_BASE}/runway/`, pages.length, 1)
+    })
+  );
+
+  for (let i = 1; i < pages.length; i += 1) {
+    const pageNumber = i + 1;
+    await addPageRecord(
+      path.join(relBase, 'page', String(pageNumber)),
+      renderListingPage({
+        pageTitle: `Runway Discovery B - Page ${pageNumber} | Verixia Apps`,
+        metaDescription: `Runway page ${pageNumber} for discovery-b.`,
+        canonicalPath: `${DISCOVERY_BASE}/runway/page/${pageNumber}/`,
+        heroEyebrow: 'Runway',
+        heroTitle: `Alphabetical runway · page ${pageNumber}`,
+        heroText: `${runwayEntries.length} source pages sorted alphabetically.`,
+        entries: pages[i],
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Runway', href: `${DISCOVERY_BASE}/runway/` },
+          { label: `Page ${pageNumber}` }
+        ],
+        pager: renderPagination(`${DISCOVERY_BASE}/runway/`, pages.length, pageNumber)
+      })
+    );
+  }
+}
+
+async function buildRandomPages({ entries, navigation, addPageRecord }) {
+  const shuffled1 = stableShuffle(entries, 'random-1').slice(0, RANDOM_PAGE_SIZE);
+  const shuffled2 = stableShuffle(entries, 'random-2').slice(0, RANDOM_PAGE_SIZE);
+  const shuffled3 = stableShuffle(entries, 'random-3').slice(0, RANDOM_PAGE_SIZE);
+
+  await addPageRecord(
+    'random',
+    renderListingPage({
+      pageTitle: 'Random Discovery B Pages | Verixia Apps',
+      metaDescription: 'Random discovery pages from scam-check-now-b.',
+      canonicalPath: `${DISCOVERY_BASE}/random/`,
+      heroEyebrow: 'Random',
+      heroTitle: 'Random discovery sample',
+      heroText: 'A stable random sample of source pages.',
+      entries: shuffled1,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Random' }]
+    })
+  );
+
+  await addPageRecord(
+    'random-2',
+    renderListingPage({
+      pageTitle: 'Random 2 Discovery B Pages | Verixia Apps',
+      metaDescription: 'Second random discovery page sample from scam-check-now-b.',
+      canonicalPath: `${DISCOVERY_BASE}/random-2/`,
+      heroEyebrow: 'Random 2',
+      heroTitle: 'Random discovery sample · set 2',
+      heroText: 'A second stable random sample of source pages.',
+      entries: shuffled2,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Random 2' }]
+    })
+  );
+
+  await addPageRecord(
+    'random-3',
+    renderListingPage({
+      pageTitle: 'Random 3 Discovery B Pages | Verixia Apps',
+      metaDescription: 'Third random discovery page sample from scam-check-now-b.',
+      canonicalPath: `${DISCOVERY_BASE}/random-3/`,
+      heroEyebrow: 'Random 3',
+      heroTitle: 'Random discovery sample · set 3',
+      heroText: 'A third stable random sample of source pages.',
+      entries: shuffled3,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Random 3' }]
+    })
+  );
+}
+
+async function buildRevisitPage({ entries, navigation, addPageRecord }) {
+  const revisit = [...entries]
+    .filter((e) => {
+      const ageDays = Math.floor((NOW.getTime() - e.lastmodDate.getTime()) / 86400000);
+      return ageDays >= 2 && ageDays <= 30;
+    })
+    .sort(sortByFreshness)
+    .slice(0, 120);
+
+  await addPageRecord(
+    'revisit',
+    renderListingPage({
+      pageTitle: 'Revisit Discovery B Pages | Verixia Apps',
+      metaDescription: 'Revisit source pages recently updated in the last 30 days.',
+      canonicalPath: `${DISCOVERY_BASE}/revisit/`,
+      heroEyebrow: 'Revisit',
+      heroTitle: 'Recently updated, worth revisiting',
+      heroText: `${revisit.length} pages updated recently but not just today.`,
+      entries: revisit,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Revisit' }]
+    })
+  );
+}
+
+async function buildTopicsPages({ topicPages, navigation, addPageRecord }) {
+  await addPageRecord(
+    'topics',
+    renderTaxonomyIndexPage({
+      pageTitle: 'Topics Discovery B | Verixia Apps',
+      metaDescription: 'Topic hubs for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/topics/`,
+      heroEyebrow: 'Topics',
+      heroTitle: 'Topic hubs',
+      heroText: `${topicPages.length} topic pages built from scam-check-now-b.`,
+      items: topicPages,
+      kind: 'Topic',
+      basePath: `${DISCOVERY_BASE}/topics/`,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Topics' }]
+    })
+  );
+
+  for (const item of topicPages) {
+    await addPageRecord(
+      path.join('topics', item.slug),
+      renderTaxonomyChildPage({
+        pageTitle: `${item.label} Discovery B Topic | Verixia Apps`,
+        metaDescription: `Discovery-b topic page for ${item.label}.`,
+        canonicalPath: `${DISCOVERY_BASE}/topics/${item.slug}/`,
+        heroEyebrow: 'Topic',
+        heroTitle: item.label,
+        heroText: `${item.entries.length} source pages grouped under this topic.`,
+        entries: item.entries,
+        kind: 'Topic',
+        item,
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Topics', href: `${DISCOVERY_BASE}/topics/` },
+          { label: item.label }
+        ]
+      }),
+      item.lastmod
+    );
+  }
+}
+
+async function buildTodayTopicsPage({ todayEntries, topicPages, navigation, addPageRecord }) {
+  const todayTopicCards = topicPages
+    .map((item) => ({
+      ...item,
+      todayEntries: item.entries.filter((entry) => todayEntries.some((t) => t.sourceUrl === entry.sourceUrl))
+    }))
+    .filter((item) => item.todayEntries.length > 0)
+    .sort((a, b) => b.todayEntries.length - a.todayEntries.length || a.label.localeCompare(b.label));
+
+  await addPageRecord(
+    path.join('today', 'topics'),
+    renderTodayTopicsPage({
+      pageTitle: 'Today Topics Discovery B | Verixia Apps',
+      metaDescription: 'Topic view for pages updated today in discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/today/topics/`,
+      heroEyebrow: 'Today / Topics',
+      heroTitle: 'Today by topic',
+      heroText: `${todayTopicCards.length} topics with updates today.`,
+      items: todayTopicCards,
+      navigation,
+      breadcrumb: [
+        { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+        { label: 'Today', href: `${DISCOVERY_BASE}/today/` },
+        { label: 'Topics' }
+      ]
+    })
+  );
+}
+
+async function buildPlatformsPages({ platformPages, latestEntries, navigation, addPageRecord }) {
+  await addPageRecord(
+    'platforms',
+    renderTaxonomyIndexPage({
+      pageTitle: 'Platforms Discovery B | Verixia Apps',
+      metaDescription: 'Platform hubs for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/platforms/`,
+      heroEyebrow: 'Platforms',
+      heroTitle: 'Platform hubs',
+      heroText: `${platformPages.length} platform pages built from scam-check-now-b.`,
+      items: platformPages,
+      kind: 'Platform',
+      basePath: `${DISCOVERY_BASE}/platforms/`,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Platforms' }],
+      extraSections: [
+        renderLinkCardsSection(
+          'Latest platform jumps',
+          platformPages.slice(0, 12).map((item) =>
+            renderTaxonomyCard('Platform', item.label, item.entries.length, taxonomyUrl('platforms', item.slug))
+          )
+        )
+      ]
+    })
+  );
+
+  for (const item of platformPages) {
+    await addPageRecord(
+      path.join('platforms', item.slug),
+      renderTaxonomyChildPage({
+        pageTitle: `${item.label} Discovery B Platform | Verixia Apps`,
+        metaDescription: `Discovery-b platform page for ${item.label}.`,
+        canonicalPath: `${DISCOVERY_BASE}/platforms/${item.slug}/`,
+        heroEyebrow: 'Platform',
+        heroTitle: item.label,
+        heroText: `${item.entries.length} source pages grouped under this platform.`,
+        entries: item.entries,
+        kind: 'Platform',
+        item,
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Platforms', href: `${DISCOVERY_BASE}/platforms/` },
+          { label: item.label }
+        ],
+        extraSections: [
+          renderLinkCardsSection(
+            'Latest on this platform',
+            latestEntries
+              .filter((entry) => entry.platformLabels.includes(item.label))
+              .slice(0, 12)
+              .map(renderEntryCard)
+          )
+        ]
+      }),
+      item.lastmod
+    );
+  }
+}
+
+async function buildLatestPlatformsPage({ latestEntries, platformPages, navigation, addPageRecord }) {
+  const cards = platformPages
+    .map((item) => ({
+      item,
+      count: latestEntries.filter((entry) => entry.platformLabels.includes(item.label)).length
+    }))
+    .filter((row) => row.count > 0)
+    .sort((a, b) => b.count - a.count || a.item.label.localeCompare(b.item.label));
+
+  await addPageRecord(
+    path.join('latest', 'platforms'),
+    renderLatestPlatformsPage({
+      pageTitle: 'Latest Platforms Discovery B | Verixia Apps',
+      metaDescription: 'Latest platform view for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/latest/platforms/`,
+      heroEyebrow: 'Latest / Platforms',
+      heroTitle: 'Latest by platform',
+      heroText: `${cards.length} platforms represented in the latest set.`,
+      cards,
+      navigation,
+      breadcrumb: [
+        { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+        { label: 'Latest', href: `${DISCOVERY_BASE}/latest/` },
+        { label: 'Platforms' }
+      ]
+    })
+  );
+}
+
+async function buildClustersPages({ clusterPages, navigation, addPageRecord }) {
+  await addPageRecord(
+    'clusters',
+    renderTaxonomyIndexPage({
+      pageTitle: 'Clusters Discovery B | Verixia Apps',
+      metaDescription: 'Cluster hubs for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/clusters/`,
+      heroEyebrow: 'Clusters',
+      heroTitle: 'Pattern clusters',
+      heroText: `${clusterPages.length} cluster pages built from token pair groupings.`,
+      items: clusterPages,
+      kind: 'Cluster',
+      basePath: `${DISCOVERY_BASE}/clusters/`,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Clusters' }]
+    })
+  );
+
+  for (const item of clusterPages) {
+    await addPageRecord(
+      path.join('clusters', item.slug),
+      renderTaxonomyChildPage({
+        pageTitle: `${item.label} Discovery B Cluster | Verixia Apps`,
+        metaDescription: `Discovery-b cluster page for ${item.label}.`,
+        canonicalPath: `${DISCOVERY_BASE}/clusters/${item.slug}/`,
+        heroEyebrow: 'Cluster',
+        heroTitle: item.label,
+        heroText: `${item.entries.length} source pages grouped in this cluster.`,
+        entries: item.entries,
+        kind: 'Cluster',
+        item,
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Clusters', href: `${DISCOVERY_BASE}/clusters/` },
+          { label: item.label }
+        ]
+      }),
+      item.lastmod
+    );
+  }
+}
+
+async function buildHybridsPages({ hybridPages, navigation, addPageRecord }) {
+  await addPageRecord(
+    'hybrids',
+    renderTaxonomyIndexPage({
+      pageTitle: 'Hybrids Discovery B | Verixia Apps',
+      metaDescription: 'Hybrid hubs for discovery-b.',
+      canonicalPath: `${DISCOVERY_BASE}/hybrids/`,
+      heroEyebrow: 'Hybrids',
+      heroTitle: 'Hybrid intent pages',
+      heroText: `${hybridPages.length} hybrid pages built from combined topic and platform signals.`,
+      items: hybridPages,
+      kind: 'Hybrid',
+      basePath: `${DISCOVERY_BASE}/hybrids/`,
+      navigation,
+      breadcrumb: [{ label: 'Discovery B', href: `${DISCOVERY_BASE}/` }, { label: 'Hybrids' }]
+    })
+  );
+
+  for (const item of hybridPages) {
+    await addPageRecord(
+      path.join('hybrids', item.slug),
+      renderTaxonomyChildPage({
+        pageTitle: `${item.label} Discovery B Hybrid | Verixia Apps`,
+        metaDescription: `Discovery-b hybrid page for ${item.label}.`,
+        canonicalPath: `${DISCOVERY_BASE}/hybrids/${item.slug}/`,
+        heroEyebrow: 'Hybrid',
+        heroTitle: item.label,
+        heroText: `${item.entries.length} source pages grouped in this hybrid.`,
+        entries: item.entries,
+        kind: 'Hybrid',
+        item,
+        navigation,
+        breadcrumb: [
+          { label: 'Discovery B', href: `${DISCOVERY_BASE}/` },
+          { label: 'Hybrids', href: `${DISCOVERY_BASE}/hybrids/` },
+          { label: item.label }
+        ]
+      }),
+      item.lastmod
+    );
+  }
+}
+
+async function buildFeed({ entries, addXmlRecord }) {
+  const feedPath = 'feed.xml';
+  const updated = entries[0]?.lastmod || isoDateTimeUTC(NOW);
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Verixia Apps Discovery B Feed</title>
+    <link>${escapeXml(joinUrl(SITE_URL, DISCOVERY_BASE, '/'))}</link>
+    <description>Latest Discovery-B pages sourced from scam-check-now-b.</description>
+    <lastBuildDate>${escapeXml(new Date(updated).toUTCString())}</lastBuildDate>
+    ${entries.map((entry) => `    <item>
+      <title>${escapeXml(entry.discoveryLabel)}</title>
+      <link>${escapeXml(entry.sourceUrl)}</link>
+      <guid>${escapeXml(entry.sourceUrl)}</guid>
+      <pubDate>${escapeXml(new Date(entry.lastmod).toUTCString())}</pubDate>
+      <description>${escapeXml(entry.metaDescription || entry.sourceLabel)}</description>
+    </item>`).join('\n')}
+  </channel>
+</rss>
+`;
+  await addXmlRecord(feedPath, xml, 'explore', updated);
+}
+
+async function buildBucketSitemaps({ discoveryPageRecords, addXmlRecord }) {
+  const records = {
+    core: [],
+    topics: [],
+    platforms: [],
+    hybrids: [],
+    clusters: [],
+    explore: []
+  };
+
+  for (const page of discoveryPageRecords) {
+    const pathname = new URL(page.loc).pathname;
+    if (pathname.includes('/topics/')) records.topics.push(page);
+    else if (pathname.includes('/platforms/')) records.platforms.push(page);
+    else if (pathname.includes('/hybrids/')) records.hybrids.push(page);
+    else if (pathname.includes('/clusters/')) records.clusters.push(page);
+    else if (
+      pathname.includes('/html-sitemap/') ||
+      pathname.includes('/random') ||
+      pathname.includes('/revisit') ||
+      pathname.includes('/runway/')
+    ) {
+      records.explore.push(page);
+    } else {
+      records.core.push(page);
     }
+  }
 
-    .app-top{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:11px 14px;
-      font-size:14px;
-      border-radius:16px;
-      font-weight:900;
-      color:#fff;
-      border:1px solid rgba(255,255,255,.12);
-      white-space:nowrap;
-      background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.08) 100%);
-      backdrop-filter:blur(10px);
-      box-shadow:var(--shadow-sm);
+  const bucketDefs = [
+    { name: 'core', records: records.core },
+    { name: 'topics', records: records.topics },
+    { name: 'platforms', records: records.platforms },
+    { name: 'hybrids', records: records.hybrids },
+    { name: 'clusters', records: records.clusters },
+    { name: 'explore', records: records.explore }
+  ];
+
+  const sitemapIndexRecords = [];
+
+  for (const bucket of bucketDefs) {
+    const relPath = path.join('sitemaps', `${bucket.name}.xml`);
+    const xml = renderUrlSet(bucket.records);
+    const latest = getLatestLastmod(bucket.records) || isoDateTimeUTC(NOW);
+    const result = await addXmlRecord(relPath, xml, bucket.name, latest);
+    sitemapIndexRecords.push(result);
+  }
+
+  return sitemapIndexRecords;
+}
+
+async function writeSitemapIndex(sitemapRecords) {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapRecords.map((record) => `  <sitemap>
+    <loc>${escapeXml(record.loc)}</loc>
+    <lastmod>${escapeXml(record.lastmod)}</lastmod>
+  </sitemap>`).join('\n')}
+</sitemapindex>
+`;
+  await fsp.writeFile(DISCOVERY_SITEMAP_PATH, xml, 'utf8');
+}
+
+function renderUrlSet(records) {
+  const deduped = dedupeByLoc(records).sort((a, b) => a.loc.localeCompare(b.loc));
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${deduped.map((record) => `  <url>
+    <loc>${escapeXml(record.loc)}</loc>
+    <lastmod>${escapeXml(record.lastmod)}</lastmod>
+  </url>`).join('\n')}
+</urlset>
+`;
+}
+
+function dedupeByLoc(records) {
+  const seen = new Map();
+  for (const record of records) {
+    const existing = seen.get(record.loc);
+    if (!existing || new Date(record.lastmod).getTime() > new Date(existing.lastmod).getTime()) {
+      seen.set(record.loc, record);
     }
+  }
+  return [...seen.values()];
+}
 
-    .upgrade-top{
-      pointer-events:auto;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:11px 15px;
-      font-size:14px;
-      border-radius:16px;
-      font-weight:900;
-      background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
-      color:#fff;
-      white-space:nowrap;
-      box-shadow:0 16px 34px rgba(34,211,238,.16);
-      text-decoration:none;
+function getLatestLastmod(records) {
+  if (!records.length) return '';
+  return records.reduce((latest, record) => {
+    return new Date(record.lastmod).getTime() > new Date(latest).getTime() ? record.lastmod : latest;
+  }, records[0].lastmod);
+}
+
+async function writePage(relDir, html) {
+  const outDir = path.join(DISCOVERY_DIR, relDir);
+  await ensureDir(outDir);
+  await fsp.writeFile(path.join(outDir, 'index.html'), html, 'utf8');
+}
+
+function renderListingPage({
+  pageTitle,
+  metaDescription,
+  canonicalPath,
+  heroEyebrow,
+  heroTitle,
+  heroText,
+  entries,
+  navigation,
+  breadcrumb,
+  pager = '',
+  extraSections = []
+}) {
+  const sections = [
+    renderBreadcrumbs(breadcrumb),
+    renderEntriesSection(entries),
+    pager ? renderRawSection(pager) : '',
+    ...extraSections
+  ].filter(Boolean);
+
+  return renderShell({
+    pageTitle,
+    metaDescription,
+    canonicalPath,
+    heroEyebrow,
+    heroTitle,
+    heroText,
+    navigation,
+    sections
+  });
+}
+
+function renderHtmlSitemapPage({
+  pageTitle,
+  metaDescription,
+  canonicalPath,
+  heroEyebrow,
+  heroTitle,
+  heroText,
+  entries,
+  navigation,
+  breadcrumb,
+  pager = ''
+}) {
+  const listItems = entries.map((entry) => {
+    return `<li><a href="${escapeHtml(entry.sourceUrl)}">${escapeHtml(entry.discoveryLabel)}</a><span>${escapeHtml(entry.sourcePath)}</span></li>`;
+  }).join('\n');
+
+  const sections = [
+    renderBreadcrumbs(breadcrumb),
+    `<section class="section">
+      <div class="container">
+        <div class="panel">
+          <h2>HTML sitemap links</h2>
+          <ul class="html-sitemap-list">
+            ${listItems}
+          </ul>
+        </div>
+      </div>
+    </section>`,
+    pager ? renderRawSection(pager) : ''
+  ];
+
+  return renderShell({
+    pageTitle,
+    metaDescription,
+    canonicalPath,
+    heroEyebrow,
+    heroTitle,
+    heroText,
+    navigation,
+    sections
+  });
+}
+
+function renderTaxonomyIndexPage({
+  pageTitle,
+  metaDescription,
+  canonicalPath,
+  heroEyebrow,
+  heroTitle,
+  heroText,
+  items,
+  kind,
+  basePath,
+  navigation,
+  breadcrumb,
+  extraSections = []
+}) {
+  const cards = items.map((item) => renderTaxonomyCard(kind, item.label, item.entries.length, `${basePath}${item.slug}/`));
+
+  const sections = [
+    renderBreadcrumbs(breadcrumb),
+    renderLinkCardsSection(`${kind} hubs`, cards),
+    ...extraSections
+  ];
+
+  return renderShell({
+    pageTitle,
+    metaDescription,
+    canonicalPath,
+    heroEyebrow,
+    heroTitle,
+    heroText,
+    navigation,
+    sections
+  });
+}
+
+function renderTaxonomyChildPage({
+  pageTitle,
+  metaDescription,
+  canonicalPath,
+  heroEyebrow,
+  heroTitle,
+  heroText,
+  entries,
+  kind,
+  item,
+  navigation,
+  breadcrumb,
+  extraSections = []
+}) {
+  const sections = [
+    renderBreadcrumbs(breadcrumb),
+    renderCardGridSection('Overview', [
+      buildStatCard('Type', kind, null, true),
+      buildStatCard('Grouped pages', String(entries.length), null, true),
+      buildStatCard('Freshest update', formatDateDisplay(item.entries[0]?.lastmodDate || NOW), null, true)
+    ]),
+    renderEntriesSection(entries),
+    ...extraSections,
+    renderLinkCardsSection('Related discovery jumps', buildRelatedJumpCards(item, kind))
+  ];
+
+  return renderShell({
+    pageTitle,
+    metaDescription,
+    canonicalPath,
+    heroEyebrow,
+    heroTitle,
+    heroText,
+    navigation,
+    sections
+  });
+}
+
+function renderTodayTopicsPage({ pageTitle, metaDescription, canonicalPath, heroEyebrow, heroTitle, heroText, items, navigation, breadcrumb }) {
+  const cards = items.map((item) => {
+    return renderTaxonomyCard('Topic', item.label, item.todayEntries.length, taxonomyUrl('topics', item.slug), `${item.todayEntries.length} today`);
+  });
+
+  const sections = [
+    renderBreadcrumbs(breadcrumb),
+    renderLinkCardsSection('Topics with updates today', cards)
+  ];
+
+  return renderShell({
+    pageTitle,
+    metaDescription,
+    canonicalPath,
+    heroEyebrow,
+    heroTitle,
+    heroText,
+    navigation,
+    sections
+  });
+}
+
+function renderLatestPlatformsPage({ pageTitle, metaDescription, canonicalPath, heroEyebrow, heroTitle, heroText, cards, navigation, breadcrumb }) {
+  const blocks = cards.map((row) => renderTaxonomyCard('Platform', row.item.label, row.count, taxonomyUrl('platforms', row.item.slug), `${row.count} latest`));
+
+  const sections = [
+    renderBreadcrumbs(breadcrumb),
+    renderLinkCardsSection('Platforms represented in the latest set', blocks)
+  ];
+
+  return renderShell({
+    pageTitle,
+    metaDescription,
+    canonicalPath,
+    heroEyebrow,
+    heroTitle,
+    heroText,
+    navigation,
+    sections
+  });
+}
+
+function renderEntriesSection(entries) {
+  return renderLinkCardsSection('Source pages', entries.map(renderEntryCard));
+}
+
+function renderEntryCard(entry) {
+  const tags = [
+    ...entry.platformLabels.slice(0, 2).map((label) => `<span class="tag">${escapeHtml(label)}</span>`),
+    ...entry.topicLabels.slice(0, 3).map((label) => `<span class="tag">${escapeHtml(label)}</span>`)
+  ].join('');
+
+  return `<a class="card" href="${escapeHtml(entry.sourceUrl)}">
+    <div class="card-eyebrow">Source page</div>
+    <h3>${escapeHtml(entry.discoveryLabel)}</h3>
+    <p>${escapeHtml(entry.metaDescription || entry.sourceLabel)}</p>
+    <div class="card-meta">
+      <span>${escapeHtml(formatDateDisplay(entry.lastmodDate))}</span>
+      <span>${escapeHtml(entry.sourcePath)}</span>
+    </div>
+    <div class="tag-row">${tags}</div>
+  </a>`;
+}
+
+function renderTaxonomyCard(kind, label, count, href, countOverrideText) {
+  const countText = countOverrideText || `${count} pages`;
+  return `<a class="card" href="${escapeHtml(joinUrl(SITE_URL, href))}">
+    <div class="card-eyebrow">${escapeHtml(kind)}</div>
+    <h3>${escapeHtml(label)}</h3>
+    <p>${escapeHtml(countText)}</p>
+    <div class="card-meta">
+      <span>Open ${escapeHtml(kind.toLowerCase())} page</span>
+    </div>
+  </a>`;
+}
+
+function buildStatCard(title, value, href = null, plain = false) {
+  const inner = `
+    <div class="card-eyebrow">Overview</div>
+    <h3>${escapeHtml(title)}</h3>
+    <p>${escapeHtml(value)}</p>
+  `;
+  if (!href || plain) return `<div class="card card-static">${inner}</div>`;
+  return `<a class="card" href="${escapeHtml(href)}">${inner}</a>`;
+}
+
+function renderCardGridSection(title, cards) {
+  return `<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>${escapeHtml(title)}</h2>
+      </div>
+      <div class="card-grid">
+        ${cards.join('\n')}
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderLinkCardsSection(title, cards) {
+  if (!cards.length) return '';
+  return `<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>${escapeHtml(title)}</h2>
+      </div>
+      <div class="card-grid">
+        ${cards.join('\n')}
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderRawSection(content) {
+  return `<section class="section"><div class="container">${content}</div></section>`;
+}
+
+function renderPagination(basePath, totalPages, currentPage) {
+  if (totalPages <= 1) return '';
+  const links = [];
+  for (let i = 1; i <= totalPages; i += 1) {
+    const href = i === 1 ? basePath : `${basePath}page/${i}/`;
+    links.push(`<a class="pager-link ${i === currentPage ? 'active' : ''}" href="${escapeHtml(joinUrl(SITE_URL, href))}">${i}</a>`);
+  }
+  return `<div class="panel pager-panel">
+    <h2>Pages</h2>
+    <div class="pager">${links.join('')}</div>
+  </div>`;
+}
+
+function renderBreadcrumbs(items) {
+  const html = items.map((item, index) => {
+    const isLast = index === items.length - 1;
+    if (!item.href || isLast) {
+      return `<span>${escapeHtml(item.label)}</span>`;
     }
+    return `<a href="${escapeHtml(joinUrl(SITE_URL, item.href))}">${escapeHtml(item.label)}</a>`;
+  }).join('<span class="crumb-sep">/</span>');
 
-    .page-shell{
-      max-width:980px;
-      margin:0 auto;
-      padding:0 14px 34px;
+  return `<section class="section section-tight">
+    <div class="container">
+      <nav class="breadcrumbs">${html}</nav>
+    </div>
+  </section>`;
+}
+
+function renderShell({
+  pageTitle,
+  metaDescription,
+  canonicalPath,
+  heroEyebrow,
+  heroTitle,
+  heroText,
+  navigation,
+  sections
+}) {
+  const canonicalUrl = joinUrl(SITE_URL, canonicalPath);
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(pageTitle)}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="${escapeHtml(metaDescription)}">
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+  <meta property="og:title" content="${escapeHtml(pageTitle)}">
+  <meta property="og:description" content="${escapeHtml(metaDescription)}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="${escapeHtml(canonicalUrl)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root{
+      --bg:#08111d;
+      --bg2:#0d1726;
+      --panel:#0f1c30;
+      --panel2:#12233d;
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#a9b7d0;
+      --accent:#6ea8ff;
+      --accent2:#9fd0ff;
+      --good:#7fe8c3;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+      --radius:20px;
+      --max:1200px;
     }
-
-    .hero{
-      position:relative;
-      padding:18px 8px 20px;
-      max-width:980px;
-      margin:0 auto 14px;
-      text-align:center;
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:
+      radial-gradient(circle at top left, rgba(110,168,255,.14), transparent 28%),
+      radial-gradient(circle at top right, rgba(127,232,195,.08), transparent 24%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
-
-    .hero-badge-row{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:10px;
+    a{color:inherit;text-decoration:none}
+    .container{max-width:var(--max);margin:0 auto;padding:0 20px}
+    .topbar{
+      position:sticky;top:0;z-index:40;
+      background:rgba(8,17,29,.78);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      display:flex;align-items:center;justify-content:space-between;gap:20px;
+      min-height:72px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.01em}
+    .brand-mark{
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:grid;place-items:center;color:#061120;font-weight:900;
+      box-shadow:var(--shadow);
+    }
+    .top-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:44px;padding:0 16px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
+      font-weight:700;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#061120;border:none;
+    }
+    .hero{padding:52px 0 24px}
+    .hero-panel{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:34px;
+      box-shadow:var(--shadow);
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(110,168,255,.12);
+      border:1px solid rgba(110,168,255,.2);
+      color:var(--accent2);
+      font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
       margin-bottom:14px;
     }
-
-    .hero-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:9px 13px;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:900;
-      color:#dbeafe;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(10px);
-    }
-
-    .hero h1{
-      margin:0;
-      font-size:48px;
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(34px,5vw,56px);
       line-height:1.02;
-      letter-spacing:-.05em;
-      font-weight:950;
-      color:#fff;
-      text-wrap:balance;
+      letter-spacing:-.03em;
+      max-width:950px;
     }
-
     .hero p{
-      margin:14px auto 0;
-      max-width:760px;
-      font-size:19px;
-      color:#c7d5eb;
-      text-wrap:balance;
-    }
-
-    .hero-trust{
-      margin-top:18px;
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:10px;
-    }
-
-    .hero-trust-chip{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 14px;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:900;
-      color:#dce8fb;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:var(--shadow-sm);
-    }
-
-    .container{
+      margin:0;
       max-width:860px;
-      margin:auto;
-      padding:22px;
-      border-radius:30px;
-      position:relative;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      background:
-        linear-gradient(180deg, rgba(17,28,51,.94) 0%, rgba(11,19,36,.98) 100%);
-      box-shadow:var(--shadow-xl);
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.65;
     }
-
-    .container::before{
-      content:"";
-      position:absolute;
-      top:-120px;
-      right:-90px;
-      width:260px;
-      height:260px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(34,211,238,.14), transparent 65%);
-      pointer-events:none;
+    .quick-nav{
+      margin-top:22px;
+      display:flex;flex-wrap:wrap;gap:10px;
     }
-
-    .container > *{position:relative;z-index:1;}
-
-    .intro-card,
-    .stats-band,
-    .links-card,
-    .related-card,
-    .footer-note{
-      background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:24px;
-      box-shadow:var(--shadow-md);
+    .quick-nav a{
+      padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:700;font-size:14px;
     }
-
-    .intro-card{
-      padding:20px;
-      background:
-        linear-gradient(135deg, rgba(34,211,238,.12) 0%, rgba(139,92,246,.12) 100%),
-        linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.05) 100%);
+    .section{padding:12px 0 22px}
+    .section-tight{padding:0 0 6px}
+    .section-head{margin-bottom:14px}
+    .section-head h2{margin:0;font-size:28px;letter-spacing:-.02em}
+    .breadcrumbs{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      color:var(--muted);font-size:14px;
     }
-
-    .intro-kicker{
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#8be9ff;
-      margin-bottom:8px;
-    }
-
-    .intro-card h2{
-      margin:0;
-      font-size:28px;
-      line-height:1.08;
-      letter-spacing:-.03em;
-      color:#fff;
-    }
-
-    .intro-card p{
-      margin:10px 0 0;
-      font-size:15px;
-      font-weight:800;
-      color:#d8e5f8;
-      line-height:1.7;
-    }
-
-    .stats-band{
+    .breadcrumbs a{color:var(--accent2)}
+    .crumb-sep{opacity:.5}
+    .card-grid{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
-      padding:16px;
-      margin-top:18px;
-    }
-
-    .stat-box{
-      padding:14px;
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .stat-label{
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#8be9ff;
-      margin-bottom:6px;
-    }
-
-    .stat-box p{
-      margin:0;
-      font-size:14px;
-      font-weight:800;
-      line-height:1.6;
-      color:#d6e3f7;
-    }
-
-    .links-card{
-      margin-top:18px;
-      padding:22px;
-      background:
-        linear-gradient(135deg, rgba(34,211,238,.10) 0%, rgba(139,92,246,.10) 100%),
-        linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.04) 100%);
-    }
-
-    .links-top{
-      text-align:center;
-      margin-bottom:16px;
-    }
-
-    .links-top h2{
-      margin:0;
-      font-size:30px;
-      line-height:1.10;
-      letter-spacing:-.04em;
-      color:#fff;
-    }
-
-    .links-top p{
-      margin:8px auto 0;
-      max-width:680px;
-      font-size:15px;
-      color:#c8d6ec;
-      font-weight:700;
-      line-height:1.7;
-    }
-
-    .links-list{
-      list-style:none;
-      padding:0;
-      margin:0;
-      display:grid;
-      gap:12px;
-    }
-
-    .links-list li{margin:0;}
-
-    .link-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      grid-template-columns:repeat(auto-fit,minmax(255px,1fr));
       gap:16px;
-      padding:16px 18px;
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.09);
-      transition:transform .15s ease, border-color .15s ease, background .15s ease;
-      text-decoration:none;
     }
-
-    .link-item:hover{
-      transform:translateY(-1px);
-      border-color:rgba(34,211,238,.35);
-      background:rgba(255,255,255,.07);
-      text-decoration:none;
+    .card,.panel{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
     }
-
-    .link-copy{min-width:0;}
-
-    .link-title{
-      display:block;
-      font-size:15px;
-      font-weight:900;
-      line-height:1.4;
-      color:#fff;
-      margin-bottom:3px;
-      word-break:break-word;
+    .card{
+      padding:20px;
+      transition:transform .16s ease,border-color .16s ease,background .16s ease;
+      min-height:210px;
+      display:flex;flex-direction:column;
     }
-
-    .link-sub{
-      display:block;
-      font-size:13px;
-      line-height:1.58;
-      font-weight:800;
-      color:#bfd0ea;
-      word-break:break-word;
-    }
-
-    .link-arrow{
-      flex:0 0 auto;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:34px;
-      height:34px;
-      border-radius:999px;
-      background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
-      color:#fff;
-      font-size:16px;
-      font-weight:900;
-      box-shadow:0 12px 24px rgba(34,211,238,.16);
-    }
-
-    .related-card{
-      margin-top:18px;
-      padding:22px;
-    }
-
-    .related-top{
-      text-align:center;
-      margin-bottom:16px;
-    }
-
-    .related-top h3{
-      margin:0;
-      font-size:24px;
-      line-height:1.12;
-      letter-spacing:-.03em;
-      color:#fff;
-    }
-
-    .related-top p{
-      margin:8px auto 0;
-      max-width:680px;
-      font-size:14px;
-      color:#c8d6ec;
-      font-weight:700;
-      line-height:1.68;
-    }
-
-    .related-grid{
-      list-style:none;
-      padding:0;
-      margin:0;
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .related-grid li{margin:0;}
-
-    .related-link{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 15px;
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      transition:transform .15s ease, border-color .15s ease, background .15s ease;
-      text-decoration:none;
-    }
-
-    .related-link:hover{
-      transform:translateY(-1px);
-      border-color:rgba(34,211,238,.35);
-      background:rgba(255,255,255,.07);
-      text-decoration:none;
-    }
-
-    .related-label{
-      display:block;
-      font-size:14px;
-      font-weight:900;
-      color:#fff;
-      line-height:1.45;
-    }
-
-    .related-sub{
-      display:block;
+    .card:hover{transform:translateY(-2px);border-color:rgba(110,168,255,.28)}
+    .card-static:hover{transform:none}
+    .card-eyebrow{
+      color:var(--good);
       font-size:12px;
       font-weight:800;
-      color:#bfd0ea;
-      line-height:1.5;
-      margin-top:3px;
-      word-break:break-word;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:10px;
     }
-
-    .related-arrow{
-      flex:0 0 auto;
-      color:#8be9ff;
-      font-size:15px;
-      font-weight:900;
+    .card h3{
+      margin:0 0 10px;
+      font-size:22px;
+      line-height:1.18;
+      letter-spacing:-.02em;
     }
-
-    .footer-note{
-      margin-top:18px;
-      padding:18px;
-      font-size:15px;
-      font-weight:800;
-      color:#d7e4f8;
-      line-height:1.72;
-      background:rgba(255,255,255,.05);
+    .card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      flex:1;
     }
-
-    .footer{
-      text-align:center;
-      margin-top:72px;
-      padding:40px 20px;
-      color:#9fb0cc;
-      font-size:14px;
-      line-height:1.75;
-      text-wrap:balance;
+    .card-meta{
+      margin-top:16px;
+      display:flex;flex-wrap:wrap;gap:8px 14px;
+      color:var(--muted);
+      font-size:13px;
     }
-
-    .footer a{
-      color:#8be9ff;
-      font-weight:700;
+    .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .tag{
+      display:inline-flex;align-items:center;
+      padding:6px 10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:var(--muted);font-size:12px;font-weight:700;
     }
-
-    @media (max-width:640px){
-      body{padding-top:84px;}
-      .hero{padding:14px 6px 18px;}
-      .hero h1{font-size:34px;}
-      .hero p{margin-top:10px;font-size:17px;}
-      .container{margin-left:12px;margin-right:12px;padding:18px;border-radius:24px;}
-      .top-bar{padding:10px 10px;}
-      .top-actions{gap:8px;margin-right:0;}
-      .logo{font-size:13px;margin-left:2px;padding:9px 12px;}
-      .app-top{font-size:13px;padding:8px 10px;}
-      .upgrade-top{font-size:13px;padding:8px 10px;margin-right:0;}
-      .intro-card h2{font-size:22px;}
-      .links-top h2{font-size:24px;}
-      .stats-band{grid-template-columns:1fr;}
-      .related-grid{grid-template-columns:1fr;}
-      .link-item{align-items:flex-start;}
+    .panel{padding:22px}
+    .panel h2{margin:0 0 14px;font-size:24px}
+    .html-sitemap-list{
+      list-style:none;padding:0;margin:0;
+      display:grid;grid-template-columns:1fr;gap:12px;
+    }
+    .html-sitemap-list li{
+      display:flex;flex-direction:column;gap:4px;
+      padding:12px 0;border-top:1px solid var(--line);
+    }
+    .html-sitemap-list li:first-child{border-top:none;padding-top:0}
+    .html-sitemap-list a{font-weight:700;color:var(--text)}
+    .html-sitemap-list span{color:var(--muted);font-size:13px}
+    .pager-panel{margin-top:10px}
+    .pager{display:flex;flex-wrap:wrap;gap:10px}
+    .pager-link{
+      min-width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+      border:1px solid var(--line);background:rgba(255,255,255,.03);font-weight:800;
+    }
+    .pager-link.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#061120;border:none;
+    }
+    .footer{padding:26px 0 48px}
+    .footer-panel{
+      display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+      color:var(--muted);
+    }
+    @media (max-width:700px){
+      .hero-panel{padding:24px}
+      .topbar-inner{min-height:66px}
+      .top-actions{gap:8px}
+      .btn{min-height:40px;padding:0 14px}
     }
   </style>
 </head>
 <body>
-
-  <div class="top-bar">
-    <a class="logo" href="${htmlEscape(joinSectionUrl(""))}">
-      <span class="logo-dot"></span>
-      <span>Scam Check Now</span>
-    </a>
-    <div class="top-actions">
-      <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
-      <a class="upgrade-top" href="${htmlEscape(joinSectionUrl(""))}">Run Check</a>
-    </div>
-  </div>
-
-  <div class="page-shell">
-
-    <div class="hero">
-      <div class="hero-badge-row">
-        <div class="hero-badge">${htmlEscape(meta.badge)}</div>
-        <div class="hero-badge">Premium discovery pages</div>
-        <div class="hero-badge">Built for repeat use</div>
-      </div>
-
-      <h1>${htmlEscape(title)}</h1>
-      <p>${htmlEscape(intro || meta.intro)}</p>
-
-      <div class="hero-trust">
-        <div class="hero-trust-chip">Check before you click</div>
-        <div class="hero-trust-chip">Check before you reply</div>
-        <div class="hero-trust-chip">Check before you send money</div>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="${escapeHtml(SITE_URL)}">
+        <span class="brand-mark">V</span>
+        <span>Scam Check Now</span>
+      </a>
+      <div class="top-actions">
+        <a class="btn" href="${escapeHtml(joinUrl(SITE_URL, '/app/'))}">📱 Get App</a>
+        <a class="btn btn-primary" href="${escapeHtml(joinUrl(SITE_URL, '/'))}">Run Check</a>
       </div>
     </div>
+  </header>
 
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-panel">
+          <div class="eyebrow">${escapeHtml(heroEyebrow)}</div>
+          <h1>${escapeHtml(heroTitle)}</h1>
+          <p>${escapeHtml(heroText)}</p>
+          <div class="quick-nav">
+            ${navigation.map((item) => `<a href="${escapeHtml(joinUrl(SITE_URL, item.href))}">${escapeHtml(item.label)}</a>`).join('')}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    ${sections.join('\n')}
+  </main>
+
+  <footer class="footer">
     <div class="container">
-      <div class="intro-card">
-        <div class="intro-kicker">${htmlEscape(meta.kicker)}</div>
-        <h2>${htmlEscape(meta.eyebrow)}</h2>
-        <p>${htmlEscape(meta.intro)}</p>
-      </div>
-
-      <div class="stats-band">
-        <div class="stat-box">
-          <div class="stat-label">${htmlEscape(meta.statA)}</div>
-          <p>Structured discovery pages make it easier to browse suspicious topics without digging through clutter.</p>
+      <div class="panel footer-panel">
+        <div>Discovery-B generated from local scam-check-now-b pages.</div>
+        <div>
+          <a href="${escapeHtml(joinUrl(SITE_URL, DISCOVERY_BASE, '/html-sitemap/'))}">HTML Sitemap</a>
+          ·
+          <a href="${escapeHtml(joinUrl(SITE_URL, '/discovery-b-sitemap.xml'))}">XML Sitemap</a>
+          ·
+          <a href="${escapeHtml(joinUrl(SITE_URL, DISCOVERY_BASE, '/feed.xml'))}">Feed</a>
         </div>
-        <div class="stat-box">
-          <div class="stat-label">${htmlEscape(meta.statB)}</div>
-          <p>These pages are built to help people move faster from uncertainty to a focused scam check page.</p>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">${htmlEscape(meta.statC)}</div>
-          <p>Return visits matter here because suspicious messages, payment warnings, and fake alerts rarely happen once.</p>
-        </div>
-      </div>
-
-      <div class="links-card">
-        <div class="links-top">
-          <h2>Browse scam check pages</h2>
-          <p>Open a focused scam check page below to review suspicious messages, delivery alerts, account warnings, payment requests, crypto traps, and more.</p>
-        </div>
-
-        <ul class="links-list">
-          ${items
-            .map(
-              (item) => `
-            <li>
-              <a class="link-item" href="${htmlEscape(item.href)}">
-                <span class="link-copy">
-                  <span class="link-title">${htmlEscape(item.label)}</span>
-                  <span class="link-sub">${htmlEscape(item.sub || formatDisplayUrl(item.href))}</span>
-                </span>
-                <span class="link-arrow">→</span>
-              </a>
-            </li>
-          `
-            )
-            .join("\n")}
-        </ul>
-      </div>
-
-      ${sections.join("\n")}
-
-      <div class="footer-note">
-        These discovery pages are designed to help people navigate scam topics faster, compare patterns, and reach a focused warning page before clicking links, replying, sending money, or sharing personal information.
       </div>
     </div>
-
-    <footer class="footer">
-      <div>
-        By using this website you agree to our
-        <a href="${htmlEscape(joinSiteUrl("website-policies/scam-check/"))}" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
-      </div>
-      <div style="margin-top:10px">
-        Scam Check Now © 2026 • Scam detection and risk analysis tool
-      </div>
-    </footer>
-
-  </div>
-
+  </footer>
 </body>
 </html>`;
 }
 
-function registerGeneratedPage(bucket, url, lastmod = nowISO()) {
-  generatedPages.push({ bucket, url, lastmod });
+function buildNavigation(stats) {
+  return [
+    { label: 'Hub', href: `${DISCOVERY_BASE}/` },
+    { label: `Latest (${stats.latestCount})`, href: `${DISCOVERY_BASE}/latest/` },
+    { label: `Today (${stats.todayCount})`, href: `${DISCOVERY_BASE}/today/` },
+    { label: `This Week (${stats.thisWeekCount})`, href: `${DISCOVERY_BASE}/this-week/` },
+    { label: 'Runway', href: `${DISCOVERY_BASE}/runway/` },
+    { label: `Topics (${stats.topicCount})`, href: `${DISCOVERY_BASE}/topics/` },
+    { label: `Platforms (${stats.platformCount})`, href: `${DISCOVERY_BASE}/platforms/` },
+    { label: `Clusters (${stats.clusterCount})`, href: `${DISCOVERY_BASE}/clusters/` },
+    { label: `Hybrids (${stats.hybridCount})`, href: `${DISCOVERY_BASE}/hybrids/` },
+    { label: 'Random', href: `${DISCOVERY_BASE}/random/` },
+    { label: 'Revisit', href: `${DISCOVERY_BASE}/revisit/` },
+    { label: 'HTML Sitemap', href: `${DISCOVERY_BASE}/html-sitemap/` }
+  ];
 }
 
-function writeDiscoveryPage(
-  relativePath,
-  { title, intro, items, extraSections = [], kind = "generic" },
-  bucket = "core"
-) {
-  const cleanRelative = String(relativePath || "").replace(/^\/+|\/+$/g, "");
-  const filePath = cleanRelative
-    ? path.join(DISCOVERY_DIR, cleanRelative, "index.html")
-    : path.join(DISCOVERY_DIR, "index.html");
-
-  const canonicalUrl = cleanRelative ? joinDiscoveryUrl(cleanRelative) : joinDiscoveryUrl("");
-  const html = pageShell({
-    title,
-    canonicalUrl,
-    intro,
-    items,
-    extraSections,
-    kind,
-  });
-
-  writeFile(filePath, html);
-  registerGeneratedPage(bucket, canonicalUrl);
-}
-
-function buildXmlSitemap(urlsWithDates) {
-  const unique = [];
-  const seen = new Set();
-
-  for (const item of urlsWithDates) {
-    if (!item || !item.url || seen.has(item.url)) continue;
-    seen.add(item.url);
-    unique.push(item);
+function buildRelatedJumpCards(item, kind) {
+  const cards = [];
+  if (kind !== 'Topic') {
+    cards.push(renderTaxonomyCard('Topics', 'View all topics', 0, `${DISCOVERY_BASE}/topics/`, 'Browse'));
   }
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${unique
-  .map(
-    (item) =>
-      `  <url><loc>${escapeXml(item.url)}</loc><lastmod>${escapeXml(
-        item.lastmod || nowISO()
-      )}</lastmod></url>`
-  )
-  .join("\n")}
-</urlset>`;
-}
-
-function buildSitemapIndexXml(sitemapUrls) {
-  const unique = uniqueStrings(sitemapUrls);
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${unique
-  .map(
-    (url) =>
-      `  <sitemap><loc>${escapeXml(url)}</loc><lastmod>${escapeXml(nowISO())}</lastmod></sitemap>`
-  )
-  .join("\n")}
-</sitemapindex>`;
-}
-
-function writeSegmentedDiscoverySitemaps() {
-  const bucketFiles = {
-    core: "core.xml",
-    topics: "topics.xml",
-    platforms: "platforms.xml",
-    hybrids: "hybrids.xml",
-    clusters: "clusters.xml",
-    explore: "explore.xml",
-  };
-
-  const bucketUrls = {};
-
-  for (const page of generatedPages) {
-    const bucket = bucketFiles[page.bucket] ? page.bucket : "core";
-    if (!bucketUrls[bucket]) bucketUrls[bucket] = [];
-    bucketUrls[bucket].push({ url: page.url, lastmod: page.lastmod });
+  if (kind !== 'Platform') {
+    cards.push(renderTaxonomyCard('Platforms', 'View all platforms', 0, `${DISCOVERY_BASE}/platforms/`, 'Browse'));
   }
-
-  const sitemapIndexUrls = [];
-
-  for (const [bucket, fileName] of Object.entries(bucketFiles)) {
-    const entries = bucketUrls[bucket] || [];
-    if (!entries.length) continue;
-
-    const relativeXmlPath = path.posix.join(DISCOVERY_SEGMENT, "sitemaps", fileName);
-    const localXmlPath = path.join(DISCOVERY_DIR, "sitemaps", fileName);
-    writeFile(localXmlPath, buildXmlSitemap(entries));
-    sitemapIndexUrls.push(joinSiteUrl(relativeXmlPath));
+  if (kind !== 'Cluster') {
+    cards.push(renderTaxonomyCard('Clusters', 'View all clusters', 0, `${DISCOVERY_BASE}/clusters/`, 'Browse'));
   }
-
-  writeFile(RESOLVED_DISCOVERY_SITEMAP_PATH, buildSitemapIndexXml(sitemapIndexUrls));
+  if (kind !== 'Hybrid') {
+    cards.push(renderTaxonomyCard('Hybrids', 'View all hybrids', 0, `${DISCOVERY_BASE}/hybrids/`, 'Browse'));
+  }
+  cards.push(renderTaxonomyCard('Latest', 'Latest discovery pages', 0, `${DISCOVERY_BASE}/latest/`, 'Open'));
+  return cards;
 }
 
-function buildGroupPageLinks(basePath, groups, maxItems = 24) {
-  return groups.slice(0, maxItems).map((group) => ({
-    href: joinDiscoveryUrl(`${basePath}/${group.slug}`),
-    label: group.title,
-    sub: `${group.entries.length} grouped URLs`,
-  }));
-}
-
-function matchesKeyword(entry, keyword) {
-  const parts = tokenizeNormalized(keyword);
-  if (!parts.length) return false;
-  return parts.every((part) => entry.normalizedTokens.has(part));
-}
-
-function matchDefinition(entry, definition) {
-  return definition.keywords.some((keyword) => matchesKeyword(entry, keyword));
-}
-
-function buildPlatformGroups(entries) {
-  return PLATFORM_DEFINITIONS.map((definition) => {
-    const matched = entries.filter((entry) => matchDefinition(entry, definition));
-    return {
-      slug: definition.slug,
-      title: definition.title,
-      definition,
-      entries: sortNewestFirst(uniqueByUrl(matched)).slice(0, MAX_PLATFORM_PAGE_URLS),
-    };
-  })
-    .filter((group) => group.entries.length >= MIN_PLATFORM_SIZE)
-    .sort((a, b) => b.entries.length - a.entries.length)
-    .slice(0, MAX_PLATFORM_GROUPS);
-}
-
-function buildTopicGroups(entries) {
-  return TOPIC_DEFINITIONS.map((definition) => {
-    const matched = entries.filter((entry) => matchDefinition(entry, definition));
-    return {
-      slug: definition.slug,
-      title: definition.title,
-      definition,
-      entries: sortNewestFirst(uniqueByUrl(matched)).slice(0, MAX_TOPIC_PAGE_URLS),
-    };
-  })
-    .filter((group) => group.entries.length >= MIN_TOPIC_SIZE)
-    .sort((a, b) => b.entries.length - a.entries.length)
-    .slice(0, MAX_TOPIC_GROUPS);
-}
-
-function buildClusterGroups(entries) {
+function topTopicCardsFromEntries(entries, topicPages, maxCards) {
   const counts = new Map();
 
   for (const entry of entries) {
-    for (const token of entry.tokens) {
-      if (STOPWORDS.has(token)) continue;
-      if (token.length < 4) continue;
-      if (!counts.has(token)) counts.set(token, []);
-      counts.get(token).push(entry);
+    for (const topic of entry.topicLabels) {
+      counts.set(topic, (counts.get(topic) || 0) + 1);
     }
   }
 
+  const topicByLabel = new Map(topicPages.map((item) => [item.label, item]));
   return [...counts.entries()]
-    .map(([token, groupedEntries]) => ({
-      slug: slugify(token),
-      title: `${titleCaseFromSlug(token)} Cluster`,
-      rawToken: token,
-      entries: sortNewestFirst(uniqueByUrl(groupedEntries)).slice(0, MAX_CLUSTER_PAGE_URLS),
-    }))
-    .filter((group) => group.entries.length >= MIN_CLUSTER_SIZE)
-    .filter((group) => !TOPIC_DEFINITIONS.some((d) => d.slug === group.slug))
-    .filter((group) => !PLATFORM_DEFINITIONS.some((d) => d.slug === group.slug))
-    .sort((a, b) => b.entries.length - a.entries.length)
-    .slice(0, MAX_CLUSTER_GROUPS);
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, maxCards)
+    .map(([label, count]) => {
+      const item = topicByLabel.get(label);
+      if (!item) {
+        return renderTaxonomyCard('Topic', label, count, `${DISCOVERY_BASE}/topics/`, `${count} pages`);
+      }
+      return renderTaxonomyCard('Topic', label, count, taxonomyUrl('topics', item.slug), `${count} pages`);
+    });
 }
 
-function buildHybridGroups(entries, platformGroups, topicGroups) {
-  const hybrids = [];
+function topPlatformCardsFromEntries(entries, platformPages, maxCards) {
+  const counts = new Map();
 
-  for (const platformGroup of platformGroups) {
-    for (const topicGroup of topicGroups) {
-      const intersection = sortNewestFirst(
-        uniqueByUrl(
-          entries.filter(
-            (entry) =>
-              matchDefinition(entry, platformGroup.definition) &&
-              matchDefinition(entry, topicGroup.definition)
-          )
-        )
-      ).slice(0, MAX_HYBRID_PAGE_URLS);
-
-      if (intersection.length < MIN_HYBRID_SIZE) continue;
-
-      hybrids.push({
-        slug: `${platformGroup.slug}-${topicGroup.slug}`,
-        title: `${platformGroup.title} ${topicGroup.title}`,
-        entries: intersection,
-        platformSlug: platformGroup.slug,
-        topicSlug: topicGroup.slug,
-      });
+  for (const entry of entries) {
+    for (const platform of entry.platformLabels) {
+      counts.set(platform, (counts.get(platform) || 0) + 1);
     }
   }
 
-  return hybrids
-    .sort((a, b) => b.entries.length - a.entries.length)
-    .slice(0, MAX_HYBRID_PAGES);
-}
-
-function hasItems(items) {
-  return Array.isArray(items) && items.length > 0;
-}
-
-function createFallbackIndexItems() {
-  return linksToItems([
-    { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest discovery URLs" },
-    { href: joinDiscoveryUrl("today"), label: "Today Pages", sub: "Fresh discovery URLs" },
-    { href: joinDiscoveryUrl("this-week"), label: "This Week", sub: "Recent 7-day discovery view" },
-    { href: joinDiscoveryUrl("html-sitemap"), label: "HTML Sitemap", sub: "Wide browse view" },
-  ]);
-}
-
-function assertRootExists() {
-  if (!fs.existsSync(ROOT_DIR)) {
-    throw new Error(`B root directory not found: ${ROOT_DIR}`);
-  }
-}
-
-async function main() {
-  if (!SITE_URL) throw new Error("SITE_URL is required");
-
-  assertRootExists();
-  resetDiscoveryOutput();
-
-  console.log("Scanning B pages...");
-
-  let entries = sanitizeEntries(getAllPages(ROOT_DIR));
-  entries = uniqueByUrl(entries).map(annotateEntry);
-  entries = sortNewestFirst(entries);
-
-  if (!entries.length) throw new Error("No valid B URLs found in the section");
-
-  const latestEntries = entries.slice(0, MAX_LATEST);
-  const todayRaw = filterToday(entries);
-  const weekRaw = filterThisWeek(entries);
-
-  const todayEntries = (todayRaw.length ? todayRaw : entries).slice(0, MAX_TODAY);
-  const weekEntries = (weekRaw.length ? weekRaw : entries).slice(0, MAX_WEEK);
-  const htmlEntries = entries.slice(0, MAX_HTML);
-  const feedEntries = entries.slice(0, MAX_FEED);
-
-  const latestChunks = chunkEntries(entries, PAGINATED_LATEST_PAGE_SIZE, MAX_PAGINATED_LATEST_PAGES);
-  const todayChunks = chunkEntries(
-    todayRaw.length ? todayRaw : entries,
-    PAGINATED_TODAY_PAGE_SIZE,
-    MAX_PAGINATED_TODAY_PAGES
-  );
-  const runwayChunks = chunkEntries(entries, RUNWAY_PAGE_SIZE, MAX_RUNWAY_PAGES);
-
-  const topicGroups = buildTopicGroups(entries);
-  const platformGroups = buildPlatformGroups(entries);
-  const clusterGroups = buildClusterGroups(entries);
-  const hybridGroups = buildHybridGroups(entries, platformGroups, topicGroups);
-
-  const todayTopicGroups = buildTopicGroups(todayRaw.length ? todayRaw : todayEntries);
-  const latestPlatformGroups = buildPlatformGroups(latestEntries);
-
-  writeDiscoveryPage(
-    "",
-    {
-      title: "Scam Detection Discovery Hub",
-      intro:
-        "Central discovery page for recent scam check URLs, grouped topics, platform collections, random discovery surfaces, and revisit pages designed to support crawl depth and return visits.",
-      items: linksToItems([
-        { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest discovery URLs" },
-        { href: joinDiscoveryUrl("today"), label: "Today Pages", sub: "Fresh discovery URLs" },
-        { href: joinDiscoveryUrl("this-week"), label: "This Week", sub: "Recent 7-day discovery view" },
-        { href: joinDiscoveryUrl("html-sitemap"), label: "HTML Sitemap", sub: "Wide browse view" },
-        { href: joinDiscoveryUrl("topics"), label: "All Topics", sub: "Grouped by scam theme" },
-        { href: joinDiscoveryUrl("platforms"), label: "All Platforms", sub: "Grouped by brand or service" },
-        { href: joinDiscoveryUrl("clusters"), label: "Discovery Clusters", sub: "Grouped by repeated URL patterns" },
-        { href: joinDiscoveryUrl("hybrids"), label: "Hybrid Discovery Pages", sub: "Combined platform plus topic pages" },
-        { href: joinDiscoveryUrl("runway"), label: "Runway Pages", sub: "Paginated crawl runway" },
-        { href: joinDiscoveryUrl("random"), label: "Random Discovery 1", sub: "Shuffled alternate path" },
-        { href: joinDiscoveryUrl("random-2"), label: "Random Discovery 2", sub: "More shuffled discovery" },
-        { href: joinDiscoveryUrl("random-3"), label: "Random Discovery 3", sub: "Third random surface" },
-        { href: joinDiscoveryUrl("revisit"), label: "Revisit Pages", sub: "Resurfaced older URLs" },
-      ]),
-      extraSections: [
-        buildRelatedSection({
-          title: "Discovery indexes",
-          intro: "Use these grouped index pages to move through discovery types faster.",
-          links: [
-            { href: joinDiscoveryUrl("topics"), label: "Topic Index", sub: `${topicGroups.length} topic groups` },
-            {
-              href: joinDiscoveryUrl("platforms"),
-              label: "Platform Index",
-              sub: `${platformGroups.length} platform groups`,
-            },
-            {
-              href: joinDiscoveryUrl("clusters"),
-              label: "Cluster Index",
-              sub: `${clusterGroups.length} cluster groups`,
-            },
-            {
-              href: joinDiscoveryUrl("hybrids"),
-              label: "Hybrid Index",
-              sub: `${hybridGroups.length} hybrid pages`,
-            },
-          ],
-        }),
-      ],
-      kind: "hub",
-    },
-    "core"
-  );
-
-  writeDiscoveryPage(
-    "latest",
-    {
-      title: "Latest Pages",
-      intro: "Newest URLs discovered from the B page set.",
-      items: entriesToListItems(latestEntries),
-      extraSections: [
-        buildPagerSection("latest", latestChunks.length, 1, "Latest"),
-        buildRelatedSection({
-          title: "Latest grouped views",
-          intro: "Move from newest URLs into grouped discovery pages built from the same source set.",
-          links: [
-            {
-              href: joinDiscoveryUrl("latest/platforms"),
-              label: "Latest By Platform",
-              sub: "Fresh platform groupings",
-            },
-            { href: joinDiscoveryUrl("topics"), label: "All Topics", sub: "Compare topic collections" },
-            {
-              href: joinDiscoveryUrl("platforms"),
-              label: "All Platforms",
-              sub: "Compare platform collections",
-            },
-            { href: joinDiscoveryUrl("runway"), label: "Runway Pages", sub: "Go deeper into newer URLs" },
-          ],
-        }),
-      ],
-      kind: "latest",
-    },
-    "core"
-  );
-
-  latestChunks.slice(1).forEach((chunk, index) => {
-    const pageNumber = index + 2;
-    writeDiscoveryPage(
-      `latest/page-${pageNumber}`,
-      {
-        title: `Latest Pages - Page ${pageNumber}`,
-        intro: "More recently discovered URLs from the B page set.",
-        items: entriesToListItems(chunk),
-        extraSections: [buildPagerSection("latest", latestChunks.length, pageNumber, "Latest")],
-        kind: "latest",
-      },
-      "core"
-    );
-  });
-
-  writeDiscoveryPage(
-    "today",
-    {
-      title: `Pages Added ${todayString()}`,
-      intro: todayRaw.length
-        ? "Today's URLs from the B page set."
-        : "Freshness timestamps were limited, so this page falls back to the newest available URLs.",
-      items: entriesToListItems(todayEntries),
-      extraSections: [
-        buildPagerSection("today", todayChunks.length, 1, "Today"),
-        buildRelatedSection({
-          title: "Today grouped views",
-          intro: "Move from fresh URLs into grouped topic and platform pages built from the freshest available set.",
-          links: [
-            { href: joinDiscoveryUrl("today/topics"), label: "Today By Topic", sub: "Fresh topic groupings" },
-            { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest overall URLs" },
-            { href: joinDiscoveryUrl("this-week"), label: "This Week", sub: "Broader recent set" },
-          ],
-        }),
-      ],
-      kind: "today",
-    },
-    "core"
-  );
-
-  todayChunks.slice(1).forEach((chunk, index) => {
-    const pageNumber = index + 2;
-    writeDiscoveryPage(
-      `today/page-${pageNumber}`,
-      {
-        title: `Pages Added ${todayString()} - Page ${pageNumber}`,
-        intro: "More fresh discovery URLs from the newest available set.",
-        items: entriesToListItems(chunk),
-        extraSections: [buildPagerSection("today", todayChunks.length, pageNumber, "Today")],
-        kind: "today",
-      },
-      "core"
-    );
-  });
-
-  writeDiscoveryPage(
-    "this-week",
-    {
-      title: "Pages This Week",
-      intro: "Recent URLs from the B page set over the last seven days.",
-      items: entriesToListItems(weekEntries),
-      extraSections: [
-        buildRelatedSection({
-          title: "Recent discovery paths",
-          intro: "Expand from the weekly view into latest, today, and grouped discovery pages.",
-          links: [
-            { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest overall view" },
-            { href: joinDiscoveryUrl("today"), label: "Today Pages", sub: "Freshest day view" },
-            { href: joinDiscoveryUrl("topics"), label: "Topic Index", sub: "Grouped by scam theme" },
-            {
-              href: joinDiscoveryUrl("platforms"),
-              label: "Platform Index",
-              sub: "Grouped by platform",
-            },
-          ],
-        }),
-      ],
-      kind: "week",
-    },
-    "core"
-  );
-
-  writeDiscoveryPage(
-    "html-sitemap",
-    {
-      title: "HTML Sitemap",
-      intro: "Combined sitemap view.",
-      items: entriesToListItems(htmlEntries),
-      extraSections: [
-        buildRelatedSection({
-          title: "Broader discovery options",
-          intro: "Use these pages to browse newer, grouped, or resurfaced URL sets.",
-          links: [
-            { href: joinDiscoveryUrl("feed"), label: "Discovery Feed", sub: "Fast recent scan" },
-            { href: joinDiscoveryUrl("runway"), label: "Runway Pages", sub: "Paginated deep browse" },
-            { href: joinDiscoveryUrl("revisit"), label: "Revisit Pages", sub: "Older URLs worth recrawling" },
-          ],
-        }),
-      ],
-      kind: "html",
-    },
-    "core"
-  );
-
-  writeDiscoveryPage(
-    "feed",
-    {
-      title: "Discovery Feed",
-      intro: "Fast moving discovery feed built from the freshest available scam check URLs.",
-      items: entriesToListItems(feedEntries),
-      extraSections: [
-        buildRelatedSection({
-          title: "Use the feed with",
-          intro: "Pair the feed with wider pages and grouped discovery surfaces.",
-          links: [
-            { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest overall set" },
-            { href: joinDiscoveryUrl("today"), label: "Today Pages", sub: "Freshest day view" },
-            { href: joinDiscoveryUrl("random"), label: "Random Discovery 1", sub: "Alternate crawl path" },
-          ],
-        }),
-      ],
-      kind: "feed",
-    },
-    "core"
-  );
-
-  if (runwayChunks.length) {
-    writeDiscoveryPage(
-      "runway",
-      {
-        title: "Runway Pages",
-        intro: "Paginated runway pages created to push more scam check URLs into the discovery layer.",
-        items: linksToItems(
-          runwayChunks.map((chunk, index) => ({
-            href:
-              index === 0
-                ? joinDiscoveryUrl("runway/page-1")
-                : joinDiscoveryUrl(`runway/page-${index + 1}`),
-            label: `Runway Page ${index + 1}`,
-            sub: `${chunk.length} discovery URLs`,
-          }))
-        ),
-        kind: "runway",
-      },
-      "explore"
-    );
-
-    runwayChunks.forEach((chunk, index) => {
-      const pageNumber = index + 1;
-      writeDiscoveryPage(
-        `runway/page-${pageNumber}`,
-        {
-          title: `Runway Page ${pageNumber}`,
-          intro: "Additional scam check URLs exposed through a deeper runway discovery path.",
-          items: entriesToListItems(chunk),
-          extraSections: [buildPagerSection("runway", runwayChunks.length, pageNumber, "Runway")],
-          kind: "runway",
-        },
-        "explore"
-      );
+  const platformByLabel = new Map(platformPages.map((item) => [item.label, item]));
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, maxCards)
+    .map(([label, count]) => {
+      const item = platformByLabel.get(label);
+      if (!item) {
+        return renderTaxonomyCard('Platform', label, count, `${DISCOVERY_BASE}/platforms/`, `${count} pages`);
+      }
+      return renderTaxonomyCard('Platform', label, count, taxonomyUrl('platforms', item.slug), `${count} pages`);
     });
+}
+
+function taxonomyUrl(kind, slug) {
+  return `${DISCOVERY_BASE}/${kind}/${slug}/`;
+}
+
+function paginate(items, pageSize) {
+  if (!items.length) return [[]];
+  const pages = [];
+  for (let i = 0; i < items.length; i += pageSize) {
+    pages.push(items.slice(i, i + pageSize));
+  }
+  return pages;
+}
+
+function stableShuffle(items, seed) {
+  return [...items]
+    .map((item) => ({
+      item,
+      weight: sha1(`${seed}:${item.sourceUrl}`)
+    }))
+    .sort((a, b) => a.weight.localeCompare(b.weight))
+    .map((row) => row.item);
+}
+
+function sha1(value) {
+  return crypto.createHash('sha1').update(String(value)).digest('hex');
+}
+
+function prettifySlug(slug) {
+  const piece = String(slug || '')
+    .split('/')
+    .filter(Boolean)
+    .pop() || '';
+  return piece
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+}
+
+function prettifyToken(token) {
+  const lower = String(token || '').toLowerCase();
+  if (PLATFORM_SYNONYMS[lower]) return PLATFORM_SYNONYMS[lower];
+  return lower.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+}
+
+function joinUrl(...parts) {
+  const safeParts = parts.filter((part) => part !== undefined && part !== null).map((part) => String(part));
+  if (!safeParts.length) return '/';
+
+  const first = safeParts[0];
+  const hasAbsoluteBase = /^https?:\/\//i.test(first);
+  const lastHadTrailingSlash = /\/$/.test(safeParts[safeParts.length - 1]);
+
+  if (hasAbsoluteBase) {
+    const base = first.replace(/\/+$/, '') + '/';
+    const normalizedPath = safeParts
+      .slice(1)
+      .map((part) => part.replace(/^\/+|\/+$/g, ''))
+      .filter(Boolean)
+      .join('/');
+
+    const url = normalizedPath ? new URL(normalizedPath, base).toString() : new URL('', base).toString();
+    if (lastHadTrailingSlash) {
+      return url.endsWith('/') ? url : `${url}/`;
+    }
+    return url.endsWith('/') && normalizedPath ? url.slice(0, -1) : url;
   }
 
-  const randomSets = [
-    { path: "random", title: "Random Discovery 1" },
-    { path: "random-2", title: "Random Discovery 2" },
-    { path: "random-3", title: "Random Discovery 3" },
-  ];
+  const pathOnly = safeParts
+    .map((part, index) => {
+      if (index === 0) return part.replace(/\/+$/, '');
+      return part.replace(/^\/+|\/+$/g, '');
+    })
+    .filter(Boolean)
+    .join('/');
 
-  randomSets.forEach((set, index) => {
-    const items = entriesToListItems(pickRandomEntries(entries, RANDOM_PAGE_SIZE));
-    if (!hasItems(items)) return;
+  let result = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
+  result = result.replace(/\/{2,}/g, '/');
 
-    writeDiscoveryPage(
-      set.path,
-      {
-        title: set.title,
-        intro: "Shuffled discovery URLs for alternate crawl paths and broader internal recirculation.",
-        items,
-        extraSections: [
-          buildRelatedSection({
-            title: "More shuffled discovery",
-            intro: "Move between random discovery pages and deeper resurfacing pages.",
-            links: [
-              { href: joinDiscoveryUrl("random"), label: "Random Discovery 1", sub: "Primary shuffled set" },
-              {
-                href: joinDiscoveryUrl("random-2"),
-                label: "Random Discovery 2",
-                sub: "Secondary shuffled set",
-              },
-              { href: joinDiscoveryUrl("random-3"), label: "Random Discovery 3", sub: "Third shuffled set" },
-              { href: joinDiscoveryUrl("revisit"), label: "Revisit Pages", sub: "Older resurfaced URLs" },
-            ].filter((_, linkIndex) => linkIndex !== index),
-          }),
-        ],
-        kind: "random",
-      },
-      "explore"
-    );
+  if (lastHadTrailingSlash && !result.endsWith('/')) result += '/';
+  if (!lastHadTrailingSlash && result.length > 1 && result.endsWith('/')) result = result.slice(0, -1);
+
+  return result || '/';
+}
+
+function relDirToUrl(relDir) {
+  if (!relDir) return '/';
+  return `/${String(relDir).replace(/\\/g, '/').replace(/^\/+|\/+$/g, '')}/`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function escapeXml(value) {
+  return escapeHtml(value).replace(/'/g, '&apos;');
+}
+
+function formatDateUTC(date) {
+  const d = new Date(date);
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+}
+
+function isoDateTimeUTC(date) {
+  return new Date(date).toISOString();
+}
+
+function startOfWeekUTC(date) {
+  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = d.getUTCDay();
+  const diff = (day + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - diff);
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDaysUTC(date, days) {
+  const d = new Date(date);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d;
+}
+
+function pad(value) {
+  return String(value).padStart(2, '0');
+}
+
+function formatDateDisplay(date) {
+  const d = new Date(date);
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC'
   });
-
-  const revisitItems = entriesToListItems(
-    entries.slice(REVISIT_START_OFFSET, REVISIT_END_OFFSET).slice(0, REVISIT_PAGE_SIZE)
-  );
-  if (hasItems(revisitItems)) {
-    writeDiscoveryPage(
-      "revisit",
-      {
-        title: "Revisit Pages",
-        intro: "Resurfaced older URLs from deeper in your B page set.",
-        items: revisitItems,
-        extraSections: [
-          buildRelatedSection({
-            title: "Revisit with",
-            intro: "Pair resurfaced URLs with fresh discovery pages to strengthen crawl loops.",
-            links: [
-              { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest page set" },
-              { href: joinDiscoveryUrl("random"), label: "Random Discovery 1", sub: "Alternate discovery path" },
-              { href: joinDiscoveryUrl("runway"), label: "Runway Pages", sub: "Deeper paginated path" },
-            ],
-          }),
-        ],
-        kind: "revisit",
-      },
-      "explore"
-    );
-  }
-
-  const topicIndexItems = linksToItems(buildGroupPageLinks("topics", topicGroups));
-  writeDiscoveryPage(
-    "topics",
-    {
-      title: "All Discovery Topics",
-      intro: "Topic index built from repeated scam themes found across your B URLs.",
-      items: hasItems(topicIndexItems) ? topicIndexItems : createFallbackIndexItems(),
-      extraSections: [
-        buildRelatedSection({
-          title: "Fresh topic surfaces",
-          intro: "Use today and latest grouped views to enter topic pages from a freshness-first angle.",
-          links: [
-            {
-              href: joinDiscoveryUrl("today/topics"),
-              label: "Today By Topic",
-              sub: `${todayTopicGroups.length} fresh topic groups`,
-            },
-            { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest discovery URLs" },
-          ],
-        }),
-      ],
-      kind: "topics",
-    },
-    "topics"
-  );
-
-  topicGroups.forEach((group) => {
-    if (group.entries.length < MIN_TOPIC_SIZE) return;
-
-    writeDiscoveryPage(
-      `topics/${group.slug}`,
-      {
-        title: group.title,
-        intro: `Focused discovery page for ${group.title.toLowerCase()} built from repeated URL patterns across your B page set.`,
-        items: entriesToListItems(group.entries),
-        extraSections: [
-          buildRelatedSection({
-            title: "More topic discovery",
-            intro: "Compare related grouped discovery pages and freshness views.",
-            links: [
-              { href: joinDiscoveryUrl("topics"), label: "Topic Index", sub: "All topic pages" },
-              { href: joinDiscoveryUrl("today/topics"), label: "Today By Topic", sub: "Fresh topic view" },
-              { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest overall pages" },
-            ],
-          }),
-        ],
-        kind: "topic-child",
-      },
-      "topics"
-    );
-  });
-
-  const todayTopicIndexItems = linksToItems(buildGroupPageLinks("topics", todayTopicGroups));
-  writeDiscoveryPage(
-    "today/topics",
-    {
-      title: "Today By Topic",
-      intro: "Fresh topic groupings built from the newest available discovery URLs.",
-      items: hasItems(todayTopicIndexItems) ? todayTopicIndexItems : createFallbackIndexItems(),
-      kind: "topics",
-    },
-    "topics"
-  );
-
-  const platformIndexItems = linksToItems(buildGroupPageLinks("platforms", platformGroups));
-  writeDiscoveryPage(
-    "platforms",
-    {
-      title: "All Discovery Platforms",
-      intro: "Platform index built from repeated brands and services found across your B URLs.",
-      items: hasItems(platformIndexItems) ? platformIndexItems : createFallbackIndexItems(),
-      extraSections: [
-        buildRelatedSection({
-          title: "Fresh platform surfaces",
-          intro: "Use freshness-first grouped views to enter platform discovery pages from recent URL sets.",
-          links: [
-            {
-              href: joinDiscoveryUrl("latest/platforms"),
-              label: "Latest By Platform",
-              sub: `${latestPlatformGroups.length} fresh platform groups`,
-            },
-            { href: joinDiscoveryUrl("latest"), label: "Latest Pages", sub: "Newest discovery URLs" },
-          ],
-        }),
-      ],
-      kind: "platforms",
-    },
-    "platforms"
-  );
-
-  platformGroups.forEach((group) => {
-    if (group.entries.length < MIN_PLATFORM_SIZE) return;
-
-    writeDiscoveryPage(
-      `platforms/${group.slug}`,
-      {
-        title: `${group.title} Scam Checks`,
-        intro: `Focused discovery page for ${group.title} scam check URLs and related suspicious message patterns.`,
-        items: entriesToListItems(group.entries),
-        extraSections: [
-          buildRelatedSection({
-            title: "More platform discovery",
-            intro: "Compare related platform pages and broader grouped discovery hubs.",
-            links: [
-              { href: joinDiscoveryUrl("platforms"), label: "Platform Index", sub: "All platform pages" },
-              {
-                href: joinDiscoveryUrl("latest/platforms"),
-                label: "Latest By Platform",
-                sub: "Fresh platform groupings",
-              },
-              {
-                href: joinDiscoveryUrl("hybrids"),
-                label: "Hybrid Discovery Pages",
-                sub: "Combined platform plus topic pages",
-              },
-            ],
-          }),
-        ],
-        kind: "platform-child",
-      },
-      "platforms"
-    );
-  });
-
-  const latestPlatformIndexItems = linksToItems(buildGroupPageLinks("platforms", latestPlatformGroups));
-  writeDiscoveryPage(
-    "latest/platforms",
-    {
-      title: "Latest By Platform",
-      intro: "Fresh platform groupings based on the newest available discovery URLs.",
-      items: hasItems(latestPlatformIndexItems) ? latestPlatformIndexItems : createFallbackIndexItems(),
-      kind: "platforms",
-    },
-    "platforms"
-  );
-
-  const clusterIndexItems = linksToItems(
-    clusterGroups.map((group) => ({
-      href: joinDiscoveryUrl(`clusters/${group.slug}`),
-      label: group.title,
-      sub: `${group.entries.length} clustered URLs`,
-    }))
-  );
-  writeDiscoveryPage(
-    "clusters",
-    {
-      title: "Discovery Clusters",
-      intro: "Cluster index built from repeated URL tokens discovered across your B page set.",
-      items: hasItems(clusterIndexItems) ? clusterIndexItems : createFallbackIndexItems(),
-      kind: "clusters",
-    },
-    "clusters"
-  );
-
-  clusterGroups.forEach((group) => {
-    if (group.entries.length < MIN_CLUSTER_SIZE) return;
-
-    writeDiscoveryPage(
-      `clusters/${group.slug}`,
-      {
-        title: group.title,
-        intro: `Repeated pattern cluster page built from the token "${group.rawToken}" across your B URLs.`,
-        items: entriesToListItems(group.entries),
-        extraSections: [
-          buildRelatedSection({
-            title: "More cluster discovery",
-            intro: "Move from repeated token clusters into broader topic, platform, and hybrid pages.",
-            links: [
-              { href: joinDiscoveryUrl("clusters"), label: "Cluster Index", sub: "All cluster pages" },
-              { href: joinDiscoveryUrl("topics"), label: "Topic Index", sub: "Thematic groupings" },
-              { href: joinDiscoveryUrl("platforms"), label: "Platform Index", sub: "Brand groupings" },
-            ],
-          }),
-        ],
-        kind: "cluster-child",
-      },
-      "clusters"
-    );
-  });
-
-  const hybridIndexItems = linksToItems(
-    hybridGroups.map((group) => ({
-      href: joinDiscoveryUrl(`hybrids/${group.slug}`),
-      label: group.title,
-      sub: `${group.entries.length} hybrid URLs`,
-    }))
-  );
-  writeDiscoveryPage(
-    "hybrids",
-    {
-      title: "Hybrid Discovery Pages",
-      intro: "High-intent hybrid pages combining platforms with repeated scam topics.",
-      items: hasItems(hybridIndexItems) ? hybridIndexItems : createFallbackIndexItems(),
-      kind: "hybrids",
-    },
-    "hybrids"
-  );
-
-  hybridGroups.forEach((group) => {
-    if (group.entries.length < MIN_HYBRID_SIZE) return;
-
-    writeDiscoveryPage(
-      `hybrids/${group.slug}`,
-      {
-        title: group.title,
-        intro: `Focused hybrid discovery page combining ${group.platformSlug.replace(/-/g, " ")} with ${group.topicSlug.replace(/-/g, " ")} patterns.`,
-        items: entriesToListItems(group.entries),
-        extraSections: [
-          buildRelatedSection({
-            title: "More hybrid discovery",
-            intro: "Use platform and topic indexes to move into adjacent high-intent discovery pages.",
-            links: [
-              { href: joinDiscoveryUrl("hybrids"), label: "Hybrid Index", sub: "All hybrid pages" },
-              {
-                href: joinDiscoveryUrl(`platforms/${group.platformSlug}`),
-                label: `${titleCaseFromSlug(group.platformSlug)} Platform Page`,
-                sub: "Platform-specific discovery",
-              },
-              {
-                href: joinDiscoveryUrl(`topics/${group.topicSlug}`),
-                label: `${titleCaseFromSlug(group.topicSlug)} Topic Page`,
-                sub: "Topic-specific discovery",
-              },
-            ],
-          }),
-        ],
-        kind: "hybrid-child",
-      },
-      "hybrids"
-    );
-  });
-
-  writeSegmentedDiscoverySitemaps();
-
-  console.log("B discovery layer built successfully.");
-  console.log(`Total source URLs: ${entries.length}`);
-  console.log(`Generated discovery pages: ${generatedPages.length}`);
-  console.log(`B root directory: ${ROOT_DIR}`);
-  console.log(`B discovery directory: ${DISCOVERY_DIR}`);
-  console.log(`B discovery sitemap: ${RESOLVED_DISCOVERY_SITEMAP_PATH}`);
 }
 
 main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
+
+
