@@ -1,30 +1,33 @@
 import os
 import html
-from typing import List, Set
+from typing import Dict, List, Set, Tuple
 
 TARGET_TEMPLATE = os.getenv("TARGET_TEMPLATE", "all").strip().lower()
 REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "internal-links").strip().lower()
 MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "10"))
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
-TEMPLATE_PATHS = {
+TEMPLATE_PATHS: Dict[str, str] = {
     "a": "scam-check-now",
     "b": "scam-check-now-b",
     "c": "scam-check-now-c",
 }
 
-TODAY_TARGET_SLUGS = [
-    "is-amazon-refund-message-legit-or-scam",
-    "is-usps-tracking-text-legit-or-scam",
-    "is-venmo-verification-code-text-real-or-fake",
-    "is-security-alert-message-legit-or-scam",
-    "snapchat-scams",
-    "is-google-account-disabled-email-legit-or-scam",
-    "is-apple-account-verification-email-legit-or-scam",
-    "is-bank-account-closure-email-legit-or-scam",
-    "is-fedex-delivery-legit-or-scam",
-    "is-fedex-customs-charge-email-legit-or-scam",
+TARGET_PAGE_SPECS: List[Dict[str, str]] = [
+    {"slug": "is-recruiter-email-from-unknown-company-legit-or-scam", "cluster": "job"},
+    {"slug": "is-venmo-security-alert-email-legit-or-scam", "cluster": "security"},
+    {"slug": "is-fedex-customs-charge-email-legit-or-scam", "cluster": "delivery"},
+    {"slug": "is-amazon-refund-message-legit-or-scam", "cluster": "refund"},
+    {"slug": "is-google-account-disabled-email-legit-or-scam", "cluster": "security"},
+    {"slug": "is-fedex-package-reroute-email-legit-or-scam", "cluster": "delivery"},
+    {"slug": "is-google-security-warning-email-legit-or-scam", "cluster": "security"},
+    {"slug": "is-security-alert-message-legit-or-scam", "cluster": "security"},
+    {"slug": "is-fedex-delivery-legit-or-scam", "cluster": "delivery"},
+    {"slug": "is-apple-account-verification-email-legit-or-scam", "cluster": "security"},
 ]
+
+TODAY_TARGET_SLUGS: List[str] = [item["slug"] for item in TARGET_PAGE_SPECS]
+CLUSTER_BY_SLUG: Dict[str, str] = {item["slug"]: item["cluster"] for item in TARGET_PAGE_SPECS}
 
 SPECIAL_REPLACEMENTS = {
     "usps": "USPS",
@@ -40,6 +43,9 @@ SPECIAL_REPLACEMENTS = {
     "venmo": "Venmo",
     "paypal": "PayPal",
     "zelle": "Zelle",
+    "gmail": "Gmail",
+    "tiktok": "TikTok",
+    "ssn": "SSN",
 }
 
 STRIP_WORDS = {
@@ -56,32 +62,57 @@ STRIP_WORDS = {
     "fake",
 }
 
-LOWERCASE_LINK_WORDS = {"a", "an", "and", "or", "the"}
+LOWERCASE_LINK_WORDS = {"a", "an", "and", "or", "the", "from"}
 
 TITLE_MAP = {
-    "is-amazon-refund-message-legit-or-scam": "Amazon Refund Email Scam? Real or Fake Warning Signs",
-    "is-usps-tracking-text-legit-or-scam": "USPS Tracking Text Scam? Real or Fake Message Warning Signs",
-    "is-venmo-verification-code-text-real-or-fake": "Venmo Verification Code Text Scam? Real or Fake Warning Signs",
-    "is-security-alert-message-legit-or-scam": "Security Alert Message Scam? Real or Fake Warning Signs",
-    "snapchat-scams": "Snapchat Scams: Real Examples, Warning Signs and What to Do",
-    "is-google-account-disabled-email-legit-or-scam": "Google Account Disabled Email Scam? Real or Fake Warning Signs",
-    "is-apple-account-verification-email-legit-or-scam": "Apple Account Verification Email Scam? Real or Fake Warning Signs",
-    "is-bank-account-closure-email-legit-or-scam": "Bank Account Closure Email Scam? Real or Fake Warning Signs",
-    "is-fedex-delivery-legit-or-scam": "FedEx Delivery Message Scam? Real or Fake Warning Signs",
-    "is-fedex-customs-charge-email-legit-or-scam": "FedEx Customs Charge Email Scam? Real or Fake Warning Signs",
+    "is-recruiter-email-from-unknown-company-legit-or-scam": "Recruiter Email From Unknown Company: Legit or Scam Warning Signs",
+    "is-venmo-security-alert-email-legit-or-scam": "Venmo Security Alert Email: Legit or Scam Warning Signs",
+    "is-fedex-customs-charge-email-legit-or-scam": "FedEx Customs Charge Email: Legit or Scam Warning Signs",
+    "is-amazon-refund-message-legit-or-scam": "Amazon Refund Message: Legit or Scam Warning Signs",
+    "is-google-account-disabled-email-legit-or-scam": "Google Account Disabled Email: Legit or Scam Warning Signs",
+    "is-fedex-package-reroute-email-legit-or-scam": "FedEx Package Reroute Email: Legit or Scam Warning Signs",
+    "is-google-security-warning-email-legit-or-scam": "Google Security Warning Email: Legit or Scam Warning Signs",
+    "is-security-alert-message-legit-or-scam": "Security Alert Message: Legit or Scam Warning Signs",
+    "is-fedex-delivery-legit-or-scam": "FedEx Delivery Message: Legit or Scam Warning Signs",
+    "is-apple-account-verification-email-legit-or-scam": "Apple Account Verification Email: Legit or Scam Warning Signs",
 }
 
 DESCRIPTION_MAP = {
-    "is-amazon-refund-message-legit-or-scam": "Got an Amazon refund email or message? Learn scam warning signs, fake link risks, and what to do before you click, reply, or send information.",
-    "is-usps-tracking-text-legit-or-scam": "Got a USPS tracking text? Learn scam warning signs, fake tracking link risks, and what to do before clicking.",
-    "is-venmo-verification-code-text-real-or-fake": "Received a Venmo verification code text? Learn scam signs, fake urgency patterns, and what to do before taking action.",
+    "is-recruiter-email-from-unknown-company-legit-or-scam": "Got a recruiter email from an unknown company? Learn warning signs, fake hiring patterns, and what to do before replying or sharing personal information.",
+    "is-venmo-security-alert-email-legit-or-scam": "Got a Venmo security alert email? Learn fake alert warning signs, phishing risks, and what to do before clicking or replying.",
+    "is-fedex-customs-charge-email-legit-or-scam": "Got a FedEx customs charge email? Learn payment scam warning signs, fake shipping patterns, and what to do before paying.",
+    "is-amazon-refund-message-legit-or-scam": "Got an Amazon refund message? Learn warning signs, fake refund link risks, and what to do before you click, reply, or send information.",
+    "is-google-account-disabled-email-legit-or-scam": "Received a Google account disabled email? Learn warning signs of fake account alerts and how to verify safely.",
+    "is-fedex-package-reroute-email-legit-or-scam": "Got a FedEx package reroute email? Learn scam warning signs, fake tracking risks, and what to do before clicking.",
+    "is-google-security-warning-email-legit-or-scam": "Got a Google security warning email? Learn warning signs of phishing alerts and what to do before taking action.",
     "is-security-alert-message-legit-or-scam": "Received a security alert message? Learn how to spot fake alerts, suspicious links, and what to do next.",
-    "snapchat-scams": "Learn common Snapchat scam warning signs, fake account risks, and what to do before replying or clicking.",
-    "is-google-account-disabled-email-legit-or-scam": "Received a Google account disabled email? Learn warning signs of fake alerts and how to verify safely.",
-    "is-apple-account-verification-email-legit-or-scam": "Received an Apple account verification email? Learn scam signs and what to check before clicking.",
-    "is-bank-account-closure-email-legit-or-scam": "Got a bank account closure email? Learn warning signs and what to do before taking action.",
     "is-fedex-delivery-legit-or-scam": "Got a FedEx delivery message? Learn scam signs, fake tracking links, and what to do before clicking.",
-    "is-fedex-customs-charge-email-legit-or-scam": "Got a FedEx customs charge email? Learn scam warning signs, payment risks, and what to do before paying.",
+    "is-apple-account-verification-email-legit-or-scam": "Received an Apple account verification email? Learn warning signs, phishing risks, and what to check before clicking.",
+}
+
+CLUSTER_SUPPORT: Dict[str, List[str]] = {
+    "job": [
+        "is-recruiter-email-from-unknown-company-legit-or-scam",
+        "is-security-alert-message-legit-or-scam",
+        "is-google-account-disabled-email-legit-or-scam",
+    ],
+    "security": [
+        "is-venmo-security-alert-email-legit-or-scam",
+        "is-google-account-disabled-email-legit-or-scam",
+        "is-google-security-warning-email-legit-or-scam",
+        "is-security-alert-message-legit-or-scam",
+        "is-apple-account-verification-email-legit-or-scam",
+    ],
+    "delivery": [
+        "is-fedex-delivery-legit-or-scam",
+        "is-fedex-customs-charge-email-legit-or-scam",
+        "is-fedex-package-reroute-email-legit-or-scam",
+    ],
+    "refund": [
+        "is-amazon-refund-message-legit-or-scam",
+        "is-security-alert-message-legit-or-scam",
+        "is-google-account-disabled-email-legit-or-scam",
+    ],
 }
 
 
@@ -108,12 +139,32 @@ def is_allowed_seo_page(path: str) -> bool:
     ) and normalized.endswith("/index.html")
 
 
+def template_key_from_path(path: str) -> str | None:
+    normalized = path.replace("\\", "/")
+    for template_key, template_dir in TEMPLATE_PATHS.items():
+        if normalized.startswith(f"{template_dir}/"):
+            return template_key
+    return None
+
+
 def slug_from_path(path: str) -> str | None:
     normalized = path.replace("\\", "/").strip("/")
     parts = normalized.split("/")
     if len(parts) < 2:
         return None
     return parts[-2].strip() or None
+
+
+def public_href(template_key: str, slug: str) -> str:
+    return f"/{TEMPLATE_PATHS[template_key]}/{slug}/"
+
+
+def repo_file_for(template_key: str, slug: str) -> str:
+    return os.path.join(TEMPLATE_PATHS[template_key], slug, "index.html")
+
+
+def page_exists(template_key: str, slug: str) -> bool:
+    return os.path.exists(repo_file_for(template_key, slug))
 
 
 def get_target_files() -> List[str]:
@@ -151,9 +202,6 @@ def slug_to_topic_phrase(slug: str) -> str:
 
 
 def slug_to_question_label(slug: str) -> str:
-    if slug == "snapchat-scams":
-        return "Snapchat Scams"
-
     words = [w for w in slug.split("-") if w]
     rendered: List[str] = []
 
@@ -191,26 +239,48 @@ def build_description(slug: str) -> str:
     )
 
 
-def build_internal_link_targets(slug: str) -> List[str]:
-    category_keywords = [part for part in slug.split("-") if part and part not in STRIP_WORDS]
-    preferred: List[str] = []
-    fallback: List[str] = []
-
-    for candidate in TODAY_TARGET_SLUGS:
-        if candidate == slug:
-            continue
-        if any(keyword in candidate for keyword in category_keywords[:3]):
-            preferred.append(candidate)
-        else:
-            fallback.append(candidate)
-
-    return (preferred + fallback)[:10]
+def template_priority_for(current_template: str) -> List[str]:
+    if current_template == "a":
+        return ["a", "c", "b"]
+    if current_template == "b":
+        return ["b", "a", "c"]
+    if current_template == "c":
+        return ["c", "a", "b"]
+    return ["a", "b", "c"]
 
 
-def build_link_items_html(slugs: List[str]) -> str:
+def build_internal_link_targets(current_slug: str, current_template: str) -> List[Tuple[str, str]]:
+    cluster = CLUSTER_BY_SLUG.get(current_slug)
+    same_cluster = [slug for slug in CLUSTER_SUPPORT.get(cluster or "", []) if slug != current_slug]
+    fallback_cluster = [slug for slug in TODAY_TARGET_SLUGS if slug not in same_cluster and slug != current_slug]
+
+    ordered_slugs = same_cluster + fallback_cluster
+    template_priority = template_priority_for(current_template)
+
+    targets: List[Tuple[str, str]] = []
+    seen_hrefs: Set[str] = set()
+
+    for slug in ordered_slugs:
+        for template_key in template_priority:
+            if slug == current_slug and template_key == current_template:
+                continue
+            if not page_exists(template_key, slug):
+                continue
+            href = public_href(template_key, slug)
+            if href in seen_hrefs:
+                continue
+            targets.append((template_key, slug))
+            seen_hrefs.add(href)
+            if len(targets) >= 10:
+                return targets
+
+    return targets
+
+
+def build_link_items_html(targets: List[Tuple[str, str]]) -> str:
     items: List[str] = []
-    for target_slug in slugs:
-        href = f"/{target_slug}/"
+    for template_key, target_slug in targets:
+        href = public_href(template_key, target_slug)
         label = slug_to_question_label(target_slug)
         items.append(
             f'<li><a href="{html.escape(href, quote=True)}">{html.escape(label)}</a></li>'
@@ -264,8 +334,8 @@ def replace_list_by_id(content: str, list_id: str, items_html: str) -> str:
     return updated
 
 
-def update_internal_links_only(content: str, slug: str) -> str:
-    targets = build_internal_link_targets(slug)
+def update_internal_links_only(content: str, slug: str, template_key: str) -> str:
+    targets = build_internal_link_targets(slug, template_key)
     updated = replace_list_by_id(content, "relatedLinks", build_link_items_html(targets[:5]))
     updated = replace_list_by_id(updated, "moreLinks", build_link_items_html(targets[5:10]))
     return updated
@@ -291,8 +361,14 @@ def process_file(path: str) -> bool:
         return False
 
     slug = slug_from_path(path)
+    template_key = template_key_from_path(path)
+
     if not slug:
         print(f"SKIPPED (no slug): {path}")
+        return False
+
+    if not template_key:
+        print(f"SKIPPED (no template): {path}")
         return False
 
     with open(path, "r", encoding="utf-8") as file:
@@ -304,7 +380,7 @@ def process_file(path: str) -> bool:
         updated = replace_meta_description(updated, build_description(slug))
         updated = normalize_whitespace(updated)
     elif should_update_internal_links_only():
-        updated = update_internal_links_only(original, slug)
+        updated = update_internal_links_only(original, slug, template_key)
         updated = normalize_whitespace(updated)
     else:
         raise ValueError(f"Invalid REFRESH_SCOPE: {REFRESH_SCOPE}")
