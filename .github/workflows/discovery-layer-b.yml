@@ -2,7 +2,7 @@ name: Discovery Layer B
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -28,12 +28,13 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Build discovery layer B
-        run: node scripts/build-discovery-layer-b.js
+      - name: Run discovery layer generator
+        run: node scripts/build-discovery-layer.js
         env:
           SITE_URL: https://verixiaapps.com
-          SITE_SECTION: scam-check-now-b
-          DISCOVERY_SITEMAP_PATH: discovery-b-sitemap.xml
+          SOURCE_SITEMAP_URL: https://verixiaapps.com/sitemap-b.xml
+          SECONDARY_SITEMAP_URL: https://verixiaapps.com/sitemap.xml
+          DISCOVERY_SITEMAP_PATH: discovery-sitemap-b.xml
           DISCOVERY_DIR: discovery-b
           MAX_LATEST_URLS: "100"
           MAX_TODAY_URLS: "100"
@@ -49,10 +50,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add discovery-b-sitemap.xml discovery-b
+          git add discovery-sitemap-b.xml discovery-b/
 
           if git diff --cached --quiet; then
-            echo "No discovery B changes to commit."
+            echo "No discovery changes to commit."
             exit 0
           fi
 
