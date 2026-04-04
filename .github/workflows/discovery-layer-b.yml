@@ -28,11 +28,6 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Build discovery layer B
         run: node scripts/build-discovery-layer-b.js
         env:
@@ -46,9 +41,6 @@ jobs:
           MAX_HTML_SITEMAP_URLS: "500"
           MAX_FEED_URLS: "100"
 
-      - name: Build sitemap B
-        run: python scripts/build-sitemap-b.py
-
       - name: Commit and push discovery files
         shell: bash
         run: |
@@ -57,7 +49,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add discovery-b-sitemap.xml discovery-b sitemap-b.xml
+          git add discovery-b-sitemap.xml discovery-b
 
           if git diff --cached --quiet; then
             echo "No discovery B changes to commit."
