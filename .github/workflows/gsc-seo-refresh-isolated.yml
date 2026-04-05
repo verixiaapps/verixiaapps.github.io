@@ -3,16 +3,6 @@ name: GSC SEO Refresh Isolated
 "on":
   workflow_dispatch:
     inputs:
-      target_template:
-        description: "Which template set to refresh"
-        required: true
-        default: "all"
-        type: choice
-        options:
-          - a
-          - b
-          - c
-          - all
       refresh_scope:
         description: "What kind of GSC optimization refresh to run"
         required: true
@@ -54,8 +44,8 @@ jobs:
       GSC_INPUT_DIR: "gsc-refresh/input"
       GSC_OUTPUT_DIR: "gsc-refresh/output"
       GSC_STATE_DIR: "gsc-refresh/state"
-      DEFAULT_COMMIT_MESSAGE: "GSC internal links optimization batch"
-      TARGET_TEMPLATE: ${{ inputs.target_template }}
+      DEFAULT_COMMIT_MESSAGE: "GSC SEO page refresh batch"
+      TARGET_TEMPLATE: "a"
       REFRESH_SCOPE: ${{ inputs.refresh_scope }}
       MAX_URLS_TO_REFRESH: ${{ inputs.max_urls_to_refresh }}
       DRY_RUN: ${{ inputs.dry_run }}
@@ -109,14 +99,6 @@ jobs:
             echo "Invalid MAX_URLS_TO_REFRESH: $MAX_URLS_TO_REFRESH"
             exit 1
           fi
-
-          case "$TARGET_TEMPLATE" in
-            a|b|c|all) ;;
-            *)
-              echo "Invalid TARGET_TEMPLATE: $TARGET_TEMPLATE"
-              exit 1
-              ;;
-          esac
 
           case "$REFRESH_SCOPE" in
             internal-links|metadata) ;;
@@ -176,7 +158,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          git add -A
+          git add -- ':(glob)scam-check-now/**/index.html'
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
@@ -186,7 +168,7 @@ jobs:
           FINAL_COMMIT_MESSAGE="${{ inputs.commit_message }}"
 
           if [ -z "$FINAL_COMMIT_MESSAGE" ]; then
-            FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=${TARGET_TEMPLATE} | scope=${REFRESH_SCOPE} | count=${MAX_URLS_TO_REFRESH}"
+            FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=a | scope=${REFRESH_SCOPE} | count=${MAX_URLS_TO_REFRESH}"
           fi
 
           git commit -m "$FINAL_COMMIT_MESSAGE"
