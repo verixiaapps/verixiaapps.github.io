@@ -4,8 +4,19 @@ import html
 import json
 from typing import List, Dict, Any
 
+
+def parse_positive_int(value: str, default: int) -> int:
+    try:
+        parsed = int(str(value).strip())
+        if parsed <= 0:
+            return default
+        return parsed
+    except (TypeError, ValueError):
+        return default
+
+
 REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "metadata").strip().lower()
-MAX_URLS = int(os.getenv("MAX_URLS_TO_REFRESH", "10"))
+MAX_URLS = parse_positive_int(os.getenv("MAX_URLS_TO_REFRESH", "10"), 10)
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
 # Exact repo-root paths only
@@ -79,18 +90,56 @@ PAGE_SEO: Dict[str, Dict[str, str]] = {
     },
 }
 
+REQUIRED_SEO_KEYS = ("title", "description", "h1", "intro")
+
 
 def repo_path_to_url(path: str) -> str:
-    normalized = path.replace("\\", "/")
+    normalized = path.replace("\\", "/").strip()
     if not normalized.endswith("/index.html"):
         raise ValueError(f"Unexpected page path: {path}")
     return f"https://verixiaapps.com/{normalized[:-10]}/"
 
 
+def escape_text(text: str) -> str:
+    return html.escape(text, quote=False)
+
+
+def escape_attr(text: str) -> str:
+    return html.escape(text, quote=True)
+
+
+def validate_config() -> None:
+    if REFRESH_SCOPE != "metadata":
+        raise ValueError("Set REFRESH_SCOPE=metadata")
+
+    if MAX_URLS <= 0:
+        raise ValueError("Invalid MAX_URLS_TO_REFRESH")
+
+    seen = set()
+    for path in TARGET_FILES:
+        if path in seen:
+            raise ValueError(f"Duplicate target file: {path}")
+        seen.add(path)
+
+        if path not in PAGE_SEO:
+            raise ValueError(f"Missing PAGE_SEO entry for target file: {path}")
+
+        if not path.endswith("/index.html"):
+            raise ValueError(f"Unexpected target file path: {path}")
+
+    for path, seo in PAGE_SEO.items():
+        if not path.endswith("/index.html"):
+            raise ValueError(f"Unexpected PAGE_SEO path: {path}")
+
+        missing = [key for key in REQUIRED_SEO_KEYS if not str(seo.get(key, "")).strip()]
+        if missing:
+            raise ValueError(f"Missing SEO fields for {path}: {', '.join(missing)}")
+
+
 def replace_title(content: str, new_title: str) -> str:
     updated, count = re.subn(
-        r"<title>.*?</title>",
-        f"<title>{html.escape(new_title)}</title>",
+        r"(<title\b[^>]*>)(.*?)(</title>)",
+        rf"\g<1>{escape_text(new_title)}\g<3>",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -100,35 +149,80 @@ def replace_title(content: str, new_title: str) -> str:
     return updated
 
 
+def parse_tag_attributes(tag: str) -> Dict[str, str]:
+    attrs: Dict[str, str] = {}
+    for match in re.finditer(
+        r'([^\s=<>"\'/]+)\s*=\s*("([^"]*)"|\'([^\']*)\')',
+        tag,
+        flags=re.DOTALL,
+    ):
+        name = match.group(1).lower()
+        value = match.group(3) if match.group(3) is not None else (match.group(4) or "")
+        attrs[name] = value
+    return attrs
+
+
+def rebuild_meta_tag(original_tag: str, new_attrs: Dict[str, str]) -> str:
+    if not re.match(r"<meta\b", original_tag, flags=re.IGNORECASE):
+        return original_tag
+
+    ordered_names: List[str] = []
+    seen = set()
+
+    for match in re.finditer(
+        r'([^\s=<>"\'/]+)\s*=\s*("([^"]*)"|\'([^\']*)\')',
+        original_tag,
+        flags=re.DOTALL,
+    ):
+        name = match.group(1)
+        lower_name = name.lower()
+        if lower_name not in seen:
+            ordered_names.append(lower_name)
+            seen.add(lower_name)
+
+    for name in new_attrs.keys():
+        if name not in seen:
+            ordered_names.append(name)
+            seen.add(name)
+
+    parts = ["<meta"]
+    for name in ordered_names:
+        if name in new_attrs:
+            parts.append(f'{name}="{escape_attr(new_attrs[name])}"')
+
+    closing = " />" if re.search(r"/\s*>$", original_tag) else ">"
+    return " ".join(parts) + closing
+
+
 def replace_meta(content: str, key: str, value: str, attr: str = "name") -> str:
-    escaped = html.escape(value, quote=True)
-    patterns = [
-        rf'(<meta[^>]*{attr}="{re.escape(key)}"[^>]*content=")([^"]*)(".*?>)',
-        rf"(<meta[^>]*{attr}='{re.escape(key)}'[^>]*content=')([^']*)('.*?>)",
-        rf'(<meta[^>]*content=")([^"]*)("[^>]*{attr}="{re.escape(key)}"[^>]*>)',
-        rf"(<meta[^>]*content=')([^']*)('[^>]*{attr}='{re.escape(key)}'[^>]*>)",
-    ]
+    attr = attr.lower()
+    key_lower = key.lower()
+    meta_pattern = re.compile(r"<meta\b[^>]*>", flags=re.IGNORECASE | re.DOTALL)
 
-    updated = content
-    for pattern in patterns:
-        updated, count = re.subn(
-            pattern,
-            rf"\g<1>{escaped}\g<3>",
-            updated,
-            count=1,
-            flags=re.DOTALL | re.IGNORECASE,
-        )
-        if count:
-            return updated
+    match_to_replace = None
+    for match in meta_pattern.finditer(content):
+        tag = match.group(0)
+        attrs = parse_tag_attributes(tag)
+        if attrs.get(attr, "").lower() == key_lower:
+            match_to_replace = match
+            break
 
-    print(f"WARNING: meta {attr} '{key}' not found")
-    return updated
+    if match_to_replace is None:
+        print(f"WARNING: meta {attr} '{key}' not found")
+        return content
+
+    original_tag = match_to_replace.group(0)
+    attrs = parse_tag_attributes(original_tag)
+    attrs["content"] = value
+    new_tag = rebuild_meta_tag(original_tag, attrs)
+
+    return content[: match_to_replace.start()] + new_tag + content[match_to_replace.end() :]
 
 
 def replace_first_h1(content: str, new_h1: str) -> str:
     updated, count = re.subn(
-        r"(<h1[^>]*>)(.*?)(</h1>)",
-        rf"\g<1>{html.escape(new_h1)}\g<3>",
+        r"(<h1\b[^>]*>)(.*?)(</h1>)",
+        rf"\g<1>{escape_text(new_h1)}\g<3>",
         content,
         count=1,
         flags=re.DOTALL | re.IGNORECASE,
@@ -139,12 +233,14 @@ def replace_first_h1(content: str, new_h1: str) -> str:
 
 
 def replace_first_paragraph_after_h1(content: str, new_paragraph: str) -> str:
-    updated, count = re.subn(
-        r"(<h1[^>]*>.*?</h1>\s*<p[^>]*>)(.*?)(</p>)",
-        rf"\g<1>{html.escape(new_paragraph)}\g<3>",
+    pattern = re.compile(
+        r"(<h1\b[^>]*>.*?</h1>)(?P<gap>(?:\s|<!--.*?-->)*)(<p\b[^>]*>)(.*?)(</p>)",
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    updated, count = pattern.subn(
+        rf"\1\g<gap>\3{escape_text(new_paragraph)}\5",
         content,
         count=1,
-        flags=re.DOTALL | re.IGNORECASE,
     )
     if count == 0:
         print("WARNING: first paragraph after <h1> not found")
@@ -171,6 +267,13 @@ def update_jsonld_object(obj: Any, seo: Dict[str, str], page_url: str) -> None:
     elif obj_type == "BreadcrumbList":
         items = obj.get("itemListElement")
         if isinstance(items, list) and items:
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                item_ref = item.get("item")
+                if isinstance(item_ref, str) and item_ref == page_url:
+                    item["name"] = seo["h1"]
+
             last_item = items[-1]
             if isinstance(last_item, dict):
                 last_item["name"] = seo["h1"]
@@ -179,9 +282,9 @@ def update_jsonld_object(obj: Any, seo: Dict[str, str], page_url: str) -> None:
         obj["name"] = f"{seo['h1']} Related Scam Checks"
 
     elif obj_url == page_url:
-        if "name" in obj and isinstance(obj.get("name"), str):
+        if isinstance(obj.get("name"), str):
             obj["name"] = seo["title"]
-        if "description" in obj and isinstance(obj.get("description"), str):
+        if isinstance(obj.get("description"), str):
             obj["description"] = seo["description"]
 
     for value in obj.values():
@@ -194,9 +297,19 @@ def replace_jsonld(content: str, seo: Dict[str, str], page_url: str) -> str:
         flags=re.DOTALL | re.IGNORECASE,
     )
 
+    found_any = False
+
     def _repl(match: re.Match) -> str:
+        nonlocal found_any
+        found_any = True
+
         open_tag, json_text, close_tag = match.groups()
         stripped = json_text.strip()
+
+        if not stripped:
+            print("WARNING: JSON-LD script empty")
+            return match.group(0)
+
         try:
             data = json.loads(stripped)
         except json.JSONDecodeError:
@@ -207,9 +320,11 @@ def replace_jsonld(content: str, seo: Dict[str, str], page_url: str) -> str:
         new_json = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
         return f"{open_tag}{new_json}{close_tag}"
 
-    updated, count = pattern.subn(_repl, content)
-    if count == 0:
+    updated = pattern.sub(_repl, content)
+
+    if not found_any:
         print("WARNING: JSON-LD script not found")
+
     return updated
 
 
@@ -227,9 +342,7 @@ def process_file(path: str) -> bool:
         original = f.read()
 
     updated = original
-
-    if REFRESH_SCOPE != "metadata":
-        raise ValueError("Set REFRESH_SCOPE=metadata")
+    page_url = repo_path_to_url(path)
 
     updated = replace_title(updated, seo["title"])
     updated = replace_meta(updated, "description", seo["description"], "name")
@@ -239,7 +352,7 @@ def process_file(path: str) -> bool:
     updated = replace_meta(updated, "twitter:description", seo["description"], "name")
     updated = replace_first_h1(updated, seo["h1"])
     updated = replace_first_paragraph_after_h1(updated, seo["intro"])
-    updated = replace_jsonld(updated, seo, repo_path_to_url(path))
+    updated = replace_jsonld(updated, seo, page_url)
 
     if updated == original:
         print(f"NO CHANGE: {path}")
@@ -248,32 +361,28 @@ def process_file(path: str) -> bool:
     print(f"UPDATED: {path}")
 
     if not DRY_RUN:
-        with open(path, "w", encoding="utf-8") as f:
+        with open(path, "w", encoding="utf-8", newline="") as f:
             f.write(updated)
 
     return True
 
 
 def main() -> None:
-    if REFRESH_SCOPE != "metadata":
-        raise ValueError("Set REFRESH_SCOPE=metadata")
+    validate_config()
 
-    if MAX_URLS <= 0:
-        raise ValueError("Invalid MAX_URLS_TO_REFRESH")
-
-    files = TARGET_FILES[:MAX_URLS]
+    files = TARGET_FILES[: min(MAX_URLS, len(TARGET_FILES))]
 
     print(f"REFRESH_SCOPE={REFRESH_SCOPE}")
     print(f"DRY_RUN={DRY_RUN}")
     print(f"MAX_URLS_TO_REFRESH={MAX_URLS}")
     print(f"Processing {len(files)} exact repo-root SEO pages...")
 
-    updated = 0
+    updated_count = 0
     for path in files:
         if process_file(path):
-            updated += 1
+            updated_count += 1
 
-    print(f"Updated {updated} file(s). Done.")
+    print(f"Updated {updated_count} file(s). Done.")
 
 
 if __name__ == "__main__":
