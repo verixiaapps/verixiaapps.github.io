@@ -1,3 +1,6 @@
+Good?
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,11 +45,13 @@ window.addEventListener("load", function(){
 
   if(params.get("subscribed") === "true"){
     localStorage.setItem(BROWSER_SUB_KEY,"true");
-    document.getElementById("postPurchase").style.display = "block";
+    const postPurchase = document.getElementById("postPurchase");
+    if(postPurchase) postPurchase.style.display = "block";
   }
 
   if(isBrowserSubscribed()){
-    document.getElementById("postPurchase").style.display = "block";
+    const postPurchase = document.getElementById("postPurchase");
+    if(postPurchase) postPurchase.style.display = "block";
   }
 
   if(params.get("conversion") === "1" || params.get("subscribed") === "true"){
@@ -891,7 +896,7 @@ width:100%;
   <div class="logo">Scam Check Now</div>
   <div class="top-actions">
     <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
-    <button class="upgrade-top" onclick="openSelector()">Upgrade</button>
+    <button class="upgrade-top" type="button" onclick="openSelector()">Upgrade</button>
   </div>
 </div>
 
@@ -1124,9 +1129,11 @@ textarea.style.left="-9999px";
 document.body.appendChild(textarea);
 textarea.select();
 textarea.setSelectionRange(0, 99999);
-document.execCommand("copy");
+try{
+  document.execCommand("copy");
+  showShareStatus(successMessage);
+}catch(e){}
 document.body.removeChild(textarea);
-showShareStatus(successMessage);
 }
 
 function formatResult(text){
@@ -1211,10 +1218,6 @@ ${continuationByRisk[risk] ? `<div class="result-continuation">${continuationByR
 `;
 }
 
-function isBrowserSubscribed(){
-return localStorage.getItem("scam_check_browser_subscribed")==="true";
-}
-
 async function check(){
 
 const text=document.getElementById("text").value.trim();
@@ -1272,34 +1275,36 @@ async function checkout(priceId){
 
 const pageUrl=window.location.origin+window.location.pathname;
 
-const response=await fetch(API+"/create-checkout",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-priceId,
-email:null,
-successUrl:pageUrl+"?subscribed=true&conversion=1",
-cancelUrl:pageUrl
-})
-});
+try{
+  const response=await fetch(API+"/create-checkout",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      priceId,
+      email:null,
+      successUrl:pageUrl+"?subscribed=true&conversion=1",
+      cancelUrl:pageUrl
+    })
+  });
 
-const data=await response.json();
+  const data=await response.json();
 
-if(data.url){
-window.location=data.url;
-}else{
-alert("Checkout failed. Please try again.");
+  if(data.url){
+    window.location=data.url;
+  }else{
+    alert("Checkout failed. Please try again.");
+  }
+}catch(e){
+  alert("Checkout failed. Please try again.");
 }
 
 }
 </script>
 
-</body>
-
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
-window.addEventListener("load", function () {
+(function () {
   const STRIPE_PUBLISHABLE_KEY = "pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y";
   const API_BASE = "https://awake-integrity-production-faa0.up.railway.app";
 
@@ -1309,92 +1314,177 @@ window.addEventListener("load", function () {
     yearly: "price_1T8KOQJjMzyHDzeQfcU1C1MQ"
   };
 
-  if (document.getElementById("embedded-toggle-wrapper")) return;
+  let stripe = null;
+  let checkoutInstance = null;
+  let selectedPlanKey = "monthly";
+  let isInitializingCheckout = false;
 
-  const wrapper = document.createElement("div");
-  wrapper.id = "embedded-toggle-wrapper";
-  wrapper.style.maxWidth = "820px";
-  wrapper.style.margin = "12px auto 16px";
-  wrapper.style.padding = "0 12px";
-  wrapper.style.boxSizing = "border-box";
+  let wrapper;
+  let buttonRow;
+  let button;
+  let checkoutCard;
+  let compactRow;
+  let compactText;
+  let changePlanBtn;
+  let planRow;
+  let weeklyBtn;
+  let monthlyBtn;
+  let yearlyBtn;
+  let helper;
+  let checkoutContainer;
+  let status;
+  let closeBtn;
 
-  const buttonRow = document.createElement("div");
-  buttonRow.style.display = "flex";
-  buttonRow.style.justifyContent = "flex-start";
+  function setStatus(text) {
+    if (status) status.textContent = text || "";
+  }
 
-  const button = document.createElement("button");
-  button.type = "button";
-  button.innerText = "🔓 Unlock Unlimited Checks";
-  button.style.padding = "10px 14px";
-  button.style.borderRadius = "999px";
-  button.style.fontWeight = "900";
-  button.style.fontSize = "14px";
-  button.style.background = "linear-gradient(135deg,#8679f7,#2cc6e8)";
-  button.style.color = "#fff";
-  button.style.border = "none";
-  button.style.cursor = "pointer";
-  button.style.boxShadow = "0 10px 24px rgba(44,198,232,.18)";
-  buttonRow.appendChild(button);
+  function getPlanButtonByKey(key) {
+    return { weekly: weeklyBtn, monthly: monthlyBtn, yearly: yearlyBtn }[key] || monthlyBtn;
+  }
 
-  const checkoutCard = document.createElement("div");
-  checkoutCard.style.display = "none";
-  checkoutCard.style.marginTop = "12px";
-  checkoutCard.style.background = "linear-gradient(180deg, rgba(18,31,57,.92) 0%, rgba(11,20,39,.97) 100%)";
-  checkoutCard.style.border = "1px solid rgba(255,255,255,.10)";
-  checkoutCard.style.borderRadius = "22px";
-  checkoutCard.style.padding = "16px";
-  checkoutCard.style.boxShadow = "0 22px 56px rgba(2,6,23,.28)";
-  checkoutCard.style.color = "#fff";
+  function updateCompactSummary(key) {
+    const btn = getPlanButtonByKey(key);
+    if (!btn || !compactText) return;
+    compactText.innerHTML =
+      '<div style="font-size:12px;color:#d4e0f2;font-weight:700;">Selected plan</div>' +
+      '<div style="margin-top:2px;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + '</div>';
+  }
 
-  const title = document.createElement("div");
-  title.textContent = "Unlock unlimited scam checks instantly";
-  title.style.fontSize = "22px";
-  title.style.fontWeight = "900";
-  title.style.marginBottom = "6px";
+  function setActivePlan(key) {
+    [weeklyBtn, monthlyBtn, yearlyBtn].forEach(function (btn) {
+      if (!btn) return;
+      const isActive = btn.dataset.planKey === key;
+      btn.dataset.active = isActive ? "true" : "false";
+      btn.style.background = isActive
+        ? "linear-gradient(135deg, rgba(134,121,247,.25) 0%, rgba(44,198,232,.22) 100%)"
+        : "rgba(255,255,255,.05)";
+      btn.style.borderColor = isActive
+        ? "rgba(102,217,239,.55)"
+        : "rgba(255,255,255,.12)";
+      btn.style.boxShadow = isActive
+        ? "0 0 0 1px rgba(102,217,239,.20) inset"
+        : "none";
+      btn.style.transform = "translateY(0)";
+    });
 
-  const sub = document.createElement("div");
-  sub.textContent = "Continue with your selected plan below.";
-  sub.style.fontSize = "14px";
-  sub.style.color = "#d4e0f2";
-  sub.style.marginBottom = "12px";
+    updateCompactSummary(key);
+  }
 
-  const compactRow = document.createElement("div");
-  compactRow.style.display = "none";
-  compactRow.style.alignItems = "center";
-  compactRow.style.justifyContent = "space-between";
-  compactRow.style.gap = "10px";
-  compactRow.style.marginBottom = "12px";
-  compactRow.style.padding = "10px 12px";
-  compactRow.style.borderRadius = "14px";
-  compactRow.style.background = "rgba(255,255,255,.05)";
-  compactRow.style.border = "1px solid rgba(255,255,255,.10)";
+  function showPlanSelector() {
+    compactRow.style.display = "none";
+    planRow.style.display = "grid";
+    helper.style.display = "block";
+  }
 
-  const compactText = document.createElement("div");
-  compactText.style.fontSize = "13px";
-  compactText.style.lineHeight = "1.35";
-  compactText.style.color = "#fff";
-  compactText.style.fontWeight = "800";
+  function showCompactSelector() {
+    compactRow.style.display = "flex";
+    planRow.style.display = "none";
+    helper.style.display = "none";
+  }
 
-  const changePlanBtn = document.createElement("button");
-  changePlanBtn.type = "button";
-  changePlanBtn.textContent = "Change";
-  changePlanBtn.style.padding = "8px 12px";
-  changePlanBtn.style.borderRadius = "999px";
-  changePlanBtn.style.border = "1px solid rgba(255,255,255,.14)";
-  changePlanBtn.style.background = "rgba(255,255,255,.06)";
-  changePlanBtn.style.color = "#fff";
-  changePlanBtn.style.fontWeight = "800";
-  changePlanBtn.style.cursor = "pointer";
-  changePlanBtn.style.flex = "0 0 auto";
+  async function destroyEmbeddedCheckout() {
+    if (checkoutInstance && typeof checkoutInstance.destroy === "function") {
+      try {
+        await checkoutInstance.destroy();
+      } catch (e) {}
+    }
+    checkoutInstance = null;
+    if (checkoutContainer) {
+      checkoutContainer.innerHTML = "";
+      checkoutContainer.style.display = "none";
+      checkoutContainer.style.minHeight = "0";
+      checkoutContainer.style.paddingBottom = "0";
+    }
+  }
 
-  compactRow.appendChild(compactText);
-  compactRow.appendChild(changePlanBtn);
+  async function openCheckoutForPlan(planKey) {
+    if (isInitializingCheckout) return;
+    if (!PRICES[planKey]) return;
 
-  const planRow = document.createElement("div");
-  planRow.style.display = "grid";
-  planRow.style.gridTemplateColumns = "repeat(3, minmax(0,1fr))";
-  planRow.style.gap = "10px";
-  planRow.style.marginBottom = "12px";
+    isInitializingCheckout = true;
+    selectedPlanKey = planKey;
+    setActivePlan(planKey);
+    showCompactSelector();
+    helper.textContent = "Loading secure checkout...";
+    setStatus("");
+    checkoutContainer.style.display = "block";
+    checkoutContainer.style.minHeight = "360px";
+    checkoutContainer.innerHTML = "";
+
+    try {
+      if (!window.Stripe) {
+        throw new Error("Stripe failed to load.");
+      }
+
+      if (!stripe) {
+        stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+      }
+
+      await destroyEmbeddedCheckout();
+
+      checkoutContainer.style.display = "block";
+      checkoutContainer.style.minHeight = "520px";
+      checkoutContainer.style.paddingBottom = "24px";
+
+      const fetchClientSecret = async function () {
+        const res = await fetch(API_BASE + "/create-embedded-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            priceId: PRICES[planKey],
+            returnUrl: window.location.origin + window.location.pathname + "?subscribed=true&conversion=1"
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.clientSecret) {
+          throw new Error(data.error || "No clientSecret");
+        }
+
+        return data.clientSecret;
+      };
+
+      checkoutInstance = await stripe.createEmbeddedCheckoutPage({
+        fetchClientSecret: fetchClientSecret
+      });
+
+      checkoutInstance.mount("#embedded-checkout-mount");
+      helper.textContent = "Complete payment below.";
+    } catch (e) {
+      console.error("Embedded checkout error:", e);
+      await destroyEmbeddedCheckout();
+      showPlanSelector();
+      helper.textContent = "Select a plan to load secure checkout.";
+      checkoutContainer.innerHTML = "Unable to load checkout.";
+      checkoutContainer.style.display = "block";
+      checkoutContainer.style.minHeight = "100px";
+      setStatus("Please try again.");
+    } finally {
+      isInitializingCheckout = false;
+    }
+  }
+
+  async function openSelectorInternal() {
+    if (!checkoutCard || !buttonRow) return;
+    await destroyEmbeddedCheckout();
+    buttonRow.style.display = "none";
+    checkoutCard.style.display = "block";
+    setActivePlan(selectedPlanKey);
+    showPlanSelector();
+    helper.textContent = "Select a plan to load secure checkout.";
+    setStatus("");
+  }
+
+  async function closeCheckoutInternal() {
+    await destroyEmbeddedCheckout();
+    checkoutCard.style.display = "none";
+    buttonRow.style.display = "flex";
+    helper.textContent = "Select a plan to load secure checkout.";
+    setStatus("");
+    showPlanSelector();
+  }
 
   function makePlanButton(label, sublabel, key) {
     const btn = document.createElement("button");
@@ -1442,254 +1532,226 @@ window.addEventListener("load", function () {
     return btn;
   }
 
-  const weeklyBtn = makePlanButton("Weekly", "$3.99 / week", "weekly");
-  const monthlyBtn = makePlanButton("Monthly", "$11.99 / month", "monthly");
-  const yearlyBtn = makePlanButton("Yearly", "$39.99 / year", "yearly");
+  function buildEmbeddedUI() {
+    if (document.getElementById("embedded-toggle-wrapper")) return;
 
-  planRow.appendChild(weeklyBtn);
-  planRow.appendChild(monthlyBtn);
-  planRow.appendChild(yearlyBtn);
+    wrapper = document.createElement("div");
+    wrapper.id = "embedded-toggle-wrapper";
+    wrapper.style.maxWidth = "820px";
+    wrapper.style.margin = "12px auto 16px";
+    wrapper.style.padding = "0 12px";
+    wrapper.style.boxSizing = "border-box";
 
-  const helper = document.createElement("div");
-  helper.textContent = "Select a plan to load secure checkout.";
-  helper.style.fontSize = "13px";
-  helper.style.color = "#d4e0f2";
-  helper.style.marginBottom = "10px";
-  helper.style.lineHeight = "1.45";
+    buttonRow = document.createElement("div");
+    buttonRow.style.display = "flex";
+    buttonRow.style.justifyContent = "flex-start";
 
-  const checkoutContainer = document.createElement("div");
-  checkoutContainer.id = "embedded-checkout-mount";
-  checkoutContainer.style.minHeight = "0";
-  checkoutContainer.style.borderRadius = "16px";
-  checkoutContainer.style.overflow = "hidden";
-  checkoutContainer.style.display = "none";
+    button = document.createElement("button");
+    button.type = "button";
+    button.innerText = "🔓 Unlock Unlimited Checks";
+    button.style.padding = "10px 14px";
+    button.style.borderRadius = "999px";
+    button.style.fontWeight = "900";
+    button.style.fontSize = "14px";
+    button.style.background = "linear-gradient(135deg,#8679f7,#2cc6e8)";
+    button.style.color = "#fff";
+    button.style.border = "none";
+    button.style.cursor = "pointer";
+    button.style.boxShadow = "0 10px 24px rgba(44,198,232,.18)";
+    buttonRow.appendChild(button);
 
-  const status = document.createElement("div");
-  status.style.marginTop = "10px";
-  status.style.fontSize = "13px";
-  status.style.lineHeight = "1.45";
-  status.style.color = "#d4e0f2";
+    checkoutCard = document.createElement("div");
+    checkoutCard.style.display = "none";
+    checkoutCard.style.marginTop = "12px";
+    checkoutCard.style.background = "linear-gradient(180deg, rgba(18,31,57,.92) 0%, rgba(11,20,39,.97) 100%)";
+    checkoutCard.style.border = "1px solid rgba(255,255,255,.10)";
+    checkoutCard.style.borderRadius = "22px";
+    checkoutCard.style.padding = "16px";
+    checkoutCard.style.boxShadow = "0 22px 56px rgba(2,6,23,.28)";
+    checkoutCard.style.color = "#fff";
 
-  const closeBtn = document.createElement("button");
-  closeBtn.type = "button";
-  closeBtn.textContent = "Close";
-  closeBtn.style.marginTop = "12px";
-  closeBtn.style.padding = "10px 14px";
-  closeBtn.style.borderRadius = "12px";
-  closeBtn.style.border = "1px solid rgba(255,255,255,.14)";
-  closeBtn.style.background = "rgba(255,255,255,.06)";
-  closeBtn.style.color = "#fff";
-  closeBtn.style.fontWeight = "800";
-  closeBtn.style.cursor = "pointer";
+    const title = document.createElement("div");
+    title.textContent = "Unlock unlimited scam checks instantly";
+    title.style.fontSize = "22px";
+    title.style.fontWeight = "900";
+    title.style.marginBottom = "6px";
 
-  checkoutCard.appendChild(title);
-  checkoutCard.appendChild(sub);
-  checkoutCard.appendChild(compactRow);
-  checkoutCard.appendChild(planRow);
-  checkoutCard.appendChild(helper);
-  checkoutCard.appendChild(checkoutContainer);
-  checkoutCard.appendChild(status);
-  checkoutCard.appendChild(closeBtn);
+    const sub = document.createElement("div");
+    sub.textContent = "Continue with your selected plan below.";
+    sub.style.fontSize = "14px";
+    sub.style.color = "#d4e0f2";
+    sub.style.marginBottom = "12px";
 
-  wrapper.appendChild(buttonRow);
-  wrapper.appendChild(checkoutCard);
+    compactRow = document.createElement("div");
+    compactRow.style.display = "none";
+    compactRow.style.alignItems = "center";
+    compactRow.style.justifyContent = "space-between";
+    compactRow.style.gap = "10px";
+    compactRow.style.marginBottom = "12px";
+    compactRow.style.padding = "10px 12px";
+    compactRow.style.borderRadius = "14px";
+    compactRow.style.background = "rgba(255,255,255,.05)";
+    compactRow.style.border = "1px solid rgba(255,255,255,.10)";
 
-  const target = document.querySelector(".container");
-  if (target) {
-    const toolShell = document.querySelector(".tool-shell");
-    if (toolShell) {
-      target.insertBefore(wrapper, toolShell);
+    compactText = document.createElement("div");
+    compactText.style.fontSize = "13px";
+    compactText.style.lineHeight = "1.35";
+    compactText.style.color = "#fff";
+    compactText.style.fontWeight = "800";
+
+    changePlanBtn = document.createElement("button");
+    changePlanBtn.type = "button";
+    changePlanBtn.textContent = "Change";
+    changePlanBtn.style.padding = "8px 12px";
+    changePlanBtn.style.borderRadius = "999px";
+    changePlanBtn.style.border = "1px solid rgba(255,255,255,.14)";
+    changePlanBtn.style.background = "rgba(255,255,255,.06)";
+    changePlanBtn.style.color = "#fff";
+    changePlanBtn.style.fontWeight = "800";
+    changePlanBtn.style.cursor = "pointer";
+    changePlanBtn.style.flex = "0 0 auto";
+
+    compactRow.appendChild(compactText);
+    compactRow.appendChild(changePlanBtn);
+
+    planRow = document.createElement("div");
+    planRow.style.display = "grid";
+    planRow.style.gridTemplateColumns = "repeat(3, minmax(0,1fr))";
+    planRow.style.gap = "10px";
+    planRow.style.marginBottom = "12px";
+
+    weeklyBtn = makePlanButton("Weekly", "$3.99 / week", "weekly");
+    monthlyBtn = makePlanButton("Monthly", "$11.99 / month", "monthly");
+    yearlyBtn = makePlanButton("Yearly", "$39.99 / year", "yearly");
+
+    planRow.appendChild(weeklyBtn);
+    planRow.appendChild(monthlyBtn);
+    planRow.appendChild(yearlyBtn);
+
+    helper = document.createElement("div");
+    helper.textContent = "Select a plan to load secure checkout.";
+    helper.style.fontSize = "13px";
+    helper.style.color = "#d4e0f2";
+    helper.style.marginBottom = "10px";
+    helper.style.lineHeight = "1.45";
+
+    checkoutContainer = document.createElement("div");
+    checkoutContainer.id = "embedded-checkout-mount";
+    checkoutContainer.style.minHeight = "0";
+    checkoutContainer.style.borderRadius = "16px";
+    checkoutContainer.style.overflow = "hidden";
+    checkoutContainer.style.display = "none";
+
+    status = document.createElement("div");
+    status.style.marginTop = "10px";
+    status.style.fontSize = "13px";
+    status.style.lineHeight = "1.45";
+    status.style.color = "#d4e2f5";
+
+    closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.textContent = "Close";
+    closeBtn.style.marginTop = "12px";
+    closeBtn.style.padding = "10px 14px";
+    closeBtn.style.borderRadius = "12px";
+    closeBtn.style.border = "1px solid rgba(255,255,255,.14)";
+    closeBtn.style.background = "rgba(255,255,255,.06)";
+    closeBtn.style.color = "#fff";
+    closeBtn.style.fontWeight = "800";
+    closeBtn.style.cursor = "pointer";
+
+    checkoutCard.appendChild(title);
+    checkoutCard.appendChild(sub);
+    checkoutCard.appendChild(compactRow);
+    checkoutCard.appendChild(planRow);
+    checkoutCard.appendChild(helper);
+    checkoutCard.appendChild(checkoutContainer);
+    checkoutCard.appendChild(status);
+    checkoutCard.appendChild(closeBtn);
+
+    wrapper.appendChild(buttonRow);
+    wrapper.appendChild(checkoutCard);
+
+    const target = document.querySelector(".container");
+    if (target) {
+      const toolShell = document.querySelector(".tool-shell");
+      if (toolShell) {
+        target.insertBefore(wrapper, toolShell);
+      } else {
+        target.insertBefore(wrapper, target.firstChild);
+      }
     } else {
-      target.insertBefore(wrapper, target.firstChild);
+      document.body.appendChild(wrapper);
     }
-  } else {
-    document.body.appendChild(wrapper);
-  }
 
-  let stripe = null;
-  let selectedPlanKey = "monthly";
-  let initializedPlanKey = null;
-
-  function setStatus(text) {
-    status.textContent = text || "";
-  }
-
-  function getPlanButtonByKey(key) {
-    return { weekly: weeklyBtn, monthly: monthlyBtn, yearly: yearlyBtn }[key] || monthlyBtn;
-  }
-
-  function updateCompactSummary(key) {
-    const btn = getPlanButtonByKey(key);
-    compactText.innerHTML =
-      '<div style="font-size:12px;color:#d4e0f2;font-weight:700;">Selected plan</div>' +
-      '<div style="margin-top:2px;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + "</div>";
-  }
-
-  function setActivePlan(key) {
-    [weeklyBtn, monthlyBtn, yearlyBtn].forEach(function (btn) {
-      const isActive = btn.dataset.planKey === key;
-      btn.dataset.active = isActive ? "true" : "false";
-      btn.style.background = isActive
-        ? "linear-gradient(135deg, rgba(134,121,247,.25) 0%, rgba(44,198,232,.22) 100%)"
-        : "rgba(255,255,255,.05)";
-      btn.style.borderColor = isActive
-        ? "rgba(102,217,239,.55)"
-        : "rgba(255,255,255,.12)";
-      btn.style.boxShadow = isActive
-        ? "0 0 0 1px rgba(102,217,239,.20) inset"
-        : "none";
+    button.addEventListener("click", function () {
+      window.openEmbeddedUpgrade("monthly");
     });
 
-    updateCompactSummary(key);
-  }
+    weeklyBtn.addEventListener("click", function () {
+      openCheckoutForPlan("weekly");
+    });
 
-  function showPlanSelector() {
-    compactRow.style.display = "none";
-    planRow.style.display = "grid";
-    helper.style.display = "block";
-  }
+    monthlyBtn.addEventListener("click", function () {
+      openCheckoutForPlan("monthly");
+    });
 
-  function showCompactSelector() {
-    compactRow.style.display = "flex";
-    planRow.style.display = "none";
-    helper.style.display = "none";
-  }
+    yearlyBtn.addEventListener("click", function () {
+      openCheckoutForPlan("yearly");
+    });
 
-  function resetCheckoutMount() {
-    checkoutContainer.innerHTML = "";
-    checkoutContainer.style.display = "none";
-    checkoutContainer.style.minHeight = "0";
-    initializedPlanKey = null;
-  }
+    closeBtn.addEventListener("click", function () {
+      closeCheckoutInternal();
+    });
 
-  async function openCheckoutForPlan(planKey) {
-    selectedPlanKey = planKey;
-    setActivePlan(planKey);
-    helper.textContent = "Loading secure checkout...";
-    setStatus("");
-    checkoutContainer.innerHTML = "";
-
-    try {
-      if (!window.Stripe) {
-        throw new Error("Stripe failed to load.");
-      }
-
-      if (!stripe) {
-        stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-      }
-
-      if (initializedPlanKey === planKey) {
-        showCompactSelector();
-        checkoutContainer.style.display = "block";
-        checkoutContainer.style.minHeight = "360px";
-        helper.textContent = "Complete payment below.";
-        return;
-      }
-
-      resetCheckoutMount();
-      showCompactSelector();
-      checkoutContainer.style.display = "block";
-      checkoutContainer.style.minHeight = "360px";
-
-      const fetchClientSecret = async () => {
-        const res = await fetch(API_BASE + "/create-embedded-subscription", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            priceId: PRICES[planKey],
-            returnUrl: window.location.origin + window.location.pathname + "?subscribed=true&conversion=1"
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.clientSecret) {
-          throw new Error(data.error || "No clientSecret");
-        }
-
-        return data.clientSecret;
-      };
-
-      const checkout = await stripe.createEmbeddedCheckoutPage({
-        fetchClientSecret
-      });
-
-      checkout.mount("#embedded-checkout-mount");
-
-// ensure full checkout is visible
-      checkoutContainer.style.minHeight = "520px";
-      checkoutContainer.style.paddingBottom = "24px";
-      initializedPlanKey = planKey;
-      helper.textContent = "Complete payment below.";
-
-    } catch (e) {
-      console.error("Embedded checkout error:", e);
+    changePlanBtn.addEventListener("click", async function () {
+      await destroyEmbeddedCheckout();
       showPlanSelector();
       helper.textContent = "Select a plan to load secure checkout.";
-      checkoutContainer.innerHTML = "Unable to load checkout.";
-      checkoutContainer.style.display = "block";
-      checkoutContainer.style.minHeight = "100px";
-      setStatus("Please try again.");
-    }
-  }
+      setStatus("");
+      setActivePlan(selectedPlanKey);
+    });
 
-  function openSelector() {
-    buttonRow.style.display = "none";
-    checkoutCard.style.display = "block";
+    if (window.innerWidth <= 640) {
+      planRow.style.gridTemplateColumns = "1fr";
+      compactRow.style.flexDirection = "column";
+      compactRow.style.alignItems = "stretch";
+    }
+
     setActivePlan(selectedPlanKey);
-    showPlanSelector();
-    helper.textContent = "Select a plan to load secure checkout.";
-    setStatus("");
-    checkoutContainer.innerHTML = "";
-    checkoutContainer.style.display = "none";
-    checkoutContainer.style.minHeight = "0";
   }
 
-  function closeCheckout() {
-    checkoutCard.style.display = "none";
-    buttonRow.style.display = "flex";
-    helper.textContent = "Select a plan to load secure checkout.";
-    setStatus("");
-    showPlanSelector();
-    resetCheckoutMount();
-  }
+  window.openSelector = async function () {
+    await openSelectorInternal();
 
-  window.openEmbeddedUpgrade = function (planKey) {
-  openSelector();
+    setTimeout(function () {
+      const el = document.getElementById("embedded-toggle-wrapper");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 120);
+  };
 
-  setTimeout(() => {
-    const el = document.getElementById("embedded-toggle-wrapper");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.openEmbeddedUpgrade = async function (planKey) {
+    await openSelectorInternal();
+
+    setTimeout(function () {
+      const el = document.getElementById("embedded-toggle-wrapper");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 120);
+
+    if (planKey && PRICES[planKey]) {
+      openCheckoutForPlan(planKey);
     }
-  }, 120);
+  };
 
-  if (planKey && PRICES[planKey]) {
-    openCheckoutForPlan(planKey);
-  }
-};
-
-  button.addEventListener("click", function () { openEmbeddedUpgrade("monthly"); });
-  weeklyBtn.addEventListener("click", function () { openCheckoutForPlan("weekly"); });
-  monthlyBtn.addEventListener("click", function () { openCheckoutForPlan("monthly"); });
-  yearlyBtn.addEventListener("click", function () { openCheckoutForPlan("yearly"); });
-  closeBtn.addEventListener("click", closeCheckout);
-
-  changePlanBtn.addEventListener("click", function () {
-    showPlanSelector();
-    resetCheckoutMount();
-    helper.textContent = "Select a plan to load secure checkout.";
-    setStatus("");
+  window.addEventListener("load", function () {
+    buildEmbeddedUI();
   });
-
-  if (window.innerWidth <= 640) {
-    planRow.style.gridTemplateColumns = "1fr";
-    compactRow.style.flexDirection = "column";
-    compactRow.style.alignItems = "stretch";
-  }
-
-  setActivePlan(selectedPlanKey);
-});
+})();
 </script>
 
+</body>
 </html>
