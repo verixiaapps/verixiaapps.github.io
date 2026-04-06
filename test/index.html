@@ -1241,10 +1241,13 @@ body:JSON.stringify({text,email,subscribed})
 
 const data=await response.json();
 
-if(data.limit){
-result.innerHTML='<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlock unlimited protection so you can check the next suspicious message, link, or request before it costs you.</div></div>';
-showUpgrade();
-return;
+if (data.limit) {
+  result.innerHTML = '<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlock unlimited protection so you can check the next suspicious message, link, or request before it costs you.</div></div>';
+  showUpgrade();
+  if (window.openEmbeddedUpgrade) {
+    window.openEmbeddedUpgrade("monthly");
+  }
+  return;
 }
 
 result.innerHTML=formatResult(data.result || "");
