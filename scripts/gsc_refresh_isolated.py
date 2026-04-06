@@ -19,74 +19,39 @@ REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "metadata").strip().lower()
 MAX_URLS = parse_positive_int(os.getenv("MAX_URLS_TO_REFRESH", "10"), 10)
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
-# Exact repo-root paths only
+# Exact repo-root paths only for today's GSC-tested pages
 TARGET_FILES: List[str] = [
-    "scam-check-now/is-amazon-refund-message-legit-or-scam/index.html",
-    "scam-check-now/is-google-account-disabled-email-legit-or-scam/index.html",
-    "scam-check-now/is-fedex-customs-charge-email-legit-or-scam/index.html",
-    "scam-check-now/is-usps-tracking-text-legit-or-scam/index.html",
-    "scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/index.html",
     "scam-check-now/is-venmo-security-alert-email-legit-or-scam/index.html",
-    "scam-check-now/is-whatsapp-unusual-login-email-legit-or-scam/index.html",
-    "scam-check-now/is-venmo-verification-code-text-real-or-fake/index.html",
+    "scam-check-now/is-google-security-warning-email-legit-or-scam/index.html",
     "scam-check-now/is-security-alert-message-legit-or-scam/index.html",
+    "scam-check-now/is-apple-billing-update-email-legit-or-scam/index.html",
 ]
 
 # Exact per-page SEO updates only: metadata + visible top-of-page content + matching JSON-LD
 PAGE_SEO: Dict[str, Dict[str, str]] = {
-    "scam-check-now/is-amazon-refund-message-legit-or-scam/index.html": {
-        "title": "Is Amazon Refund Message Legit or a Scam? Warning Signs",
-        "description": "Got an Amazon refund message? Learn the warning signs and how to check if it is legit or a scam before you click, reply, or share information.",
-        "h1": "Is Amazon Refund Message Legit or a Scam?",
-        "intro": "Got an Amazon refund message? Learn the warning signs and how to check if it is legit or a scam before you click, reply, send money, or share information.",
-    },
-    "scam-check-now/is-google-account-disabled-email-legit-or-scam/index.html": {
-        "title": "Is Google Account Disabled Email Legit or a Scam? Warning Signs",
-        "description": "Got a Google account disabled email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, or reply.",
-        "h1": "Is Google Account Disabled Email Legit or a Scam?",
-        "intro": "Got a Google account disabled email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, reply, or share information.",
-    },
-    "scam-check-now/is-fedex-customs-charge-email-legit-or-scam/index.html": {
-        "title": "Is FedEx Customs Charge Email Legit or a Scam? Warning Signs",
-        "description": "Got a FedEx customs charge email? Learn the warning signs and how to check if it is legit or a scam before you pay, click, or reply.",
-        "h1": "Is FedEx Customs Charge Email Legit or a Scam?",
-        "intro": "Got a FedEx customs charge email? Learn the warning signs and how to check if it is legit or a scam before you pay, click, reply, or share information.",
-    },
-    "scam-check-now/is-usps-tracking-text-legit-or-scam/index.html": {
-        "title": "Is USPS Tracking Text Legit or a Scam? Warning Signs",
-        "description": "Got a USPS tracking text? Learn the warning signs and how to check if it is legit or a scam before you click the tracking link or reply.",
-        "h1": "Is USPS Tracking Text Legit or a Scam?",
-        "intro": "Got a USPS tracking text? Learn the warning signs and how to check if it is legit or a scam before you click the tracking link, reply, or share information.",
-    },
-    "scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/index.html": {
-        "title": "Is Recruiter Email From Unknown Company Legit or a Scam? Warning Signs",
-        "description": "Got a recruiter email from an unknown company? Learn the warning signs and how to check if it is legit or a scam before you reply or share information.",
-        "h1": "Is Recruiter Email From Unknown Company Legit or a Scam?",
-        "intro": "Got a recruiter email from an unknown company? Learn the warning signs and how to check if it is legit or a scam before you reply, click, or share information.",
-    },
     "scam-check-now/is-venmo-security-alert-email-legit-or-scam/index.html": {
         "title": "Is Venmo Security Alert Email Legit or a Scam? Warning Signs",
         "description": "Got a Venmo security alert email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, or reply.",
         "h1": "Is Venmo Security Alert Email Legit or a Scam?",
         "intro": "Got a Venmo security alert email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, reply, or share information.",
     },
-    "scam-check-now/is-whatsapp-unusual-login-email-legit-or-scam/index.html": {
-        "title": "Is WhatsApp Unusual Login Email Legit or a Scam? Warning Signs",
-        "description": "Got a WhatsApp unusual login email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, or reply.",
-        "h1": "Is WhatsApp Unusual Login Email Legit or a Scam?",
-        "intro": "Got a WhatsApp unusual login email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, reply, or share information.",
-    },
-    "scam-check-now/is-venmo-verification-code-text-real-or-fake/index.html": {
-        "title": "Is Venmo Verification Code Text Real or Fake? Warning Signs",
-        "description": "Got a Venmo verification code text? Learn the warning signs and how to check if it is real or fake before you share any code or take action.",
-        "h1": "Is Venmo Verification Code Text Real or Fake?",
-        "intro": "Got a Venmo verification code text? Learn the warning signs and how to check if it is real or fake before you share any code, click, or take action.",
+    "scam-check-now/is-google-security-warning-email-legit-or-scam/index.html": {
+        "title": "Is Google Security Warning Email Legit or a Scam? Warning Signs",
+        "description": "Got a Google security warning email? Learn the warning signs and how to check if it is legit or a scam, including fake domains and phishing red flags.",
+        "h1": "Is Google Security Warning Email Legit or a Scam?",
+        "intro": "Got a Google security warning email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, reply, or share information.",
     },
     "scam-check-now/is-security-alert-message-legit-or-scam/index.html": {
         "title": "Is Security Alert Message Legit or a Scam? Warning Signs",
-        "description": "Got a security alert message? Learn the warning signs and how to check if it is legit or a scam before you click, reply, or share information.",
+        "description": "Got a security alert message or notification? Learn the warning signs and how to check if it is legit or a scam before you click, reply, or share information.",
         "h1": "Is Security Alert Message Legit or a Scam?",
-        "intro": "Got a security alert message? Learn the warning signs and how to check if it is legit or a scam before you click, reply, or share information.",
+        "intro": "Got a security alert message or notification? Learn the warning signs and how to check if it is legit or a scam before you click, reply, log in, or share information.",
+    },
+    "scam-check-now/is-apple-billing-update-email-legit-or-scam/index.html": {
+        "title": "Is Apple Billing Update Email Legit or a Scam? Warning Signs",
+        "description": "Got an Apple billing update email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, or update payment details.",
+        "h1": "Is Apple Billing Update Email Legit or a Scam?",
+        "intro": "Got an Apple billing update email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, update payment details, or share information.",
     },
 }
 
