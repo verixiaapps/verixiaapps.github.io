@@ -1239,24 +1239,26 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({text,email,subscribed})
 });
 
-const data=await response.json();
+const data = await res.json();
 
-if(data.limit){
-  result.innerHTML='<div class="result-card"><div class="risk medium">Free Check Used</div><div class="result-summary">Unlock unlimited protection so you can check the next suspicious message, link, or request before it costs you.</div></div>';
-  showUpgrade();
+// ---- LIMIT CHECK ----
+if (data.limit !== undefined && data.used !== undefined) {
+  if (data.used >= data.limit) {
 
-  setTimeout(() => {
-    const upgradeEl = document.getElementById("upgrade");
-    if (upgradeEl) {
-      upgradeEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Optional: show message in UI
+    const msg = document.getElementById("limit-message");
+    if (msg) {
+      msg.innerText = "Free limit reached. Unlock unlimited checks.";
+      msg.style.display = "block";
     }
 
+    // Auto open paywall
     if (window.openEmbeddedUpgrade) {
-      window.openEmbeddedUpgrade("monthly");
+      window.openEmbeddedUpgrade("monthly"); // default plan
     }
-  }, 250);
 
-  return;
+    return; // stop further processing
+  }
 }
 
 result.innerHTML=formatResult(data.result || "");
