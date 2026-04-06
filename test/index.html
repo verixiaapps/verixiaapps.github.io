@@ -1655,11 +1655,19 @@ window.addEventListener("load", function () {
   }
 
   window.openEmbeddedUpgrade = function (planKey) {
-    openSelector();
-    if (planKey && PRICES[planKey]) {
-      openCheckoutForPlan(planKey);
+  openSelector();
+
+  setTimeout(() => {
+    const el = document.getElementById("embedded-toggle-wrapper");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  };
+  }, 120);
+
+  if (planKey && PRICES[planKey]) {
+    openCheckoutForPlan(planKey);
+  }
+};
 
   button.addEventListener("click", function () { openEmbeddedUpgrade("monthly"); });
   weeklyBtn.addEventListener("click", function () { openCheckoutForPlan("weekly"); });
