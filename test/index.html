@@ -897,6 +897,83 @@ width:100%;
 
 <div class="hero">
 <h1>Is this a scam? Check before you click or send money</h1>
+<!-- SCAM CHECK WIDGET START -->
+
+<div id="scam-check-widget" style="max-width:600px;margin:auto;padding:20px;border-radius:16px;background:#0f172a;color:#fff;font-family:system-ui;">
+
+  <h2 style="margin-top:0;">Check Scam Risk</h2>
+
+  <textarea id="scamText" placeholder="Paste suspicious message, email, or link..."
+    style="width:100%;padding:14px;border-radius:12px;border:1px solid #334155;background:#020617;color:#fff;height:140px;"></textarea>
+
+  <button onclick="runScamCheck()"
+    style="width:100%;margin-top:12px;padding:14px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-weight:700;cursor:pointer;">
+    Check Scam Risk
+  </button>
+
+  <div id="scamResult" style="margin-top:16px;"></div>
+
+</div>
+
+<script>
+const API = "https://awake-integrity-production-faa0.up.railway.app";
+
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+}
+
+function getRiskLevel(text){
+  const t = text.toLowerCase();
+  if(t.includes("high")) return "HIGH";
+  if(t.includes("medium")) return "MEDIUM";
+  if(t.includes("low")) return "LOW";
+  return "REVIEW";
+}
+
+async function runScamCheck(){
+
+  const input = document.getElementById("scamText").value.trim();
+  const resultEl = document.getElementById("scamResult");
+
+  if(!input){
+    resultEl.innerHTML = "<div>Paste something to check.</div>";
+    return;
+  }
+
+  resultEl.innerHTML = "<div>Analyzing...</div>";
+
+  try{
+
+    const res = await fetch(API + "/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: input })
+    });
+
+    const data = await res.json();
+    const output = data.result || "No result returned.";
+
+    const risk = getRiskLevel(output);
+
+    resultEl.innerHTML = `
+      <div style="background:#fff;color:#111;padding:16px;border-radius:12px;">
+        <strong>Risk: ${risk}</strong>
+        <p style="margin-top:8px;">${escapeHtml(output)}</p>
+      </div>
+    `;
+
+  }catch(e){
+    resultEl.innerHTML = "<div>Error analyzing. Try again.</div>";
+  }
+
+}
+</script>
+
+<!-- SCAM CHECK WIDGET END -->
+
 <p>Paste a suspicious message, email, website, job offer, or link and get a fast scam risk review before you take action.</p>
 <div class="hero-trust">No signup required • 1 free check • Results in seconds</div>
 </div>
