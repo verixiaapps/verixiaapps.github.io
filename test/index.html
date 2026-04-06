@@ -1404,95 +1404,65 @@ alert("Checkout failed. Please try again.");
 
 </body>
 
-<!-- STRIPE EMBEDDED CHECKOUT AUTO-INJECT START -->
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
 window.addEventListener("load", function () {
-  const STRIPE_PUBLISHABLE_KEY = "pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y";
+
+  const STRIPE_PUBLISHABLE_KEY = "YOUR_KEY";
   const API_BASE = "https://awake-integrity-production-faa0.up.railway.app";
   const PRICE_ID = "price_1T8KOUJjMzyHDzeQxaqPFOSB";
 
-  if (document.getElementById("auto-embedded-checkout")) return;
+  if (document.getElementById("embedded-toggle-wrapper")) return;
 
-  const container = document.createElement("div");
-  container.id = "auto-embedded-checkout";
-  container.style.maxWidth = "820px";
-  container.style.margin = "0 auto 18px";
-  container.style.padding = "0";
-  container.style.boxSizing = "border-box";
+  const wrapper = document.createElement("div");
+  wrapper.id = "embedded-toggle-wrapper";
+  wrapper.style.maxWidth = "820px";
+  wrapper.style.margin = "20px auto";
+  wrapper.style.padding = "0 12px";
 
-  const card = document.createElement("div");
-  card.style.background = "linear-gradient(180deg, rgba(18,31,57,.92) 0%, rgba(11,20,39,.97) 100%)";
-  card.style.border = "1px solid rgba(255,255,255,.10)";
-  card.style.borderRadius = "22px";
-  card.style.padding = "18px";
-  card.style.boxShadow = "0 22px 56px rgba(2,6,23,.28)";
-  card.style.color = "#fff";
+  const button = document.createElement("button");
+  button.innerText = "🔓 Unlock Unlimited Checks";
+  button.style.width = "100%";
+  button.style.padding = "14px";
+  button.style.borderRadius = "14px";
+  button.style.fontWeight = "900";
+  button.style.fontSize = "15px";
+  button.style.background = "linear-gradient(135deg,#8679f7,#2cc6e8)";
+  button.style.color = "#fff";
+  button.style.border = "none";
+  button.style.cursor = "pointer";
+  button.style.boxShadow = "0 10px 24px rgba(44,198,232,.18)";
 
-  const badge = document.createElement("div");
-  badge.textContent = "Secure embedded checkout";
-  badge.style.fontSize = "11px";
-  badge.style.fontWeight = "800";
-  badge.style.letterSpacing = ".08em";
-  badge.style.textTransform = "uppercase";
-  badge.style.color = "#bff7ff";
-  badge.style.marginBottom = "8px";
+  const checkoutContainer = document.createElement("div");
+  checkoutContainer.id = "embedded-checkout-mount";
+  checkoutContainer.style.display = "none";
+  checkoutContainer.style.marginTop = "14px";
+  checkoutContainer.style.borderRadius = "16px";
+  checkoutContainer.style.overflow = "hidden";
 
-  const title = document.createElement("div");
-  title.textContent = "Subscribe without leaving the page";
-  title.style.fontSize = "24px";
-  title.style.lineHeight = "1.15";
-  title.style.fontWeight = "900";
-  title.style.marginBottom = "6px";
-
-  const sub = document.createElement("div");
-  sub.textContent = "Use the embedded checkout below, or use the 3 Stripe buttons further down if you prefer the hosted payment page.";
-  sub.style.fontSize = "14px";
-  sub.style.lineHeight = "1.55";
-  sub.style.color = "#d4e0f2";
-  sub.style.marginBottom = "14px";
-
-  const mountDiv = document.createElement("div");
-  mountDiv.id = "embedded-checkout-mount";
-  mountDiv.style.minHeight = "140px";
-
-  const message = document.createElement("div");
-  message.id = "embedded-checkout-message";
-  message.style.marginTop = "10px";
-  message.style.fontSize = "13px";
-  message.style.color = "#d4e0f2";
-  message.style.lineHeight = "1.45";
-
-  card.appendChild(badge);
-  card.appendChild(title);
-  card.appendChild(sub);
-  card.appendChild(mountDiv);
-  card.appendChild(message);
-  container.appendChild(card);
+  wrapper.appendChild(button);
+  wrapper.appendChild(checkoutContainer);
 
   const target = document.querySelector(".container");
   if (target) {
-    target.insertBefore(container, target.firstChild);
-  } else {
-    document.body.appendChild(container);
+    target.insertBefore(wrapper, target.firstChild);
   }
 
-  function setMessage(text) {
-    message.textContent = text || "";
-  }
+  let initialized = false;
 
-  async function initializeEmbeddedCheckout() {
+  button.onclick = async () => {
+    button.style.display = "none";
+    checkoutContainer.style.display = "block";
+
+    if (initialized) return;
+    initialized = true;
+
     try {
-      if (!window.Stripe) {
-        setMessage("Stripe failed to load.");
-        return;
-      }
-
       const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
       const fetchClientSecret = async () => {
-        const response = await fetch(API_BASE + "/create-embedded-subscription", {
+        const res = await fetch(API_BASE + "/create-embedded-subscription", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1501,13 +1471,9 @@ window.addEventListener("load", function () {
           })
         });
 
-        const data = await response.json();
+        const data = await res.json();
 
-        if (!response.ok || !data.clientSecret) {
-          console.error("Embedded checkout response:", data);
-          throw new Error(data.error || "No clientSecret returned.");
-        }
-
+        if (!data.clientSecret) throw new Error("No clientSecret");
         return data.clientSecret;
       };
 
@@ -1516,15 +1482,13 @@ window.addEventListener("load", function () {
       });
 
       checkout.mount("#embedded-checkout-mount");
-    } catch (error) {
-      console.error("Embedded checkout error:", error);
-      setMessage("Unable to load embedded checkout right now.");
-    }
-  }
 
-  initializeEmbeddedCheckout();
+    } catch (e) {
+      checkoutContainer.innerHTML = "Unable to load checkout.";
+    }
+  };
+
 });
 </script>
-<!-- STRIPE EMBEDDED CHECKOUT AUTO-INJECT END -->
 
 </html>
