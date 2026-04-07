@@ -40,7 +40,7 @@ jobs:
           node-version: "20"
 
       - name: Run template updater
-        run: node scripts/update-embedded-upgrade-templates.js
+        run: node scripts/fragments/update-embedded-upgrade-templates.js
 
       - name: Show git diff summary
         if: always()
@@ -67,6 +67,6 @@ jobs:
             FINAL_MESSAGE="Update embedded upgrade script in all SEO templates"
           fi
 
-          git add templates/seo-template.html templates/seo-template-b.html templates/seo-template-c.html scripts/update-embedded-upgrade-templates.js scripts/fragments/embedded-upgrade-script.html 2>/dev/null || true
+          git add templates/seo-template.html templates/seo-template-b.html templates/seo-template-c.html scripts/fragments/update-embedded-upgrade-templates.js scripts/fragments/embedded-upgrade-script.html 2>/dev/null || true
           git commit -m "$FINAL_MESSAGE"
           git push
