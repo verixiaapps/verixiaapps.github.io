@@ -98,7 +98,7 @@ function loadFragment() {
     fail(`Missing fragment file: ${path.relative(ROOT, FRAGMENT_PATH)}`);
   }
 
-  let fragment = fs.readFileSync(FRAGMENT_PATH, "utf8").replace(/\r\n/g, "\n").trim();
+  const fragment = fs.readFileSync(FRAGMENT_PATH, "utf8").replace(/\r\n/g, "\n").trim();
 
   if (!fragment) {
     fail("Embedded upgrade fragment file is empty.");
@@ -148,30 +148,29 @@ function getTargetFiles() {
   fail(`Invalid RUN_MODE: ${RUN_MODE}. Allowed: single_page, folder, all`);
 }
 
-function stripPreviousInjectedBlock(content) {
-  let updated = content;
-
-  updated = updated.replace(
-    /\n*<script>\s*\(function\s*\(\)\s*\{\s*[\s\S]*?window\.__SCAM_CHECK_EMBEDDED_UPGRADE__[\s\S]*?<\/script>\s*(?=<\/html>\s*$)/i,
-    "\n"
-  );
-
-  return updated;
-}
-
 function injectAtBottom(originalContent, fragment) {
-  let content = originalContent.replace(/\r\n/g, "\n").trimEnd();
+  const content = originalContent.replace(/\r\n/g, "\n");
+  const lower = content.toLowerCase();
 
-  content = stripPreviousInjectedBlock(content).trimEnd();
+  const bodyCloseIndex = lower.lastIndexOf("</body>");
+  const htmlCloseIndex = lower.lastIndexOf("</html>");
 
-  const hasBodyClose = /<\/body>\s*<\/html>\s*$/i.test(content);
-  if (!hasBodyClose) {
-    throw new Error("File does not end with </body></html> in the expected order.");
+  if (bodyCloseIndex === -1) {
+    throw new Error("File is missing closing </body> tag.");
   }
 
-  content = content.replace(/<\/body>\s*<\/html>\s*$/i, "</body>");
+  if (htmlCloseIndex === -1) {
+    throw new Error("File is missing closing </html> tag.");
+  }
 
-  return `${content}\n\n${fragment}\n\n</html>\n`;
+  if (bodyCloseIndex > htmlCloseIndex) {
+    throw new Error("Closing </body> appears after closing </html>.");
+  }
+
+  const beforeBodyClose = content.slice(0, bodyCloseIndex);
+  const bodyCloseTag = content.slice(bodyCloseIndex, bodyCloseIndex + 7);
+
+  return `${beforeBodyClose}${bodyCloseTag}\n\n${fragment}\n\n</html>\n`;
 }
 
 function main() {
