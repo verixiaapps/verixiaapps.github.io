@@ -279,15 +279,13 @@
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
-            const storedEmail = getStoredVerifiedEmail();
-            const shouldSendSubscribed =
-              !!enteredEmail &&
-              !!storedEmail &&
-              enteredEmail === storedEmail &&
-              isBrowserSubscribed();
 
             parsedBody.email = enteredEmail;
-            parsedBody.subscribed = shouldSendSubscribed;
+
+            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
+              delete parsedBody.subscribed;
+            }
+
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -329,7 +327,7 @@
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
+                if (window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
