@@ -30,28 +30,28 @@ TARGET_FILES: List[str] = [
 # Exact per-page SEO updates only: metadata + visible top-of-page content + matching JSON-LD
 PAGE_SEO: Dict[str, Dict[str, str]] = {
     "scam-check-now/is-venmo-security-alert-email-legit-or-scam/index.html": {
-        "title": "Is Venmo Security Alert Email Legit or a Scam? Warning Signs",
-        "description": "Got a Venmo security alert email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, or reply.",
+        "title": "Is Venmo Security Alert Email Legit or a Scam? Real or Fake Warning Signs",
+        "description": "Got a Venmo security alert email? Learn common scam warning signs, how to check if it is real or fake, and what to do before you click, log in, or reply.",
         "h1": "Is Venmo Security Alert Email Legit or a Scam?",
-        "intro": "Got a Venmo security alert email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, reply, or share information.",
+        "intro": "Got a Venmo security alert email? It could be a real account notice or a phishing scam. Learn the warning signs and how to check if it is legit or fake before you click, log in, reply, or share information.",
     },
     "scam-check-now/is-google-security-warning-email-legit-or-scam/index.html": {
-        "title": "Is Google Security Warning Email Legit or a Scam? Warning Signs",
-        "description": "Got a Google security warning email? Learn the warning signs and how to check if it is legit or a scam, including fake domains and phishing red flags.",
+        "title": "Is Google Security Warning Email Legit or a Scam? Real or Fake Warning Signs",
+        "description": "Got a Google security warning email? Learn how to tell if it is legit or a scam, including phishing red flags, fake domains, and what to do before you click or sign in.",
         "h1": "Is Google Security Warning Email Legit or a Scam?",
-        "intro": "Got a Google security warning email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, reply, or share information.",
+        "intro": "Got a Google security warning email? Some are real, but many are phishing scams meant to steal your password or verification codes. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share information.",
     },
     "scam-check-now/is-security-alert-message-legit-or-scam/index.html": {
-        "title": "Is Security Alert Message Legit or a Scam? Warning Signs",
-        "description": "Got a security alert message or notification? Learn the warning signs and how to check if it is legit or a scam before you click, reply, or share information.",
+        "title": "Is Security Alert Message Legit or a Scam? Real or Fake Warning Signs",
+        "description": "Got a security alert message or notification? Learn how to tell if it is legit or a scam, what red flags to watch for, and what to do before you click, reply, or log in.",
         "h1": "Is Security Alert Message Legit or a Scam?",
-        "intro": "Got a security alert message or notification? Learn the warning signs and how to check if it is legit or a scam before you click, reply, log in, or share information.",
+        "intro": "Got a security alert message or notification? Some alerts are legitimate, but many are scams designed to create panic and push you to click fast. Learn the warning signs and how to check if it is real or fake before you click, reply, log in, or share information.",
     },
     "scam-check-now/is-apple-billing-update-email-legit-or-scam/index.html": {
-        "title": "Is Apple Billing Update Email Legit or a Scam? Warning Signs",
-        "description": "Got an Apple billing update email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, or update payment details.",
+        "title": "Is Apple Billing Update Email Legit or a Scam? Real or Fake Warning Signs",
+        "description": "Got an Apple billing update email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click or update payment details.",
         "h1": "Is Apple Billing Update Email Legit or a Scam?",
-        "intro": "Got an Apple billing update email? Learn the warning signs and how to check if it is legit or a scam before you click, log in, update payment details, or share information.",
+        "intro": "Got an Apple billing update email? It may be a real billing notice, but scammers also send fake Apple payment alerts to steal login and card details. Learn the warning signs and how to check if it is legit or fake before you click, sign in, update payment details, or share information.",
     },
 }
 
