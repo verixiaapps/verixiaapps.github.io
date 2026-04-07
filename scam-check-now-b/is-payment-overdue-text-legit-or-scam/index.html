@@ -2463,7 +2463,6 @@ async function checkout(priceId) {
 
 </body>
 
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2474,6 +2473,7 @@ async function checkout(priceId) {
   const ADS_ID = "AW-17956428385";
   const ADS_SEND_TO = "AW-17956428385/dE43CO04_IUcEOGopfJC";
   const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
+  const VERIFIED_SUB_EMAIL_KEY = "scam_check_verified_subscriber_email";
 
   const PRICES = {
     weekly: "price_1T8KOTJjMzyHDzeQDDg1A2TF",
@@ -2504,8 +2504,63 @@ async function checkout(priceId) {
   let status;
   let closeBtn;
 
+  function normalizeEmail(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getEmailInput() {
+    return document.getElementById("email");
+  }
+
+  function getEnteredEmail() {
+    const input = getEmailInput();
+    return input ? normalizeEmail(input.value) : "";
+  }
+
+  function getStoredVerifiedEmail() {
+    return normalizeEmail(localStorage.getItem(VERIFIED_SUB_EMAIL_KEY) || "");
+  }
+
+  function setStoredVerifiedEmail(email) {
+    const normalized = normalizeEmail(email);
+    if (normalized) {
+      localStorage.setItem(VERIFIED_SUB_EMAIL_KEY, normalized);
+    }
+  }
+
   function isBrowserSubscribed() {
     return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+  }
+
+  function markBrowserSubscribed(value) {
+    if (value) {
+      localStorage.setItem(BROWSER_SUB_KEY, "true");
+    } else {
+      localStorage.removeItem(BROWSER_SUB_KEY);
+    }
+  }
+
+  function isVerifiedSubscriberForCurrentUser() {
+    const storedEmail = getStoredVerifiedEmail();
+    const enteredEmail = getEnteredEmail();
+
+    if (!isBrowserSubscribed()) return false;
+    if (!storedEmail) return false;
+    if (!enteredEmail) return false;
+
+    return enteredEmail === storedEmail;
+  }
+
+  function shouldSuppressUpgrade() {
+    return isVerifiedSubscriberForCurrentUser();
+  }
+
+  function syncPostPurchaseMessage() {
+    const postPurchase = document.getElementById("postPurchase");
+    if (!postPurchase) return;
+
+    postPurchase.textContent = "✅ Unlimited scam checks are active with this account";
+    postPurchase.style.display = shouldSuppressUpgrade() ? "block" : "none";
   }
 
   function setStatus(text) {
@@ -2610,13 +2665,10 @@ async function checkout(priceId) {
     }
 
     if (hasSubscribed) {
-      localStorage.setItem(BROWSER_SUB_KEY, "true");
+      markBrowserSubscribed(true);
     }
 
-    if (isBrowserSubscribed()) {
-      const postPurchase = document.getElementById("postPurchase");
-      if (postPurchase) postPurchase.style.display = "block";
-    }
+    syncPostPurchaseMessage();
 
     if (hasConversion || hasSubscribed) {
       try {
@@ -2629,18 +2681,7 @@ async function checkout(priceId) {
     const topBtn = document.querySelector(".upgrade-top");
     if (!topBtn) return;
     topBtn.setAttribute("type", "button");
-    topBtn.removeAttribute("onclick");
-    topBtn.onclick = function (e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      hideLegacyUpgradeUI();
-      if (window.openEmbeddedUpgrade) {
-        window.openEmbeddedUpgrade("monthly");
-      }
-      return false;
-    };
+    topBtn.setAttribute("onclick", "openSelector()");
   }
 
   function patchHostedCheckoutFallback() {
@@ -2675,9 +2716,7 @@ async function checkout(priceId) {
   function patchShowUpgrade() {
     window.showUpgrade = function () {
       hideLegacyUpgradeUI();
-      if (window.openEmbeddedUpgrade) {
-        window.openEmbeddedUpgrade("monthly");
-      }
+      return;
     };
   }
 
@@ -2688,12 +2727,68 @@ async function checkout(priceId) {
     const originalFetch = window.fetch.bind(window);
 
     window.fetch = async function (input, init) {
+      let requestUrl = "";
+      let isAnalyzeRequest = false;
+      let parsedBody = null;
+
+      try {
+        requestUrl = typeof input === "string" ? input : (input && input.url ? input.url : "");
+        isAnalyzeRequest = !!requestUrl && requestUrl.indexOf("/analyze") !== -1;
+
+        if (isAnalyzeRequest && init && typeof init.body === "string") {
+          try {
+            parsedBody = JSON.parse(init.body);
+          } catch (e) {
+            parsedBody = null;
+          }
+
+          if (parsedBody && typeof parsedBody === "object") {
+            const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+
+            parsedBody.email = enteredEmail;
+
+            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
+              delete parsedBody.subscribed;
+            }
+
+            init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
+          }
+        }
+      } catch (e) {}
+
       const response = await originalFetch(input, init);
 
       try {
-        const url = typeof input === "string" ? input : (input && input.url ? input.url : "");
-        if (url && url.indexOf("/analyze") !== -1) {
+        if (isAnalyzeRequest) {
+          const requestEmail = normalizeEmail((parsedBody && parsedBody.email) || getEnteredEmail());
+
           response.clone().json().then(function (data) {
+            const backendConfirmedSubscribed = !!(
+              data &&
+              (
+                data.subscribed === true ||
+                data.activeSubscription === true ||
+                data.hasSubscription === true ||
+                data.unlimited === true
+              )
+            );
+
+            if (backendConfirmedSubscribed) {
+              markBrowserSubscribed(true);
+
+              if (requestEmail) {
+                setStoredVerifiedEmail(requestEmail);
+              } else if (data && data.email) {
+                setStoredVerifiedEmail(data.email);
+              }
+
+              syncPostPurchaseMessage();
+              hideLegacyUpgradeUI();
+              return;
+            }
+
+            syncPostPurchaseMessage();
+
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
@@ -2710,22 +2805,25 @@ async function checkout(priceId) {
     };
   }
 
-  function patchLegacyButtons() {
-    const buttons = Array.from(document.querySelectorAll('button[onclick], .upgrade-top'));
+  function patchCheckButtonHandlers() {
+    const buttons = Array.from(document.querySelectorAll('button[onclick], .check'));
     buttons.forEach(function (btn) {
       const onclickText = (btn.getAttribute("onclick") || "").trim();
-      const text = (btn.textContent || "").toLowerCase().trim();
+      const text = (btn.textContent || "").toLowerCase();
 
-      if (
-        onclickText === "showUpgrade()" ||
-        text.includes("upgrade")
-      ) {
+      if (onclickText === "showUpgrade()" || text === "upgrade") {
         btn.removeAttribute("onclick");
         btn.onclick = function (e) {
           if (e) {
             e.preventDefault();
             e.stopPropagation();
           }
+
+          if (shouldSuppressUpgrade()) {
+            hideLegacyUpgradeUI();
+            return false;
+          }
+
           hideLegacyUpgradeUI();
           if (window.openEmbeddedUpgrade) {
             window.openEmbeddedUpgrade("monthly");
@@ -2733,6 +2831,17 @@ async function checkout(priceId) {
           return false;
         };
       }
+    });
+  }
+
+  function patchSubscriberEmailField() {
+    const input = getEmailInput();
+    if (!input || input.__SCAM_CHECK_EMAIL_PATCHED__) return;
+
+    input.__SCAM_CHECK_EMAIL_PATCHED__ = true;
+    input.addEventListener("input", function () {
+      syncPostPurchaseMessage();
+      hideLegacyUpgradeUI();
     });
   }
 
@@ -2899,6 +3008,12 @@ async function checkout(priceId) {
 
   async function openSelectorInternal() {
     if (!checkoutCard || !buttonRow) return;
+
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+
     hideLegacyUpgradeUI();
     await destroyEmbeddedCheckout();
     buttonRow.style.display = "none";
@@ -3117,6 +3232,10 @@ async function checkout(priceId) {
     }
 
     button.addEventListener("click", function () {
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return;
+      }
       window.openEmbeddedUpgrade("monthly");
     });
 
@@ -3154,6 +3273,11 @@ async function checkout(priceId) {
   }
 
   window.openSelector = async function () {
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+
     await openSelectorInternal();
 
     setTimeout(function () {
@@ -3167,6 +3291,11 @@ async function checkout(priceId) {
   };
 
   window.openEmbeddedUpgrade = async function (planKey) {
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+
     await openSelectorInternal();
 
     setTimeout(function () {
@@ -3192,17 +3321,23 @@ async function checkout(priceId) {
     patchHostedCheckoutFallback();
     patchShowUpgrade();
     patchAnalyzeLimitAutoOpen();
-    patchLegacyButtons();
     buildEmbeddedUI();
+    patchCheckButtonHandlers();
+    patchSubscriberEmailField();
+    syncPostPurchaseMessage();
 
     setTimeout(function () {
       hideLegacyUpgradeUI();
-      patchLegacyButtons();
+      patchCheckButtonHandlers();
+      patchSubscriberEmailField();
+      syncPostPurchaseMessage();
     }, 0);
 
     setTimeout(function () {
       hideLegacyUpgradeUI();
-      patchLegacyButtons();
+      patchCheckButtonHandlers();
+      patchSubscriberEmailField();
+      syncPostPurchaseMessage();
     }, 150);
   }
 
@@ -3213,6 +3348,5 @@ async function checkout(priceId) {
   }
 })();
 </script>
-
 
 </html>
