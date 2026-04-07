@@ -2681,11 +2681,31 @@ async function checkout(priceId) {
     const topBtn = document.querySelector(".upgrade-top");
     if (!topBtn) return;
     topBtn.setAttribute("type", "button");
-    topBtn.setAttribute("onclick", "openSelector()");
+    topBtn.removeAttribute("onclick");
+    topBtn.onclick = function (e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return false;
+      }
+      hideLegacyUpgradeUI();
+      if (window.openEmbeddedUpgrade) {
+        window.openEmbeddedUpgrade("monthly");
+      }
+      return false;
+    };
   }
 
   function patchHostedCheckoutFallback() {
     window.checkout = async function (priceId) {
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return;
+      }
+
       const pageUrl = window.location.origin + window.location.pathname;
 
       try {
@@ -2744,7 +2764,6 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
-
             parsedBody.email = enteredEmail;
 
             if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
@@ -2805,13 +2824,13 @@ async function checkout(priceId) {
     };
   }
 
-  function patchCheckButtonHandlers() {
-    const buttons = Array.from(document.querySelectorAll('button[onclick], .check'));
+  function patchLegacyButtons() {
+    const buttons = Array.from(document.querySelectorAll('button[onclick], .upgrade-top'));
     buttons.forEach(function (btn) {
       const onclickText = (btn.getAttribute("onclick") || "").trim();
-      const text = (btn.textContent || "").toLowerCase();
+      const text = (btn.textContent || "").toLowerCase().trim();
 
-      if (onclickText === "showUpgrade()" || text === "upgrade") {
+      if (onclickText === "showUpgrade()" || text.includes("upgrade")) {
         btn.removeAttribute("onclick");
         btn.onclick = function (e) {
           if (e) {
@@ -2937,6 +2956,10 @@ async function checkout(priceId) {
   }
 
   async function openCheckoutForPlan(planKey) {
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
     if (isInitializingCheckout) return;
     if (!PRICES[planKey]) return;
 
@@ -3027,7 +3050,7 @@ async function checkout(priceId) {
   async function closeCheckoutInternal() {
     await destroyEmbeddedCheckout();
     checkoutCard.style.display = "none";
-    buttonRow.style.display = "flex";
+    buttonRow.style.display = shouldSuppressUpgrade() ? "none" : "flex";
     helper.textContent = "Select a plan to load secure checkout.";
     setStatus("");
     showPlanSelector();
@@ -3090,7 +3113,7 @@ async function checkout(priceId) {
     wrapper.style.boxSizing = "border-box";
 
     buttonRow = document.createElement("div");
-    buttonRow.style.display = "flex";
+    buttonRow.style.display = shouldSuppressUpgrade() ? "none" : "flex";
     buttonRow.style.justifyContent = "flex-start";
 
     button = document.createElement("button");
@@ -3321,21 +3344,21 @@ async function checkout(priceId) {
     patchHostedCheckoutFallback();
     patchShowUpgrade();
     patchAnalyzeLimitAutoOpen();
-    buildEmbeddedUI();
-    patchCheckButtonHandlers();
+    patchLegacyButtons();
     patchSubscriberEmailField();
+    buildEmbeddedUI();
     syncPostPurchaseMessage();
 
     setTimeout(function () {
       hideLegacyUpgradeUI();
-      patchCheckButtonHandlers();
+      patchLegacyButtons();
       patchSubscriberEmailField();
       syncPostPurchaseMessage();
     }, 0);
 
     setTimeout(function () {
       hideLegacyUpgradeUI();
-      patchCheckButtonHandlers();
+      patchLegacyButtons();
       patchSubscriberEmailField();
       syncPostPurchaseMessage();
     }, 150);
