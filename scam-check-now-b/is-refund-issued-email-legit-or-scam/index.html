@@ -2467,7 +2467,6 @@ async function checkout(priceId) {
 </body>
 
 <script>
-
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
   window.__SCAM_CHECK_EMBEDDED_UPGRADE__ = true;
@@ -2476,12 +2475,8 @@ async function checkout(priceId) {
   const STRIPE_PUBLISHABLE_KEY = "pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y";
   const ADS_ID = "AW-17956428385";
   const ADS_SEND_TO = "AW-17956428385/dE43CO04_IUcEOGopfJC";
-
-  const STORAGE_KEYS = {
-    subscribed: "scam_check_browser_subscribed",
-    suppressUntil: "scam_check_popup_suppress_until",
-    popupOpenedThisPage: "scam_check_popup_opened_this_page"
-  };
+  const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
+  const VERIFIED_SUB_EMAIL_KEY = "scam_check_verified_subscriber_email";
 
   const PRICES = {
     weekly: "price_1T8KOTJjMzyHDzeQDDg1A2TF",
@@ -2489,16 +2484,12 @@ async function checkout(priceId) {
     yearly: "price_1T8KOQJjMzyHDzeQfcU1C1MQ"
   };
 
-  const POPUP_COOLDOWN_MS = 1000 * 60 * 10;
-  const PURCHASE_SUPPRESS_MS = 1000 * 60 * 60 * 24 * 30;
-
   let stripe = null;
   let checkoutInstance = null;
   let selectedPlanKey = "monthly";
   let isInitializingCheckout = false;
   let stripeScriptPromise = null;
-  let postPurchaseObserver = null;
-  let isOpeningUpgrade = false;
+  let legacyUpgradeObserver = null;
 
   let wrapper;
   let buttonRow;
@@ -2516,91 +2507,124 @@ async function checkout(priceId) {
   let status;
   let closeBtn;
 
-  function safeLocalGet(key) {
-    try {
-      return localStorage.getItem(key);
-    } catch (e) {
-      return null;
+  function normalizeEmail(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getEmailInput() {
+    return document.getElementById("email");
+  }
+
+  function getEnteredEmail() {
+    const input = getEmailInput();
+    return input ? normalizeEmail(input.value) : "";
+  }
+
+  function getStoredVerifiedEmail() {
+    return normalizeEmail(localStorage.getItem(VERIFIED_SUB_EMAIL_KEY) || "");
+  }
+
+  function setStoredVerifiedEmail(email) {
+    const normalized = normalizeEmail(email);
+    if (normalized) {
+      localStorage.setItem(VERIFIED_SUB_EMAIL_KEY, normalized);
     }
-  }
-
-  function safeLocalSet(key, value) {
-    try {
-      localStorage.setItem(key, value);
-    } catch (e) {}
-  }
-
-  function safeLocalRemove(key) {
-    try {
-      localStorage.removeItem(key);
-    } catch (e) {}
   }
 
   function isBrowserSubscribed() {
-    return safeLocalGet(STORAGE_KEYS.subscribed) === "true";
+    return localStorage.getItem(BROWSER_SUB_KEY) === "true";
   }
 
-  function setBrowserSubscribed(value) {
+  function markBrowserSubscribed(value) {
     if (value) {
-      safeLocalSet(STORAGE_KEYS.subscribed, "true");
-      safeLocalRemove(STORAGE_KEYS.suppressUntil);
+      localStorage.setItem(BROWSER_SUB_KEY, "true");
     } else {
-      safeLocalRemove(STORAGE_KEYS.subscribed);
+      localStorage.removeItem(BROWSER_SUB_KEY);
     }
   }
 
-  function suppressPopupFor(ms) {
-    safeLocalSet(STORAGE_KEYS.suppressUntil, String(Date.now() + ms));
+  function isVerifiedSubscriberForCurrentUser() {
+    const storedEmail = getStoredVerifiedEmail();
+    const enteredEmail = getEnteredEmail();
+
+    if (!isBrowserSubscribed()) return false;
+    if (!storedEmail) return false;
+    if (!enteredEmail) return false;
+
+    return enteredEmail === storedEmail;
   }
 
-  function isPopupSuppressed() {
-    const until = Number(safeLocalGet(STORAGE_KEYS.suppressUntil) || "0");
-    return until > Date.now();
+  function shouldSuppressUpgrade() {
+    return isVerifiedSubscriberForCurrentUser();
   }
 
-  function wasPopupOpenedThisPage() {
-    return sessionStorage.getItem(STORAGE_KEYS.popupOpenedThisPage) === "true";
-  }
+  function syncPostPurchaseMessage() {
+    const postPurchase = document.getElementById("postPurchase");
+    if (!postPurchase) return;
 
-  function markPopupOpenedThisPage() {
-    try {
-      sessionStorage.setItem(STORAGE_KEYS.popupOpenedThisPage, "true");
-    } catch (e) {}
+    postPurchase.textContent = "✅ Unlimited scam checks are active with this account";
+    postPurchase.style.display = shouldSuppressUpgrade() ? "block" : "none";
   }
 
   function setStatus(text) {
     if (status) status.textContent = text || "";
   }
 
-  function isElementVisible(el) {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    if (style.display === "none" || style.visibility === "hidden") return false;
-    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+  function injectLegacyUpgradeKillCSS() {
+    if (document.getElementById("scam-check-hide-legacy-upgrade")) return;
+
+    const style = document.createElement("style");
+    style.id = "scam-check-hide-legacy-upgrade";
+    style.textContent = `
+      #upgrade {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+        max-height: 0 !important;
+        min-height: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
-  function isAnySubscribedSignalPresent() {
-    if (isBrowserSubscribed()) return true;
-
-    const postPurchase = document.getElementById("postPurchase");
-    if (isElementVisible(postPurchase)) return true;
-
-    return false;
+  function hideLegacyUpgradeUI() {
+    const oldUpgrade = document.getElementById("upgrade");
+    if (oldUpgrade) {
+      oldUpgrade.style.setProperty("display", "none", "important");
+      oldUpgrade.style.setProperty("visibility", "hidden", "important");
+      oldUpgrade.style.setProperty("pointer-events", "none", "important");
+      oldUpgrade.style.setProperty("opacity", "0", "important");
+      oldUpgrade.style.setProperty("max-height", "0", "important");
+      oldUpgrade.style.setProperty("min-height", "0", "important");
+      oldUpgrade.style.setProperty("height", "0", "important");
+      oldUpgrade.style.setProperty("overflow", "hidden", "important");
+      oldUpgrade.style.setProperty("margin", "0", "important");
+      oldUpgrade.style.setProperty("padding", "0", "important");
+      oldUpgrade.style.setProperty("border", "0", "important");
+      oldUpgrade.setAttribute("hidden", "");
+      oldUpgrade.setAttribute("aria-hidden", "true");
+    }
   }
 
-  function markBrowserSubscribed() {
-    setBrowserSubscribed(true);
+  function watchLegacyUpgradeUI() {
+    if (legacyUpgradeObserver) return;
 
-    const postPurchase = document.getElementById("postPurchase");
-    if (postPurchase) postPurchase.style.display = "block";
+    legacyUpgradeObserver = new MutationObserver(function () {
+      hideLegacyUpgradeUI();
+    });
 
-    if (buttonRow) buttonRow.style.display = "none";
-    if (checkoutCard) checkoutCard.style.display = "none";
-  }
-
-  function clearBrowserSubscribed() {
-    safeLocalRemove(STORAGE_KEYS.subscribed);
-    safeLocalRemove(STORAGE_KEYS.suppressUntil);
+    legacyUpgradeObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"]
+    });
   }
 
   function ensureAdsScript() {
@@ -2644,14 +2668,10 @@ async function checkout(priceId) {
     }
 
     if (hasSubscribed) {
-      markBrowserSubscribed();
-      suppressPopupFor(PURCHASE_SUPPRESS_MS);
+      markBrowserSubscribed(true);
     }
 
-    if (isBrowserSubscribed()) {
-      const postPurchase = document.getElementById("postPurchase");
-      if (postPurchase) postPurchase.style.display = "block";
-    }
+    syncPostPurchaseMessage();
 
     if (hasConversion || hasSubscribed) {
       try {
@@ -2663,23 +2683,31 @@ async function checkout(priceId) {
   function patchTopUpgradeButton() {
     const topBtn = document.querySelector(".upgrade-top");
     if (!topBtn) return;
-
-    topBtn.type = "button";
+    topBtn.setAttribute("type", "button");
     topBtn.removeAttribute("onclick");
     topBtn.onclick = function (e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      if (isAnySubscribedSignalPresent()) return false;
-      window.openSelector();
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return false;
+      }
+      hideLegacyUpgradeUI();
+      if (window.openEmbeddedUpgrade) {
+        window.openEmbeddedUpgrade("monthly");
+      }
       return false;
     };
   }
 
   function patchHostedCheckoutFallback() {
     window.checkout = async function (priceId) {
-      if (isAnySubscribedSignalPresent()) return;
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return;
+      }
 
       const pageUrl = window.location.origin + window.location.pathname;
 
@@ -2710,35 +2738,9 @@ async function checkout(priceId) {
 
   function patchShowUpgrade() {
     window.showUpgrade = function () {
-      if (isAnySubscribedSignalPresent()) return;
-      window.openSelector();
+      hideLegacyUpgradeUI();
+      return;
     };
-  }
-
-  function responseShowsSubscribed(data) {
-    if (!data || typeof data !== "object") return false;
-
-    return (
-      data.subscribed === true ||
-      data.subscriptionActive === true ||
-      data.hasSubscription === true ||
-      data.activeSubscription === true ||
-      data.isSubscribed === true ||
-      data.customerSubscribed === true ||
-      data.paid === true ||
-      data.planActive === true
-    );
-  }
-
-  function shouldAutoOpenUpgradeForAnalyze(data) {
-    if (!data || typeof data !== "object") return false;
-    if (responseShowsSubscribed(data)) return false;
-    if (isAnySubscribedSignalPresent()) return false;
-    if (isPopupSuppressed()) return false;
-    if (wasPopupOpenedThisPage()) return false;
-    if (isOpeningUpgrade) return false;
-    if (checkoutCard && checkoutCard.style.display === "block") return false;
-    return data.limit === true;
   }
 
   function patchAnalyzeLimitAutoOpen() {
@@ -2748,34 +2750,121 @@ async function checkout(priceId) {
     const originalFetch = window.fetch.bind(window);
 
     window.fetch = async function (input, init) {
+      let requestUrl = "";
+      let isAnalyzeRequest = false;
+      let parsedBody = null;
+
+      try {
+        requestUrl = typeof input === "string" ? input : (input && input.url ? input.url : "");
+        isAnalyzeRequest = !!requestUrl && requestUrl.indexOf("/analyze") !== -1;
+
+        if (isAnalyzeRequest && init && typeof init.body === "string") {
+          try {
+            parsedBody = JSON.parse(init.body);
+          } catch (e) {
+            parsedBody = null;
+          }
+
+          if (parsedBody && typeof parsedBody === "object") {
+            const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            parsedBody.email = enteredEmail;
+
+            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
+              delete parsedBody.subscribed;
+            }
+
+            init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
+          }
+        }
+      } catch (e) {}
+
       const response = await originalFetch(input, init);
 
       try {
-        const url = typeof input === "string" ? input : (input && input.url ? input.url : "");
-        if (url && url.indexOf("/analyze") !== -1) {
+        if (isAnalyzeRequest) {
+          const requestEmail = normalizeEmail((parsedBody && parsedBody.email) || getEnteredEmail());
+
           response.clone().json().then(function (data) {
-            if (responseShowsSubscribed(data)) {
-              markBrowserSubscribed();
+            const backendConfirmedSubscribed = !!(
+              data &&
+              (
+                data.subscribed === true ||
+                data.activeSubscription === true ||
+                data.hasSubscription === true ||
+                data.unlimited === true
+              )
+            );
+
+            if (backendConfirmedSubscribed) {
+              markBrowserSubscribed(true);
+
+              if (requestEmail) {
+                setStoredVerifiedEmail(requestEmail);
+              } else if (data && data.email) {
+                setStoredVerifiedEmail(data.email);
+              }
+
+              syncPostPurchaseMessage();
+              hideLegacyUpgradeUI();
               return;
             }
 
-            if (!shouldAutoOpenUpgradeForAnalyze(data)) return;
+            syncPostPurchaseMessage();
 
-            markPopupOpenedThisPage();
-            suppressPopupFor(POPUP_COOLDOWN_MS);
-
-            setTimeout(function () {
-              if (isAnySubscribedSignalPresent()) return;
-              if (window.openEmbeddedUpgrade) {
-                window.openEmbeddedUpgrade("monthly");
-              }
-            }, 10);
+            if (data && data.limit === true) {
+              setTimeout(function () {
+                hideLegacyUpgradeUI();
+                if (window.openEmbeddedUpgrade) {
+                  window.openEmbeddedUpgrade("monthly");
+                }
+              }, 0);
+            }
           }).catch(function () {});
         }
       } catch (e) {}
 
       return response;
     };
+  }
+
+  function patchLegacyButtons() {
+    const buttons = Array.from(document.querySelectorAll('button[onclick], .upgrade-top'));
+    buttons.forEach(function (btn) {
+      const onclickText = (btn.getAttribute("onclick") || "").trim();
+      const text = (btn.textContent || "").toLowerCase().trim();
+
+      if (onclickText === "showUpgrade()" || text.includes("upgrade")) {
+        btn.removeAttribute("onclick");
+        btn.onclick = function (e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+
+          if (shouldSuppressUpgrade()) {
+            hideLegacyUpgradeUI();
+            return false;
+          }
+
+          hideLegacyUpgradeUI();
+          if (window.openEmbeddedUpgrade) {
+            window.openEmbeddedUpgrade("monthly");
+          }
+          return false;
+        };
+      }
+    });
+  }
+
+  function patchSubscriberEmailField() {
+    const input = getEmailInput();
+    if (!input || input.__SCAM_CHECK_EMAIL_PATCHED__) return;
+
+    input.__SCAM_CHECK_EMAIL_PATCHED__ = true;
+    input.addEventListener("input", function () {
+      syncPostPurchaseMessage();
+      hideLegacyUpgradeUI();
+    });
   }
 
   function ensureStripeScript() {
@@ -2813,16 +2902,14 @@ async function checkout(priceId) {
   function updateCompactSummary(key) {
     const btn = getPlanButtonByKey(key);
     if (!btn || !compactText) return;
-
     compactText.innerHTML =
       '<div style="font-size:12px;color:#d4e0f2;font-weight:700;">Selected plan</div>' +
-      '<div style="margin-top:2px;">' + btn.dataset.planLabel + " • " + btn.dataset.planSubLabel + "</div>";
+      '<div style="margin-top:2px;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + '</div>';
   }
 
   function setActivePlan(key) {
     [weeklyBtn, monthlyBtn, yearlyBtn].forEach(function (btn) {
       if (!btn) return;
-
       const isActive = btn.dataset.planKey === key;
       btn.dataset.active = isActive ? "true" : "false";
       btn.style.background = isActive
@@ -2872,7 +2959,10 @@ async function checkout(priceId) {
   }
 
   async function openCheckoutForPlan(planKey) {
-    if (isAnySubscribedSignalPresent()) return;
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
     if (isInitializingCheckout) return;
     if (!PRICES[planKey]) return;
 
@@ -2943,9 +3033,14 @@ async function checkout(priceId) {
   }
 
   async function openSelectorInternal() {
-    if (isAnySubscribedSignalPresent()) return;
     if (!checkoutCard || !buttonRow) return;
 
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+
+    hideLegacyUpgradeUI();
     await destroyEmbeddedCheckout();
     buttonRow.style.display = "none";
     checkoutCard.style.display = "block";
@@ -2958,11 +3053,10 @@ async function checkout(priceId) {
   async function closeCheckoutInternal() {
     await destroyEmbeddedCheckout();
     checkoutCard.style.display = "none";
-    buttonRow.style.display = isAnySubscribedSignalPresent() ? "none" : "flex";
+    buttonRow.style.display = shouldSuppressUpgrade() ? "none" : "flex";
     helper.textContent = "Select a plan to load secure checkout.";
     setStatus("");
     showPlanSelector();
-    suppressPopupFor(POPUP_COOLDOWN_MS);
   }
 
   function makePlanButton(label, sublabel, key) {
@@ -3011,30 +3105,6 @@ async function checkout(priceId) {
     return btn;
   }
 
-  function watchPostPurchaseState() {
-    const sync = function () {
-      const postPurchase = document.getElementById("postPurchase");
-      if (isElementVisible(postPurchase)) {
-        markBrowserSubscribed();
-      }
-    };
-
-    sync();
-
-    if (postPurchaseObserver) return;
-
-    postPurchaseObserver = new MutationObserver(function () {
-      sync();
-    });
-
-    postPurchaseObserver.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["style", "class", "hidden"]
-    });
-  }
-
   function buildEmbeddedUI() {
     if (document.getElementById("embedded-toggle-wrapper")) return;
 
@@ -3046,7 +3116,7 @@ async function checkout(priceId) {
     wrapper.style.boxSizing = "border-box";
 
     buttonRow = document.createElement("div");
-    buttonRow.style.display = isAnySubscribedSignalPresent() ? "none" : "flex";
+    buttonRow.style.display = shouldSuppressUpgrade() ? "none" : "flex";
     buttonRow.style.justifyContent = "flex-start";
 
     button = document.createElement("button");
@@ -3188,7 +3258,10 @@ async function checkout(priceId) {
     }
 
     button.addEventListener("click", function () {
-      if (isAnySubscribedSignalPresent()) return;
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return;
+      }
       window.openEmbeddedUpgrade("monthly");
     });
 
@@ -3226,67 +3299,72 @@ async function checkout(priceId) {
   }
 
   window.openSelector = async function () {
-    if (isAnySubscribedSignalPresent()) return;
-    if (isOpeningUpgrade) return;
-
-    isOpeningUpgrade = true;
-    try {
-      await openSelectorInternal();
-
-      setTimeout(function () {
-        const el = document.getElementById("embedded-toggle-wrapper");
-        if (el) {
-          try {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          } catch (e) {}
-        }
-      }, 120);
-    } finally {
-      isOpeningUpgrade = false;
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
     }
+
+    await openSelectorInternal();
+
+    setTimeout(function () {
+      const el = document.getElementById("embedded-toggle-wrapper");
+      if (el) {
+        try {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (e) {}
+      }
+    }, 120);
   };
 
   window.openEmbeddedUpgrade = async function (planKey) {
-    if (isAnySubscribedSignalPresent()) return;
-    if (isOpeningUpgrade) return;
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
 
-    isOpeningUpgrade = true;
-    try {
-      await openSelectorInternal();
+    await openSelectorInternal();
 
-      setTimeout(function () {
-        const el = document.getElementById("embedded-toggle-wrapper");
-        if (el) {
-          try {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          } catch (e) {}
-        }
-      }, 120);
-
-      if (planKey && PRICES[planKey]) {
-        await openCheckoutForPlan(planKey);
+    setTimeout(function () {
+      const el = document.getElementById("embedded-toggle-wrapper");
+      if (el) {
+        try {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (e) {}
       }
-    } finally {
-      isOpeningUpgrade = false;
+    }, 120);
+
+    if (planKey && PRICES[planKey]) {
+      openCheckoutForPlan(planKey);
     }
   };
 
-  window.markScamCheckSubscribed = function () {
-    markBrowserSubscribed();
-  };
-
-  window.clearScamCheckSubscribed = function () {
-    clearBrowserSubscribed();
-  };
-
   function init() {
+    injectLegacyUpgradeKillCSS();
+    hideLegacyUpgradeUI();
+    watchLegacyUpgradeUI();
     handleReturnState();
     patchTopUpgradeButton();
     patchHostedCheckoutFallback();
     patchShowUpgrade();
     patchAnalyzeLimitAutoOpen();
+    patchLegacyButtons();
+    patchSubscriberEmailField();
     buildEmbeddedUI();
-    watchPostPurchaseState();
+    syncPostPurchaseMessage();
+
+    setTimeout(function () {
+      hideLegacyUpgradeUI();
+      patchLegacyButtons();
+      patchSubscriberEmailField();
+      syncPostPurchaseMessage();
+    }, 0);
+
+    setTimeout(function () {
+      hideLegacyUpgradeUI();
+      patchLegacyButtons();
+      patchSubscriberEmailField();
+      syncPostPurchaseMessage();
+    }, 150);
   }
 
   if (document.readyState === "loading") {
@@ -3296,6 +3374,5 @@ async function checkout(priceId) {
   }
 })();
 </script>
-
 
 </html>
