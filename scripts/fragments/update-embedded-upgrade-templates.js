@@ -1,9 +1,3 @@
-That means no, it was not fully fixed.
-
-Because if GitHub Actions runs the file, then the file must be a Node script, not raw browser code.
-
-Use this as the entire scripts/fragments/update-embedded-upgrade-templates.js file:
-
 const fs = require("fs");
 const path = require("path");
 
@@ -998,13 +992,3 @@ function main() {
 }
 
 main();
-
-This version is a real Node file for GitHub Actions:
-	•	Node runs the updater
-	•	the updater injects your browser script into the HTML pages
-	•	it updates all index.html files inside:
-	•	scam-check-now
-	•	scam-check-now-b
-	•	scam-check-now-c
-
-So this fixes the actual mismatch.
