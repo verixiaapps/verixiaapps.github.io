@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Unusual Login Email is a common question when something like an account locked warning appears without context. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common IRS Unusual Login Email flow starts with something like an account locked warning, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received an email that appears to be from the IRS, claiming that there has been an unusual login attempt on your account. The message may include official-looking logos and formatting, making it seem authentic. It likely asks you to click on a link to verify your identity or secure your account. The email might even include a sense of urgency, warning you that failure to act could lead to serious consequences regarding your tax filings or potential penalties.
+You might have recently received an email claiming to be from the IRS, notifying you of an unusual login attempt on your account. The message likely includes official-looking logos and language, urging you to click on a link to verify your identity or secure your account. It may even mention specific details, like your last payment or tax filing, to make it seem more authentic. The email could be designed to look like a standard communication from the IRS, complete with a sense of urgency that compels you to act quickly.
 
-This kind of email is designed to create a sense of panic and urgency. It may state that your account has been compromised and that immediate action is required to prevent further issues. By leveraging your fear of tax problems, it aims to make you act quickly without thinking. You might find yourself feeling pressured to click the link or provide personal information without taking a moment to verify the source.
+The pressure to respond is palpable, as the email might state that your account will be locked if you don’t take immediate action. This tactic plays on your fear of losing access to important financial information or facing penalties. The sender may also include a reassuring tone, suggesting that they are there to help you resolve the issue. This combination of urgency and trust can make it difficult to pause and question the legitimacy of the email.
 
-Variations of this scam can appear in different forms, such as texts or phone calls that mimic IRS communication. You might receive a text message that looks like it’s coming from the IRS, prompting you to click a link or call a number. Some scammers even create fake websites that look remarkably similar to the IRS site, further blurring the lines between real and fake. Each version may use slightly different language or scenarios, but the goal remains the same: to trick you into divulging sensitive information.
+You may encounter variations of this scam, such as text messages or phone calls that mimic the same style. Some messages might claim to be from a tax professional or a third-party service, urging you to confirm your details. Others may even reference a recent tax refund or stimulus payment, enticing you with the promise of funds. Each version is crafted to exploit your concerns about taxes and finances, making it easy to overlook the red flags.
 
-Falling for this scam can have serious consequences. If you provide your personal information, scammers can access your financial accounts, file fraudulent tax returns in your name, or even steal your identity. The aftermath can be a long and painful process of recovering your identity and finances, not to mention the stress and anxiety that come with dealing with tax issues. It’s crucial to remain vigilant and question any unsolicited communication that seems off, especially when it involves your financial information.
+Falling for this scam can lead to serious consequences. If you click the link and provide your personal information, you risk identity theft and financial loss. Scammers can use your details to access your accounts, file fraudulent tax returns, or open new lines of credit in your name. The aftermath can be a lengthy and stressful process to regain control over your identity and finances, leaving you vulnerable and exposed.
 <p>This is why step-by-step checking matters. Once a message related to IRS Unusual Login Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

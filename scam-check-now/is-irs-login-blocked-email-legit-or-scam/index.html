@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Login Blocked Email is a common question when something like a password reset message appears without context. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many IRS Login Blocked Email cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive an email that appears to be from the IRS, claiming that your account has been temporarily blocked due to suspicious activity. The message includes official-looking logos and a sense of urgency, urging you to click a link to verify your identity and unlock your account. The email may even reference specific details like your last payment or tax return, making it seem more credible. You might feel a knot in your stomach as you read it, wondering if this is a legitimate warning or a clever trap.
+You might have recently received an email that claims your IRS login has been blocked, urging you to take immediate action to restore access. The message often looks official, complete with IRS logos and a professional tone, making it seem like a legitimate communication. It may include a link that directs you to a website that closely resembles the official IRS site, where you're prompted to enter personal information or login credentials. The email's appearance can easily trick you into believing it’s a genuine warning from the IRS.
 
-The email creates a sense of urgency by stating that your account will remain blocked unless you act immediately. Phrases like "urgent action required" or "your account is at risk" are designed to provoke anxiety, pushing you to click the link without thinking. This pressure can cloud your judgment, making it easy to overlook red flags. The promise of restoring access to your account can feel reassuring, especially if you’re already stressed about your taxes.
+This type of scam often creates a sense of urgency, suggesting that your account is at risk and that you must act quickly to avoid penalties or further complications. Phrases like "Your account will be permanently locked if you do not respond within 24 hours" are common. This pressure can cloud your judgment, making you more likely to click on links or provide sensitive information without taking a moment to verify the source. The fear of losing access to important financial information can drive you to act hastily.
 
-Variations of this scam can pop up in different forms, such as text messages or phone calls, all mimicking the IRS's tone and style. You might receive a text that says your tax refund is pending and requires verification, or a phone call from someone claiming to be an IRS agent who needs your information to resolve an issue. Each version is crafted to exploit your trust in official communication, making it harder to distinguish between real and fake.
+You may encounter variations of this scam that come in different forms, such as text messages or phone calls claiming to be from the IRS. Some messages may even reference a supposed tax refund waiting for you, encouraging you to verify your identity. Others might suggest that you owe back taxes and need to settle them immediately to avoid legal action. Each variation is designed to exploit your trust in official channels, making it seem like a routine communication from a trusted authority.
 
-If you fall for this scam, the consequences can be severe. You might unknowingly provide personal information, such as your Social Security number or bank details, leading to identity theft or financial loss. Even if you think you’re just verifying your account, you could end up giving scammers access to sensitive data that could take years to recover from. The emotional and financial toll can linger long after the initial incident, leaving you feeling vulnerable and exposed.
+Falling for this scam can lead to serious consequences, including identity theft and financial loss. If you provide your personal information, scammers can use it to access your accounts, file false tax returns, or open new accounts in your name. The aftermath can be a lengthy and stressful process of reclaiming your identity and finances, leaving you vulnerable and exposed. It’s crucial to remain vigilant and skeptical of any unexpected communications that require immediate action regarding your financial information.
 <p>The strongest clue is usually not one isolated detail. With IRS Login Blocked Email, the risk often becomes clearer when something like a password reset message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

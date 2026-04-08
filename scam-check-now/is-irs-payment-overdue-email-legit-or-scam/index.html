@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Payment Overdue Email is a common question when something like an IRS warning feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common IRS Payment Overdue Email flow starts with something like an IRS warning, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming to be from the IRS, stating that your payment is overdue. The message often includes official-looking logos and a sense of urgency, suggesting that immediate action is required to avoid penalties or legal consequences. It may ask you to click a link to verify your payment status or to provide personal information. The email could also reference specific amounts owed, making it feel more legitimate and tailored to you.
+You might have received an email claiming to be from the IRS, stating that your payment is overdue and demanding immediate action. The email often includes official-looking logos and a sense of urgency, suggesting that you need to click a link or call a number to resolve the issue. It may even reference your tax identification number or other personal details to make it seem more legitimate. The message is crafted to provoke anxiety, making you feel like you could face severe consequences if you don’t act quickly.
 
-This type of scam thrives on creating a sense of panic. The sender might emphasize that failure to respond could lead to serious repercussions, such as wage garnishment or legal action. By instilling fear, they hope to push you into acting quickly without taking the time to think critically about the situation. You might feel compelled to click on links or provide information just to resolve the issue and avoid any potential fallout.
+The urgency in these emails is palpable. They often threaten penalties, interest, or even legal action if you don’t respond immediately. This pressure can make you feel like you have no choice but to click on the provided link or call the number, believing that you’re dealing with a legitimate IRS representative. Scammers know how to exploit your fear of the tax authority, making you feel that any delay could lead to serious repercussions. It’s a tactic designed to bypass your critical thinking and push you into hasty decisions.
 
-Variations of this scam can appear in different formats, such as text messages or phone calls, all claiming to be from the IRS. Some may even impersonate tax professionals or use fake websites that mimic the official IRS site. You might receive a voicemail urging you to call back immediately or a text message that seems to come from a trusted source. Each iteration is designed to look credible, making it difficult to discern what’s real and what’s not.
+You might also see variations of this scam, such as text messages or phone calls that mimic the same urgency and official tone. Some messages may claim that your refund is being held up due to an overdue payment, while others might ask for personal information under the guise of verifying your account. Each version is designed to look credible, often using language that sounds formal and authoritative. The goal is to confuse you and make you think you’re dealing with a real issue, rather than a malicious attempt to steal your information.
 
-Falling for this scam can lead to serious consequences. If you provide personal information, you risk identity theft, which can take years to resolve. Your financial information could be compromised, leading to unauthorized transactions or drained bank accounts. The emotional toll can be significant, as the stress of dealing with the aftermath can linger long after the initial encounter. Recognizing these scams is crucial to protecting yourself from their harmful effects.
+Falling for this scam can lead to serious consequences. If you provide your personal information, you could find yourself a victim of identity theft, with your financial accounts compromised. Scammers may use your details to file fraudulent tax returns, draining your refund before you even realize what’s happened. The emotional toll can be significant, as you grapple with the aftermath of feeling tricked and the potential financial losses that could follow. It’s crucial to stay vigilant and recognize when something feels off, especially when it comes to your financial security.
 <p>This is why step-by-step checking matters. Once a message related to IRS Payment Overdue Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1386,7 +1386,7 @@ Falling for this scam can lead to serious consequences. If you provide personal 
 <li><a href="/scam-check-now/is-social-security-message-legit-or-scam/">Is Social Security Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-payment-declined-email-legit-or-scam/">Is Amazon Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-payment-failed-email-legit-or-scam/">Is Amazon Payment Failed Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-payment-declined-email-legit-or-scam/">Is Apple Payment Declined Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-amazon-payment-retry-email-legit-or-scam/">Is Amazon Payment Retry Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

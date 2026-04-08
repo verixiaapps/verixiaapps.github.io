@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Refund Notification Email is a common question when something like a benefits verification request feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common IRS Refund Notification Email scenario uses fear, urgency, or the promise of money to get a fast response, often through something like a benefits verification request. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>
-You might have received an email claiming to be from the IRS, notifying you about your tax refund. It often includes official-looking logos and language, stating that you need to click a link to verify your information or claim your refund. The email might even reference your tax filing status or provide a fake refund amount, making it seem legitimate. The sender's email address might look similar to an official IRS domain, which can easily mislead you into thinking it's a genuine communication.
+You might have received an email claiming to be from the IRS, notifying you about a refund that you didn’t expect. The message often includes official-looking logos and language, making it seem credible. It might instruct you to click on a link to claim your refund or provide personal information to verify your identity. The email may even reference your tax filing status or include details that seem familiar, creating an illusion of authenticity. If you’re not careful, this seemingly legitimate communication can lead you down a dangerous path.
 
-This type of scam usually creates a sense of urgency, suggesting that you must act quickly to secure your refund. The message may state that failure to respond within a certain timeframe could result in penalties or delays. By instilling fear or anxiety about your finances, the scammer aims to pressure you into clicking on links or providing personal information without taking the time to verify the source. This tactic is designed to exploit your trust and make you feel like you have no choice but to comply.
+The urgency in these emails is palpable. They often state that your refund is pending or that you need to act quickly to avoid delays. Phrases like “immediate action required” or “your account will be locked” are common tactics to pressure you into responding without thinking. This sense of urgency can cloud your judgment, making you more likely to click on links or provide sensitive information. The goal is to make you feel like you must act now, leaving little room for skepticism.
 
-You might also encounter variations of this scam, such as text messages or phone calls claiming to be from the IRS. Some messages may ask you to confirm your identity through a website that looks remarkably similar to the official IRS site. Others might come from fake tax preparation services that claim to help you get your refund faster. Regardless of the format, the goal remains the same: to trick you into giving away sensitive information that can be used against you.
+You might also encounter variations of this scam through text messages or phone calls. A text could pop up on your phone, claiming to be from the IRS, with a link to click for your refund. Alternatively, you might receive a call from someone posing as an IRS agent, asking for your personal details to process your refund. Each variation is designed to exploit your trust and urgency, using different channels to reach you. The consistency in the messaging can make it hard to discern what’s real and what’s a trap.
 
-If you fall for this scam, the consequences can be severe. Scammers can gain access to your personal and financial information, leading to identity theft or unauthorized transactions. They may file false tax returns in your name, claiming refunds that you will never see. The emotional and financial toll can be significant, leaving you to deal with the aftermath while trying to reclaim your identity and finances. Always take a moment to verify any unexpected communication regarding your taxes, as it could save you from a world of trouble.
+Falling for this scam can have serious consequences. If you provide your personal information, scammers can access your financial accounts, leading to identity theft or unauthorized transactions. Even if you think you’re just verifying your refund, you could end up losing money or compromising your sensitive data. The aftermath can be stressful and time-consuming as you work to recover from the breach and protect yourself from further scams. It’s crucial to remain vigilant and question any unexpected communication regarding your finances.
 <p>The strongest clue is usually not one isolated detail. With IRS Refund Notification Email, the risk often becomes clearer when something like a benefits verification request is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Payment Request Text is a common question when something like a PayPal refund email feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common IRS Payment Request Text scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received a text message claiming to be from the IRS, urging you to click a link to settle an outstanding payment. The message may have included official-looking logos and a sense of urgency, suggesting that immediate action is required to avoid penalties or legal consequences. It could even mention specific amounts owed or reference your tax filings. The language is designed to mimic official communication, making it easy to mistake for a legitimate request.
+You might receive a text message claiming to be from the IRS, stating that you owe money and need to make an immediate payment. The message often includes a link to a website that looks official, with logos and formatting that mimic the IRS. It may even reference your personal information, like the last four digits of your Social Security number, to make it seem more credible. The urgency of the message can be alarming, suggesting that failure to act quickly could lead to legal action or penalties.
 
-The sender often creates a sense of urgency, pushing you to act quickly. Phrases like "immediate action required" or "failure to respond will result in penalties" are common tactics. This pressure can cloud your judgment, making you more likely to click on the link without thinking twice. The message may also include a phone number that seems official, leading you to believe that you’re dealing with a trustworthy source. This manipulative approach is designed to bypass your skepticism and prompt a hasty response.
+The sender creates a sense of urgency by claiming that your account is under review or that a deadline is approaching. They might say you have only a few hours to respond or risk severe consequences. This pressure can make you feel anxious and rushed, pushing you to click on the link without thinking it through. The message may also include a phone number to call, where a person on the other end sounds authoritative and convincing, further reinforcing the illusion of legitimacy.
 
-Variations of this scam can appear in different forms, such as emails that look like they’re from the IRS or even phone calls where someone claims to be an IRS agent. You might see messages that reference tax refunds or offer assistance with tax-related issues, all while maintaining that urgent tone. Some scams even involve fake websites that closely resemble the IRS site, making it difficult to distinguish between what's real and what's not. Each version plays on your concerns about taxes and financial responsibilities.
+Variations of this scam can appear in different formats, such as emails or phone calls, all designed to look as if they come from the IRS. You might see messages that offer a refund or claim you’ve been selected for an audit, all while asking for personal information or payment. Some scams even use fake IRS websites that look almost identical to the real one, making it difficult to discern the difference. Each variation plays on similar themes of urgency and authority, making it easy to fall for the ruse.
 
-If you fall for this scam, the consequences can be severe. You may end up providing personal information, such as your Social Security number or bank details, which can lead to identity theft. Even if you don’t share sensitive information, clicking on a malicious link can expose your device to malware, compromising your security. The emotional toll can be significant as well, leaving you feeling vulnerable and anxious about your finances. Recognizing these tactics is crucial to protecting yourself from potential harm.
+If you respond to one of these messages, you risk giving away sensitive personal information or financial details. Scammers can use this information for identity theft, draining your bank accounts or opening new lines of credit in your name. The emotional toll can be significant, leaving you feeling violated and vulnerable. Recognizing these tactics is crucial to protecting yourself from falling victim to a scam that could have serious repercussions for your financial security and peace of mind.
 <p>The strongest clue is usually not one isolated detail. With IRS Payment Request Text, the risk often becomes clearer when something like a PayPal refund email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Sign in Alert Email is a common question when something like an IRS warning feels suspicious. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common IRS Sign in Alert Email scenario uses fear, urgency, or the promise of money to get a fast response, often through something like an IRS warning. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>
-You might receive an email that looks like it’s from the IRS, alerting you to sign in to your account for an important update. The message often includes official-looking logos and a professional tone, making it seem legitimate. It may even mention specific details like your tax filing status or recent transactions to catch your attention. The email typically prompts you to click on a link that directs you to a website that mimics the IRS portal, asking for your personal information or login credentials.
+You might have recently received an email that looks like it’s from the IRS, alerting you to sign in to your account for urgent updates or to verify your information. The email may include official-looking logos, a professional tone, and even specific details about your tax filings. It might urge you to click a link that takes you to a website that closely resembles the IRS site. The message seems genuine, making it easy to overlook any red flags, especially when it appears to come from a trusted source.
 
-This type of email creates a sense of urgency, suggesting that immediate action is required to avoid penalties or to access a refund. Phrases like “your account will be suspended” or “urgent action required” are common, pushing you to act quickly without taking the time to verify the source. The email may also include reassuring language about your security, making you feel safe in providing sensitive information.
+This type of scam often creates a sense of urgency, suggesting that immediate action is required to avoid penalties or to access important tax refunds. The language used can be alarming, prompting you to act quickly without taking the time to think critically about the situation. You might feel a rush of anxiety, believing that you could miss out on something important if you don’t respond right away. This pressure can cloud your judgment, making it harder to recognize that the email may not be legitimate.
 
-Variations of this scam can include text messages or phone calls, where the scammer impersonates an IRS agent. You might receive a text that claims your tax refund is pending and provides a link for you to claim it. Alternatively, a phone call could involve someone who sounds official, urging you to verify your identity to resolve an issue. Each version is designed to exploit your trust and urgency, adapting to whatever medium you’re most likely to respond to.
+You may also encounter variations of this scam that look slightly different but carry the same deceptive message. Some emails may claim to be from a tax preparation service or a financial institution, asking you to verify your identity to avoid issues with your account. Others might come as text messages or phone calls, using similar tactics to instill fear and urgency. Regardless of the format, the goal remains the same: to trick you into providing personal information or clicking on malicious links.
 
-Falling for this scam can lead to severe consequences, including identity theft and financial loss. If you provide your information, the scammer can access your bank accounts or file fraudulent tax returns in your name. The aftermath can be a lengthy and stressful process to reclaim your identity and finances, leaving you vulnerable to further scams. Recognizing these tactics is crucial to protecting yourself from becoming a victim.
+Falling for this scam can lead to serious consequences, including identity theft or financial loss. If you enter your information on a fraudulent site, scammers can use it to access your accounts, file false tax returns, or even drain your bank account. The aftermath can be overwhelming, requiring extensive time and effort to recover your identity and finances. It’s crucial to remain vigilant and skeptical of any communication that pressures you to act quickly, especially when it concerns sensitive information like your taxes.
 <p>The strongest clue is usually not one isolated detail. With IRS Sign in Alert Email, the risk often becomes clearer when something like an IRS warning is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Security Warning Email is a common question when something like a tax refund message feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common IRS Security Warning Email scenario uses fear, urgency, or the promise of money to get a fast response, often through something like a tax refund message. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>
-You might have recently received an email that looks like it’s from the IRS, warning you about a security issue with your tax information. The message may include official-looking logos and language that sounds authoritative, urging you to click a link to verify your account or provide personal details. The email may even reference specific tax forms or deadlines, making it seem legitimate and relevant to your current situation. It’s designed to catch your attention and make you feel like you need to act quickly to protect your information.
+You might have recently received an email claiming to be from the IRS, warning you about suspicious activity on your account. The message often includes official-looking logos and a subject line that demands your immediate attention, such as “Urgent: Security Alert on Your IRS Account.” It may instruct you to click a link to verify your identity or provide personal information to prevent further issues. The email may even reference specific details about your tax filings to make it seem more credible, catching your eye and prompting you to act quickly.
 
-The urgency in these emails is palpable. You might feel a sense of panic as the message emphasizes that your tax account is at risk or that immediate action is required to avoid penalties. This pressure can lead you to overlook red flags, as the email may suggest that failure to respond could result in serious consequences. The tone is often alarming, creating a sense of fear that prompts you to click the link or provide the requested information without thinking twice.
+The urgency in these emails is palpable. They often state that your account will be locked or that you could face legal action if you don’t respond immediately. This pressure can make you feel like you have no choice but to comply. The message might also include phrases like “failure to act will result in penalties,” which can trigger a sense of fear and compel you to click that link without thinking twice. The combination of urgency and a seemingly official tone can create a false sense of security that you’re dealing with a legitimate issue.
 
-These scams can take on various forms, sometimes appearing as a text message or even a phone call. You might receive a message claiming to be from the IRS, asking for verification of your Social Security number or bank details. Some variations may even include fake websites that mimic the IRS portal, further tricking you into entering sensitive information. The common thread is that they all aim to exploit your trust in official communications, making it hard to distinguish between what is real and what is not.
+You may notice variations in these scam emails. Some might claim to be from different government agencies or even financial institutions, but the core message remains the same: there’s a problem that needs your immediate attention. Others may include attachments that promise to provide more details, but these can contain malware designed to compromise your device. Regardless of the sender’s name or the specific details, the tactic remains consistent: instilling fear and urgency to provoke a hasty response.
 
-If you fall for this scam, the consequences can be severe. Your personal information could be compromised, leading to identity theft or financial loss. Scammers may use your details to file fraudulent tax returns, resulting in complications with the IRS that could take months to resolve. The emotional toll of realizing you’ve been deceived can be significant, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to remain vigilant and question any unexpected communication regarding your taxes, especially when it prompts immediate action.
+Falling for this type of scam can lead to serious consequences. If you provide your personal information, you risk identity theft, which can result in financial loss and a lengthy process to regain control of your accounts. Even clicking on a malicious link can install harmful software on your device, potentially exposing sensitive information to cybercriminals. The aftermath can be overwhelming, leaving you to deal with the repercussions while trying to untangle the mess created by a moment of panic.
 <p>The strongest clue is usually not one isolated detail. With IRS Security Warning Email, the risk often becomes clearer when something like a tax refund message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

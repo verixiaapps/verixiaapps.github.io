@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Tax Refund Email is a common question when something like a Social Security notice feels suspicious. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a Social Security notice and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You receive an email that looks like it’s from the IRS, complete with their logo and official-sounding language. The subject line reads, “Important: Your Tax Refund Is Waiting!” Inside, the message claims you need to verify your information to receive your refund. There’s a link that urges you to click immediately to avoid delays. The email may even reference your previous tax filings, making it seem legitimate and personal. If you’re expecting a refund, this could easily catch your attention and make you feel like you need to act fast.
+You might have recently received an email claiming to be from the IRS, stating that you are eligible for a tax refund. The message often looks official, complete with IRS logos and a professional tone, urging you to click a link to verify your information. It may even include specific details like your name or the last four digits of your Social Security number, making it feel more legitimate. The email might come from an address that closely resembles an official IRS domain, which can easily mislead you into thinking it’s a genuine communication.
 
-The email creates a sense of urgency by suggesting that your refund is time-sensitive. It might say something like, “Act now to ensure you don’t miss out on your funds!” This pressure can make you feel anxious, prompting you to click the link without thinking twice. The professional appearance of the email and the authoritative tone can create a false sense of trust, making you believe that this is a genuine communication from a government agency that you should respond to right away.
+The urgency in these emails is striking. They often state that you need to act quickly to claim your refund, creating a sense of panic that you might miss out on your money. Phrases like "limited time offer" or "urgent action required" are common, pushing you to click the link without taking a moment to think. This pressure can cloud your judgment, making it easier to overlook the signs that something is off. The promise of a tax refund can be enticing, especially if you’re expecting one, which is precisely what these scammers are counting on.
 
-You might also see variations of this scam that come in different formats. For instance, it could arrive as a text message or a phone call, using similar language to convey urgency. Some scams might even claim to be from a tax preparation service or a financial institution, all while directing you to a fake website that mimics the IRS. Each version is designed to look official, playing on your expectations and fears about tax season and refunds.
+You may also encounter variations of this scam, such as texts or phone calls that mimic the IRS. Some messages may claim that you owe money instead of offering a refund, asking you to settle your account immediately. Others might direct you to a fake website that looks identical to the IRS site, where they ask for personal information under the guise of verifying your identity. Each version is designed to exploit your trust and urgency, adapting to what might resonate with you at that moment.
 
-Falling for this scam can lead to serious consequences. If you click the link and provide your personal information, you risk identity theft, which can take years to resolve. Your financial information could be misused, leading to unauthorized transactions or tax fraud. The emotional toll of dealing with the aftermath can be overwhelming, as you may find yourself facing unexpected financial burdens and the stress of trying to reclaim your identity. It’s crucial to be vigilant and question any unsolicited communication regarding your taxes.
+Falling for this scam can have serious consequences. If you provide your personal information, the scammers can steal your identity, leading to financial loss and a long, complicated process to recover what’s been taken. Even if you don’t give out sensitive information, the emotional toll of being scammed can leave you feeling violated and anxious. It’s crucial to recognize these tactics to protect yourself from potential harm and avoid the pitfalls that come with misplaced trust.
 <p>That difference matters because a real notice related to IRS Tax Refund Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

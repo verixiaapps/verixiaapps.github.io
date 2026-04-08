@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Tax Filing Notice is a common question when something like an IRS warning feels suspicious. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common IRS Tax Filing Notice flow starts with something like an IRS warning, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might receive a notice claiming to be from the IRS, stating that there’s an issue with your tax filing. It often looks official, complete with the IRS logo and a sense of urgency. The message may ask you to verify your information or provide personal details to resolve a supposed problem. You might even receive a phone call from someone claiming to be an IRS agent, insisting that you owe money and must act immediately to avoid serious consequences. The language is designed to make you feel anxious and compelled to respond quickly.
+You might have recently received a notice claiming to be from the IRS, informing you about your tax filing status or asking for immediate action. The email or letter may include official-looking logos and language that seems legitimate, perhaps even referencing your tax ID or other personal information. It might ask you to click a link to verify your information or provide sensitive details over the phone. The urgency in the message can be alarming, making you feel like you need to act fast to avoid penalties or legal issues.
 
-The urgency in these messages is palpable. They often threaten legal action or suggest that your tax refund is at risk if you don’t act fast. The scammers know that fear can cloud judgment, making you more likely to comply without questioning the legitimacy of the request. They may even provide a callback number that appears legitimate, further building trust. This tactic is meant to make you feel like you’re in a critical situation that requires immediate attention, pushing you to act without thinking it through.
+Scammers often craft these messages to create a sense of urgency, making you feel like you could face serious consequences if you don’t respond quickly. They might threaten immediate action, like garnishing your wages or seizing your assets, which can leave you feeling anxious and pressured. This tactic is designed to bypass your better judgment, pushing you to act without fully considering the legitimacy of the communication. The more urgent the message, the more likely it is to be a scam.
 
-You might also encounter variations of this scam, such as emails that appear to be from tax software companies or fake websites that mimic the IRS portal. Some might even send you a text message with a link that claims to provide important updates about your tax status. Each version is crafted to look credible, using official-sounding language and mimicking real IRS communications. The goal is the same: to trick you into providing sensitive information or making a payment.
+These scams can take on various forms, from emails that appear to be from the IRS to phone calls where someone claims to be an IRS agent. You might see a text message that looks like it’s coming from a government number, or a website that mimics the official IRS site, asking you to log in to resolve an issue. Each variation is designed to exploit your trust in authority figures, using familiar language and formats to make the scam feel more convincing. 
 
-Falling for one of these scams can have serious consequences. You could end up giving away your personal information, which can lead to identity theft, or you might pay money that you don’t actually owe. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it’s about the long-term impact on your trust in legitimate institutions and your peace of mind.
+If you fall for one of these scams, the consequences can be severe. You could end up giving away personal information, such as your Social Security number or bank account details, leading to identity theft or financial loss. Even if you realize it’s a scam later, the damage may already be done, leaving you to deal with the fallout. The emotional toll can be significant, as you may feel violated and anxious about the potential repercussions. Recognizing these scams is crucial to protecting yourself and your financial well-being.
 <p>This is why step-by-step checking matters. Once a message related to IRS Tax Filing Notice moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

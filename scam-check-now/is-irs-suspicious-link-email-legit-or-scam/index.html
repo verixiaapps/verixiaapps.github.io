@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Suspicious Link Email is a common question when something like a suspicious sign-in link feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>Many IRS Suspicious Link Email scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a suspicious sign-in link. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You receive an email that looks official, complete with the IRS logo and a subject line that grabs your attention: “Important Tax Information Regarding Your Refund.” The email urges you to click on a link to verify your information or face penalties. The message is crafted to look like it’s coming from a legitimate source, with professional language and a sense of urgency that makes it hard to ignore. It may even include personal details, like your name or partial address, to make it seem more credible.
+You might have recently received an email claiming to be from the IRS, complete with official-looking logos and urgent language. The message may state that there’s an issue with your tax return or that you need to verify your information immediately. Often, it includes a link that directs you to a website that looks remarkably similar to the IRS site. The email may even address you by name, making it feel more personalized and legitimate, which can easily catch you off guard.
 
-The email plays on your emotions, creating a sense of urgency that compels you to act quickly. Phrases like “time-sensitive” or “failure to respond could lead to serious consequences” are designed to pressure you into clicking the link without thinking twice. The sender wants you to feel anxious about your tax status, making it easier for them to manipulate you. You might feel that this is a legitimate communication from the IRS, especially if you’re expecting a refund or have recently filed your taxes.
+The urgency in these emails is palpable. They often use phrases like “immediate action required” or “failure to respond may result in penalties,” pushing you to click the link without thinking. This pressure can create a sense of panic, leading you to believe that you must act quickly to avoid serious consequences. The sender may also try to build trust by referencing previous communications or using official jargon, making it harder to discern the truth.
 
-Variations of this scam can appear in different forms, such as text messages or even phone calls that mimic IRS representatives. You might receive a text that claims your tax refund is on hold and instructs you to click a link to resolve the issue. Alternatively, a phone call could come from a number that looks official, with a recorded message urging you to call back immediately. Each variation is designed to exploit your trust in government communications, making it difficult to discern what’s real and what’s not.
+You might also notice variations of this scam that come in different forms, such as text messages or phone calls. Some may claim to offer a tax refund or provide assistance with your tax filing, while others could threaten legal action if you don’t comply. Each version plays on your emotions and fears, making it easy to overlook the red flags. The consistent theme is the use of urgency and authority to manipulate your response.
 
-Falling for this scam can lead to serious consequences, including identity theft and financial loss. If you click the link, you may unknowingly download malware onto your device or provide sensitive information that scammers can use against you. Your personal data could be sold on the dark web, leading to further complications like fraudulent tax returns or unauthorized purchases. The danger isn’t just in losing money; it’s about the long-term impact on your financial security and peace of mind.
+Falling for this type of scam can lead to serious repercussions. If you click on the link, you might inadvertently download malware onto your device or give away personal information like your Social Security number or bank details. This can lead to identity theft, financial loss, and a long, complicated process of trying to reclaim your stolen identity. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security.
 <p>The strongest clue is usually not one isolated detail. With IRS Suspicious Link Email, the risk often becomes clearer when something like a suspicious sign-in link is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

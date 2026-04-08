@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Login from New Device Email is a common question when something like a two-factor code request appears without context. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many IRS Login from New Device Email cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email that claims to be from the IRS, notifying you that your account has been accessed from a new device. The message often includes details like the device type and location, urging you to log in immediately to verify your identity. The email may look official, complete with the IRS logo and a professional tone, making it seem like a legitimate security alert. However, the urgency of the message can make you feel anxious, prompting you to act quickly without thinking it through.
+You might have recently received an email claiming that your IRS account has been accessed from a new device. The message often looks official, complete with the IRS logo and a sense of urgency. It may state that you need to verify your identity immediately to avoid account suspension or penalties. The sender's email address might seem legitimate at first glance, but upon closer inspection, it could contain subtle misspellings or unusual domains that raise red flags. This kind of communication can easily catch you off guard, especially if you’re not expecting it.
 
-The email typically creates a sense of urgency by suggesting that your account is at risk or that unauthorized access has occurred. It may state that immediate action is required to prevent your account from being locked or compromised. This pressure can push you to click on links or provide personal information without taking the time to verify the source. The combination of fear and urgency can cloud your judgment, making it easy to overlook the signs that something isn’t right.
+The email typically creates a sense of urgency, suggesting that immediate action is required to secure your account. It might emphasize that your personal information is at risk or that you could face serious consequences if you don’t respond quickly. This pressure can make you feel anxious and push you to click on links or provide information without taking the time to think critically about the situation. Scammers know how to manipulate emotions, and they exploit this tactic to get you to act hastily.
 
-You might also come across variations of this scam, such as text messages or phone calls claiming to be from the IRS. Sometimes, the message may ask you to confirm your identity by providing sensitive information or clicking on a link that leads to a fake website. Other times, the scammer might impersonate a tax professional or a government official, creating a false sense of trust. Regardless of the format, the goal remains the same: to trick you into sharing your personal information.
+You may also encounter variations of this scam, such as a text message or even a phone call claiming to be from the IRS. The text might instruct you to click a link to verify your account, while the call could involve someone posing as an IRS agent asking for personal details. Sometimes, these messages may even reference recent tax filings or refunds to make them seem more credible. Each version is designed to exploit your trust in official channels, making it harder to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. If you provide your login credentials or personal information, scammers can access your financial accounts, leading to identity theft and financial loss. The aftermath can be overwhelming, involving long hours spent trying to recover your identity and finances. In some cases, victims find themselves dealing with tax fraud, where someone else files a return in their name, complicating their tax situation for years to come. It’s crucial to stay vigilant and recognize these tactics before it’s too late.
+If you fall for this scam, the consequences can be severe. Providing your personal information can lead to identity theft, financial loss, or unauthorized access to your accounts. Scammers can use your details to file fraudulent tax returns or open new accounts in your name, leaving you to deal with the fallout. The emotional and financial toll can be overwhelming, and recovering from such a breach can take time and effort. It’s crucial to stay vigilant and question any unexpected communications, especially when they involve sensitive information.
 <p>The strongest clue is usually not one isolated detail. With IRS Login from New Device Email, the risk often becomes clearer when something like a two-factor code request is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
