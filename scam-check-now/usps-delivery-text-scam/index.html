@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>USPS Delivery Text scams often arrive as normal-looking package alerts, tracking problems, or delivery updates, such as a USPS tracking text. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common USPS Delivery Text message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a USPS tracking text. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You receive a text message that looks like it’s from USPS, complete with their logo and a familiar format. The message informs you that there’s a delivery issue with your package and prompts you to click a link to resolve it. The urgency is palpable; it states that your package will be returned to sender if you don’t act immediately. The sender’s number seems legitimate, and the message feels official, making it easy to overlook the red flags.
+You receive a text message that seems to come from USPS, letting you know that your package is on the way. The message includes a tracking number and a link that claims you need to confirm your delivery details. It looks official, complete with the USPS logo and a friendly tone, making it easy to believe that it’s a legitimate update about your shipment. You might even feel a sense of relief, thinking it’s just a routine notification about something you ordered.
 
-The text creates a sense of panic, suggesting that your package is just a click away from being lost forever. It plays on your anxiety about missing an important delivery, making you feel like you need to respond right away. This pressure can cloud your judgment, pushing you to click the link without a second thought. You might think, “I need to fix this now,” and that’s exactly what the scammer wants you to feel.
+The message creates a sense of urgency by stating that your package cannot be delivered unless you click the link and verify your information immediately. It might say something like, "Your package is on hold! Click here to resolve the issue." This kind of pressure can make you act quickly, especially if you’re expecting a delivery. The fear of missing out on your package can cloud your judgment, pushing you to click the link without a second thought.
 
-Variations of this scam can pop up in different forms, such as emails or even phone calls. You might receive a similar message claiming to be from FedEx or UPS, each with its own twist on the urgency. Sometimes, the message will include a fake tracking number or a promise of a refund to entice you further. Each version is designed to look credible, often using official logos and language that mimics real shipping notifications.
+Variations of this scam can pop up in different forms. You might receive an email that looks like it’s from USPS, or even a phone call from someone claiming to be a delivery agent. Some might use a different shipping service name, but the message remains the same: a package is waiting, and you need to act fast. The details may change slightly, but the core tactic of urgency and the promise of a package is consistent, making it easy to overlook the signs that something is off.
 
-If you fall for this scam and click the link, you could end up giving away personal information or downloading malware onto your device. Scammers can use this information to steal your identity, access your bank accounts, or even sell your data on the dark web. The consequences can be severe, leading to financial loss and a long road to recovery. What seemed like a simple delivery issue can quickly spiral into a much larger problem, leaving you vulnerable and exposed.
+Falling for this scam can lead to serious consequences. Once you click the link, you may unknowingly provide personal information, which can be used for identity theft or financial fraud. Your device might also become infected with malware, putting your sensitive data at risk. The aftermath can be overwhelming, as you try to regain control of your information and deal with the fallout of what seemed like a simple delivery update. It’s a reminder that not everything that looks official is safe.
 <p>Delivery-related scams connected to USPS Delivery Text usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a USPS tracking text appears.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Job Scam Email Asking for Personal Info scams often look like ordinary recruiter outreach, remote job offers, interview requests, or onboarding messages at first glance, including things like an onboarding payment request. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. The real goal is usually to collect personal information, push you into paying upfront, or move you into an unofficial hiring process before you can verify the employer.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A typical Job Scam Email Asking for Personal Info case may involve something like an onboarding payment request, a job offer that feels unusually fast, easy, or high-paying, or a request for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>
-You open your email and see a message with an enticing subject line like “Your Dream Job Awaits!” Inside, the email promises a high-paying position with flexible hours, all from the comfort of your home. The sender claims to be a reputable company, complete with a professional-looking logo and an official-sounding email address. As you read on, they ask for your personal information, including your Social Security number and bank details, assuring you that this is a standard part of the hiring process. It feels legitimate, and the excitement of a new job opportunity pulls you in.
+You might receive an email that looks like it’s from a reputable company, complete with a professional logo and a friendly greeting. The subject line could read something like, "Exciting Job Opportunity Just for You!" Inside, the message describes a position that seems perfect for your skills and experience. It may even include a link to a polished website that showcases the company’s values and mission. However, as you read further, you notice a request for personal information, such as your Social Security number or bank details, under the guise of a background check or direct deposit setup.
 
-The email creates a sense of urgency, stating that positions are limited and that you must respond quickly to secure your spot. They might include phrases like “Act now!” or “Don’t miss out on this chance!” This pressure can make you feel like you’re on the verge of a breakthrough, pushing you to overlook any hesitations. The promise of a quick response or the mention of a limited-time offer can make you feel like you need to act fast, heightening the emotional stakes of the situation.
+The email often creates a sense of urgency, making you feel like you need to act fast to secure the position. Phrases like “limited openings” or “apply now to be considered” are common, pushing you to respond quickly. This pressure can cloud your judgment, making you less likely to scrutinize the email closely. You might feel flattered that a company is interested in you, which can lead to a false sense of trust. The polished presentation and professional tone can make it hard to believe that this is anything but a legitimate opportunity.
 
-You might also encounter variations of this scam. Some emails may come from slightly altered company names or use generic titles like “HR Manager” instead of a specific person. Others might include links to fake websites that mimic real job boards, making it even harder to spot the deception. They may also reach out via social media, offering you a position based on your profile or previous experience. Each variation is designed to catch you off guard, making it easier to fall into their trap.
+Scammers are clever and may use different tactics to lure you in. Some may create fake job postings on legitimate job boards, while others might impersonate well-known companies in their emails. You might see variations where they offer remote work opportunities or promise high salaries for minimal effort. Each version is designed to appeal to your aspirations and needs, making it easy to overlook the red flags. The more convincing the setup, the easier it is to fall for their scheme.
 
-If you provide your personal information, the consequences can be severe. Scammers can use your details to steal your identity, drain your bank account, or even open new lines of credit in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious. You might find yourself dealing with financial institutions, credit agencies, and even law enforcement, all while trying to piece your life back together. It's a situation that can spiral quickly, and the initial excitement of a job offer can turn into a nightmare.
+If you provide your personal information, the consequences can be severe. Scammers can use your details to steal your identity, drain your bank account, or even open new credit lines in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial future. What starts as an innocent job inquiry can spiral into a nightmare, affecting not just your finances but your peace of mind as well.
 <p>The strongest clue is usually not one isolated detail. With Job Scam Email Asking for Personal Info, the risk often becomes clearer when something like an onboarding payment request is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ If you provide your personal information, the consequences can be severe. Scamme
 <li><a href="/scam-check-now/is-job-onboarding-payment-request-legit-or-scam/">Is Job Onboarding Payment Request or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-job-interview-text-legit-or-scam/">Is Job Interview Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-job-offer/">Did I Get Scammed by Job Offer?</a></li>
-<li><a href="/scam-check-now/remote-job-scam-warning-signs/">Is Remote Job Scam Warning Signs a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-job-offer-email-legit-or-scam/">Is This Job Offer Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/fake-job-offer-message-scam/">Is Fake Job Offer Message a Scam?</a></li>
 <li><a href="/scam-check-now/is-remote-job-offer-message-legit-or-scam/">Is Remote Job Offer Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-remote-job-offer-legit-or-scam/">Is This Remote Job Offer or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-unknown-number-offering-job-legit-or-scam/">Is Unknown Number Offering Job or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/fake-job-offer-scam/">Is Fake Job Offer a Scam?</a></li>
-<li><a href="/scam-check-now/is-job-offer-email-asking-for-bank-details-legit-or-scam/">Is Job Offer Email Asking for Bank Details or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
