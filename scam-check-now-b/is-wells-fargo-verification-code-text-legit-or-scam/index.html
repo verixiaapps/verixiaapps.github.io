@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wells Fargo Verification Code Text is a common question when something like a two-factor code request appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Wells Fargo Verification Code Text flow starts with something like a two-factor code request, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received a text claiming to be from Wells Fargo, asking you to verify your account with a code. The message could look official, featuring the bank's logo and a friendly tone, making it seem like a routine security check. It might say something like, "Your verification code is 123456. Please enter this code to secure your account." At first glance, it feels like a legitimate communication, especially if you have an account with them. However, this is where the trouble begins, as these messages often mask a more sinister intent.
+You receive a text message claiming to be from Wells Fargo, saying that your account has been flagged for suspicious activity. The message instructs you to verify your identity by entering a code they’ve just sent you. It looks official, complete with the bank's logo and a sense of urgency that makes you feel like you need to act fast. You might even notice that the sender's number appears similar to the bank's customer service line, adding a layer of credibility that makes it hard to dismiss.
 
-The urgency in these texts is palpable. They often come at odd hours or right after you've made a transaction, creating a sense of immediacy that pushes you to act quickly. The message may suggest that your account is at risk or that you need to verify your identity to prevent unauthorized access. This pressure can make you feel like you have no choice but to comply, leading you to enter the code without thinking twice. The familiarity of the bank's branding adds a layer of trust that can cloud your judgment.
+This message creates a sense of urgency, suggesting that your account could be compromised if you don’t respond immediately. The language used is designed to evoke fear and concern, pushing you to act quickly without thinking. It might say something like, "Your account will be locked unless you verify your identity within the next hour." This pressure can cloud your judgment, making it easy to overlook red flags and compelling you to follow through without questioning the legitimacy of the request.
 
-Variations of this scam can be subtle yet alarming. You might receive a call instead, where a voice claims to be from Wells Fargo, asking for your personal information under the guise of account verification. Alternatively, you could encounter a phishing email that looks almost identical to official correspondence, complete with links that lead to fake websites designed to steal your credentials. Each version plays on your trust and familiarity with the bank, making it easy to overlook the red flags.
+Variations of this scam can come in different forms. You might see emails that look like official communications from Wells Fargo, complete with links that lead to fake websites designed to mimic the bank's login page. Some scams might even come as phone calls, where a caller claims to be from Wells Fargo’s fraud department, asking for your personal information to "help" you. Each variation is crafted to exploit your trust in the bank, making it difficult to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. Once you provide the code or any personal information, scammers can gain access to your account, draining your funds or committing identity theft. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it’s about the long-term impact on your peace of mind and trust in digital communications. Recognizing these tactics is crucial to protecting yourself from becoming a victim.
+Falling for this scam can have serious consequences. If you provide the verification code or any personal information, you may inadvertently give scammers access to your bank account. This could lead to unauthorized transactions, identity theft, and a long, frustrating process to regain control of your finances. The emotional toll of realizing you’ve been scammed can be just as damaging as the financial impact, leaving you feeling vulnerable and anxious about future communications.
 <p>This is why step-by-step checking matters. Once a message related to Wells Fargo Verification Code Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

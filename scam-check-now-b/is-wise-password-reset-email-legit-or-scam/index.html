@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wise Password Reset Email is a common question when something like a login alert email appears without context. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Wise Password Reset Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be from Wise, stating that your password needs to be reset. The message often includes your name and a sense of urgency, urging you to click on a link to secure your account. The email may look polished, featuring Wise's logo and familiar colors, which can make it seem legitimate. However, the link could lead you to a fake website designed to capture your login credentials, leaving you vulnerable to identity theft.
+You might have recently received an email claiming to be from Wise, asking you to reset your password. The message often looks official, featuring the Wise logo and a professional layout. It may include a link that directs you to a page that resembles the actual Wise website, prompting you to enter your current password and create a new one. The email might even mention recent activity on your account to make it feel more authentic, leaving you wondering if it’s a legitimate request or a clever trap.
 
-The email typically creates a sense of urgency, suggesting that your account has been compromised or that suspicious activity has been detected. It may warn you that failure to act quickly could result in your account being locked or compromised. This pressure can make you feel like you need to resolve the issue immediately, prompting you to click the link without taking a moment to verify the source. Scammers know how to exploit your emotions, making it easy to fall into their trap.
+Scammers know how to create a sense of urgency. The email could say something like, “Your account will be locked in 24 hours if you don’t reset your password,” pushing you to act quickly without thinking. This pressure can cloud your judgment, making you more likely to click on the link without verifying its authenticity. The combination of urgency and the familiar branding of Wise can make it difficult to discern whether the email is a genuine security measure or a malicious attempt to steal your information.
 
-Variations of this scam can include text messages or even phone calls that mimic Wise's customer service. You might receive a text that looks like it’s from Wise, urging you to reset your password due to “unusual activity.” Sometimes, these messages may even reference recent transactions to make them seem more credible. The common thread is that they all aim to get you to act quickly, often bypassing your usual caution and skepticism.
+You may also encounter variations of this scam that appear in different forms. For instance, a text message might arrive on your phone, mimicking the same urgency as the email. It could claim that your account has been compromised and provide a link to reset your password. Alternatively, you might see a pop-up on a website that looks like Wise, urging you to take immediate action. Each version is designed to exploit your trust and prompt you to act without hesitation.
 
-If you fall for this scam, the consequences can be severe. By entering your credentials on a fraudulent site, you risk losing access to your Wise account and potentially exposing your financial information to criminals. Once they have your login details, they can drain your account, make unauthorized transactions, or even steal your identity. The aftermath can be a long and painful process of recovery, leaving you feeling violated and vulnerable.
+Falling for this scam can have serious consequences. If you enter your credentials on a fake site, scammers can gain access to your Wise account, potentially draining your funds or using your personal information for identity theft. The aftermath can be devastating, leaving you not only financially vulnerable but also dealing with the stress of recovering your account and protecting your identity. It’s crucial to take a moment to verify any unexpected password reset requests before taking action.
 <p>The strongest clue is usually not one isolated detail. With Wise Password Reset Email, the risk often becomes clearer when something like a login alert email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1464,10 +1464,10 @@ If you fall for this scam, the consequences can be severe. By entering your cred
 <li><a href="/scam-check-now-b/is-robinhood-password-reset-email-legit-or-scam/">Is Robinhood Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-password-reset-email-legit-or-scam/">Is American Express Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-password-reset-email-legit-or-scam/">Is Capital One Password Reset Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-reset-email-legit-or-scam/">Is Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-password-reset-email-legit-or-scam/">Is Pnc Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-password-reset-email-legit-or-scam/">Is Td Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-us-bank-password-reset-email-legit-or-scam/">Is Us Bank Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-wells-fargo-password-reset-email-legit-or-scam/">Is Wells Fargo Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

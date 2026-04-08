@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wells Fargo Suspicious Activity Email is a common question when something like a suspicious message feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Wells Fargo Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Wells Fargo, alerting you about suspicious activity on your account. The message often includes official-looking logos, urgent language, and a prompt to click a link to verify your information or secure your account. It may even reference specific transactions or account details to make it seem legitimate. The email could appear in your inbox just when you’re expecting a bank notification, making it easy to overlook any signs that it might not be what it seems.
+You might have recently received an email claiming to be from Wells Fargo, alerting you to suspicious activity on your account. The message likely includes your name and account details, urging you to click on a link to verify your identity or secure your account. The email may look official, complete with the Wells Fargo logo and a professional layout, making it seem like a legitimate communication from your bank. However, the urgency in the message can be alarming, pushing you to act quickly without thinking twice.
 
-The urgency in these emails is palpable. You might feel a rush of anxiety as you read about potential unauthorized transactions, pushing you to act quickly. The sender often emphasizes that your account could be compromised if you don’t respond immediately. This pressure can cloud your judgment, making you more likely to click on links or provide personal information without taking a moment to think it through. Scammers know how to play on your emotions, creating a false sense of urgency that feels all too real.
+The email creates a sense of urgency by stating that your account may be compromised and that immediate action is required. Phrases like “act now” or “your account will be locked” can trigger a panic response, leading you to click the link without considering the consequences. This pressure is designed to bypass your usual caution and make you feel that you must respond immediately to protect your finances. The scammers rely on this emotional manipulation to get you to act before you have a chance to think critically.
 
-Variations of this scam can pop up in different forms, such as text messages or phone calls, all claiming to be from Wells Fargo. You might receive a text that looks like it’s coming from a familiar number, urging you to click a link or call a number to resolve an issue. Some may even go so far as to create fake websites that closely mimic the Wells Fargo login page, making it difficult to distinguish between the real and the fraudulent. Each version is designed to look credible, and they often use current events or common banking practices to lend an air of authenticity.
+You may also notice variations of this scam, such as text messages or phone calls claiming to be from Wells Fargo. The text might ask you to confirm a transaction you didn’t make, while a phone call could involve someone posing as a bank representative asking for your personal information. Each version of the scam is crafted to appear genuine, often using familiar language and scenarios that make it easy for you to let your guard down. Scammers are constantly adapting their tactics, making it essential to remain vigilant.
 
-Falling for this scam can have serious consequences. If you provide your login details or personal information, you could find your account drained or your identity stolen. Scammers can use your information to open new accounts in your name, leading to financial loss and a long, arduous process to reclaim your identity. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to take a moment to verify any communication before taking action, especially when it comes to your banking information.
+Falling for this scam can have serious consequences. If you provide your personal information, you risk having your account drained or your identity stolen. Scammers can use your details to open new accounts in your name, leading to financial chaos and a long, arduous process to reclaim your identity. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. It’s crucial to take a moment to verify any communication before acting, especially when it concerns your bank.
 <p>Scams connected to Wells Fargo Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

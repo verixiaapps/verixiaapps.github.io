@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wise Login Alert Email is a common question when something like a two-factor code request appears without context. The main question is whether the message or request can be trusted. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Wise Login Alert Email cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be a login alert from Wise, notifying you of a sign-in attempt from an unfamiliar device or location. The message often includes your name, a timestamp, and a link to verify your account. It may look polished, with Wise's branding and a sense of urgency, urging you to act quickly to secure your account. The email may even mention that your account will be locked if you don’t respond within a specific timeframe, making it feel legitimate and pressing.
+You might have recently received an email claiming to be from Wise, alerting you about a login attempt from an unfamiliar device or location. The message often includes details like the time of the attempt and a link to secure your account. It may look official, complete with Wise branding and even a customer service number. At first glance, it seems like a legitimate security measure, but it’s essential to take a closer look before acting on it.
 
-This kind of email is designed to create a sense of urgency and fear. The sender wants you to feel that your account is at risk, prompting you to click on the provided link without thinking. By using familiar language and visuals, the scammer builds a false sense of trust, making it seem like they are genuinely looking out for your security. You might feel compelled to act immediately, thinking that delaying could lead to losing access to your funds or personal information.
+The email usually creates a sense of urgency, suggesting that your account could be compromised if you don’t act immediately. Phrases like “Your account is at risk” or “Secure your account now” are designed to make you feel anxious and prompt you to click on the link without thinking. This pressure can lead you to overlook red flags, especially when the email appears to come from a trusted source. The fear of losing access to your funds or personal information can cloud your judgment.
 
-Variations of this scam can appear in different forms, such as text messages or even phone calls. You might receive a text that claims to be from Wise, alerting you to suspicious activity and directing you to a website that looks similar to the official one. Sometimes, the scammer may even impersonate customer service, asking for your personal information to "verify" your identity. Each version aims to exploit your trust in the brand, making it harder to distinguish between a real alert and a malicious attempt.
+You might also encounter variations of this scam, such as text messages or phone calls claiming to be from Wise, urging you to verify your account. Some messages may even reference recent transactions or account updates to make them seem more credible. Scammers are constantly adapting their tactics, so what you see today might look slightly different tomorrow, but the goal remains the same: to trick you into providing sensitive information or accessing a malicious site.
 
-Falling for this scam can have serious consequences. If you click on the link and enter your login credentials, the scammer gains access to your account, potentially draining your funds or using your information for identity theft. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. It’s crucial to remain vigilant and verify any unexpected communications before taking action, as the ramifications of a single mistake can be far-reaching.
+If you fall for this scam, the consequences can be severe. You could inadvertently give away your login credentials, allowing scammers to access your account and drain your funds. Even worse, they might use your information for identity theft, leading to long-term financial and emotional distress. The initial moment of panic can quickly turn into a nightmare, leaving you feeling violated and vulnerable. Always take a moment to verify the source before clicking on any links or providing personal information.
 <p>Account-security scams connected to Wise Login Alert Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a two-factor code request.</p>
 </div>
 
@@ -1462,12 +1462,12 @@ Falling for this scam can have serious consequences. If you click on the link an
 <li><a href="/scam-check-now-b/is-robinhood-login-alert-email-legit-or-scam/">Is Robinhood Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-login-alert-email-legit-or-scam/">Is American Express Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-login-alert-email-legit-or-scam/">Is Capital One Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-new-device-login-alert-email-legit-or-scam/">Is New Device Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-login-alert-email-legit-or-scam/">Is Pnc Bank Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-security-alert-email-about-login-legit-or-scam/">Is Security Alert Email About Login or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-login-alert-email-legit-or-scam/">Is Td Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-us-bank-login-alert-email-legit-or-scam/">Is Us Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wells-fargo-login-alert-email-legit-or-scam/">Is Wells Fargo Login Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-bank-of-america-login-alert-email-legit-or-scam/">Is Bank of America Login Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-binance-login-attempt-email-legit-or-scam/">Is Binance Login Attempt Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wise Verification Code Text is a common question when something like a password reset message appears without context. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Wise Verification Code Text flow starts with something like a password reset message, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received a text message claiming to be from Wise, asking you to verify a code for a transaction or account activity. The message may look official, complete with the Wise logo and a sense of urgency, stating that your account will be suspended unless you act quickly. It could even include a link that appears to lead to the Wise website, making it seem like a legitimate request. If you’re not expecting any verification codes, this can raise a red flag, but the message can be so convincing that it’s easy to let your guard down.
+You might receive a text claiming to be from Wise, asking you to verify a recent transaction or account activity. The message often includes a verification code and urges you to respond quickly, suggesting that your account is at risk. It may look official, complete with Wise branding and a sense of urgency, making it hard to ignore. You could find yourself questioning whether this is a legitimate request or something more sinister, especially if you’ve recently interacted with Wise or made a transaction.
 
-Scammers often create a sense of urgency to manipulate your emotions, making you feel like you need to act immediately. They might say that your account is at risk or that there’s been suspicious activity, pushing you to enter the code or click a link without thinking. This pressure can make you feel like you’re doing the right thing to protect your account, but in reality, you could be walking straight into a trap. The urgency is designed to cloud your judgment, making it harder to spot the warning signs.
+Scammers know how to play on your emotions, creating a sense of urgency that compels you to act without thinking. The message might say your account will be locked unless you verify your identity immediately. This pressure can make you feel like you have no choice but to comply, especially if you’re worried about losing access to your funds. The combination of fear and urgency is a powerful tactic, designed to push you into making hasty decisions.
 
-You might also encounter variations of this scam, such as receiving an email that looks like it’s from Wise, complete with official branding and links to a fake login page. Some scammers even use phone calls, pretending to be customer support and asking for your verification code directly. Each version plays on your trust in the brand and your desire to keep your account secure, making it challenging to differentiate between a genuine request and a malicious one. The tactics may differ, but the goal remains the same: to trick you into giving away sensitive information.
+Variations of this scam can appear in different forms, such as emails that mimic Wise’s communication style or phone calls from someone claiming to be a customer service representative. You might even encounter fake websites that look almost identical to the real Wise site, where you’re prompted to enter your personal information. Each version is crafted to exploit your trust, using familiar logos and language to make it seem credible. The more convincing the presentation, the easier it is to fall for the trap.
 
-Falling for this scam can have serious consequences. If you provide the verification code or enter your login details on a fake site, you could lose access to your account and have your funds drained. Scammers can use your information to commit identity theft or make unauthorized transactions, leaving you to deal with the aftermath. The emotional toll can be significant, as you may feel violated or embarrassed for being deceived. Understanding how these scams operate can help you stay vigilant and protect yourself from potential harm.
+If you respond to these messages, you risk giving away sensitive information like your account details or passwords. This can lead to unauthorized access to your financial accounts, resulting in significant losses. Scammers may drain your account or use your information for identity theft, leaving you to deal with the aftermath. The emotional and financial toll can be overwhelming, making it crucial to recognize these tactics before it’s too late.
 <p>This is why step-by-step checking matters. Once a message related to Wise Verification Code Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wise Suspicious Activity Email is a common question when something like a strange text feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Wise Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like a strange text may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received an email from “Wise” claiming there’s suspicious activity on your account. The message often appears official, complete with the company logo and professional language. It might urge you to click a link to verify your identity or resolve an urgent issue. The email could even reference recent transactions, making it feel personal and relevant. The sender’s address may look similar to the legitimate Wise domain, adding to the confusion and making it hard to tell if it’s genuine or a cleverly disguised scam.
+You might have recently received an email claiming to be from Wise, alerting you to suspicious activity on your account. The message often contains your name and may even reference recent transactions, urging you to click a link to verify your account details. The email might look professional, featuring Wise's logo and colors, making it seem legitimate at first glance. However, the urgency in the message can be alarming, pushing you to act quickly without taking the time to think it through.
 
-The urgency in these emails is palpable. They often state that immediate action is required to prevent your account from being locked or compromised. This tactic plays on your fear of losing access to your funds or having your personal information stolen. You might feel compelled to act quickly, bypassing your usual caution. The email may even include reassuring phrases about your account security, which can create a false sense of trust and make you more likely to click the link without a second thought.
+The email typically creates a sense of urgency by stating that your account will be locked or that funds could be at risk unless you respond immediately. This tactic is designed to provoke a quick reaction, making you feel like you must act now to protect your money. The sender may use phrases like "immediate action required" or "your account is at risk," which can easily trigger anxiety, especially if you’ve recently made transactions or changes to your account.
 
-Variations of this scam can appear in different forms. You might receive a text message instead of an email, or a pop-up notification while browsing the web. Some scammers might even impersonate customer service representatives over the phone, claiming they need to verify your account details. Each version is designed to look legitimate, often mimicking the style and tone of Wise communications. The more familiar the message feels, the easier it is to let your guard down and respond without verifying its authenticity.
+You might also encounter variations of this scam, such as text messages or phone calls that mimic Wise's communication style. Some messages may claim to be from customer support, offering assistance with a supposed issue. Others might involve fake websites that look almost identical to Wise's official site, tricking you into entering personal information. Each version is crafted to exploit your trust and familiarity with Wise, making it harder to spot the deception.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information or login credentials, you risk losing access to your account and potentially having your funds drained. Scammers can use your information for identity theft, leading to long-term financial and emotional repercussions. The aftermath can be overwhelming, as you may find yourself dealing with unauthorized transactions, credit issues, and the stress of trying to regain control of your finances. It’s crucial to take a moment to verify any suspicious communication before taking action.
+If you fall for this scam, the consequences can be severe. You could inadvertently provide your login credentials or financial information to criminals, allowing them to access your account and steal your funds. Once they have your information, they can make unauthorized transactions or even sell your data on the dark web. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling violated and anxious about your financial security.
 <p>Scams connected to Wise Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a strange text is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
