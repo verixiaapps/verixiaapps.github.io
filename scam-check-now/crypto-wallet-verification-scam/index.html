@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Crypto Wallet Verification scams are built to look credible to people already thinking about exchanges, wallets, investments, or account recovery, including requests like a crypto recovery message. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. They often create urgency around access, profit, or security so you act before carefully verifying the request.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many Crypto Wallet Verification scams involve things like a crypto recovery message, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might receive an email or text claiming to be from your cryptocurrency wallet provider, asking you to verify your account due to suspicious activity. The message often includes a link that leads to a website that looks almost identical to the official site. It may even use your name and mention recent transactions to make it feel legitimate. You might notice a sense of familiarity in the tone, as if the sender knows you personally, which can make you let your guard down.
+You might receive an email or text that looks like it’s from your cryptocurrency exchange or wallet provider, claiming that your account needs urgent verification. The message may include your name, a logo that resembles the real company, and a link to a website that looks almost identical to the official site. It may say something like, “Your account has been flagged for suspicious activity. Click here to verify your identity immediately.” The tone is alarming, making you feel like you need to act fast to protect your assets.
 
-These messages often create a sense of urgency, suggesting that your account will be locked or your funds will be at risk if you don’t act immediately. You may feel pressured to click the link and complete the verification process quickly to avoid losing access to your assets. The urgency is designed to cloud your judgment, making it easy to overlook the signs that something isn’t right. The fear of losing your investments can push you to act without thinking.
+The urgency in these messages is palpable. They often use phrases like “limited time” or “failure to comply will result in account suspension,” pushing you to click the link without taking a moment to think. This pressure can make you feel like you’re in a race against time, and the trust they build through familiar branding makes it easier to overlook the red flags. You might think, “This must be legitimate; they have my information,” leading you to believe that you’re simply following necessary security protocols.
 
-Variations of this scam can appear in different forms, such as a direct message on social media or a phone call from someone claiming to be a customer service representative. Some may even use fake testimonials or endorsements from supposed satisfied customers to build trust. You might see messages that promise rewards or bonuses for verifying your account, making it seem even more enticing. Each variation is crafted to exploit your trust and urgency, leading you to believe that you’re taking necessary action.
+Variations of this scam can appear in different formats, such as a phone call from someone claiming to be a customer service representative. They might ask for your login details or request that you download an app to complete the verification. Some scams even come as social media messages from fake accounts that impersonate well-known figures in the crypto community, urging you to act quickly. Each variation is designed to exploit your familiarity with the platform, making it harder to spot the deception.
 
-If you fall for this scam, you could end up giving away your login credentials or even transferring funds to the scammer’s wallet. This can lead to significant financial loss, as recovering stolen cryptocurrency is often nearly impossible. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Once you realize what has happened, the regret can be overwhelming, especially knowing that a simple moment of caution could have saved you from the ordeal.
+Falling for this scam can have severe consequences. If you provide your login details or download malicious software, you risk losing access to your entire crypto wallet. Scammers can drain your funds in a matter of minutes, leaving you with no recourse. The emotional toll can be just as damaging, as many victims experience anxiety and regret after realizing they’ve been duped. The financial loss can be devastating, especially if you’ve invested significant amounts into cryptocurrency.
 <p>Crypto-related scams connected to Crypto Wallet Verification often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like a crypto recovery message.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
