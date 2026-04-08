@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Social Security Message is a common question when something like a tax refund message feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Social Security Message flow starts with something like a tax refund message, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You receive a message that appears to be from the Social Security Administration, claiming there’s a problem with your account. The text or email might include official-looking logos and a sense of urgency, stating that you need to verify your information immediately to avoid suspension of your benefits. The sender might even use a familiar name or reference a recent transaction to make it feel more authentic. The layout and language may mimic official communication, making it hard to distinguish between a legitimate message and a clever scam.
+You receive a message that appears to be from the Social Security Administration, informing you that there’s a problem with your account. The text or email uses official-looking logos and language, urging you to click a link to verify your information immediately. It might even mention your name or partial Social Security number, making it feel personal and legitimate. The urgency in the message is palpable, as it warns that failure to respond could lead to suspension of benefits or legal action.
 
-The pressure builds as the message emphasizes that immediate action is required. It may threaten consequences like losing your benefits or facing legal action if you don’t respond quickly. This tactic plays on your fears and creates a sense of urgency, pushing you to act without thinking. You might find yourself clicking on links or providing personal information, convinced that you’re protecting your benefits. The emotional manipulation is designed to bypass your usual skepticism and make you feel like you have no choice but to comply.
+The message creates a sense of panic, pushing you to act quickly without thinking. It might say something like, “Your benefits will be suspended unless you verify your information within 24 hours.” This pressure can make you feel like you have no choice but to comply, especially if you rely on Social Security for your income. The tone is authoritative, designed to instill fear and urgency, which can cloud your judgment.
 
-Scammers are crafty and often change their approach, so you might see variations of this message. Some might come as phone calls, where a friendly voice claims to be from Social Security, urging you to confirm your details over the phone. Others may use fake websites that look nearly identical to the official Social Security site, tricking you into entering sensitive information. Each variation is designed to exploit your trust in government agencies, making it easy to overlook red flags.
+You might encounter variations of this scam that appear in different forms, such as robocalls claiming to be from Social Security, or fake websites that look almost identical to the official site. Some messages may even offer a “refund” or “bonus” if you provide your information. Each version is crafted to exploit your trust in government communications, making it easy to overlook the signs that something is off.
 
-Falling for one of these scams can have serious repercussions. You might find your personal information compromised, leading to identity theft, financial loss, or even legal troubles. Once scammers have your details, they can drain your accounts or open new ones in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you may feel violated and anxious about your financial security. Recognizing these scams is crucial to protecting yourself and your peace of mind.
+Falling for this scam can have serious consequences. If you provide your personal information, scammers can steal your identity, drain your bank accounts, or even rack up debts in your name. The aftermath can be a long and painful process of recovery, involving credit monitoring, reporting fraud, and potentially dealing with legal issues. The emotional toll of realizing you’ve been scammed can linger long after the incident, leaving you feeling vulnerable and anxious about future communications.
 <p>This is why step-by-step checking matters. Once a message related to Social Security Message moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
