@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Capital One Fraud Alert Email is a common question when something like a suspicious message feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Capital One Fraud Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Capital One, alerting you about suspicious activity on your account. The message often includes your name and may even reference recent transactions, urging you to click a link to verify your identity. The email may look official, complete with logos and formatting that mimic genuine communications from the bank, making it easy to overlook any red flags. You might feel a sense of relief that your bank is looking out for you, but it’s crucial to take a moment to scrutinize the details.
+You might receive an email that looks like it’s from Capital One, claiming there’s been suspicious activity on your account. The email often includes your name, account details, and a sense of urgency, urging you to click a link to verify your information. The design mimics official communications, complete with logos and formatting that seem authentic. It may even reference recent transactions or account changes, making it feel personal and relevant to your situation. If you’ve been banking online, this message could easily catch your eye and prompt you to act quickly.
 
-The urgency in these emails is palpable. They often state that your account is at risk and that immediate action is required to prevent unauthorized access. This pressure can lead you to act quickly, clicking on links without fully considering the source. The language used is designed to instill fear and prompt you to provide personal information, making it feel like a legitimate warning rather than a potential trap. You may feel compelled to resolve the issue right away, thinking that any delay could lead to financial loss.
+The email typically creates a sense of urgency, suggesting that your account is at risk and immediate action is necessary. Phrases like “Your account will be locked if you don’t respond” or “Verify your identity to prevent unauthorized access” play on your fears and instincts. This pressure can lead you to click the link without thinking twice, believing you’re protecting your finances. The emotional pull is strong, especially when it feels like your security is at stake, making it hard to pause and question the legitimacy of the message.
 
-Scammers are skilled at adapting their tactics, and variations of this email might come in different forms. You might see a text message or even a phone call that claims to be from Capital One, using similar language about account security. Some messages may even reference a recent purchase or a new device being used to access your account, creating a false sense of familiarity. Each variation is crafted to exploit your trust in your bank, making it harder to distinguish between what is real and what is not.
+You may also encounter variations of this scam, such as text messages or phone calls that claim to be from Capital One. A text might say there's a problem with your recent transaction, while a call could ask you to confirm your identity for security purposes. Each version is designed to look credible, often using similar language and urgency to trick you into providing personal information. The scammers adapt their tactics to fit different platforms, making it crucial to stay vigilant regardless of how the message arrives.
 
-If you fall for this scam, the consequences can be severe. Providing your personal information can lead to unauthorized transactions, identity theft, and financial loss. Once scammers have your details, they can access your accounts, apply for credit in your name, or even sell your information on the dark web. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s essential to remain vigilant and question any unexpected communications, especially when they involve your personal information.
+Falling for this scam can lead to serious consequences, including identity theft and financial loss. If you provide your information, the scammers can gain access to your account, draining your funds or racking up charges in your name. The aftermath of such a breach can be overwhelming, requiring you to navigate the complexities of fraud recovery and potentially damaging your credit score. The emotional toll can be just as significant, leaving you feeling violated and anxious about your financial security.
 <p>Scams connected to Capital One Fraud Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -1464,10 +1464,10 @@ If you fall for this scam, the consequences can be severe. Providing your person
 <li><a href="/scam-check-now-b/is-revolut-fraud-alert-email-legit-or-scam/">Is Revolut Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-fraud-alert-email-legit-or-scam/">Is Robinhood Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-fraud-alert-email-legit-or-scam/">Is Wise Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-fraud-alert-email-legit-or-scam/">Is Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-account-alert-email-legit-or-scam/">Is American Express Account Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-login-alert-email-legit-or-scam/">Is American Express Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-security-alert-email-legit-or-scam/">Is American Express Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-american-express-transaction-alert-email-legit-or-scam/">Is American Express Transaction Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

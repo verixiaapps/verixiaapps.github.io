@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Citibank Suspicious Activity Email is a common question when something like a Zelle transfer problem message feels suspicious. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Citibank Suspicious Activity Email scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might receive an email that appears to be from Citibank, claiming there’s suspicious activity on your account. The message often includes your name, a logo that looks official, and a sense of urgency, urging you to click a link to verify your information. The email may even reference recent transactions, making it feel more legitimate. It’s designed to look like a standard security alert, but the moment you click that link, you could be led to a fake website that mimics the real Citibank login page.
+You might have recently received an email claiming to be from Citibank, alerting you to suspicious activity on your account. The message often includes your name, a sense of urgency, and a link that directs you to a website that looks strikingly similar to Citibank’s official site. The email might even contain official-looking logos and language that mimics the bank’s communication style, making it difficult to discern whether it’s genuine or a clever ruse designed to trick you.
 
-The email creates a sense of urgency by suggesting that immediate action is required to protect your account. Phrases like “Your account will be locked if you don’t respond within 24 hours” are common. This pressure can make you act quickly, overriding your instinct to double-check the source. The sender often tries to establish trust by using official-sounding language and including customer service contact information, which can further convince you that the email is genuine.
+The email creates a sense of urgency, often stating that immediate action is required to secure your account. Phrases like "your account will be locked" or "verify your identity to avoid penalties" are common tactics used to pressure you into clicking the link or providing personal information. This urgency can cloud your judgment, making you feel like you must act quickly, which is exactly what the scammers want. They rely on your instinct to protect your finances, pushing you to bypass your usual caution.
 
-You may also encounter variations of this scam. Sometimes, the email might come from a different bank or financial institution, but the message remains largely the same. Other times, it could be a text message or even a phone call, with the caller ID spoofed to show a legitimate Citibank number. Each variation is crafted to exploit your trust in well-known financial institutions, making it harder to spot the deception.
+You may notice variations of this scam, such as text messages or phone calls that claim to be from Citibank. The text might say you've received a payment or that there's a problem with your recent transaction, prompting you to click a link or call a number. Each variation is designed to exploit your trust in the bank, using familiar branding and language to make the scam feel legitimate. Whether it’s an email or a text, the goal remains the same: to lure you into a trap.
 
-Falling for this scam can lead to serious consequences. If you enter your login credentials on the fake site, scammers can gain access to your real account, potentially draining your funds or making unauthorized transactions. Beyond financial loss, there’s the risk of identity theft, where your personal information is used for fraudulent purposes. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security.
+Falling for this scam can lead to serious consequences. If you provide your personal information, you could find your bank account drained or your identity stolen. Scammers can use your details to make unauthorized transactions, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you may feel a mix of embarrassment and anxiety over what has happened. Protecting yourself means recognizing these tactics and taking a moment to verify any communication before acting.
 <p>The strongest clue is usually not one isolated detail. With Citibank Suspicious Activity Email, the risk often becomes clearer when something like a Zelle transfer problem message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

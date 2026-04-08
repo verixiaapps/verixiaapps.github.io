@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Capital One Verification Code Text is a common question when something like a password reset message appears without context. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Capital One Verification Code Text cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text message claiming to be from Capital One, stating that there’s been suspicious activity on your account. The message includes a verification code that you need to enter to secure your account. It looks official, complete with the Capital One logo and a friendly tone. The urgency in the message is palpable, suggesting that immediate action is necessary to prevent unauthorized access. You might feel a twinge of anxiety, prompting you to quickly check your account and respond without thinking twice.
+You might receive a text claiming to be from Capital One, stating that you need to verify your account with a code. The message often looks official, complete with the bank's logo or a familiar phone number. It may say something like, “Your verification code is 123456. Please enter it to secure your account.” This can catch you off guard, especially if you’ve recently logged into your account or made a transaction. The urgency of the message can make it feel even more legitimate, as if your account is at immediate risk.
 
-This text message creates a sense of urgency that can be hard to ignore. It plays on your fears of losing access to your funds or having your personal information compromised. By presenting itself as a protective measure, the scammer builds trust, making you feel like you’re taking the right steps to safeguard your account. The message may even include a phone number to call for further assistance, which can feel reassuring, but it’s all part of the trap designed to manipulate your emotions.
+Scammers know how to create a sense of urgency and pressure. The text may warn you that your account will be locked unless you act quickly, pushing you to respond without thinking. This tactic plays on your fear of losing access to your funds or having your identity compromised. You might feel compelled to act fast, thinking that you’re protecting your financial information. This emotional response is exactly what the scammer is counting on, as it can cloud your judgment and lead you to make hasty decisions.
 
-You might encounter variations of this scam, such as emails that appear to be from Capital One or even phone calls that mimic customer service representatives. In some cases, the messages might ask you to click on a link to verify your identity instead of providing a code. Each version has its own nuances, but they all share the same goal: to trick you into revealing sensitive information or granting access to your account. The familiarity of the Capital One brand makes it easy to let your guard down, especially if you’ve had previous interactions with them.
+Variations of this scam can appear in different forms. You might get a phone call from someone claiming to be from Capital One, asking for your verification code directly, or an email that looks like it’s from the bank, complete with links that lead to fake websites. Sometimes, the messages may even reference recent transactions or account activity to make them seem more credible. Each variation is designed to exploit your trust in the bank and create a false sense of security, making it harder to recognize the threat.
 
-If you fall for this scam, the consequences can be severe. Scammers can gain access to your bank account, draining your funds or using your personal information for identity theft. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Once your information is compromised, it can take a long time to recover, and you may find yourself dealing with the fallout for months or even years. The best defense is to stay informed and be skeptical of any unsolicited messages that ask for your personal information.
+Falling for this scam can have serious consequences. If you provide the verification code, you’re essentially giving the scammer access to your account, which can lead to unauthorized transactions, identity theft, and financial loss. Once they have your information, they can drain your accounts or open new lines of credit in your name. The aftermath can be overwhelming, involving lengthy disputes with your bank and potential damage to your credit score. Protecting yourself starts with recognizing these messages for what they are and taking a moment to verify their legitimacy before acting.
 <p>The strongest clue is usually not one isolated detail. With Capital One Verification Code Text, the risk often becomes clearer when something like a password reset message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

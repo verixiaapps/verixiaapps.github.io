@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Citibank Password Reset Email is a common question when something like a password reset message appears without context. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Citibank Password Reset Email flow starts with something like a password reset message, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You open your email to find a message that looks like it’s from Citibank, informing you that your password has been reset. The email features the bank's logo and a professional layout, making it seem legitimate. It includes a link to a website that closely resembles Citibank’s official site, urging you to verify your identity by entering your personal information. The email might even address you by name, adding a personal touch that makes it feel authentic. You might think it’s just a routine security measure, but that’s where the trap lies.
+You might have recently received an email claiming to be from Citibank, urging you to reset your password. The message often features Citibank's logo and a professional layout, making it look legitimate at first glance. It typically includes a link that directs you to a website that resembles the official Citibank login page, asking you to enter your account details. The email may reference recent suspicious activity on your account, making it seem urgent and important to act quickly.
 
-The urgency in the email is palpable. It warns you that your account has been compromised and that immediate action is required to secure it. Phrases like “Act now to avoid account suspension” or “Your immediate response is crucial” create a sense of panic, pushing you to click the link without a second thought. This pressure can cloud your judgment, making you more likely to overlook any red flags. The combination of urgency and a familiar tone makes it easy to trust the message, even when it might not be genuine.
+The email creates a sense of urgency by suggesting that your account is at risk or that immediate action is required to secure your information. Phrases like "Your account will be locked if you do not respond within 24 hours" are common, pushing you to click the link without taking the time to think critically. This pressure can easily lead you to overlook red flags, as the fear of losing access to your account can cloud your judgment.
 
-Scammers often adapt their tactics to stay ahead of the game. You might receive a similar email claiming to be from Citibank but with slight variations, such as a different sender address or a different reason for the password reset. Some versions may come as a text message or a phone call, where the caller impersonates a bank representative. Each variation is designed to exploit your trust in the bank, making it harder to spot the deception. The more convincing the communication, the easier it is to fall into the trap.
+Variations of this scam can come in many forms. You might receive a text message instead of an email, or the sender could use a slightly altered email address that looks similar to Citibank’s official domain. Some scams even go as far as to create fake customer service numbers that you might call for help, further entrenching you in their web of deceit. Each version is designed to exploit your trust and urgency, making it harder to spot the difference between a real communication and a fraudulent one.
 
-If you do fall for this scam, the consequences can be severe. Providing your personal information can lead to unauthorized access to your bank account, resulting in financial loss. Scammers can drain your funds, make unauthorized transactions, or even steal your identity. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s a harsh reality that can happen to anyone, and being aware of these tactics is crucial to protecting yourself.
+If you fall for this scam, the consequences can be severe. By entering your information on a fake site, you risk giving scammers access to your bank account, potentially leading to unauthorized transactions or identity theft. Once they have your credentials, they can drain your account or open new lines of credit in your name, leaving you to deal with the financial fallout. The emotional toll of realizing you've been scammed can be just as damaging, making it crucial to recognize these tactics before it’s too late.
 <p>This is why step-by-step checking matters. Once a message related to Citibank Password Reset Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1464,10 +1464,10 @@ If you do fall for this scam, the consequences can be severe. Providing your per
 <li><a href="/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/">Is Wise Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-password-reset-email-legit-or-scam/">Is American Express Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-password-reset-email-legit-or-scam/">Is Capital One Password Reset Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-reset-email-legit-or-scam/">Is Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-password-reset-email-legit-or-scam/">Is Pnc Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-password-reset-email-legit-or-scam/">Is Td Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-us-bank-password-reset-email-legit-or-scam/">Is Us Bank Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-wells-fargo-password-reset-email-legit-or-scam/">Is Wells Fargo Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

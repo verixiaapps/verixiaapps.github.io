@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Chase Payment Declined Email is a common question when something like a suspicious message feels suspicious. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming that your Chase payment has been declined, complete with official-looking logos and formatting. The message often includes details like your account number, a request for immediate action, and a link that appears to lead to the Chase website. The email may even mention a transaction amount or date that makes it feel personal and urgent. It’s designed to catch your eye and provoke concern, making you feel like you need to act quickly to resolve the issue.
+You might have recently received an email that looks like it’s from Chase, telling you that your payment has been declined. The message often includes your name, a reference number, and a link to “resolve the issue.” It might even have Chase’s logo and a professional layout that makes it seem legitimate. The email could mention a specific transaction or account detail that makes it feel personal, which can easily catch your attention and prompt you to take action without thinking twice.
 
-The urgency in these emails is palpable. They often state that your account will be locked or that you will lose access to your funds if you don’t click the link and verify your information right away. This pressure can make you feel anxious, pushing you to act without thinking. The email may also include a customer service number, which seems legitimate, but could lead you to a scammer posing as a Chase representative. The combination of urgency and trust is a powerful tactic that can easily lead you to make a hasty decision.
+The urgency in these emails is palpable. They often state that immediate action is required to avoid account suspension or further complications. This pressure can make you feel anxious, pushing you to click the link or provide personal information quickly. The sender may even claim that your account has been compromised, leveraging your fear to gain your trust. It’s designed to make you feel like you’re in a race against time, compelling you to respond before it’s “too late.”
 
-You might also notice variations of this scam, such as text messages or phone calls that mimic the same language and urgency. Some may even come from spoofed numbers that look like they belong to Chase. Others might claim to be from third-party payment processors or delivery services, all while using similar tactics to create panic. Each variation is tailored to catch you off guard, making it harder to recognize the signs of a scam. Even if you think you know what to look for, these messages can be surprisingly convincing.
+You might also notice variations of this scam, such as text messages or calls that mimic the same urgency and style. Some messages may claim to be from a different financial institution or even a service you use regularly, but the core message remains the same: your payment is declined, and you need to act fast. The sender might use different tactics, like offering a “customer support” number, but the goal is to get you to engage in a way that compromises your information or finances.
 
-Falling for this scam can have serious consequences. If you provide your personal or financial information, you risk having your account drained, or worse, becoming a victim of identity theft. Scammers can use your information to open new accounts in your name, leaving you to deal with the fallout. The emotional toll can be just as damaging, as you may feel violated and anxious about your financial security. It’s crucial to take a moment to verify any unexpected messages before taking action, no matter how real they seem.
+Falling for this scam can lead to serious consequences. If you provide your personal or financial information, you risk identity theft, unauthorized transactions, and potential financial loss. Even if you think you’re just fixing a payment issue, you could be opening the door to fraudsters who will exploit your trust. The emotional toll can be significant, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to take a step back and verify the source before taking any action.
 <p>That difference matters because a real notice related to Chase Payment Declined Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1463,11 +1463,11 @@ Falling for this scam can have serious consequences. If you provide your persona
 <li><a href="/scam-check-now-b/is-wise-payment-declined-email-legit-or-scam/">Is Wise Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-payment-declined-email-legit-or-scam/">Is American Express Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-payment-declined-email-legit-or-scam/">Is Capital One Payment Declined Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-payment-declined-email-legit-or-scam/">Is Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-payment-declined-email-legit-or-scam/">Is Pnc Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-payment-declined-email-legit-or-scam/">Is Td Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-us-bank-payment-declined-email-legit-or-scam/">Is Us Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wells-fargo-payment-declined-email-legit-or-scam/">Is Wells Fargo Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-bank-of-america-payment-declined-email-legit-or-scam/">Is Bank of America Payment Declined Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

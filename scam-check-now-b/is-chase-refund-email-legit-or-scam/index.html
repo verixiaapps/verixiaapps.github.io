@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Chase Refund Email is a common question when something like a strange text feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Chase Refund Email situations, the message is written to build trust and urgency at the same time. Something like a strange text may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Chase, stating that you are eligible for a refund due to an overcharge or some sort of account error. The email often includes Chase's logo and a professional layout, making it appear authentic. It might ask you to click on a link to verify your account information or to claim your refund. The message may even include specific details about your account to make it seem more credible, like the last four digits of your account number or recent transactions.
+You might have received an email that claims to be from Chase, telling you that you’re eligible for a refund due to an overcharge or some sort of account error. The email often looks official, complete with the Chase logo and a professional layout. It might even include personal details, like the last four digits of your account number, making it seem even more legitimate. The message usually contains a link that urges you to click to claim your refund, promising that it will only take a minute to complete the process.
 
-The urgency in these emails is palpable. They often state that you must act quickly to secure your refund, implying that the offer is time-sensitive or that your account will be compromised if you don’t respond immediately. This pressure can make you feel anxious, prompting you to click the link without thinking twice. The email may also use friendly language, addressing you by name and assuring you that your satisfaction is their priority, which can create a false sense of trust.
+The urgency in these emails is palpable. You may notice phrases like “act now” or “limited time offer,” designed to make you feel like you could miss out on something important if you don’t respond immediately. This pressure can be unsettling, especially if you’ve been waiting for a refund or have had recent transactions that might warrant such a message. The email may also include a phone number to call, where you’ll be greeted by someone who sounds professional and knowledgeable, further building your trust.
 
-Variations of this scam can appear in different forms. Some may come as text messages or phone calls, where a representative claims to be from Chase and offers you a refund. Others might direct you to a website that looks remarkably similar to Chase's official site but is designed to harvest your personal information. The messages can vary in wording and style, but they all share a common goal: to get you to act quickly without verifying the source.
+You might come across variations of this scam, such as text messages or even social media ads that promise similar refunds. Some versions may claim to be from different financial institutions, while others might present themselves as third-party services that can help you reclaim funds. Regardless of the format, the core message remains the same: they want you to take immediate action without thinking it through. This adaptability makes it harder to spot, especially if you’re already dealing with financial matters.
 
-If you fall for this scam, the consequences can be severe. You might unknowingly provide your personal information, leading to identity theft or unauthorized transactions on your account. Even if you think you’re just providing information for a refund, you could be giving scammers access to your financial life. Once they have your details, it can take a long time to regain control and recover from the fallout, leaving you vulnerable and stressed.
+Falling for this scam can lead to serious consequences. If you click the link and provide your personal information, you risk having your identity stolen or your bank account compromised. Even if you don’t share sensitive information, simply engaging with the scam can make you a target for further attempts. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. It’s crucial to take a moment to verify any unexpected communication before acting on it.
 <p>Scams connected to Chase Refund Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a strange text is used as the starting point.</p>
 </div>
 
@@ -1459,6 +1459,8 @@ If you fall for this scam, the consequences can be severe. You might unknowingly
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-discover-refund-email-legit-or-scam/">Is Discover Refund Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-confirmation-email-legit-or-scam/">Is Refund Confirmation Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-issued-email-legit-or-scam/">Is Refund Issued Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-revolut-refund-email-legit-or-scam/">Is Revolut Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-refund-email-legit-or-scam/">Is Robinhood Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-refund-email-legit-or-scam/">Is Wise Refund Email or Scam Legit or a Scam?</a></li>
@@ -1466,8 +1468,6 @@ If you fall for this scam, the consequences can be severe. You might unknowingly
 <li><a href="/scam-check-now-b/is-capital-one-refund-email-legit-or-scam/">Is Capital One Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-refund-email-legit-or-scam/">Is Pnc Bank Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-refund-email-legit-or-scam/">Is Td Bank Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-us-bank-refund-email-legit-or-scam/">Is Us Bank Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-wells-fargo-refund-email-legit-or-scam/">Is Wells Fargo Refund Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

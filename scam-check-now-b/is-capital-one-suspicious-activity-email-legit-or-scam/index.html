@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Capital One Suspicious Activity Email is a common question when something like a strange text feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a strange text and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from Capital One, alerting you to suspicious activity on your account. The email often features official-looking logos and formatting, making it seem authentic. It may urge you to click on a link to verify your account details or to confirm a transaction you don’t recognize. The message might even include your name and partial account number, which can make it feel more legitimate. If you’re unsure, it’s easy to feel anxious and compelled to act quickly.
+You might have recently received an email claiming to be from Capital One, alerting you to suspicious activity on your account. The message often includes your name and a warning that your account may be compromised. It might even contain a link that directs you to a site that looks remarkably similar to the official Capital One website. The email may urge you to act quickly to secure your account, making it seem like a legitimate and urgent communication from your bank.
 
-The urgency in these emails is designed to create a sense of panic. Phrases like “immediate action required” or “your account will be locked” can push you to respond without thinking. Scammers know that when you’re worried about your finances, you’re more likely to overlook red flags. They may even provide a phone number to call, where a supposed representative is ready to assist you, further establishing trust and making you feel secure in sharing your information.
+This type of email typically creates a sense of urgency, pushing you to click on the provided link without thinking twice. The language used often emphasizes immediate action, suggesting that your account is at risk and that failure to respond could lead to serious consequences. You might feel a rush of anxiety, prompting you to follow the instructions without taking a moment to verify the source. This emotional manipulation is designed to build trust, making you believe that the email is a genuine security alert.
 
-You may encounter variations of this scam, such as text messages or fake websites that mimic Capital One’s official site. Some messages might claim to be from a different financial institution but use similar tactics. The language can change slightly, but the core strategy remains the same: instill fear and urgency to prompt you to act. Whether it’s a text message urging you to click a link or a phone call from a “customer service agent,” the goal is to trick you into providing personal information.
+Scammers often tweak their tactics, so you may see variations of this email that appear to come from different financial institutions or even government agencies. Some might claim that your account is being reviewed for suspicious transactions, while others could offer a reward for completing a survey to "confirm" your identity. Regardless of the specifics, the core message remains the same: they want you to act quickly and without skepticism. This adaptability makes it easy for scammers to exploit your trust in familiar brands.
 
-Falling for this scam can have serious consequences. If you provide your account details, scammers can drain your funds, rack up charges, or even steal your identity. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to recognize these tactics so you can protect yourself from potential harm and avoid becoming another victim of this pervasive scheme.
+If you fall for this scam and provide your personal information or login credentials, you could face serious financial repercussions. Your account could be drained, or your identity could be stolen, leading to a long and complicated recovery process. The emotional toll can be just as significant, leaving you feeling vulnerable and violated. Recognizing these tactics is crucial to protecting yourself from potential harm and ensuring your financial security.
 <p>That difference matters because a real notice related to Capital One Suspicious Activity Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

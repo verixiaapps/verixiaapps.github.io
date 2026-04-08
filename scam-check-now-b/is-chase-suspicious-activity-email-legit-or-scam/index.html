@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Chase Suspicious Activity Email is a common question when something like a strange text feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Chase Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like a strange text may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Chase, alerting you to suspicious activity on your account. The message often includes your name and may even feature Chase's logo, making it look official. It typically urges you to click on a link to verify your account information or to log in to your online banking. The email might mention a transaction that you don’t recognize, creating a sense of urgency that prompts you to act quickly without thinking.
+You might have recently received an email that looks like it’s from Chase, claiming there’s suspicious activity on your account. The message likely includes your name and a sense of urgency, urging you to click a link to verify your identity or secure your account. The email may even feature the Chase logo and a professional layout, making it seem trustworthy. However, the real intention behind this message is to trick you into providing personal information or login credentials.
 
-The language in these emails is designed to instill fear and urgency. Phrases like "immediate action required" or "your account will be suspended" push you to respond right away. This tactic is effective because it plays on your instinct to protect your finances. You might feel a rush of anxiety, believing that if you don’t act fast, you could lose access to your funds or face other consequences. This pressure can cloud your judgment, making it easier to fall into the trap.
+The urgency in the email can be overwhelming. It may state that your account will be locked or that you could face financial loss if you don’t act immediately. This pressure can make you feel like you have no choice but to respond quickly, which is exactly what the scammers want. They create a scenario where you feel anxious about your finances, making it easier for them to manipulate your actions.
 
-You may encounter variations of this scam that look slightly different but serve the same purpose. Some emails might come from a different domain that resembles Chase, while others could be text messages or phone calls claiming to be from customer service. They might ask you to confirm personal details or direct you to a fake website that mimics the real Chase login page. Each version is crafted to exploit your trust in a reputable institution, making it difficult to discern what’s genuine.
+You might also notice variations of this scam, such as text messages or phone calls claiming to be from Chase. In some cases, the message may ask you to download an app or call a number to resolve the issue. Each variation is designed to exploit your trust in the bank and can appear quite convincing, often using familiar terminology or referencing recent transactions to make it feel legitimate.
 
-Falling for this scam can have serious repercussions. If you enter your information on a fraudulent site, you’re handing over your login credentials to criminals who can then drain your account or commit identity theft. The aftermath can be devastating, leading to financial loss, damage to your credit score, and a long, stressful process to recover your identity and funds. It’s crucial to take a moment to verify any communication before responding, especially when it involves your finances.
+Falling for this scam can lead to serious consequences. If you provide your information, scammers can gain access to your bank account, draining your funds or making unauthorized transactions. The aftermath can be a lengthy and stressful process of trying to recover your money and restore your account. Additionally, your personal information could be sold on the dark web, leading to identity theft and further complications in your financial life.
 <p>Scams connected to Chase Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a strange text is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

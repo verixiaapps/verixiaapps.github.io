@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Citibank Verification Code Text is a common question when something like an account locked warning appears without context. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Citibank Verification Code Text cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text message claiming to be from Citibank, stating that your account has been flagged for suspicious activity. The message prompts you to enter a verification code to secure your account. It looks official, complete with Citibank’s logo and a link that appears to lead to their website. The urgency in the message is palpable, suggesting that immediate action is required to prevent your account from being locked. You might feel a rush of anxiety, thinking that your financial security is at risk.
+You receive a text message claiming to be from Citibank, stating that your account has been flagged for suspicious activity. The message includes a verification code and urges you to respond immediately to secure your account. It looks official, complete with Citibank's branding and a sense of urgency that makes you feel like you need to act fast. The sender's number might even appear familiar, or it could be a seemingly legitimate short code, making it hard to distinguish from real communications you’ve received before.
 
-The text creates a sense of urgency by implying that your account is in jeopardy, pushing you to act quickly without thinking. It may even include phrases like “time-sensitive” or “failure to respond may result in account suspension.” This pressure can cloud your judgment, making you more likely to trust the message and follow the instructions without verifying its authenticity. The familiar branding and professional tone can further convince you that this is a legitimate communication from your bank.
+The message creates a sense of panic, suggesting that if you don’t verify your account right away, you risk losing access or facing financial consequences. This pressure can cloud your judgment, making you more likely to comply without thinking twice. The urgency is designed to bypass your usual skepticism, pushing you to enter the verification code or click on a link that promises to resolve the issue quickly. It feels like a lifeline, but in reality, it’s a trap.
 
-Variations of this scam can come in different forms, such as emails that mimic Citibank’s official correspondence or phone calls from someone claiming to be a bank representative. You might receive a call from a number that looks similar to Citibank’s customer service line, adding to the deception. Each variation aims to exploit your trust in the bank, using the same tactics of urgency and fear to manipulate you into providing personal information or verification codes.
+You might also encounter variations of this scam, such as an email that looks like it’s from Citibank or a phone call from someone claiming to be a customer service representative. These messages often use similar language, claiming to need your immediate attention or offering a special promotion that requires verification. Some may even mention recent transactions you’ve made to appear more credible. Each variation plays on the same theme: urgency and trust, making it easy to mistake them for legitimate communications.
 
-Falling for this scam can have serious consequences. If you enter the verification code or provide personal information, you may unknowingly give scammers access to your bank account. This could lead to unauthorized transactions, identity theft, and financial loss. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s essential to be vigilant and question any unexpected messages, especially when they involve your personal information or financial accounts.
+Falling for this scam can lead to serious consequences. If you provide the verification code or click on a malicious link, you may inadvertently give scammers access to your personal and financial information. This can result in unauthorized transactions, identity theft, or even draining your bank account. The emotional and financial fallout can be overwhelming, leaving you feeling violated and vulnerable. It’s crucial to remain vigilant and question any unexpected requests for your information, no matter how legitimate they may seem.
 <p>Account-security scams connected to Citibank Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like an account locked warning.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

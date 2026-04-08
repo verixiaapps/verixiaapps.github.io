@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Capital One Transfer Alert Email is a common question when something like a suspicious link feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Capital One Transfer Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You open your email to find a message from what appears to be Capital One, notifying you of a recent transfer alert. The email features the bank's logo and includes details about a transaction you don’t recognize. It urges you to click a link to verify your account information or to secure your account immediately. The message feels official, and the urgency in the tone makes you pause. You wonder if this is a legitimate alert or something more sinister.
+You receive an email that looks like it’s from Capital One, complete with their logo and branding. The subject line reads, “Important: Transfer Alert for Your Account.” Inside, the message claims there has been a suspicious transfer attempt and urges you to verify your account details immediately. It includes a link that appears to lead to the official Capital One website, but something feels off. You notice the email address is slightly different from the one you usually see, and the tone seems more urgent than usual, making you hesitate.
 
-The email creates a sense of urgency, suggesting that your account may be compromised. Phrases like “immediate action required” or “your account is at risk” push you to act quickly, often before you have time to think. This pressure can make you feel anxious and lead you to click the link without considering the consequences. The design and language are crafted to build trust, making you feel like you’re dealing with a reputable institution.
+The email creates a sense of urgency by stating that your account is at risk and that immediate action is required to prevent unauthorized access. It might mention a deadline, suggesting that failure to respond could lead to account suspension. This pressure can make you feel anxious, prompting you to click the link without a second thought. The message is designed to instill fear and urgency, making it harder for you to think critically about the situation.
 
-You might also see variations of this scam through text messages or phone calls, where the same urgency is conveyed. A text might read, “Your Capital One account has suspicious activity. Click here to secure it.” Alternatively, a phone call could come from a number that looks legitimate, with someone claiming to be from customer service. Each version aims to catch you off guard, using familiar branding and language to create a false sense of security.
+You might also encounter variations of this scam, such as text messages or phone calls claiming to be from Capital One. A text might say, “Your account has been compromised. Click here to secure it now,” while a call could involve someone posing as a customer service representative, asking for your personal information to “verify” your identity. Each version plays on the same theme of urgency and fear, making it easy to overlook the signs that something is amiss.
 
-If you fall for this scam, the consequences can be severe. Clicking the link may lead to a fake website designed to steal your login credentials, putting your financial information at risk. Once scammers have access to your account, they can drain your funds or rack up charges in your name. The emotional and financial toll can be significant, leaving you feeling violated and vulnerable. Recognizing these tactics is crucial to protecting yourself from potential harm.
+If you fall for this scam, the consequences can be severe. You could unknowingly provide your login credentials or personal information to fraudsters, giving them access to your financial accounts. This can lead to unauthorized transactions, identity theft, and significant financial loss. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling vulnerable and violated. It’s crucial to take a moment to verify the source before acting on any urgent requests.
 <p>Scams connected to Capital One Transfer Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

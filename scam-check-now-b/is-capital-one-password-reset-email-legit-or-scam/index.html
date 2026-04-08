@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Capital One Password Reset Email is a common question when something like a login alert email appears without context. The main question is whether the message or request can be trusted. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Capital One Password Reset Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have just received an email that looks like it’s from Capital One, claiming that you need to reset your password. The message often includes the Capital One logo and uses language that seems official, urging you to click a link to verify your identity. It may even address you by name, making it feel personal and legitimate. The email might mention suspicious activity on your account, prompting you to act quickly. This setup can make you feel like you’re in a real situation where your account security is at risk.
+You might receive an email that looks like it’s from Capital One, claiming that you need to reset your password. The message often includes the bank’s logo and uses official language, making it seem legitimate. It may say something like, “We noticed unusual activity on your account,” and provide a link for you to click to reset your password. The email might even address you by name, which adds to its authenticity and can make you feel compelled to act quickly.
 
-The urgency in these emails is palpable. They often state that your account will be locked if you don’t respond immediately, creating a sense of panic. This pressure can cloud your judgment, making you more likely to click on the link without thinking twice. The email may also include reassuring phrases about protecting your account, which can further build trust. You might feel that ignoring the message could lead to serious consequences, pushing you to act before fully considering the source.
+The urgency in these emails is palpable. They often mention that your account will be locked if you don’t take immediate action, creating a sense of panic. You may feel pressured to click the link right away, fearing that your account is at risk. This tactic plays on your emotions, making it difficult to think clearly. The sender may even include a phone number for customer support, further convincing you that this is a genuine communication from Capital One.
 
-These scams can take on various appearances. Sometimes, the email may come from a slightly altered email address that looks similar to Capital One’s official domain. Other times, the message might come as a text or even a phone call, using the same tactics of urgency and personalization. You might see a message claiming your account has been compromised, or that you need to verify recent transactions. Each variation is designed to catch you off guard, making it harder to discern what’s real and what’s not.
+Variations of this scam can appear in different ways. You might encounter a text message that mimics the same urgency, or even a phone call from someone claiming to be a Capital One representative. Some messages may ask you to verify your identity by providing personal information, while others might direct you to a website that looks almost identical to the official Capital One site. Each version is designed to catch you off guard and exploit your trust.
 
-If you fall for this scam, the consequences can be severe. Clicking on the link could lead you to a fake website designed to steal your login credentials. Once scammers have your information, they can access your account, potentially draining your funds or making unauthorized purchases. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s crucial to be vigilant and verify any communication that seems off, especially when it comes to your personal information.
+If you fall for this scam, the consequences can be severe. By entering your information on a fraudulent site, you risk giving scammers access to your bank account, leading to unauthorized transactions and identity theft. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to take a moment to verify any communication before acting, as a single misstep can have lasting repercussions.
 <p>Account-security scams connected to Capital One Password Reset Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -1467,7 +1467,7 @@ If you fall for this scam, the consequences can be severe. Clicking on the link 
 <li><a href="/scam-check-now-b/is-revolut-password-reset-email-legit-or-scam/">Is Revolut Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-password-reset-email-legit-or-scam/">Is Robinhood Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/">Is Wise Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-american-express-account-alert-email-legit-or-scam/">Is American Express Account Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-reset-email-legit-or-scam/">Is Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

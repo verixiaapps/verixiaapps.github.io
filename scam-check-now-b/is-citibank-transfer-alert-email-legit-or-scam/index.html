@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Citibank Transfer Alert Email is a common question when something like a PayPal refund email feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Citibank Transfer Alert Email flow starts with something like a PayPal refund email, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming to be from Citibank, alerting you about a transfer that you didn’t initiate. The message often looks official, complete with Citibank’s logo and a professional layout. It may include details like the amount of the transfer, the recipient’s name, and a link prompting you to verify the transaction. The email may even address you by name, making it seem more credible. If you’re not expecting a transfer, this could raise immediate concern and prompt you to act quickly.
+You open your email to find a message from what appears to be Citibank, alerting you to a recent transfer from your account. The email features Citibank's logo and uses a professional tone, making it seem authentic. It includes details like the amount transferred, the date, and even a link to "verify" the transaction. At first glance, everything looks normal, but there’s a sense of urgency in the message, urging you to click the link immediately to confirm the transaction or risk account suspension.
 
-The email typically creates a sense of urgency, suggesting that your account may be compromised or that immediate action is required to prevent unauthorized access. Phrases like “Your account will be locked if you don’t respond within 24 hours” are common, pushing you to click on links or provide personal information without taking the time to think it through. This pressure can make it easy to overlook red flags, especially if you’re already feeling anxious about your finances.
+This email plays on your emotions, creating a sense of panic that something might be wrong with your account. The language used is designed to build trust, mentioning that they are looking out for your security. You might feel compelled to act quickly, fearing that if you don’t respond, you could lose access to your funds or face other consequences. This pressure can cloud your judgment, making it easier to overlook red flags.
 
-You might encounter variations of this scam, such as texts or phone calls claiming to be from Citibank, all designed to elicit the same response. The text may ask you to click on a link to confirm a suspicious transaction, while a phone call could involve someone posing as a bank representative requesting your account details for verification. Each version aims to exploit your trust in Citibank and your desire to protect your financial assets, making it harder to discern what’s real and what’s not.
+Scammers often use variations of this tactic, so you might also see similar messages claiming to be from other banks or financial institutions. Some may even come as text messages or phone calls, all designed to mimic legitimate communications. They might change the details slightly, such as the transfer amount or the urgency level, but the core message remains the same: act now to protect your account. This adaptability makes it challenging to spot a scam immediately.
 
-Falling for this scam can lead to serious consequences, such as unauthorized access to your bank account or identity theft. Once scammers have your information, they can drain your funds or open new accounts in your name, leaving you to deal with the financial fallout. The emotional toll can be just as damaging, as the violation of trust can lead to anxiety and a sense of vulnerability. It’s crucial to stay vigilant and question any unexpected communications regarding your finances.
+If you fall for this scheme, the consequences can be severe. Clicking on the link may lead you to a fake website designed to steal your login credentials, or worse, you could inadvertently download malware onto your device. Once scammers have your information, they can drain your accounts or use your identity for further fraudulent activities. The emotional and financial toll can be significant, leaving you not only with lost funds but also with the stress of dealing with identity theft.
 <p>This is why step-by-step checking matters. Once a message related to Citibank Transfer Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

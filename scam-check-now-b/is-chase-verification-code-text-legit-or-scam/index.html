@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Chase Verification Code Text is a common question when something like a password reset message appears without context. The main question is whether the message or request can be trusted. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Chase Verification Code Text cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text message that appears to be from Chase, claiming that there’s been suspicious activity on your account. The message includes a verification code and urges you to confirm your identity by entering the code on a provided link. The sender's number looks official, and the language used is professional, making it seem like a legitimate communication from your bank. You might even notice that the message includes your name, which adds an extra layer of authenticity that can easily catch you off guard.
+You receive a text message claiming to be from Chase, stating that there’s been suspicious activity on your account. The message includes a verification code and urges you to respond immediately to secure your account. It looks official, complete with Chase branding and a sense of urgency, making it easy to believe it’s a legitimate communication from your bank. The sender may even use a number that appears to be associated with Chase, adding another layer of authenticity to the message.
 
-This message creates a sense of urgency, suggesting that immediate action is required to protect your account. It might say something like, "Your account will be locked unless you verify your identity within the next hour." This pressure can lead you to act quickly, bypassing your usual caution. The familiarity of the Chase brand and the professional tone can make you feel secure, reinforcing the deceptive trust that scammers rely on to manipulate their victims.
+The urgency in the message is palpable; it implies that your account is at risk and that you must act fast to prevent unauthorized access. This pressure can make you feel anxious and compelled to respond quickly, often overriding your instincts to verify the source. The message may also include phrases like “immediate action required” or “your account will be locked,” which can heighten your fear of losing access to your finances. This tactic is designed to bypass your critical thinking and push you into a hasty decision.
 
-Scammers often use variations of this tactic, sometimes sending emails that look like official correspondence or even making phone calls that mimic Chase’s customer service. You might receive a voicemail asking you to call back a number that seems legitimate or an email with a link that appears to lead to the Chase website. Each variation is designed to exploit your trust in the bank and can adapt to the latest security trends, making it harder to spot the deception.
+You might see variations of this scam, such as emails that look like official Chase correspondence or phone calls from someone claiming to be a Chase representative. They might ask for your personal information or direct you to a fake website that mimics the Chase login page. Each variation is crafted to exploit your trust in the bank and create a seamless experience that feels genuine, making it harder to spot the red flags. The scammers are skilled at adapting their tactics to fit different platforms, ensuring that their approach feels relevant to your situation.
 
-If you fall for this scam, the consequences can be severe. Entering the verification code or clicking on the link can give scammers access to your personal information, allowing them to drain your bank account or open new accounts in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s important to recognize these tactics to protect yourself from falling victim to such scams.
+Falling for this scam can lead to severe consequences. If you provide the verification code or any personal information, the scammers can gain access to your bank account, draining your funds or making unauthorized transactions. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Once your information is compromised, it can take significant time and effort to recover, and you may find yourself dealing with the aftermath for months. The danger is real, and recognizing these scams can be the first step in protecting yourself.
 <p>Account-security scams connected to Chase Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a password reset message.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
