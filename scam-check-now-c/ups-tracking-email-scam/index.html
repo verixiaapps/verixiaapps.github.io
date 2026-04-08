@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>UPS Tracking Email scams often arrive as normal-looking package alerts, tracking problems, or delivery updates, such as a customs fee link. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common UPS Tracking Email message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a customs fee link. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You receive an email that looks just like a legitimate UPS notification, complete with their logo and branding. The subject line reads something like "Your Package is Delayed: Action Required." Inside, there's a message that claims your shipment is on hold due to an address issue. A link is provided to "confirm your details," which looks convincing enough that you might not think twice about clicking it. The email even includes a tracking number that appears valid, making it all the more believable.
+You open your inbox to find an email that looks almost identical to a legitimate UPS tracking notification. The subject line reads, “Your package is on the way!” and includes a tracking link that seems to lead to the UPS website. The email is filled with familiar branding, including the logo and color scheme, making it easy to overlook any subtle discrepancies. As you scan the message, it claims that there’s a problem with your shipment and urges you to click the link to resolve the issue quickly.
 
-The urgency in the message is palpable. It tells you that your package will be returned to the sender if you don’t act immediately. This pressure can make you feel anxious, especially if you’re expecting a delivery. The email may also mention a limited timeframe, suggesting that you need to resolve the issue within 24 hours to avoid losing your package. This tactic is designed to push you into making hasty decisions without fully considering the risks.
+The email creates a sense of urgency by stating that your package will be returned to the sender if you don’t act immediately. Phrases like “Action Required” and “Your prompt response is crucial” are designed to make you feel anxious about missing out on your delivery. This pressure can cloud your judgment, pushing you to click the link without thinking twice. The scammer’s goal is to foster a sense of trust, making you believe that you’re dealing with a reputable company, when in reality, they’re just after your personal information.
 
-You might see variations of this scam that include texts or even phone calls, all mimicking UPS communications. Some messages may claim to offer a refund for a delivery fee or ask you to verify your account for a supposed security upgrade. Other versions might even appear to come from different shipping companies, using similar language and urgency to catch you off guard. Each variation is crafted to exploit your trust in well-known delivery services.
+You might encounter variations of this scam that appear as text messages or even automated phone calls. In some cases, the message may claim that your package has been delivered but requires additional information to confirm the delivery. Other versions might ask you to verify your shipping address or payment details. Each variation is crafted to look convincing, often using real tracking numbers or even spoofing the sender’s email address to make it seem legitimate. These tactics can easily mislead you into thinking you’re dealing with a trustworthy source.
 
-If you fall for this scam, the consequences can be severe. Clicking on the link may lead you to a fraudulent website designed to steal your personal information, including credit card details or login credentials. Even worse, you might unknowingly download malware that compromises your device. Beyond the immediate financial risks, falling for such scams can lead to long-term identity theft, leaving you to deal with the fallout for years to come.
+Falling for this scam can lead to serious consequences. Once you click the link, you may be directed to a fake website designed to harvest your personal information, such as your credit card details or login credentials. This data can be used for identity theft or unauthorized purchases, leaving you vulnerable and potentially facing financial loss. The emotional toll can be significant as well, knowing that your trust was exploited. It’s crucial to remain vigilant, as these scams can have lasting effects on your security and peace of mind.
 <p>Delivery-related scams connected to UPS Tracking Email usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a customs fee link appears.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ If you fall for this scam, the consequences can be severe. Clicking on the link 
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/bank-account-locked-message-fake/">Bank Account Locked Message Fake</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/bank-fraud-alert-text-legit-or-scam/">Bank Fraud Alert Text Legit Or Scam</a></li>
+<li><a href="/scam-check-now-c/bank-suspicious-activity-email-scam/">Bank Suspicious Activity Email Scam</a></li>
+<li><a href="/scam-check-now-c/bank-account-locked-message-fake/">Bank Account Locked Message Fake</a></li>
 <li><a href="/scam-check-now-c/bank-verification-code-text-scam/">Bank Verification Code Text Scam</a></li>
 <li><a href="/scam-check-now-c/bank-login-alert-email-fake/">Bank Login Alert Email Fake</a></li>
 <li><a href="/scam-check-now-c/bank-payment-declined-message-scam/">Bank Payment Declined Message Scam</a></li>
 <li><a href="/scam-check-now-c/bank-security-alert-text-fake/">Bank Security Alert Text Fake</a></li>
 <li><a href="/scam-check-now-c/bank-account-warning-email-scam/">Bank Account Warning Email Scam</a></li>
 <li><a href="/scam-check-now-c/bank-password-reset-message-fake/">Bank Password Reset Message Fake</a></li>
-<li><a href="/scam-check-now-c/bank-unauthorized-transaction-alert-scam/">Bank Unauthorized Transaction Alert Scam</a></li>
-<li><a href="/scam-check-now-c/credit-card-fraud-alert-text-legit/">Credit Card Fraud Alert Text Legit</a></li>
-<li><a href="/scam-check-now-c/credit-card-suspicious-activity-email-scam/">Credit Card Suspicious Activity Email Scam</a></li></ul>
+<li><a href="/scam-check-now-c/bank-unauthorized-transaction-alert-scam/">Bank Unauthorized Transaction Alert Scam</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

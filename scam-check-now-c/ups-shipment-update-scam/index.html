@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>UPS Shipment Update scams often arrive as normal-looking package alerts, tracking problems, or delivery updates, such as a customs fee link. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common UPS Shipment Update message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a customs fee link. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You might receive an email or text that looks like it’s from UPS, complete with their logo and familiar formatting. The message claims there’s an update regarding a shipment you’re expecting, often including a tracking number that seems legitimate. It might say something like, “Your package is on hold due to an address issue. Click here to resolve it.” The urgency in the message makes it feel real, as if your delivery is at risk unless you act quickly.
+You might have received an email or text claiming to be from UPS, stating there's an issue with your shipment. The message often includes a link that looks legitimate, urging you to click to resolve the problem. It may mention a tracking number that seems familiar, making it easy to believe it's genuine. The sender's email address might mimic UPS closely, but a closer look reveals subtle differences. This message can pop up unexpectedly, especially if you’re waiting for a delivery, making it all the more convincing.
 
-The scam plays on your sense of urgency, making you feel like you need to resolve the issue immediately to avoid missing your package. The message often includes phrases like “Act now” or “Immediate action required,” pushing you to click on a link or provide personal information without taking a moment to think it through. This pressure can lead you to overlook red flags, as the fear of losing a package can cloud your judgment.
+The urgency in these messages is palpable. They often say your package will be returned or delayed unless you act immediately. This pressure can trigger a quick response, especially if you’re anxious about your order. The scammer knows how to play on your emotions, making you feel like you have no choice but to click the link and resolve the issue. The design of the email or text is usually polished, adding an air of trustworthiness that can easily mislead you.
 
-You might also see variations of this scam that come from different delivery services or even fake websites that mimic UPS’s design. Some messages may claim your package is delayed due to customs issues, while others might say there’s a problem with payment. Each variation is crafted to look convincing, often using language that feels familiar and urgent, making it easy to mistake for a legitimate notification.
+Variations of this scam can come in different forms, such as fake delivery notifications from other shipping companies or even social media messages that claim to be from UPS. Some may offer refunds or discounts on future deliveries, enticing you to provide personal information. Others might claim that your package has been flagged for customs issues, requiring immediate action. Each version is crafted to look legitimate, making it difficult to discern the real from the fake.
 
-Falling for this scam can lead to serious consequences. If you click the link, you might end up on a phishing site designed to steal your personal information, like your credit card or social security number. Even if you think you’re just resolving a shipping issue, you could inadvertently give scammers access to your accounts. This can lead to identity theft, financial loss, and a long, stressful process to regain control over your personal information.
+Falling for this scam can lead to serious consequences. If you click the link, you may unknowingly download malware onto your device, compromising your personal information. Scammers can steal your financial data, leading to unauthorized charges or identity theft. Even if you think you’re just resolving a shipping issue, you could end up facing a much larger problem that impacts your finances and security. It’s crucial to recognize these tactics before it’s too late.
 <p>Delivery-related scams connected to UPS Shipment Update usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a customs fee link appears.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ Falling for this scam can lead to serious consequences. If you click the link, y
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/bank-account-locked-message-fake/">Bank Account Locked Message Fake</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/bank-fraud-alert-text-legit-or-scam/">Bank Fraud Alert Text Legit Or Scam</a></li>
+<li><a href="/scam-check-now-c/bank-suspicious-activity-email-scam/">Bank Suspicious Activity Email Scam</a></li>
+<li><a href="/scam-check-now-c/bank-account-locked-message-fake/">Bank Account Locked Message Fake</a></li>
 <li><a href="/scam-check-now-c/bank-verification-code-text-scam/">Bank Verification Code Text Scam</a></li>
 <li><a href="/scam-check-now-c/bank-login-alert-email-fake/">Bank Login Alert Email Fake</a></li>
 <li><a href="/scam-check-now-c/bank-payment-declined-message-scam/">Bank Payment Declined Message Scam</a></li>
 <li><a href="/scam-check-now-c/bank-security-alert-text-fake/">Bank Security Alert Text Fake</a></li>
 <li><a href="/scam-check-now-c/bank-account-warning-email-scam/">Bank Account Warning Email Scam</a></li>
 <li><a href="/scam-check-now-c/bank-password-reset-message-fake/">Bank Password Reset Message Fake</a></li>
-<li><a href="/scam-check-now-c/bank-unauthorized-transaction-alert-scam/">Bank Unauthorized Transaction Alert Scam</a></li>
-<li><a href="/scam-check-now-c/credit-card-fraud-alert-text-legit/">Credit Card Fraud Alert Text Legit</a></li>
-<li><a href="/scam-check-now-c/credit-card-suspicious-activity-email-scam/">Credit Card Suspicious Activity Email Scam</a></li></ul>
+<li><a href="/scam-check-now-c/bank-unauthorized-transaction-alert-scam/">Bank Unauthorized Transaction Alert Scam</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

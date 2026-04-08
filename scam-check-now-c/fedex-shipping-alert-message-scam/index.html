@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>FedEx Shipping Alert Message scams often arrive as normal-looking package alerts, tracking problems, or delivery updates, such as a customs fee link. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common FedEx Shipping Alert Message message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a customs fee link. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You might receive a message that looks like it’s from FedEx, claiming there’s an issue with your recent shipment. The text or email may include your name, a tracking number, and a link to resolve the problem. It often appears very official, complete with the FedEx logo and formatting that mimics their legitimate communications. You may find yourself clicking on a link that promises to provide updates or allow you to confirm your delivery details, all while feeling reassured that it’s a genuine message from a trusted shipping service.
+You might have recently received a message claiming to be from FedEx, alerting you about a shipping issue with a package. The text or email often includes a link that appears legitimate, featuring the FedEx logo and a professional tone. It might say something like, "Your shipment is on hold due to an address error. Click here to resolve the issue." The urgency in the message can catch your attention, making it seem like a real-time problem you need to address immediately.
 
-The urgency in these messages is palpable. They often state that your package is delayed or that immediate action is required to avoid further issues. This pressure can make you act quickly, without taking the time to verify the source. The message might say something like, "Your package will be returned if you don’t respond within 24 hours," which can push you to click the link without thinking twice. The familiarity of the FedEx brand can create a false sense of security, making you more likely to trust the communication.
+The scam thrives on creating a sense of urgency and trust. The message may suggest that your package is crucial or time-sensitive, pushing you to act quickly without thinking. This pressure can lead you to click on the link or provide personal information, believing you are resolving a legitimate issue. The familiarity of the FedEx brand and the professional appearance of the message can further convince you that it’s a genuine notification, making it easy to let your guard down.
 
-Scammers can alter their approach slightly to catch you off guard. You might receive a voicemail with a similar message, or an email that appears to come from a different shipping company, but still uses the same tactics. Some variations might include fake delivery notifications or requests for payment to release your package. Each version is designed to look legitimate, often using real tracking numbers or even spoofing email addresses to make it seem like you’re dealing with a reputable company.
+Variations of this scam can appear in different forms, such as a voicemail claiming to be from FedEx or even a fake website that mimics the official FedEx site. Some might use different shipping companies, but the core tactic remains the same: they want you to take immediate action. You might see messages that claim your delivery is scheduled for today or that you need to confirm your identity to avoid delays. Each version is designed to exploit your concern about missing a package.
 
-Falling for this scam can lead to serious consequences. You may unknowingly provide your personal information, which can be used for identity theft, or you could end up downloading malware onto your device. If you enter your payment details, you risk financial loss and unauthorized charges. The emotional toll can also be significant, leaving you feeling violated and anxious about your security. It’s crucial to remain vigilant, as these scams can have lasting effects on your personal and financial wellbeing.
+Falling for this scam can lead to serious consequences. If you click on the link, you might unknowingly download malware onto your device or be directed to a phishing site where your personal information is harvested. This can result in identity theft, financial loss, or unauthorized transactions. The emotional toll of realizing you’ve been deceived can also be significant, leaving you feeling vulnerable and anxious about future communications.
 <p>Delivery-related scams connected to FedEx Shipping Alert Message usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a customs fee link appears.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ Falling for this scam can lead to serious consequences. You may unknowingly prov
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/bank-account-locked-message-fake/">Bank Account Locked Message Fake</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/bank-fraud-alert-text-legit-or-scam/">Bank Fraud Alert Text Legit Or Scam</a></li>
+<li><a href="/scam-check-now-c/bank-suspicious-activity-email-scam/">Bank Suspicious Activity Email Scam</a></li>
+<li><a href="/scam-check-now-c/bank-account-locked-message-fake/">Bank Account Locked Message Fake</a></li>
 <li><a href="/scam-check-now-c/bank-verification-code-text-scam/">Bank Verification Code Text Scam</a></li>
 <li><a href="/scam-check-now-c/bank-login-alert-email-fake/">Bank Login Alert Email Fake</a></li>
 <li><a href="/scam-check-now-c/bank-payment-declined-message-scam/">Bank Payment Declined Message Scam</a></li>
 <li><a href="/scam-check-now-c/bank-security-alert-text-fake/">Bank Security Alert Text Fake</a></li>
 <li><a href="/scam-check-now-c/bank-account-warning-email-scam/">Bank Account Warning Email Scam</a></li>
 <li><a href="/scam-check-now-c/bank-password-reset-message-fake/">Bank Password Reset Message Fake</a></li>
-<li><a href="/scam-check-now-c/bank-unauthorized-transaction-alert-scam/">Bank Unauthorized Transaction Alert Scam</a></li>
-<li><a href="/scam-check-now-c/credit-card-fraud-alert-text-legit/">Credit Card Fraud Alert Text Legit</a></li>
-<li><a href="/scam-check-now-c/credit-card-suspicious-activity-email-scam/">Credit Card Suspicious Activity Email Scam</a></li></ul>
+<li><a href="/scam-check-now-c/bank-unauthorized-transaction-alert-scam/">Bank Unauthorized Transaction Alert Scam</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
