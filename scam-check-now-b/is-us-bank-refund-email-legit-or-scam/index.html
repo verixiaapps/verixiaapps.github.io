@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Refund Email is a common question when something like an Amazon payment warning feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Us Bank Refund Email scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming to be from U.S. Bank, stating that you are eligible for a refund due to an overcharge or an error on your account. The message often includes official-looking logos and might even reference specific transactions or account details that make it seem legitimate. It may ask you to click a link to verify your information or claim your refund, presenting itself as a straightforward and beneficial communication from your bank.
+You might have received an email claiming to be from U.S. Bank, stating that you are eligible for a refund due to an overcharge or an account error. The message often looks professional, complete with the bank's logo and a sense of urgency. It may instruct you to click a link to verify your account information or to claim your refund. The language is designed to make you feel like this is a legitimate communication, often mentioning specific details about your account that seem accurate, which can make it all the more convincing.
 
-The email usually creates a sense of urgency, suggesting that you need to act quickly to secure your refund. Phrases like “limited time offer” or “your account will be suspended” can pressure you into clicking the link without thinking it through. This tactic is designed to bypass your usual skepticism by making you feel like you might miss out on something important, playing on your emotions to elicit a hasty response.
+The email typically emphasizes urgency, suggesting that you must act quickly to secure your refund or risk losing it. Phrases like "limited time offer" or "immediate action required" are common, creating a sense of panic that pushes you to click the link without thinking twice. The sender may even include a phone number to call for further assistance, making it feel more trustworthy. This combination of urgency and a seemingly helpful tone can easily lead you to believe that this is a genuine message from your bank.
 
-You might also see variations of this scam appearing as text messages or even phone calls, where the caller claims to be a bank representative. They may use similar language, promising refunds or claiming to resolve issues with your account. Some versions may even ask you to verify your identity by providing personal information, which can seem harmless at first but is a red flag that you should not ignore.
+You may also encounter variations of this scam, such as text messages or phone calls that mimic the same urgency and professional appearance. Some messages may claim to be from a different financial institution or even a government agency, but the core tactic remains the same. They often use familiar logos and language that you might associate with legitimate communications, making it difficult to discern the truth. Each variation aims to exploit your trust in established institutions, playing on your fears of missing out on a refund or facing account issues.
 
-If you fall for this scam, the consequences can be severe. You might inadvertently give away sensitive information, such as your account number or social security number, leading to identity theft or unauthorized transactions. Even if you think you’re just verifying a refund, the scammers can use that information to drain your accounts or open new ones in your name. Protecting your personal information is crucial, as the fallout from these scams can be both financially and emotionally devastating.
+Falling for this scam can have serious consequences. If you provide your personal information, you risk identity theft, unauthorized transactions, or even losing access to your bank account. Scammers can use your details to create new accounts in your name or drain your existing accounts, leaving you in a financial mess. The emotional toll can also be significant, as the realization that you’ve been deceived can lead to stress and anxiety. It’s crucial to be vigilant and skeptical of unexpected communications, especially when they involve your money.
 <p>Payment-related scams connected to Us Bank Refund Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like an Amazon payment warning is involved.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

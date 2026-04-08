@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Transfer Alert Email is a common question when something like a Zelle transfer problem message feels suspicious. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like a Zelle transfer problem message and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>
-You might have recently received an email claiming to be from US Bank, alerting you about a pending transfer in your account. The message often includes official-looking logos and formatting, making it seem authentic. It may ask you to click a link to verify your account details or confirm the transaction. The urgency in the email can be alarming, suggesting that immediate action is necessary to prevent your account from being locked or compromised. This can easily catch you off guard, especially if you’re expecting a transaction or have been dealing with banking issues.
+You might have recently received an email claiming to be from U.S. Bank, alerting you about a transfer made from your account. The message often includes official-looking logos and a sense of urgency, stating that your immediate action is required to confirm or dispute the transaction. It may even contain a link that appears to direct you to the U.S. Bank website, urging you to log in to verify your account details. The language used is designed to mimic legitimate communications, making it difficult to discern whether it’s a genuine alert or a clever ruse.
 
-The email typically creates a sense of urgency by stating that your account will be suspended if you do not respond quickly. Phrases like “Act now” or “Your immediate attention is required” are common, pushing you to click on links without thinking twice. This pressure can make you feel like you’re in a race against time, leading you to act impulsively. The message may also include personal information that makes it seem more credible, creating a false sense of security that you are dealing with a legitimate source.
+The email typically creates a sense of urgency, suggesting that failure to act could lead to account suspension or unauthorized charges. Phrases like "immediate attention required" or "your account is at risk" are common, pushing you to click on the provided link without taking a moment to think. This pressure can cloud your judgment, making you more likely to overlook red flags. The goal is to make you feel like you have no choice but to respond quickly, which is exactly what the scammer wants.
 
-Variations of this scam can include texts or calls claiming to be from US Bank, each designed to mimic real communication from the bank. You might receive a text message alerting you of a suspicious transaction, prompting you to call a number that appears to be official. Some versions might even involve fake websites that look almost identical to the US Bank login page, tricking you into entering your credentials. Each variation is crafted to exploit your trust and urgency, making it harder to spot the deception.
+You may also encounter variations of this scam, such as text messages or phone calls that claim to be from U.S. Bank. A text may inform you of a suspicious transaction and prompt you to click a link to secure your account. Alternatively, a phone call may come from a number that seems legitimate, with someone asking for your personal information to "verify" your identity. Each variation is designed to exploit your trust and urgency, making it easy to fall into the trap.
 
-Falling for this scam can have serious consequences. If you provide your personal information or login credentials, scammers can gain access to your bank account, leading to unauthorized transactions and potential financial loss. Beyond the immediate monetary risks, there’s also the emotional toll of realizing you’ve been deceived. The aftermath can involve a lengthy process of recovering your account, disputing charges, and dealing with the stress of identity theft. It’s crucial to remain vigilant and question any unexpected communication regarding your finances.
+If you respond to one of these scams, you risk giving away sensitive information, such as your account number or login credentials. This can lead to unauthorized access to your bank account, resulting in financial loss and potential identity theft. The consequences can be severe, leaving you not only with lost funds but also with the long and stressful process of trying to recover your identity and finances. It’s crucial to take a moment to verify any communication before acting, no matter how convincing it may seem.
 <p>That difference matters because a real notice related to Us Bank Transfer Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Wells Fargo Password Reset Email is a common question when something like an account locked warning appears without context. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Wells Fargo Password Reset Email cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be from Wells Fargo, asking you to reset your password. The message often looks official, featuring the bank’s logo and a professional layout. It may include a link that directs you to a website that closely resembles the Wells Fargo login page. The email could even contain personalized information, like your name or partial account number, making it seem even more convincing. You might have felt a moment of panic, thinking your account could be compromised, prompting you to act quickly.
+You might have recently received an email claiming to be from Wells Fargo, prompting you to reset your password. The message often includes official-looking logos and language that mimics the bank’s typical communications. It may state that there’s been suspicious activity on your account, urging you to act quickly. Links in the email may direct you to a website that looks almost identical to the Wells Fargo login page, making it easy to mistake for a legitimate request. The email may even address you by name, which can add to its credibility.
 
-The urgency in these emails is palpable. They often state that your account has been flagged for suspicious activity or that immediate action is required to secure your information. This pressure can make you feel like you have no choice but to click the link and reset your password right away. The language used is designed to instill fear, making you believe that if you don’t act fast, you could lose access to your funds or face other dire consequences. This tactic plays on your emotions, pushing you to make hasty decisions.
+The urgency in these emails is palpable. They often use phrases like “immediate action required” or “your account will be locked” if you don’t comply. This pressure can lead you to click on links without thinking twice, especially if you’re already feeling anxious about your account security. The design and tone of the email are crafted to instill a sense of trust, making it seem like a necessary step to protect your financial information. You might feel compelled to act quickly, believing that you’re safeguarding your account.
 
-You might also notice variations of this scam that appear in different forms. For instance, some messages may come as text alerts or even phone calls, claiming to be from Wells Fargo’s fraud department. They may ask you to verify your identity by providing personal information or clicking on a link. The layout and tone might change slightly, but the core message remains the same: they need your immediate attention to resolve an urgent issue. This adaptability makes it harder to spot the scam, especially if you’re already anxious about your account security.
+Scammers are known for their adaptability, so you might see variations of this email. Some may come from slightly altered email addresses that resemble Wells Fargo’s official domain, while others might include different reasons for password resets, such as system upgrades or policy changes. You could also receive text messages or phone calls with similar messages, all designed to catch you off guard. Each variation maintains that same urgent tone, making it difficult to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. If you enter your credentials on a fake site, you’re essentially handing over your account information to criminals. This can lead to unauthorized transactions, identity theft, and a long, frustrating process to regain control of your account. The emotional toll can be significant, leaving you feeling vulnerable and violated. It’s crucial to take a moment to verify any communication you receive, especially when it involves your financial security.
+Falling for this scam can have serious consequences. If you enter your credentials on a fraudulent site, you’re handing over your sensitive information to criminals who can drain your accounts or commit identity theft. Even if you think you’re just resetting a password, you could be opening the door to financial loss and long-term damage to your credit. The emotional toll can be just as significant, leaving you feeling violated and anxious about your financial security. It’s crucial to take a moment to verify before acting on any unexpected email or message.
 <p>The strongest clue is usually not one isolated detail. With Wells Fargo Password Reset Email, the risk often becomes clearer when something like an account locked warning is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

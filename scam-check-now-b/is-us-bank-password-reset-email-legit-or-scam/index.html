@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Password Reset Email is a common question when something like a login alert email appears without context. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a login alert email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from U.S. Bank, stating that your password needs to be reset. The message often looks official, complete with the bank's logo and a professional layout. It may include a link that directs you to a login page where you’re prompted to enter your current password and create a new one. The email might even address you by name, making it feel personal and legitimate. Everything seems in order, but that’s where the danger lies.
+You just received an email that appears to be from US Bank, claiming that your password needs to be reset. The message is professionally formatted, complete with the bank’s logo and a sense of urgency. It instructs you to click on a link to verify your account information. The email might even include a warning that failure to act could result in account suspension or unauthorized access. Everything seems legitimate, but that nagging feeling in your gut tells you to double-check before you proceed.
 
-The email likely creates a sense of urgency, suggesting that your account has been compromised or that immediate action is required to avoid account suspension. Phrases like “urgent action needed” or “your account will be locked” are designed to make you feel anxious and pressured to respond quickly. This tactic plays on your fear of losing access to your finances, making it easier for scammers to manipulate your emotions and push you into taking hasty actions without thinking.
+The email creates a sense of urgency, making you feel like you must act quickly to protect your account. Phrases like “immediate action required” or “your account is at risk” are designed to trigger anxiety, pushing you to click the link without thinking. This tactic builds a false sense of trust, as it mimics the tone and style of genuine communications from your bank. You might find yourself wondering if this is a legitimate security measure or a clever ploy to steal your information.
 
-You may also encounter variations of this scam, such as text messages or phone calls claiming to be from U.S. Bank. The text might say your account has been flagged for suspicious activity, urging you to click a link. Alternatively, a caller may impersonate a bank representative, asking for your personal information to “verify” your identity. Each of these methods aims to catch you off guard, making it difficult to discern what’s real and what’s not.
+Variations of this scam can appear in different forms, such as text messages or even phone calls. You might receive a text that looks like it’s from US Bank, urging you to click a link to reset your password. Alternatively, a caller may claim to be a bank representative, asking for your personal information to verify your account. Each version has its own subtle differences, but the core message remains the same: they want you to act quickly and without hesitation.
 
-If you fall for this scam, the consequences can be severe. Scammers can gain access to your bank account, draining your funds or making unauthorized transactions. Once they have your personal information, they may even open new accounts in your name, leading to long-term financial damage and a complicated recovery process. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security.
+If you fall for this scam, the consequences can be severe. Clicking that link could lead to a phishing site designed to capture your login credentials, giving scammers access to your bank account. Once they have your information, they can drain your funds, make unauthorized transactions, or even open new accounts in your name. The emotional and financial fallout can be overwhelming, leaving you not only with a loss of money but also with the stress of dealing with identity theft and financial recovery.
 <p>That difference matters because a real notice related to Us Bank Password Reset Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

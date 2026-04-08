@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Td Bank Fraud Alert Email is a common question when something like a PayPal refund email feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like a PayPal refund email and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>
-You might have recently received an email claiming to be from TD Bank, alerting you to suspicious activity on your account. The message often includes your name, account details, and a sense of urgency, urging you to click a link to verify your information. The email may look professional, complete with the bank's logo and formatting, making it seem like a legitimate communication. It’s designed to catch your attention, especially if you’ve been active with your banking lately.
+You might have recently received an email claiming to be from TD Bank, warning you about suspicious activity on your account. The message often includes your name, a sense of urgency, and a link that prompts you to verify your information. It might look official, complete with the bank's logo and even a customer service number. The email may ask you to click on a link to log in and confirm your identity, making it seem like a necessary step to protect your finances. This kind of communication can easily catch you off guard, especially if you’re not expecting it.
 
-The email creates a sense of urgency by suggesting that your account could be compromised unless you act quickly. Phrases like "immediate action required" or "your account will be locked" are common tactics used to pressure you into responding without thinking. This urgency can lead you to click on links or provide personal information before you have a chance to verify the source. The message may even include a reassuring tone, making you feel as though you can trust the sender.
+The urgency in these emails is palpable. They often state that your account will be locked or that funds could be lost if you don’t act immediately. This pressure can make you feel like you have no choice but to respond quickly, bypassing your usual caution. The email may also include reassuring phrases about your account security, making you feel like it’s a legitimate request from a trusted source. This blend of urgency and trust can easily cloud your judgment, leading you to take actions you wouldn’t normally consider.
 
-You might also notice variations of this scam, such as text messages or phone calls claiming to be from TD Bank. These could include fake alerts about transactions, requests for account verification, or even offers for assistance with your account. Each variation is crafted to mimic the bank's communication style, making it harder to distinguish between what is real and what is not. Scammers are constantly evolving their tactics, so what you see today might be slightly different tomorrow.
+Variations of this scam can appear in different forms, such as text messages or phone calls, all claiming to be from TD Bank. You might receive a text alerting you to unusual transactions, prompting you to click a link to verify your account. Alternatively, a phone call may come from someone posing as a bank representative, asking for your personal information to "confirm" your identity. Each version is designed to look credible, often using familiar language and logos, making it difficult to discern what’s real and what’s not.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information, you risk having your bank account drained or your identity stolen. Scammers can use your details to access your accounts, make unauthorized transactions, or even open new accounts in your name. The aftermath can be devastating, as it often takes time to recover lost funds and restore your credit. It’s crucial to remain vigilant and question any unexpected communication that seems too good to be true or overly alarming.
+If you fall for this scam, the consequences can be severe. Providing your personal information can lead to unauthorized access to your bank account, resulting in stolen funds or identity theft. Once scammers have your details, they can wreak havoc on your finances, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the realization that you’ve been deceived can lead to anxiety and distrust in future communications. It’s crucial to remain vigilant and question any unexpected messages, no matter how legitimate they may seem.
 <p>That difference matters because a real notice related to Td Bank Fraud Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Td Bank Suspicious Activity Email is a common question when something like an Amazon payment warning feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Td Bank Suspicious Activity Email scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming to be from TD Bank, warning you about suspicious activity on your account. The message often includes your name, account number, and a sense of urgency, urging you to click a link to verify your information. The email may look professional, complete with the bank’s logo and colors, making it seem legitimate. However, the real intent is to trick you into providing personal details or logging into a fake website that mimics the bank's official site.
+You receive an email that looks like it’s from TD Bank, complete with their logo and familiar color scheme. The subject line reads, “Suspicious Activity Detected on Your Account,” and it urges you to click a link to verify your information. The message is crafted to look official, using terminology you’d expect from your bank, and it even includes a customer service number. At first glance, it seems like a legitimate warning, but there’s something unsettling about the urgency in the tone that makes you pause.
 
-The email creates an immediate sense of urgency, suggesting that your account is at risk and that you need to act quickly to avoid potential fraud. Phrases like “Your account will be suspended” or “Immediate action required” are designed to provoke anxiety, pushing you to click the link without thinking. This pressure can cloud your judgment, making it easier for scammers to manipulate you into providing sensitive information.
+The email creates a sense of urgency, suggesting that immediate action is required to protect your account. Phrases like “Your account will be locked if you do not respond within 24 hours” are designed to push you into a quick decision. This pressure can make it hard to think clearly, especially if you’re already worried about your financial security. The combination of a familiar sender and alarming content makes it easy to overlook the red flags.
 
-You might also see variations of this scam, such as text messages or phone calls that claim to be from TD Bank. These messages may include different scenarios, like a supposed transaction you didn’t make or a security alert about your login attempts. Each variation aims to instill fear and prompt you to take action, whether that’s clicking a link or calling a number that leads you to a scammer posing as a bank representative.
+You might also see variations of this scam, such as text messages or phone calls claiming to be from TD Bank. The text may ask you to click a link to confirm your identity, while the call could involve a “representative” requesting your personal details. Each version aims to mimic the bank’s communication style, making it difficult to discern what’s real and what’s not. The consistency in branding and language can easily confuse anyone who isn’t on high alert.
 
-Falling for this scam can lead to serious consequences, including identity theft and financial loss. If you provide your login credentials, scammers can access your account, draining your funds or making unauthorized transactions. Even if you think you’re being cautious, the sophisticated nature of these scams can catch anyone off guard, leaving you vulnerable and regretting that moment of trust.
+Falling for this scam can lead to serious consequences. If you provide your information, the scammer can access your bank account, leading to unauthorized transactions and potential identity theft. The emotional toll can be significant, leaving you feeling violated and anxious about your financial safety. It’s not just about losing money; it’s about the trust you place in institutions that are supposed to protect you. The aftermath can be a long and frustrating process of trying to regain control over your accounts and personal information.
 <p>Payment-related scams connected to Td Bank Suspicious Activity Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like an Amazon payment warning is involved.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

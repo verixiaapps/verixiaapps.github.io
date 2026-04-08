@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Robinhood Verification Code Text is a common question when something like a password reset message appears without context. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a password reset message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have received a text that claims to be from Robinhood, asking you to verify your account with a code. The message often looks official, featuring the Robinhood logo and using language that sounds legitimate. It may say something like, “Your verification code is 123456. Please enter it to confirm your identity.” This type of communication can easily catch you off guard, especially if you’re expecting a message from the platform. The design and wording can make it seem like a routine security measure, but it’s crucial to take a step back before responding.
+You might have recently received a text claiming to be from Robinhood, asking you to verify your account with a code. The message often appears official, featuring the Robinhood logo and using language that sounds friendly and reassuring. It may say something like, “Your verification code is 123456. Please enter this code to secure your account.” At first glance, it seems like a routine security measure, especially if you’ve been using the app. However, it’s crucial to take a closer look before acting on it.
 
-Scammers know how to create a sense of urgency. The message might suggest that your account is at risk or that you need to act quickly to avoid losing access. This pressure can make you feel like you have no choice but to respond immediately, especially if you’ve recently logged into your account or made a transaction. They often play on your emotions, making you believe that failing to comply could lead to serious consequences, like losing your investments or facing account suspension. This tactic is designed to bypass your usual skepticism and push you into a hasty decision.
+Scammers know how to create a sense of urgency. The message may mention that your account is at risk or that immediate action is required to prevent unauthorized access. This pressure can trick you into responding quickly without thinking. They might also include a link that appears legitimate but leads to a fake website designed to capture your login details. By fostering a sense of trust, they exploit your fear of losing access to your investments, making it harder to see the red flags.
 
-You might also encounter variations of this scam, such as emails or calls that mimic Robinhood’s communication style. Some messages may claim to be from customer support, asking for your personal information or prompting you to click a link to verify your account. Others might come from fake websites that look almost identical to Robinhood’s official site, tricking you into entering your login credentials. Each version is crafted to exploit your trust in the platform, making it easy to overlook red flags in the heat of the moment.
+You may encounter variations of this scam, with different messaging or even calls claiming to be from customer support. Some texts might ask you to click on a link to verify your identity, while others could come from a spoofed number that looks like it belongs to Robinhood. Each variation is designed to catch you off guard, often using familiar phrases or references to recent transactions to make the communication seem credible. This adaptability makes it harder to recognize the scam until it’s too late.
 
-Falling for this scam can lead to serious consequences. If you provide the verification code or any personal information, scammers can gain access to your account, draining your funds or making unauthorized trades. Once they have your information, it can be incredibly difficult to regain control. You may end up dealing with financial loss and the hassle of trying to recover your account, all while feeling the weight of having been deceived. The emotional and financial toll can be significant, making it essential to remain vigilant against these tactics.
+Falling for this scam can have serious consequences. If you enter your verification code or personal information, you may unknowingly give scammers access to your account, leading to unauthorized transactions or even identity theft. The aftermath can be devastating, not just financially but also emotionally, as you realize that your trust has been exploited. Protecting yourself means staying vigilant and questioning any unexpected requests for sensitive information, especially when they create a sense of urgency.
 <p>That difference matters because a real notice related to Robinhood Verification Code Text should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

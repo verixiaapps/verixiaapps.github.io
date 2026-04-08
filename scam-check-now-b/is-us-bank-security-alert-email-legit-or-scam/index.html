@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Security Alert Email is a common question when something like an account locked warning appears without context. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Us Bank Security Alert Email cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have received an email that looks like it’s from US Bank, claiming there’s been suspicious activity on your account. The message often includes your name and account details, making it seem legitimate. It might ask you to click a link to verify your identity or confirm a transaction. The email design mimics the official US Bank branding, complete with logos and colors, which can make it hard to distinguish from real communications. You might even notice a sense of familiarity, as it references recent transactions or your account balance, drawing you in further.
+You might have recently received an email claiming to be from U.S. Bank, notifying you of a security alert regarding your account. The message may look official, complete with the bank's logo and a professional tone. It often includes alarming details about suspicious activity, urging you to click a link to verify your information. The email may even address you by name, making it feel personal and legitimate. However, the real intent is to trick you into providing sensitive information, like your login credentials or Social Security number.
 
-The urgency in these emails is palpable. They often state that immediate action is required to prevent account suspension or unauthorized access. This pressure can make you feel anxious, pushing you to act quickly without thinking. The message may claim that failure to respond within a certain timeframe will result in serious consequences, such as losing access to your funds. This tactic is designed to bypass your usual skepticism, making you more likely to click that link or provide personal information without a second thought.
+The urgency in these emails is palpable. They often state that immediate action is required to prevent unauthorized access to your account. Phrases like "Your account will be locked" or "Act now to secure your funds" create a sense of panic, pushing you to click the link without thinking twice. This pressure can cloud your judgment, making it easier for scammers to manipulate your emotions and lead you to their fraudulent website, which looks strikingly similar to the real U.S. Bank site.
 
-You might encounter variations of this scam that appear as text messages or even automated phone calls. A text could say you need to verify a recent purchase, while a call might ask you to confirm your account details to avoid a security breach. Each version aims to create a sense of legitimacy by using official-sounding language and urgent requests. Some might even include a fake customer service number that leads you to a scammer posing as a bank representative, further complicating your ability to discern what's real.
+These scams can take on various forms, sometimes appearing as text messages or even automated phone calls. You might receive a text alerting you to a supposed problem with your account, prompting you to call a number that leads you to a scammer. In other instances, you may encounter pop-up ads while browsing the internet, claiming to be from U.S. Bank and asking you to enter your details for verification. Each variation is designed to exploit your trust in the bank and your fear of losing access to your finances.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information, you risk having your account drained or your identity stolen. Scammers can use your details to open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the realization that you’ve been deceived can lead to feelings of vulnerability and distrust. Protecting yourself means being aware of these tactics and taking a moment to verify any communication that seems off, no matter how legitimate it appears.
+Falling for this scam can have serious consequences. If you provide your information, scammers can gain access to your bank account, leading to unauthorized transactions and potential identity theft. The financial impact can be devastating, and recovering your funds may take significant time and effort. Beyond the monetary loss, the emotional toll of realizing you've been scammed can leave you feeling vulnerable and anxious about your online security. It's crucial to remain vigilant and question any unexpected communication regarding your financial accounts.
 <p>The strongest clue is usually not one isolated detail. With Us Bank Security Alert Email, the risk often becomes clearer when something like an account locked warning is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1466,8 +1466,8 @@ Falling for this scam can lead to serious consequences. If you provide your pers
 <li><a href="/scam-check-now-b/is-pnc-bank-fraud-alert-email-legit-or-scam/">Is Pnc Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-login-alert-email-legit-or-scam/">Is Pnc Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-transfer-alert-email-legit-or-scam/">Is Pnc Bank Transfer Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-security-alert-email-about-login-legit-or-scam/">Is Security Alert Email About Login or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-fraud-alert-email-legit-or-scam/">Is Td Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-td-bank-login-alert-email-legit-or-scam/">Is Td Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

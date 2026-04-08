@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Robinhood Transfer Alert Email is a common question when something like a suspicious link feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Robinhood Transfer Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Robinhood, alerting you about a transfer in your account. The email may include official-looking logos, links to the Robinhood website, and even a message that seems personalized, mentioning your name or account details. It could ask you to verify your account or confirm a transaction by clicking on a link. The layout might resemble genuine communications from Robinhood, making it easy to overlook any signs that it could be a scam.
+You might have recently received an email claiming to be from Robinhood, alerting you about a transfer in your account. It could look official, complete with the Robinhood logo and a message urging you to verify your account details. The email may include links that appear to direct you to the Robinhood website, asking you to log in to confirm the transaction. The language is often urgent, suggesting that immediate action is required to prevent unauthorized access or to secure your funds. It’s easy to see how this could catch your attention, especially if you’re an active user of the platform.
 
-The message likely creates a sense of urgency, suggesting that immediate action is required to prevent unauthorized access or to secure your funds. Phrases like “Your account will be locked if you don’t respond within 24 hours” can make you feel pressured to act quickly. This tactic is designed to bypass your critical thinking, pushing you to click on links or provide personal information without taking the time to verify the source.
+The urgency in the email is designed to create a sense of panic. You might feel compelled to click on the links without thinking twice, fearing that your account is at risk. Scammers know how to play on your emotions, making you believe that if you don’t act quickly, you could lose access to your investments or even your money. This pressure can cloud your judgment, leading you to make hasty decisions that you wouldn’t normally consider.
 
-You might also notice variations of this scam, such as texts or calls that mimic Robinhood's customer service. Some may even impersonate a friend or family member who claims they had a similar experience. These messages can appear to come from legitimate sources, using familiar language and scenarios that make them seem trustworthy. The more they resemble real communications, the easier it is to let your guard down and respond without checking the details.
+Variations of this scam can pop up in different forms, such as text messages or phone calls claiming to be from Robinhood support. You might receive a text alerting you to suspicious activity, directing you to a website that looks strikingly similar to Robinhood’s official site. Some scammers even go as far as impersonating customer service representatives, calling you directly to confirm your account details. Each variation is crafted to look legitimate, making it difficult to discern what is real and what is not.
 
-Falling for this type of scam can lead to serious consequences, including unauthorized access to your financial accounts or identity theft. If you provide your login information or personal details, scammers can drain your accounts or open new ones in your name. The aftermath can be devastating, leaving you to deal with financial loss, damaged credit, and the stress of recovering your identity. It’s crucial to remain vigilant and verify any unexpected communications before taking action.
+Falling for this scam can have serious consequences. If you provide your login information or personal details, scammers can gain access to your account, draining your funds or making unauthorized trades. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to take a moment to verify any unexpected messages you receive, as the cost of acting too quickly can be significant.
 <p>Scams connected to Robinhood Transfer Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

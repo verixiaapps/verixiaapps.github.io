@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Suspicious Activity Email is a common question when something like an Amazon payment warning feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common Us Bank Suspicious Activity Email scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming to be from U.S. Bank, warning you about suspicious activity on your account. The message likely includes your name and account details, urging you to click on a link to verify your identity or secure your account. The email might look professional, complete with the bank’s logo and even a customer service number that seems legitimate. It’s designed to mimic official communications, making it easy to mistake for a genuine alert.
+You might have recently received an email claiming to be from U.S. Bank, alerting you to suspicious activity on your account. The message typically includes your name and account details, making it seem legitimate. It may ask you to click a link to verify your identity or to update your account information. The email often features official logos and a professional layout, designed to mimic the bank's actual communications, which can make it hard to distinguish from real messages you receive.
 
-The urgency in the email is palpable. Phrases like “immediate action required” or “your account will be locked” create a sense of panic, pushing you to act quickly. You might feel compelled to click the link without thinking twice, fearing that your hard-earned money is at risk. This tactic plays on your emotions, making it seem like the bank is looking out for you, when in reality, it’s a ploy to extract your personal information.
+The urgency in these emails is palpable; they often state that immediate action is required to protect your account. Phrases like "Your account will be locked" or "Act now to avoid penalties" create a sense of panic, pushing you to respond quickly without thinking it through. This pressure can cloud your judgment, making it easier for scammers to manipulate you into providing sensitive information or clicking on harmful links.
 
-Scammers often adapt their tactics, so you might see variations of this email. Some may come as text messages or even phone calls, where a friendly voice claims to be from U.S. Bank, asking for your account details to resolve an issue. Others might use fake websites that look almost identical to the bank’s official site, tricking you into entering sensitive information. Each version is crafted to exploit your trust and urgency, making it harder to discern what’s real.
+You may also encounter variations of this scam, such as text messages or phone calls that claim to be from U.S. Bank. These messages might reference recent transactions or unusual logins, using personalized information to gain your trust. Some variations might even include fake customer service numbers that appear legitimate, further complicating the situation. Each version is crafted to exploit your concerns about account security, making it difficult to recognize the deception.
 
-If you fall for this scam, the consequences can be severe. Your personal and financial information may end up in the hands of criminals, leading to unauthorized transactions, identity theft, or even drained bank accounts. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to recognize these tactics to protect yourself from becoming another victim.
+If you fall for this scam, the consequences can be severe. Scammers can gain access to your personal and financial information, leading to unauthorized transactions or identity theft. Once they have your details, they can drain your accounts or open new lines of credit in your name, leaving you to deal with the aftermath. The emotional and financial toll can be significant, making it crucial to stay vigilant and skeptical of unsolicited communications, even if they seem to come from trusted sources like your bank.
 <p>Payment-related scams connected to Us Bank Suspicious Activity Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like an Amazon payment warning is involved.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Fraud Alert Email is a common question when something like a PayPal refund email feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Us Bank Fraud Alert Email flow starts with something like a PayPal refund email, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might receive an email that looks like it’s from U.S. Bank, warning you about unusual activity on your account. The message often includes your name and account details, making it seem legitimate. It might ask you to click a link to verify your identity or confirm a recent transaction. The design of the email mimics official communications, complete with logos and formatting that appear professional. If you’re not paying close attention, it can be easy to mistake this for a genuine alert, especially if you’ve recently made transactions or changes to your account.
+You might have recently received an email claiming to be from U.S. Bank, alerting you to suspicious activity on your account. The message could look official, complete with the bank's logo and a professional tone. It may ask you to verify your account information by clicking on a link or downloading an attachment. The email often includes specific details about a transaction that you may or may not recognize, making it seem credible and relevant to your current banking situation.
 
-The email typically creates a sense of urgency, claiming that your account is at risk and immediate action is required. Phrases like “your account will be locked” or “verify now to avoid penalties” push you to act quickly, often bypassing your usual caution. This pressure can make you feel like you must respond right away, overriding any instinct to double-check the source. The combination of urgency and the appearance of trustworthiness can easily lead you to click the link without a second thought.
+The urgency in the email is palpable. It might say something like, "Your account will be locked if you do not respond within 24 hours," creating a sense of panic. This pressure can lead you to act quickly without thinking, pushing you to click that link or provide personal information to avoid losing access to your funds. The message may also include phrases that instill trust, such as "We value your security" or "Protecting your account is our top priority," making it even harder to question its legitimacy.
 
-You might also encounter variations of this scam that come through text messages or phone calls, all designed to look like they’re from U.S. Bank. A text might say you’ve received a payment or need to confirm a transaction, while a call could feature a “representative” asking for your information to resolve an urgent issue. Each version plays on your familiarity with banking communications, often using similar language and branding to create a false sense of security. The more these messages appear in your inbox or phone, the easier it becomes to overlook the warning signs.
+Variations of this scam can appear in different forms, such as text messages or phone calls, all designed to mimic U.S. Bank's communication style. You might receive a text claiming to be a fraud alert, urging you to click a link or call a number to verify your identity. Some scammers even go as far as spoofing the bank's phone number, making it look like the call is genuinely coming from U.S. Bank. Each version is crafted to exploit your trust and urgency, making it challenging to discern what's real.
 
-If you fall for this scam, the consequences can be severe. By providing your personal information, you risk having your account compromised, leading to unauthorized transactions and potential financial loss. Scammers can use your details to open new accounts in your name or access your existing accounts, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the violation of trust can lead to anxiety and a sense of vulnerability. Recognizing these scams is crucial to protecting yourself and your finances.
+Falling for this kind of scam can have severe consequences. If you provide your personal information, scammers can gain access to your bank account, leading to unauthorized transactions and financial loss. Beyond the immediate theft, there’s the emotional toll of feeling violated and the stress of dealing with the aftermath. You might find yourself spending hours trying to recover your account and protect your identity, all because a seemingly legitimate email caught you off guard.
 <p>This is why step-by-step checking matters. Once a message related to Us Bank Fraud Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

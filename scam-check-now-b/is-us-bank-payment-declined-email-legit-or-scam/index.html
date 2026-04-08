@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Us Bank Payment Declined Email is a common question when something like a PayPal refund email feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like a PayPal refund email and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>
-You open your email to find a message from what appears to be U.S. Bank, stating that your recent payment has been declined. The email features the bank's logo and a professional layout, making it look legitimate at first glance. It urges you to click a link to verify your account information and resolve the issue. The urgency is palpable; it mentions that your account may be temporarily suspended if you don’t act quickly. You might feel a knot in your stomach, wondering if this is a genuine warning or just another phishing attempt.
+You receive an email that looks like it’s from U.S. Bank, claiming that your recent payment has been declined. The message includes your name, a reference number, and a link to "resolve" the issue. The email design mimics the official U.S. Bank branding, complete with logos and colors that seem familiar. It urges you to act quickly, suggesting that your account may be at risk if you don’t click the link and provide the requested information. At first glance, it seems like a legitimate communication from your bank, but there’s something unsettling about the urgency.
 
-The email plays on your emotions by creating a sense of urgency. Phrases like “immediate action required” or “your account is at risk” are designed to trigger a quick response. You might feel pressured to click the link without thinking twice, fearing that you could lose access to your funds or face other consequences. This tactic is effective because it exploits your trust in your bank and the fear of missing out on important information about your finances.
+The email creates a sense of urgency by stating that your account will be locked if you don’t respond immediately. It plays on your emotions, making you feel anxious about the potential consequences of inaction. By using phrases like “immediate action required” and “your security is our priority,” it builds a false sense of trust. You might find yourself feeling pressured to click the link and provide your personal information, thinking you’re safeguarding your account, when in reality, you’re being led into a trap.
 
-You might also notice variations of this scam. For instance, some messages may claim to be from a different financial institution or use slightly altered email addresses that look similar to the official ones. Others might come as text messages or phone calls, making it even harder to distinguish between genuine communication and a scam. Each version aims to catch you off guard, often using familiar logos or language to build credibility and manipulate your response.
+Variations of this scam can appear in different forms. You might receive a text message with a similar message, or even a phone call from someone claiming to be a U.S. Bank representative. They may ask for your account details or direct you to a fake website that looks almost identical to the official U.S. Bank site. Each version aims to exploit your trust in the bank, using familiar logos and language to make the scam feel credible. The slight differences in delivery can make it easy to overlook the signs that something is off.
 
-Falling for this scam can have serious consequences. If you provide your personal information, you risk having your bank account compromised, leading to unauthorized transactions and identity theft. The emotional toll can be significant, as you may feel violated and anxious about your financial security. Moreover, cleaning up the aftermath of such a breach can be time-consuming and stressful, leaving you vulnerable to further scams in the future. It’s crucial to remain vigilant and question any unexpected communication regarding your finances.
+If you fall for this scam, the consequences can be severe. You might unknowingly provide sensitive information, allowing scammers to access your bank account and drain your funds. Even if they don’t steal your money right away, they could use your personal information for identity theft, leading to long-term financial and emotional distress. The aftermath can involve hours of dealing with your bank, credit agencies, and possibly law enforcement, all while trying to piece together how it happened and how to recover from it.
 <p>That difference matters because a real notice related to Us Bank Payment Declined Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
