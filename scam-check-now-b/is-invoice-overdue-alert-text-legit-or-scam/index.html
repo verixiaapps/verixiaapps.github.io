@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/payment-scams/">Payment Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/text-scams/">Text Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Invoice Overdue Alert Text is a common question when something like an Amazon payment warning feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Invoice Overdue Alert Text scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You receive a text message that reads, “Your invoice is overdue! Immediate payment is required to avoid penalties. Click here to settle your account.” The message looks official, complete with a logo and a link that seems to lead to a legitimate website. The urgency in the tone makes you pause. You might have received similar texts before, especially if you’ve ever dealt with online services or subscriptions. The sender claims to be a company you recognize, which adds a layer of credibility to the alert, making it difficult to dismiss outright.
+You receive a text message that reads, “Your invoice is overdue! Immediate payment is required to avoid penalties. Click here to settle your account.” The sender claims to be from a well-known company you’ve interacted with before, and the link looks legitimate at first glance. The message is urgent, suggesting that your account could be suspended or that you might face additional fees if you don’t act quickly. It’s designed to catch your attention and provoke a sense of panic, making you feel like you need to respond right away.
 
-The pressure builds as the message emphasizes that immediate action is necessary. It suggests that if you don’t pay right away, you could face additional fees or even service interruptions. This tactic is designed to trigger a sense of panic, pushing you to act quickly without taking the time to verify the message's authenticity. You might find yourself questioning whether you’ve overlooked an actual invoice, leading you to click the link without a second thought.
+The urgency in the message is palpable. It plays on your fear of financial repercussions, creating a scenario where you might feel cornered. You might think, “I can’t afford to have my account suspended,” or “I don’t want to deal with late fees.” This pressure can cloud your judgment, pushing you to click the link without taking a moment to verify the sender or the legitimacy of the claim. The message is crafted to build trust, often using familiar branding or language that mimics the real company, making it even harder to discern fact from fiction.
 
-Variations of this scam can appear in different forms. You might receive an email that looks like it’s from your utility provider or a text that claims to be from a popular online retailer. Some might even use a phone call, where a representative sounds convincing and provides details about your account. Each version plays on the same theme of urgency and authority, making it easy to mistake them for legitimate communications, especially if you’re already expecting a bill or have recently made a purchase.
+You might also notice variations of this scam appearing in your inbox or as phone calls. Some messages may come from different companies, while others might claim to be from a service provider or a subscription you’ve forgotten about. The language may change slightly, but the core message remains the same: an overdue invoice that requires immediate attention. Some might even offer a discount for prompt payment, further enticing you to act quickly without thinking. Each version is designed to exploit your trust and urgency, making it easy to overlook the warning signs.
 
-Falling for this scam can lead to serious consequences. If you click the link, you might be directed to a fraudulent website designed to steal your payment information. Even worse, you could unknowingly download malware onto your device, compromising your personal data. The financial impact can be significant, not just from the immediate loss but also from the long-term effects of identity theft. It’s crucial to remain vigilant and verify any unexpected alerts before taking action.
+Falling for this scam can lead to serious consequences. If you click the link, you could unknowingly provide your personal information or financial details to the scammers. This could result in unauthorized charges, identity theft, or even malware being installed on your device. The aftermath can be overwhelming, as you scramble to secure your accounts and deal with the fallout. It’s not just about losing money; it’s about the time and stress involved in recovering from a situation that could have been avoided with a moment of skepticism.
 <p>The strongest clue is usually not one isolated detail. With Invoice Overdue Alert Text, the risk often becomes clearer when something like an Amazon payment warning is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

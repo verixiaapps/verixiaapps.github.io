@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/payment-scams/">Payment Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/text-scams/">Text Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Refund Issued Text is a common question when something like a suspicious message feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Refund Issued Text situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You receive a text message claiming that a refund has been issued to your account. The message includes your name and a link to verify the details. It looks official, complete with a logo from a well-known company, and it urges you to click the link to confirm your information. The language is casual yet professional, making it seem like a routine notification. At first glance, it feels legitimate, especially if you've recently made a purchase or had a service issue. You might even think it’s a simple mistake that needs correcting, prompting you to act quickly.
+You receive a text message that claims to be from a well-known retailer, stating that a refund has been issued to your account. The message includes a link to confirm your details and access the refund. It looks official, complete with the company’s logo and a professional tone. You might even notice that it uses your first name, making it feel personal and genuine. This kind of message can easily catch you off guard, especially if you’ve recently made a purchase or returned an item.
 
-The urgency in the message is palpable. It tells you that the refund will expire if you don’t respond within a specific timeframe, creating a sense of panic. You might feel compelled to click the link immediately, fearing you’ll miss out on your money. The sender's tone is friendly, almost reassuring, which can easily build trust. They might even mention that many customers have already received their refunds, making you feel like you could be missing out on something that everyone else is benefiting from.
+The urgency in the message is palpable. It may say that you need to act quickly to claim your refund before it expires or that your account will be charged if you don’t respond. This tactic is designed to create a sense of panic, pushing you to click the link without thinking twice. The message may also mention that this is a limited-time offer or that it’s a one-time resolution to an issue you didn’t even know existed, making it hard to resist the urge to engage.
 
-You might see variations of this scam. Sometimes, it comes as an email with a similar message, or even a phone call where someone claims to be from customer service. The details may change slightly, like the refund amount or the company name, but the core message remains the same. Some scams even use fake websites that look remarkably similar to the official ones, tricking you into providing personal information. Each version is designed to catch you off guard, making it easy to overlook the red flags.
+You might see variations of this scam that appear to come from different companies or even government agencies. Some texts might claim to be about tax refunds, while others could reference subscription services you’ve never signed up for. Each version typically shares the same structure: a promise of money back, a link to click, and a sense of urgency. The sender’s name may change, but the core elements remain the same, making it easy to overlook the red flags.
 
-Falling for this scam can have serious consequences. If you click that link, you could unknowingly provide your personal information to cybercriminals, who may then access your bank account or steal your identity. The aftermath can be devastating, leading to financial loss and a long, arduous process of recovery. What seemed like a harmless text could open the door to a world of trouble, leaving you feeling violated and anxious about your security.
+Falling for this scam can lead to serious consequences. If you click the link, you might unknowingly provide your personal information, which can be used for identity theft or financial fraud. Even if you think you’re just confirming a refund, you could end up exposing your bank details or login credentials. The aftermath can be stressful and costly, leaving you to deal with the repercussions long after the initial message has faded from your phone screen.
 <p>Scams connected to Refund Issued Text often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

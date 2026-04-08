@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/payment-scams/">Payment Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/text-scams/">Text Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Payment Overdue Text is a common question when something like a suspicious link feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Payment Overdue Text situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You receive a text message that reads, “Your payment is overdue. Please click the link to resolve this issue immediately.” The message looks official, complete with a company logo and a customer service number that seems legitimate. It might even mention your account details, making it feel personal and urgent. You might be tempted to click the link, thinking it’s a simple reminder from a service you use. The message is crafted to catch your attention and make you feel like you need to act fast to avoid any consequences.
+You receive a text message that reads, “Your payment is overdue! Please click the link to settle your account immediately.” The sender claims to be from a well-known service provider, complete with their logo and official-looking language. The message might even include your name, making it feel personal and legitimate. You might find yourself glancing at your bank account, wondering if you missed a payment. The urgency in the message is palpable, and it’s easy to feel a twinge of panic as you consider the consequences of ignoring it.
 
-The urgency in the text is palpable. It suggests that failure to respond could lead to late fees, service interruptions, or even legal action. This pressure can make you feel anxious, prompting you to act without fully thinking it through. The sender may use phrases like “immediate action required” or “your account will be suspended” to push you into a hasty decision. This tactic is designed to bypass your natural skepticism, making you believe that ignoring the message could have serious repercussions.
+The text creates a sense of urgency by implying that immediate action is necessary to avoid penalties or service interruptions. It often includes phrases like “act now” or “your account will be suspended” to pressure you into clicking the link without thinking. This tactic plays on your fear of missing payments or losing access to services you rely on. The sender’s tone is authoritative, making it seem like they have the power to take action against you if you don’t comply quickly. This pressure can cloud your judgment, pushing you to act impulsively.
 
-Scammers often change their approach to keep you guessing. You might see variations like a phone call from someone claiming to be from your bank, or an email that appears to come from a trusted retailer. The details may differ, but the core message remains the same: there’s an urgent need for you to verify your payment information. Some messages might even include fake customer reviews or testimonials to build a false sense of trust. Each version is tailored to fit different contexts, but they all aim to elicit the same response from you.
+You might encounter variations of this scam, such as emails that look like they come from your bank or phone calls from someone claiming to be a customer service representative. Sometimes, the message may offer a discount for paying immediately or threaten legal action if you don’t respond. Each version is designed to exploit your trust in established companies, using familiar logos and jargon to make the communication appear credible. The slight differences in delivery can make it difficult to recognize the underlying scam.
 
-If you fall for this scam, you could end up providing sensitive information like your credit card number or login credentials. Once scammers have this data, they can drain your accounts, make unauthorized purchases, or even steal your identity. The aftermath can be devastating—financial loss, damaged credit scores, and the stress of dealing with the fallout. It’s crucial to remain vigilant and take a moment to verify the legitimacy of any unexpected messages before taking action.
+Falling for this scam can lead to serious consequences. If you click the link, you might be directed to a fake website designed to steal your personal information or financial details. Entering your data could result in identity theft or unauthorized transactions, leaving you with a hefty financial burden. Even if you don’t provide sensitive information, the act of engaging with the scammer can lead to further harassment or more sophisticated scams targeting you in the future. It’s crucial to remain vigilant and skeptical when dealing with unexpected payment requests.
 <p>Scams connected to Payment Overdue Text often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

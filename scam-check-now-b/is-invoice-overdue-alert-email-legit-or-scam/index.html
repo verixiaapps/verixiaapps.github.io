@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Invoice Overdue Alert Email is a common question when something like a bank fraud alert text feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Invoice Overdue Alert Email flow starts with something like a bank fraud alert text, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You open your email and see a message with the subject line “Invoice Overdue Alert.” The sender claims to be from a well-known company, and the email includes your name and details about an unpaid invoice. The formatting looks professional, complete with logos and contact information. There’s a clear call to action urging you to click a link to view the invoice and settle the payment immediately. The urgency in the tone makes it hard to ignore, especially if you’ve been expecting a delivery or service from that company.
+You just received an email with the subject line "Invoice Overdue Alert" that claims you owe a payment for services you don’t remember ordering. The email looks official, complete with a company logo and a professional layout. It includes a link to view the invoice, along with a stern message warning you that immediate action is required to avoid penalties. The sender's email address seems to match the company’s domain, but something feels off. You might be questioning whether this is a legitimate reminder or a clever ruse designed to catch you off guard.
 
-The email plays on your anxiety about overdue payments, suggesting that immediate action is necessary to avoid late fees or service interruptions. It might even include phrases like “Your account will be suspended if payment is not received within 24 hours.” This pressure can make you feel like you have to act quickly, pushing you to click the link without taking a moment to verify the sender. The combination of urgency and familiarity can create a false sense of security that makes you more likely to respond.
+The email creates a sense of urgency by stating that your account is at risk of being suspended if you don’t pay right away. It may even threaten additional fees or legal action if you ignore it. This pressure can make you feel anxious and prompt you to act quickly, often without taking the time to verify the source. By appealing to your fear of missing payments or damaging your credit, the scammer aims to bypass your usual caution and get you to click on the link or provide sensitive information.
 
-You might also encounter variations of this scam, such as text messages or phone calls claiming to be from your bank or service provider. The message may include slightly different details, like a different invoice number or a different company name that sounds similar to a legitimate business. Some variations might even include attachments that appear to be invoices. Each time, the goal is the same: to trick you into providing sensitive information or making a payment without verifying the legitimacy of the request.
+You might notice variations of this scam, such as a text message or a phone call claiming the same overdue invoice. Some versions might even reference a well-known company or service you use, making it seem more credible. They may tweak the wording or change the sender's name slightly, but the core message remains the same: you owe money, and you need to act fast. This adaptability allows scammers to reach a wider audience, as they can target various demographics by changing the details to fit different scenarios.
 
-Falling for this scam can have serious consequences. You could end up losing money if you make a payment to a fraudulent account, or you might inadvertently share personal information that could lead to identity theft. The emotional toll can also be significant, leaving you feeling embarrassed or anxious about your financial security. It’s crucial to take a moment to think critically about any unexpected invoice alerts you receive, as the fallout from acting too quickly can be both costly and stressful.
+If you fall for this scam, the consequences can be severe. You could end up providing your financial information, leading to unauthorized charges or identity theft. Even if you don’t click on any links, simply engaging with the email might put you on a list for future scams. The emotional and financial toll can linger long after the incident, leaving you feeling vulnerable and distrustful of legitimate communications. It's crucial to stay vigilant and question unexpected messages, especially when they invoke fear or urgency.
 <p>This is why step-by-step checking matters. Once a message related to Invoice Overdue Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

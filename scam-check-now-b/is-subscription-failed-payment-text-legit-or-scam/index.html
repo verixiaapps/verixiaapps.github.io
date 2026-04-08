@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/payment-scams/">Payment Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/text-scams/">Text Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Subscription Failed Payment Text is a common question when something like a suspicious link feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Subscription Failed Payment Text situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received a text message that reads something like, “Your subscription payment has failed. Please verify your account immediately.” The message often includes a link that takes you to a website that looks strikingly similar to a legitimate service you use. It might even have your name or a familiar logo, making it feel authentic. This kind of communication can easily catch you off guard, especially if you’re expecting a payment to go through or have recently signed up for a new service.
+You receive a text message that reads, “Your subscription payment has failed. Please confirm your payment details immediately to avoid service interruption.” The sender appears to be a well-known streaming service or an app you use regularly. The message includes a link that claims to take you to your account to resolve the issue. It feels urgent, as if your access to your favorite shows or services is at stake, and you might think it’s a simple oversight that needs quick attention.
 
-The urgency in these messages is palpable. They often use phrases that imply immediate action is required, like “Your access will be suspended” or “You must act now to avoid service interruption.” This pressure can make you feel anxious and prompt you to click the link without thinking twice. Scammers know that creating a sense of urgency can cloud your judgment, pushing you to act quickly rather than taking a moment to verify the source.
+The urgency in the message is palpable. It plays on your fear of losing access to something you enjoy or rely on. The sender's name looks familiar, and the language is casual, making it feel like a legitimate communication. You might feel a slight panic, prompting you to act quickly without fully considering the implications. This pressure to resolve the issue immediately can cloud your judgment, pushing you to click the link without a second thought.
 
-You might see variations of this scam that target different services, from streaming platforms to online shopping sites. Some messages might even claim that your account is at risk of being hacked, while others may suggest that you need to update your payment information. They can come from different numbers or even spoofed email addresses, making it hard to distinguish them from legitimate communications. Each version is designed to exploit your trust and familiarity with the service.
+Scammers often use variations of this tactic, tweaking the details to fit different services you might use. You might receive similar messages claiming to be from your bank, a delivery service, or even a subscription box you’ve signed up for. Each message is designed to look authentic, using logos and language that mirror the real companies. They may even reference specific transactions or services to make the scam feel more credible, leading you to believe that this is a legitimate concern.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information or payment details, you could find yourself facing unauthorized charges or identity theft. Scammers can use your information to access your accounts, leaving you vulnerable and potentially costing you a significant amount of money. The emotional toll can be just as damaging, as the realization that you’ve been deceived can leave you feeling violated and anxious about your online security.
+If you fall for this scam, the consequences can be severe. Clicking the link may lead you to a fake website designed to steal your personal information or payment details. Once scammers have your data, they can make unauthorized charges, drain your accounts, or even sell your information on the dark web. The emotional and financial fallout can be significant, leaving you feeling violated and vulnerable. It’s crucial to take a moment to verify any unexpected messages before acting on them.
 <p>Scams connected to Subscription Failed Payment Text often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
