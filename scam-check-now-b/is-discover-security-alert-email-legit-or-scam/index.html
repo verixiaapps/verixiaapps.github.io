@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Discover Security Alert Email is a common question when something like a password reset message appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Discover Security Alert Email flow starts with something like a password reset message, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received an email claiming to be from Discover, alerting you about unusual activity on your account. The message often includes your name, a sense of urgency, and a link that directs you to a website that looks remarkably similar to the official Discover site. The email may even contain a warning that your account will be locked if you don’t act quickly. It’s designed to catch your attention and make you feel like you need to respond immediately to protect your finances.
+You might have recently received an email that looks like it’s from Discover, alerting you to unusual activity on your account. The email may feature the Discover logo, include your name, and contain a message urging you to click a link to verify your account details or to reset your password. It may even mention specific transactions that you don’t recognize, making it seem like a legitimate security alert. The design and language used in the email can be quite convincing, mimicking the style of official communications you expect from your bank.
 
-This type of scam plays on your emotions, creating a sense of urgency that can be hard to ignore. The email may state that your account has been compromised and that you must verify your information right away to prevent unauthorized transactions. By using language that implies immediate action is necessary, the scammer hopes to bypass your usual caution and prompt you to click on the link without thinking twice. You might feel a rush of anxiety, convincing you that responding quickly is the only option.
+The urgency in the message is palpable. It often states that immediate action is required to prevent unauthorized access or to secure your funds. Phrases like “your account will be locked” or “act now to avoid further issues” are common, creating a sense of panic. This pressure can make you feel like you need to respond quickly, overriding your instincts to pause and think critically about the situation. The email may also include customer service numbers that seem legitimate, further building trust and making you feel safe in taking action.
 
-You may also encounter variations of this scam, such as text messages or phone calls that mimic Discover's customer service. In a text, you might receive a similar alert about suspicious activity, with a link to a site that looks legitimate. Phone calls can be even more convincing, with someone claiming to be from Discover asking for your personal information to "verify" your identity. Each variation is crafted to exploit your trust and urgency, making it difficult to distinguish between a genuine alert and a clever ruse.
+You might also encounter variations of this scam, such as text messages or phone calls claiming to be from Discover. The text might say your account has been compromised and provide a link to a website that looks similar to the official Discover site. Alternatively, you could receive a call from someone claiming to be a Discover representative, asking for your personal information to “verify” your identity. Each version is designed to catch you off guard, using familiar branding and language to lower your defenses.
 
-If you fall for this scam, the consequences can be severe. Providing your personal information can lead to identity theft, unauthorized transactions, and a long, stressful process of trying to recover your finances. Your credit score could suffer, and you may find yourself dealing with fraudulent charges that take time and effort to resolve. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to take a step back and verify any alerts before taking action.
+If you fall for this scam, the consequences can be severe. Providing your personal information can lead to identity theft, unauthorized transactions, and financial loss. Scammers can drain your accounts or open new ones in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, causing anxiety and distrust in future communications. It’s crucial to recognize these tactics to protect yourself and your financial well-being.
 <p>This is why step-by-step checking matters. Once a message related to Discover Security Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1467,7 +1467,7 @@ If you fall for this scam, the consequences can be severe. Providing your person
 <li><a href="/scam-check-now-b/is-american-express-security-alert-email-legit-or-scam/">Is American Express Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-security-alert-email-legit-or-scam/">Is Capital One Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-security-alert-email-legit-or-scam/">Is Pnc Bank Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-td-bank-security-alert-email-legit-or-scam/">Is Td Bank Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-security-alert-email-about-login-legit-or-scam/">Is Security Alert Email About Login or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

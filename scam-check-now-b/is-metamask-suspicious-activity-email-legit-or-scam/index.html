@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>MetaMask Suspicious Activity Email is a common question when something like an unexpected email feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many MetaMask Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from MetaMask, warning you about suspicious activity on your account. The message often includes official-looking logos and a sense of urgency, stating that your wallet has been compromised or that your funds are at risk. It may ask you to click on a link to verify your identity or to secure your account. The language is designed to mimic legitimate communications, making it hard to distinguish between a real alert and a phishing attempt.
+You might have recently received an email claiming to be from MetaMask, warning you of suspicious activity on your account. The message may include your name, a request to verify your identity, and a link that directs you to a website that looks strikingly similar to the official MetaMask site. The email may also contain logos and branding that seem authentic, making it easy to believe that it’s a legitimate communication. However, the urgency in the message often raises red flags, as it pressures you to act quickly to avoid losing access to your funds.
 
-The email creates a sense of immediate danger, urging you to act quickly to avoid losing your assets. Phrases like "urgent action required" or "your account will be suspended" are common, pushing you to click the link without taking a moment to think. This tactic plays on your fear of losing access to your funds, making you more likely to overlook red flags. Scammers know that when you're anxious, you might not scrutinize the details as closely as you normally would.
+The email likely creates a sense of panic, suggesting that your account is at risk and that immediate action is required. You might feel compelled to click the link and provide personal information to resolve the issue, fearing that any delay could lead to financial loss. This tactic is designed to exploit your emotions, making you more likely to overlook warning signs. The language may be crafted to sound official, further building trust and convincing you that this is a critical matter that needs your immediate attention.
 
-You may also encounter variations of this scam through text messages or social media notifications, each designed to look like an official MetaMask communication. Some messages might claim that you need to update your security settings or that a transaction has failed, prompting you to enter your private keys or wallet information. The format may change, but the underlying strategy remains the same: to trick you into revealing sensitive information by creating a false sense of legitimacy.
+You may also encounter variations of this scam, such as text messages or social media direct messages that mimic the same tone and urgency. Some may even pose as customer support representatives, reaching out to you directly to assist with the “suspicious activity.” These messages might use different phrasing or slightly altered URLs, but the core tactic remains the same: to create a false sense of urgency and to trick you into providing sensitive information. Each variation is designed to catch you off guard, making it difficult to discern what is real and what is not.
 
-Falling for this scam can have serious consequences. If you provide your wallet information or click on a malicious link, you risk losing access to your funds entirely. Scammers can drain your wallet in seconds, leaving you with little recourse to recover what you've lost. This isn't just an inconvenience; it can lead to significant financial loss and a long-term impact on your trust in digital wallets and cryptocurrencies. Be vigilant and take a moment to verify any communication before acting.
+Falling for this scam can lead to devastating consequences. If you provide your personal information, you risk having your MetaMask account compromised, which could result in the loss of your cryptocurrency assets. Scammers can drain your wallet, leaving you with no recourse to recover your funds. The emotional toll can be significant, as the realization that you’ve been deceived can lead to feelings of shame and frustration. Protecting yourself from these scams is crucial, as the consequences can be both financially and emotionally damaging.
 <p>Scams connected to MetaMask Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like an unexpected email is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

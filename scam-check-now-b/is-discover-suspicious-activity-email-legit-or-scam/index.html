@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Discover Suspicious Activity Email is a common question when something like an unexpected email feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an unexpected email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from Discover, alerting you to suspicious activity on your account. The message often includes your name and may even reference specific transactions that seem out of place. It urges you to click on a link to verify your account information or to call a number provided in the email. The design of the email may closely resemble official communications from Discover, complete with logos and formatting that look legitimate, making it easy to mistake for a genuine alert.
+You might have recently received an email claiming to be from Discover, alerting you to suspicious activity on your account. The message typically includes your name, a mention of a recent transaction that seems out of place, and a prompt to click a link to verify your account details. The design often mimics official communications, complete with the Discover logo and professional language, making it look legitimate at first glance. However, the sense of urgency in the email can be alarming, pushing you to act quickly without fully considering the situation.
 
-The email creates a sense of urgency, suggesting that immediate action is required to protect your account. It may state that your account will be locked if you don’t respond quickly, playing on your fear of losing access to your funds. This pressure can cloud your judgment, pushing you to act without thoroughly checking the details. The sender may even include a friendly tone, addressing you by name and assuring you that they are there to help, which can further build trust and make you feel secure in responding.
+The email often creates a sense of urgency by stating that your account will be locked if you don’t respond immediately. It may mention that your security is at risk and that you need to confirm your identity to avoid losing access to your funds. This pressure can make you feel anxious, prompting you to click the link without thinking twice. The sender’s use of familiar language and branding is designed to build trust, making it easier for you to overlook any red flags.
 
-You might encounter variations of this scam, such as text messages or phone calls that mimic the same alarming tone. Some messages may claim to be from a different financial institution or even a government agency, but the core tactic remains the same: create urgency and demand immediate action. The links may lead to fake websites that look identical to the official ones, or the caller may have a convincing script that makes them sound credible. Each version is designed to exploit your trust and prompt you to share sensitive information.
+You might also encounter variations of this scam through text messages or phone calls, where the same tactics are employed. A text could inform you of a “suspicious login attempt,” encouraging you to click a link or call a number to resolve the issue. Phone calls may involve someone impersonating a Discover representative, asking for your personal information to “verify” your identity. Each version aims to exploit your concern for your financial security, making it hard to distinguish between a real alert and a scam.
 
-Falling for this scam can have serious consequences. If you provide your personal or financial information, you risk identity theft and unauthorized transactions. Scammers can drain your accounts, ruin your credit, and create a long-lasting impact on your financial health. The emotional toll can be significant as well, leaving you feeling violated and anxious about your security. Recognizing these tactics is essential to protect yourself and your information from falling into the wrong hands.
+If you fall for this type of scam, the consequences can be severe. By clicking on the link and entering your personal information, you risk giving scammers access to your account, potentially leading to unauthorized transactions and identity theft. This not only puts your finances in jeopardy but can also take a significant emotional toll as you navigate the aftermath. Protecting yourself means being vigilant and questioning any unexpected communication regarding your financial accounts.
 <p>That difference matters because a real notice related to Discover Suspicious Activity Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

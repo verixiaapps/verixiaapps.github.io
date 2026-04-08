@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Crypto Withdrawal Email is a common question when something like an exchange support DM creates urgency around crypto. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>Many Crypto Withdrawal Email scams involve things like an exchange support DM, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might have recently received an email claiming to be from a cryptocurrency exchange, notifying you that your withdrawal request is pending approval. The message often includes official-looking logos, a professional tone, and may even reference your account details to make it seem legitimate. It might urge you to click a link to verify your identity or confirm the transaction. The email could also contain a sense of urgency, warning you that your funds will be frozen if you don’t act immediately. This setup is designed to catch your attention and prompt quick action without much thought.
+You might have recently received an email claiming to be from your cryptocurrency exchange, stating that you need to verify your account to process a withdrawal. The message often includes your account details and a link to a website that looks almost identical to the official site. It may even feature logos and branding that seem legitimate, making it hard to tell at first glance if it’s a genuine communication or a cleverly disguised scam. The urgency in the email can be alarming, suggesting that your account will be locked or that you will miss out on a lucrative opportunity if you don’t act quickly.
 
-The urgency in these emails can be overwhelming. They often emphasize that your account is at risk or that you need to confirm your identity to avoid losing access to your funds. This pressure can make you feel like you have no choice but to comply, especially if you’ve been waiting for a withdrawal to go through. The combination of urgency and fear of loss can cloud your judgment, making it easier to overlook red flags. You might find yourself racing to click the link, thinking you’re protecting your assets.
+The email typically creates a sense of urgency, pushing you to click on the provided link immediately. Phrases like “Immediate action required” or “Your funds are at risk” are common, designed to make you feel anxious and pressured to respond without thinking. This tactic is effective because it plays on your fear of losing access to your cryptocurrency or missing out on a potential profit. You may find yourself racing against the clock, convinced that you need to verify your information right away to avoid dire consequences.
 
-You may also encounter variations of this scam that look slightly different but carry the same deceptive intent. Some emails might claim to be from a different exchange or even a wallet service, while others could come as text messages or social media direct messages. The language might change, but the core message remains the same: act now to secure your funds. Some variations may even include fake customer support numbers or websites designed to mimic legitimate services, further complicating your ability to discern what’s real.
+Variations of this scam can appear in different forms. Some might come as text messages or phone calls, claiming to be from customer support. Others may offer enticing promotions or bonuses for verifying your account, making the offer seem too good to resist. The website you’re directed to may look authentic but could be a phishing site designed to capture your login credentials. Even if you think you’re being cautious, these scams can adapt and change their tactics to catch you off guard.
 
-Falling for this type of scam can lead to serious consequences. If you provide your personal information or login credentials, scammers can gain access to your accounts, potentially draining your cryptocurrency holdings. Even if you think you’re just verifying a simple withdrawal, you could be handing over the keys to your financial assets. The emotional and financial toll can be devastating, leaving you not only with lost funds but also with the anxiety of knowing you’ve been targeted by fraudsters.
+If you fall for this scam, the consequences can be severe. Scammers can gain access to your account, draining your cryptocurrency holdings or stealing personal information that can lead to identity theft. You might find yourself locked out of your account, with no way to recover your funds. The emotional and financial impact can be devastating, leaving you feeling violated and frustrated. It’s crucial to remain vigilant and question any unexpected requests for your personal information, especially when it comes to your hard-earned investments.
 <p>The strongest clue is usually not one isolated detail. With Crypto Withdrawal Email, the risk often becomes clearer when something like an exchange support DM is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1464,10 +1464,10 @@ Falling for this type of scam can lead to serious consequences. If you provide y
 <li><a href="/scam-check-now-b/is-crypto-unusual-activity-email-legit-or-scam/">Is Crypto Unusual Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-crypto-message-from-unknown-sender-legit-or-scam/">Is Crypto Message from Unknown Sender or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-withdrawal-alert-email-legit-or-scam/">Is Binance Withdrawal Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-account-disabled-email-legit-or-scam/">Is Account Disabled Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-refund-email-legit-or-scam/">Is Binance Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-chase-refund-email-legit-or-scam/">Is Chase Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-citibank-refund-email-legit-or-scam/">Is Citibank Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-revolut-refund-email-legit-or-scam/">Is Revolut Refund Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

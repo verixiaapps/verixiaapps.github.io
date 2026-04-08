@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Discover Verification Code Text is a common question when something like a login alert email appears without context. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Discover Verification Code Text cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might receive a text that appears to be from Discover, claiming that you need to verify your account with a code. The message often includes a sense of urgency, stating that your account will be locked or compromised if you don’t act quickly. It may even include a phone number or a link that looks legitimate, making it seem like a genuine communication from your bank. The sender's number may mimic official channels, adding to the confusion and making you question whether it’s real or not.
+You might receive a text claiming to be from Discover, asking you to verify a recent transaction or account activity. The message often includes a verification code and urges you to respond quickly to confirm your identity. It may look official, featuring Discover's logo or a familiar format, making it easy to mistake for a legitimate communication. The sender’s number might even resemble Discover's customer service line, adding to the authenticity of the message.
 
-The urgency in these messages is palpable. They often say something like, “Your account is at risk! Reply with the code to secure it.” This pressure can make you feel anxious, prompting you to act without thinking. The scammers know that when people feel rushed, they are more likely to overlook red flags. They create a false sense of trust by using familiar branding and language that mimics real communications from your bank, making it easy to let your guard down.
+The urgency in these texts is palpable. You might feel a rush of anxiety, thinking your account is compromised or that someone is trying to make unauthorized charges. The message often emphasizes that immediate action is required to protect your account, creating a sense of panic. This pressure can cloud your judgment, making you more likely to respond without thinking critically about the situation.
 
-You may also encounter variations of this scam. Sometimes, the message will ask you to click a link that leads to a fake website designed to look like Discover’s official site. Other times, you might get a call instead of a text, with someone claiming to be a customer service representative asking for your verification code. Each version aims to exploit your trust and urgency, making it difficult to discern what’s real and what’s not.
+Variations of this scam can appear in different forms, such as emails that look like official correspondence from Discover or phone calls from someone claiming to be a customer service representative. They may ask you to click on a link to verify your account or provide personal information under the guise of security checks. Each version is designed to exploit your trust and urgency, making it harder to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. If you provide your verification code, you could inadvertently give scammers access to your account, leading to unauthorized transactions and potential identity theft. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s crucial to remain vigilant and question any unexpected requests for sensitive information, especially when they come with a sense of urgency.
+Falling for this scam can lead to serious consequences, including unauthorized access to your financial accounts or identity theft. Once scammers have your verification code or personal information, they can easily manipulate your accounts, draining your funds or opening new lines of credit in your name. The aftermath can be devastating, leaving you to deal with the financial and emotional fallout while trying to reclaim your identity and security.
 <p>The strongest clue is usually not one isolated detail. With Discover Verification Code Text, the risk often becomes clearer when something like a login alert email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

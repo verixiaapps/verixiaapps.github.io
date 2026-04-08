@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>MetaMask Password Reset Email is a common question when something like a two-factor code request appears without context. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a two-factor code request and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from MetaMask, urging you to reset your password. The message looks official, complete with the MetaMask logo and a professional layout. It may contain a link that directs you to a website that closely resembles the real MetaMask site. The email often includes a message about suspicious activity on your account, making it seem urgent and important. You might feel compelled to act quickly, thinking this is a necessary step to secure your funds.
+You receive an email that looks like it’s from MetaMask, informing you that your password has been reset. The email features the MetaMask logo, a professional layout, and a link that appears to lead to the official site. The message might even include a friendly greeting and a reminder about the importance of securing your wallet. At first glance, it feels legitimate, and you might think it’s just a routine notification. However, the email could be a cleverly crafted phishing attempt designed to trick you into revealing sensitive information.
 
-The urgency in these emails can be overwhelming. They often mention a limited time to reset your password or that your account will be locked if you don’t respond immediately. This pressure can cloud your judgment, pushing you to click on the provided link without a second thought. The email may even include a friendly tone, making it seem like a trusted communication from a service you use regularly. This combination of urgency and familiarity can make it hard to distinguish between a legitimate message and a malicious one.
+The urgency in the email is palpable. It might state that your account has been compromised or that immediate action is required to secure your funds. Phrases like “act now” or “your account will be suspended” are common tactics to create panic. This pressure can cloud your judgment, making you more likely to click on the link without verifying its authenticity. The email may also include a reassuring message about how MetaMask is committed to your security, further establishing a false sense of trust.
 
-Scammers are skilled at adapting their tactics, and the MetaMask password reset email is no exception. You might see variations that include different sender addresses or slightly altered website URLs that look almost identical to the real MetaMask site. Some emails might even reference recent transactions or changes to your account to add a layer of credibility. These small differences can easily trick someone who is not paying close attention, leading them to believe they are interacting with a legitimate service.
+Scammers often use variations of this tactic, sending messages that claim to be from other cryptocurrency platforms or wallets. You might see emails that mention suspicious login attempts or requests for verification. The design and language can vary, but the core strategy remains the same: to mimic legitimate communications to lure you into their trap. Even a text message or social media direct message could be part of this scheme, making it harder to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. If you enter your credentials on a fraudulent site, the scammers can gain access to your MetaMask wallet and drain your funds. Once they have your information, recovering your assets is nearly impossible. The emotional toll can be significant as well, leaving you feeling violated and helpless. This type of scam not only threatens your financial security but can also erode your trust in online services, making you more hesitant to engage with legitimate platforms in the future.
+If you fall for this scam and enter your credentials, you risk losing access to your wallet and funds. Scammers can quickly drain your account, leaving you with little recourse to recover your assets. The emotional toll can be significant, as you may feel violated and regretful for not being more cautious. Understanding how these scams operate is crucial, as the consequences can be severe and long-lasting, impacting not just your finances but your overall trust in online transactions.
 <p>That difference matters because a real notice related to MetaMask Password Reset Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1465,9 +1465,9 @@ Falling for this scam can have serious consequences. If you enter your credentia
 <li><a href="/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/">Is Wise Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-password-reset-email-legit-or-scam/">Is American Express Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-password-reset-email-legit-or-scam/">Is Capital One Password Reset Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-reset-email-legit-or-scam/">Is Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-password-reset-email-legit-or-scam/">Is Pnc Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-password-reset-email-legit-or-scam/">Is Td Bank Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-us-bank-password-reset-email-legit-or-scam/">Is Us Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

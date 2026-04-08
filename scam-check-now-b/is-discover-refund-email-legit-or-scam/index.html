@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Discover Refund Email is a common question when something like an unexpected email feels suspicious. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Discover Refund Email situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Discover, stating that you are eligible for a refund due to an overcharge or a recent policy change. The message often includes your name, account details, and a link that directs you to a website that looks almost identical to Discover’s official site. The email might even feature their logo and a professional layout, making it seem legitimate. This kind of communication can easily catch you off guard, especially if you’ve had recent interactions with Discover or are expecting a refund.
+You might have received an email claiming to be from Discover, stating that you are eligible for a refund due to an overcharge or a promotional adjustment. The message often looks official, complete with the Discover logo and a professional layout. It may include details like your account number or a personalized greeting, making it feel legitimate. The email typically prompts you to click a link to verify your information or claim your refund, making it seem like a straightforward process.
 
-The urgency in these emails is palpable. They often state that you need to act quickly to claim your refund, warning that failure to do so could result in losing the opportunity. You might notice phrases like “immediate action required” or “limited time offer,” which are designed to create a sense of panic. This pressure can make you feel compelled to click the link and provide personal information, as it seems like a time-sensitive matter that you can’t afford to ignore.
+The urgency in these emails is palpable. They often suggest that you must act quickly to claim your refund before it expires, creating a sense of panic. Phrases like “limited time offer” or “immediate action required” are common, pushing you to click the link without thinking twice. This pressure can cloud your judgment, making you more likely to overlook red flags and act impulsively.
 
-You may also encounter variations of this scam, such as text messages or phone calls that mimic Discover's customer service. Some messages might claim that your account is compromised and that you need to verify your information to secure your account. Others may offer rewards or bonuses that seem too good to be true. Each variation is crafted to exploit your trust in Discover, making it harder to discern what’s real and what’s not.
+You might also encounter variations of this scam through text messages or phone calls. A text could alert you to a supposed refund, urging you to visit a website that looks similar to Discover’s official site. Calls may come from numbers that appear legitimate, with someone on the other end claiming to be a customer service representative. Each variation is designed to exploit your trust and urgency, making it easy to mistake these communications for genuine outreach.
 
-Falling for this scam can have serious repercussions. If you provide your personal information, scammers can gain access to your financial accounts, leading to unauthorized transactions and identity theft. The emotional toll can be significant, as you may feel violated and anxious about your financial security. It’s not just about losing money; it’s about the trust you place in companies you believe are looking out for your best interests. Protecting yourself means being vigilant and questioning the authenticity of any unexpected communication.
+Falling for this scam can lead to serious consequences. If you provide your personal information or login credentials, scammers can access your account and drain your funds. Even if you don’t lose money immediately, the breach of your personal information can lead to identity theft, resulting in long-term financial and emotional distress. The allure of a quick refund can quickly turn into a nightmare, leaving you feeling violated and vulnerable.
 <p>The strongest clue is usually not one isolated detail. With Discover Refund Email, the risk often becomes clearer when something like an unexpected email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1460,14 +1460,14 @@ Falling for this scam can have serious repercussions. If you provide your person
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-chase-refund-email-legit-or-scam/">Is Chase Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-citibank-refund-email-legit-or-scam/">Is Citibank Refund Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-confirmation-email-legit-or-scam/">Is Refund Confirmation Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-issued-email-legit-or-scam/">Is Refund Issued Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-revolut-refund-email-legit-or-scam/">Is Revolut Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-refund-email-legit-or-scam/">Is Robinhood Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-refund-email-legit-or-scam/">Is Wise Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-refund-email-legit-or-scam/">Is American Express Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-refund-email-legit-or-scam/">Is Capital One Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-refund-email-legit-or-scam/">Is Pnc Bank Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-td-bank-refund-email-legit-or-scam/">Is Td Bank Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-us-bank-refund-email-legit-or-scam/">Is Us Bank Refund Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

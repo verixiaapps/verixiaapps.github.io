@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Crypto Unusual Activity Email is a common question when something like a password reset message appears without context. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a password reset message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming unusual activity on your cryptocurrency account. The message often includes your account details, urging you to verify your identity by clicking a link or providing sensitive information. It may look official, complete with logos and language that mimics your crypto exchange. The sender often appears to be from a legitimate source, making it easy to overlook any red flags. The urgency in the email can make you feel like you must act quickly to protect your assets, which is exactly what the scammers want.
+You might have received an email that claims there’s unusual activity on your cryptocurrency account, urging you to take immediate action. The message often includes your account details and a link to a website that looks strikingly similar to the official platform you use. It may even feature logos and branding that seem legitimate. The email typically has a subject line designed to grab your attention, such as “Immediate Action Required” or “Your Account is at Risk.” This creates a sense of panic, making you feel like you must act quickly to secure your funds.
 
-These emails are designed to create a sense of panic. They often state that your account will be suspended or that you risk losing your funds if you don’t respond immediately. This pressure can cloud your judgment, leading you to click on links or provide information without thinking it through. The urgency is a tactic to bypass your usual caution, making you feel like you’re in a race against time to secure your investments. It’s easy to see how someone might feel compelled to act without verifying the source.
+The urgency in these emails is palpable. You may feel pressured to click on the provided link or call the number listed to verify your account. Scammers know that when you’re anxious about your finances, you’re less likely to scrutinize the details. They often use phrases like “time-sensitive” or “failure to respond may result in account suspension” to push you into a hasty decision. This tactic exploits your trust in the cryptocurrency platform, making it seem like they genuinely care about your security.
 
-You might also encounter variations of this scam, such as text messages or social media alerts claiming the same unusual activity. Some messages may come from seemingly trustworthy contacts or even impersonate customer service representatives from your exchange. They often use similar language and urgency, making it hard to distinguish between a genuine alert and a scam. While the core message remains the same, the delivery method can vary, keeping you on your toes and making it difficult to spot the deception.
+Variations of this scam can appear in different formats, such as text messages or even phone calls. You might receive a text alerting you to suspicious activity, prompting you to click a link that leads to a fake login page. Alternatively, a caller may impersonate customer support, asking for your personal information to “verify” your identity. Each version is crafted to seem credible, often mimicking the style and tone of real communications from your cryptocurrency provider. The goal is the same: to trick you into giving away sensitive information.
 
-Falling for this type of scam can lead to significant financial loss. If you provide your login details or personal information, scammers can access your account and drain your funds. The repercussions don’t stop there; your personal data could be sold on the dark web, leading to identity theft and further financial complications. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your online security. It's crucial to remain vigilant and skeptical of any communication that demands immediate action regarding your finances.
+Falling for this scam can have dire consequences. If you provide your login credentials or personal information, scammers can drain your account or steal your identity. Once they have access, recovering your funds can be nearly impossible, and the emotional toll can be significant. You might find yourself grappling with financial loss and the stress of knowing you were deceived. The aftermath can leave you feeling vulnerable and distrustful of legitimate communications, making it harder to navigate your financial landscape in the future.
 <p>That difference matters because a real notice related to Crypto Unusual Activity Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1466,8 +1466,8 @@ Falling for this type of scam can lead to significant financial loss. If you pro
 <li><a href="/scam-check-now-b/is-citibank-suspicious-activity-email-legit-or-scam/">Is Citibank Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-revolut-suspicious-activity-email-legit-or-scam/">Is Revolut Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-suspicious-activity-email-legit-or-scam/">Is Robinhood Suspicious Activity Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-unusual-login-alert-email-legit-or-scam/">Is Unusual Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-suspicious-activity-email-legit-or-scam/">Is Wise Suspicious Activity Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-american-express-suspicious-activity-email-legit-or-scam/">Is American Express Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
