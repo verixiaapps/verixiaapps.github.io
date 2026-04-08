@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Chase Account Locked Email is a common question when something like a password reset message appears without context. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a password reset message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might receive an email claiming that your Chase account has been locked due to suspicious activity. The message often looks official, complete with the Chase logo and a professional layout. It may include specific details about your account, like the last transaction or your account number, making it seem even more legitimate. The email typically prompts you to click on a link to verify your identity or to reset your password, which can be alarming if you’re not expecting it.
+You might receive an email that looks like it’s from Chase, claiming that your account has been locked due to suspicious activity. The message often features the Chase logo, professional formatting, and even a personalized greeting using your name. It may instruct you to click on a link to verify your identity or unlock your account. The urgency in the email is palpable, suggesting that immediate action is required to prevent further issues or potential loss of access to your funds. This can make it feel very real, especially if you have recently made transactions or changes to your account.
 
-The urgency in these emails is palpable. They often state that immediate action is required to unlock your account, creating a sense of panic. Phrases like “your account will be permanently locked” or “act now to avoid further issues” push you to respond quickly without thinking. This pressure can cloud your judgment, leading you to click the link without verifying its authenticity. The design and language are crafted to instill trust, making it easy to overlook the red flags.
+The email often employs high-pressure tactics, urging you to act quickly. Phrases like “Your account will be permanently locked if you do not respond within 24 hours” create a sense of urgency that can cloud your judgment. The sender may also include a customer service number, making it seem like a legitimate outreach from Chase. This combination of urgency and trust can lead you to feel compelled to click the link or provide personal information, believing you are protecting your account from a real threat.
 
-You might also encounter variations of this scam, such as texts or calls that claim to be from Chase. Some might even impersonate customer service representatives, asking for your personal information over the phone. Others could direct you to a fake website that looks nearly identical to the real Chase site. Each variation aims to exploit your trust in the bank, using different tactics to catch you off guard and get you to act quickly.
+Scammers are clever and may use different variations of this tactic. You might see similar messages claiming to be from other banks or financial institutions, or they may come in the form of text messages or phone calls. Some messages may even suggest that you’ve won a prize or are eligible for a special offer, all while asking for your Chase account details. Each variation is designed to exploit your trust and urgency, making it difficult to discern what’s genuine and what’s not.
 
-Falling for this scam can have serious consequences. If you provide your personal information, you risk having your account drained or your identity stolen. Scammers can use your details to access not just your Chase account but other financial accounts as well. The aftermath can be a long and painful process of recovery, involving hours spent on the phone with your bank and credit agencies, not to mention the emotional toll of feeling violated. It's crucial to take a moment to verify any suspicious messages before taking action.
+Falling for this scam can lead to serious consequences. If you provide your login details or personal information, the scammer can gain access to your account, draining your funds or committing identity theft. This could result in financial loss, damage to your credit score, and a lengthy process to recover your identity and funds. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s crucial to be vigilant and verify any communication that seems suspicious before taking any action.
 <p>That difference matters because a real notice related to Chase Account Locked Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1379,14 +1379,14 @@ Falling for this scam can have serious consequences. If you provide your persona
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-account-suspension-email-legit-or-scam/">Is Bank Account Suspension Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-account-temporarily-restricted-email-legit-or-scam/">Is Bank Account Temporarily Restricted Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-billing-issue-email-legit-or-scam/">Is Bank Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-alert-email-legit-or-scam/">Is Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-case-email-legit-or-scam/">Is Bank Fraud Case Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-warning-email-legit-or-scam/">Is Bank Fraud Warning Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-login-attempt-email-legit-or-scam/">Is Bank Login Attempt Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-login-blocked-email-legit-or-scam/">Is Bank Login Blocked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-payment-declined-email-legit-or-scam/">Is Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

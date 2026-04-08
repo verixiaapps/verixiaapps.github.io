@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Chase Verification Code Text is a common question when something like a password reset message appears without context. The main question is whether the message or request can be trusted. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Chase Verification Code Text cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might receive a text message claiming to be from Chase, telling you that your account has been compromised and asking you to verify your identity by entering a code they’ve sent you. The message may look official, complete with Chase branding and language that seems legitimate. It could even include a link to a website that resembles the Chase login page, making it easy to mistake for a real communication from your bank. If you’re not expecting a message like this, it’s natural to feel anxious and compelled to act quickly.
+You might receive a text claiming to be from Chase, stating that a verification code has been sent to your phone for a transaction you didn’t initiate. The message often includes a code and urges you to verify your account immediately. It may look official, complete with the bank’s logo or familiar language, making it seem like a legitimate security measure. You might even notice that the sender's number resembles Chase's official contact numbers, which can add to the confusion and make you question whether it’s real or not.
 
-The urgency in these messages is palpable. They often use phrases like “immediate action required” or “your account will be locked” to create a sense of panic. This pressure can make you feel like you have no choice but to respond right away. The message may also reference recent transactions or account activity to build trust, making it harder to recognize that it’s a scam. You might find yourself thinking that the only way to protect your finances is to follow their instructions without questioning the legitimacy of the request.
+The urgency in these messages is palpable. They often say something like, “Your account will be locked if you don’t verify this code within 10 minutes.” This pressure can make you act quickly, bypassing your usual caution. The message might also suggest that you need to act now to avoid losing access to your funds, which can trigger a panic response. This tactic is designed to exploit your trust in your bank's security protocols, making you feel like you’re doing the right thing by responding.
 
-Scammers are crafty and often tailor their approach to fit different scenarios. You might see variations where the message claims to be from a different bank or financial institution, or even a service like PayPal or Venmo. Some messages may come in the form of a phone call, where a “representative” asks for your verification code directly. Others might arrive as emails that look like they’re from Chase, complete with logos and official-sounding language. Each variation is designed to catch you off guard, playing on your trust in familiar brands.
+Scammers can adapt their approach, so you might encounter variations of this text. Some messages may claim to be from other financial institutions, while others might suggest that you need to verify a recent purchase or update your account information. They can also come in the form of emails or even phone calls, where the caller impersonates a bank representative. Each variation plays on your familiarity with banking processes, making it all the more convincing.
 
-Falling for this type of scam can have serious consequences. If you enter your verification code or personal information, the scammers can gain access to your bank account, potentially draining your funds or committing identity theft. The emotional toll can be just as damaging, leaving you feeling vulnerable and violated. It’s not just about losing money; it’s about the breach of trust in the systems you rely on for your financial security. Recognizing these tactics is crucial to protecting yourself and your hard-earned money.
+Falling for this type of scam can have serious consequences. If you provide the verification code, the scammer can gain access to your account, leading to unauthorized transactions and potential financial loss. Your personal information could be compromised, making you vulnerable to identity theft. The aftermath can be stressful and time-consuming, as you may have to deal with your bank, monitor your accounts, and take steps to secure your identity. It’s crucial to recognize these messages for what they are and to protect your financial well-being.
 <p>Account-security scams connected to Chase Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a password reset message.</p>
 </div>
 
@@ -1383,10 +1383,10 @@ Falling for this type of scam can have serious consequences. If you enter your v
 <li><a href="/scam-check-now/is-wells-fargo-verification-code-text-legit-or-scam/">Is Wells Fargo Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-verification-code-text-legit-or-scam/">Is Bank of America Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-verification-code-text-real-or-fake/">Is Bank Verification Code Text Real or Fake</a></li>
+<li><a href="/scam-check-now/is-bank-verification-request-text-legit-or-scam/">Is Bank Verification Request Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-verification-link-email-legit-or-scam/">Is Bank Verification Link Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-unusual-activity-text-legit-or-scam/">Is Bank Unusual Activity Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

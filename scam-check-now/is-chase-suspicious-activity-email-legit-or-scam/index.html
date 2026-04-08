@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Chase Suspicious Activity Email is a common question when something like a strange text feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Chase Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like a strange text may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Chase, alerting you to suspicious activity on your account. The message often includes your name and may even reference recent transactions, urging you to click on a link to verify your account details. The email design mimics Chase’s branding closely, making it difficult to distinguish between a legitimate alert and a cleverly disguised scam. You might feel a sense of alarm, especially if you’ve been using your account frequently, and the urgency in the email makes it hard to ignore.
+You receive an email that appears to be from Chase, alerting you to suspicious activity on your account. The message includes your name and a sense of urgency, urging you to click a link to verify your account information. The email design mimics Chase’s branding closely, with official logos and formatting, making it hard to distinguish from legitimate communications. You might notice that the sender’s email address looks similar to Chase’s, but a closer look reveals subtle differences that raise your eyebrows.
 
-The email typically creates a sense of urgency, suggesting that immediate action is required to prevent unauthorized access to your account. Phrases like “Your account will be locked” or “Immediate verification needed” can trigger a panic response, pushing you to act quickly without thinking. This pressure can cloud your judgment, making it easier to overlook subtle signs that the email is not what it claims to be. You might find yourself clicking the link without a second thought, convinced that you need to protect your finances.
+The email’s tone is alarming, suggesting that your account could be compromised unless you act immediately. It plays on your fears of losing access to your funds or having your identity stolen. This pressure to respond quickly can cloud your judgment, making it easy to overlook red flags. You might feel a sense of trust because the email seems personalized and professional, reinforcing the idea that you need to take immediate action to protect your account.
 
-Scammers often use variations of this tactic, sometimes posing as other financial institutions or even government agencies. You might see similar emails claiming to be from PayPal, your credit card company, or even the IRS. Each version is designed to look authentic, often using official logos and language that sounds legitimate. They might even customize the message based on your recent transactions or personal information, making it feel even more believable. You may not realize that these variations are all part of the same deceptive strategy aimed at stealing your information.
+Scammers often tweak their tactics, so you might encounter variations of this email. Some versions may come as text messages or even phone calls that claim to be from Chase, using similar language and urgency. Others might direct you to a fake website that looks like Chase’s login page, where they ask for your credentials. Each variation is designed to exploit your trust in a well-known financial institution, making it difficult to spot the deceit.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information, you risk having your account drained or your identity stolen. Scammers can use your details to open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the violation of trust can leave you feeling vulnerable and anxious about your financial security. It’s crucial to remain vigilant and question any communication that seems off, even if it appears to come from a trusted source like Chase.
+If you fall for this scam, the consequences can be severe. You could unknowingly provide your login information, allowing scammers to access your account and drain your funds. Beyond financial loss, there’s the risk of identity theft, which can take years to resolve. The emotional toll of realizing you’ve been deceived can linger, leaving you feeling vulnerable and anxious about your financial security.
 <p>Scams connected to Chase Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a strange text is used as the starting point.</p>
 </div>
 
@@ -1378,6 +1378,7 @@ Falling for this scam can lead to serious consequences. If you provide your pers
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-chase-refund-email-legit-or-scam/">Is Chase Refund Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-suspicious-activity-email-legit-or-scam/">Is Bank Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-wells-fargo-suspicious-activity-email-legit-or-scam/">Is Wells Fargo Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-suspicious-activity-email-legit-or-scam/">Is Bank of America Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-activity-email-legit-or-scam/">Is Bank Account Activity Email or Scam Legit or a Scam?</a></li>
@@ -1386,7 +1387,6 @@ Falling for this scam can lead to serious consequences. If you provide your pers
 <li><a href="/scam-check-now/is-bank-account-closure-email-legit-or-scam/">Is Bank Account Closure Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-locked-email-legit-or-scam/">Is Bank Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-reactivation-email-legit-or-scam/">Is Bank Account Reactivation Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-account-suspension-email-legit-or-scam/">Is Bank Account Suspension Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

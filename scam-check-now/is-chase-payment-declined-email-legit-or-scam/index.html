@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Chase Payment Declined Email is a common question when something like a suspicious message feels suspicious. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have received an email that looks like it’s from Chase, claiming that your payment has been declined. The message usually includes your name and details about a recent transaction, making it seem legitimate. It may urge you to click a link to verify your account or to provide additional information. The email often has a professional layout, complete with Chase branding, which can make it hard to distinguish from a real communication. If you’ve ever felt a moment of panic upon seeing that message, you’re not alone; many people have found themselves in the same situation.
+You might have recently received an email that appears to be from Chase, claiming that your payment has been declined. The message often includes your name and details about the transaction, making it seem legitimate. It typically features Chase's branding, complete with logos and a professional layout. The email may urge you to click on a link to resolve the issue, leading you to a website that looks strikingly similar to Chase's official site. This familiarity can easily trick you into believing that the communication is genuine.
 
-The urgency in these emails is palpable. They often state that your account will be locked or that you’ll miss out on a critical payment if you don’t act immediately. This pressure can make you feel like you need to respond quickly, bypassing your usual caution. The sender may even include a phone number that seems to belong to Chase, further convincing you that this is a legitimate issue that requires your immediate attention. The emotional response they aim for can cloud your judgment, pushing you to click that link without thinking twice.
+The urgency in these emails is palpable. They often state that immediate action is required to avoid further complications, such as account suspension or additional fees. This pressure can make you feel anxious and prompt you to act quickly without thinking. The email might even include phrases like "your account is at risk" or "urgent verification needed," which can heighten your sense of alarm. This tactic is designed to bypass your usual caution and push you into making hasty decisions.
 
-Scammers are known for their creativity, and this scam is no different. You might see variations where the email claims to be from a different bank or financial institution, or it may come as a text message instead of an email. Some versions might even include a fake invoice or a notification about a refund that seems too good to be true. Each variation is designed to catch you off guard, making it easy to fall into the trap. The more familiar the message feels, the more likely you are to trust it, which is exactly what the scammers want.
+You may encounter variations of this scam that play on different aspects of your banking experience. For instance, some emails might claim to be from a different financial institution or reference a payment method you recently used, like PayPal or a credit card. Others might come as text messages or phone calls, all delivering a similar message of urgency and requiring you to verify your account information. Each version is crafted to fit seamlessly into your daily life, making it harder to spot the deception.
 
-If you respond to one of these emails, you could end up providing sensitive information like your account number or Social Security number. This can lead to identity theft or unauthorized transactions that can drain your accounts. The consequences can be severe, leaving you not just financially vulnerable but also emotionally stressed as you navigate the aftermath. It’s crucial to take a moment to think before acting on messages that create a sense of urgency, especially when they involve your personal or financial information.
+Falling for this scam can have serious consequences. If you click on the link and enter your personal information, you risk giving scammers access to your bank account, leading to unauthorized transactions and identity theft. Even if you don’t enter any information, simply engaging with the email can put you on a list for future scams. The emotional and financial fallout can be significant, leaving you feeling vulnerable and exposed. It's crucial to take a moment to verify any suspicious communication before taking action.
 <p>That difference matters because a real notice related to Chase Payment Declined Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
