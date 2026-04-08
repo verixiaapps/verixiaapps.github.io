@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Cash App Refund Pending Message is a common question when something like a PayPal refund email feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common Cash App Refund Pending Message scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received a message claiming that your Cash App refund is pending, complete with official-looking logos and urgent language. The message may ask you to click a link to verify your account or provide personal information to process the refund. It often mimics the tone of legitimate communications from Cash App, making it easy to mistake for a genuine notification. The sender may even use a familiar email address or phone number, adding to the illusion of authenticity.
+You might have recently received a message claiming that your Cash App refund is pending, complete with official-looking logos and urgent language. It could appear as a text or email, telling you to click a link to verify your account or provide additional information. The message may even mention a specific transaction number or an amount that seems familiar, making it feel legitimate. This kind of communication can easily catch you off guard, especially if you’ve been waiting for a refund or a transaction to clear.
 
-The urgency in these messages is palpable. They often state that your account will be suspended if you don’t act quickly, creating a sense of panic. You might feel compelled to click the link immediately, thinking you’re about to miss out on your hard-earned money. This pressure can cloud your judgment, making it difficult to take a step back and assess the situation rationally. Scammers know how to exploit your emotions, making you believe that you’re in a race against time.
+The urgency in these messages is often palpable. They may say your account will be locked unless you act immediately or that you must confirm details to avoid losing your funds. This pressure can lead you to make hasty decisions, especially if you’re anxious about your money. The sender may use phrases that evoke trust, like referencing Cash App’s customer service or claiming to be a representative trying to help you. This manipulation can make you feel like you’re in a genuine conversation, even when you’re not.
 
-Variations of this scam can pop up in different formats. You might see similar messages appearing as texts, emails, or even social media direct messages. Some may claim to be from customer support, while others might suggest that your account has been compromised. They can also include fake customer service numbers that lead you to someone who is not affiliated with Cash App at all. Each version is designed to look as convincing as possible, keeping you on high alert and more likely to respond.
+You might also encounter variations of this scam that could look slightly different but carry the same intent. For instance, some messages may come from accounts that mimic Cash App support but have slight misspellings in the email address. Others might claim to be from a financial institution or a third-party service, all while pushing the same narrative of a pending refund. Each variation is designed to catch you off guard, making it hard to discern what’s real and what’s not.
 
-Falling for this scam can lead to severe consequences. If you provide your personal information or click on malicious links, you risk losing access to your Cash App account and potentially your bank account. Scammers can drain your funds or use your information for identity theft, leaving you to deal with the fallout. The emotional and financial toll can be overwhelming, especially when you realize that you were misled by a message that seemed so real.
+Falling for this scam can lead to serious consequences. If you provide your personal information or login credentials, you risk losing access to your Cash App account and potentially your funds. Scammers can drain your account or use your information for identity theft, leaving you in a vulnerable position. The emotional and financial fallout can be overwhelming, especially when you realize that what you thought was a legitimate refund was just a ploy to exploit your trust.
 <p>Payment-related scams connected to Cash App Refund Pending Message often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a PayPal refund email is involved.</p>
 </div>
 
@@ -1378,6 +1378,7 @@ Falling for this scam can lead to severe consequences. If you provide your perso
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-cash-app-support-message-legit-or-scam/">Is Cash App Support Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-cash-app-account-flagged-email-legit-or-scam/">Is Cash App Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-cash-app-account-limited-email-legit-or-scam/">Is Cash App Account Limited Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-cash-app-account-locked-alert-legit-or-scam/">Is Cash App Account Locked Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-cash-app-account-locked-email-legit-or-scam/">Is Cash App Account Locked Email or Scam Legit or a Scam?</a></li>
@@ -1386,7 +1387,6 @@ Falling for this scam can lead to severe consequences. If you provide your perso
 <li><a href="/scam-check-now/is-cash-app-billing-issue-email-legit-or-scam/">Is Cash App Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-cash-app-fraud-alert-email-legit-or-scam/">Is Cash App Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-cash-app-fraud-warning-text-legit-or-scam/">Is Cash App Fraud Warning Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-cash-app-login-alert-email-legit-or-scam/">Is Cash App Login Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
