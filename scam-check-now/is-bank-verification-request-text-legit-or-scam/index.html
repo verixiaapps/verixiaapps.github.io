@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank Verification Request Text is a common question when something like a Zelle transfer problem message feels suspicious. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Bank Verification Request Text scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You receive a text message that looks like it’s from your bank, complete with their logo and a friendly greeting. The message says there’s been unusual activity on your account and urges you to verify your information immediately by clicking a link. The link takes you to a website that closely resembles your bank’s official site, where you’re prompted to enter your login credentials and personal details. Everything seems official, and you might even notice that the URL looks almost identical to the real one, making it hard to question its legitimacy.
+You might receive a text message claiming to be from your bank, asking you to verify your account information or confirm a recent transaction. The message often includes a link that appears to lead to your bank’s website or a phone number that seems legitimate. It may even use your bank's logo or mention your name to make it feel more authentic. The urgency in the tone can be alarming, suggesting that immediate action is required to avoid account suspension or fraud.
 
-The urgency of the situation is palpable. The message often states that your account will be locked or that you could face financial loss if you don’t act quickly. This pressure can make you feel like you have no choice but to comply. The friendly tone of the message, combined with the threat of losing access to your funds, creates a false sense of security that can easily lead you into a trap. You might think, “This must be important; I better take care of it now.”
+These messages are designed to create a sense of urgency, making you feel like you need to act quickly to protect your finances. You might read phrases like “Your account will be locked unless you verify now” or “Immediate action required to prevent unauthorized access.” This pressure can cloud your judgment, pushing you to click the link or call the number without taking a moment to think about the legitimacy of the request.
 
-Scammers are clever and often change their tactics to catch you off guard. You might see variations of this scam, such as a phone call from someone claiming to be from your bank, asking for the same information. Some might even send emails that look legitimate, complete with official branding and customer service contact details. Each variation is designed to exploit your trust in your bank, making it difficult to discern what is real and what is not. You could find yourself questioning every communication you receive, unsure of what to believe.
+Scammers often change their tactics to stay ahead, so you might see variations of this message. Some may come as emails or even phone calls, where the caller pretends to be a bank representative. Others might ask for additional personal information, like your Social Security number or passwords, under the guise of a security check. Even if the message seems slightly different, the core tactic remains the same: to trick you into providing sensitive information.
 
-If you fall for this scam, the consequences can be severe. Once the scammers have your information, they can drain your account, open new credit lines in your name, or engage in identity theft. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it’s about the long-term impact on your trust in financial institutions and your sense of safety in managing your personal information.
+If you fall for this scam, the consequences can be severe. Providing your information can lead to unauthorized access to your bank account, resulting in stolen funds and identity theft. Once scammers have your details, they can drain your account or open new accounts in your name, leaving you to deal with the aftermath. The emotional and financial toll can be overwhelming, making it crucial to recognize these deceptive tactics before it’s too late.
 <p>The strongest clue is usually not one isolated detail. With Bank Verification Request Text, the risk often becomes clearer when something like a Zelle transfer problem message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

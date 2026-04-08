@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank Transfer Cancellation Email is a common question when something like a PayPal refund email feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Bank Transfer Cancellation Email flow starts with something like a PayPal refund email, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might receive an email claiming to be from your bank, stating that there’s been a problem with a recent transfer you initiated. The message often includes official-looking logos and language that mimics your bank’s communication style. It may ask you to click a link to verify your account details or confirm the transaction. The email often looks convincing, with details that seem tailored to your recent banking activity, making it easy to overlook the red flags.
+You might have recently received an email claiming that your bank transfer has been canceled due to suspicious activity or an error. The message may look official, complete with your bank's logo and a professional tone. It often includes a link to a website that mimics your bank's online portal, encouraging you to log in to verify your account details. The urgency in the email can be alarming, suggesting that immediate action is required to prevent further issues with your account.
 
-The urgency in these emails is palpable. They often state that your account will be frozen or that funds will be lost unless you act immediately. This pressure can make you feel like you have no choice but to respond quickly, overriding your instinct to pause and think. The message may even include a phone number to call for immediate assistance, further reinforcing the illusion of legitimacy. You might feel reassured by the professionalism of the communication, leading you to trust it without question.
+This type of scam preys on your instinct to act quickly, creating a sense of panic. The email may state that your account will be frozen or that you could lose access to your funds if you don’t respond right away. By using language that evokes fear or concern about your financial security, the scammer builds a false sense of trust, making you feel like you’re dealing with a legitimate banking issue rather than a phishing attempt.
 
-Variations of this scam can pop up in different forms. You might see a text message instead of an email, or a phone call from someone claiming to be a bank representative. Some scams even use social media platforms to reach you, making it harder to identify them as fraudulent. They may reference different types of transactions or claim to be related to account security, but the core tactic remains the same: creating a sense of urgency and fear to prompt you into action.
+You might also encounter variations of this scam, such as text messages or phone calls that convey similar messages about canceled transfers. Some may even claim to be from a fraud department, asking you to confirm recent transactions. The language may differ slightly, or the urgency may be ramped up, but the core tactic remains the same: to get you to act without thinking. These variations can make it difficult to recognize the scam, especially when they appear to come from familiar sources.
 
-Falling for this scam can have serious consequences. If you provide your personal information or click on a malicious link, you risk giving scammers access to your bank account, leading to unauthorized transactions or identity theft. The aftermath can be overwhelming, as you may find yourself dealing with financial losses and the long process of recovering your identity. It’s a reminder that even the most official-looking messages can be traps, and taking a moment to verify can save you from a lot of trouble.
+Falling for this scam can lead to serious consequences. If you provide your login information, the scammer can access your bank account, potentially draining your funds or making unauthorized transactions. Additionally, your personal information could be sold or used for identity theft, leading to long-term financial and emotional distress. The impact of such scams can be devastating, leaving you not only financially vulnerable but also questioning your judgment in recognizing legitimate communications.
 <p>This is why step-by-step checking matters. Once a message related to Bank Transfer Cancellation Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1380,13 +1380,13 @@ Falling for this scam can have serious consequences. If you provide your persona
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-billing-issue-email-legit-or-scam/">Is Bank Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-alert-email-legit-or-scam/">Is Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-case-email-legit-or-scam/">Is Bank Fraud Case Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-warning-email-legit-or-scam/">Is Bank Fraud Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-attempt-email-legit-or-scam/">Is Bank Login Attempt Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-blocked-email-legit-or-scam/">Is Bank Login Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-payment-declined-email-legit-or-scam/">Is Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-refund-notification-email-legit-or-scam/">Is Bank Refund Notification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-security-check-email-legit-or-scam/">Is Bank Security Check Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-security-warning-email-legit-or-scam/">Is Bank Security Warning Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

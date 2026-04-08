@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank Payment Declined Message is a common question when something like a bank fraud alert text feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Bank Payment Declined Message scenario starts with something like a bank fraud alert text, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You receive a message that your recent bank payment has been declined, complete with your bank's logo and a sense of urgency. The text or email might include a link to a website that looks strikingly similar to your bank's official site. It often states that your account is at risk and urges you to verify your information immediately to avoid further issues. The message may even reference a recent transaction you made, making it feel personal and legitimate, which can easily catch you off guard.
+You might have recently received a message claiming that your bank payment has been declined, complete with your bank's logo and a sense of urgency. The text or email often instructs you to click a link to verify your account information or to call a number for immediate assistance. The language used is designed to mimic official communication, making it feel legitimate. You may have felt a rush of anxiety, thinking about the implications of a declined payment and the potential impact on your finances.
 
-The urgency of the message is designed to provoke a quick response. It might say something like, "Your account will be locked unless you act now!" This pressure can make you feel anxious, prompting you to click the link without thinking twice. By creating a scenario where you feel your finances are in jeopardy, the scammer aims to bypass your usual caution and get you to act impulsively, believing they are providing a necessary service.
+The urgency in these messages is palpable. They often state that your account will be suspended unless you act quickly, creating a pressure cooker scenario that makes you feel like you must respond immediately. This tactic plays on your fears and the instinct to protect your financial assets. Scammers know that when you’re in a panic, you’re less likely to scrutinize the details, making it easier for them to manipulate you into providing sensitive information.
 
-You might encounter variations of this scam, such as phone calls claiming to be from your bank's fraud department or even fake apps that mimic your bank's interface. Some messages may ask you to call a number that leads to a scammer posing as a bank representative. Others may include a request for personal information or payment details under the guise of verifying your identity. Each variation is crafted to exploit your trust and urgency, making it harder to spot the deception.
+You might notice variations of this scam that look slightly different but carry the same message. Some may come as a phone call from someone posing as a bank representative, while others may appear as a pop-up on a website you’re visiting. The common thread is the urgency and the request for personal information, whether it’s your account number, Social Security number, or even passwords. Each version is crafted to exploit your trust in your financial institution, making it all the more convincing.
 
-Falling for this scam can lead to devastating consequences. If you provide your personal or financial information, scammers can drain your bank account or open new accounts in your name. The emotional toll can be significant, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it’s about the long-term impact on your trust in digital communications and the stress of dealing with the aftermath.
+Falling for this scam can lead to serious consequences. Once scammers have your information, they can drain your bank account, open new lines of credit in your name, or even sell your data on the dark web. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to take a step back and assess the situation before reacting, as the cost of a hasty decision can be steep.
 <p>Payment-related scams connected to Bank Payment Declined Message often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a bank fraud alert text is involved.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ Falling for this scam can lead to devastating consequences. If you provide your 
 <li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-billing-issue-email-legit-or-scam/">Is Bank Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-alert-email-legit-or-scam/">Is Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-alert-text-legit-or-scam/">Is Bank Fraud Alert Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-case-email-legit-or-scam/">Is Bank Fraud Case Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-department-call-legit-or-scam/">Is Bank Fraud Department Call or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-warning-email-legit-or-scam/">Is Bank Fraud Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-attempt-email-legit-or-scam/">Is Bank Login Attempt Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-login-blocked-email-legit-or-scam/">Is Bank Login Blocked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-debit-card-suspension-email-legit-or-scam/">Is Bank Debit Card Suspension Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

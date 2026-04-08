@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank OTP Request I Didn’t Initiate is a common question when something like an Amazon payment warning feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Bank OTP Request I Didn’t Initiate scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You just received a text message from what appears to be your bank, containing a one-time password (OTP) request that you didn’t initiate. The message might include a sense of urgency, telling you to act quickly to secure your account. It may even provide a link to a website that looks almost identical to your bank’s official site, asking you to verify your identity by entering personal information. This scenario is all too common, and it’s designed to catch you off guard, making you question whether you might have forgotten a transaction or if someone else is trying to access your account.
+You receive a text message from what appears to be your bank, stating that a one-time password (OTP) request has been initiated for a transaction you don’t recognize. The message includes a code and instructs you to enter it to confirm or cancel the transaction. You might feel a pang of confusion and concern, especially if you haven’t made any recent purchases or changes to your account. It’s unsettling to see a message that seems so official but doesn’t align with your activity. This scenario is all too familiar for many, as scammers often exploit the trust we place in our financial institutions.
 
-The message creates an immediate sense of urgency, suggesting that your account is at risk. It might say something like, “Your account has been compromised. Please verify your identity within the next 10 minutes to avoid suspension.” This kind of pressure can cloud your judgment, pushing you to act quickly without thinking it through. The familiar branding and language used in the message can establish a false sense of trust, making you feel like you’re dealing with a legitimate request from your bank.
+The urgency of the situation can be overwhelming. The message may suggest that immediate action is required to prevent unauthorized access to your account. It might even threaten consequences if you don’t respond quickly, pushing you to act without fully thinking it through. This tactic plays on your fear of losing access to your funds or having your account compromised. The language used is often reassuring, making it seem like a legitimate security measure, which can lead you to let your guard down and respond without hesitation.
 
-Variations of this scam can come in different forms, such as an email that looks like it’s from your bank or even a phone call from someone claiming to be a customer service representative. You might see a message that asks you to click a link to reset your password or provide your account details to confirm a suspicious transaction. Each version is designed to mimic the official communication style of your bank, making it harder to discern what’s real and what’s not.
+Scammers often tweak their approach to keep you guessing. You might receive an email instead of a text, or the message could come from a phone number that looks similar to your bank’s official contact. Some variations might involve fake websites that mimic your bank’s login page, where you’re prompted to enter your credentials after receiving the OTP request. Each version is designed to look credible, making it difficult to distinguish between a genuine alert and a malicious attempt to gain access to your personal information.
 
-If you fall for this scam, the consequences can be severe. Providing your personal information or entering the OTP on a fraudulent site can lead to unauthorized access to your bank account, resulting in stolen funds or identity theft. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to remain vigilant and question any unexpected requests for sensitive information, even if they appear to come from a trusted source.
+Falling for this type of scam can have serious repercussions. If you enter the OTP or any personal information, you could unwittingly give scammers direct access to your bank account. This might lead to unauthorized transactions, drained accounts, or even identity theft. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to remain vigilant and question any unexpected requests, especially when they involve sensitive information like OTPs.
 <p>The strongest clue is usually not one isolated detail. With Bank OTP Request I Didn’t Initiate, the risk often becomes clearer when something like an Amazon payment warning is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ If you fall for this scam, the consequences can be severe. Providing your person
 <li><a href="/scam-check-now/is-bank-of-america-suspicious-activity-email-legit-or-scam/">Is Bank of America Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-transfer-alert-email-legit-or-scam/">Is Bank of America Transfer Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-verification-code-text-legit-or-scam/">Is Bank of America Verification Code Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-sms-alert-asking-for-confirmation-legit-or-scam/">Is Bank SMS Alert Asking for Confirmation or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-temporarily-restricted-email-legit-or-scam/">Is Bank Account Temporarily Restricted Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-asking-to-confirm-transaction-legit-or-scam/">Is Bank Asking to Confirm Transaction or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-debit-card-suspension-email-legit-or-scam/">Is Bank Debit Card Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-real-or-fake/">Is Bank Login Alert Email Real or Fake</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

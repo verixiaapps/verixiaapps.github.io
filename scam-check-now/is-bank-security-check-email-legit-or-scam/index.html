@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank Security Check Email is a common question when something like a PayPal refund email feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Bank Security Check Email scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming to be from your bank, urging you to verify your account information due to suspicious activity. The message often features your bank's logo and includes a sense of urgency, telling you that immediate action is required to prevent your account from being locked. It may even provide a link that appears to lead to your bank's official website, where you’re prompted to enter sensitive information like your password or Social Security number. The polished design and familiar branding can make it feel legitimate, but it’s crucial to take a step back.
+You might have received an email that looks like it’s from your bank, claiming there’s been unusual activity on your account. The message often includes your name and some account details, making it seem legitimate. It may instruct you to click a link to verify your identity or confirm recent transactions. The email is designed to mimic the official communication style of your bank, complete with logos and branding that seem authentic. At first glance, it appears to be a routine security check, but it’s important to take a closer look before acting.
 
-This type of email is designed to create a sense of panic. The sender may state that your account has been compromised or that there’s been an unauthorized transaction. By instilling fear, they push you to act quickly without thinking. You might feel compelled to click the link and provide the requested information, believing that you’re protecting your financial assets. The urgency is a powerful tool, making it easy to overlook the signs that something isn’t right.
+The urgency in these emails is palpable. They often state that immediate action is required to prevent your account from being locked or compromised. This pressure can lead you to act quickly, without fully analyzing the situation. The message may include phrases like “act now” or “your account is at risk,” which can trigger a sense of panic. In moments like these, it’s easy to overlook the red flags and assume that the email is a genuine attempt to protect your finances.
 
-You might also encounter variations of this scam. For instance, some emails may come from addresses that look similar to your bank’s, with just a slight alteration, or they may be disguised as a text message from a supposed bank representative. Others might even use social media platforms to reach you. Each version aims to exploit your trust in your bank and your fear of losing access to your funds, making it all the more difficult to recognize the deception.
+You might also see variations of this scam that come in different forms, such as text messages or phone calls. Sometimes, the email may claim to be from a third-party security service, or it could even reference a recent purchase you made, which adds a layer of credibility. In other cases, the sender may use a different email address that looks similar to your bank’s official domain, making it harder to spot the deception. These variations are designed to catch you off guard, making it crucial to remain vigilant.
 
-Falling for this scam can have serious consequences. If you provide your information, the scammer can gain access to your bank account, leading to unauthorized transactions and financial loss. Beyond the immediate monetary impact, it can take time to resolve the issues, and you may find yourself dealing with the aftermath of identity theft. The emotional stress and potential damage to your credit can linger long after the initial incident, making it crucial to remain vigilant against these deceptive tactics.
+Falling for this scam can have serious consequences. If you provide your personal information or login credentials, you could unwittingly give scammers access to your bank account. This could lead to unauthorized transactions, drained funds, or even identity theft. The aftermath can be overwhelming, as you may find yourself dealing with fraudulent charges and the hassle of reclaiming your lost money. It’s not just about the immediate financial loss; it can also impact your credit score and create long-term issues that take time and effort to resolve.
 <p>The strongest clue is usually not one isolated detail. With Bank Security Check Email, the risk often becomes clearer when something like a PayPal refund email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1380,13 +1380,13 @@ Falling for this scam can have serious consequences. If you provide your informa
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-billing-issue-email-legit-or-scam/">Is Bank Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-alert-email-legit-or-scam/">Is Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-case-email-legit-or-scam/">Is Bank Fraud Case Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-warning-email-legit-or-scam/">Is Bank Fraud Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-attempt-email-legit-or-scam/">Is Bank Login Attempt Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-blocked-email-legit-or-scam/">Is Bank Login Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-payment-declined-email-legit-or-scam/">Is Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-refund-notification-email-legit-or-scam/">Is Bank Refund Notification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-debit-card-suspension-email-legit-or-scam/">Is Bank Debit Card Suspension Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

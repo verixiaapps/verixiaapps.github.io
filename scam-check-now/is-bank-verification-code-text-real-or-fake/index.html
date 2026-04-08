@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank Verification Code Text Real or Fake is a common question when something like a two-factor code request appears without context. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Bank Verification Code Text Real or Fake cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text that looks legitimate, claiming to be from your bank. It reads something like, “Your account has been flagged for unusual activity. To verify your identity, please reply with the code: 123456.” The message may even include your bank’s logo and a phone number that seems official. At first glance, it feels like a standard security measure, but something about it feels off. You might wonder why your bank would reach out via text instead of through their app or website.
+You receive a text message that seems to come from your bank, stating that there’s been suspicious activity on your account. It asks you to verify your identity by entering a bank verification code. The message looks official, complete with your bank’s logo and a friendly tone. It might even include a link that leads to a website that mimics your bank’s login page. Everything appears legitimate, and you might feel a sense of relief that your bank is looking out for you, but something feels off.
 
-The urgency in the message is palpable. It creates a sense of panic, making you feel like you need to act fast to protect your account. The implication is clear: if you don’t respond quickly, your account could be compromised. This pressure can cloud your judgment, pushing you to act without thinking. You might feel a rush of anxiety, convincing yourself that you must comply to avoid losing access to your hard-earned money.
+The urgency in the message is palpable. It emphasizes that you need to act quickly to prevent your account from being compromised. Phrases like “immediate action required” or “your account will be locked” create a sense of panic, pushing you to respond without thinking. This pressure can cloud your judgment, making it easy to overlook the warning signs. You trust that your bank is protecting you, which is exactly what the scammer wants you to feel.
 
-Variations of this scam can come in different forms. You might receive a similar message claiming to be from a different financial institution or even a service like PayPal or Venmo. Some texts may ask you to click a link to verify your information, leading you to a fake website that mimics your bank’s login page. Others might come as phone calls, where a “representative” asks for your verification code directly. Each variation is designed to look credible, making it easy to let your guard down.
+Scammers often use variations of this tactic, changing the sender's phone number or altering the wording slightly to evade detection. You might receive a call instead, where the caller claims to be a bank representative, asking for your verification code. Some might even send emails that look like official correspondence from your bank, complete with links that lead to fake sites designed to harvest your information. Each variation is crafted to exploit your trust and urgency, making it harder to spot the deception.
 
-Falling for this scam can lead to serious consequences. If you provide the verification code, the scammer can gain access to your account, draining your funds or making unauthorized transactions. The emotional toll can be just as significant, leaving you feeling violated and anxious about your financial security. It’s a reminder that what seems like a routine check could be a trap, and the fallout can be both financially and emotionally devastating.
+If you fall for this trap, the consequences can be severe. Scammers can gain access to your bank account, draining your funds or making unauthorized transactions. Your personal information may be sold on the dark web, leading to identity theft that can take years to resolve. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Recognizing these scams before they take hold is crucial to protecting yourself and your hard-earned money.
 <p>Account-security scams connected to Bank Verification Code Text Real or Fake are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a two-factor code request.</p>
 </div>
 
@@ -1377,7 +1377,8 @@ Falling for this scam can lead to serious consequences. If you provide the verif
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-unusual-activity-text-legit-or-scam/">Is Bank Unusual Activity Text or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-fraud-alert-text-legit-or-scam/">Is Bank Fraud Alert Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-unusual-activity-text-legit-or-scam/">Is Bank Unusual Activity Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-bank-text/">Did I Get Scammed by Bank Text?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-account-locked-email-legit-or-scam/">Is Bank of America Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-fraud-alert-email-legit-or-scam/">Is Bank of America Fraud Alert Email or Scam Legit or a Scam?</a></li>
@@ -1386,7 +1387,6 @@ Falling for this scam can lead to serious consequences. If you provide the verif
 <li><a href="/scam-check-now/is-bank-of-america-payment-declined-email-legit-or-scam/">Is Bank of America Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-security-alert-email-legit-or-scam/">Is Bank of America Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-suspicious-activity-email-legit-or-scam/">Is Bank of America Suspicious Activity Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-of-america-transfer-alert-email-legit-or-scam/">Is Bank of America Transfer Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

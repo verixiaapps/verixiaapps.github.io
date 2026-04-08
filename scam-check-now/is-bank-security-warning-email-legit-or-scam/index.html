@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank Security Warning Email is a common question when something like a PayPal refund email feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Bank Security Warning Email scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email that looks like it’s from your bank, warning you about suspicious activity on your account. The message may include your name, a logo that looks official, and even some details about recent transactions. It often instructs you to click a link to verify your identity or to log in to your account immediately. The email may seem urgent, with phrases like “Immediate action required” or “Your account will be suspended if you don’t respond.” This can make you feel anxious, prompting you to act quickly without thinking.
+You open your email to find a message from what appears to be your bank, alerting you to suspicious activity on your account. The email is professionally formatted, complete with your bank’s logo and a sense of urgency in the subject line. It instructs you to click on a link to verify your identity and secure your account. The language is clear and direct, making it seem like a legitimate warning that demands your immediate attention. You might even notice that it addresses you by name, making it feel even more personal and credible.
 
-Scammers know how to play on your emotions, creating a sense of urgency that pushes you to respond before you have a chance to think it through. They often use language that builds trust, such as referencing your account number or mentioning recent transactions that seem familiar. This tactic makes the email feel legitimate, and you might find yourself clicking the link without a second thought. The fear of losing access to your funds can cloud your judgment, leading you to believe that you must act right away.
+The email creates a sense of urgency that can be hard to ignore. It warns you that your account may be compromised and that you need to act quickly to prevent unauthorized transactions. This pressure can make you feel anxious, pushing you to click the link without thinking twice. The message might also assure you that your information is safe if you follow the provided instructions, further building trust in what seems like a legitimate communication from your bank.
 
-These scams can come in various forms, sometimes appearing as text messages or phone calls that mimic your bank's customer service. You might receive a text claiming there’s been a security breach, urging you to click a link or call a number to resolve the issue. Alternatively, you might encounter a pop-up on a website that looks like your bank’s login page, asking for your credentials. Each version is designed to look credible, making it easy to mistake them for genuine communications from your bank.
+Variations of this scam can include texts or phone calls that mimic your bank’s communication style. You may receive a text message claiming that your account has been locked, urging you to call a number to resolve the issue. Alternatively, a phone call might come from someone posing as a bank representative, asking for your personal information to "verify" your identity. Each version is designed to exploit your trust in your bank, using familiar language and branding to make you feel secure in responding.
 
-Falling for this type of scam can have serious consequences. If you provide your personal information or login details, scammers can gain access to your bank account, leading to unauthorized transactions and financial loss. The aftermath can be stressful and time-consuming, as you may need to work with your bank to recover lost funds and secure your account. Additionally, your personal information could be sold on the dark web, leading to further identity theft issues. It’s crucial to take a moment to verify any communication before acting, especially when it involves your finances.
+If you fall for this scam, the consequences can be severe. Providing your personal information could lead to unauthorized access to your bank account, resulting in financial loss and identity theft. Once scammers have your details, they can drain your funds or open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the realization that you’ve been deceived can lead to feelings of vulnerability and mistrust in future communications.
 <p>Payment-related scams connected to Bank Security Warning Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a PayPal refund email is involved.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ Falling for this type of scam can have serious consequences. If you provide your
 <li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-billing-issue-email-legit-or-scam/">Is Bank Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-alert-email-legit-or-scam/">Is Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-case-email-legit-or-scam/">Is Bank Fraud Case Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-attempt-email-legit-or-scam/">Is Bank Login Attempt Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-blocked-email-legit-or-scam/">Is Bank Login Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-payment-declined-email-legit-or-scam/">Is Bank Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-refund-notification-email-legit-or-scam/">Is Bank Refund Notification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

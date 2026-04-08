@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Bank of America Verification Code Text is a common question when something like a login alert email appears without context. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Bank of America Verification Code Text cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might receive a text claiming to be from Bank of America, asking you to verify your account by entering a code they’ve sent you. The message often looks official, complete with the bank's logo and a professional tone. It may say something like, “Your account has been flagged for unusual activity. Please reply with the verification code to secure your account.” This type of message can catch you off guard, especially if you’ve recently interacted with your bank or made a transaction.
+You receive a text message that looks like it’s from Bank of America, claiming that there’s a security issue with your account. The message instructs you to enter a verification code to confirm your identity. It may even include a link that appears to lead to the official Bank of America website. The urgency in the message is palpable, making you feel like you need to act quickly to protect your account from unauthorized access. The sender’s number might even resemble a legitimate Bank of America contact, adding to the confusion.
 
-The urgency is palpable in these texts. They often suggest immediate action is required to prevent account suspension or unauthorized access. By creating a sense of panic, the scammer manipulates you into responding quickly without thinking. You might feel compelled to act right away, fearing the loss of access to your funds or the safety of your personal information. This pressure can cloud your judgment, making it easy to overlook red flags.
+The text creates a sense of urgency by suggesting that immediate action is required. Phrases like “Your account may be compromised” or “Act now to prevent further issues” push you to respond quickly, often bypassing your usual caution. This pressure can make you feel that you’re in a race against time, prompting you to click the link or respond with your information without fully thinking it through. The message may even include a reassuring tone, making it seem like a genuine communication from your bank.
 
-These scams can take on various forms. You might see similar messages from other banks or financial institutions, or they may come as emails that look like official correspondence. Some may even call you directly, impersonating a bank representative and asking for verification codes or personal information. The common thread is that they all aim to instill fear and urgency, pushing you to act without verifying the source.
+You might also encounter variations of this scam, such as phone calls that mimic customer service representatives or emails that appear to come from Bank of America. Some messages may ask you to verify your identity through a different method, like answering security questions or providing personal details. Each variation is designed to look legitimate, often using official logos or language that makes you feel secure. This adaptability is what makes these scams particularly insidious, as they can take on many forms while maintaining the same deceptive intent.
 
-If you fall for this scam, the consequences can be severe. By providing the verification code, you’re essentially giving the scammer access to your account, which could lead to unauthorized transactions and financial loss. Additionally, your personal information may be compromised, putting you at risk for identity theft. The emotional toll of realizing you’ve been scammed can be significant, leaving you feeling vulnerable and anxious about your financial security.
+Falling for this scam can lead to serious consequences. If you provide your verification code or personal information, scammers can gain access to your bank account, potentially draining your funds or using your identity for fraudulent activities. The aftermath can be devastating, leaving you to deal with financial loss and the stress of recovering your identity. It’s a reminder that while messages may look authentic, it’s crucial to take a moment to verify their legitimacy before acting.
 <p>Account-security scams connected to Bank of America Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ If you fall for this scam, the consequences can be severe. By providing the veri
 <li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-alert-text-legit-or-scam/">Is Bank Fraud Alert Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-bank-text/">Did I Get Scammed by Bank Text?</a></li>
-<li><a href="/scam-check-now/is-bank-debit-card-suspension-email-legit-or-scam/">Is Bank Debit Card Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-login-alert-email-real-or-fake/">Is Bank Login Alert Email Real or Fake</a></li>
+<li><a href="/scam-check-now/is-bank-account-temporarily-restricted-email-legit-or-scam/">Is Bank Account Temporarily Restricted Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
