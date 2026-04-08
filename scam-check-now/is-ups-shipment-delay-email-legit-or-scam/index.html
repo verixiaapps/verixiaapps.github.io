@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>UPS Shipment Delay Email is a common question when something like a FedEx delivery alert looks urgent but feels slightly off. Most scam checks start with the same question: does the situation hold up when you verify it independently? The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common UPS Shipment Delay Email message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a FedEx delivery alert. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You might have recently received an email claiming to be from UPS, notifying you about a delay in your shipment. The message often includes your tracking number, a sense of urgency about the delivery, and a link to "resolve" the issue. It may look official, complete with UPS logos and formatting that seems legitimate. However, the email may also contain slight misspellings or unusual phrasing that raises suspicion. If you’re expecting a package, it’s easy to feel worried and click on the link without thinking twice.
+You open your email to find a message claiming to be from UPS, informing you that your shipment is delayed. The email includes your tracking number, a link to a website that looks almost identical to the official UPS site, and a request for you to confirm your shipping details. The tone is professional, and the email uses UPS branding, making it seem credible at first glance. Everything appears legitimate, but you can't shake the feeling that something isn't quite right.
 
-Scammers know how to play on your emotions. They create a sense of urgency by suggesting that your package is stuck or that immediate action is required to avoid further delays. The email may threaten that your shipment will be returned or lost if you don’t respond quickly. This pressure can lead you to act impulsively, making you more likely to click on links or provide personal information without verifying the source. The fear of missing out on an important delivery can cloud your judgment.
+The urgency in the email is palpable. It states that your package is on hold and that you must act quickly to avoid further delays. Phrases like “immediate action required” or “your account will be suspended” create a sense of panic. This pressure can make you feel like you have no choice but to click the link and provide your information. Scammers know how to exploit your emotions, making you believe that you are about to miss out on something important.
 
-Variations of this scam can appear in different forms. You might receive a text message with a similar message, or even a phone call claiming to be from UPS customer service. Some versions might ask you to download an attachment to view the shipment details, which can lead to malware on your device. Others may mimic a legitimate shipping update, making it even harder to distinguish between a real notification and a scam. Each variation is designed to catch you off guard and exploit your trust in well-known delivery services.
+Variations of this scam can appear in different forms. You might receive a text message with a similar message, or even a phone call from someone claiming to be a UPS representative. The details may change slightly—a different tracking number, a different shipping issue—but the core tactic remains the same. They might even use your name to make the communication feel more personal and trustworthy, further blurring the lines between legitimate and fraudulent.
 
-Falling for this scam can have serious consequences. If you click on a malicious link, you risk exposing your personal information, which can lead to identity theft or financial loss. Even if you don’t provide any information, malware can compromise your device, giving scammers access to your sensitive data. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling vulnerable and anxious about future communications. It’s crucial to take a moment to verify the source before acting on any unexpected messages regarding your shipments.
+Falling for this scam can have serious consequences. If you click the link and enter your personal information, you risk having your identity stolen or your financial accounts compromised. Scammers can use your details to make unauthorized purchases or even sell your information on the dark web. The emotional toll of realizing you’ve been duped can be just as damaging, leaving you feeling vulnerable and anxious about future online interactions. It's crucial to stay vigilant and question any unexpected communication regarding your shipments.
 <p>Delivery-related scams connected to UPS Shipment Delay Email usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a FedEx delivery alert appears.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

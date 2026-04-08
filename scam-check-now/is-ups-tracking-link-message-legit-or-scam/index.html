@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>UPS Tracking Link Message is a common question when something like a USPS tracking text looks urgent but feels slightly off. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate delivery notice usually appears in the real carrier app or on the official tracking page, while a scam version often starts with something like a USPS tracking text and pushes you toward a message link, a small fee, or a rushed address update.</p>
-You might have recently received a message claiming to be from UPS, complete with a tracking link that promises to show you the status of your package. The message often looks official, featuring the UPS logo and even a reference number that seems legitimate. It might say something like, "Your package is on the way! Click here to track your shipment." At first glance, it appears to be a standard notification from a trusted shipping company, making it easy to overlook any signs of trouble.
+You receive a message that appears to be from UPS, complete with their logo and a tracking link that claims your package is ready for delivery. The text is straightforward, urging you to click the link to view your shipping details. At first glance, it seems legitimate, especially if you’ve been expecting a package. However, the urgency of the message, often stating that your delivery is delayed or requires immediate action, raises a red flag. It’s designed to catch your attention and prompt you to act quickly, which is a tactic many scammers use to bypass your better judgment.
 
-The urgency in these messages is palpable. They often mention that your package is delayed or requires immediate action to avoid a fee or cancellation. This pressure can make you feel like you need to act quickly, prompting you to click the link without a second thought. The combination of a familiar brand and a time-sensitive issue builds a false sense of trust, making it harder to question the legitimacy of the message. You might find yourself thinking, "I need to see where my package is," which is exactly what the scammer wants.
+The message may create a sense of trust by mimicking the official UPS communication style. It may even include personal information, like your name or partial address, making it feel even more convincing. Scammers often invest time in crafting these messages to look authentic, using familiar logos and language. The urgency is palpable; they might say that your package will be returned to sender if you don’t click the link immediately. This pressure can make you feel compelled to act without thinking, increasing the likelihood that you’ll fall for the trap.
 
-Variations of this scam can pop up in different forms. You might see emails that look like they’re from UPS but come from an unusual domain or texts that claim to be from a delivery service you’ve never used. Some may even impersonate local delivery companies or use fake tracking numbers that seem plausible. Each version is designed to catch you off guard, often using slight tweaks in language or format to appear more convincing. The more familiar they seem, the easier it is to let your guard down.
+Variations of this scam can appear in different forms. You might receive an email instead of a text, or the message could come from a different courier service, such as FedEx or DHL. Some versions might include attachments that claim to provide tracking information, while others might ask you to verify your shipping details through a form. Each variation is designed to exploit your expectations and create a sense of urgency, making it difficult to discern the real from the fake. The language may change slightly, but the core tactic remains the same: to get you to click that link.
 
-Falling for this scam can have serious consequences. Clicking on the link might lead you to a phishing site designed to steal your personal information, such as your credit card details or login credentials. In some cases, it could even install malware on your device, compromising your security further. The aftermath can leave you not only without your package but also facing financial loss and identity theft, making it crucial to remain vigilant when dealing with unexpected tracking messages.
+If you click the link, you could find yourself on a fraudulent website designed to steal your personal information or install malware on your device. This can lead to identity theft, financial loss, or even unauthorized purchases made in your name. The consequences can extend beyond just immediate financial impact; your personal data may be sold on the dark web, leading to long-term issues. Recognizing these scams is crucial because they prey on your trust and urgency, turning what should be a simple package delivery into a potential nightmare.
 <p>That difference matters because a real notice related to UPS Tracking Link Message should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

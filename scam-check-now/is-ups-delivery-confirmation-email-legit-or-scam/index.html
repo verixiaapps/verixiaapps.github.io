@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>UPS Delivery Confirmation Email is a common question when something like a customs fee link looks urgent but feels slightly off. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate delivery notice usually appears in the real carrier app or on the official tracking page, while a scam version often starts with something like a customs fee link and pushes you toward a message link, a small fee, or a rushed address update.</p>
-You might have recently received an email that looks like it’s from UPS, claiming to confirm a delivery. The message often includes your name, a tracking number, and a link to view the shipment details. It may even feature the UPS logo and a professional layout that makes it appear authentic. However, as you glance through the email, something feels off. The urgency in the message might suggest that you need to act quickly to avoid missing your package, creating a sense of panic that pushes you to click on the link without thinking twice.
+You might have recently received an email that looks like it’s from UPS, claiming to confirm a delivery. The message often features the UPS logo, includes your name, and provides a tracking number. It may even have a link that appears to direct you to the official UPS website. However, upon closer inspection, you might notice that the sender's email address is slightly off, or the language seems a bit unusual. These details can easily be overlooked, especially when the email looks so convincing at first glance.
 
-Scammers know how to play on your emotions. They craft these emails to create a false sense of urgency, making you believe that your package is either delayed or that there’s an issue that needs immediate attention. The pressure to resolve the situation can cloud your judgment, leading you to click on links or download attachments that could compromise your personal information. The familiarity of the UPS brand adds a layer of trust, making it harder to recognize the deception at play.
+The urgency in these emails is palpable. They often state that your package is delayed or that action is required to avoid a missed delivery. This pressure can make you feel anxious, prompting you to click on links or download attachments without thinking twice. The email might suggest that you need to verify your information to ensure prompt delivery, playing on your desire to receive your package on time. This tactic is designed to bypass your skepticism by creating a sense of immediate need.
 
-You might also encounter variations of this scam. Some emails may claim to be from other delivery services, like FedEx or DHL, but they follow the same formula. Others might come disguised as notifications about missed deliveries or requests for payment to release a package. The language can vary, but the core tactic remains the same: instilling fear and urgency to get you to act without thinking. You could even receive a text message or a phone call that mimics this same approach, making it even more challenging to discern what’s real and what’s not.
+You might also encounter variations of this scam that come through text messages or even phone calls. A text might say your package is ready for pickup, with a link to a website that looks legitimate but is actually a phishing site. Alternatively, you could receive a call from someone claiming to be a UPS representative, asking for personal information to resolve an issue with your delivery. Each variation is crafted to exploit your trust in a well-known service, making it harder to discern what’s real and what’s not.
 
-Falling for this scam can lead to serious consequences. If you click on a malicious link, you might unknowingly download malware onto your device, allowing scammers to access your personal information, including bank details and passwords. Even if you don’t fall for the initial bait, providing any personal information in response can put you at risk for identity theft. The aftermath can be stressful and time-consuming, as you scramble to secure your accounts and mitigate the damage. It’s crucial to stay vigilant and question the legitimacy of unexpected delivery notifications.
+Falling for this scam can lead to serious consequences. If you click on the wrong link, you might unknowingly download malware onto your device, compromising your personal information and financial security. Providing your details to a scammer can result in identity theft, unauthorized purchases, or even account takeovers. The aftermath can be overwhelming, leaving you to deal with the fallout while trying to regain control of your information. It’s crucial to stay vigilant and recognize the signs before it’s too late.
 <p>That difference matters because a real notice related to UPS Delivery Confirmation Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1380,13 +1380,13 @@ Falling for this scam can lead to serious consequences. If you click on a malici
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-fedex-delivery-exception-email-legit-or-scam/">Is FedEx Delivery Exception Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-fedex-delivery-notification-email-legit-or-scam/">Is FedEx Delivery Notification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-fedex-delivery-problem-email-legit-or-scam/">Is FedEx Delivery Problem Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/delivery-scam-message-example/">Is Delivery Scam Message Example a Scam?</a></li>
 <li><a href="/scam-check-now/is-fedex-delivery-alert-text-legit-or-scam/">Is FedEx Delivery Alert Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-fedex-failed-delivery-notice-legit-or-scam/">Is FedEx Failed Delivery Notice or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-fedex-missed-delivery-message-legit-or-scam/">Is FedEx Missed Delivery Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-fedex-missed-delivery-text-legit-or-scam/">Is FedEx Missed Delivery Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-delivery-text-message-legit-or-scam/">Is This Delivery Text Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-unknown-message-about-delivery-legit-or-scam/">Is Unknown Message About Delivery or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/usps-delivery-failed-text-scam/">Is USPS Delivery Failed Text a Scam?</a></li>
-<li><a href="/scam-check-now/is-fedex-customs-charge-email-legit-or-scam/">Is FedEx Customs Charge Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

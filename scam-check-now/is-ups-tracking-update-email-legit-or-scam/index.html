@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>UPS Tracking Update Email is a common question when something like a USPS tracking text looks urgent but feels slightly off. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common UPS Tracking Update Email message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a USPS tracking text. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You might have received an email claiming to be from UPS, complete with their logo and a subject line that reads something like "Your Package Tracking Update." The message often includes a link that urges you to click to view the status of your shipment. It may even reference a tracking number that looks legitimate at first glance. The email's layout mimics official communications, making it easy to overlook any signs that it could be a scam. You might feel a sense of relief, thinking it’s just a routine update about a package you ordered.
+You might have received an email claiming to be from UPS, complete with their logo and a subject line that mentions a tracking update for a package you’re expecting. The message often includes a link that urges you to click for more details about your shipment. It may look official, with formatting that mimics UPS communications, making it easy to overlook any signs of deceit. The email may even contain your name and other details that make it feel personal, creating a sense of authenticity that can be hard to resist.
 
-The urgency in these emails is palpable. They often state that your package is delayed or that immediate action is required to avoid further issues. Phrases like "Your immediate attention is required" or "Click here to resolve this issue" create a sense of panic, pushing you to act quickly without fully thinking it through. This tactic is designed to bypass your usual caution, making you feel like you must respond right away to avoid missing out or facing consequences.
+The urgency in these emails is palpable. You might read phrases like “Your package is delayed” or “Immediate action required to avoid cancellation.” This kind of pressure can push you to click the link without thinking twice, especially if you’re eagerly awaiting a delivery. The sender’s goal is to make you feel anxious about your shipment, compelling you to act quickly. This tactic plays on your emotions, making it seem like you need to resolve an issue right away, which can cloud your judgment.
 
-Scammers frequently change the details to keep their tactics fresh. You might see variations that include fake shipping notifications from other carriers or even messages that appear to come from a well-known retailer. Some emails may ask you to confirm your shipping address, while others might offer a discount on your next purchase if you click a link. Each variation is crafted to exploit your trust in established delivery services and retail brands, making it harder for you to spot the deception.
+Variations of this scam can pop up in different forms. You might see similar messages coming from other shipping companies or even fake notifications about missed deliveries. Some emails might appear to come from a different sender but still contain the same urgency and tracking language. Others may claim to offer discounts or special promotions related to your shipment. Each version is designed to look legitimate, often using real tracking numbers or references to recent purchases to gain your trust.
 
-Falling for this scam can lead to serious consequences. Clicking the link might direct you to a malicious website that steals your personal information or even installs malware on your device. If you enter any details, such as your credit card number or login credentials, you could find yourself facing identity theft or unauthorized charges. The emotional toll can be just as damaging, leaving you feeling violated and anxious about the security of your personal information.
+Falling for this scam can lead to serious consequences. By clicking the link, you might inadvertently download malware onto your device or provide personal information that can be used for identity theft. Your financial details could be at risk if you’re prompted to enter payment information on a fake site. The aftermath can be stressful and costly, leaving you not only without your expected package but also dealing with the repercussions of compromised personal security.
 <p>Delivery-related scams connected to UPS Tracking Update Email usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a USPS tracking text appears.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

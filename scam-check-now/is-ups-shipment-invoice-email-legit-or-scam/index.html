@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>UPS Shipment Invoice Email is a common question when something like a Zelle transfer problem message feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common UPS Shipment Invoice Email scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email that looks like it’s from UPS, claiming to be an invoice for a shipment you don’t remember ordering. The email often includes your name, a tracking number, and a link to view or pay the invoice. The design mimics official UPS communications, complete with their logo and branding, making it easy to mistake for a legitimate message. The email may even mention a delivery date that’s just around the corner, which can catch your attention and make you think twice about its authenticity.
+You might have recently received an email that looks like it’s from UPS, claiming to include an invoice for a shipment you don’t remember ordering. The email often features the UPS logo and uses language that seems official, complete with tracking numbers and shipping details. It may even include a link or attachment that prompts you to download the invoice or view your shipment status. At first glance, everything appears legitimate, but that’s where the danger lies. 
 
-The urgency in these emails is palpable. They often state that immediate action is required to avoid delays or additional fees, creating a sense of panic. You might feel pressured to click on the link provided to resolve the issue quickly. This tactic is designed to bypass your usual caution, making you act before you have a chance to think critically. The email may also include phrases that evoke trust, such as “Your satisfaction is our priority,” further convincing you that this is a legitimate communication from UPS.
+The email is designed to create a sense of urgency. It might say that your package is on hold due to an unpaid invoice or that immediate action is required to avoid a fee. This pressure can make you feel like you need to act quickly, pushing you to click on links or download files without thinking twice. The sender’s goal is to instill trust by mimicking the professional tone and style of UPS communications, making it difficult for you to discern that it’s actually a scam.
 
-Variations of this scam can appear in different forms, such as text messages or even phone calls. You might receive a text that says your package is on hold and requires payment to release it. Alternatively, a caller may impersonate a UPS representative, asking for your personal information to “verify” your account. Each variation is crafted to exploit your trust in UPS and your desire to resolve shipping issues quickly, making it harder to spot the red flags.
+You may also encounter variations of this scam that come from different shipping companies or even local delivery services. Some might claim to be from FedEx or DHL, while others could use slightly altered email addresses that look similar to the real ones. The messages may change in terms of the details they provide, but they all share the same tactic: tricking you into believing you have an urgent shipment issue. This adaptability makes it even more challenging to recognize the scam, especially if you frequently receive legitimate shipping notifications.
 
-Falling for this scam can have serious consequences. If you click on the link, you may inadvertently download malware onto your device or be directed to a fake website designed to steal your personal information. This can lead to identity theft, financial loss, and a host of other problems that can take time and effort to resolve. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling vulnerable and anxious about future communications.
+Falling for this scam can lead to serious consequences. If you click on a malicious link or download an infected attachment, you could inadvertently install malware on your device, compromising your personal information. Scammers may use this information to steal your identity or access your financial accounts. The aftermath can be overwhelming, as you may find yourself dealing with unauthorized transactions or identity theft, leaving you feeling vulnerable and exposed.
 <p>The strongest clue is usually not one isolated detail. With UPS Shipment Invoice Email, the risk often becomes clearer when something like a Zelle transfer problem message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
