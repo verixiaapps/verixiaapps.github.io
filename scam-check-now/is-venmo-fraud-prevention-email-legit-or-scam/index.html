@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Venmo Fraud Prevention Email is a common question when something like a Zelle transfer problem message feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Venmo Fraud Prevention Email flow starts with something like a Zelle transfer problem message, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming to be from Venmo, warning you about suspicious activity on your account. It may have included official-looking logos and a message urging you to verify your identity by clicking on a link or providing personal information. The email could have mentioned that your account would be suspended unless you acted immediately, making it seem urgent and legitimate. If you felt a twinge of concern while reading it, you're not alone; many people encounter these types of messages that appear to be from trusted services.
+You receive an email that looks like it’s from Venmo, complete with their logo and a professional layout. The subject line reads, “Important: Verify Your Account to Avoid Suspension.” Inside, the message urges you to click a link to confirm your account details, warning that failure to do so will result in losing access to your funds. The email may even include a friendly greeting, making it seem like a legitimate communication from a service you trust. It’s designed to look official, making it easy to overlook any red flags.
 
-The urgency in these emails is often designed to provoke a quick reaction. You might find yourself feeling anxious about your account security, leading you to click the link without thinking twice. The sender may even use language that builds trust, such as referencing your recent transactions or using terms that sound familiar. This manipulation can make you feel like you are genuinely communicating with Venmo, prompting you to act fast to protect your finances, even if it means providing sensitive information.
+The urgency in the email is palpable. Phrases like “act now” or “limited time” create a sense of panic, pushing you to respond quickly without thinking. The message may mention recent security updates or unusual activity on your account, playing on your fears of being hacked or losing money. This tactic is effective because it preys on your instinct to protect your finances, making you feel like you must act immediately to safeguard your account.
 
-Scammers are known to adapt their tactics, so you might see variations of this email. Some may come as text messages or even phone calls, all claiming to be from Venmo's customer support. They might ask for different types of information, like your password or Social Security number, or even direct you to a fake website that looks like the real Venmo site. Each version aims to catch you off guard, making it easy to mistake them for legitimate communications from the service you trust.
+You might see variations of this scam in different formats. Some versions come as text messages or phone calls, with the same urgent tone and requests for personal information. Others might appear as pop-up messages while you’re using the app. Each variation has a similar goal: to trick you into providing sensitive information or clicking on malicious links. The scammers are constantly adapting, so what seems like a straightforward email could easily morph into a text or call that catches you off guard.
 
-If you fall for this scam, the consequences can be severe. You could end up giving away your account credentials, allowing scammers to drain your funds or make unauthorized transactions. Once they have your information, recovering your account can be a long and frustrating process, often requiring you to deal with customer service and potentially losing money in the meantime. The emotional toll can be just as damaging, leaving you feeling violated and anxious about future online interactions.
+Falling for this scam can have serious consequences. If you provide your information, the scammers can access your Venmo account, draining your funds or making unauthorized transactions. Once they have your details, it can be incredibly difficult to recover your money or regain control of your account. Beyond financial loss, there’s the added stress of dealing with identity theft and the time-consuming process of trying to resolve the situation. The implications can extend far beyond just a single transaction, affecting your overall financial security.
 <p>This is why step-by-step checking matters. Once a message related to Venmo Fraud Prevention Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1379,14 +1379,14 @@ If you fall for this scam, the consequences can be severe. You could end up givi
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-venmo-billing-issue-email-legit-or-scam/">Is Venmo Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-charge-notification-email-legit-or-scam/">Is Venmo Charge Notification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-venmo-payment-declined-email-legit-or-scam/">Is Venmo Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-venmo-payment-request-email-legit-or-scam/">Is Venmo Payment Request Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-refund-notification-email-legit-or-scam/">Is Venmo Refund Notification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-security-alert-email-legit-or-scam/">Is Venmo Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-security-warning-email-legit-or-scam/">Is Venmo Security Warning Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-suspicious-login-email-legit-or-scam/">Is Venmo Suspicious Login Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-suspicious-transfer-email-legit-or-scam/">Is Venmo Suspicious Transfer Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-transaction-failed-email-legit-or-scam/">Is Venmo Transaction Failed Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-unauthorized-payment-email-legit-or-scam/">Is Venmo Unauthorized Payment Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-unusual-activity-email-legit-or-scam/">Is Venmo Unusual Activity Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

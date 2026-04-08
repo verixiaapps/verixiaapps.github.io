@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>USPS Shipping Invoice Email is a common question when something like a PayPal refund email feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common USPS Shipping Invoice Email scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email that looks like an official USPS shipping invoice, complete with your name, tracking numbers, and even a logo that seems legitimate. The email might urge you to click a link to review your shipment details or to pay a fee for a package that you don’t remember ordering. The layout is polished, and the language is professional, making it easy to believe that it’s a genuine communication from the postal service. But as you read through it, something feels off, and you can’t shake the feeling that this might not be what it seems.
+You might have recently received an email that looks like it’s from USPS, complete with their logo and a subject line that mentions a shipping invoice. The message typically claims you have a package waiting for you, and it urges you to click a link to view the invoice or track your shipment. The email may even include details like a tracking number or a delivery date to make it seem more legitimate. At first glance, it can appear official, especially if you’re expecting a package, making it easy to overlook any red flags.
 
-The urgency in these emails is palpable. They often claim that your package is on hold or that immediate action is required to avoid additional fees or delivery delays. This pressure can make you feel anxious, prompting you to act quickly without thinking it through. The sender might even include a friendly note, suggesting that they’re there to help resolve any issues, which can create a false sense of trust. You might find yourself convinced that responding is the only way to ensure your package arrives on time.
+The urgency in these emails is often palpable. They might say your package is on hold or that immediate action is required to avoid additional fees. This pressure can lead you to act quickly without thinking, especially if you’re anxious about a delivery. The email may also include reassuring phrases about your account status or customer satisfaction, creating a false sense of trust. You might feel compelled to click the link, thinking you’re just confirming your shipment, but that’s exactly what the scammer wants.
 
-Variations of this scam can be subtle yet effective. Some emails may appear to come from different shipping companies or even from local delivery services, all using similar tactics to catch your attention. You might see slight changes in the sender's email address or different logos, but the core message remains the same: a package is waiting for you, and action is needed. Even text messages can pop up with similar content, making it difficult to discern what’s real and what’s not. Each version is designed to exploit your expectations about package deliveries.
+Variations of this scam can be quite deceptive. You may receive a text message instead, or the email could come from a slightly altered email address that looks similar to USPS. Some versions might even include attachments that claim to be shipping labels or invoices, which can further trick you into believing they are legitimate. Scammers are constantly adapting their tactics, so the message may not always look the same, but the core strategy remains: to get you to take action without questioning the source.
 
-Falling for this scam can lead to serious consequences. Clicking on the links may direct you to malicious websites designed to steal your personal information or install malware on your device. You could end up giving away your credit card details or other sensitive information, leaving you vulnerable to identity theft or financial loss. The emotional toll can be significant, as the realization that you’ve been deceived sets in. It’s a reminder that even the most official-looking communications can be traps waiting to ensnare unsuspecting individuals.
+Falling for this scam can lead to serious consequences. By clicking on the link, you may unknowingly download malware onto your device or provide personal information that can be used for identity theft. Your financial information could be at risk if you’re prompted to enter credit card details. The emotional toll of realizing you’ve been scammed can be overwhelming, leaving you feeling vulnerable and anxious about future online interactions. It’s crucial to take a moment to verify any unexpected messages before acting on them.
 <p>Payment-related scams connected to USPS Shipping Invoice Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a PayPal refund email is involved.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ Falling for this scam can lead to serious consequences. Clicking on the links ma
 <li><a href="/scam-check-now/is-usps-package-held-email-legit-or-scam/">Is USPS Package Held Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-returned-package-email-legit-or-scam/">Is USPS Returned Package Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-shipping-fee-text-legit-or-scam/">Is USPS Shipping Fee Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-tracking-update-email-legit-or-scam/">Is USPS Tracking Update Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-package-held-email-real-or-fake/">Is USPS Package Held Email Real or Fake</a></li>
 <li><a href="/scam-check-now/is-usps-delivery-attempt-notice-legit-or-scam/">Is USPS Delivery Attempt Notice or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-delivery-failed-message-legit-or-scam/">Is USPS Delivery Failed Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-delivery-failed-text-legit-or-scam/">Is USPS Delivery Failed Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-missed-delivery-text-legit-or-scam/">Is USPS Missed Delivery Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-usps-package-problem-message-legit-or-scam/">Is USPS Package Problem Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

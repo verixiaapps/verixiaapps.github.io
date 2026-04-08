@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>USPS Package Problem Message is a common question when something like a customs fee link looks urgent but feels slightly off. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common USPS Package Problem Message message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a customs fee link. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You might have recently received a message claiming there’s a problem with your USPS package, urging you to click a link for more details. This message often mimics the official USPS branding, complete with logos and formatting that look legitimate. It may come via email or text, and it typically includes your name or a tracking number to make it feel personalized. The sender might even use a familiar email address that seems to come from USPS, making it easy to overlook the warning signs.
+You might have recently received a message claiming there's a problem with your USPS package. It could be an email that looks like it’s from USPS, complete with their logo, or a text message urging you to click a link to resolve the issue. The message often includes details that seem specific to you, like your tracking number or delivery address, making it feel legitimate. The sender may even use a familiar tone, as if they’re reaching out to help you with a delivery issue, which can easily catch you off guard.
 
-The urgency in these messages is palpable. They often state that your package will be delayed or returned unless you act immediately. This pressure can make you feel anxious, prompting you to click the link without thinking twice. The message might suggest that you need to verify your information or pay a small fee to resolve the issue. This tactic is designed to create a sense of trust, making you believe that you’re simply following necessary steps to retrieve your package.
+The urgency in these messages is palpable. They often say you need to act quickly to avoid delays or additional fees, creating a sense of panic. You might feel compelled to click the link immediately, thinking it’s a time-sensitive matter. This pressure can cloud your judgment, making you more likely to overlook red flags. The fear of missing out on a package you’ve been waiting for can be a powerful motivator to respond without thinking.
 
-Variations of this scam can be subtle yet effective. Some messages might claim to be from a delivery service other than USPS, while others could present as notifications from a third-party shipping company. You might see slight changes in the sender’s email address or the wording in the message, but the core tactic remains the same: instilling a sense of urgency and a need to act quickly. Sometimes, scammers even use fake tracking numbers to make the message appear more credible.
+Variations of this scam can pop up in different formats. You might see a phone call from someone claiming to be a USPS representative, or a social media message that looks like it’s from a friend who had a similar issue. Sometimes, the message might even suggest that you need to verify your identity or payment information to resolve the problem. Each version is designed to look credible, often using official-looking language or mimicking real USPS communications to gain your trust.
 
-Falling for this scam can lead to serious consequences. Clicking the link may direct you to a phishing site designed to steal your personal information, such as credit card details or social security numbers. In some cases, you might unknowingly download malware onto your device, compromising your security further. The aftermath can be stressful and costly, leaving you to deal with identity theft or financial loss while trying to resolve the fallout from what seemed like a simple package issue.
+Falling for this scam can lead to serious consequences. If you click on a malicious link, you might unknowingly download malware onto your device, putting your personal information at risk. Alternatively, you could end up providing sensitive data like your credit card number or Social Security number to the scammer. This can lead to identity theft, financial loss, and a long, arduous process to reclaim your security. The emotional toll of realizing you’ve been duped can be just as damaging, leaving you feeling vulnerable and anxious about future communications.
 <p>Delivery-related scams connected to USPS Package Problem Message usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a customs fee link appears.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ Falling for this scam can lead to serious consequences. Clicking the link may di
 <li><a href="/scam-check-now/is-usps-delivery-notification-email-legit-or-scam/">Is USPS Delivery Notification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-failed-shipment-email-legit-or-scam/">Is USPS Failed Shipment Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-missed-delivery-text-legit-or-scam/">Is USPS Missed Delivery Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-tracking-update-email-legit-or-scam/">Is USPS Tracking Update Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-tracking-text-legit-or-scam/">Is USPS Tracking Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/usps-delivery-text-scam/">Is USPS Delivery Text a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-usps-text/">Did I Get Scammed by USPS Text?</a></li>
+<li><a href="/scam-check-now/is-fedex-package-held-message-legit-or-scam/">Is FedEx Package Held Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

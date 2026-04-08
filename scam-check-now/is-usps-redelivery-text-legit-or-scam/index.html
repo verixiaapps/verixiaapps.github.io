@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>USPS Redelivery Text is a common question when something like a FedEx delivery alert looks urgent but feels slightly off. Most scam checks start with the same question: does the situation hold up when you verify it independently? The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common USPS Redelivery Text message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like a FedEx delivery alert. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>
-You might have recently received a text that claims to be from USPS, telling you about a missed delivery and urging you to schedule a redelivery. The message often includes a link that looks official, making it seem like a legitimate notification. It might even use your first name or reference a tracking number to make it feel more personalized. The sender's number may appear to be a local area code, which can further trick you into believing it’s a genuine communication from the postal service.
+You might receive a text message claiming to be from USPS, saying that a package delivery was missed and you need to schedule a redelivery. The message often includes a link that looks official, urging you to click it to confirm your address or pay a fee. The sender might use a number that resembles a USPS contact, making it seem legitimate. The text may even include specific details about your package, like a tracking number, which can make it feel more convincing.
 
-This kind of message is designed to create a sense of urgency. It often states that you need to act quickly to avoid additional fees or to ensure that your package is redelivered promptly. The pressure to respond can be overwhelming, especially if you’re expecting a delivery. The message might also include reassuring language about the reliability of USPS, making you feel more inclined to trust it. This combination of urgency and trust is a common tactic used by scammers to get you to engage without thinking critically.
+The urgency in these messages is palpable. They often imply that you need to act quickly to avoid losing your package or facing additional fees. This pressure can lead you to click the link without thinking twice, especially if you’re expecting a delivery. The tone is crafted to instill a sense of trust, making you feel like you’re dealing with an official service rather than a potential scammer.
 
-You might also see variations of this scam, such as emails that look like official USPS correspondence or even phone calls from someone claiming to be a USPS representative. Some messages may ask you to confirm your address or provide personal information under the guise of verifying your identity. Each version may have slightly different wording or formatting, but the core tactic remains the same: to lure you into clicking a link or providing sensitive information.
+Variations of this scam can appear in different forms. Some messages might claim to be from other delivery services, like FedEx or UPS, while others may use slightly altered URLs that look similar to the official USPS site. You might also encounter emails or even phone calls that follow the same pattern, all designed to catch you off guard and manipulate your response. Each version is tailored to exploit your expectations around package deliveries.
 
-Falling for this scam can lead to serious consequences. If you click the link, you might unknowingly download malware onto your device, compromising your personal information. Providing your details could result in identity theft or unauthorized charges on your accounts. The emotional toll can be significant as well, leaving you feeling violated and anxious about your security. Recognizing these messages for what they are is crucial to protecting yourself and your information.
+If you fall for this scam, the consequences can be serious. Clicking the link may lead to phishing sites designed to steal your personal information, or you could inadvertently download malware onto your device. Beyond the immediate financial risks, such as identity theft or unauthorized charges, there’s the added stress of dealing with the aftermath. Protecting your information is crucial, and recognizing these scams is the first step in safeguarding yourself.
 <p>Delivery-related scams connected to USPS Redelivery Text usually work because the request seems small and ordinary. Even a minor fee or simple address update can be enough to collect payment information or redirect you to a fake page, which is why independent tracking checks matter when something like a FedEx delivery alert appears.</p>
 </div>
 
@@ -1366,7 +1366,7 @@ Falling for this scam can lead to serious consequences. If you click the link, y
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-usps-tracking-text-legit-or-scam/">Is USPS Tracking Text or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/usps-delivery-text-scam/">Is USPS Delivery Text a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-usps-text/">Did I Get Scammed by USPS Text?</a></li>
 <li><a href="/scam-check-now/is-usps-delivery-failed-text-legit-or-scam/">Is USPS Delivery Failed Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-usps-missed-delivery-text-legit-or-scam/">Is USPS Missed Delivery Text or Scam Legit or a Scam?</a></li>
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
