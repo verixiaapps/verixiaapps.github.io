@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Billing Issue Alert Email is a common question when something like a suspicious message feels suspicious. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You open your email to find a message titled “Urgent: Billing Issue Alert.” The email looks official, complete with your name and a logo that resembles a well-known company. It details an unexpected charge on your account and urges you to click a link to resolve the issue immediately. The language is alarming, suggesting that failure to act could result in account suspension or additional fees. The sender’s email address appears legitimate at first glance, but something feels off. You can’t shake the feeling that this might not be what it seems.
+You might receive an email that looks like it’s from your bank or a well-known service provider, claiming there’s a billing issue with your account. The email often features their logo and uses official language, making it seem legitimate. It may state that you need to verify your account information immediately to avoid service interruption or additional charges. The sender’s email address may look similar to the real one, but a closer look reveals subtle differences that could indicate it’s not genuine.
 
-The urgency in the message is palpable. It plays on your fear of losing access to your account or facing unexpected charges. The email might even include a friendly tone, as if the sender genuinely cares about your experience. This tactic is designed to build trust quickly, making you feel like you’re part of an exclusive group that needs to act fast. You might find yourself racing to click the link, convinced that you need to resolve the issue before it escalates. This pressure can cloud your judgment, making it easy to overlook red flags.
+This type of scam often creates a sense of urgency, pushing you to act quickly. Phrases like “Your account will be suspended in 24 hours” or “Immediate action required” are common tactics used to make you feel pressured. The email may also include links that promise to take you to a secure site for verification, making it seem like a straightforward solution to a supposed problem. This pressure can cloud your judgment, leading you to click without thinking.
 
-You might also encounter variations of this scam, such as a text message that mimics your bank or a phone call from someone claiming to be a customer service representative. Each version shares the same theme of urgency and fear, but the delivery method changes. Some messages may even include fake customer support numbers or links to websites that look almost identical to the real ones. This adaptability makes it difficult to spot the scam, as it can appear in the most familiar forms, targeting your sense of security.
+You might see variations of this scam, such as texts or phone calls with similar messages. Some may come from fake customer service representatives who claim to be helping you resolve an issue. Others might appear as messages from delivery services, stating there’s a problem with your package delivery. Each variation uses familiar names and logos to gain your trust, but the core message remains the same: act fast or face consequences.
 
-Falling for this scam can lead to serious consequences. Clicking the link may take you to a phishing website designed to steal your personal information, such as passwords or credit card details. Once scammers have this information, they can drain your bank account or open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you grapple with feelings of violation and regret. Protecting yourself from these scams is crucial, as the fallout can affect not just your finances but your peace of mind as well.
+Falling for this scam can have serious repercussions. If you provide your personal information, you risk identity theft, unauthorized transactions, or even losing access to your accounts. Scammers can use your details to drain your bank account or open new lines of credit in your name, leaving you to deal with the aftermath. The emotional and financial toll can be significant, making it crucial to take a moment to verify the source before responding to any alarming messages.
 <p>That difference matters because a real notice related to Billing Issue Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

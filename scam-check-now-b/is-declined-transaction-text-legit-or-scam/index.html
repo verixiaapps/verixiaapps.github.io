@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Declined Transaction Text is a common question when something like an unexpected email feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Declined Transaction Text situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You receive a text message that reads, "Your recent transaction has been declined. Click here to verify your account." At first glance, it looks like a standard notification from your bank or payment service. The message may even include your bank's logo or a familiar name, making it seem legitimate. You might feel a sense of unease, wondering if you accidentally made a purchase you didn't intend to. The urgency of the situation prompts you to click the link, believing you need to act quickly to resolve the issue.
+You receive a text message that reads, “Your recent transaction has been declined. Please verify your account immediately.” The sender appears to be your bank, complete with their logo and official-sounding language. The message includes a link that urges you to click to resolve the issue. It feels alarming, especially if you’ve recently made a purchase. You might think it’s a standard security measure, but the urgency of the message makes you hesitate. Is this a legitimate alert, or is it something more sinister?
 
-The text creates a sense of urgency, making you feel like you have to respond immediately to avoid further complications. It might mention that your account will be locked or that you could lose access to your funds if you don’t verify your information right away. This pressure can cloud your judgment, pushing you to take action without fully thinking through the consequences. The message is crafted to evoke anxiety, making it easy to overlook the signs that it could be a scam.
+The text creates a sense of urgency that is hard to ignore. It taps into your concern for your finances and your desire to keep your accounts secure. By implying that immediate action is required, it pressures you to respond quickly, often before you have a chance to think critically about the situation. You might feel compelled to click the link without verifying the sender, fearing that your account could be compromised. This emotional manipulation is a common tactic used to catch you off guard.
 
-You might see variations of this scam, such as emails that appear to come from your bank or even phone calls from someone claiming to be a customer service representative. They may ask for personal information or direct you to a website that looks almost identical to your bank’s official site. Sometimes, these messages will even reference recent transactions, which can make them feel even more credible. Each version is designed to exploit your trust and create a sense of familiarity that makes you less likely to question its authenticity.
+You might also encounter variations of this scam that seem equally convincing. Some messages may claim to be from a delivery service, stating that a package could not be delivered due to payment issues. Others might come as emails that look like official correspondence from your bank, complete with personalized details that make them seem legitimate. Even phone calls can come through, where a friendly voice claims to be from customer service, urging you to take action. Each variation is designed to exploit your trust and prompt a hasty response.
 
-If you fall for this scam, the consequences can be severe. You might unknowingly provide sensitive information, such as your account number or password, which can lead to unauthorized access to your finances. Scammers can drain your accounts, make fraudulent purchases, or even sell your information on the dark web. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to remain vigilant and skeptical of unexpected messages, even if they seem to come from trusted sources.
+Falling for this scam can lead to serious consequences. If you click the link and enter your personal information, you might unknowingly give scammers access to your bank account or sensitive data. This can result in unauthorized transactions, identity theft, and a long, frustrating process to regain control of your finances. The emotional toll can be significant, leaving you feeling violated and anxious about your security. It’s crucial to take a moment to assess the situation before acting on messages that provoke fear or urgency.
 <p>The strongest clue is usually not one isolated detail. With Declined Transaction Text, the risk often becomes clearer when something like an unexpected email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1462,12 +1462,12 @@ If you fall for this scam, the consequences can be severe. You might unknowingly
 <li><a href="/scam-check-now-b/is-identity-verification-text-legit-or-scam/">Is Identity Verification Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-otp-verification-text-legit-or-scam/">Is OTP Verification Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-password-reset-text-legit-or-scam/">Is Password Reset Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-payment-overdue-text-legit-or-scam/">Is Payment Overdue Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-issued-text-legit-or-scam/">Is Refund Issued Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-subscription-renewal-text-legit-or-scam/">Is Subscription Renewal Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-suspicious-login-text-legit-or-scam/">Is Suspicious Login Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-unusual-login-text-legit-or-scam/">Is Unusual Login Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-account-verification-alert-text-legit-or-scam/">Is Account Verification Alert Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-binance-payment-declined-email-legit-or-scam/">Is Binance Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-chase-payment-declined-email-legit-or-scam/">Is Chase Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-chase-verification-code-text-legit-or-scam/">Is Chase Verification Code Text or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

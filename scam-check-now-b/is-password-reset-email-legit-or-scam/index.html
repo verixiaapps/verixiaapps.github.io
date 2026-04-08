@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Password Reset Email is a common question when something like a login alert email appears without context. Most scam checks start with the same question: does the situation hold up when you verify it independently? These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Password Reset Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might receive an email that looks like it’s from a trusted service, claiming that your password has been reset. The message often includes your name, a friendly greeting, and a link to reset your password. It may even mention that you requested this change, urging you to act quickly to secure your account. The email often uses official logos and familiar language, making it seem legitimate. If you didn’t request a reset, you might feel a mix of confusion and concern, prompting you to click the link without a second thought.
+You might receive an email that looks like it’s from a trusted service, claiming that your password has been reset or that someone is trying to access your account. The email often includes your name, a logo that resembles the company’s branding, and a message urging you to click a link to secure your account. The link might lead to a website that looks almost identical to the legitimate one, making it easy to mistake for the real thing. If you’re not expecting a password reset, this kind of email can catch you off guard.
 
-The urgency in these emails is palpable. They often state that your account will be locked if you don’t act immediately, creating a sense of panic. You might feel compelled to click the link right away, fearing that your account is at risk. The message may also include a phone number for support, further establishing a sense of trust. This pressure can cloud your judgment, making it easy to overlook red flags that might indicate the email is not what it seems.
+Scammers know how to play on your emotions, creating a sense of urgency that pushes you to act quickly. The message might say that your account will be locked unless you reset your password immediately or that suspicious activity has been detected. This pressure can cloud your judgment, making you more likely to click the link without thinking twice. The email may even include reassuring language, like “We value your security,” which can make you feel safe enough to proceed without verifying the source.
 
-You may encounter variations of this scam that can make it even more confusing. For instance, some emails might claim to be from your bank, while others could appear to be from popular online retailers or social media platforms. They might use slightly different wording or even include a fake customer service number. Each version is designed to exploit your trust in these well-known brands, making it difficult to discern the genuine from the fraudulent.
+Variations of this scam can appear in different forms, such as a text message or a phone call. You might get a text saying your account is compromised, urging you to click a link or call a number for assistance. Alternatively, a caller may impersonate customer support, asking for your details to help you reset your password. Each version is designed to look legitimate, often mimicking the tone and style of actual communications from the service you use, making it harder to detect the deception.
 
-Falling for this scam can have serious consequences. If you click the link and enter your information, you could inadvertently hand over your login credentials to cybercriminals. This could lead to unauthorized access to your accounts, financial loss, or identity theft. The aftermath can be overwhelming, as you may need to take extensive measures to secure your accounts and recover from the breach. The emotional toll of realizing you’ve been scammed can linger long after the incident, making it crucial to stay vigilant.
+Falling for this scam can have serious consequences. If you click the link and enter your credentials, you might unknowingly hand over your login information to the scammer. This can lead to unauthorized access to your accounts, financial loss, and even identity theft. Once they have your details, they can exploit your accounts in ways that can take months to resolve. The initial moment of panic can turn into a long-term nightmare, leaving you feeling vulnerable and exposed.
 <p>Account-security scams connected to Password Reset Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

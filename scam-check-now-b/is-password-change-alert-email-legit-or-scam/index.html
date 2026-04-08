@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Password Change Alert Email is a common question when something like a suspicious link feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Password Change Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You just received an email that looks like it’s from your bank, alerting you to a recent password change on your account. The message is designed to catch your eye, featuring your bank’s logo and a subject line that reads, “Important: Password Change Notification.” As you scan the email, you notice it includes a link to verify your identity. The language is urgent, suggesting that if you didn’t make this change, you need to act immediately to secure your account. It feels official, but something about it seems off.
+You open your email to find a message that looks like it’s from your bank, notifying you of a password change request. The email includes your name, a timestamp, and a link that seems to direct you to the bank’s website. It’s formatted professionally, complete with logos and disclaimers. At first glance, it appears legitimate, but something about it feels off. You didn’t request a password change, and yet the email urges you to act quickly to secure your account. The sense of familiarity makes it easy to overlook the red flags.
 
-The email creates a sense of urgency by implying that your account security is at risk. It encourages you to click the link right away, claiming that failure to do so could lead to unauthorized access or even account suspension. You might feel a rush of anxiety, prompting you to act quickly without fully thinking through the situation. This tactic is effective because it plays on your fears and desire to protect your financial assets, making it harder to pause and question the legitimacy of the email.
+The urgency in the email is palpable. It warns that if you don’t verify your account within a few hours, your access could be suspended. This pressure can make you feel anxious, pushing you to click the link without thinking. The email might even include a friendly tone, as if the sender genuinely cares about your security. This combination of urgency and trust can easily cloud your judgment, making you more likely to take immediate action rather than pause and consider the implications.
 
-You might also encounter variations of this scam, such as text messages or even phone calls that mimic your bank’s customer service. In some cases, the message may claim that your account has been compromised, urging you to reset your password through a provided link. The sender might use slightly different wording or even change the sender’s email address to look more convincing. Each version is crafted to exploit your trust in established institutions, making it difficult to discern what is real and what is not.
+Scammers often adapt their tactics, so you might see similar messages claiming to be from other services like social media platforms or online retailers. They may use slight variations in the sender's email address or change the wording to make it seem more personal. You might receive a text message with a similar alert, or even a phone call claiming to be from customer service, asking for your details to verify your identity. Each variation is designed to catch you off guard, making it harder to recognize the scam.
 
-Falling for this scam can have serious consequences. If you click the link and enter your credentials, you may inadvertently give scammers access to your bank account, leading to unauthorized transactions and financial loss. Even if you don’t provide your information, the fear and confusion can leave you vulnerable to further scams. It’s a dangerous cycle that can compromise not just your finances, but your peace of mind as well.
+If you fall for this type of scam, the consequences can be severe. Clicking on the link could lead to a fake website designed to harvest your login credentials. Once the scammers have your information, they can access your accounts, make unauthorized transactions, or even steal your identity. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to take a moment to verify any unexpected alerts before taking action, as the cost of falling for these scams can be significant.
 <p>Scams connected to Password Change Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

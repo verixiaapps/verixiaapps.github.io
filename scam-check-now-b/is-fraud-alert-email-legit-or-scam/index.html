@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Fraud Alert Email is a common question when something like a suspicious message feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Fraud Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You receive an email that claims to be from your bank, alerting you to suspicious activity on your account. The message is urgent, stating that you need to verify your identity immediately to prevent unauthorized transactions. It includes a link that directs you to a website that looks almost identical to your bank’s official site. The email is filled with official-sounding language and even includes your name, making it seem like a legitimate communication. You might feel a twinge of anxiety as you read through the message, wondering if your account is really at risk.
+You might have recently received an email claiming to be from your bank, alerting you about suspicious activity on your account. The message often includes your name, a sense of urgency, and a link that prompts you to verify your information immediately. The email may look professional, complete with logos and official-sounding language, making it easy to mistake for a legitimate communication. You might even notice that it addresses you personally, which can add to the illusion of authenticity.
 
-The urgency is palpable. The email insists that you must act within 24 hours to secure your account, creating a sense of panic. It may even mention that failure to respond will lead to your account being locked or further fraudulent activity occurring. This pressure can cloud your judgment, pushing you to click the link without taking a moment to think. The email might even include a customer service number, making it seem like you can trust the source if you call for help.
+The email creates a sense of urgency by stating that your account will be locked or that you could lose access if you don’t act fast. This pressure can make you feel anxious, prompting you to click the link without thinking. It may also include reassuring phrases about your security, making you trust the sender. The combination of urgency and trust can lead you to believe that you must respond quickly to protect your finances.
 
-Variations of this scam can appear in different forms. You might receive a text message claiming to be from a delivery service, stating that your package is on hold due to an issue with your payment information. Alternatively, you could see a pop-up on a website that looks like a security alert, asking you to verify your details. Each version plays on your emotions, whether it’s fear of losing access to your bank account or anxiety over a delayed package, making them all the more convincing.
+You might encounter variations of this scam, such as texts or phone calls that deliver similar messages. Some may claim to be from a government agency or a popular online retailer, using familiar logos and language to gain your confidence. Others might even reference recent transactions to make the situation feel more real. Each variation is designed to catch you off guard, making it harder to recognize the red flags.
 
-If you fall for this scam, the consequences can be severe. You may unknowingly provide your personal information, such as your social security number or banking details, to cybercriminals. This can lead to identity theft, drained bank accounts, and a long, arduous process to regain control of your finances. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about your security. It’s crucial to take a moment to verify any unexpected alerts before taking action.
+Falling for this scam can lead to serious consequences, such as unauthorized access to your bank account or identity theft. Once you provide your information, scammers can drain your funds or open new accounts in your name, leaving you to deal with the aftermath. The emotional and financial toll can be overwhelming, making it crucial to stay vigilant and question any unexpected alerts you receive.
 <p>Scams connected to Fraud Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

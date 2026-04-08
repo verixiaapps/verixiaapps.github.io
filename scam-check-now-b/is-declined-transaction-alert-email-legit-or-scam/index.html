@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Declined Transaction Alert Email is a common question when something like a suspicious message feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Declined Transaction Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You just received an email that claims to be from your bank, alerting you about a declined transaction. The message looks official, complete with your bank's logo and a subject line that reads, "Important: Declined Transaction Alert." Inside, it details a recent attempt to process a payment that you don’t recognize, urging you to click a link to verify your account information. The email might even include a customer service number that seems legitimate, making it hard to dismiss as a simple phishing attempt.
+You open your email to find a message that reads, “Your recent transaction has been declined.” The sender appears to be your bank, complete with their logo and a professional-looking layout. The email urges you to click a link to verify your account details and resolve the issue. The language is direct and alarming, making it seem like a critical situation that needs your immediate attention. You might feel a twinge of panic as you consider the implications of a declined transaction, especially if you’ve been expecting a payment or making a purchase.
 
-The email creates a sense of urgency by suggesting that your account is at risk. It might mention that failure to act quickly could lead to account suspension or unauthorized transactions. This pressure can make you feel anxious, prompting you to click the link without thinking twice. The design and language are crafted to build trust, making it seem like a genuine communication from your bank, which can easily lead you to overlook potential red flags.
+The email creates a sense of urgency, suggesting that your account may be at risk if you don’t act quickly. Phrases like “immediate action required” or “your account will be suspended” are designed to push you into a hasty decision. You might find yourself feeling a mix of anxiety and trust, as the email mimics the tone and style of official communications you’ve received in the past. This combination of fear and familiarity can make it hard to think clearly, leading you to believe that responding is the only option.
 
-Variations of this scam can appear in different forms, such as text messages or even phone calls. You might receive a text that says your account has been compromised, with a link to a website that looks just like your bank’s login page. Alternatively, a caller might impersonate a bank representative, providing just enough information to sound credible while asking for personal details. Each version is designed to exploit your trust and urgency, making it easy to fall into their trap.
+Scammers often tweak their tactics to stay ahead of detection. You might encounter a similar alert via text message or even a phone call, where an automated voice claims to be from your bank. The message might change slightly, perhaps mentioning a specific transaction or a different account, but the core tactic remains the same: instill fear and prompt you to act without thinking. Even the website link could lead to a page that looks almost identical to your bank’s official site, further blurring the lines between real and fake.
 
-If you act on this scam, you risk exposing your personal and financial information to criminals. They could gain access to your bank account, leading to unauthorized transactions or identity theft. The consequences can be severe, resulting in financial loss and a long, complicated process to recover your identity and funds. It’s not just about the immediate threat; it’s about the lasting impact on your financial security and peace of mind.
+Falling for this kind of scam can have serious consequences. If you provide your personal information, you risk identity theft, unauthorized transactions, and financial loss. Scammers can drain your accounts or open new lines of credit in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you may feel violated and anxious about your financial security. Recognizing these tactics can help you protect yourself and avoid becoming another victim of this pervasive scam.
 <p>The strongest clue is usually not one isolated detail. With Declined Transaction Alert Email, the risk often becomes clearer when something like a suspicious message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

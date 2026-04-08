@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Fraud Alert Text is a common question when something like an unexpected email feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Fraud Alert Text flow starts with something like an unexpected email, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have received a text message recently claiming to be from your bank, alerting you to suspicious activity on your account. The message may ask you to click a link to verify your identity or confirm a transaction you don’t recognize. It looks official, complete with your bank's logo and a professional tone. The urgency in the message can be alarming, suggesting that your account may be compromised if you don’t act quickly. It feels real, and you might find yourself wondering if this is a genuine alert or something more sinister.
+You might have received a text message that claims to be from your bank, alerting you to suspicious activity on your account. The message often looks official, complete with your bank's logo and a request for immediate action. It may say something like, "Your account has been compromised. Click the link to verify your identity." The urgency in the tone can make it feel very real, especially if you’ve recently made a transaction or if it’s late at night when you’re less alert.
 
-Scammers know how to tap into your emotions. The message often creates a sense of urgency, making you feel like you need to respond immediately to protect your hard-earned money. They might use phrases like “immediate action required” or “your account will be locked” to pressure you into clicking that link or providing personal information. This tactic is designed to bypass your rational thinking, pushing you to act before you have a chance to question the legitimacy of the message.
+Scammers know how to play on your emotions, creating a sense of urgency that pushes you to act quickly. They might say your account will be locked unless you respond immediately, or that you could lose access to your funds. This pressure can cloud your judgment, making you more likely to click on the link or provide personal information without thinking twice. The familiarity of the message can create a false sense of security, leading you to trust the source without verifying it.
 
-You may also encounter variations of this scam, such as emails that appear to come from a trusted source or phone calls from someone posing as a customer service representative. Some might even use fake websites that closely mimic your bank's official site, complete with similar URLs and branding. Each version is crafted to look convincing, often using personal information that might be publicly available to make their approach seem more credible. This adaptability makes it harder to spot the red flags.
+You may also encounter variations of this scam that come from different sources. Some messages might appear to be from a delivery service, claiming there’s a problem with your package, while others could seem like a government alert about your taxes. Each variation uses similar tactics—urgent language, official-looking logos, and a call to action that feels pressing. Even if the sender’s name or the context changes, the core strategy remains the same: to get you to act quickly without questioning the legitimacy.
 
-Falling for one of these scams can have serious consequences. If you provide your personal information or login credentials, the scammer can gain access to your bank account, leading to unauthorized transactions and financial loss. Beyond the immediate monetary impact, you might also face long-term issues like identity theft, which can take years to resolve. The emotional toll of realizing you’ve been deceived can be just as damaging, leaving you feeling vulnerable and distrustful of future communications.
+Falling for one of these scams can have serious consequences. If you provide your personal information, you risk identity theft, which can lead to unauthorized transactions and damage to your credit score. Even clicking on a seemingly harmless link can expose your device to malware, giving scammers access to sensitive information. The aftermath can be overwhelming, involving lengthy processes to recover your accounts and restore your peace of mind. It’s crucial to take a moment to verify any unexpected messages before taking action.
 <p>This is why step-by-step checking matters. Once a message related to Fraud Alert Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1458,7 +1458,8 @@ Falling for one of these scams can have serious consequences. If you provide you
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-password-change-alert-text-legit-or-scam/">Is Password Change Alert Text or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-invoice-overdue-alert-text-legit-or-scam/">Is Invoice Overdue Alert Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-change-alert-text-legit-or-scam/">Is Password Change Alert Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-revolut-fraud-alert-email-legit-or-scam/">Is Revolut Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-fraud-alert-email-legit-or-scam/">Is Robinhood Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-unauthorized-charge-alert-text-legit-or-scam/">Is Unauthorized Charge Alert Text or Scam Legit or a Scam?</a></li>
@@ -1467,7 +1468,6 @@ Falling for one of these scams can have serious consequences. If you provide you
 <li><a href="/scam-check-now-b/is-capital-one-fraud-alert-email-legit-or-scam/">Is Capital One Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-fraud-alert-email-legit-or-scam/">Is Pnc Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-security-alert-text-about-login-legit-or-scam/">Is Security Alert Text About Login or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-td-bank-fraud-alert-email-legit-or-scam/">Is Td Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

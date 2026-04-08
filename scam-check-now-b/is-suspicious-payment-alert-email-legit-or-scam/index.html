@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Suspicious Payment Alert Email is a common question when something like a suspicious link feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Suspicious Payment Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You open your inbox to find an email with a subject line that reads, “Suspicious Payment Alert: Immediate Action Required.” The message claims to be from your bank or a well-known payment service, complete with their logo and official-sounding language. It warns you about a recent transaction that seems out of place and instructs you to click a link to verify your account information. As you read through the email, it feels urgent and alarming, making you question whether your account is at risk.
+You open your email to find a message titled “Suspicious Payment Alert” from what appears to be your bank. The email is professionally formatted, complete with your name and account details. It claims that there’s been an unusual transaction on your account and urges you to click a link to verify your identity. The urgency is palpable, as it warns that your account may be temporarily suspended if you don’t act immediately. The sender’s email address looks similar to your bank’s official domain, making it all the more convincing.
 
-The email creates a sense of urgency by suggesting that your account could be compromised if you don’t act quickly. It may even mention a deadline, pushing you to click the link without thinking twice. The tone is authoritative, almost as if it’s a warning from someone who genuinely cares about your financial safety. This kind of pressure can make it easy to overlook red flags, especially when you’re worried about your money and personal information.
+The email plays on your emotions, creating a sense of panic and fear. You might feel a rush of anxiety, thinking about the potential consequences of not responding quickly. The message emphasizes the need for immediate action, implying that your financial security is at risk. This pressure can cloud your judgment, making you more likely to click the link without a second thought. Scammers know how to exploit these feelings, making their messages feel all the more urgent and legitimate.
 
-You might also encounter variations of this scam, such as a text message or a phone call that uses similar tactics. The text could say that your payment has been flagged, urging you to respond immediately to avoid account suspension. Alternatively, a caller might impersonate a customer service representative, providing just enough personal information to sound credible. Each variation plays on your fear and trust, making it hard to discern what’s real and what’s not.
+You might also notice that this type of scam can come in various forms. Sometimes, it appears as a text message from a number that looks like your bank’s customer service line, or even a phone call from someone claiming to be a bank representative. The language may differ slightly, but the core message remains the same: there’s a problem with your account that requires your immediate attention. Each variation is designed to catch you off guard, making it harder to recognize the signs of a scam.
 
-Falling for this scam can lead to serious consequences. If you click the link and enter your information, you may unknowingly give scammers access to your bank account or personal data. This can result in unauthorized transactions, identity theft, and a long, frustrating process to regain control of your finances. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about future communications. It's crucial to stay vigilant and recognize when something feels off.
+Falling for this scam can lead to serious consequences. If you enter your personal information, you may inadvertently give scammers access to your bank account, leading to unauthorized transactions and potential identity theft. The fallout can be devastating, not just financially but also emotionally, as you grapple with the violation of your trust and security. It’s crucial to remain vigilant and question any unexpected alerts regarding your finances, as the cost of inaction can be far greater than the momentary inconvenience of verifying a message.
 <p>Scams connected to Suspicious Payment Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Security Alert Email About Login is a common question when something like an account locked warning appears without context. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Security Alert Email About Login flow starts with something like an account locked warning, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You just received an email that looks like it’s from your bank, alerting you about a suspicious login attempt on your account. The email includes your name, a logo that seems official, and a link urging you to verify your identity immediately. The message is crafted to look legitimate, complete with professional language and a sense of urgency. You might notice it mentions a specific time and location of the supposed login, making it feel even more real. It’s easy to see how you could be drawn in, especially when it appears to come from a trusted source.
+You just received an email that looks like it’s from your bank, notifying you of a security alert regarding your account. The message claims that there was an unauthorized login attempt and urges you to click a link to verify your identity. The email has the bank's logo, a professional layout, and even includes a customer service number that seems legitimate. It feels urgent, and you might think, “I need to act fast to protect my account.” But as you read further, you notice a few oddities, like a generic greeting instead of your name.
 
-The email creates a sense of urgency that compels you to act quickly. Phrases like “Your account may be compromised” or “Immediate action required” can trigger a fight-or-flight response, pushing you to click the link without thinking. The fear of losing access to your funds or personal information can cloud your judgment. Scammers know that when you’re anxious, you’re less likely to scrutinize the details, making it easier for them to manipulate you into providing sensitive information.
+The email creates a sense of urgency, suggesting that your account is at risk and that immediate action is necessary. Phrases like “Your account will be locked if you don’t respond within 24 hours” can make you feel pressured to click the link without thinking twice. This tactic is designed to bypass your usual skepticism, making you feel like you’re in a race against time. The more frantic the message, the more likely you are to overlook any red flags.
 
-Variations of this scam can pop up in different forms, such as text messages or phone calls. You might receive a text claiming to be from your service provider, warning you about unusual activity on your account. Alternatively, a phone call could come from someone posing as a customer service representative, asking you to confirm your login details for security purposes. Each version is designed to exploit your trust, often using familiar logos or language that makes it hard to distinguish from genuine communications.
+You might also see variations of this scam. For instance, some emails may claim to be from a popular online retailer, warning you about a suspicious login from a different location. Others might come as text messages or even phone calls, where a friendly voice claims to be from customer support, asking you to verify your account details. Each version plays on your trust and familiarity with these brands, making it easy to dismiss your doubts.
 
-Falling for this scam can have serious consequences. If you enter your login details or personal information, the scammer can gain access to your account, leading to unauthorized transactions or identity theft. The aftermath can be devastating, resulting in financial loss, damaged credit, and a lengthy recovery process. The emotional toll can also be significant, leaving you feeling violated and anxious about your security. It’s crucial to take a moment to verify any unexpected alerts before taking action.
+If you fall for this scam, the consequences can be severe. Clicking the link could lead you to a fake website designed to steal your login credentials, giving scammers access to your bank account or personal information. Once they have that, they could drain your funds, rack up charges on your credit cards, or even open new accounts in your name. The emotional and financial fallout can be overwhelming, leaving you feeling violated and vulnerable.
 <p>This is why step-by-step checking matters. Once a message related to Security Alert Email About Login moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

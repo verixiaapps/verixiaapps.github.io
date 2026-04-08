@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>One Time Passcode Email is a common question when something like an unexpected email feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many One Time Passcode Email situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received an email recently claiming to be from your bank or a popular online service, stating that a one-time passcode (OTP) has been generated for your account access. The message often includes a sense of urgency, telling you to verify your identity or confirm a transaction you didn’t initiate. It may even look official, complete with logos and a professional layout, making it easy to believe that it’s legitimate. However, these emails can be cleverly designed to trick you into revealing personal information or clicking on malicious links.
+You might receive an email claiming to be from your bank or a popular online service, stating that a one-time passcode (OTP) has been generated for your account. The message often includes a sense of urgency, suggesting that you need to verify your identity immediately to prevent unauthorized access. It may even provide a code that you didn’t request, along with a link to click for further instructions. The email typically looks professional, complete with logos and official-sounding language, making it easy to overlook any red flags.
 
-The urgency in these messages is palpable. They often say things like, “Your account will be locked in 10 minutes unless you verify this code,” creating a panic that pushes you to act quickly without thinking. This pressure can cloud your judgment, making it more likely that you’ll overlook red flags. The sender may even claim to be a trusted source, using language that makes you feel secure about providing your information. This tactic is effective because it plays on your fear of losing access to your accounts or missing out on important transactions.
+This type of scam thrives on creating a sense of urgency. The message might say that your account will be locked if you don’t act quickly, or that someone is trying to access your information. By pushing you to respond immediately, the scammer hopes to bypass your usual caution. They want you to feel pressured to click the link or enter your information without taking the time to think critically about the situation.
 
-You might also encounter variations of this scam, such as text messages or phone calls that claim to be from tech support or customer service. In these cases, the scammer might ask you to confirm your identity by providing the OTP they just sent you. Some may even go as far as to create fake websites that mimic the login pages of trusted services, further blurring the line between real and fake. Each variation is designed to exploit your trust and urgency, making it crucial to stay vigilant.
+You may encounter variations of this scam that appear in different forms. For instance, it could come as a text message or even a phone call, where the caller claims to be from customer service, asking for your OTP to verify your identity. Some versions might suggest that your account has been compromised and that you need to reset your password right away. Each variation is designed to look legitimate and often mimics the communication style of real companies, making it harder to discern the truth.
 
-Falling for this type of scam can have serious consequences. If you provide your OTP or other sensitive information, scammers can gain access to your accounts, leading to unauthorized transactions or identity theft. The aftermath can be devastating, resulting in financial loss and a long, arduous process to reclaim your identity and secure your accounts. It’s not just about losing money; it’s about the time and stress involved in dealing with the fallout. Recognizing these scams is essential to protect yourself and your personal information.
+If you fall for this scam, the consequences can be severe. Scammers can gain access to your accounts, leading to unauthorized transactions, identity theft, or loss of personal information. Once they have your login details, they can lock you out of your account and cause financial damage that may take months to resolve. The emotional toll of realizing you’ve been deceived can be just as damaging, leaving you feeling vulnerable and anxious about your online security.
 <p>Scams connected to One Time Passcode Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like an unexpected email is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Password Reset Text is a common question when something like a password reset message appears without context. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a password reset message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You receive a text message that claims to be from your bank, stating that your account has been locked due to suspicious activity. The message includes a link to reset your password immediately. The sender's number looks familiar, and the text uses your name, making it feel personal and urgent. You might even notice that the link appears to lead to your bank's official website. It’s easy to see why you’d feel compelled to act quickly, especially when your financial security seems at stake.
+You receive a text message claiming to be from your bank, stating that there has been unusual activity on your account. The message includes a link to reset your password immediately to secure your funds. The sender’s number looks familiar, and the message is written in a way that seems official, using your name and referencing your account. Everything appears legitimate at first glance, making it easy to overlook the red flags.
 
-The urgency in the message is palpable. It tells you that if you don’t reset your password within a certain timeframe, you risk losing access to your account. This kind of pressure can cloud your judgment, making you more likely to click the link without thinking twice. The message might even include a friendly tone, assuring you that they’re there to help, which can create a false sense of trust. You might feel like you’re doing the right thing by following the instructions, believing you’re protecting your account.
+The urgency in the message is palpable. It tells you that you must act quickly to prevent unauthorized access to your account. The tone is alarming, suggesting that your financial security is at risk. This pressure can make you feel like you have no choice but to click the link and follow the instructions. It’s designed to bypass your usual caution, playing on your fear of losing money or having your identity stolen.
 
-Variations of this scam can be quite subtle. You might receive a similar text from what appears to be a tech support number, claiming there’s an issue with your device that needs immediate attention. Alternatively, it could come from a delivery service, stating that your package is on hold and requires verification. Each version plays on your emotions and the context of your life, making it challenging to discern what’s real and what’s not.
+You might also encounter variations of this scam. Some messages may claim to be from popular online services, like social media platforms or email providers, warning you about suspicious login attempts. Others might appear as notifications from delivery services, stating that your package is on hold and you need to verify your identity. Each version uses similar tactics of urgency and personalization to lure you into a false sense of security.
 
-Falling for this kind of scam can have serious repercussions. If you enter your information into the fake site, you’re handing over your password and potentially other sensitive data to criminals. They could drain your bank account, make unauthorized purchases, or even steal your identity. The aftermath can be overwhelming, leading to financial loss and a long, arduous process of recovery. It’s crucial to take a moment to verify before acting, especially when it comes to your personal information.
+Falling for this scam can have serious consequences. If you enter your information on the fraudulent site, you could unknowingly give scammers access to your bank account or personal data. This can lead to unauthorized transactions, identity theft, and a long, painful process to recover your funds. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial safety.
 <p>That difference matters because a real notice related to Password Reset Text should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

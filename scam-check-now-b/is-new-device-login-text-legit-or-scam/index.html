@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>New Device Login Text is a common question when something like an account locked warning appears without context. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many New Device Login Text cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might receive a text message that reads something like, “Your account was accessed from a new device. If this wasn’t you, click here to secure your account.” The message often includes a link that looks legitimate, perhaps even mimicking your bank or a popular online service. The urgency in the wording makes it feel real, as if someone is trying to break into your account right now. It’s designed to catch your attention, making you feel that you need to act quickly to protect your personal information.
+You receive a text message that reads, “New device login detected! If this was you, please confirm your identity by clicking the link.” The message looks official, complete with a logo and a professional tone. You might notice that it comes from a number that resembles your bank or a popular online service. It feels urgent, almost like a warning, prompting you to act quickly. You might even think, “I did log in from a different device, so this must be legitimate.” 
 
-The creators of these messages know how to play on your emotions. They often use phrases that instill fear or concern, suggesting that your account is at risk. By creating a sense of urgency, they pressure you into clicking the link without taking the time to think it through. You might feel a rush of anxiety, prompting you to act immediately, which is exactly what they want. The more panicked you feel, the more likely you are to overlook red flags.
+The urgency is palpable. The message implies that your account is at risk, creating a sense of panic. You feel the pressure to respond immediately, fearing that if you don’t act quickly, you could lose access to your account or, worse, your personal information could be compromised. The sender’s tone is reassuring, making you believe that they are there to help you secure your account. This combination of urgency and trust can cloud your judgment, pushing you to click the link without a second thought.
 
-You might also encounter variations of this scam. Sometimes, the message might come as an email or even a phone call, with someone claiming to be from customer support. They may ask for personal details or direct you to a website that looks almost identical to the real one. Other times, the message might suggest that you need to verify your identity due to suspicious activity. Each version is crafted to seem credible, making it harder to spot the deception.
+You might also see variations of this scam. Perhaps you get an email instead of a text, or the message claims to be from a different service you use. Some messages might even include a phone number to call for verification. The common thread is the same: they all create a scenario where you feel compelled to verify your identity, often leading you to a fake website that looks strikingly similar to the real one. Each version is designed to catch you off guard, making it easy to overlook the red flags.
 
-If you fall for this trap, the consequences can be severe. Clicking the link may lead you to a fake site designed to steal your login credentials, leaving your account vulnerable to unauthorized access. Once they have your information, scammers can drain your bank account, make unauthorized purchases, or even steal your identity. The emotional and financial fallout can be overwhelming, leaving you feeling violated and anxious about your security. It’s crucial to recognize these messages for what they are before it’s too late.
+Falling for this scam can have serious consequences. Once you click the link and enter your information, you might unknowingly hand over your login credentials to cybercriminals. This could lead to unauthorized access to your accounts, financial loss, or identity theft. The aftermath can be overwhelming, as you scramble to regain control and protect yourself from further damage. It’s a reminder that not every alert is genuine, and taking a moment to verify can save you from a potentially devastating situation.
 <p>Account-security scams connected to New Device Login Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like an account locked warning.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

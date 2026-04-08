@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>New Device Login Alert Email is a common question when something like a password reset message appears without context. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many New Device Login Alert Email cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You just received an email that claims to be from your email provider, notifying you of a new device login. The message includes your name, the type of device, and a timestamp that seems accurate. It urges you to click on a link to verify the login or secure your account. The email looks official, complete with logos and formatting that mimic the real company’s style. But as you read it, a nagging feeling tells you something might be off. 
+You might have recently received an email alerting you about a new device attempting to log into your account. The message typically includes your name, the device type, and the location of the login attempt. It may even contain a link to secure your account or verify the login. The email often looks polished, featuring your service provider's logo and familiar formatting, making it seem credible at first glance. You might feel a jolt of concern, thinking someone is trying to access your personal information.
 
-The email creates a sense of urgency, suggesting that if you don’t act immediately, your account could be compromised. It might even mention that someone from a location you don’t recognize has accessed your account, which can make you feel vulnerable and anxious. The message is crafted to instill fear, pushing you to click the link without taking a moment to think critically. This tactic is designed to bypass your usual caution, making it easy to fall into the trap.
+Scammers know how to play on your emotions, creating a sense of urgency that compels you to act quickly. The email may suggest that your account will be locked unless you confirm the login or change your password immediately. This pressure can cloud your judgment, pushing you to click on links without considering the consequences. The fear of losing access to your account or having your information compromised can make you more susceptible to falling for the trap.
 
-You might see variations of this scam that appear as text messages or pop-up alerts while browsing the web. Some messages might claim to be from a bank or another service you use, warning you of unusual activity. Others could come from social media platforms, claiming a security breach. They all share the same formula: a familiar logo, a sense of urgency, and a link that leads you to a fake login page designed to steal your credentials.
+You may also encounter variations of this scam, such as a text message or a phone call claiming to be from your service provider. The message might say that your account has been flagged for suspicious activity or that you need to verify your identity. Each version is designed to look legitimate, often mimicking the language and tone of official communications. The goal is the same: to trick you into providing personal information or clicking on malicious links.
 
-If you click that link and enter your information, you risk giving away your login details to scammers. This could lead to unauthorized access to your accounts, financial loss, or identity theft. Once they have your information, they can wreak havoc, changing passwords and locking you out. The consequences can be severe, affecting not just your finances but your peace of mind as well. It’s crucial to take a moment to verify before acting on such messages.
+If you respond to these scams, the consequences can be severe. You might inadvertently give away your login credentials, allowing scammers to access your accounts and steal sensitive information. This could lead to identity theft, financial loss, or unauthorized transactions. The aftermath can be overwhelming, involving lengthy processes to secure your accounts and potentially irreversible damage to your credit score. It's crucial to remain vigilant and question any unexpected alerts that prompt immediate action.
 <p>Account-security scams connected to New Device Login Alert Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a password reset message.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Account Breach Text is a common question when something like an unexpected email feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Account Breach Text situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You receive a text message that reads, “Your account has been compromised! Click here to verify your information immediately.” The link looks legitimate, featuring the name of your bank or a well-known service provider, making it easy to believe it’s real. The message might even include your name or other personal details, which adds to its authenticity. It’s alarming, and your heart races as you wonder if your financial information is at risk. 
+You receive a text message that claims to be from your bank, stating that there has been an unusual login attempt on your account. The message includes a link that urges you to verify your identity immediately to prevent unauthorized access. It looks official, complete with your bank's logo and a message that seems personalized, mentioning your name and account details. The urgency in the tone makes it hard to ignore, and you might feel a twinge of anxiety as you read it, wondering if your account is truly at risk.
 
-The urgency in the message is palpable. It tells you that you must act quickly to avoid losing access to your account or suffering financial loss. This pressure can make you feel like you have no choice but to click the link and provide the requested information. The fear of being locked out or facing unexpected charges can cloud your judgment, leading you to trust the message without a second thought.
+This kind of message is designed to create a sense of urgency, making you feel like you need to act fast to protect your finances. The sender often uses phrases like "immediate action required" or "your account will be locked" if you don't respond quickly. This pressure can cloud your judgment, pushing you to click the link without thinking twice. It’s easy to feel reassured by the professional appearance of the text, which is exactly what the scammer intends—to build trust and prompt you to respond without hesitation.
 
-Variations of this scam can appear in different forms. You might receive an email that looks like it’s from your service provider, complete with logos and branding. Some scams even come as phone calls, where an automated voice claims to be from your bank, urging you to confirm your account details. Each version is designed to exploit your trust and sense of urgency, making it difficult to discern what’s real and what’s not.
+Variations of this scam can show up in different forms, such as emails that appear to come from your bank or even phone calls from someone claiming to be a customer service representative. Some might use fake websites that look almost identical to your bank's official site, while others might send you a voicemail with similar alarming messages. Each variation aims to exploit your fear of losing access to your account, making it difficult to discern what's real and what's not. You might find yourself second-guessing your instincts, especially if you’ve recently had any unusual activity on your account.
 
-Falling for this scam can have serious consequences. If you click the link and enter your information, you might unknowingly hand over your login credentials or financial details to cybercriminals. This can lead to unauthorized transactions, identity theft, or even draining your bank account. The aftermath can be devastating, leaving you to deal with the financial and emotional fallout while trying to recover your stolen identity and funds.
+If you fall for this scam, the consequences can be severe. Providing your personal information can lead to unauthorized transactions, identity theft, and financial loss. Once the scammer has your details, they can drain your account or open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the feeling of being tricked can linger long after the incident. Protecting yourself from these tactics is crucial, as the repercussions can extend far beyond just a few lost dollars.
 <p>Scams connected to Account Breach Text often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like an unexpected email is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

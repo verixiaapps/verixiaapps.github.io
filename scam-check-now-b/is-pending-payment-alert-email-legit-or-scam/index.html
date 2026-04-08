@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Pending Payment Alert Email is a common question when something like an unexpected email feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Pending Payment Alert Email situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email with a subject line like "Pending Payment Alert" or "Action Required: Payment Processing Issue." The message often includes your name and may even feature a logo that looks familiar, like a bank or a well-known service provider. It claims that there’s an issue with a recent transaction and urges you to click a link to resolve it. The email often looks polished, with professional formatting and language that mimics official communications, making it easy to overlook any red flags.
+You might have recently received an email with a subject line like "Pending Payment Alert" or "Action Required: Payment Processing Issue." The message usually looks official, complete with a company logo and a professional layout. It may claim that your account is at risk and that you need to verify your payment details immediately to avoid service interruption. The sender's email address might seem legitimate at first glance, but a closer look could reveal subtle misspellings or unusual domain names that don’t quite match the company’s official website.
 
-The pressure to act quickly is palpable in these messages. They often state that your account will be temporarily suspended or that a payment will be canceled if you don’t respond immediately. This sense of urgency is designed to make you feel anxious and prompt you to click the link without thinking. The email may also include phrases like "your immediate attention is required" or "failure to act may result in additional charges," pushing you to respond before you have a chance to consider the legitimacy of the request.
+The email often creates a sense of urgency, stating that your account will be suspended or that a payment will be declined unless you act quickly. Phrases like "Immediate action required" or "Your account will be locked in 24 hours" are designed to provoke anxiety and compel you to click on links or provide personal information without thinking. This pressure can make it easy to overlook red flags, especially if you’re already stressed about finances or managing multiple accounts.
 
-You might see variations of this scam in different forms, such as text messages or even phone calls claiming to be from customer service. Some messages might say that your subscription is about to expire or that you owe money for a service you didn’t use. They often use familiar names or brands to create a false sense of security, making it easy to dismiss any doubts you might have. Even if you think you know the sender, it’s crucial to remember that scammers can easily spoof email addresses and phone numbers.
+You may also encounter variations of this scam that appear as text messages or even phone calls, where the scammer impersonates a customer service representative. In these cases, they might say they need to confirm your payment information to resolve an issue. Some messages may even include fake tracking numbers or invoices that look convincing, making it harder to discern what’s real and what’s not. Each variation is crafted to exploit your trust, often mimicking the language and branding of well-known companies.
 
-If you fall for this scam, the consequences can be severe. Clicking on the link may lead to a website designed to steal your personal information, like your bank account details or social security number. In some cases, it might even install malware on your device, giving scammers access to your files and sensitive data. Once they have your information, it can be used for identity theft or financial fraud, leaving you to deal with the aftermath. Protecting yourself means recognizing these tactics and taking a moment to verify before acting.
+Falling for this scam can lead to serious consequences. If you provide your personal or financial information, you might find your accounts drained or your identity stolen. Scammers can use your data to make unauthorized purchases or open new accounts in your name, leaving you to deal with the fallout. The emotional and financial toll can be overwhelming, making it crucial to scrutinize any unexpected payment alerts you receive.
 <p>Scams connected to Pending Payment Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like an unexpected email is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

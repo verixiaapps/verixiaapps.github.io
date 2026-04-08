@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Account Breach Alert Email is a common question when something like a suspicious message feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Account Breach Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You open your email to find a message that claims to be from your bank, warning you of a potential account breach. The subject line reads, "Urgent: Immediate Action Required!" Inside, the email details suspicious activity on your account and urges you to click a link to verify your identity. The layout looks professional, with your bank’s logo prominently displayed, and the language is alarming yet reassuring, making it seem like a genuine warning. You might feel a knot in your stomach as you read it, wondering if your finances are at risk.
+You might have recently received an email that claims to be from your bank or an online service, warning you about a potential account breach. The message often includes your name and some details about your account, making it feel personal and legitimate. It may instruct you to click a link to verify your account information or to reset your password immediately. The email design often mimics the official branding of the company, complete with logos and colors, which can make it even harder to distinguish from a genuine alert.
 
-The email creates a sense of urgency that makes it hard to think clearly. Phrases like “your account will be locked” or “act now to prevent unauthorized access” push you to act quickly, often before you can fully assess the situation. The sender may even include a phone number for immediate assistance, making it feel like a lifeline. You might find yourself feeling a mix of fear and trust, believing that responding quickly is the only way to protect your account.
+Scammers know how to create a sense of urgency that compels you to act quickly. They might mention that your account will be locked or that unauthorized transactions have been detected, prompting you to click the link without thinking twice. This pressure can make you feel like you need to resolve the issue immediately to protect your finances. The emotional pull of fear and urgency is a powerful tactic that can cloud your judgment, making it easier for them to manipulate you.
 
-Variations of this scam can pop up in different forms, such as text messages or phone calls that mimic your bank’s customer service. You might receive a text alerting you to a supposed issue, or a call from someone claiming to be a bank representative asking for your personal details. Each version is crafted to look legitimate, often using official-sounding language and even referencing specific transactions or locations to make the threat feel real. It’s easy to see how someone could mistake these messages for genuine alerts.
+You might see variations of this scam that appear to come from different sources, such as a tech support email claiming there's a problem with your device or a notification from a popular e-commerce site about suspicious activity. Each version will typically include similar elements: a sense of urgency, a call to action, and a link that leads to a fake website designed to harvest your personal information. The language may change slightly, but the core tactic remains the same, making it easy to overlook the warning signs.
 
-If you fall for this scam, the consequences can be severe. You could unknowingly provide your login credentials or personal information to a fraudster, leaving your account vulnerable to theft. Once they have access, they can drain your funds or use your identity for further fraudulent activities. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s a reminder that while some emails may seem urgent and trustworthy, taking a moment to verify their authenticity can save you from significant trouble.
+Falling for this type of scam can have serious consequences. If you enter your information on a fraudulent site, you risk losing access to your accounts and exposing your financial details to criminals. They may drain your bank account or use your identity for further fraudulent activities. The aftermath can be devastating, leading to financial loss, damaged credit, and the long, arduous process of reclaiming your identity. It’s crucial to remain vigilant and question any unexpected messages that prompt you to take immediate action.
 <p>Scams connected to Account Breach Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
