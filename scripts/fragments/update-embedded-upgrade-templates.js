@@ -1,5 +1,24 @@
-<script>
-(function () {
+That means no, it was not fully fixed.
+
+Because if GitHub Actions runs the file, then the file must be a Node script, not raw browser code.
+
+Use this as the entire scripts/fragments/update-embedded-upgrade-templates.js file:
+
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = process.cwd();
+
+const TARGET_DIRS = [
+  "scam-check-now",
+  "scam-check-now-b",
+  "scam-check-now-c"
+];
+
+const START_MARKER = "<!-- SCAM_CHECK_EMBEDDED_UPGRADE_START -->";
+const END_MARKER = "<!-- SCAM_CHECK_EMBEDDED_UPGRADE_END -->";
+
+const BROWSER_SNIPPET = String.raw`(function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
   window.__SCAM_CHECK_EMBEDDED_UPGRADE__ = true;
 
@@ -107,7 +126,7 @@
 
     const style = document.createElement("style");
     style.id = "scam-check-hide-legacy-upgrade";
-    style.textContent = `
+    style.textContent = \`
       #upgrade {
         display: none !important;
         visibility: hidden !important;
@@ -121,7 +140,7 @@
         padding: 0 !important;
         border: 0 !important;
       }
-    `;
+    \`;
     document.head.appendChild(style);
   }
 
@@ -904,5 +923,88 @@
   } else {
     init();
   }
-})();
+})();`;
+
+function walk(dir, results = []) {
+  if (!fs.existsSync(dir)) return results;
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      walk(fullPath, results);
+      continue;
+    }
+
+    if (entry.isFile() && entry.name === "index.html") {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
+function upsertManagedBlock(html) {
+  const managedBlock = `${START_MARKER}
+<script>
+${BROWSER_SNIPPET}
 </script>
+${END_MARKER}`;
+
+  const managedRegex = new RegExp(
+    `${escapeRegex(START_MARKER)}[\\s\\S]*?${escapeRegex(END_MARKER)}`,
+    "g"
+  );
+
+  if (managedRegex.test(html)) {
+    return html.replace(managedRegex, managedBlock);
+  }
+
+  if (html.includes("</body>")) {
+    return html.replace("</body>", `${managedBlock}\n</body>`);
+  }
+
+  return `${html}\n${managedBlock}\n`;
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function main() {
+  const targetFiles = TARGET_DIRS.flatMap((dir) => walk(path.join(ROOT, dir)));
+
+  if (!targetFiles.length) {
+    console.log("No index.html files found in target directories.");
+    process.exit(0);
+  }
+
+  let updatedCount = 0;
+
+  for (const filePath of targetFiles) {
+    const original = fs.readFileSync(filePath, "utf8");
+    const updated = upsertManagedBlock(original);
+
+    if (updated !== original) {
+      fs.writeFileSync(filePath, updated, "utf8");
+      updatedCount += 1;
+      console.log(`Updated: ${path.relative(ROOT, filePath)}`);
+    } else {
+      console.log(`No change: ${path.relative(ROOT, filePath)}`);
+    }
+  }
+
+  console.log(`Done. Updated ${updatedCount} file(s).`);
+}
+
+main();
+
+This version is a real Node file for GitHub Actions:
+	•	Node runs the updater
+	•	the updater injects your browser script into the HTML pages
+	•	it updates all index.html files inside:
+	•	scam-check-now
+	•	scam-check-now-b
+	•	scam-check-now-c
+
+So this fixes the actual mismatch.
