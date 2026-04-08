@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Trading Group is a common question when something like an unexpected email feels suspicious. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an unexpected email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have received a message from a trading group promising quick profits and insider tips that seem too good to be true. Perhaps it was an email with flashy graphics, or a text that mentioned a limited-time offer for a “guaranteed” investment strategy. The sender may have claimed to be a financial expert or a successful trader, complete with testimonials and impressive statistics. If you clicked on a link, it likely led you to a polished website that showcased glowing reviews and enticing offers, making it hard to resist the temptation to join.
+You might have received an enticing message from a trading group promising guaranteed returns on your investments, claiming they have insider knowledge or unique strategies. The message may have included flashy graphics, testimonials from supposed successful traders, or links to a polished website that looks legitimate. Perhaps you were invited to a live webinar where a charismatic speaker showcased impressive charts and success stories, making it seem like a golden opportunity you couldn't pass up. If you clicked on a link, you might have been directed to a platform that required you to create an account and deposit funds, all while assuring you that this was a once-in-a-lifetime chance.
 
-The urgency of the situation is often a key tactic. You might have felt the pressure to act quickly, with phrases like “limited spots available” or “join now before it’s too late” pushing you to make a hasty decision. The messages often create a false sense of security, making you believe that this is a once-in-a-lifetime opportunity. You may have been encouraged to invest immediately, with promises of high returns that could change your financial future overnight. The emotional pull can be strong, especially if you’re looking for ways to grow your wealth.
+The urgency in these messages is often palpable. You might have been told that spots are limited or that a special promotion is ending soon, pushing you to act quickly. They may have used phrases like “Don’t miss out!” or “Join now before it’s too late!” to create a sense of fear of missing out. This pressure can cloud your judgment, making it easy to overlook red flags. The trust factor is also manipulated, as they often leverage social proof, showing you screenshots of other members’ profits or even fake reviews to make you feel secure in your decision.
 
-These scams can take on various forms, adapting to the latest trends and platforms. You might encounter them on social media, where influencers promote trading groups with flashy success stories. Alternatively, they could appear in a direct message from someone claiming to be a friend or acquaintance who has had great success with the group. Some variations may even involve fake webinars or online seminars that claim to provide free insights, only to lead you into a costly membership or investment scheme.
+Scams like this can come in various forms, each designed to exploit your desire for financial gain. You may have encountered a social media ad promising high returns, an email from a “trusted” financial advisor, or even a direct message from someone claiming to be a successful trader. Each variation may use slightly different tactics or platforms, but the underlying theme remains the same: they want your money. It’s common for these groups to change their names or websites frequently, making it hard to trace them back once they’ve taken your funds.
 
-If you find yourself entangled in one of these scams, the consequences can be severe. You may lose your hard-earned money, and the emotional toll can leave you feeling embarrassed or anxious. Beyond financial loss, falling for such schemes can lead to identity theft or further scams, as your information may be sold to other malicious entities. The initial excitement of potential profits quickly turns into regret, leaving you questioning your judgment and wary of future opportunities.
+Falling for this kind of scam can lead to significant financial loss and emotional distress. You might find yourself unable to withdraw your funds, facing hidden fees, or discovering that the platform is a complete sham. The aftermath can leave you feeling embarrassed, frustrated, and wary of future investments. Beyond the immediate financial impact, it can also erode your trust in legitimate trading opportunities, making it harder to engage in the market again. Recognizing the signs early can save you from a costly mistake.
 <p>That difference matters because a real notice related to Trading Group should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ If you find yourself entangled in one of these scams, the consequences can be se
 <li><a href="/scam-check-now/did-i-get-scammed-by-email-link/">Did I Get Scammed by Email Link?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-fake-invoice/">Did I Get Scammed by Fake Invoice?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-fake-receipt/">Did I Get Scammed by Fake Receipt?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-fake-recruiter/">Did I Get Scammed by Fake Recruiter?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-fake-website/">Did I Get Scammed by Fake Website?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-forex-message/">Did I Get Scammed by Forex Message?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-free-trial/">Did I Get Scammed by Free Trial?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-google-email/">Did I Get Scammed by Google Email?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-hinge-message/">Did I Get Scammed by Hinge Message?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-invoice-email/">Did I Get Scammed by Invoice Email?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-microsoft-email/">Did I Get Scammed by Microsoft Email?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-grant-offer/">Did I Get Scammed by Grant Offer?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

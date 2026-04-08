@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp is a common question when something like a suspicious link feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many WhatsApp situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received a WhatsApp message from someone claiming to be a friend or a family member in distress, asking for immediate help. The message often includes a story about a sudden financial emergency, like needing money for medical bills or an unexpected travel expense. It might even come with a sense of familiarity, using your friend's name and profile picture, making it feel genuine. You could also see messages from unknown numbers promising you prizes or asking you to verify your account, all designed to catch your attention and make you act quickly.
+You receive a WhatsApp message from someone claiming to be a friend in distress. They say they've lost their phone and urgently need money to cover an unexpected expense. The message feels personal, filled with details that make it seem authentic, like referencing a shared experience or a mutual acquaintance. You might even notice a sense of familiarity in their tone, which makes you hesitate just long enough to consider helping them out. The request seems innocent at first, but there’s something unsettling about the urgency in their voice.
 
-The urgency in these messages is palpable. They might say things like, “I need your help right now!” or “You could lose your account if you don’t respond immediately!” This pressure can make you feel like you have no time to think, pushing you to act before you fully process the situation. The emotional appeal—whether it’s fear of losing money or the desire to help a loved one—can cloud your judgment, making it easier to overlook red flags.
+The pressure builds as they insist that you act quickly, claiming they can’t reach anyone else and that time is running out. They may even follow up with a phone call, using a different number, to reinforce their story. The emotional appeal is strong; they might express panic or desperation, making it hard to think clearly. You feel compelled to help, and the thought of letting a friend down weighs heavily on you. This emotional manipulation is designed to bypass your usual skepticism and push you to act without questioning the situation.
 
-Scammers often change their tactics to keep you guessing. You might get a message that looks like it’s from your bank, asking you to verify your account details due to suspicious activity. Or perhaps you receive a voice note that sounds like a friend in distress, but it’s actually a recorded message. Sometimes, you might even see fake accounts set up to impersonate someone you know, complete with their profile picture and bio, making it hard to tell what’s real and what’s not.
+You might encounter variations of this scam, such as receiving a message from a stranger posing as a customer service representative or a family member claiming to be in trouble. Sometimes, the scammer may use a fake profile that looks just like someone you know, complete with pictures and shared contacts. Other times, they might send you a link to a website that looks legitimate, asking for personal information or payment details. Each version is crafted to exploit your trust and familiarity, making it all the more convincing.
 
-Falling for one of these scams can lead to serious consequences. You might end up sending money to a stranger, leaving you financially vulnerable and potentially compromising your personal information. If you share sensitive details, like passwords or bank information, you could face identity theft or unauthorized transactions. The emotional toll can be just as damaging, leaving you feeling betrayed and anxious about future interactions. Recognizing these scams is crucial to protecting yourself and your loved ones from harm.
+Falling for this kind of scam can lead to significant financial loss and emotional distress. Once you send money, it’s often impossible to recover, and the scammer may continue to target you or your contacts. You might find yourself questioning your judgment, feeling embarrassed about being deceived. Beyond the immediate financial impact, it can also lead to a loss of trust in your relationships, as you may hesitate to reach out to friends or family for help in the future. The consequences extend far beyond just a single transaction, affecting your sense of security and connection.
 <p>Scams connected to WhatsApp often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

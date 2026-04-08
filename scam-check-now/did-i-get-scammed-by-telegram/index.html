@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram is a common question when something like a suspicious message feels suspicious. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have received a message on Telegram that seemed harmless at first—a friend’s profile picture, a friendly greeting, and a request for help or money. The message may have claimed they were in a tight spot, needing funds for an emergency or offering you an unbelievable investment opportunity. The casual tone and familiar name might have put you at ease, making it feel like a legitimate conversation. But as you read further, something felt off, and now you’re questioning whether it was a scam designed to exploit your trust.
+You might have received a message on Telegram that seemed harmless at first, perhaps from someone claiming to be a friend or a representative of a well-known company. The message could have promised exclusive deals, investment opportunities, or even a prize you never entered. As you read through the text, it felt personal, with details that made it seem legitimate. The sender may have even included links that led you to a website that looked professional, making it easy to overlook any red flags.
 
-Scammers often create a sense of urgency to make you act quickly without thinking. They might say that the opportunity is time-sensitive or that your friend is in immediate danger. This pressure can cloud your judgment, pushing you to send money or share personal information before you have a chance to really consider the situation. The emotional appeal is powerful, and it’s easy to feel compelled to help someone you think is in need, especially when the message feels personal and urgent.
+Scammers often create a sense of urgency to push you into acting quickly. You might have felt a rush of excitement or fear as they claimed that the offer was only available for a limited time or that your account was at risk and needed immediate attention. This pressure can cloud your judgment, making it harder to think critically about the situation. The friendly tone and personalized messages can foster a false sense of trust, leading you to believe that you’re dealing with someone genuine.
 
-You may also encounter variations of this scam that look slightly different but have the same underlying tactics. Some might come from fake accounts that mimic your friends or family, while others could be unsolicited messages from strangers claiming to be part of a business or investment group. They may offer enticing deals or ask for your assistance in a way that feels familiar. The common thread is that they all play on your emotions and trust, making it hard to see the red flags until it’s too late.
+Variations of these scams can be subtle yet effective. You might encounter a message that appears to come from a group you’re part of, or a fake account mimicking someone you know. Some scams may involve fake investment platforms promising high returns, while others might focus on phishing for your personal information. Each variation is designed to exploit your trust and urgency, making it easy to overlook the signs that something isn’t quite right.
 
-If you fall for one of these scams, the consequences can be severe. You might lose money that you can’t afford to part with, or worse, your personal information could be compromised, leading to identity theft. The emotional toll can be just as damaging, leaving you feeling violated and questioning your judgment. It’s a harsh reality that these scams can happen to anyone, and recognizing them can be the first step in protecting yourself from future exploitation.
+Falling for one of these scams can have serious consequences. You might find yourself losing money, having your personal information compromised, or even facing identity theft. The emotional toll can be just as damaging, leaving you feeling embarrassed or anxious about your online safety. Once the scammer has your information, it can be incredibly difficult to regain control, and the repercussions can linger long after the initial encounter. Recognizing these tactics is crucial to protecting yourself from future scams.
 <p>That difference matters because a real notice related to Telegram should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
