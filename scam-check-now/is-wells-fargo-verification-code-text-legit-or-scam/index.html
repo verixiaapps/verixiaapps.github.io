@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Wells Fargo Verification Code Text is a common question when something like a two-factor code request appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Wells Fargo Verification Code Text flow starts with something like a two-factor code request, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received a text claiming to be from Wells Fargo, asking you to verify your account with a code. The message could look official, complete with the bank's logo and a friendly tone, urging you to act quickly. It may say something like, “Your account has been flagged for unusual activity. Please enter the code provided to secure your account.” At first glance, it seems like a legitimate request, especially if you’re a Wells Fargo customer who has been keeping an eye on your account activity.
+You might receive a text message claiming to be from Wells Fargo, asking you to verify your account by entering a code they just sent you. The message often looks official, complete with the bank’s name and sometimes even includes a fake customer service number. You might think it’s a routine security check, especially if you’ve recently logged into your account or made a transaction. The sender usually uses a short code or a number that resembles Wells Fargo’s official contact, making it seem even more legitimate.
 
-The urgency in the message is palpable, designed to make you feel anxious about your account's security. It might mention that your account will be locked if you don't respond immediately, creating a sense of panic. This pressure can cloud your judgment, making you more likely to comply without thinking twice. The friendly language and sense of urgency are crafted to build trust, making you feel like you’re communicating with a reliable source that genuinely cares about your financial safety.
+The urgency of the message can be alarming. It might say that your account has been compromised or that immediate action is required to prevent unauthorized access. This creates a sense of panic, pushing you to act quickly without thinking. The message may also include phrases like “your immediate attention is required” or “failure to respond may lead to account suspension,” which can make you feel like you have no choice but to comply. This pressure can cloud your judgment and lead you to make hasty decisions.
 
-You may also notice variations of this scam, such as emails or phone calls instead of texts. Some messages might claim to be from different departments within Wells Fargo, like fraud protection or customer service, each with their own twist on the urgency. The sender might even use a spoofed phone number that looks like it’s coming from Wells Fargo. These variations can make it even more challenging to discern what’s real and what’s a trap, especially if you’re already on high alert for any suspicious activity.
+You may encounter variations of this scam, such as emails or phone calls that mimic the same urgency and authority. Some messages may ask you to click a link to verify your identity, while others might request personal information directly. The tactics can shift slightly, but the core strategy remains the same: to create a scenario where you feel compelled to provide sensitive information. You might even see different logos or branding that appear legitimate, further complicating your ability to discern what is real.
 
-Falling for this scam can have serious consequences. If you enter the verification code, you might inadvertently give scammers access to your account, leading to unauthorized transactions and potential identity theft. Your financial information could be compromised, leaving you vulnerable to further attacks. The emotional toll can be just as damaging, as the stress of dealing with the aftermath can linger long after the initial incident. Protecting yourself starts with being aware of these tactics and recognizing when something feels off.
+Falling for this scam can have serious consequences. If you provide the verification code or any personal information, you could inadvertently give scammers access to your bank account. This can lead to unauthorized transactions, identity theft, and a lengthy process to recover your funds and restore your account. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to remain vigilant and think critically before responding to any unexpected messages, especially when they involve your finances.
 <p>This is why step-by-step checking matters. Once a message related to Wells Fargo Verification Code Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ Falling for this scam can have serious consequences. If you enter the verificati
 <li><a href="/scam-check-now/is-bank-of-america-verification-code-text-legit-or-scam/">Is Bank of America Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-chase-verification-code-text-legit-or-scam/">Is Chase Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-verification-code-text-real-or-fake/">Is Bank Verification Code Text Real or Fake</a></li>
+<li><a href="/scam-check-now/is-bank-verification-request-text-legit-or-scam/">Is Bank Verification Request Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-email-legit-or-scam/">Is Bank Account Verification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

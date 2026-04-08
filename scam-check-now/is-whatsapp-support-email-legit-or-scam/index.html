@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp Support Email is a common question when something like a suspicious link feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common WhatsApp Support Email flow starts with something like a suspicious link, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming to be from WhatsApp support, complete with their logo and a friendly greeting. The message could be informing you about a supposed issue with your account, urging you to click on a link to verify your information or reset your password. The email may look convincing, using official language and even referencing your phone number. You might feel a sense of relief at first, thinking that it’s a legitimate communication from a trusted source, but that’s exactly what scammers want you to think.
+You might have received an email claiming to be from WhatsApp support, complete with their logo and a message that looks official. It may say something like your account has been compromised or that you need to verify your information to continue using the service. The email often includes a link to a website that looks similar to WhatsApp's official site, urging you to log in or provide personal details. The language used is designed to mimic the tone of genuine customer support, making it easy to mistake for a legitimate communication.
 
-The urgency in these emails is often palpable. They might state that your account will be suspended unless you act immediately, creating a sense of panic. The message may emphasize that your privacy is at risk, pushing you to respond quickly without thinking. This pressure can cloud your judgment, making you more likely to click on links or provide personal information without a second thought. The design and tone of the email are crafted to build trust, making it difficult to distinguish between genuine support and a malicious attempt to steal your information.
+The urgency in these emails is palpable. You might feel a rush of anxiety as you read that your account will be suspended unless you act immediately. This pressure can cloud your judgment, making you more likely to click on the provided link or respond with your information. Scammers know that creating a sense of urgency can lead to hasty decisions, and they exploit this tactic to catch you off guard. The promise of immediate resolution or assistance can be incredibly persuasive, especially if you’ve recently had issues with your account.
 
-You may also encounter variations of this scam, such as texts or direct messages on social media mimicking WhatsApp's support team. These messages might ask you to verify your account through a different method, like a phone call or a different website that looks similar to WhatsApp's official site. Some variations might even include fake customer service numbers, making it seem like you’re speaking to a real representative. Each version is designed to catch you off guard, playing on your familiarity with the platform and its communication style.
+Variations of this scam can appear in different forms, such as text messages or even direct messages on social media. You might see a message claiming to be from a “WhatsApp Team” or a similar name, asking you to confirm your account details. Some versions may even include fake customer service numbers that lead to more scams. The common thread is that they all aim to create confusion and urgency, making it difficult for you to discern what is real and what is not.
 
-Falling for this scam can have serious repercussions. If you provide your personal information, scammers can gain access to your account, potentially leading to identity theft or financial loss. They might use your account to reach out to your contacts, spreading the scam further and damaging your relationships. The emotional toll can also be significant, leaving you feeling violated and anxious about your online security. Recognizing these scams is crucial to protecting yourself and your information in an increasingly deceptive digital landscape.
+Falling for this scam can have serious consequences. If you provide your login credentials or personal information, scammers can gain access to your account, potentially leading to identity theft or unauthorized transactions. Your contacts could also be targeted, as scammers may use your account to reach out to them, perpetuating the cycle. The emotional and financial toll can be significant, leaving you feeling violated and vulnerable. It’s crucial to remain vigilant and question the authenticity of any unexpected communication claiming to be from WhatsApp support.
 <p>This is why step-by-step checking matters. Once a message related to WhatsApp Support Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1385,8 +1385,8 @@ Falling for this scam can have serious repercussions. If you provide your person
 <li><a href="/scam-check-now/is-whatsapp-payment-request-message-legit-or-scam/">Is WhatsApp Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-whatsapp/">Did I Get Scammed by WhatsApp?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-message-from-unknown-number-legit-or-scam/">Is WhatsApp Message from Unknown Number or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-whatsapp-message-legit-or-scam/">Is This WhatsApp Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-job-offer-whatsapp-message-legit-or-scam/">Is Job Offer WhatsApp Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-crypto-support-email-legit-or-scam/">Is Crypto Support Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

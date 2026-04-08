@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp Support Message Real or Fake is a common question when something like a strange text feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common WhatsApp Support Message Real or Fake flow starts with something like a strange text, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You receive a message on WhatsApp claiming to be from customer support, stating that there’s an issue with your account that needs immediate attention. The message looks official, complete with the WhatsApp logo and a friendly greeting. It might even reference your name and ask you to click on a link to verify your account. The urgency in their tone makes it seem like a genuine concern, urging you to act quickly to avoid losing access to your account or missing out on a special offer.
+You might receive a message on WhatsApp claiming to be from support, telling you that there’s an issue with your account. The message often includes your name and may even reference recent activity, making it feel legitimate. It could ask you to click on a link to verify your information or to respond with personal details like your phone number or a verification code. The sender may use a profile picture that looks official or mimic the format of a genuine support message, which can easily mislead you into believing it's real.
 
-The message creates a sense of urgency by suggesting that your account will be suspended if you don’t respond right away. It might say something like, “Act now to keep your account secure!” This pressure can make you feel anxious, pushing you to click the link without taking a moment to think. The familiarity of the platform and the professional appearance of the message can easily lead you to trust it, especially if you’re already feeling uneasy about your account.
+The urgency of the message is designed to catch you off guard. It may state that your account will be suspended unless you act immediately, creating a sense of panic. You might feel compelled to respond quickly, fearing that you could lose access to your contacts or important conversations. By using phrases like “immediate action required” or “your account is at risk,” the scammer plays on your emotions, making it harder to think critically about the situation.
 
-You might also encounter variations of this scam, such as a call from someone claiming to be from WhatsApp support, or an email that looks like it’s from a legitimate source. Sometimes, the message may include a fake verification code or ask you to download an app for “security purposes.” Each version is designed to exploit your trust in the platform, making it seem like a routine check-up when it’s anything but.
+Variations of this scam can be subtle but equally deceptive. You might see messages that appear to come from a different support channel or even from a friend whose account has been compromised. Some scams might use fake websites that look like WhatsApp's official site, asking you to log in or provide personal information. Others could come through a voice call, where someone impersonates a support agent and asks for sensitive details. Each version is crafted to exploit your trust in the platform and your desire to resolve any potential issues.
 
-Falling for this scam can have serious consequences. If you provide your personal information or click on the malicious link, you risk losing access to your account and potentially exposing your private data. Scammers can use this information to commit identity theft, drain your bank account, or even target your contacts. The emotional toll of realizing you’ve been deceived can be just as damaging, leaving you feeling vulnerable and anxious about your online safety.
+Falling for this scam can lead to serious consequences. If you provide your personal information, scammers can gain access to your account, potentially leading to identity theft or financial loss. They may use your account to scam your contacts, further spreading the deceit. Once your information is compromised, it can be challenging to regain control, and the emotional toll of dealing with the aftermath can be overwhelming. Recognizing the signs of these messages is crucial to protecting yourself and your personal information.
 <p>This is why step-by-step checking matters. Once a message related to WhatsApp Support Message Real or Fake moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp Suspicious Login Alert is a common question when something like an account locked warning appears without context. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an account locked warning and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You just received a message on WhatsApp that says someone is trying to log into your account from an unfamiliar device. The alert looks official, complete with the WhatsApp logo and a link to verify your identity. It urges you to act fast, claiming that your account will be locked if you don’t respond within a few minutes. The message feels alarming, especially since it mentions your phone number and seems to come from a trusted source. You might even see a sense of urgency in the wording, making you feel like you need to take immediate action to protect your account.
+You might have recently received a WhatsApp login alert that seemed to come out of nowhere, warning you about a suspicious login attempt from an unfamiliar device or location. The message often looks official, complete with WhatsApp branding and a sense of urgency, urging you to act quickly to secure your account. It might even include a link that claims to help you verify your identity or change your password. If you clicked on that link or provided any personal information, you could be at risk, as these alerts are designed to trick you into revealing sensitive data.
 
-The pressure builds as the message emphasizes how quickly someone could gain access to your personal chats and contacts. It might mention recent suspicious activity or suggest that your account is at risk of being hacked. This tactic is designed to create a sense of panic, making you more likely to click the link without thinking. The sender may even use friendly language, claiming to be from WhatsApp support, which can make you feel more at ease and inclined to trust the message. You might find yourself questioning whether you should really check your account, just to be safe.
+The urgency in these messages is palpable. They often emphasize that your account could be compromised, creating a sense of panic that pushes you to respond immediately. You might feel compelled to click on the provided link, thinking you’re protecting your account from a potential breach. The language used is crafted to build trust, making you believe that you’re interacting with WhatsApp directly. This psychological manipulation is a key tactic that scammers use to bypass your defenses and get you to act without thinking.
 
-You might also notice variations of this scam. Sometimes, the alert might come as an email or a text message instead of a WhatsApp notification, but the content remains strikingly similar. Other times, the message may include a fake phone number to call for "support," where scammers will try to extract personal information. Regardless of the format, the core message remains the same: act quickly to secure your account. This adaptability makes it harder to spot the scam, as it can appear in various forms that seem legitimate.
+You may encounter variations of this scam that look slightly different but carry the same deceptive message. For instance, some messages might claim to be from WhatsApp support, asking you to confirm your account details or verify your phone number. Others might come through text or email, using a different communication channel but still mimicking the official WhatsApp tone. Regardless of the format, they share the same goal: to confuse and mislead you into providing your personal information.
 
-Falling for this scam can lead to serious consequences. If you click the link and provide your information, you could inadvertently hand over access to your account to scammers. They might then use your WhatsApp to reach out to your contacts, spreading the scam further or even attempting to extract money from your friends and family. The fallout can be damaging, not just to your personal privacy but also to your relationships and finances. It’s crucial to remain vigilant and skeptical of any unexpected alerts, especially when they demand immediate action.
+Falling for this scam can have serious consequences. If you give away your login details or personal information, you risk losing access to your WhatsApp account and potentially exposing your contacts to further scams. Scammers can use your account to impersonate you, tricking your friends and family into sending money or sharing sensitive information. The fallout can be damaging, not just to you but to those in your network, making it essential to stay vigilant against these deceptive tactics.
 <p>That difference matters because a real notice related to WhatsApp Suspicious Login Alert should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

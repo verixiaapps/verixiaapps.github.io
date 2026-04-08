@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp Suspicious Link Message is a common question when something like a fake login page feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many WhatsApp Suspicious Link Message scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a fake login page. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You might have recently received a WhatsApp message that seemed harmless at first glance, perhaps from a contact you know or even a number that looks familiar. The message usually contains a link, claiming to offer something enticing, like a prize, an important update, or a chance to win a gift card. It may even include a friendly greeting or a personal touch, making it feel legitimate. But as you read it, a nagging feeling creeps in—something just doesn’t sit right.
+You might have recently received a WhatsApp message from an unknown number, claiming to be a friend or a company you recognize, urging you to click on a link. The message often sounds casual, like, “Hey, check this out!” or “You won’t believe what I found!” The link may lead to a website that looks almost identical to a legitimate one, but it’s designed to trick you into providing personal information or downloading harmful software. The familiarity of the sender's name can make it easy to overlook the warning signs.
 
-The urgency in these messages can be overwhelming. They often state that you need to act quickly to claim your prize or avoid missing out on something important. Phrases like “limited time offer” or “only a few left” are common, designed to push you into clicking the link without thinking. The sender might even express concern or excitement about your potential win, making you feel like you’re part of an exclusive group. This emotional pull can cloud your judgment, leading you to overlook red flags.
+The urgency in these messages is striking. They often include phrases like “Act now!” or “Limited time offer!” to push you into making a quick decision without thinking it through. This pressure can be overwhelming, especially if the message claims you’ve won something or need to verify your account immediately. The sender may even go as far as to say they’re in a hurry and need your help, creating a false sense of trust that makes you feel obligated to respond right away.
 
-You may notice variations of this scam that appear in different forms. Some messages might claim to be from a well-known company, while others could come from someone pretending to be a friend or family member who has “forwarded” the message to you. The links can lead to fake websites that look strikingly similar to the real ones, tricking you into entering personal information or payment details. Even if the message seems slightly different from the last one you saw, the underlying tactics remain the same.
+You might also encounter variations of this scam, where the message appears to come from a service you use, like a bank or an online retailer. These messages might say there’s been suspicious activity on your account or that you need to confirm your identity. Sometimes, they’ll even use official logos and language to make the scam seem more convincing. Each variation is designed to exploit your trust in familiar brands or people, making it harder to spot the deception.
 
-Falling for this type of scam can have serious consequences. Once you click the link, you might unknowingly download malware onto your device, compromising your personal information and financial security. Your accounts could be hacked, leading to unauthorized transactions or identity theft. The emotional and financial fallout can be significant, leaving you feeling violated and anxious about the safety of your online presence. It’s a reminder that what seems like a simple message can lead to a complex web of trouble.
+Falling for this type of scam can lead to serious consequences. If you click the link and enter your information, you risk having your personal data stolen, which can lead to identity theft or financial loss. Even if you don’t provide information, downloading malicious software can compromise your device, giving scammers access to your contacts and sensitive information. The aftermath can be stressful and time-consuming as you try to regain control and protect yourself from further harm.
 <p>Phishing-related scams connected to WhatsApp Suspicious Link Message often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a fake login page is used to build trust.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

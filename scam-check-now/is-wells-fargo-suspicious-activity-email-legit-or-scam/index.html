@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Wells Fargo Suspicious Activity Email is a common question when something like a suspicious message feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Wells Fargo Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Wells Fargo, alerting you to suspicious activity on your account. The message could look official, complete with the bank's logo and a professional tone, urging you to click a link to verify your information. It may even mention specific transactions that seem out of place, making it feel personal and relevant to you. The email might ask you to log in to your account immediately to secure it, creating a sense of urgency that can be hard to ignore.
+You just received an email that looks like it’s from Wells Fargo, claiming there’s suspicious activity on your account. The email has the Wells Fargo logo, includes your name, and urges you to click a link to verify your account details. The message might mention a recent transaction you don’t recognize or an unusual login attempt, making it feel personal and alarming. It appears to be a routine security alert, but there’s something unsettling about the urgency in the tone.
 
-This type of email often plays on your emotions, creating a sense of panic. The message might state that your account will be locked unless you take action right away, pushing you to act without thinking. The sender may use language that builds trust, such as referencing your recent transactions or including customer service contact information that seems legitimate. This combination of urgency and familiarity can make it difficult to distinguish between a real warning and a cleverly crafted scam.
+The email creates a sense of urgency, making you feel like you need to act fast to protect your account. Phrases like “immediate action required” or “your account will be locked” are designed to provoke anxiety and prompt you to click the link without thinking. The sender’s email address might look similar to official Wells Fargo addresses, further building trust. You might even notice that the email is written in a professional tone, which can make it harder to question its legitimacy.
 
-You may also encounter variations of this scam through text messages or phone calls. A text might inform you of a supposed security breach, prompting you to click a link or call a number for assistance. Alternatively, you might receive a phone call from someone claiming to be a Wells Fargo representative, asking for your personal details to "verify" your identity. Each variation is designed to exploit your trust in the bank, making it seem like a genuine attempt to protect your account.
+Scammers often tweak their tactics, so you might see variations of this email that look slightly different. Some may come as text messages or phone calls, claiming to be from Wells Fargo’s fraud department. They might ask you to verify your identity by providing personal information or direct you to a fake website that looks almost identical to the bank’s official site. Each variation is crafted to exploit your trust and urgency, making it easy to get caught off guard.
 
-Falling for this scam can have serious consequences. If you provide your personal information, the scammers can gain access to your bank account, leading to unauthorized transactions and potential financial loss. Beyond the immediate financial impact, you may also face the hassle of dealing with identity theft, which can take months or even years to resolve. The emotional toll of realizing you've been deceived can linger, making it crucial to remain vigilant and skeptical of any unsolicited communication regarding your finances.
+If you fall for this scam, the consequences can be severe. You could end up giving away sensitive information like your Social Security number or banking credentials, leading to identity theft or unauthorized transactions. Once scammers have your information, they can drain your accounts or open new ones in your name, leaving you to deal with the financial fallout. It’s a situation that can spiral quickly, impacting not just your finances but your peace of mind as well.
 <p>Scams connected to Wells Fargo Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -1380,13 +1380,13 @@ Falling for this scam can have serious consequences. If you provide your persona
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-wells-fargo-refund-email-legit-or-scam/">Is Wells Fargo Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-wells-fargo-security-alert-message-legit-or-scam/">Is Wells Fargo Security Alert Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-suspicious-activity-email-legit-or-scam/">Is Bank of America Suspicious Activity Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-suspicious-activity-email-legit-or-scam/">Is Bank Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-chase-suspicious-activity-email-legit-or-scam/">Is Chase Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-activity-email-legit-or-scam/">Is Bank Account Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-suspicious-transaction-email-legit-or-scam/">Is Bank Suspicious Transaction Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-unusual-activity-email-legit-or-scam/">Is Bank Unusual Activity Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-account-temporarily-restricted-email-legit-or-scam/">Is Bank Account Temporarily Restricted Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-debit-card-suspension-email-legit-or-scam/">Is Bank Debit Card Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-of-america-refund-email-legit-or-scam/">Is Bank of America Refund Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

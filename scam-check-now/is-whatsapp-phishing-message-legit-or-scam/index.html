@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp Phishing Message is a common question when something like a suspicious sign-in link feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many WhatsApp Phishing Message scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a suspicious sign-in link. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You might have received a WhatsApp message that seems to come from a trusted contact or even a recognizable company, claiming that your account will be suspended unless you verify your information immediately. The message often includes a link that looks legitimate at first glance, perhaps even mimicking the official WhatsApp branding. It might say something like, "Your account will be suspended in 24 hours. Click here to verify your identity." This kind of message is designed to catch you off guard, making you feel like you need to act quickly to avoid losing access to your account.
+You might have recently received a WhatsApp message that seemed to come from a trusted source, like a friend or a well-known company. It could have included a link urging you to verify your account, claim a prize, or confirm a payment. The message often looks convincing, complete with logos and familiar language, making it easy to think it’s genuine. You may have even noticed that it came from a number you recognize, which adds to the sense of legitimacy. However, these messages are designed to trick you into providing personal information or clicking on malicious links.
 
-Scammers know how to play on your emotions, creating a sense of urgency that can cloud your judgment. When you read that your account is at risk, it’s easy to feel panicked and compelled to click the link without thinking twice. They may also use language that feels familiar and trustworthy, like addressing you by name or referencing a recent conversation you had. This familiarity builds a false sense of security, making it more likely that you’ll take the bait and follow their instructions.
+The urgency in these messages is a key tactic to get you to act quickly. You might feel pressured to respond immediately, fearing that your account will be locked or that you’ll miss out on a limited-time offer. This sense of urgency can cloud your judgment, making it harder to think critically about the request. The sender often uses phrases like “immediate action required” or “your account is at risk,” which can make you feel anxious and compelled to comply without taking a moment to verify the situation.
 
-You might also encounter variations of this phishing attempt, such as messages claiming you’ve won a prize or that there’s an issue with a recent payment. These messages can come from different numbers, and the links may lead to fake login pages that closely resemble the real WhatsApp interface. Some might even ask you to download an app that promises to enhance your WhatsApp experience but is actually designed to steal your personal information. Each version is crafted to exploit your trust and urgency, making it harder to discern what’s real.
+You may encounter variations of this scam that appear in different forms. For instance, one message might claim to be from a delivery service, asking you to confirm your address, while another could pretend to be from a bank, requesting your login details. Sometimes, the messages may even come with a sense of familiarity, as if they’re referencing past conversations or transactions. These adaptations are designed to exploit your trust and make the scam feel more personalized, increasing the likelihood that you’ll engage with it.
 
-Falling for this kind of scam can have serious consequences. If you provide your information, the scammers can gain access to your account, potentially leading to identity theft or unauthorized transactions. They may also use your account to target your contacts, spreading the scam further. The emotional toll can be significant as well, leaving you feeling violated and anxious about your personal data. Recognizing these tactics is crucial to protecting yourself and your information from falling into the wrong hands.
+Falling for this type of scam can have serious consequences. If you provide your personal information or click on a malicious link, you risk having your accounts compromised, leading to identity theft or financial loss. Your sensitive data could be sold on the dark web, and you might find yourself dealing with unauthorized transactions or even legal issues. The emotional toll can be significant as well, leaving you feeling violated and anxious about your online security. It’s crucial to remain vigilant and question any unexpected messages, especially those that create a sense of urgency.
 <p>Phishing-related scams connected to WhatsApp Phishing Message often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a suspicious sign-in link is used to build trust.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ Falling for this kind of scam can have serious consequences. If you provide your
 <li><a href="/scam-check-now/is-whatsapp-login-blocked-email-legit-or-scam/">Is WhatsApp Login Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-whatsapp/">Did I Get Scammed by WhatsApp?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-login-from-new-device-email-legit-or-scam/">Is WhatsApp Login from New Device Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-whatsapp-message-legit-or-scam/">Is This WhatsApp Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-job-offer-whatsapp-message-legit-or-scam/">Is Job Offer WhatsApp Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-telegram-phishing-message-legit-or-scam/">Is Telegram Phishing Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-binance-phishing-email-legit-or-scam/">Is Binance Phishing Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-crypto-phishing-email-legit-or-scam/">Is Crypto Phishing Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-instagram-phishing-email-legit-or-scam/">Is Instagram Phishing Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-phishing-text-message-legit-or-scam/">Is This Phishing Text Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/phishing-security-alert-message-scam/">Is Phishing Security Alert Message a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

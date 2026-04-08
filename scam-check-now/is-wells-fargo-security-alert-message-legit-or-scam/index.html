@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Wells Fargo Security Alert Message is a common question when something like a password reset message appears without context. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Wells Fargo Security Alert Message cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text message that appears to be from Wells Fargo, notifying you of suspicious activity on your account. The message includes a link to verify your identity and urges you to act quickly to secure your funds. The sender's number looks official, and the language used mimics the tone of real communications from your bank. You might even see a familiar logo or branding, making it seem even more legitimate. It’s easy to feel a sense of panic, especially if you’ve recently made a large purchase or noticed unusual transactions.
+You receive a text message that looks like it’s from Wells Fargo, alerting you to unusual activity on your account. The message urges you to click a link to verify your identity or risk losing access to your funds. The sender’s number appears to be legitimate, and the language used is professional, making it seem like a genuine security alert. It might even include your name and partial account number, which adds to its authenticity. At first glance, everything seems normal, and you might feel compelled to act quickly.
 
-The message creates an immediate sense of urgency, suggesting that your account may be compromised. It emphasizes that you must click the link right away to prevent further unauthorized access. This pressure can cloud your judgment, making you feel like you have no choice but to respond quickly. The fear of losing your hard-earned money can override your instinct to pause and think critically about the situation. You may feel reassured by the professional tone and the familiar branding, leading you to trust the message without question.
+The urgency in the message is palpable. It creates a sense of panic, suggesting that immediate action is required to protect your account. Phrases like “your account will be locked” or “you must respond within 24 hours” are designed to push you into a hasty decision. This pressure can cloud your judgment, making it harder to think critically about the situation. The message may even include reassuring details, like mentioning Wells Fargo’s commitment to your security, which can further build trust and make you feel safe in responding.
 
-Scammers often adapt their tactics, so you might encounter variations of this message. Some may come via email, appearing as an official Wells Fargo alert, while others might arrive as a phone call from someone claiming to be a bank representative. They might ask you to confirm your account details or provide personal information to "verify" your identity. Each variation is designed to exploit your trust in your bank, making it difficult to distinguish between a genuine alert and a deceptive scheme.
+Variations of this scam can appear in your email or even as a phone call. You might receive an email that looks like a legitimate Wells Fargo communication, complete with logos and formatting that mimic their official correspondence. Alternatively, a caller may claim to be from Wells Fargo's fraud department, asking for your personal information to "verify" your identity. Each version has the same goal: to trick you into providing sensitive information or clicking on malicious links.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information or click on the malicious link, you risk having your bank account drained or your identity stolen. Scammers can use your information to open new accounts in your name, leaving you to deal with the financial fallout. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s crucial to stay vigilant and question any unexpected messages, even if they seem to come from a trusted source.
+Falling for this scam can lead to severe consequences. If you provide your information, scammers can gain access to your bank account, draining your funds or making unauthorized transactions. Beyond financial loss, it can also lead to identity theft, where your personal information is used to open new accounts in your name. The emotional toll of realizing you’ve been scammed can be overwhelming, leaving you feeling violated and vulnerable. Protecting yourself starts with being aware of these tactics and recognizing that not every alert is what it seems.
 <p>The strongest clue is usually not one isolated detail. With Wells Fargo Security Alert Message, the risk often becomes clearer when something like a password reset message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1383,10 +1383,10 @@ Falling for this scam can lead to serious consequences. If you provide your pers
 <li><a href="/scam-check-now/bank-account-alert-scam-text/">Is Bank Account Alert Scam Text a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-sign-in-alert-email-legit-or-scam/">Is Bank Sign in Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-fraud-alert-email-legit-or-scam/">Is Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-fraud-alert-text-legit-or-scam/">Is Bank Fraud Alert Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-fraud-alert-email-legit-or-scam/">Is Bank of America Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-fraud-alert-text-legit-or-scam/">Is Bank of America Fraud Alert Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-of-america-login-alert-email-legit-or-scam/">Is Bank of America Login Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-of-america-transfer-alert-email-legit-or-scam/">Is Bank of America Transfer Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

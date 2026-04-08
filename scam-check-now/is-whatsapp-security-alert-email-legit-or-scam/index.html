@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>WhatsApp Security Alert Email is a common question when something like an account locked warning appears without context. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an account locked warning and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email that claims to be a WhatsApp security alert, notifying you of unusual activity on your account. The message often includes your name and a sense of urgency, stating that someone has attempted to access your account from an unrecognized device. It may even prompt you to click on a link to verify your identity or secure your account. The email’s design mimics official correspondence, complete with WhatsApp branding, making it look authentic at first glance.
+You might have recently received an email that claims to be a security alert from WhatsApp, warning you about suspicious activity on your account. The message may look official, complete with the WhatsApp logo and a sense of urgency, urging you to click on a link to verify your identity or secure your account. It might even mention specific details, like your phone number or recent login attempts, making it seem more credible. The email could be designed to mimic the style of genuine communications from WhatsApp, leaving you uncertain about its authenticity.
 
-This type of scam thrives on creating a sense of panic. The email might use phrases like “immediate action required” or “your account will be suspended” if you don’t respond quickly. This pressure can lead you to act impulsively, clicking on links or providing personal information without taking a moment to think. The fear of losing access to your messages or contacts can cloud your judgment, making you more susceptible to falling for the trap.
+This type of scam often plays on your emotions, creating a sense of urgency that pushes you to act quickly. The email might threaten that your account will be suspended if you don’t respond immediately or suggest that someone is trying to access your information. By instilling fear and urgency, the scammers aim to bypass your usual caution, making you more likely to click on the link without thinking twice. The promise of security and reassurance can feel convincing, especially if you’re already worried about your online safety.
 
-You may encounter variations of this scam, such as texts or even phone calls claiming to be from WhatsApp support. Some messages might ask you to confirm a code sent to your phone, while others could direct you to a fake website that looks just like the real WhatsApp login page. Each version is designed to exploit your trust in the platform, using familiar language and logos to make the deception more convincing.
+You might also notice variations of this scam, such as text messages or even phone calls that claim to be from WhatsApp support. Some messages may ask you to confirm your account details through a different platform or request a verification code that they can use to gain access to your account. Each variation is crafted to exploit your trust in WhatsApp, often using familiar language or referencing recent updates to make it seem legitimate. The consistency in the approach can make it even harder to discern what is real and what is a trap.
 
-If you inadvertently engage with these scams, the consequences can be severe. Scammers can gain access to your personal information, including your contacts, messages, and even financial details if you’ve linked your account to payment methods. Once they have your data, they can impersonate you, potentially leading to identity theft or further scams targeting your friends and family. The emotional and financial fallout can be significant, leaving you feeling violated and vulnerable.
+Falling for this scam can lead to serious consequences. If you click the link and provide your information, scammers can take control of your WhatsApp account, potentially accessing your contacts and private messages. This not only compromises your personal information but can also put your friends and family at risk if the scammers impersonate you. The fallout can be extensive, leading to financial loss or identity theft, and the emotional toll of realizing you've been deceived can be significant. It's crucial to remain vigilant and question any unexpected communications that seem to require immediate action.
 <p>That difference matters because a real notice related to WhatsApp Security Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ If you inadvertently engage with these scams, the consequences can be severe. Sc
 <li><a href="/scam-check-now/is-whatsapp-phishing-message-legit-or-scam/">Is WhatsApp Phishing Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-whatsapp/">Did I Get Scammed by WhatsApp?</a></li>
 <li><a href="/scam-check-now/is-job-offer-whatsapp-message-legit-or-scam/">Is Job Offer WhatsApp Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-whatsapp-message-legit-or-scam/">Is This WhatsApp Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-security-alert-email-legit-or-scam/">Is Amazon Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-binance-security-alert-email-legit-or-scam/">Is Binance Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-chase-security-alert-email-legit-or-scam/">Is Chase Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-apple-security-alert-email-legit-or-scam/">Is Apple Security Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
