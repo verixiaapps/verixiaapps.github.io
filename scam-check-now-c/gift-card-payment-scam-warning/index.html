@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>Gift Card Payment Scam Warning scams are designed to look believable at first glance. Messages like a suspicious message often arrive as ordinary alerts, emails, or requests. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. The real goal is to create pressure and get you to act before you stop to verify the details.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might receive a message that seems to come from a trusted source, like a friend or a reputable company, asking you to purchase gift cards as a form of payment. The message often includes a sense of urgency, claiming that there’s a limited-time offer or an immediate need for funds. It may instruct you to buy specific gift cards from popular retailers and send the codes directly to them. The language is casual, making it feel like a simple favor or a quick solution to a problem, which can easily catch you off guard.
+You might have recently received a message that seemed harmless enough, perhaps claiming to be from a well-known retailer or even a friend. It could have asked you to purchase gift cards as a form of payment for a service or to help someone in need. The message often includes a sense of familiarity, using logos and language that mimic legitimate companies, making it easy to overlook any red flags. You might have felt a rush of anxiety, thinking you were helping someone or taking care of an important bill, but the urgency in the message was designed to cloud your judgment.
 
-The pressure to act quickly is a key tactic in these scams. You may feel a sense of obligation, especially if the message appears to come from someone you know or a company you trust. They might say that you need to act fast to avoid missing out on a deal, or they could threaten consequences if you don’t comply. This creates a heightened emotional response, making you more likely to overlook red flags and act without thinking it through.
+The pressure builds quickly as the sender insists that time is of the essence. They might say that the offer is only valid for a limited time or that immediate action is required to avoid a penalty. This tactic creates a sense of panic, pushing you to act without fully thinking through the situation. You may find yourself convinced that this is a legitimate request, especially if they use personal details that make it feel more authentic. The emotional appeal can be strong, making you feel like you’re doing the right thing by complying.
 
-Variations of this scam can appear in different forms. You might encounter a fake tech support call claiming your computer has a virus, urging you to buy gift cards to pay for their services. Alternatively, you could receive an email that looks like it’s from a popular online retailer, offering a refund that can only be processed through gift cards. Each version is designed to exploit your trust and urgency, making it easy to mistake them for legitimate requests.
+You might also encounter variations of this scam that take different forms. For instance, a fake tech support call could claim that your computer has a virus and that purchasing gift cards is the only way to resolve the issue. Alternatively, you could receive an email that appears to be from a popular streaming service, asking you to buy gift cards to maintain your subscription. Each version is crafted to exploit your trust in familiar brands or people, making it easy to fall into the trap.
 
-If you fall for this scam, the consequences can be severe. Once you send the gift card information, it’s nearly impossible to recover your money. Scammers often use these funds for illicit activities, leaving you with no recourse. The emotional toll can be just as damaging, as you may feel embarrassed or ashamed for being deceived. Understanding how these scams operate can help you recognize the signs and protect yourself from becoming a victim.
+If you end up falling for this scam, the consequences can be severe. Once you share the gift card numbers, the scammer can drain the value almost instantly, leaving you with no way to recover your money. This can lead to financial strain, especially if you were counting on that money for something important. Beyond the immediate loss, it can also leave you feeling embarrassed and violated, as the realization sinks in that you were manipulated. The emotional toll can linger, making you wary of future transactions and relationships.
 <p>That difference matters because a real notice related to Gift Card Payment Scam Warning should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ If you fall for this scam, the consequences can be severe. Once you send the gif
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/irs-payment-request-message-fake/">Irs Payment Request Message Fake</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/government-impersonation-scam-message/">Government Impersonation Scam Message</a></li>
+<li><a href="/scam-check-now-c/irs-tax-refund-email-scam/">Irs Tax Refund Email Scam</a></li>
+<li><a href="/scam-check-now-c/irs-payment-request-message-fake/">Irs Payment Request Message Fake</a></li>
 <li><a href="/scam-check-now-c/social-security-alert-scam-text/">Social Security Alert Scam Text</a></li>
 <li><a href="/scam-check-now-c/government-grant-scam-email/">Government Grant Scam Email</a></li>
 <li><a href="/scam-check-now-c/tax-refund-notification-scam-message/">Tax Refund Notification Scam Message</a></li>
 <li><a href="/scam-check-now-c/irs-audit-warning-email-scam/">Irs Audit Warning Email Scam</a></li>
 <li><a href="/scam-check-now-c/government-assistance-scam-text/">Government Assistance Scam Text</a></li>
 <li><a href="/scam-check-now-c/irs-account-alert-message-fake/">Irs Account Alert Message Fake</a></li>
-<li><a href="/scam-check-now-c/social-security-suspension-scam-email/">Social Security Suspension Scam Email</a></li>
-<li><a href="/scam-check-now-c/lottery-winning-email-scam/">Lottery Winning Email Scam</a></li>
-<li><a href="/scam-check-now-c/prize-notification-message-scam/">Prize Notification Message Scam</a></li></ul>
+<li><a href="/scam-check-now-c/social-security-suspension-scam-email/">Social Security Suspension Scam Email</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

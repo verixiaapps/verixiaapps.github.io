@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>Crypto Withdrawal Fee Scam Message scams are built to look credible to people already thinking about exchanges, wallets, investments, or account recovery, including requests like a crypto recovery message. Most scam checks start with the same question: does the situation hold up when you verify it independently? They often create urgency around access, profit, or security so you act before carefully verifying the request.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>Many Crypto Withdrawal Fee Scam Message scams involve things like a crypto recovery message, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might receive a message that looks like it’s from a legitimate cryptocurrency exchange, claiming that you need to pay a withdrawal fee to access your funds. The text may include official logos and jargon that make it seem credible, often with a link to a website that mimics the real platform. The message might say something like, “Your recent transaction has been flagged. To proceed, please pay a small fee.” This can create a sense of urgency, making you feel like you need to act quickly to avoid losing your money.
+You might have received a message that looks like it’s from a reputable cryptocurrency exchange, claiming that you need to pay a withdrawal fee to access your funds. The message often includes official-looking logos and a professional tone, making it seem legitimate. It might say something like, "Your recent transaction is pending due to an outstanding fee. Please pay $200 to release your funds." This kind of communication can easily catch you off guard, especially if you’ve recently made transactions or are expecting to withdraw money.
 
-The scammer's tactic is to create a sense of pressure, suggesting that your account is at risk or that you’ll miss out on a lucrative opportunity if you don’t respond immediately. They may even include a countdown timer or mention that the fee is only available for a limited time. This urgency can cloud your judgment, making you more likely to click the link and provide your payment information without thinking it through. The message may even include testimonials or fake customer support numbers to build trust.
+The urgency in these messages is palpable. They often use phrases like “immediate action required” or “your account will be suspended” to create a sense of panic. You may feel pressured to act quickly, fearing that if you don’t pay the fee, you could lose access to your funds forever. This tactic plays on your emotions, making it hard to think clearly. The combination of urgency and the appearance of authority can easily lead you to make a hasty decision.
 
-You might also encounter variations of this scam, such as emails that claim to be from customer service, asking you to verify your account details before you can withdraw your funds. Some may come as direct messages on social media, where they impersonate a friend or influencer who supposedly had a similar issue. Regardless of the form it takes, the underlying goal remains the same: to trick you into sending money or sharing sensitive information.
+You might also encounter variations of this scam. For instance, some messages might claim to be from customer support, offering assistance with a “technical issue” that requires a fee to resolve. Others may come as unsolicited emails or texts from fake accounts that mimic real exchanges, using slight variations in the domain name. Each version is designed to exploit your trust and urgency, making it difficult to discern what is real and what is not.
 
-Falling for this scam can lead to significant financial loss, as the scammers will quickly drain your funds and disappear. Once you’ve sent the money or provided your details, it’s incredibly difficult to recover your losses. Beyond the immediate financial impact, it can also leave you feeling violated and distrustful of legitimate services. The emotional toll can linger long after the money is gone, making it essential to recognize these tactics before it’s too late.
+If you fall for this scam, the consequences can be severe. Paying the fee doesn’t grant you access to your funds; instead, it lines the pockets of the scammers. You could end up losing not just the withdrawal fee, but potentially more if they gain access to your personal information. In some cases, victims have reported losing their entire cryptocurrency holdings. The emotional and financial impact can be devastating, leaving you feeling violated and vulnerable in a space that should be secure.
 <p>Crypto-related scams connected to Crypto Withdrawal Fee Scam Message often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like a crypto recovery message.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ Falling for this scam can lead to significant financial loss, as the scammers wi
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/irs-payment-request-message-fake/">Irs Payment Request Message Fake</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/government-impersonation-scam-message/">Government Impersonation Scam Message</a></li>
+<li><a href="/scam-check-now-c/irs-tax-refund-email-scam/">Irs Tax Refund Email Scam</a></li>
+<li><a href="/scam-check-now-c/irs-payment-request-message-fake/">Irs Payment Request Message Fake</a></li>
 <li><a href="/scam-check-now-c/social-security-alert-scam-text/">Social Security Alert Scam Text</a></li>
 <li><a href="/scam-check-now-c/government-grant-scam-email/">Government Grant Scam Email</a></li>
 <li><a href="/scam-check-now-c/tax-refund-notification-scam-message/">Tax Refund Notification Scam Message</a></li>
 <li><a href="/scam-check-now-c/irs-audit-warning-email-scam/">Irs Audit Warning Email Scam</a></li>
 <li><a href="/scam-check-now-c/government-assistance-scam-text/">Government Assistance Scam Text</a></li>
 <li><a href="/scam-check-now-c/irs-account-alert-message-fake/">Irs Account Alert Message Fake</a></li>
-<li><a href="/scam-check-now-c/social-security-suspension-scam-email/">Social Security Suspension Scam Email</a></li>
-<li><a href="/scam-check-now-c/lottery-winning-email-scam/">Lottery Winning Email Scam</a></li>
-<li><a href="/scam-check-now-c/prize-notification-message-scam/">Prize Notification Message Scam</a></li></ul>
+<li><a href="/scam-check-now-c/social-security-suspension-scam-email/">Social Security Suspension Scam Email</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

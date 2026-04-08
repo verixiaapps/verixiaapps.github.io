@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>Gift Card Scam Message Warning scams are designed to look believable at first glance. Messages like a suspicious link often arrive as ordinary alerts, emails, or requests. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. The real goal is to create pressure and get you to act before you stop to verify the details.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious link and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might receive a message that looks like it’s from someone you know, maybe even a colleague or a friend, asking you to buy gift cards. The text or email could say something like, “I need your help! I’m in a tight spot and can’t talk right now. Can you grab some gift cards for me?” The sender’s name is familiar, and the urgency in their tone makes it feel legitimate. You might even see a logo or branding that looks official, making it hard to question the request.
+You might receive a message that seems to come from a trusted source, like a friend, family member, or even a well-known company. It could be a text or email that says you’ve won a gift card or that you need to act quickly to claim a special offer. The message often includes a link or a phone number, urging you to respond immediately. The tone is friendly and familiar, making it easy to let your guard down. You might even see logos or branding that look legitimate, which adds to the sense of authenticity.
 
-The message often creates a sense of urgency, making you feel like you need to act quickly to help out. It plays on your emotions, suggesting that your friend is in trouble and needs immediate assistance. This pressure can cloud your judgment, pushing you to make a hasty decision without verifying the request. You might think, “What if something really is wrong?” and rush to buy those cards, believing you’re doing a good deed.
+Once you read the message, you might feel a rush of excitement or urgency. The sender may claim that the offer is time-sensitive, pushing you to act fast to avoid missing out. They might say that there are only a few gift cards left or that you need to respond within a certain timeframe to secure your prize. This pressure can make you feel like you have to make a quick decision, and that’s when you might overlook red flags or inconsistencies in the message.
 
-Variations of this scam can come in many forms. You might get a call from someone claiming to be from a well-known company, saying there’s a problem with your account and you need to resolve it by purchasing gift cards. Alternatively, you could see a pop-up on a website that claims you’ve won a prize, but you need to pay taxes upfront via gift cards to claim it. Each version is designed to exploit your trust and urgency, making it easy to overlook the red flags.
+These scams can take on various forms, making them even trickier to spot. You might get a message claiming to be from a popular retailer, offering a gift card in exchange for a survey or feedback. Alternatively, you could receive a call from someone pretending to be a customer service representative, asking for personal information to verify your eligibility for a gift card. Each variation is designed to exploit your trust and make you feel like you’re engaging in a legitimate transaction.
 
-Falling for this scam can lead to significant financial loss, as once you send those gift card numbers, the money is gone for good. You may find yourself feeling embarrassed or ashamed for not realizing it was a scam, and the emotional toll can be just as damaging as the financial one. It’s not just about losing money; it’s about the betrayal of trust and the realization that someone manipulated your goodwill for their gain.
+Falling for this type of scam can have serious consequences. If you provide your personal information or purchase a gift card as instructed, you could end up losing money or exposing your financial details to criminals. Once scammers have your information, they can use it for identity theft or other fraudulent activities, leaving you to deal with the aftermath. The emotional toll of realizing you’ve been scammed can be just as damaging, leading to feelings of embarrassment and distrust in future interactions.
 <p>That difference matters because a real notice related to Gift Card Scam Message Warning should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ Falling for this scam can lead to significant financial loss, as once you send t
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/irs-payment-request-message-fake/">Irs Payment Request Message Fake</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/government-impersonation-scam-message/">Government Impersonation Scam Message</a></li>
+<li><a href="/scam-check-now-c/irs-tax-refund-email-scam/">Irs Tax Refund Email Scam</a></li>
+<li><a href="/scam-check-now-c/irs-payment-request-message-fake/">Irs Payment Request Message Fake</a></li>
 <li><a href="/scam-check-now-c/social-security-alert-scam-text/">Social Security Alert Scam Text</a></li>
 <li><a href="/scam-check-now-c/government-grant-scam-email/">Government Grant Scam Email</a></li>
 <li><a href="/scam-check-now-c/tax-refund-notification-scam-message/">Tax Refund Notification Scam Message</a></li>
 <li><a href="/scam-check-now-c/irs-audit-warning-email-scam/">Irs Audit Warning Email Scam</a></li>
 <li><a href="/scam-check-now-c/government-assistance-scam-text/">Government Assistance Scam Text</a></li>
 <li><a href="/scam-check-now-c/irs-account-alert-message-fake/">Irs Account Alert Message Fake</a></li>
-<li><a href="/scam-check-now-c/social-security-suspension-scam-email/">Social Security Suspension Scam Email</a></li>
-<li><a href="/scam-check-now-c/lottery-winning-email-scam/">Lottery Winning Email Scam</a></li>
-<li><a href="/scam-check-now-c/prize-notification-message-scam/">Prize Notification Message Scam</a></li></ul>
+<li><a href="/scam-check-now-c/social-security-suspension-scam-email/">Social Security Suspension Scam Email</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
