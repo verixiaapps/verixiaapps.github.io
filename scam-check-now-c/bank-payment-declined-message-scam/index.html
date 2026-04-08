@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>Bank Payment Declined Message scams are designed to look believable at first glance. Messages like a Zelle transfer problem message often arrive as ordinary alerts, emails, or requests. A common pattern starts when someone receives something that looks routine at first glance. The real goal is to create pressure and get you to act before you stop to verify the details.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common Bank Payment Declined Message scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You receive a text message that looks like it’s from your bank, stating that your recent payment has been declined due to suspicious activity. The message includes your bank’s logo and a link that claims to provide more details. It feels urgent, as it mentions that your account may be compromised and you need to act quickly to secure it. The sender's number appears to be official, making it hard to believe it could be anything but legitimate. You might even feel a pang of anxiety as you read it, wondering if your finances are at risk.
+You might have received a message that looks like it’s from your bank, telling you that your recent payment has been declined. The text or email often includes your name, account number, and a link to “verify” your information. It may even appear to come from a legitimate email address or phone number. The message is designed to mimic official bank communications, making it seem like a routine notification that requires your immediate attention. You might feel a sense of panic as you read it, thinking about the potential consequences of a declined payment.
 
-The message plays on your emotions, creating a sense of urgency that compels you to click the link immediately. It suggests that your account is in jeopardy, pushing you to act before it’s too late. You might find yourself feeling anxious, fearing the loss of your hard-earned money. The tone is authoritative, mimicking the way your bank communicates, which builds trust. This combination of urgency and familiarity makes it easy to overlook any red flags.
+The urgency in these messages is palpable. They often state that your account will be locked or that a payment will be missed unless you act quickly. This pressure can make you feel like you need to resolve the issue immediately, pushing you to click on the provided link or call the number listed. Scammers know that when you’re in a rush, you’re less likely to scrutinize the details, making it easier for them to trick you into sharing sensitive information or logging into a fake website.
 
-Variations of this scam can appear in different formats, such as emails or phone calls. You might receive an email that looks like an official bank notification, complete with your name and account details. Alternatively, a phone call may come from someone claiming to be a bank representative, asking for your information to resolve the issue. Each version is designed to catch you off guard, making it seem like a routine check when, in fact, it’s a trap.
+You may encounter variations of this scam that play on different aspects of banking. Some messages might claim that there’s an issue with your credit card, while others could suggest suspicious activity in your account. They might even use different channels, like social media or direct messages, to reach you. Regardless of the format, the core tactic remains the same: create a sense of urgency and trust to manipulate you into taking action without thinking.
 
-If you fall for this scam, the consequences can be severe. You may unknowingly provide your personal information, such as your account number or password, to the scammers. This could lead to unauthorized transactions, draining your bank account or even opening new accounts in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s a reminder that even the most seemingly legitimate messages can hide malicious intent.
+If you fall for this scam, the consequences can be severe. By providing your personal information, you risk giving scammers access to your bank account, leading to unauthorized transactions or identity theft. This can result in significant financial loss and a lengthy process to recover your funds. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about your financial security. It’s crucial to recognize these messages for what they are and to take a moment to verify their authenticity before acting.
 <p>Payment-related scams connected to Bank Payment Declined Message often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a Zelle transfer problem message is involved.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ If you fall for this scam, the consequences can be severe. You may unknowingly p
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/crypto-profit-guarantee-email-scam/">Crypto Profit Guarantee Email Scam</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/crypto-investment-message-scam/">Crypto Investment Message Scam</a></li>
+<li><a href="/scam-check-now-c/bitcoin-investment-opportunity-scam-text/">Bitcoin Investment Opportunity Scam Text</a></li>
+<li><a href="/scam-check-now-c/crypto-profit-guarantee-email-scam/">Crypto Profit Guarantee Email Scam</a></li>
 <li><a href="/scam-check-now-c/fake-trading-platform-message-scam/">Fake Trading Platform Message Scam</a></li>
 <li><a href="/scam-check-now-c/crypto-withdrawal-fee-scam-message/">Crypto Withdrawal Fee Scam Message</a></li>
 <li><a href="/scam-check-now-c/crypto-doubling-money-scam-email/">Crypto Doubling Money Scam Email</a></li>
 <li><a href="/scam-check-now-c/crypto-signal-group-scam-message/">Crypto Signal Group Scam Message</a></li>
 <li><a href="/scam-check-now-c/fake-crypto-support-message-scam/">Fake Crypto Support Message Scam</a></li>
 <li><a href="/scam-check-now-c/crypto-investment-alert-email-fake/">Crypto Investment Alert Email Fake</a></li>
-<li><a href="/scam-check-now-c/crypto-profit-message-scam/">Crypto Profit Message Scam</a></li>
-<li><a href="/scam-check-now-c/gift-card-scam-message-warning/">Gift Card Scam Message Warning</a></li>
-<li><a href="/scam-check-now-c/itunes-gift-card-request-scam-text/">Itunes Gift Card Request Scam Text</a></li></ul>
+<li><a href="/scam-check-now-c/crypto-profit-message-scam/">Crypto Profit Message Scam</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>Credit Card Verification Email scams are designed to imitate normal account activity like login alerts, verification requests, password resets, or support messages, including things like a login alert email. A common pattern starts when someone receives something that looks routine at first glance. The real goal is often to capture credentials, one-time codes, or identity details before you check the official account directly.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Credit Card Verification Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might receive an email that looks surprisingly legitimate, claiming to be from your bank or a well-known payment processor. The message often includes your name and may even feature the bank’s logo, making it seem authentic. It typically states that there’s an issue with your account that requires immediate attention. The email may contain a link that directs you to a website designed to mimic your bank’s login page, where you’re prompted to enter sensitive information like your credit card number or Social Security number.
+You might have recently received an email that looks like it’s from your bank, asking you to verify your credit card information. The message may include your name and even a logo that seems legitimate, making it easy to overlook the red flags. It often claims there’s been suspicious activity on your account, urging you to click a link to confirm your details. The email might even contain a sense of familiarity, referencing recent transactions or promotions that make it feel more authentic.
 
-This email creates a sense of urgency, suggesting that your account will be suspended or that you’ll miss out on a crucial transaction if you don’t act quickly. The language is often alarming, urging you to verify your information to avoid penalties or to ensure your account remains active. By instilling fear, the scammer manipulates you into bypassing your usual caution, making you more likely to click the link and provide your personal details without thinking twice.
+The urgency in these emails is palpable. They often state that your account will be suspended or that you could face penalties if you don’t act immediately. This pressure can create a sense of panic, pushing you to click the link without thinking twice. The sender may also use phrases like “immediate action required” or “your security is our priority,” which are designed to build trust and make you feel like you’re in a race against time to protect your finances.
 
-Variations of this scam can appear in different forms, such as text messages or phone calls. You might receive a text alerting you to suspicious activity on your account, followed by a link that leads to a similar fake website. Some scammers even go so far as to spoof the phone number of your bank, making it seem like a legitimate call. Regardless of the format, the core tactic remains the same: they want your information, and they’ll use any means necessary to get it.
+You might encounter variations of this scam that come in different forms, such as text messages or even phone calls. A text could claim to be from your credit card provider, asking you to verify your account through a link. Alternatively, a caller might impersonate a customer service representative, asking for your details to “help you resolve an issue.” Each version plays on the same tactics of urgency and trust, making it easy to fall for their schemes, especially when they seem to come from a recognizable source.
 
-If you fall for this scam, the consequences can be severe. Your financial information could be compromised, leading to unauthorized charges or identity theft. Once the scammers have your details, they can drain your accounts or open new credit lines in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the realization that you’ve been deceived can lead to anxiety and mistrust in future transactions. It’s crucial to remain vigilant and skeptical of any unsolicited requests for your personal information.
+If you do end up providing your information, the consequences can be severe. Scammers can use your credit card details to make unauthorized purchases, leading to financial loss and potential damage to your credit score. You may find yourself dealing with fraudulent charges, lengthy disputes, and the hassle of trying to reclaim your funds. This kind of breach can also expose you to identity theft, leaving you vulnerable long after the initial scam. It’s a situation that can spiral quickly, affecting not just your finances but your peace of mind as well.
 <p>Account-security scams connected to Credit Card Verification Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ If you fall for this scam, the consequences can be severe. Your financial inform
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/crypto-profit-guarantee-email-scam/">Crypto Profit Guarantee Email Scam</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/crypto-investment-message-scam/">Crypto Investment Message Scam</a></li>
+<li><a href="/scam-check-now-c/bitcoin-investment-opportunity-scam-text/">Bitcoin Investment Opportunity Scam Text</a></li>
+<li><a href="/scam-check-now-c/crypto-profit-guarantee-email-scam/">Crypto Profit Guarantee Email Scam</a></li>
 <li><a href="/scam-check-now-c/fake-trading-platform-message-scam/">Fake Trading Platform Message Scam</a></li>
 <li><a href="/scam-check-now-c/crypto-withdrawal-fee-scam-message/">Crypto Withdrawal Fee Scam Message</a></li>
 <li><a href="/scam-check-now-c/crypto-doubling-money-scam-email/">Crypto Doubling Money Scam Email</a></li>
 <li><a href="/scam-check-now-c/crypto-signal-group-scam-message/">Crypto Signal Group Scam Message</a></li>
 <li><a href="/scam-check-now-c/fake-crypto-support-message-scam/">Fake Crypto Support Message Scam</a></li>
 <li><a href="/scam-check-now-c/crypto-investment-alert-email-fake/">Crypto Investment Alert Email Fake</a></li>
-<li><a href="/scam-check-now-c/crypto-profit-message-scam/">Crypto Profit Message Scam</a></li>
-<li><a href="/scam-check-now-c/gift-card-scam-message-warning/">Gift Card Scam Message Warning</a></li>
-<li><a href="/scam-check-now-c/itunes-gift-card-request-scam-text/">Itunes Gift Card Request Scam Text</a></li></ul>
+<li><a href="/scam-check-now-c/crypto-profit-message-scam/">Crypto Profit Message Scam</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

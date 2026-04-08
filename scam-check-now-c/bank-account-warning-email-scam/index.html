@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>Bank Account Warning Email scams are designed to look believable at first glance. Messages like a Zelle transfer problem message often arrive as ordinary alerts, emails, or requests. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. The real goal is to create pressure and get you to act before you stop to verify the details.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Bank Account Warning Email scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email that looks like it’s from your bank, complete with their logo and official colors. The subject line could read something alarming like “Immediate Action Required: Your Account is at Risk!” Inside, the message may claim that suspicious activity has been detected on your account, urging you to click on a link to verify your information. The email might even include a sense of familiarity, addressing you by name, which can make it feel more legitimate and personal.
+You might have recently received an email that looks like it’s from your bank, complete with their logo and a professional tone. It tells you that there’s been suspicious activity on your account and urges you to click a link to verify your identity. The email may even include a sense of urgency, stating that your account will be locked if you don’t act immediately. It feels legitimate, and the fear of losing access to your funds can be overwhelming, making it hard to think clearly about the situation.
 
-The urgency in these emails is palpable. They often create a sense of panic, suggesting that if you don’t act immediately, your account could be frozen or compromised. You might feel pressured to click the link without thinking, believing that you need to protect your hard-earned money. The language is crafted to provoke a quick response, making it easy to overlook any signs that the email isn’t genuine.
+The message often creates a sense of panic, suggesting that your account is at risk and that you need to respond right away. This pressure can cloud your judgment, pushing you to act quickly without fully considering the implications. The email might also include a phone number to call for assistance, making it seem even more trustworthy. The combination of urgency and authority can lead you to believe that this is a genuine warning from your bank, making it easy to overlook the red flags.
 
-Variations of this scam can be quite deceptive. You might encounter a text message that mimics your bank's communication style, or a phone call from someone claiming to be a bank representative, asking for your personal details. Some emails might even include fake customer service numbers or links to websites that look almost identical to your bank's official site. Each version is designed to exploit your trust and urgency, making it difficult to spot the red flags.
+Variations of this scam can appear in different forms, such as text messages or even automated phone calls. You might receive a text that says your account has been compromised and provides a link to “secure” your information. Some scams may even come as fake notifications from banking apps, designed to look like alerts you’re accustomed to receiving. Each version aims to exploit your trust in your financial institution, making it difficult to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. If you provide your personal information, you could find your bank account drained or your identity stolen. Scammers can use your details to open new accounts in your name, leading to financial chaos and a long, arduous process to reclaim your identity. The emotional toll can be just as damaging, leaving you feeling violated and vulnerable. It’s crucial to remain vigilant and question any communication that demands immediate action regarding your finances.
+Falling for this scam can have serious consequences. If you provide your personal information, you risk having your bank account drained or your identity stolen. Scammers can use your details to access your funds, leaving you in a difficult position to recover your losses. The emotional toll can be significant as well, leading to stress and anxiety over your financial security. It’s crucial to remain vigilant and question any unexpected communications regarding your bank account.
 <p>The strongest clue is usually not one isolated detail. With Bank Account Warning Email, the risk often becomes clearer when something like a Zelle transfer problem message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1485,16 +1485,16 @@ Falling for this scam can have serious consequences. If you provide your persona
 
     <div class="link-section" id="relatedLinksWrap">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/crypto-profit-guarantee-email-scam/">Crypto Profit Guarantee Email Scam</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now-c/crypto-investment-message-scam/">Crypto Investment Message Scam</a></li>
+<li><a href="/scam-check-now-c/bitcoin-investment-opportunity-scam-text/">Bitcoin Investment Opportunity Scam Text</a></li>
+<li><a href="/scam-check-now-c/crypto-profit-guarantee-email-scam/">Crypto Profit Guarantee Email Scam</a></li>
 <li><a href="/scam-check-now-c/fake-trading-platform-message-scam/">Fake Trading Platform Message Scam</a></li>
 <li><a href="/scam-check-now-c/crypto-withdrawal-fee-scam-message/">Crypto Withdrawal Fee Scam Message</a></li>
 <li><a href="/scam-check-now-c/crypto-doubling-money-scam-email/">Crypto Doubling Money Scam Email</a></li>
 <li><a href="/scam-check-now-c/crypto-signal-group-scam-message/">Crypto Signal Group Scam Message</a></li>
 <li><a href="/scam-check-now-c/fake-crypto-support-message-scam/">Fake Crypto Support Message Scam</a></li>
 <li><a href="/scam-check-now-c/crypto-investment-alert-email-fake/">Crypto Investment Alert Email Fake</a></li>
-<li><a href="/scam-check-now-c/crypto-profit-message-scam/">Crypto Profit Message Scam</a></li>
-<li><a href="/scam-check-now-c/gift-card-scam-message-warning/">Gift Card Scam Message Warning</a></li>
-<li><a href="/scam-check-now-c/itunes-gift-card-request-scam-text/">Itunes Gift Card Request Scam Text</a></li></ul>
+<li><a href="/scam-check-now-c/crypto-profit-message-scam/">Crypto Profit Message Scam</a></li></ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
