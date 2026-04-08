@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>This Renewal Email Real or Phishing is a common question when something like a suspicious sign-in link feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>Many This Renewal Email Real or Phishing scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a suspicious sign-in link. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You just received an email that looks like it’s from your internet service provider, complete with their logo and a subject line that reads, “Your subscription is about to expire.” The message urges you to click a link to renew your service immediately, warning that failure to do so will result in a disruption of your service. The email includes what appears to be your account number and even a customer service phone number, making it seem legitimate. Everything looks professional, but something feels off.
+You might have received an email that looks like it’s from a well-known service provider, claiming that your subscription is about to expire. The message often includes your name, a familiar logo, and urgent language urging you to click a link to renew your account. The email may even mention a specific amount that will be charged if you don’t act quickly. It feels legitimate, but the pressure to respond immediately can make you hesitate, especially if you’re unsure whether you actually signed up for that service in the first place.
 
-The urgency in the email is palpable. It creates a sense of panic, suggesting that you could lose access to your internet service if you don’t act right away. The sender claims that this is a final notice, and they emphasize that the renewal process is quick and easy if you just click the link provided. This pressure can make you feel like you have no choice but to respond immediately, pushing you to overlook any red flags that might indicate it’s a scam.
+The scam often plays on your emotions, creating a sense of urgency that compels you to act without thinking. You might see phrases like “Your account will be suspended” or “Immediate action required” that push you to click the link before you have a chance to verify the sender. This tactic is designed to make you feel like you’re on the verge of losing something important, which can cloud your judgment and lead you to overlook the signs that something isn’t right.
 
-You might encounter variations of this scam that target different services, such as your streaming subscription or even your online banking account. Some emails may come with slightly altered logos or different sender addresses, but they all share a similar structure: a sense of urgency, a call to action, and a promise of immediate resolution. You could even receive a text message with a similar tone, directing you to a website that looks almost identical to the real one, making it harder to distinguish fact from fiction.
+These phishing emails can come in various forms, mimicking everything from subscription renewals to billing notifications. You might see a message that looks like it’s from your internet provider, a streaming service, or even a popular online retailer. Sometimes, they even include fake customer service numbers that lead you to a scammer who sounds convincing. Each version is crafted to fit the context of your recent online activity, making it harder to distinguish between a real message and a fraudulent one.
 
-If you fall for this scam, the consequences can be severe. Clicking on the link could lead you to a fraudulent site designed to steal your personal information, including credit card details and passwords. Once your information is compromised, it can be used for identity theft or unauthorized transactions, leaving you to deal with the aftermath. The emotional and financial toll can be significant, and recovering from such a breach can take time and effort you never anticipated having to expend.
+Falling for this type of scam can have serious consequences. If you click the link and enter your payment information, you could be handing over your financial details to criminals. This might lead to unauthorized charges on your accounts or even identity theft. Once they have your information, it can take months to recover, and the emotional toll can be overwhelming. It’s crucial to take a moment to verify the source before taking any action, as the ramifications of a hasty decision can be significant.
 <p>Phishing-related scams connected to This Renewal Email Real or Phishing often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a suspicious sign-in link is used to build trust.</p>
 </div>
 
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>This Payment Alert is a common question when something like a suspicious link feels suspicious. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common This Payment Alert flow starts with something like a suspicious link, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You just received a payment alert that looks official, complete with your bank’s logo and a message saying there’s an issue with your account. The email or text urges you to click a link to verify your information immediately. The language is formal, and it even includes a customer service number that seems legitimate. Everything about it feels real, from the formatting to the urgency in the message. You might even notice that it addresses you by name, which adds to the authenticity and makes you think it’s a genuine communication from your bank.
+You just received a payment alert that seems to come from your bank, complete with their logo and a professional-looking layout. The message states that there’s been suspicious activity on your account, and it urges you to click a link to verify your information. The urgency in the tone is palpable, suggesting that your account could be frozen if you don’t act immediately. You might even notice that the email or text contains your name, making it feel more legitimate and personal.
 
-The message creates a sense of urgency, suggesting that your account could be locked if you don’t act quickly. You feel a pang of anxiety, fearing that you might lose access to your funds or that your financial security is at risk. The sender might even mention recent suspicious activity to heighten your concern, making you feel like you need to resolve this issue immediately. This pressure can cloud your judgment, pushing you to act without thinking things through, especially when it seems like your money is on the line.
+The message creates an immediate sense of urgency, making you feel like you need to respond quickly to avoid potential financial loss. It may mention that your account will be locked or that a payment is pending, which adds to the pressure. These tactics are designed to bypass your usual skepticism and push you into a hasty decision. You might find yourself thinking, “I can’t risk losing access to my funds,” which is exactly what the scammer wants.
 
-Variations of this scam can come through different channels, such as a phone call claiming to be from your bank’s fraud department. The caller might provide details about your account to make you feel secure, then ask for your personal information to “verify” your identity. You might also see similar messages appearing in social media ads or even on websites that mimic your bank’s site. Each version is crafted to look convincing, often using logos and language that make them seem credible, which can easily mislead you.
+You might also see variations of this scam, such as a text message claiming to be from a delivery service, stating that there’s an issue with your package that requires immediate attention. Alternatively, it could come as a phone call from someone claiming to be a customer service representative, asking you to confirm your payment details. Each variation plays on your fears and trust, often using familiar logos and language to create a false sense of security.
 
-If you fall for this scam, the consequences can be severe. Providing your personal information can lead to unauthorized transactions, identity theft, or even drained bank accounts. Once the scammers have your details, they can exploit your trust in ways that are difficult to recover from. You might find yourself dealing with financial losses, a damaged credit score, and the stress of trying to reclaim your identity. The emotional toll can be just as damaging, leaving you feeling vulnerable and wary of future communications.
+If you fall for this scam, the consequences can be severe. You might unknowingly provide your banking details, leading to unauthorized transactions or identity theft. Even if you think you’re just verifying a payment, you could end up giving scammers access to your entire financial life. The aftermath can leave you feeling violated and financially vulnerable, as recovering from such breaches often proves to be a long and painful process.
 <p>This is why step-by-step checking matters. Once a message related to This Payment Alert moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

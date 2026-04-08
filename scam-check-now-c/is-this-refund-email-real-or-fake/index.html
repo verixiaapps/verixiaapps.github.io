@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>This Refund Email Real or Fake is a common question when something like a suspicious message feels suspicious. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You open your inbox and see an email that claims you have a refund waiting for you. The sender's address looks legitimate at first glance, and the subject line reads, “Your Refund is Ready!” Inside, the message details a recent purchase and instructs you to click a link to claim your refund. The email is designed to mimic the style of a well-known retailer, complete with logos and formatting that seem authentic. It feels familiar, like something you might have seen before, making it easy to overlook the subtle signs that something isn’t quite right.
+You open your inbox and see an email with a subject line that reads, "Your Refund Request Has Been Processed." The sender appears legitimate, possibly even a company you’ve interacted with before. The email is polished, complete with their logo, and contains a link that claims to direct you to your account for further details. As you read through the message, it mentions a refund amount that seems just right, and it urges you to act quickly to claim your funds. You might feel a mix of curiosity and concern, wondering if this is a genuine opportunity or something more sinister.
 
-As you read through the email, a sense of urgency washes over you. The message states that you must act quickly to secure your refund, or it will be forfeited. Phrases like “limited time offer” and “immediate action required” create a pressure cooker environment, pushing you to click the link without taking a moment to think. This tactic is effective because it plays on your emotions, making you feel anxious about losing money you believe is rightfully yours. The more you read, the more convincing it becomes, almost as if it’s tailored just for you.
+The email creates a sense of urgency, suggesting that the refund will expire if you don’t respond within a specific timeframe. Phrases like "act now" or "limited time offer" are designed to push you into making a quick decision without thinking it through. The sender may even include a friendly tone, addressing you by name and referencing past transactions to build a sense of trust. This combination of urgency and familiarity can make it difficult to pause and question the authenticity of the message.
 
-You might also encounter variations of this scam. Sometimes, the email may come from a different sender, or it could be a text message that appears to come from your bank, promising a refund for a service you never used. In other cases, the message may include a fake customer service number, urging you to call for assistance. Each variation is crafted to exploit your trust in familiar brands or institutions, making it harder to spot the deception. The details may change, but the core strategy remains the same: to trick you into acting impulsively.
+You might also encounter variations of this scam, such as text messages or phone calls that mimic the same style. A text could pop up on your phone, claiming that your account has been flagged for a refund, with a link to click for more information. Alternatively, a phone call might come from someone posing as a customer service representative, asking for your personal details to process your refund. Each version is crafted to look convincing, making it easy to overlook red flags.
 
-Falling for this scam can have serious consequences. Once you click the link, you might be directed to a fake website designed to capture your personal information, such as your credit card details or login credentials. Even if you don’t provide sensitive information, malware could be installed on your device, compromising your security. The aftermath can leave you not only financially vulnerable but also dealing with the stress of identity theft or financial loss. It’s a situation that can spiral quickly, turning what seemed like a simple refund into a nightmare.
+Falling for this scam can lead to serious consequences. If you click the link, you might be directed to a fake website designed to steal your personal information or financial details. Even worse, you could unknowingly download malware onto your device, compromising your security. The aftermath can leave you not only without the promised refund but also vulnerable to identity theft and financial loss. It's a situation that can escalate quickly, leaving you feeling violated and anxious about your online safety.
 <p>That difference matters because a real notice related to This Refund Email Real or Fake should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

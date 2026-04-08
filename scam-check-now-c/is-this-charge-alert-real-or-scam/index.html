@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>This Charge Alert is a common question when something like a suspicious link feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many This Charge Alert situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You just received a text message that reads, “Your account has been charged $299 for a subscription you didn’t authorize. Click here to dispute the charge.” The link takes you to a website that looks almost identical to your bank’s official site, complete with logos and familiar colors. The message feels urgent, and you can’t help but wonder if someone has accessed your account without your permission. It’s unsettling, and you might find yourself questioning whether this alert is legitimate or just another scam trying to trick you.
+You just received a charge alert on your phone that claims a large transaction was made on your account. The message looks official, complete with your bank's logo and a customer service number. It urges you to click a link to verify the transaction, warning that your account may be compromised if you don’t act quickly. The urgency in the message is palpable, making it hard to ignore. You might feel a rush of anxiety, wondering if someone has accessed your finances without your permission.
 
-The message creates an immediate sense of urgency, making you feel like you need to act fast. It suggests that your hard-earned money is at risk, and if you don’t respond quickly, you could lose it. This pressure can cloud your judgment, pushing you to click the link without thinking twice. The scammer’s goal is to build trust by mimicking your bank’s communication style, making it seem like they are genuinely trying to help you resolve a problem. You might feel a mix of anxiety and determination to protect your finances, which is precisely what they want.
+This kind of alert is designed to create a sense of panic and urgency. The message may mention that your account will be frozen or that you could face hefty fees if you don’t respond immediately. By instilling fear, the scammer aims to push you into a hasty decision. You might find yourself clicking the link without thinking, driven by the need to protect your hard-earned money. The familiarity of the branding and the professional tone can make it feel like a legitimate communication, further lowering your guard.
 
-You might also see variations of this scam in your email inbox, where a similar message claims to be from a well-known retailer, stating that your recent purchase could not be processed due to a billing issue. The email includes a link to “update your payment information,” leading you to a site that looks legitimate but is actually designed to steal your personal details. Sometimes, these scams even come as phone calls, where a friendly voice claims to be from your bank, asking you to verify your account information to prevent unauthorized charges. Each version is crafted to exploit your trust and concern.
+You might also encounter variations of this scam, such as a phone call from someone claiming to be a bank representative, or an email that looks like it’s from your financial institution. Each version may use slightly different language or tactics, but the core message remains the same: there’s a problem with your account that requires your immediate attention. Sometimes, the scam may even involve fake websites that mimic your bank’s official site, making it even more challenging to discern what’s real.
 
-Falling for this scam can lead to serious consequences. If you enter your information on the fraudulent site, the scammer gains access to your financial details, potentially draining your bank account or racking up charges on your credit card. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Once your information is compromised, recovering from the fallout can take time, effort, and sometimes even legal action. It’s a reminder that in moments of panic, it’s crucial to take a step back and verify before acting.
+Falling for this type of scam can have serious consequences. If you provide your personal information or log into a fraudulent website, you risk losing access to your bank account and exposing yourself to identity theft. Scammers can drain your funds or rack up charges in your name, leaving you to deal with the aftermath. The emotional toll can be significant, as you grapple with the violation of your trust and the financial repercussions that follow. It’s crucial to remain vigilant and question any unexpected alerts regarding your finances.
 <p>Scams connected to This Charge Alert often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

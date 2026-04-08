@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>This Service Message is a common question when something like a suspicious link feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many This Service Message situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You open your email to find a message that looks official, complete with a company logo and a professional tone. It claims there’s an urgent issue with your account, and you need to click a link to verify your information. The email might even address you by name, making it feel personal and legitimate. Or perhaps you receive a text message that says your package is delayed, and you need to confirm your address to avoid further delays. Everything seems to check out at first glance, but something feels off.
+You open your email to find a message that looks official, perhaps from a well-known company or a service you’ve recently used. The subject line grabs your attention: “Action Required: Verify Your Account Now!” Inside, the email claims there’s been suspicious activity on your account, urging you to click a link to secure your information. The logo looks authentic, and the language is professional, making it easy to overlook the red flags. You might even receive a text that mimics your bank’s phone number, asking you to confirm your identity immediately. 
 
-The message is designed to create a sense of urgency, pushing you to act quickly without thinking. It might say that your account will be suspended if you don’t respond within 24 hours, or that your package will be returned if you don’t verify your address immediately. This pressure can make you feel anxious, prompting you to click the link or provide your information without taking a moment to consider the risks. The polished presentation and the urgency can easily lead you to trust the message, even if it’s not from a legitimate source.
+The urgency in the message is palpable. It tells you that failure to act could lead to account suspension or financial loss. This pressure can make you feel anxious, prompting you to respond quickly without thinking. The sender may even include a reassuring statement about their commitment to your security, which can create a false sense of trust. You might find yourself racing against the clock, convinced that you need to act fast to protect your assets, which is exactly what the scammer wants.
 
-You might encounter variations of this scam that look slightly different but carry the same deceptive intent. For instance, instead of an email, you could receive a phone call from someone claiming to be from your bank, asking for your account details to resolve a supposed security issue. Or you might see a pop-up on a website that claims your computer is infected and offers a “free scan” that ultimately leads to malware. Each version is crafted to exploit your trust and urgency, making it harder to spot the red flags.
+Variations of this scam can come in many forms, each designed to catch you off guard. You might receive a phone call claiming to be from tech support, saying they need to fix a problem with your device. Alternatively, a fake website may pop up that looks just like a legitimate service, offering enticing deals or urgent notifications. Each version plays on your emotions, whether it’s fear, curiosity, or the desire for a good deal, making it hard to discern what’s real.
 
-Falling for one of these scams can lead to serious consequences. If you provide your personal information, you risk identity theft, which can take years to resolve. Your financial accounts could be drained, or your credit could be damaged, leaving you with a long and difficult road to recovery. Even if you think you’re just verifying a simple detail, the implications can be far-reaching, affecting your finances and peace of mind. It’s crucial to take a step back and assess the situation before acting on any unexpected messages.
+Falling for one of these scams can lead to serious consequences. You could unknowingly provide your personal information, allowing scammers to access your accounts or steal your identity. Financial loss is often just the beginning; the emotional toll can be significant, leaving you feeling violated and anxious. Once your information is compromised, recovering from the aftermath can be a long and painful process, making it crucial to stay vigilant and question the authenticity of unexpected messages.
 <p>Scams connected to This Service Message often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

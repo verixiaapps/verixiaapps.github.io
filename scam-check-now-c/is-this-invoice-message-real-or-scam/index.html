@@ -1461,13 +1461,13 @@ body{padding-top:84px;}
 <p>This Invoice Message is a common question when something like a Zelle transfer problem message feels suspicious. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common This Invoice Message scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You open your email to find an invoice that looks legitimate at first glance. It has your name, a company logo, and a detailed breakdown of services rendered. The sender claims to be a trusted vendor you’ve worked with before, and the subject line reads, “Immediate Action Required: Invoice Due.” The message urges you to review the attached document and make a payment within 48 hours to avoid late fees. Everything seems in order, but something feels off, and you can’t shake the nagging doubt that this might not be what it appears.
+You open your email to find an invoice that seems to come from a familiar vendor, complete with their logo and a detailed breakdown of services rendered. The message is professionally written, and the subject line reads, “Your Invoice is Ready for Review.” As you scroll through, you notice the total amount due is significant, and there’s a link to view the invoice online. The sender’s email address looks legitimate at first glance, but something about it feels off. You’re left wondering if this is a genuine request or a clever ruse designed to trick you.
 
-The urgency in the message is palpable. Phrases like “act now” and “limited time offer” create a sense of panic, pushing you to make quick decisions without fully assessing the situation. The sender may even include a phone number, encouraging you to call if you have questions, which can further build trust. You might feel compelled to pay the invoice immediately to avoid any negative consequences, especially if you’re busy and don’t want to deal with potential fallout later.
+The urgency in the message is palpable. It states that payment is due within 24 hours to avoid late fees, and it even mentions that failure to pay could lead to service interruptions. This pressure makes you feel like you need to act quickly, and the fear of missing out on critical services can cloud your judgment. The tone is friendly yet authoritative, making it easy to trust the sender, especially if they seem to know your business. You might even feel a pang of anxiety, thinking about the consequences of ignoring such an important message.
 
-You might encounter variations of this scam that look slightly different but carry the same deceptive tactics. For instance, you could receive a text message with a link to a fake invoice or a phone call from someone claiming to be from your finance department, asking for payment details. Some scammers even create fake websites that mimic real companies, complete with customer testimonials and fake contact information. Each version is designed to catch you off guard, making it harder to spot the red flags.
+Scammers are adept at mimicking legitimate businesses, so you might see variations of this invoice scam. One might come as a text message with a link to a fake payment portal, while another could arrive as a phone call from someone claiming to be from your accounting department, asking for immediate payment. Some might even use social media to reach you, sending direct messages that appear to be from a trusted source. Each variation is designed to exploit your trust and create confusion, making it harder to discern what’s real.
 
-Falling for this kind of scam can lead to serious financial repercussions. If you pay the invoice, you may find that your money has vanished, leaving you without the goods or services you thought you were purchasing. Worse yet, you could inadvertently provide sensitive information, like your bank details or credit card numbers, which can lead to identity theft or further financial loss. The aftermath can be stressful and time-consuming, as you scramble to recover your funds and secure your accounts.
+Falling for this scam can have serious repercussions. If you click the link and enter your payment information, you might find your bank account drained or your personal data compromised. Even if the invoice seems legitimate, paying it could mean you’re funding a criminal operation, leaving you vulnerable to further scams. The aftermath can be stressful, as you scramble to recover lost funds and secure your accounts. This isn’t just about a single invoice; it’s about protecting yourself from a web of deceit that could impact your financial security and peace of mind.
 <p>The strongest clue is usually not one isolated detail. With This Invoice Message, the risk often becomes clearer when something like a Zelle transfer problem message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2679,12 +2679,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2726,7 +2729,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3287,4 +3290,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
