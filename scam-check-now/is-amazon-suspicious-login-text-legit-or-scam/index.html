@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Amazon Suspicious Login Text is a common question when something like a password reset message appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Amazon Suspicious Login Text flow starts with something like a password reset message, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received a text claiming that there’s been a suspicious login attempt on your Amazon account. The message may look official, complete with Amazon’s logo and a link urging you to verify your account. It often includes details that make it seem legitimate, like the last four digits of your credit card or a mention of your recent orders. The urgency in the message can catch you off guard, making it feel like you need to act quickly to protect your account.
+You might have recently received a text that claims to be from Amazon, alerting you about a suspicious login attempt on your account. The message may look official, complete with Amazon's logo and a sense of urgency, urging you to click a link to secure your account. It could mention specific details like the location of the login attempt or the device used, making it seem even more credible. This kind of communication can catch you off guard, especially when it appears to come from a trusted source like Amazon.
 
-The text typically creates a sense of immediate danger, suggesting that your account is at risk of being compromised. It might say something like, “Your account will be locked in 24 hours if you don’t respond.” This kind of pressure can lead you to click the link without thinking, as you want to ensure your account remains secure. The familiarity of the brand and the alarming tone can easily trick you into believing that this is a genuine alert from Amazon.
+The urgency in these messages is often overwhelming. They create a sense of panic, suggesting that your account is at risk and immediate action is required. You might feel compelled to click the link without thinking, driven by the fear of losing access to your account or having your personal information compromised. This pressure can cloud your judgment, leading you to act quickly rather than taking a moment to verify the authenticity of the message.
 
-You may also encounter variations of this scam, such as emails that appear to be from Amazon’s customer service or phone calls from someone claiming to be a representative. Some messages might offer a reward for completing a survey or ask you to confirm your identity by providing personal information. Each version aims to exploit your trust in Amazon, making it increasingly difficult to discern what’s real and what’s not.
+Variations of this scam can be quite deceptive. You might see similar texts claiming to be from other well-known companies, or they could come in the form of emails that look like official communications. Some might even use different tactics, like offering a reward for reporting suspicious activity or claiming that your order is on hold until you verify your information. Regardless of the format, they all share the same goal: to trick you into providing sensitive information or clicking on harmful links.
 
-Falling for this scam can have serious consequences. If you click the link and enter your information, you could unwittingly hand over your login credentials to cybercriminals. This can lead to unauthorized purchases, identity theft, and a long, frustrating process to reclaim your account. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your online security. It’s crucial to be vigilant and question any unexpected messages, especially when they involve your personal information.
+Falling for this scam can have serious consequences. If you provide your login credentials or personal information, you risk giving scammers access to your Amazon account and potentially other accounts linked to it. They could make unauthorized purchases, steal your payment information, or even use your identity for further fraudulent activities. The aftermath can be a long and stressful process of reclaiming your accounts and dealing with financial losses, making it crucial to stay alert and skeptical of unexpected messages.
 <p>This is why step-by-step checking matters. Once a message related to Amazon Suspicious Login Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1377,16 +1377,16 @@ Falling for this scam can have serious consequences. If you click the link and e
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-amazon-suspicious-order-email-legit-or-scam/">Is Amazon Suspicious Order Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-amazon-verification-code-text-legit-or-scam/">Is Amazon Verification Code Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-amazon-suspicious-refund-activity-email-legit-or-scam/">Is Amazon Suspicious Refund Activity Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/amazon-phishing-refund-email/">Is Amazon Phishing Refund Email a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/amazon-phishing-refund-email/">Is Amazon Phishing Refund Email a Scam?</a></li>
 <li><a href="/scam-check-now/amazon-refund-scam-email/">Is Amazon Refund Scam Email a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-flagged-email-legit-or-scam/">Is Amazon Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-locked-email-legit-or-scam/">Is Amazon Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-reinstatement-email-legit-or-scam/">Is Amazon Account Reinstatement Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-suspension-email-legit-or-scam/">Is Amazon Account Suspension Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-update-email-legit-or-scam/">Is Amazon Account Update Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-amazon-account-verification-email-legit-or-scam/">Is Amazon Account Verification Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-amazon-account-warning-email-legit-or-scam/">Is Amazon Account Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-amazon-billing-issue-email-legit-or-scam/">Is Amazon Billing Issue Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

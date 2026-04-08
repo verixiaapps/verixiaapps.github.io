@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Amazon Suspicious Refund Activity Email is a common question when something like a PayPal refund email feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Amazon Suspicious Refund Activity Email scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have received an email that looks like it’s from Amazon, claiming there’s suspicious activity regarding a refund on your account. The message often includes details like a recent order number, a refund amount, and a link to verify your account. It may even have Amazon’s logo and a professional layout, making it seem legitimate. The email might urge you to click a link to confirm your identity or to review the refund, creating a sense of familiarity that can easily trick you into thinking it’s real.
+You receive an email that appears to be from Amazon, claiming there’s suspicious activity related to a refund on your account. The message is professionally formatted, complete with the Amazon logo, and it includes your name and a reference to a recent purchase. It urges you to click a link to verify your account details or to confirm that you did not request this refund. The email might even mention a specific amount, making it feel personal and urgent, as if your account is at risk of being compromised.
 
-The urgency in these emails is palpable. They often state that immediate action is required to prevent your account from being suspended or to secure your funds. Phrases like “act now” or “your account is at risk” are common, designed to provoke a quick response without giving you time to think. This pressure can lead you to click on links or provide personal information without considering the potential consequences, making it easy to overlook red flags.
+The email creates a sense of urgency, suggesting that immediate action is required to protect your account. Phrases like “your account will be suspended” or “failure to respond may result in loss of access” are designed to provoke anxiety. This pressure can push you to act quickly without thinking, leading you to click the link and enter your personal information, believing you are safeguarding your account. The polished presentation and use of familiar branding can easily build a false sense of trust.
 
-You might see variations of this scam that include fake phone calls or text messages, all mimicking Amazon’s communication style. Some messages might claim your account has been compromised, while others may offer an enticing deal that requires you to act fast. The common thread is the use of familiar branding and language that makes it hard to distinguish between what’s real and what’s not. Each variation is crafted to exploit your trust in Amazon, making it all the more convincing.
+You might also encounter variations of this scam, such as text messages or phone calls that mimic the same urgency. A text might say, “Your refund is pending—click here to confirm,” or a call could come from a number that looks legitimate. The language may vary, but the underlying tactic remains the same: to instill fear and prompt you to take action without verifying the source. Each version is crafted to exploit your trust in Amazon, making it all the more convincing.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information, scammers can gain access to your Amazon account, potentially leading to unauthorized purchases or identity theft. Even if you think you’re just verifying a refund, you may inadvertently give away sensitive details that can be used against you. The aftermath can be stressful and time-consuming as you work to regain control of your accounts and deal with the fallout from the breach.
+If you fall for this scam, the consequences can be severe. By providing your personal information, you risk identity theft, unauthorized purchases, or even having your account drained. Scammers can use your details to access other accounts or sell your information on the dark web. The emotional toll of realizing you’ve been deceived can be just as damaging, leaving you feeling vulnerable and exposed. Protecting yourself begins with recognizing these tactics and taking a moment to verify before acting.
 <p>The strongest clue is usually not one isolated detail. With Amazon Suspicious Refund Activity Email, the risk often becomes clearer when something like a PayPal refund email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1378,15 +1378,15 @@ Falling for this scam can lead to serious consequences. If you provide your pers
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-amazon-refund-email-legit-or-scam/">Is Amazon Refund Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-amazon-refund-link-message-legit-or-scam/">Is Amazon Refund Link Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-refund-message-real-or-fake/">Is Amazon Refund Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-amazon-refund-message-legit-or-scam/">Is Amazon Refund Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-suspicious-activity-text-legit-or-scam/">Is Amazon Suspicious Activity Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-suspicious-order-email-legit-or-scam/">Is Amazon Suspicious Order Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-amazon-unusual-activity-email-legit-or-scam/">Is Amazon Unusual Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-access-denied-email-legit-or-scam/">Is Amazon Account Access Denied Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-sign-in-alert-email-legit-or-scam/">Is Amazon Sign in Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-amazon-account-flagged-email-legit-or-scam/">Is Amazon Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-account-locked-email-legit-or-scam/">Is Amazon Account Locked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-amazon-account-reinstatement-email-legit-or-scam/">Is Amazon Account Reinstatement Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
