@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>PayPal Verification Message is a common question when something like a bank fraud alert text feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common PayPal Verification Message scenario starts with something like a bank fraud alert text, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have received a message claiming to be from PayPal, asking you to verify your account. It could look like an official email or a text, complete with the PayPal logo and a link that seems to direct you to their website. The message often contains phrases like “urgent action required” or “your account will be limited unless you verify now.” It feels real, and the design mimics what you’d expect from a legitimate PayPal communication, making it easy to overlook any red flags.
+You might have recently received an email or text claiming to be from PayPal, asking you to verify your account. The message often includes a sense of urgency, stating that your account will be suspended unless you click a link and provide your personal information. The email may look official, complete with the PayPal logo and a professional layout, making it easy to mistake for a legitimate communication. You might find yourself questioning whether this is a real request or just another scam trying to exploit your trust.
 
-The urgency in these messages is palpable. They often play on your fear of losing access to your funds or facing account restrictions. You might feel pressured to act quickly, convinced that if you don’t respond immediately, you could lose your money or face other consequences. This tactic is designed to bypass your usual caution, making you more likely to click on links or provide personal information without a second thought.
+Scammers know how to create a sense of urgency that can make you act quickly without thinking. The message may threaten immediate consequences, like account suspension or unauthorized transactions, which can trigger your anxiety about losing access to your funds. Alternatively, it might offer a reward or bonus for completing the verification, playing on your desire to maintain a good standing with PayPal. This psychological manipulation is designed to lower your defenses and prompt you to click that link or provide sensitive information.
 
-You may also encounter variations of this scam. Some messages might claim that there’s been suspicious activity on your account, while others could say you need to confirm a recent transaction. The sender’s email address might look similar to PayPal’s, but a closer inspection reveals subtle differences. Each variation is crafted to exploit your trust in PayPal, making it crucial to remain vigilant, as these scams can adapt to current events or trends.
+You may also encounter variations of this scam, such as phone calls from someone claiming to be a PayPal representative. They might ask you to verify your account details over the phone or direct you to a website that looks strikingly similar to the official PayPal site. Some scams even use social media platforms to reach you, sending direct messages that mimic PayPal's branding. Each version is crafted to make you feel comfortable and secure, but they all share the same goal: to steal your information.
 
-Falling for one of these scams can lead to serious consequences. If you provide your login details or personal information, scammers can gain access to your PayPal account and drain your funds. They might also use your information for identity theft, putting your financial security at risk. The emotional toll can be significant, leaving you feeling violated and anxious about your financial safety. It’s essential to stay alert and question any unexpected requests for verification, especially when they come with a sense of urgency.
+If you fall for this scam, the consequences can be severe. Your personal and financial information could be compromised, leading to unauthorized transactions or identity theft. Scammers can drain your PayPal account or use your details to open new accounts in your name, leaving you to deal with the fallout. The emotional toll can be just as damaging, as you may feel violated and anxious about your financial security. It's crucial to be vigilant and question any unexpected requests for verification, especially when they come with a sense of urgency.
 <p>Payment-related scams connected to PayPal Verification Message often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a bank fraud alert text is involved.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
