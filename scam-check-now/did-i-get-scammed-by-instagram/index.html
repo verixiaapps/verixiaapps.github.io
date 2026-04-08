@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram is a common question when something like an unexpected email feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Instagram situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received a message on Instagram that seemed too good to be true, perhaps claiming you’ve won a prize or that someone is interested in your profile. The message might have come from a verified account or someone you follow, making it feel legitimate. It could include links to a website that looks official, asking you to enter personal information or to click on a link to claim your reward. The familiarity of the platform can make it easy to overlook red flags, especially when the message feels tailored just for you.
+You might have received a direct message on Instagram from someone claiming to be a celebrity or a brand you admire, offering you exclusive access to a giveaway or a special promotion. The message often looks official, complete with logos and professional language, making it easy to believe it’s genuine. You might have clicked on a link that led you to a website that closely resembles Instagram, where you were prompted to enter your login credentials or personal information. It feels real, and you might have even noticed friends commenting on similar posts, which adds to the authenticity.
 
-Scammers often create a sense of urgency to prompt quick action. You might feel a rush of excitement or fear, believing that if you don’t respond immediately, you’ll miss out on a fantastic opportunity or risk losing something valuable. They may use phrases like “limited time offer” or “act now to secure your prize,” pushing you to make hasty decisions without fully considering the implications. This pressure can cloud your judgment, making it harder to spot inconsistencies or suspicious elements in the communication.
+The urgency in these messages can be overwhelming. They often state that you must act quickly to claim your prize or that the offer is only available for a limited time. This pressure can cloud your judgment, making you feel like you’re missing out if you don’t respond immediately. The sender may also use flattery, telling you how lucky you are to be chosen, which builds a false sense of trust. You might find yourself thinking that this is a once-in-a-lifetime opportunity, compelling you to take action without fully considering the risks.
 
-You may also encounter variations of this scam, such as fake accounts impersonating popular influencers or brands, offering exclusive deals or collaborations. Sometimes, they might ask you to verify your account by providing your password or other sensitive information. Other times, they could send you a direct message claiming that your account has been compromised and that you need to click a link to secure it. Each variation is designed to exploit your trust in the platform and your desire to engage with others.
+Scammers are clever and often change their tactics to keep you on your toes. You might see variations where the message claims you’ve won a contest you never entered or that your account has been flagged for suspicious activity, prompting you to verify your information. Some scams even involve fake customer support accounts that mimic Instagram’s official channels, making it difficult to discern what’s real. Each variation is designed to exploit your emotions and instincts, leading you to act before you think.
 
-Falling for one of these scams can lead to serious consequences. If you provide personal information, you could find your account hacked, leading to unauthorized transactions or identity theft. Even if you think you’re just entering a contest, you might inadvertently give scammers access to your private data, which they can use for malicious purposes. The emotional toll can also be significant, leaving you feeling embarrassed or violated, especially if you realize that your trust was exploited. It’s crucial to remain vigilant and question any unexpected messages that seem out of place.
+Falling for these scams can have serious consequences. If you provide your personal information or login details, you risk losing access to your account, which could lead to identity theft or financial loss. Scammers can use your information to impersonate you, potentially damaging your reputation and relationships. The emotional toll can be significant, leaving you feeling embarrassed or violated. Recognizing these tactics is crucial to protecting yourself and your online presence.
 <p>Scams connected to Instagram often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like an unexpected email is used as the starting point.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>IRS Message is a common question when something like a tax refund message feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common IRS Message scenario uses fear, urgency, or the promise of money to get a fast response, often through something like a tax refund message. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>
-You receive a message that looks official, claiming to be from the IRS. It might say something like, “Your tax refund is on hold. Please verify your information immediately.” The email or text often includes the IRS logo and may even have a legitimate-looking sender address. If you click a link, it takes you to a website that mimics the IRS site, asking for personal details like your Social Security number or bank account information. Everything seems legitimate, and the pressure to act quickly feels real.
+You might have received a message claiming to be from the IRS, stating that you owe back taxes or that there’s a problem with your tax return. The message may look official, complete with IRS logos and formatting, and could come via email, text, or even a phone call. It might ask you to click a link or call a number to resolve the issue, making it seem urgent and legitimate. The language used is often alarming, suggesting immediate consequences if you don’t act quickly, which can leave you feeling anxious and unsure about your financial situation.
 
-The message creates a sense of urgency, suggesting that you need to respond immediately to avoid penalties or delays in your refund. It plays on your fears of being audited or missing out on money you’re owed. The language is designed to instill panic, making you feel like you have no choice but to comply. You might think, “I can’t risk losing my refund,” which pushes you to act without thinking it through.
+The urgency in these messages is designed to catch you off guard. They often threaten legal action, fines, or even arrest if you don’t respond right away. This pressure can make you feel like you have no choice but to comply, pushing you to provide personal information or make a payment without taking the time to verify the source. The fear of dealing with the IRS can cloud your judgment, making it easier for scammers to manipulate your emotions and prompt hasty decisions.
 
-Variations of this scam can appear in different formats. You might receive a phone call from someone claiming to be an IRS agent, using a fake badge number and threatening legal action if you don’t pay a supposed debt. Alternatively, you could see a pop-up on a website that looks like a government portal, urging you to enter your details to claim a refund. Each version has the same goal: to trick you into giving away your personal information.
+You might also encounter variations of this scam that look slightly different but carry the same deceptive message. For example, some messages may claim to be from a tax preparation service or a government agency that’s not the IRS but still sounds official. Others might come as fake notifications about your tax refund being processed or delayed. Each version aims to exploit your trust in government communications, making it difficult to discern what’s real and what’s not, especially during tax season when you’re already preoccupied.
 
-If you fall for this scam, the consequences can be severe. Your personal information can be used for identity theft, leading to unauthorized charges on your accounts or even tax fraud in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it’s about the long-term impact on your peace of mind and trust in online communications.
+Falling for one of these scams can have serious repercussions. If you provide personal information, you risk identity theft, which can lead to financial loss and a long, complicated process to reclaim your identity. Even if you make a payment, you won’t see that money again, and the scammers will continue to target you. The emotional toll can be significant, leaving you feeling violated and anxious about future communications. Recognizing these scams is crucial to protecting yourself and your finances.
 <p>Government-related scams connected to IRS Message often use the appearance of authority to push fast decisions. That is why it is important to verify any claim directly through the official agency website or number instead of trusting the message on its own, especially when something like a tax refund message is used to create urgency.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Investment Advisor is a common question when something like a suspicious message feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Investment Advisor situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received a message from an investment advisor promising high returns with little risk, perhaps through an email that looks professional or a text that feels personal. They often use familiar logos or even claim to be affiliated with reputable financial institutions. You might recall a phone call where the advisor spoke confidently about a “limited-time opportunity” that guarantees profits, making it seem like a golden chance you can’t afford to miss. The language is persuasive, and the urgency is palpable, making you feel like this could be the breakthrough you’ve been waiting for.
+You might have received a message from an investment advisor promising high returns with minimal risk. Perhaps it came in the form of an email that looked legitimate, complete with a professional logo and a convincing signature. Or maybe it was a text that seemed to come from a trusted source, urging you to act quickly to secure your financial future. The language is often persuasive, filled with phrases like "exclusive opportunity" or "limited time offer," making it hard to resist. You may even recall a phone call where the advisor seemed knowledgeable, speaking confidently about market trends and investment strategies.
 
-The pressure builds as they emphasize that this opportunity is exclusive, and you need to act fast. They may tell you that only a few spots are left or that the offer expires soon, pushing you to make quick decisions without fully understanding the risks involved. Trust is built through flattery or by sharing testimonials from supposed satisfied clients. You may find yourself feeling reassured, thinking that this advisor has your best interests at heart, which makes it even easier to overlook any red flags that might pop up.
+The urgency in these communications is palpable. They often insist that you must act now to take advantage of this once-in-a-lifetime opportunity, playing on your fear of missing out. You might feel a sense of trust, especially if they reference well-known companies or use jargon that sounds familiar. They may even share testimonials or success stories from other clients, making it seem like everyone else is already benefiting from their advice. This pressure can cloud your judgment, pushing you to make hasty decisions without fully understanding the risks involved.
 
-Scammers often tweak their approach to keep you guessing. You might see variations of their pitch through different channels, like a social media ad promising wealth or a text message that looks like it’s from a friend who’s “in the know.” They might even create fake websites that mimic legitimate investment firms, complete with testimonials and success stories that seem credible. Each variation is designed to catch your attention and lower your defenses, making it harder to recognize the signs of deceit.
+Scammers are crafty and often adapt their tactics to appear more convincing. You might see variations where they pose as representatives from reputable financial institutions or even create fake websites that mimic real ones. Some may reach out through social media, claiming to be financial gurus with a track record of success. Others might use sophisticated techniques like fake webinars or online seminars to lure you in, promising insider knowledge that seems too good to pass up. Each variation is designed to exploit your trust and eagerness to grow your wealth.
 
-If you find yourself falling for this, the consequences can be severe. You could lose not just your initial investment but also your trust in legitimate financial advisors. The emotional toll can be just as damaging, leaving you feeling embarrassed or anxious about your financial future. In some cases, scammers may even use your personal information for identity theft, leading to further complications down the line. The danger isn’t just in losing money; it’s in the lasting impact on your financial security and peace of mind.
+Falling for this type of scam can have severe consequences. You may find yourself losing not just your initial investment but also facing ongoing financial difficulties as you try to recover lost funds. The emotional toll can be just as damaging, leaving you feeling embarrassed or ashamed for being deceived. In some cases, scammers may even use your personal information for identity theft, leading to further complications. Recognizing the signs early can help you protect yourself from these dangerous schemes and safeguard your hard-earned money.
 <p>The strongest clue is usually not one isolated detail. With Investment Advisor, the risk often becomes clearer when something like a suspicious message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ If you find yourself falling for this, the consequences can be severe. You could
 <li><a href="/scam-check-now/did-i-get-scammed-by-email-link/">Did I Get Scammed by Email Link?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-fake-invoice/">Did I Get Scammed by Fake Invoice?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-fake-receipt/">Did I Get Scammed by Fake Receipt?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-fake-recruiter/">Did I Get Scammed by Fake Recruiter?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-fake-website/">Did I Get Scammed by Fake Website?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-forex-message/">Did I Get Scammed by Forex Message?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-free-trial/">Did I Get Scammed by Free Trial?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-google-email/">Did I Get Scammed by Google Email?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-hinge-message/">Did I Get Scammed by Hinge Message?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-invoice-email/">Did I Get Scammed by Invoice Email?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-grant-offer/">Did I Get Scammed by Grant Offer?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3097,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
