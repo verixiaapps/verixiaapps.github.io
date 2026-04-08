@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Pnc Bank Security Alert Email is a common question when something like a two-factor code request appears without context. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Pnc Bank Security Alert Email cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be from PNC Bank, warning you about suspicious activity on your account. The message often includes your name and may even feature the bank's logo, making it look official. It typically urges you to click on a link to verify your account details or reset your password. The email may also contain a sense of urgency, stating that your account will be locked if you don’t act immediately. This creates a scenario where you feel compelled to respond quickly without taking the time to think it through.
+You might have recently received an email claiming to be from PNC Bank, alerting you about suspicious activity on your account. The message often features the bank's logo, a professional layout, and a subject line that grabs your attention, such as “Urgent: Security Alert on Your Account.” It may ask you to click a link to verify your identity or confirm recent transactions. This email can look very convincing, making it easy to assume it’s a legitimate communication from your bank.
 
-The urgency in these emails is designed to provoke a quick reaction. You might notice phrases like "immediate action required" or "your account is at risk," which can make you feel anxious about your financial security. This pressure can cloud your judgment, leading you to click on links or provide personal information without considering the consequences. Scammers know that when you’re worried about your money, you’re less likely to scrutinize the details of the message.
+The urgency in these emails is palpable. They often state that your account will be locked or compromised if you don’t act immediately. This pressure can lead you to click on the provided link without thinking twice. The email may also include reassuring phrases about their commitment to your security, which can create a false sense of trust. You may feel compelled to respond quickly, believing that you are protecting your finances.
 
-Variations of this scam can appear in different forms, such as text messages or phone calls. You might receive a text that looks like it’s from PNC Bank, asking you to confirm a transaction you didn’t make. Alternatively, a phone call may come from someone claiming to be a bank representative, asking for your account information to resolve a supposed issue. Each version aims to exploit your trust in the bank, using familiar logos and language to make the communication feel legitimate.
+Scammers frequently tweak these messages to keep them fresh and relevant. You might see variations where the email claims to be from a different financial institution or uses slightly different wording. Some may even come as text messages or phone calls, all designed to mimic the official communication style of PNC Bank. They may reference specific transactions or even include personal information to make the message seem more credible, further blurring the lines between real and fake.
 
-Falling for this kind of scam can have serious repercussions. If you provide your personal information, scammers can gain access to your bank account, leading to unauthorized transactions or identity theft. This not only puts your finances at risk but can also create a long and stressful process to recover your stolen identity and funds. The emotional toll of realizing you’ve been scammed can linger, making it crucial to stay vigilant and question any unexpected communications regarding your bank account.
+Falling for this scam can have serious consequences. If you click on the link and enter your personal information, you could be handing over your banking credentials to criminals. This can lead to unauthorized transactions, identity theft, or even draining your account entirely. The aftermath can be a long and painful process to recover your funds and restore your financial security, leaving you feeling vulnerable and anxious about your future.
 <p>Account-security scams connected to Pnc Bank Security Alert Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a two-factor code request.</p>
 </div>
 
@@ -1463,11 +1463,11 @@ Falling for this kind of scam can have serious repercussions. If you provide you
 <li><a href="/scam-check-now-b/is-bank-of-america-security-alert-email-legit-or-scam/">Is Bank of America Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-security-alert-email-legit-or-scam/">Is American Express Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-security-alert-email-legit-or-scam/">Is Capital One Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-security-alert-email-about-login-legit-or-scam/">Is Security Alert Email About Login or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-fraud-alert-email-legit-or-scam/">Is Td Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-login-alert-email-legit-or-scam/">Is Td Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-transfer-alert-email-legit-or-scam/">Is Td Bank Transfer Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-us-bank-fraud-alert-email-legit-or-scam/">Is Us Bank Fraud Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-us-bank-login-alert-email-legit-or-scam/">Is Us Bank Login Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

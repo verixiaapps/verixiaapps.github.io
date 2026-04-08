@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Pnc Bank Fraud Alert Email is a common question when something like a bank fraud alert text feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like a bank fraud alert text and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>
-You might receive an email that appears to be from PNC Bank, claiming there’s been suspicious activity on your account. The message often includes your name and may even have the bank's logo, making it look official. It typically urges you to click on a link to verify your account information or to reset your password. The email might also contain a sense of urgency, suggesting that immediate action is required to prevent unauthorized access or account suspension. This can make it feel like a legitimate concern that you need to address right away.
+You might have recently received an email claiming to be from PNC Bank, alerting you to suspicious activity on your account. The message often features the bank’s logo and uses official-looking language, urging you to click on a link to verify your identity or secure your account. It may mention specific transactions that seem alarming, making it look like a genuine warning. The email could even include a sense of urgency, suggesting that immediate action is required to prevent your account from being compromised.
 
-The email creates pressure by stating that your account is at risk and that failure to respond could lead to serious consequences. You might feel a rush of anxiety as you read it, prompting you to act quickly without fully thinking it through. The sender often uses language that builds trust, like referencing your recent transactions or mentioning security measures they’ve implemented. This can make you feel like you’re in a safe space, even as you’re being directed to a potentially harmful site.
+The email is designed to create a sense of panic, pushing you to act quickly without thinking. It may state that your account will be locked if you don’t respond right away, or that you’ll lose access to funds. This tactic plays on your fears and trust in your bank, making you more likely to click on the link provided. The sender often uses language that mimics official communications, making it hard to distinguish between a legitimate alert and a scam.
 
-Variations of this scam can appear in different forms, such as text messages or phone calls that mimic PNC Bank's customer service. You might get a text saying that your account has been locked and asking you to click a link to unlock it. Alternatively, a phone call could come from a number that looks legitimate, with someone claiming to be a bank representative. Each version aims to elicit the same response: your personal information, which can lead to identity theft or unauthorized transactions.
+You might also encounter variations of this scam, such as text messages or phone calls that claim to be from PNC Bank. In some cases, the message could come from a spoofed email address that looks similar to the bank’s official domain. Other times, it might involve a fake website that closely resembles the real PNC Bank site, designed to capture your login details. Regardless of the format, the core message remains the same: it’s urgent, and you need to act now.
 
-If you fall for this scam, the consequences can be severe. You may inadvertently provide sensitive information that allows scammers to access your bank account, leading to financial loss. Once they have your details, they can drain your funds or open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as the realization that you’ve been deceived can lead to feelings of vulnerability and distrust in future communications.
+Falling for this scam can have serious consequences. If you provide your personal information, you risk having your bank account drained or your identity stolen. Scammers can use your details to open new accounts in your name, leading to financial loss and damage to your credit score. The emotional toll can be just as significant, leaving you feeling violated and anxious about your financial security. Recognizing these tactics is crucial to protecting yourself from becoming a victim.
 <p>That difference matters because a real notice related to Pnc Bank Fraud Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Revolut Suspicious Activity Email is a common question when something like a suspicious link feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Revolut Suspicious Activity Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Revolut, alerting you about suspicious activity on your account. The message often uses official branding and a professional tone, making it look legitimate at first glance. It may ask you to click on a link to verify your account or provide personal information to confirm your identity. The email might even include details that seem specific to your account, like recent transactions or your account balance, which can make it feel even more convincing.
+You might have just received an email that looks like it’s from Revolut, claiming there’s suspicious activity on your account. The message may include your name and even some details about recent transactions, urging you to click a link to verify your identity. The email often features the official Revolut logo and a professional layout, making it seem legitimate. However, the urgency in the language can be alarming, suggesting that your account might be frozen if you don’t act immediately. This creates a sense of panic, pushing you to respond without thinking it through.
 
-The urgency in these emails is palpable. They often state that immediate action is required to prevent your account from being locked or compromised. This pressure can lead you to act quickly without fully thinking through the situation. The language used is designed to evoke fear and concern, making you believe that your financial security is at risk. You might feel compelled to click the link or respond, thinking you’re protecting your account from a real threat.
+The email likely emphasizes the need for immediate action, stating that your account security is at risk. Phrases like “urgent action required” or “your account will be suspended” are designed to pressure you into clicking the link. This sense of urgency can cloud your judgment, making you more likely to overlook red flags. Scammers know that when you feel rushed, you’re less likely to scrutinize the details, and they exploit this to their advantage. By creating a scenario where you feel you must act fast, they increase the chances of you falling into their trap.
 
-Variations of this scam can appear in different forms, such as text messages or phone calls. You might receive a text that mimics a notification from Revolut, urging you to click a link to resolve an issue. Alternatively, a caller might impersonate customer service, asking for sensitive information to "verify" your identity. Each version plays on the same themes of urgency and trust, making it easy to overlook the red flags if you're not careful.
+You may also encounter variations of this scam, such as text messages or even phone calls that mimic Revolut's customer service. A text might inform you of “suspicious login attempts,” urging you to click a link or call a number for assistance. In some cases, the email might ask you to download an app that appears to be Revolut but is actually designed to steal your information. Each variation may have a slightly different approach, but the core tactic remains the same: to create fear and urgency, pushing you toward a quick, unwise decision.
 
-Falling for this scam can have serious consequences. If you provide your personal information or log in through a fraudulent link, you risk losing access to your account and exposing your financial details to criminals. This could lead to unauthorized transactions, identity theft, and a long process of trying to recover your funds. The emotional toll of realizing you’ve been scammed can be overwhelming, leaving you feeling vulnerable and anxious about your financial future.
+If you fall for this scam, the consequences can be severe. You might unknowingly provide your login credentials, giving scammers access to your account and personal information. This could lead to unauthorized transactions, identity theft, or even financial loss. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your security. Once the scammers have your information, it can be incredibly difficult to recover your account and regain control, making it essential to stay vigilant and question any unexpected communication regarding your financial accounts.
 <p>Scams connected to Revolut Suspicious Activity Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

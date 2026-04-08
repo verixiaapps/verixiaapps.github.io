@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Revolut Verification Code Text is a common question when something like an account locked warning appears without context. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Revolut Verification Code Text flow starts with something like an account locked warning, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might receive a text message claiming to be from Revolut, containing a verification code that you didn’t request. The message often looks official, complete with the Revolut logo and a friendly tone, urging you to enter the code to verify your account. It may say something like, "Your verification code is 123456. Please enter this code to continue." If you’re not actively trying to log in or set up a new account, this message can catch you off guard and make you question whether it’s a legitimate communication.
+You receive a text message that appears to be from Revolut, containing a verification code. The message might read something like, "Your verification code is 123456. Enter this code to complete your login." It looks official, complete with the Revolut logo and a professional tone. You might even notice that the sender's number is similar to the one you’ve seen in previous communications from Revolut, making it seem legitimate. It’s easy to assume this is just a routine security check, especially if you've recently tried to log in or make a transaction.
 
-The urgency in these messages is palpable. They often imply that immediate action is required to secure your account or prevent unauthorized access. You might feel a rush of anxiety, thinking that your account is at risk, which can lead you to act quickly without fully considering the source of the message. The sender may even include phrases like, “If you didn’t request this, please contact support,” making it seem like they genuinely care about your security, further building trust in their message.
+The urgency of the message can be unsettling. It often implies that there’s a problem with your account or that immediate action is required to prevent unauthorized access. You might feel a pang of anxiety, prompting you to act quickly. The message may suggest that failing to enter the code could lead to account suspension or other dire consequences. This pressure can cloud your judgment, making you more likely to respond without fully considering the situation.
 
-Variations of this scam can pop up in different forms. You might see emails that look like they’re from Revolut, asking you to click a link to verify your account, or even phone calls where someone claims to be from customer support, asking for your verification code. Each version is designed to exploit your trust in a reputable service, adapting to various platforms to catch you off guard. The common thread is that they all aim to get you to reveal sensitive information or act impulsively.
+Scammers frequently adapt their tactics, so you might encounter variations of this message. For instance, you might receive an email that looks like it’s from Revolut, asking you to click a link to verify your identity. Alternatively, a phone call could come from someone claiming to be from customer support, asking for your verification code to help you with a supposed issue. Each version is designed to mimic the authentic communication style of Revolut, making it difficult to discern what’s real and what’s not.
 
-Falling for this scam can lead to serious consequences. If you enter the verification code or provide personal information, scammers can gain access to your account, draining your funds or stealing your identity. The aftermath can be devastating, leaving you to deal with the financial and emotional fallout. It’s not just about losing money; it’s about the breach of trust and the feeling of vulnerability that comes from being targeted in such a personal way.
+If you fall for this scam, the consequences can be severe. Entering the verification code can give scammers access to your account, allowing them to drain your funds or make unauthorized transactions. You may find yourself locked out of your account, struggling to regain control while dealing with the financial fallout. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your personal information. Protecting yourself starts with recognizing these tactics and staying vigilant against messages that seem too urgent or out of the ordinary.
 <p>This is why step-by-step checking matters. Once a message related to Revolut Verification Code Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Pnc Bank Verification Code Text is a common question when something like an account locked warning appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Pnc Bank Verification Code Text flow starts with something like an account locked warning, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have received a text claiming to be from PNC Bank, asking you to verify your account with a code. The message often looks official, complete with the bank's logo and a friendly greeting. It may say something like, “Your verification code is 123456. Please enter this code to secure your account.” The text might even include a link that appears to lead to the bank's website. At first glance, it seems like a legitimate request, especially if you’ve recently interacted with your bank.
+You might have received a text claiming to be from PNC Bank, asking you to verify your account with a code. The message may look official, complete with the bank's logo or a familiar phone number. It could say something like, “Your verification code is 123456. Please enter it to secure your account.” At first glance, it seems like a routine security measure, but the urgency of the message can make you second-guess your instincts.
 
-The urgency in these messages is palpable. They often imply that immediate action is required to prevent your account from being compromised. You might feel a rush of anxiety, prompting you to respond quickly without thinking. The sender may use phrases like “Your account will be locked if you don’t act now” to create a sense of panic. This pressure can cloud your judgment, making it easy to overlook the signs that something isn’t right.
+The text often creates a sense of urgency, suggesting that your account is at risk or that immediate action is required. Phrases like “Your account will be locked if you don’t respond” can push you to act quickly, bypassing your usual caution. This pressure can lead you to believe that you need to comply to protect your finances, making it easier for scammers to manipulate your response.
 
-Scammers are clever and often tweak their tactics to stay one step ahead. You might see variations of this message, such as an email that looks like it’s from PNC Bank, or even a phone call where someone claims to be a bank representative. They might ask for personal information or direct you to a fake website that mirrors the real one. Each version is designed to exploit your trust and urgency, making it harder for you to spot the deception.
+You might also see variations of this scam, such as emails or phone calls that mimic PNC Bank’s communication style. Some messages may claim to be from a “fraud prevention team,” asking you to confirm a transaction you didn’t make. Others might direct you to a fake website that looks almost identical to PNC’s official site, where you’re prompted to enter personal information. Each version is designed to look legitimate, making it hard to distinguish between what’s real and what’s not.
 
-If you fall for this scam, the consequences can be severe. Providing your verification code or personal information can lead to unauthorized access to your bank account, resulting in financial loss and identity theft. The aftermath can be overwhelming, involving long hours spent trying to recover your funds and protect your identity. It’s not just about the money; it’s about the peace of mind that can be shattered in an instant.
+If you fall for this scam, you could unknowingly give away sensitive information, such as your account number or login credentials. Scammers can then access your bank account, draining your funds or committing identity theft. The emotional and financial fallout can be significant, leaving you feeling violated and anxious about your financial security. It’s crucial to remain vigilant and question any unexpected requests for personal information, especially when they come with a sense of urgency.
 <p>This is why step-by-step checking matters. Once a message related to Pnc Bank Verification Code Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

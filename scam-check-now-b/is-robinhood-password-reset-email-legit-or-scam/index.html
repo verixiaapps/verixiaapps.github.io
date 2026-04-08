@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Robinhood Password Reset Email is a common question when something like a login alert email appears without context. A common pattern starts when someone receives something that looks routine at first glance. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Robinhood Password Reset Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You recently received an email claiming to be from Robinhood, asking you to reset your password. The message looks official, complete with the Robinhood logo and a sense of urgency. It tells you that there’s been suspicious activity on your account, and you need to act fast to secure your funds. The email includes a link that directs you to a page that resembles the Robinhood login screen, making it easy to mistake for the real thing. The combination of familiar branding and a direct call to action makes it feel legitimate, but something about it just doesn’t sit right.
+You might have recently received an email claiming to be from Robinhood, asking you to reset your password. The message may look official, complete with the Robinhood logo and a link that seems to direct you to their website. It might even include a sense of urgency, suggesting that your account has been compromised or that immediate action is required to secure your funds. The language used can be convincing, making it seem like a legitimate request from the trading platform you trust.
 
-The email plays on your emotions, creating a sense of urgency that makes you feel like you must act immediately. It suggests that your account is at risk, and if you don’t reset your password now, you could lose access to your investments. This pressure can cloud your judgment, pushing you to click the link without fully considering the consequences. The urgency is designed to bypass your usual caution, making it easy to overlook warning signs that something isn’t quite right.
+This email is designed to create a sense of urgency, pushing you to act quickly without thinking. It might say that your account will be locked unless you reset your password immediately. By instilling fear of losing access to your investments or missing out on trading opportunities, the scammer aims to bypass your usual caution. They want you to click on the link and enter your credentials without verifying the source, making it easier for them to steal your information.
 
-You might notice variations of this scam that look slightly different but carry the same message. Some emails may come from addresses that are similar to Robinhood’s official domain but have small differences, like an extra letter or a different extension. Others might arrive as text messages or even phone calls, where the caller ID appears to be from Robinhood. Regardless of the format, they all share the same goal: to trick you into providing your login information or personal details.
+You may also encounter variations of this scam, such as texts or phone calls claiming to be from Robinhood support. These messages might offer assistance with a supposed issue or alert you to suspicious activity on your account. They could even mimic customer service representatives, asking for your personal details to "verify" your identity. Each version is crafted to look authentic, using familiar logos and language, making it hard to distinguish between a real communication and a fraudulent one.
 
-Falling for this scam can have serious consequences. If you enter your information on a fraudulent site, you risk losing access to your Robinhood account and potentially your investments. Scammers can drain your funds, and recovering your money can be a long and frustrating process. Beyond financial loss, your personal information could be compromised, leading to identity theft or further scams. It’s crucial to take a moment to verify any communication before acting, especially when it involves your finances.
+If you fall for this scam, the consequences can be severe. Once you provide your login details, scammers can access your account, draining your funds or making unauthorized trades. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. The aftermath can involve lengthy processes to recover your account and funds, not to mention the potential for identity theft. Recognizing these scams is crucial to protecting yourself and your investments.
 <p>Account-security scams connected to Robinhood Password Reset Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -1466,8 +1466,8 @@ Falling for this scam can have serious consequences. If you enter your informati
 <li><a href="/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/">Is Wise Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-american-express-password-reset-email-legit-or-scam/">Is American Express Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-password-reset-email-legit-or-scam/">Is Capital One Password Reset Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-reset-email-legit-or-scam/">Is Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-password-reset-email-legit-or-scam/">Is Pnc Bank Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-td-bank-password-reset-email-legit-or-scam/">Is Td Bank Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

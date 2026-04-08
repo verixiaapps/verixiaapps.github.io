@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Pnc Bank Transfer Alert Email is a common question when something like a PayPal refund email feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Pnc Bank Transfer Alert Email scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming to be from PNC Bank, notifying you about a transfer alert. The message likely includes your name, account details, and a sense of urgency, prompting you to click on a link to verify the transaction. The email may look polished, complete with the bank’s logo and official colors, making it seem credible at first glance. However, the language may feel slightly off, with awkward phrasing or unusual requests that raise a red flag.
+You might have recently received an email claiming to be from PNC Bank, notifying you of a transfer alert. The message often includes your name, a transaction amount, and a link to view details. The design may look professional, mimicking the bank's branding, which can make it seem legitimate. However, the email may contain subtle errors, such as misspellings or unusual formatting, that hint at its true nature. If you’re unsure, you might find yourself questioning whether this alert is a genuine notification or a clever attempt to lure you into a trap.
 
-Scammers often create a sense of urgency in these emails, suggesting that you need to act immediately to avoid account suspension or unauthorized transactions. This pressure can lead you to click on links or provide personal information without thinking twice. You might feel a rush of anxiety, believing that your account is at risk, which is exactly what the scammer wants. They play on your fears to manipulate your response and gain access to your sensitive information.
+Scammers know how to create a sense of urgency. The email may state that your account is at risk or that immediate action is required to verify the transaction. This pressure can lead you to click on links or provide personal information without thinking twice. The message may also include reassuring phrases about your account security, making you feel safe enough to engage. This blend of urgency and trust is a common tactic that can cloud your judgment, making it easy to overlook the warning signs.
 
-You may also encounter variations of this scam, such as text messages or phone calls claiming to be from PNC Bank. The text might alert you about suspicious activity, urging you to respond quickly, while a phone call could involve someone posing as a bank representative asking for your account details. Each version aims to catch you off guard, often using your personal information to make the communication seem legitimate and trustworthy.
+You might encounter variations of this scam, such as text messages or phone calls that convey a similar message. Some may claim to be from customer service, asking you to confirm a recent transaction or update your information. Others might use different bank names or slightly alter the details to catch you off guard. Regardless of the format, these scams share the same goal: to trick you into providing sensitive information or clicking on malicious links.
 
-Falling for this scam can lead to serious consequences. If you provide your information, scammers can drain your bank account, open new accounts in your name, or engage in identity theft. The aftermath can be financially devastating and emotionally draining, leaving you to deal with the fallout long after the initial incident. It's crucial to remain vigilant and question any unexpected communications, especially when they involve your finances.
+Falling for this scam can have serious consequences. If you provide your personal information, scammers can gain access to your bank account, leading to unauthorized transactions and financial loss. Your identity could be compromised, resulting in long-term damage that takes time and effort to resolve. The emotional toll can be just as significant, leaving you feeling violated and anxious about your financial security. Recognizing these threats is crucial to protecting yourself and your assets.
 <p>The strongest clue is usually not one isolated detail. With Pnc Bank Transfer Alert Email, the risk often becomes clearer when something like a PayPal refund email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
