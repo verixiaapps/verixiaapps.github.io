@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/brand-scams/">Brand Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/email-scams/">Email Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Bank of America Transfer Alert Email is a common question when something like an Amazon payment warning feels suspicious. A real notice usually survives independent verification, while a scam version usually depends on speed, pressure, or a fake link. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like an Amazon payment warning and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>
-You might have recently received an email claiming to be from Bank of America, alerting you about a transfer that you didn’t initiate. The message may include your name, account details, and a link to verify the transaction. It looks official, complete with the bank’s logo and formatting that mimics their legitimate communications. The email might even mention a specific amount and a deadline for action, making it feel urgent. You could easily mistake it for a genuine alert, especially if you’re accustomed to receiving notifications from your bank.
+You might have recently received an email claiming to be from Bank of America, alerting you about a transfer that you didn’t initiate. The email may look official, complete with the bank's logo and a professional layout. It often includes details about the transaction, such as the amount and the recipient, urging you to click a link to confirm or dispute the transfer. You might notice that the sender's email address appears to be legitimate at first glance, but a closer look could reveal subtle discrepancies that raise questions about its authenticity.
 
-The email creates a sense of urgency, suggesting that immediate action is required to prevent account suspension or unauthorized transactions. It may say something like, “Your account will be locked unless you confirm this transfer within 24 hours.” This pressure can lead you to act quickly, bypassing your usual caution. The message may also include reassuring language about their commitment to your security, which can make you feel safe enough to click on the provided link without a second thought.
+The urgency in these emails is palpable. They often state that immediate action is required to prevent unauthorized access to your account or to stop a fraudulent transaction. This pressure can make you feel anxious, prompting you to act quickly without fully considering the implications. The message may even include phrases like “your account will be locked” or “your funds are at risk,” which can trigger a fight-or-flight response, pushing you to click that link before taking a moment to think it through.
 
-Scammers often adapt their tactics, so you might encounter variations of this email. For instance, some may claim to be from a different financial institution or might use a different scenario, such as a loan approval or a refund request. They might also use text messages or phone calls that seem to come from Bank of America, employing similar language and urgency. Each version is designed to exploit your trust and prompt you to take action without verifying the source.
+Variations of this scam can pop up in different forms, such as text messages or phone calls, all claiming to be from Bank of America. You might receive a text alerting you to a suspicious login attempt, or a phone call from someone posing as a bank representative asking for your account details. Each version maintains that same sense of urgency and authority, often using your personal information to make the communication feel more legitimate, which can easily mislead you into believing it’s real.
 
-If you fall for this scam, the consequences can be severe. You could end up providing sensitive information like your login credentials or personal identification details, which can lead to identity theft or unauthorized access to your bank account. Once the scammers have your information, they can drain your accounts or open new lines of credit in your name, leaving you to deal with the fallout. It’s crucial to recognize these tactics to protect your financial security and personal information.
+If you fall for this scam, the consequences can be severe. Clicking on the link may lead you to a fake website designed to steal your login credentials, giving scammers access to your bank account. Once they have your information, they can drain your funds, make unauthorized transactions, or even open new accounts in your name. The aftermath can leave you not only financially vulnerable but also dealing with the emotional stress of having your trust violated, making it crucial to be vigilant about any unexpected communications from your bank.
 <p>That difference matters because a real notice related to Bank of America Transfer Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

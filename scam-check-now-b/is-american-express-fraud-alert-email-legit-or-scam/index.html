@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>American Express Fraud Alert Email is a common question when something like a strange text feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many American Express Fraud Alert Email situations, the message is written to build trust and urgency at the same time. Something like a strange text may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received an email that looks like it’s from American Express, claiming there's been suspicious activity on your account. The message often includes your name, a logo that looks official, and a sense of urgency, urging you to click a link to verify your account details. The email may even mention specific transactions that seem concerning, making it appear legitimate. It’s designed to catch your attention and prompt immediate action, often making you feel anxious about your account security.
+You receive an email that looks like it’s from American Express, complete with their logo and a professional layout. The subject line reads, “Urgent: Your Account Requires Immediate Attention.” Inside, the message claims there’s been suspicious activity on your account and prompts you to click a link to verify your identity. The email may even include a customer service number that appears legitimate, making it seem like a genuine outreach from your bank.
 
-The pressure in these emails is palpable. They often state that your account will be locked or that you might face unauthorized charges if you don’t act quickly. This creates a sense of urgency that can cloud your judgment. You might think, “I need to resolve this now,” and before you know it, you’re clicking on links or providing personal information without fully considering the risks. The email may even include reassuring phrases about their commitment to your security, making it harder to question its authenticity.
+The urgency of the message is palpable. It tells you that your account will be locked if you don’t act quickly, creating a sense of panic. You might feel pressured to respond immediately, fearing that any delay could lead to financial loss or account access issues. The email often uses phrases like “protect your account” or “act now to avoid problems,” which can easily trigger your instinct to comply without thinking twice.
 
-You may also encounter variations of this scam that appear in different forms. Some might come as text messages or phone calls, where the scammer impersonates a customer service representative. They might ask for your account number or other personal details, claiming they need to verify your identity. Others may use fake websites that mimic the American Express login page, tricking you into entering your credentials. Each variation is crafted to exploit your trust and urgency, making it difficult to discern what’s real.
+Variations of this scam can appear in different forms, such as text messages or phone calls. You might receive a text that says, “We detected unusual activity on your account. Please verify your information.” Alternatively, a phone call may come from someone claiming to be a fraud investigator from American Express, asking for your personal details to “confirm your identity.” Each variation is designed to look credible and exploit your trust in the company.
 
-Falling for this scam can have serious consequences. If you provide your personal information, you risk identity theft, unauthorized transactions, and a long, stressful process to reclaim your accounts. Your financial security could be compromised, leading to significant losses and potential damage to your credit score. It’s a reminder that what seems like a simple alert could lead to a much larger problem if you don’t take a moment to verify its legitimacy.
+Falling for this scam can lead to serious consequences. If you provide your personal information, the scammer can access your account, make unauthorized transactions, or even open new accounts in your name. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s crucial to recognize these tactics to protect yourself from potential financial harm.
 <p>Scams connected to American Express Fraud Alert Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a strange text is used as the starting point.</p>
 </div>
 
@@ -1465,9 +1465,9 @@ Falling for this scam can have serious consequences. If you provide your persona
 <li><a href="/scam-check-now-b/is-revolut-fraud-alert-email-legit-or-scam/">Is Revolut Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-fraud-alert-email-legit-or-scam/">Is Robinhood Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-fraud-alert-email-legit-or-scam/">Is Wise Fraud Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-fraud-alert-email-legit-or-scam/">Is Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-login-alert-email-legit-or-scam/">Is Capital One Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-capital-one-security-alert-email-legit-or-scam/">Is Capital One Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-capital-one-transfer-alert-email-legit-or-scam/">Is Capital One Transfer Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

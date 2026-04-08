@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>American Express Password Reset Email is a common question when something like an account locked warning appears without context. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common American Express Password Reset Email flow starts with something like an account locked warning, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You just received an email that appears to be from American Express, claiming that your account password needs to be reset. The message has the familiar logo and a professional layout, making it look legitimate. It includes a link that urges you to click immediately to secure your account. The email might even reference recent transactions or your account balance, which can make it feel even more convincing. You might think it’s just a routine security measure, but there’s a nagging feeling that something isn’t right.
+You receive an email that looks like it’s from American Express, complete with the logo and familiar branding. The subject line reads something like “Important: Your Password Reset Request.” Inside, the message tells you that someone has requested to reset your password and provides a link to do so. The email might even include a sense of urgency, warning you that your account could be compromised if you don’t act quickly. It feels official, and you might find yourself wondering if you really did request a password reset.
 
-The email creates a sense of urgency, suggesting that your account is at risk and that immediate action is required. Phrases like "Your account will be locked if you do not respond" or "Act now to prevent unauthorized access" can trigger anxiety. This pressure can cloud your judgment, making you more likely to click the link without thoroughly examining the email. It’s designed to make you feel like you have no choice but to comply, playing on your fear of losing access to your finances.
+The email creates an immediate sense of urgency, making you feel like you need to act fast to protect your account. It might say that your account will be locked if you don’t reset your password within a specific timeframe. This pressure can cloud your judgment, pushing you to click the link without fully considering whether the email is legitimate. The combination of urgency and the trusted brand name can make it difficult to pause and think critically about the situation.
 
-You might also see variations of this scam, such as a text message or a phone call that claims to be from American Express. These messages may ask you to verify your identity or provide personal information, often using different tactics but maintaining that same urgent tone. Some messages might even claim to offer a special promotion or reward that requires immediate action, making it easy to overlook the red flags. Each version is crafted to exploit your trust in a well-known financial institution.
+You might also encounter variations of this scam. Some emails may claim to be from a different financial institution, or they might offer a different reason for the password reset, such as suspicious activity on your account. The sender's email address might look similar to the official one, with just a slight difference that’s easy to overlook. Even text messages can appear, directing you to a fake website that mimics the real American Express login page, further blurring the lines between legitimate communication and a scam.
 
-Falling for this scam can lead to serious consequences. If you provide your login information, scammers can gain access to your account, potentially draining your funds or making unauthorized transactions. Your personal information could also be sold on the dark web, leading to identity theft. The emotional and financial fallout can be overwhelming, leaving you feeling violated and vulnerable. It’s crucial to take a moment to verify any unexpected communication before taking action, no matter how legitimate it appears at first glance.
+If you fall for this scam, you could end up giving away your login credentials to a fraudster. Once they have access to your account, they can make unauthorized transactions, steal your personal information, or even open new accounts in your name. The consequences can be severe, leading to financial loss and a long, arduous process to recover your identity and finances. It’s crucial to recognize these scams before they take advantage of your trust.
 <p>This is why step-by-step checking matters. Once a message related to American Express Password Reset Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1467,7 +1467,7 @@ Falling for this scam can lead to serious consequences. If you provide your logi
 <li><a href="/scam-check-now-b/is-revolut-password-reset-email-legit-or-scam/">Is Revolut Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-password-reset-email-legit-or-scam/">Is Robinhood Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-password-reset-email-legit-or-scam/">Is Wise Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-capital-one-account-locked-email-legit-or-scam/">Is Capital One Account Locked Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-password-reset-email-legit-or-scam/">Is Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

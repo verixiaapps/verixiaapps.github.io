@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/brand-scams/">Brand Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/email-scams/">Email Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Bank of America Refund Email is a common question when something like a bank fraud alert text feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Bank of America Refund Email scenario starts with something like a bank fraud alert text, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You open your email to find a message claiming to be from Bank of America, stating that you are eligible for a refund due to an overcharge. The email features the bank's logo and uses a professional tone, making it look legitimate at first glance. It includes a link that directs you to a website that resembles the official Bank of America site, complete with familiar colors and layout. The urgency is palpable, as the email warns you that the refund will only be available for a limited time, pushing you to act quickly.
+You open your email to find a message that seems to be from Bank of America, claiming you’re due for a refund. The email has the bank’s logo and a subject line that reads, “Immediate Action Required: Your Refund is Pending.” Inside, it instructs you to click a link to verify your account information to process the refund. The tone is formal yet friendly, making it feel like a legitimate communication from your bank. You might notice a sense of familiarity in the language, as if they already know you and are looking out for your best interests.
 
-The message creates a sense of urgency by suggesting that your account is at risk or that the refund is time-sensitive. It may mention a recent transaction that requires your immediate attention, making you feel like you need to resolve the issue without delay. This pressure can cloud your judgment, leading you to click on the link or provide personal information without fully considering the consequences. The email may even include a friendly note, making it seem like the bank is looking out for you, further building trust.
+The urgency in the email is palpable. It mentions that the refund will expire if you don’t act within 24 hours, pushing you to click the link without thinking twice. This pressure can be overwhelming, especially if you’ve recently had a transaction with the bank. The message might even include a customer service number that appears to be official, creating a false sense of security. You might feel compelled to resolve the issue quickly, leading you to overlook any red flags.
 
-You might also encounter variations of this scam, such as text messages or phone calls claiming to be from Bank of America. A text could tell you that your account has been flagged for suspicious activity, urging you to verify your identity through a provided link. Alternatively, a phone call may come from someone posing as a bank representative, asking for your account details to process the supposed refund. Each version is designed to exploit your trust in the bank, using familiar language and branding to make you feel safe.
+Variations of this scam can pop up in different forms. You might receive a text message instead, with a similar tone and urgency, or even a phone call from someone claiming to be a bank representative. Each version is crafted to look as authentic as possible, often using your name and other personal details to gain your trust. Some might even mimic the bank’s website design, making it easy to mistake a fraudulent site for the real one. Each time, the goal remains the same: to get you to provide sensitive information.
 
-Falling for this scam can lead to serious consequences. If you provide your personal information, you risk identity theft, which can take years to resolve. Your financial accounts could be drained, and your credit score may suffer as a result. Beyond the immediate financial loss, the emotional toll of realizing you’ve been scammed can be overwhelming, leaving you feeling vulnerable and distrustful. It's crucial to remain vigilant and question any unexpected communications, especially when they involve your finances.
+If you fall for this scam, the consequences can be severe. Your personal and financial information could be compromised, leading to unauthorized transactions or identity theft. Once the scammers have your details, they can drain your accounts or open new ones in your name, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you may feel violated and anxious about your financial security. It’s crucial to stay vigilant and question any unexpected communications, especially when money is involved.
 <p>Payment-related scams connected to Bank of America Refund Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a bank fraud alert text is involved.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

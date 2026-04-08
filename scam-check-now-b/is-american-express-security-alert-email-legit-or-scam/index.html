@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>American Express Security Alert Email is a common question when something like a login alert email appears without context. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a login alert email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from American Express, alerting you to suspicious activity on your account. The message typically includes your name, a sense of urgency, and instructions to click a link to verify your account details. The email may look official, complete with the American Express logo and formatting that mimics their legitimate communications. However, the sender's email address might be slightly off, or the link could lead to a website that resembles the real American Express site but is designed to capture your personal information.
+You might have recently received an email claiming to be from American Express, alerting you to unusual activity on your account. The message often looks official, featuring the American Express logo and a professional layout. It typically includes a subject line that grabs your attention, such as "Immediate Action Required: Security Alert." The email may instruct you to click a link to verify your account or confirm recent transactions, making it seem urgent and necessary to protect your financial information.
 
-The urgency in these emails is palpable. They often state that immediate action is required to prevent unauthorized transactions or to secure your account. You may feel a rush of anxiety as you read about potential fraud, prompting you to act quickly without thinking. This pressure can cloud your judgment, making you more likely to click on links or provide sensitive information without verifying the source. The combination of urgency and the appearance of legitimacy can easily trick you into believing that this is a genuine security alert.
+This type of scam often plays on your emotions, creating a sense of urgency that pushes you to act quickly. You might feel anxious about the possibility of unauthorized charges, leading you to click the link without thinking twice. The email may even include personal information that makes it seem more legitimate, like the last four digits of your card number or your name, which can create a false sense of security and trust in the message.
 
-Variations of this scam can appear in different formats, such as text messages or phone calls. You might receive a text that says your account is locked and instructs you to call a number or click a link. Alternatively, a caller may impersonate an American Express representative, claiming they need to verify your account due to suspicious activity. Each version maintains that same sense of urgency and fear, but the methods of delivery can change, making it crucial to remain vigilant regardless of how the message reaches you.
+Variations of this scam can appear in different forms, such as text messages or phone calls. You might receive a text that looks like it’s from American Express, alerting you to suspicious activity and prompting you to respond immediately. Alternatively, a caller may claim to be from customer service, asking for your account details to resolve an urgent issue. Each variation is designed to exploit your trust and urgency, making it easy to overlook the red flags.
 
-Falling for this scam can have serious repercussions. If you provide your personal information, you risk having your account drained or your identity stolen. Scammers can use your details to make unauthorized purchases or open new accounts in your name, leaving you to deal with the financial and emotional fallout. The aftermath can be time-consuming and stressful, as you work to recover your funds and restore your credit. Recognizing these scams is essential to protect yourself and your financial well-being.
+Falling for this scam can lead to serious consequences. If you click on the link and enter your information, you may unknowingly give scammers access to your account, leading to unauthorized charges or identity theft. The emotional and financial fallout can be devastating, leaving you to deal with the aftermath of compromised accounts and the stress of restoring your financial security. It's crucial to remain vigilant and question any unexpected communications regarding your financial accounts.
 <p>That difference matters because a real notice related to American Express Security Alert Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1460,6 +1460,7 @@ Falling for this scam can have serious repercussions. If you provide your person
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-capital-one-security-alert-email-legit-or-scam/">Is Capital One Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-pnc-bank-security-alert-email-legit-or-scam/">Is Pnc Bank Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-security-alert-email-about-login-legit-or-scam/">Is Security Alert Email About Login or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-td-bank-security-alert-email-legit-or-scam/">Is Td Bank Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-us-bank-security-alert-email-legit-or-scam/">Is Us Bank Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wells-fargo-security-alert-email-legit-or-scam/">Is Wells Fargo Security Alert Email or Scam Legit or a Scam?</a></li>
@@ -1467,7 +1468,6 @@ Falling for this scam can have serious repercussions. If you provide your person
 <li><a href="/scam-check-now-b/is-citibank-security-alert-email-legit-or-scam/">Is Citibank Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-discover-security-alert-email-legit-or-scam/">Is Discover Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-metamask-security-alert-email-legit-or-scam/">Is MetaMask Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-revolut-security-alert-email-legit-or-scam/">Is Revolut Security Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>American Express Payment Declined Email is a common question when something like a strange text feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common American Express Payment Declined Email flow starts with something like a strange text, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming that your American Express payment has been declined, complete with official-looking logos and a sense of urgency. The message may instruct you to click a link to verify your account details or to update your payment information. It often appears to come from a legitimate email address, making it all the more convincing. The language used is typically formal and authoritative, mimicking the tone you’d expect from a financial institution, which can easily lead you to believe that it’s a genuine communication.
+You might have recently received an email that looks like it’s from American Express, telling you that your payment has been declined. The message often includes your name and account details, making it seem legitimate. It may even have the American Express logo and a professional layout that mimics their official communications. The email typically instructs you to click a link to verify your account or provide additional information to resolve the issue. At first glance, it can be easy to assume that this is a routine notification from your credit card provider.
 
-The urgency in these emails is palpable. You might notice phrases like “Immediate action required” or “Your account will be suspended” if you don’t respond quickly. This pressure can push you to act without thinking, making it easy to overlook red flags. Scammers know that creating a sense of panic can lead you to make hasty decisions, such as clicking on links or providing sensitive information without verifying the source. This tactic is designed to exploit your trust and prompt you to act before you have a chance to consider the implications.
+The urgency in the email is palpable. Phrases like “immediate action required” or “your account will be suspended” create a sense of panic. This pressure can make you feel like you need to act quickly, often overriding your instinct to pause and think. The email may also suggest that your account is at risk, which plays on your fears of identity theft or financial loss. This emotional manipulation is a key tactic that scammers use to get you to respond without questioning the legitimacy of the message.
 
-Variations of this scam can appear in different formats, such as text messages or even phone calls. You might receive a text that looks like it’s from American Express, stating that there’s an issue with your account, urging you to click a link or call a number. Some scammers even go so far as to create fake websites that closely resemble the official American Express site, making it difficult to discern the difference. Each version is crafted to look legitimate, often using familiar branding and terminology to lull you into a false sense of security.
+You might encounter variations of this scam that look slightly different but carry the same deceptive message. Some emails may claim to be from other financial institutions or even government agencies, while others might come as text messages or phone calls. Each version aims to create a sense of urgency and often includes a link or phone number that leads you to a fake website designed to steal your personal information. The common thread is that they all exploit your trust in established financial institutions to lure you into a trap.
 
-Falling for this scam can have serious consequences. If you provide your personal information, such as your Social Security number or credit card details, you could find yourself a victim of identity theft or financial fraud. Scammers can drain your accounts, rack up charges in your name, or sell your information on the dark web. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Recognizing these scams is crucial to protecting yourself and your finances.
+Falling for this scam can have serious consequences. If you provide your personal or financial information, you risk identity theft, unauthorized transactions, and a long, stressful process to recover your accounts. Scammers can drain your bank account or rack up charges on your credit cards, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you may feel violated and anxious about your financial security. Being aware of these tactics can help you protect yourself from becoming a victim.
 <p>This is why step-by-step checking matters. Once a message related to American Express Payment Declined Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1467,7 +1467,7 @@ Falling for this scam can have serious consequences. If you provide your persona
 <li><a href="/scam-check-now-b/is-revolut-payment-declined-email-legit-or-scam/">Is Revolut Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-payment-declined-email-legit-or-scam/">Is Robinhood Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-payment-declined-email-legit-or-scam/">Is Wise Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-capital-one-account-locked-email-legit-or-scam/">Is Capital One Account Locked Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-payment-declined-email-legit-or-scam/">Is Payment Declined Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

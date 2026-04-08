@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Binance Verification Code Email is a common question when something like a login alert email appears without context. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Binance Verification Code Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be from Binance, complete with a verification code that you didn’t request. The message often looks official, featuring the Binance logo and a professional layout, making it seem legitimate at first glance. It may even include details like your account balance or recent transactions to convince you that it’s really from the exchange. If you’re like many users, you might feel a moment of panic, thinking someone is trying to access your account, and you need to act fast.
+You might have recently received an email claiming to be from Binance, asking you to verify your account with a code. The message may look official, complete with the Binance logo and professional formatting. It might even include a friendly greeting, making it seem like a legitimate communication from the exchange. However, the email could be asking you to click on a link or enter your personal information, which is a common tactic used by scammers to gain access to your account.
 
-The email typically creates a sense of urgency, urging you to verify your account immediately to avoid suspension or loss of funds. Phrases like “Your account will be locked in 24 hours” or “Immediate action required” are common tactics to pressure you into clicking links or entering personal information. The scammers know that fear can cloud judgment, making you more likely to respond without thinking critically about the legitimacy of the message.
+The urgency in these emails is often palpable. You might notice phrases like "Immediate action required" or "Your account will be suspended if you don’t verify." This pressure can make you feel anxious, prompting you to act quickly without fully thinking it through. Scammers know that creating a sense of urgency can cloud your judgment, making it easier for them to trick you into providing sensitive information or clicking on malicious links.
 
-You may also encounter variations of this scam, such as text messages or pop-up notifications on websites that mimic Binance’s interface. Some messages may claim to be from customer support, offering assistance with a supposed issue on your account. Others might come from unofficial-looking domains that closely resemble the real Binance website. Each version is designed to exploit your trust and prompt you to take action without verifying the source.
+Variations of this scam can appear in different forms. You might get a text message instead of an email, or even a phone call claiming to be from Binance support. Each version typically carries the same theme of urgency and verification, but the approach may vary slightly. Some messages might offer a reward for completing the verification, while others may threaten account suspension. Regardless of how it appears, the intent remains the same: to deceive you into giving away your personal information.
 
-Falling for this scam can lead to serious consequences, including unauthorized access to your Binance account and potential loss of funds. If you provide the verification code or click on a malicious link, scammers can take control of your account, draining your assets or using your information for identity theft. The emotional and financial toll can be significant, leaving you feeling violated and vulnerable. Recognizing these tactics is crucial to protecting yourself and your investments.
+Falling for this scam can have serious consequences. If you provide your verification code or personal details, scammers can gain access to your Binance account, potentially draining your funds or making unauthorized trades. This not only results in financial loss but can also lead to a lengthy and complicated process to recover your account. The emotional toll can be significant, leaving you feeling violated and anxious about your online security. It's crucial to remain vigilant and skeptical of any unexpected requests for verification.
 <p>Account-security scams connected to Binance Verification Code Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -1460,6 +1460,7 @@ Falling for this scam can lead to serious consequences, including unauthorized a
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now-b/is-binance-suspicious-login-email-legit-or-scam/">Is Binance Suspicious Login Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-binance-refund-email-legit-or-scam/">Is Binance Refund Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-account-verification-alert-email-legit-or-scam/">Is Account Verification Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-chase-verification-code-text-legit-or-scam/">Is Chase Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-citibank-verification-code-text-legit-or-scam/">Is Citibank Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-crypto-account-verification-email-legit-or-scam/">Is Crypto Account Verification Email or Scam Legit or a Scam?</a></li>
@@ -1467,7 +1468,6 @@ Falling for this scam can lead to serious consequences, including unauthorized a
 <li><a href="/scam-check-now-b/is-revolut-verification-code-text-legit-or-scam/">Is Revolut Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-robinhood-verification-code-text-legit-or-scam/">Is Robinhood Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-wise-verification-code-text-legit-or-scam/">Is Wise Verification Code Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-american-express-verification-code-text-legit-or-scam/">Is American Express Verification Code Text or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

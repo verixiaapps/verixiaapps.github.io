@@ -1398,7 +1398,7 @@ body{padding-top:84px;}
     <div id="contentBridge" class="content-bridge"></div>
 
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="https://verixiaapps.com/scam-check-now-b/hubs/brand-scams/">Brand Scams</a>
+      <a href="https://verixiaapps.com/scam-check-now-b/hubs/email-scams/">Email Scams</a>
     </div>
 
     <div class="content-header-band">
@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>Bank of America Fraud Alert Email is a common question when something like a Zelle transfer problem message feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Bank of America Fraud Alert Email flow starts with something like a Zelle transfer problem message, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have received an email that looks like it’s from Bank of America, claiming there’s been suspicious activity on your account. The message may include your name, account details, and a link to “verify” your information. It often has the bank’s logo and a professional layout, making it appear legitimate. The email might urge you to act quickly, warning that your account could be compromised if you don’t respond immediately. This kind of communication can be alarming, especially if you’ve recently made transactions or noticed unusual activity.
+You receive an email that looks like it’s from Bank of America, complete with their logo and branding. The subject line reads, “Urgent: Fraud Alert on Your Account.” Inside, the message claims there’s been suspicious activity detected and urges you to click a link to verify your identity. The email may even include a phone number that appears to be the bank’s customer service line, making it seem even more legitimate. You might notice the language is formal, and the email addresses you by name, which can make it feel personal and credible.
 
-The urgency in these emails is designed to push you into making a hasty decision. They often state that your account will be locked or that you could face financial loss if you don’t click on the provided link right away. This creates a sense of panic, making you feel like you must act now to protect your finances. The email may also include reassuring phrases, like “we value your security,” which can trick you into trusting the message even more.
+This email creates a sense of urgency, pushing you to act quickly. It might say something like, “Your account will be locked if you do not respond within 24 hours.” This pressure can make it hard to think clearly, especially if you’re worried about your finances. The fear of losing access to your account or facing unauthorized charges can compel you to click that link without taking a moment to consider the consequences.
 
-Variations of this scam can include text messages or phone calls that mimic Bank of America’s communication style. You might receive a text alerting you to a “problem” with your account, directing you to a website that looks almost identical to the bank’s official site. Sometimes, scammers will even use caller ID spoofing to make it look like the call is coming from Bank of America. Each version aims to exploit your trust and urgency, adapting to whatever method you’re most likely to respond to.
+You might also encounter variations of this scam. For example, instead of an email, you could receive a text message that looks like it’s from Bank of America, or even a phone call from someone claiming to be a bank representative. The message might change slightly, perhaps mentioning a recent transaction or asking you to confirm your account details. Regardless of the format, the core tactic remains the same: to create a false sense of urgency and trust.
 
-Falling for this scam can lead to serious consequences. If you enter your personal information, scammers can gain access to your bank account, leading to unauthorized transactions and financial loss. They may even sell your information on the dark web, putting you at risk for identity theft. The aftermath can be overwhelming, as you might find yourself dealing with fraudulent charges, a damaged credit score, and the hassle of trying to regain control over your finances. It’s crucial to take a moment to verify any communication before acting, no matter how urgent it seems.
+Falling for this scam can lead to serious consequences. If you click the link and enter your information, you could unknowingly give away your login credentials, allowing scammers to access your bank account. This could result in unauthorized transactions, drained funds, and a lengthy process to recover your identity and finances. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security.
 <p>This is why step-by-step checking matters. Once a message related to Bank of America Fraud Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

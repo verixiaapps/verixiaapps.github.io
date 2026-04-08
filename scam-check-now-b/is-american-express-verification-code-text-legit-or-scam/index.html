@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>American Express Verification Code Text is a common question when something like a two-factor code request appears without context. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many American Express Verification Code Text cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text message that appears to be from American Express, claiming that there’s an urgent issue with your account. The message prompts you to verify your identity by entering a code they’ve provided. It looks official, complete with branding and even a customer service number that seems legitimate. You might feel a twinge of anxiety, wondering if your account is really at risk. The message is designed to catch your attention, making it seem like you must act quickly to avoid potential problems with your finances.
+You might have received a text claiming to be from American Express, asking you to verify a recent transaction or to confirm your account details. The message often includes a verification code and urges you to respond quickly, suggesting that your account is at risk or that there’s a problem with a recent purchase. It may even look official, using American Express branding and language that feels familiar. If you’re not expecting a message like this, it’s natural to feel confused or anxious about whether it’s real or a scam.
 
-The urgency in these messages is palpable. They often state that your account will be locked or that unauthorized transactions have been detected, pushing you to respond immediately. This pressure can cloud your judgment, making you more likely to overlook red flags. The sender's ability to mimic official communication creates a false sense of security, making you think that you’re dealing with a trusted entity. You might feel compelled to act fast, fearing the consequences of inaction, which is exactly what the scammer wants.
+Scammers know how to create a sense of urgency that can catch you off guard. They might say your account will be locked unless you act immediately, or that a suspicious transaction has been detected. This pressure can make you feel like you need to respond quickly, leading you to bypass your usual caution. The message may also include a link that appears legitimate, making it even easier to trust. It’s designed to exploit your emotions and prompt you to take action without thinking.
 
-Variations of this scam can come in different forms. You might receive an email that looks like it’s from American Express, complete with logos and formatting that seem authentic. Alternatively, a phone call could come from a number that appears to be from the company, urging you to provide personal information for verification. Each version is crafted to exploit your trust, often using familiar phrases and customer service language that makes it hard to distinguish from real communication.
+You might see variations of this scam, such as emails that look like they come from American Express or phone calls where someone claims to be a customer service representative. Sometimes, they might ask you to call a number that seems official, but it leads you to a scammer instead. Other times, the message may come from a different financial institution, but the tactics remain the same. Each variation is crafted to mimic the real thing closely, making it harder to distinguish between what’s genuine and what’s not.
 
-If you fall for this scam, the consequences can be severe. Providing the verification code can give scammers direct access to your account, allowing them to drain your funds or make unauthorized purchases. Beyond the immediate financial loss, there’s also the emotional toll of realizing you’ve been deceived. Your personal information may be compromised, leading to potential identity theft. The aftermath can leave you feeling vulnerable and anxious, questioning every future communication you receive.
+Falling for this type of scam can have serious consequences. If you provide your verification code or personal information, the scammer can gain access to your account, leading to unauthorized transactions and financial loss. Beyond the immediate financial impact, it can also affect your credit score and leave you dealing with the aftermath of identity theft. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s crucial to be vigilant and verify any unexpected communications before taking action.
 <p>Account-security scams connected to American Express Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a two-factor code request.</p>
 </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 

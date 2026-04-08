@@ -1423,13 +1423,13 @@ body{padding-top:84px;}
 <p>American Express Refund Email is a common question when something like a suspicious message feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many American Express Refund Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from American Express, stating that a refund has been processed for your account. The message often looks official, complete with the company logo and professional formatting. It may include specific details about your account, such as your name and the last four digits of your card number, making it feel legitimate. The email usually has a link directing you to a website where you can confirm your refund, which can easily trick you into thinking it’s a genuine communication from your bank.
+You might have recently received an email that looks like it’s from American Express, claiming that you’re due for a refund. The message may have a professional layout, complete with the company logo and a personalized greeting. It could state that there’s an issue with your account or that you’ve overpaid for a service. The email often includes a link to a website that resembles the official American Express site, urging you to click through to claim your refund. Everything seems legitimate at first glance, but that’s where the trouble begins.
 
-This type of email often creates a sense of urgency, suggesting that you need to act quickly to claim your refund or risk losing it. Phrases like “immediate action required” or “your account will be suspended” are common, designed to provoke anxiety and prompt you to click the link without thinking. The message may also include a friendly tone, making it seem like a helpful reminder rather than a potential threat. This combination of urgency and familiarity can make it hard to resist responding.
+The urgency in these emails is palpable. They often mention that your account will be suspended or that you’ll miss out on a limited-time offer if you don’t act quickly. This creates a sense of panic, pushing you to click the link without thinking twice. You might feel a rush of relief at the thought of getting money back, which makes you more likely to overlook red flags. The email may even include a customer service number that sounds official, further solidifying the illusion of trustworthiness.
 
-Variations of this scam can appear in different forms, such as text messages or phone calls, where the scammer impersonates customer service representatives. You might receive a text that says your account has been flagged for unusual activity, followed by a link to verify your information. Sometimes, the scam may even come as a fake website that looks almost identical to the official American Express site, further blurring the lines between real and fraudulent communications. Each variation is crafted to exploit your trust and prompt you to take action.
+You may notice variations of this scam, such as text messages or social media ads that claim to be from American Express. Some might even come as phone calls from someone impersonating a customer service representative, asking for your personal information to process your refund. Each version is crafted to look convincing, using familiar language and logos to create a false sense of security. The tactics may differ, but the goal remains the same: to trick you into providing sensitive information.
 
-If you fall for this scam, the consequences can be severe. You might unknowingly provide your personal information, which can lead to identity theft and unauthorized charges on your account. Once scammers have your details, they can drain your finances or open new accounts in your name, leaving you to deal with the aftermath. The emotional toll can be significant, as you realize that a moment of urgency led to a breach of your security, making it crucial to remain vigilant against such deceptive tactics.
+If you fall for this scam, the consequences can be severe. You might unknowingly give away your credit card details or personal information, leading to identity theft or unauthorized charges. Once scammers have your data, they can drain your accounts or open new lines of credit in your name, leaving you to deal with the fallout. The emotional toll can be just as damaging, as you grapple with the realization that you’ve been deceived. Taking a moment to verify before clicking can save you from a lot of trouble.
 <p>Scams connected to American Express Refund Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -1465,9 +1465,9 @@ If you fall for this scam, the consequences can be severe. You might unknowingly
 <li><a href="/scam-check-now-b/is-chase-refund-email-legit-or-scam/">Is Chase Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-citibank-refund-email-legit-or-scam/">Is Citibank Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-discover-refund-email-legit-or-scam/">Is Discover Refund Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-confirmation-email-legit-or-scam/">Is Refund Confirmation Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now-b/is-refund-issued-email-legit-or-scam/">Is Refund Issued Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now-b/is-revolut-refund-email-legit-or-scam/">Is Revolut Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-robinhood-refund-email-legit-or-scam/">Is Robinhood Refund Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now-b/is-wise-refund-email-legit-or-scam/">Is Wise Refund Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2764,12 +2764,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2811,7 +2814,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3372,4 +3375,4 @@ async function checkout(priceId) {
 })();
 </script>
 
-</html>
+</html> 
