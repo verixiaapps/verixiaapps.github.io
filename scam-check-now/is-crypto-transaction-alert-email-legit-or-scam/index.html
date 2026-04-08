@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Crypto Transaction Alert Email is a common question when something like a crypto recovery message creates urgency around crypto. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many Crypto Transaction Alert Email scams involve things like a crypto recovery message, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might have recently received an email that looks like it’s from your cryptocurrency exchange, alerting you about a transaction you didn’t make. The email may include your account details, a transaction ID, and even a request to verify your identity by clicking on a link. The design might mimic the official branding of the exchange, complete with logos and color schemes that feel familiar. It’s crafted to look legitimate, making it easy to assume that it’s a genuine alert about your funds.
+You might have recently received an email claiming to be from a cryptocurrency exchange, alerting you about a transaction that you didn’t initiate. The message often includes details like a transaction ID, the amount, and a link to “verify” your account. It may even use the logo of a well-known exchange to make it look credible. The sender’s email address might seem legitimate at first glance, but a closer look could reveal subtle misspellings or unusual domains. This email is designed to catch your attention and provoke a reaction, making it feel urgent and real.
 
-The urgency in the email is palpable. It might state that your account will be locked unless you verify the transaction immediately, creating a sense of panic. You may feel pressured to act quickly, fearing that your funds are at risk. This tactic is designed to bypass your usual caution, pushing you to click that link or provide personal information without taking a moment to think it through. The emotional pull is strong, making you feel like you need to resolve the situation right away.
+The urgency in these emails is palpable. They often state that your account will be locked unless you take immediate action, creating a sense of panic. You might feel compelled to click the link to resolve the issue, believing that you need to act fast to protect your funds. The message may also include phrases like “your security is our priority,” which are meant to build trust. This combination of urgency and a false sense of security can cloud your judgment, pushing you to respond before you think it through.
 
-You may encounter variations of this scam that look slightly different but carry the same deceptive message. Some emails might claim to be from a different cryptocurrency service or even a wallet provider, while others could come as text messages or social media alerts. They might use different language or urgency tactics, but the core message remains the same: they want you to act quickly without verifying the source. Each variation is tailored to catch you off guard, leveraging your trust in these platforms.
+Scammers are clever and often tailor their tactics to fit various scenarios. You might see variations of this scam that claim to be from different exchanges or even impersonate wallet services. Some may come as text messages or social media direct messages, all using similar language to trick you into clicking a link or providing personal information. They may even reference recent market trends or promotions to make the message feel more relevant and timely, increasing the likelihood that you’ll engage with it.
 
-If you fall for this scam, the consequences can be severe. You might end up giving away sensitive information, allowing scammers to access your account and drain your funds. Even if you think you’re just verifying a transaction, you could be handing over the keys to your entire cryptocurrency portfolio. The financial loss can be devastating, and recovering those funds is often nearly impossible. The emotional toll can linger, leaving you feeling violated and distrustful of future transactions.
+Falling for this type of scam can have serious consequences. If you click the link and enter your credentials, you could unwittingly give scammers access to your account, leading to unauthorized transactions and potential loss of your funds. Even if you don’t provide information, simply engaging with the email can put you on a list for future scams. The emotional toll of realizing you’ve been duped can be significant, leaving you feeling vulnerable and distrustful of legitimate communications in the future.
 <p>Crypto-related scams connected to Crypto Transaction Alert Email often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like a crypto recovery message.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ If you fall for this scam, the consequences can be severe. You might end up givi
 <li><a href="/scam-check-now/is-crypto-phishing-email-legit-or-scam/">Is Crypto Phishing Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-support-email-legit-or-scam/">Is Crypto Support Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-trading-signal-message-legit-or-scam/">Is Crypto Trading Signal Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/crypto-investment-message-scam-example/">Is Crypto Investment Message Scam Example a Scam?</a></li>
 <li><a href="/scam-check-now/crypto-wallet-verification-scam/">Is Crypto Wallet Verification a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-airdrop-message-legit-or-scam/">Is Crypto Airdrop Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-giveaway-message-legit-or-scam/">Is Crypto Giveaway Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-investment-message-legit-or-scam/">Is Crypto Investment Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-message-from-unknown-sender-legit-or-scam/">Is Crypto Message from Unknown Sender or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-crypto-presale-message-legit-or-scam/">Is Crypto Presale Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

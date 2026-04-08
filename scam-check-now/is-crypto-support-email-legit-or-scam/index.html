@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Crypto Support Email is a common question when something like a wallet verification request creates urgency around crypto. The main question is whether the message or request can be trusted. These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>Many Crypto Support Email scams involve things like a wallet verification request, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might receive an email that appears to be from a well-known cryptocurrency exchange, claiming to be their support team. The message often includes your name and mentions a recent transaction or security alert, urging you to verify your account details. The sender's email address may look almost identical to the official one, with just a minor variation that could easily go unnoticed. The email may also contain links that direct you to a website designed to mimic the exchange's official site, making it seem legitimate at first glance.
+You might have recently received an email claiming to be from a cryptocurrency support team, complete with official logos and a professional tone. The message often states that there’s a problem with your account, urging you to click a link to verify your identity or resolve the issue. The email may even include a sense of urgency, suggesting that your account will be locked or that you could lose access to your funds if you don’t act immediately. This setup can be alarming, especially if you’ve invested time and money into your crypto assets.
 
-The urgency in these emails is palpable. They often state that your account will be suspended unless you act immediately, creating a sense of panic. This pressure can lead you to click on links or provide personal information without fully considering the consequences. The language used is typically friendly and reassuring, designed to build trust quickly. Phrases like “your security is our top priority” can make you feel safe enough to comply without hesitation.
+Scammers know how to play on your emotions, creating a sense of panic that drives you to act without thinking. They often make it sound like they’re there to help you, using phrases that establish a false sense of trust. You might feel reassured by the professional layout and the use of technical jargon, which can make the email seem legitimate. This pressure can lead you to click on links or provide sensitive information before you have a chance to fully evaluate the situation.
 
-You might also encounter variations of this scam through text messages or social media direct messages. A message could claim that you’ve won a cryptocurrency giveaway or that your account needs verification due to suspicious activity. These messages often use similar tactics, such as mimicking official logos and branding. Even phone calls can be part of this scheme, where someone claims to be a support representative, asking for your login credentials to help resolve an issue.
+You may also encounter variations of this scam that come in different forms, such as text messages or even phone calls. Some might claim to be from a well-known exchange, while others could pose as a wallet service. Each variation typically follows the same pattern: they create a sense of urgency and rely on your trust in the brand they’re impersonating. The messages may even reference recent transactions or account activity to make them seem more credible, further complicating your ability to discern their legitimacy.
 
-Falling for this type of scam can have serious consequences. If you provide your login information, scammers can access your account, draining your funds or making unauthorized transactions. The emotional toll can be significant as well, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it can also lead to long-term issues with identity theft and a lengthy recovery process. Recognizing these tactics is crucial to protecting yourself and your investments.
+Falling for this type of scam can have severe consequences. If you provide your personal information or click on a malicious link, you could end up losing access to your cryptocurrency wallet or even have your funds drained. The aftermath can be devastating, leading to financial loss and a long process of trying to recover what’s been taken. This isn’t just about losing money; it’s about the emotional toll of realizing that you’ve been deceived, which can leave you feeling vulnerable and distrustful of future communications.
 <p>Crypto-related scams connected to Crypto Support Email often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like a wallet verification request.</p>
 </div>
 
@@ -1383,10 +1383,10 @@ Falling for this type of scam can have serious consequences. If you provide your
 <li><a href="/scam-check-now/is-crypto-giveaway-message-legit-or-scam/">Is Crypto Giveaway Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-investment-message-legit-or-scam/">Is Crypto Investment Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-presale-message-legit-or-scam/">Is Crypto Presale Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-crypto-investment/">Did I Get Scammed by Crypto Investment?</a></li>
 <li><a href="/scam-check-now/is-crypto-exchange-login-alert-legit-or-scam/">Is Crypto Exchange Login Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/crypto-investment-message-scam-example/">Is Crypto Investment Message Scam Example a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-message-from-unknown-sender-legit-or-scam/">Is Crypto Message from Unknown Sender or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-support-email-real-or-fake/">Is Coinbase Support Email Real or Fake</a></li>
-<li><a href="/scam-check-now/is-metamask-support-message-legit-or-scam/">Is MetaMask Support Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
