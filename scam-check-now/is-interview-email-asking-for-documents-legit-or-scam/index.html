@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Interview Email Asking for Documents is a common question when something like a remote job offer feels too fast, too vague, or too good to be true. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to whether the sender, company, pay, and hiring process can be verified independently.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A typical Interview Email Asking for Documents case may involve something like a remote job offer, a job offer that feels unusually fast, easy, or high-paying, or a request for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>
-You receive an email that looks like it’s from a reputable company, inviting you for an interview. The message is professionally formatted, complete with the company logo and a signature from someone who seems to hold a significant position. However, as you read further, you notice a request for personal documents, such as your Social Security number, bank details, or copies of your identification. The email may even include a link to a website that resembles the company's official site, making it hard to distinguish between what's real and what's not.
+You receive an email that looks like it’s from a reputable company, complete with a polished logo and professional language. The message informs you that you’ve been selected for an interview, which is exciting news. However, it also requests personal documents, such as your driver’s license, social security number, or even bank details, to proceed with the hiring process. The sender assures you that this is standard procedure and that all information will be kept confidential. At first glance, it seems legitimate, but something feels off.
 
-The email creates a sense of urgency, stating that you need to provide these documents quickly to secure your spot in the interview process. Phrases like "limited positions available" or "act now to avoid missing out" are common tactics used to pressure you into responding without taking the time to think critically. This urgency can cloud your judgment, making you more likely to comply with the request without questioning its legitimacy.
+The email creates a sense of urgency, stating that the position is in high demand and that you need to act quickly to secure your spot. It might even mention that they have other candidates lined up, making you feel like you must comply to avoid losing this opportunity. This pressure can cloud your judgment, pushing you to send sensitive information without taking a moment to verify the source. The polished presentation and the promise of a job can easily lead you to overlook potential red flags.
 
-You might encounter variations of this scam that appear in different formats. For instance, the initial contact could come via a text message or a phone call, with the same request for sensitive information. Some scammers even impersonate recruitment agencies, claiming they are acting on behalf of a well-known company. The language may change slightly, but the core tactic remains the same: to make you feel like you’re on the brink of a great opportunity while simultaneously putting you at risk.
+Variations of this scam can appear in different forms, such as a text message or a phone call. You might receive a message saying you've been pre-approved for a job and need to confirm your identity by providing documents. Sometimes, scammers will even set up fake websites that mimic real company pages, making it harder to distinguish between what's real and what's not. The urgency and pressure tactics remain consistent, but the delivery method may change, keeping you on your toes.
 
-If you fall for this scam, the consequences can be severe. Providing personal information can lead to identity theft, financial loss, or even unauthorized access to your accounts. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your safety. It’s crucial to recognize these red flags and take a moment to verify the legitimacy of any requests before sharing any personal information.
+If you fall for this scam, the consequences can be severe. Providing personal information can lead to identity theft, financial loss, and a long road to recovery. Scammers can use your details to open accounts in your name, leaving you to deal with the fallout. Beyond the immediate financial implications, the emotional toll of being scammed can linger, leaving you feeling violated and distrustful of future opportunities. It’s crucial to pause and think critically before sharing any personal information, especially when it feels rushed.
 <p>Job-related scams connected to Interview Email Asking for Documents often break normal hiring patterns. Real employers usually have a verifiable company presence, a clear role, and a consistent interview process, while scam messages often stay vague until they ask for money, documents, or account details, especially after something like a remote job offer appears.</p>
 </div>
 
@@ -1379,14 +1379,14 @@ If you fall for this scam, the consequences can be severe. Providing personal in
       <h3 id="moreLinksHeading">More Scam Checks</h3>
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-onboarding-email-asking-for-personal-details-legit-or-scam/">Is Onboarding Email Asking for Personal Details or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-onboarding-email-asking-for-sensitive-info-legit-or-scam/">Is Onboarding Email Asking for Sensitive Info or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-email-asking-for-personal-info-a-scam/">Is This Email Asking for Personal Info a Scam</a></li>
 <li><a href="/scam-check-now/onboarding-email-scam-asking-for-details/">Is Onboarding Email Scam Asking for Details a Scam?</a></li>
 <li><a href="/scam-check-now/recruiter-email-scam-asking-for-info/">Is Recruiter Email Scam Asking for Info a Scam?</a></li>
 <li><a href="/scam-check-now/is-dating-message-asking-for-money-legit-or-scam/">Is Dating Message Asking for Money or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-friend-asking-for-money-a-scam/">Is This Friend Asking for Money a Scam</a></li>
+<li><a href="/scam-check-now/is-this-message-asking-for-payment-a-scam/">Is This Message Asking for Payment a Scam</a></li>
 <li><a href="/scam-check-now/is-unknown-caller-asking-for-money-legit-or-scam/">Is Unknown Caller Asking for Money or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-unknown-contact-asking-for-money-legit-or-scam/">Is Unknown Contact Asking for Money or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/background-check-email-scam-asking-payment/">Is Background Check Email Scam Asking Payment a Scam?</a></li>
-<li><a href="/scam-check-now/dating-scam-asking-for-money-message/">Is Dating Scam Asking for Money Message a Scam?</a></li>
-<li><a href="/scam-check-now/fake-receipt-email-for-unknown-purchase-scam/">Is Fake Receipt Email for Unknown Purchase a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

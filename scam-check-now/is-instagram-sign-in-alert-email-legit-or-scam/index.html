@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Sign in Alert Email is a common question when something like a suspicious message feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Instagram Sign in Alert Email flow starts with something like a suspicious message, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email that looks like it’s from Instagram, alerting you about a sign-in attempt from an unfamiliar device or location. The email often includes logos and branding that mimic Instagram’s style, making it seem authentic. It may even contain a link that claims to take you to your account to verify the activity. This message can feel alarming, especially if you’re not expecting any logins, prompting you to act quickly and check your account status.
+You might have recently received an email that looks like it’s from Instagram, alerting you about a sign-in attempt from an unfamiliar device or location. The email often features Instagram’s logo and a message that claims someone is trying to access your account. It may even include a link that says something like “If this was you, click here to confirm.” The layout and design are convincing, making it easy to overlook any signs that it could be a scam.
 
-Scammers know how to play on your emotions, creating a sense of urgency that pushes you to click on links without thinking. The email may warn you that your account is at risk or that someone is trying to access your personal information. This pressure can make you feel like you need to respond immediately, leading you to click on the provided link, believing you're protecting your account. The design and language used in these emails often aim to build trust, making you feel secure enough to provide sensitive information.
+These emails are designed to create a sense of urgency. They often state that your account will be locked or compromised if you don’t act immediately. This pressure can lead you to click the link without thinking twice, believing that you need to secure your account quickly. The message may also include reassuring language, making it sound like Instagram is genuinely looking out for your security, which can further build your trust in the communication.
 
-You might see variations of this scam, such as messages claiming to be from other social media platforms or even financial institutions. Some emails might say your password has been changed or that there’s a security update needed. They can also come as text messages or direct messages on social media, all crafted to look legitimate. Each version shares the same goal: to trick you into taking action that compromises your security.
+You might encounter variations of this scam that look slightly different but carry the same intent. Some emails may come from addresses that seem similar to Instagram’s official domain, while others might claim to be from a third-party security service. They might also use different tactics, like offering a reward for confirming your account details or claiming there’s a problem with your payment method. Regardless of the variation, the goal remains the same: to trick you into providing sensitive information.
 
-Falling for this scam can lead to serious consequences. If you click on the link and enter your credentials, you may unwittingly hand over your account to the scammer, who can then lock you out or use your account for malicious purposes. This can result in identity theft, unauthorized transactions, or even the spread of malware if you download anything from the site. The fallout can be extensive, affecting not just your online presence but potentially your financial security and personal information as well.
+Falling for this scam can lead to serious consequences. If you click the link and enter your login details, you may unknowingly hand over your account to cybercriminals. This can result in unauthorized access to your personal information, loss of control over your social media presence, and even financial loss if your account is linked to payment methods. The aftermath can be distressing, leaving you vulnerable to further scams and identity theft.
 <p>This is why step-by-step checking matters. Once a message related to Instagram Sign in Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1386,7 +1386,7 @@ Falling for this scam can lead to serious consequences. If you click on the link
 <li><a href="/scam-check-now/is-instagram-account-suspended-message-legit-or-scam/">Is Instagram Account Suspended Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-instagram-payment-request-message-legit-or-scam/">Is Instagram Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-instagram/">Did I Get Scammed by Instagram?</a></li>
-<li><a href="/scam-check-now/is-amazon-sign-in-alert-email-legit-or-scam/">Is Amazon Sign in Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-instagram-message-legit-or-scam/">Is This Instagram Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Suspicious Login Alert is a common question when something like a login alert email appears without context. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Instagram Suspicious Login Alert cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You may have recently received an email or notification claiming that there was a suspicious login attempt on your Instagram account. The message often includes details like the location of the login attempt and a prompt to secure your account immediately. It might look official, complete with Instagram's logo and links that seem to lead to their website. The urgency of the situation can make you feel anxious, prompting you to click on the provided link to resolve the issue quickly.
+You might have recently received a notification from Instagram alerting you about a suspicious login attempt on your account. The message could look official, complete with Instagram's logo and a link to "secure your account." It may have mentioned a location that you don’t recognize or a device that isn’t yours, making it seem urgent and legitimate. The email or text might even ask you to confirm your identity by clicking a link, which can be alarming, especially if you’ve been using Instagram regularly and are concerned about your account’s security.
 
-This type of scam thrives on creating a sense of urgency and fear. The message may state that your account will be locked or compromised if you don't act fast. By presenting itself as a security alert, it builds trust, making you believe that Instagram is genuinely concerned about your account's safety. This emotional pressure can cloud your judgment, pushing you to take action without thoroughly checking the legitimacy of the message.
+The urgency in these alerts is designed to get you to act quickly, often before you have time to think. The message might say that your account will be locked or compromised if you don’t respond immediately. This pressure can make you feel like you need to take action right away, pushing you to click on the link without fully considering the consequences. The language used is often alarming, making it seem like your account is at serious risk, which can trigger a quick response from you.
 
-Scammers often tweak their tactics to keep you guessing. You might see variations where the email claims to be from Instagram support or includes a fake verification code that you need to enter. Sometimes, they even create counterfeit login pages that look almost identical to the real Instagram site. These variations can make it difficult to discern what's real and what's a trap, especially if you're already on high alert about your account security.
+Variations of this scam can appear in different forms, such as a direct message on Instagram itself or even a phone call claiming to be from Instagram support. Some messages might suggest that your account has been flagged for suspicious activity, while others could claim that you’ve violated community guidelines. Regardless of the variation, the common thread is the attempt to create a sense of urgency and fear, leading you to believe that immediate action is necessary to protect your account.
 
-Falling for this scam can have serious consequences. If you enter your login credentials on a fake site, the scammers gain access to your account, which they can then use to steal personal information, spread malware, or even impersonate you to your friends. The fallout can be extensive, leading to a loss of privacy and control over your online presence. It's crucial to take a moment to verify any alerts before acting, as the risks of acting impulsively can be significant.
+If you fall for this scam, you could inadvertently provide your login credentials to cybercriminals, allowing them to access your account. This could lead to unauthorized posts, loss of personal information, or even financial theft if your account is linked to payment methods. The fallout can be severe, not just in terms of losing access to your social media but also in the potential for identity theft or damage to your online reputation. Taking a moment to verify the authenticity of such alerts can save you from significant trouble down the line.
 <p>The strongest clue is usually not one isolated detail. With Instagram Suspicious Login Alert, the risk often becomes clearer when something like a login alert email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

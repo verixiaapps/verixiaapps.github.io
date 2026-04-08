@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Verification Code Text is a common question when something like a two-factor code request appears without context. The main question is whether the message or request can be trusted. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Instagram Verification Code Text cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You receive a text claiming to be from Instagram, stating that your verification code is needed to secure your account. The message might look official, complete with a logo and a friendly tone, urging you to enter the code quickly to avoid losing access. It might even mention recent suspicious activity on your account, making it feel urgent and personal. You might think it’s a routine security measure, especially if you’ve recently logged in from a new device or location.
+You might receive a text claiming to be from Instagram, informing you that someone is trying to log into your account and that you need to verify your identity with a code they’ve sent. The message may look official, complete with Instagram’s branding and even a sense of urgency, suggesting that your account is at risk. It often includes a prompt to respond quickly, making it feel like a legitimate security measure to protect your account from unauthorized access.
 
-The text creates a sense of urgency by suggesting that immediate action is necessary to protect your account. It might say something like, “Your account will be locked in 10 minutes unless you verify.” This pressure can cloud your judgment, making you feel like you must act fast. The sender often uses language that builds trust, like referencing your profile name or mentioning recent activity, making it harder to question the legitimacy of the request.
+This kind of message is designed to create a sense of panic. You might feel the pressure to act immediately, fearing that your account could be compromised. The text might say something like, “Your account is being accessed from a new device. Reply with the code to secure your account.” This tactic plays on your trust in the platform and your desire to keep your personal information safe, making it all the more convincing.
 
-You might also encounter variations of this scam, such as emails or direct messages on social media, all designed to mimic official communications from Instagram. Some might ask you to click a link to a fake login page, while others may request personal information under the guise of account verification. Scammers are constantly adapting their tactics, so the message you received could look slightly different from what others have experienced, but the goal remains the same: to trick you into revealing sensitive information.
+Variations of this scam can appear in different forms. You might see similar messages claiming to be from other social media platforms or even emails that look like they’re coming from Instagram’s official support. Some might ask you to click a link to verify your information instead of providing a code. Regardless of the format, they all share the same goal: to trick you into providing sensitive information or access to your account.
 
-Falling for this scam can lead to serious consequences. If you provide the verification code or any personal information, scammers can gain access to your account, potentially locking you out and using it to scam your friends or spread malicious content. Your personal data might be compromised, leading to identity theft or financial loss. The emotional toll of realizing you’ve been deceived can be just as damaging, leaving you feeling vulnerable and anxious about your online safety.
+If you fall for this scam, the consequences can be severe. Scammers can gain access to your Instagram account, locking you out and potentially using it to scam your friends or post inappropriate content. They may also harvest personal information that can lead to identity theft or financial loss. The emotional toll of realizing you’ve been duped can be just as damaging, leaving you feeling vulnerable and violated in a space that should be safe and enjoyable.
 <p>Account-security scams connected to Instagram Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a two-factor code request.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

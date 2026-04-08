@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Support Email Real or Fake is a common question when something like a suspicious link feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Instagram Support Email Real or Fake situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Instagram support, asking you to verify your account or click on a link to resolve an issue. The message may look official, complete with Instagram's logo and a professional tone, making it seem legitimate. It could mention a problem with your account, like suspicious activity or a need for verification, which instantly grabs your attention. The sender’s email address might appear to be from Instagram, but a closer look could reveal subtle discrepancies that raise red flags.
+You might have received an email claiming to be from Instagram support, complete with their logo and a friendly greeting. The message often mentions an issue with your account, urging you to click a link to verify your information or reset your password. The email might even include a sense of urgency, warning that your account will be suspended if you don’t act quickly. It looks convincing, almost like a legitimate correspondence, making it easy to overlook the red flags.
 
-Scammers often create a sense of urgency in these messages, making you feel like you must act quickly to avoid losing access to your account. Phrases like “Immediate action required” or “Your account will be suspended” are designed to pressure you into clicking links or providing personal information without thinking. This tactic plays on your fear of losing your social media presence or missing out on important updates, compelling you to respond before taking a moment to verify the source.
+The email plays on your emotions, creating a sense of panic that your account could be compromised. It may say something like, “Your account has been flagged for suspicious activity—please verify your identity immediately.” This kind of language is designed to make you feel like you have to act fast, pushing you to click the link without thinking twice. The urgency can cloud your judgment, making you more susceptible to falling for the trap.
 
-You may also encounter variations of this scam, such as direct messages on Instagram itself, where a user claiming to be from support asks for your login details or personal information. Some might even create fake Instagram pages that mimic the official support account, further blurring the lines between real and fake. These variations can make it even harder to distinguish between genuine communication from Instagram and a cleverly crafted scam designed to deceive you.
+Variations of this scam can appear in different forms, such as direct messages on Instagram itself or even fake support accounts reaching out to you. Some might even mimic the look of the official Instagram interface, complete with similar usernames and profile pictures. You might see messages claiming you've won a prize or that your content has violated community guidelines, all leading you to a link that appears harmless but is anything but. Each variation is crafted to exploit your trust in the platform.
 
-Falling for this scam can have serious consequences. If you provide your login information, the scammer could gain access to your account, potentially locking you out or using it for malicious purposes. Your personal information might be sold or used in further scams, putting not just you but also your contacts at risk. The emotional toll of losing access to your social media can be significant, especially if it includes cherished memories or important connections. It's crucial to remain vigilant and skeptical of any unsolicited communication that claims to be from Instagram support.
+If you click on the link or provide any personal information, you risk losing access to your account or, worse, exposing your sensitive data to cybercriminals. This can lead to identity theft or financial loss, as scammers can use your information for malicious purposes. The consequences can be severe, affecting not just your online presence but also your peace of mind. It’s crucial to remain vigilant and question the authenticity of any communication that seems off, especially when it involves your personal accounts.
 <p>The strongest clue is usually not one isolated detail. With Instagram Support Email Real or Fake, the risk often becomes clearer when something like a suspicious link is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

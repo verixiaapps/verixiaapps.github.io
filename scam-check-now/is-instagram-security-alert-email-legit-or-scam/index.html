@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Security Alert Email is a common question when something like a login alert email appears without context. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Instagram Security Alert Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be from Instagram, warning you about suspicious activity on your account. The message likely includes a subject line that grabs your attention, such as “Security Alert: Unrecognized Login Attempt.” It may feature Instagram's logo and ask you to click a link to verify your identity or secure your account. The email might even contain details like the location of the login attempt, making it seem more legitimate. It’s designed to look official, but that doesn’t mean it’s safe.
+You might have recently received an email claiming to be from Instagram, alerting you about suspicious activity on your account. The message often includes a subject line like "Security Alert: Unrecognized Login Attempt" and may prompt you to click a link to secure your account. The email may even feature Instagram's logo and a professional layout, making it look legitimate. However, the urgency in the tone and the request for immediate action can make you second-guess whether the alert is real or a clever trap.
 
-This email creates a sense of urgency, making you feel like immediate action is necessary to protect your account. Phrases like “Your account is at risk” or “Act now to prevent unauthorized access” are common tactics used to pressure you into clicking the link. The sender often tries to establish trust by using familiar branding and language, making it easy to overlook the red flags. You may find yourself feeling anxious about your account’s security, which can cloud your judgment.
+This type of email is designed to create a sense of urgency, pushing you to act quickly without thinking. It may mention that your account will be locked if you don’t respond within a certain timeframe, or that your personal information is at risk. This pressure can lead you to click on links or provide sensitive information without taking a moment to verify the source. Scammers know that urgency can cloud your judgment, making it easier for them to manipulate your actions.
 
-Scammers often tweak their approach, sending similar emails that might claim to be from other platforms or services you use. You could receive a message that looks like it’s from Facebook, PayPal, or even your bank, all using the same tactics to lure you in. Each variation might include different details, such as a fake support number or a different link, but the goal remains the same: to get you to act quickly without thinking. It’s easy to get caught up in the moment, especially when the message feels relevant to your life.
+You might also notice variations of this scam, such as texts or direct messages on social media platforms that claim to be from Instagram support. Some may even impersonate friends or family members who claim they’ve had issues with their accounts. The messages often contain similar language and urgency, making them hard to distinguish from genuine communications. Regardless of the format, the goal remains the same: to trick you into providing personal information or clicking on malicious links.
 
-If you click the link and provide your information, you risk losing access to your account or even exposing your personal data to malicious actors. This could lead to identity theft or financial loss, as scammers can use your credentials to access other accounts or make unauthorized transactions. The consequences can be severe, affecting not just your online presence but also your peace of mind. It’s crucial to take a moment to verify the source before acting, as a single misstep can have lasting repercussions.
+Falling for this scam can have serious consequences. If you enter your login credentials on a fake site, you risk losing access to your Instagram account and potentially exposing your personal information to identity thieves. This can lead to unauthorized transactions, loss of privacy, and even financial loss. The emotional toll of realizing you've been scammed can be significant, leaving you feeling vulnerable and distrustful of future communications. It's crucial to take a moment to verify any alerts before taking action.
 <p>The strongest clue is usually not one isolated detail. With Instagram Security Alert Email, the risk often becomes clearer when something like a login alert email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ If you click the link and provide your information, you risk losing access to yo
 <li><a href="/scam-check-now/is-instagram-payment-request-message-legit-or-scam/">Is Instagram Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-instagram-message-from-unknown-user-legit-or-scam/">Is Instagram Message from Unknown User or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-instagram/">Did I Get Scammed by Instagram?</a></li>
+<li><a href="/scam-check-now/is-this-instagram-message-legit-or-scam/">Is This Instagram Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-amazon-security-alert-email-legit-or-scam/">Is Amazon Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-binance-security-alert-email-legit-or-scam/">Is Binance Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-chase-security-alert-email-legit-or-scam/">Is Chase Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-apple-security-alert-email-legit-or-scam/">Is Apple Security Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

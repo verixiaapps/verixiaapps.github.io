@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Unusual Login Email is a common question when something like an account locked warning appears without context. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Instagram Unusual Login Email cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email from Instagram stating that there was an unusual login attempt on your account. The message may have included details like the location of the login attempt and a prompt to secure your account. It might have looked official, complete with Instagram’s logo and a link that seems to lead to their website. This type of email can be alarming, especially if you’ve noticed some strange activity on your account or received similar messages before.
+You receive an email that looks like it’s from Instagram, claiming that there’s been an unusual login attempt on your account. The message includes details like your username and a location that seems familiar, making it feel legitimate. It urges you to click on a link to secure your account immediately. The email design mimics Instagram’s branding, complete with their logo and color scheme, which adds to the authenticity. You might notice that the sender’s email address appears to be from Instagram, but a closer look reveals subtle discrepancies that raise suspicion.
 
-The email often creates a sense of urgency, urging you to act quickly to secure your account. Phrases like “your account may be compromised” or “click here to verify your identity” can pressure you into making hasty decisions. You might feel a rush of anxiety, prompting you to click the link without a second thought. Scammers know how to exploit your emotions, making it easy for you to overlook potential red flags in the process.
+The email creates a sense of urgency, making you feel like you must act quickly to protect your account. Phrases like “Your account will be locked” or “Immediate action required” are strategically placed to pressure you into clicking the link without thinking twice. This tactic plays on your fears of losing access to your social media or having your personal information compromised. The emotional pull is strong, and you might find yourself feeling anxious about what could happen if you ignore the warning.
 
-You may also encounter variations of this scam. For instance, instead of an email, it could come as a text message or even a direct message on Instagram itself. Some messages may claim to offer a solution to a problem you didn’t even know you had, like a “security check” or “account verification.” Each variation is designed to look legitimate, often mimicking Instagram’s branding and language, making it hard to distinguish between what’s real and what’s not.
+You might encounter variations of this scam that look slightly different but serve the same purpose. Some emails may claim to be from a different social media platform or even a bank, using similar tactics to instill fear. Others might come as text messages or direct messages on social media, often with a link that promises to resolve the issue. Each version is designed to exploit your trust and urgency, making it easy to overlook the signs that something is off.
 
-Falling for this scam can have serious consequences. If you click on the link and enter your login credentials, you’re essentially handing over your account to the scammers. They could lock you out, use your account to scam your friends, or even steal your personal information. The aftermath can be frustrating and time-consuming, leaving you to deal with the fallout while trying to regain control of your account. It’s crucial to remain vigilant and question any unexpected messages, especially when they involve your personal information.
+Falling for this scam can lead to serious consequences. If you click the link and enter your login details, you’re handing over your account to the scammers. They can then lock you out, use your account for malicious purposes, or even access sensitive personal information. This not only jeopardizes your online safety but can also lead to identity theft or financial loss. The aftermath can be stressful and time-consuming, leaving you to deal with the fallout while the scammers continue their operations unhindered.
 <p>Account-security scams connected to Instagram Unusual Login Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like an account locked warning.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

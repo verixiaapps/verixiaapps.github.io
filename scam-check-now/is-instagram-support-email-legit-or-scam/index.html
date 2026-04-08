@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Support Email is a common question when something like an unexpected email feels suspicious. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an unexpected email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might receive an email claiming to be from Instagram support, complete with their logo and a professional tone, notifying you of suspicious activity on your account. The message may urge you to verify your identity by clicking a link that leads to a page that looks like the official Instagram login. The email often includes phrases like “urgent action required” or “your account will be suspended,” making it seem like you need to respond immediately to avoid losing access to your profile. This setup can feel alarmingly real, especially if you’ve recently noticed any unusual activity.
+You might have recently received an email claiming to be from Instagram support, telling you that your account has been compromised or that you need to verify your information. The email often looks official, complete with the Instagram logo and a professional tone. It may include a link that prompts you to log in or provide personal information. The message might even reference specific details about your account, making it seem more credible and tailored to you. If you’ve seen something like this, it’s easy to feel alarmed and compelled to act quickly.
 
-The sense of urgency is a powerful tool in these scams. By suggesting that your account is at risk, the email pressures you to act quickly without thinking. You might feel a rush of anxiety, prompting you to click the link and enter your credentials without double-checking the sender’s email address or the URL. The scammers know that in moments of panic, people are less likely to scrutinize the details, making it easier for them to trick you into handing over sensitive information.
+The urgency in these emails is palpable. They often threaten account suspension or loss of access if you don’t respond immediately. This tactic plays on your fears, making you feel like you have no choice but to click the link and follow the instructions. The sender may even include a reassuring note, promising that they are there to help you recover your account. This combination of pressure and false trust can be incredibly persuasive, leading you to believe that you are communicating with a legitimate source.
 
-These scams can take on various forms, sometimes appearing as direct messages on Instagram or even through text messages that mimic Instagram’s communication style. You might receive a message claiming you’ve won a prize or that your account has been flagged for violating community guidelines, all designed to elicit a quick response. Each variation is tailored to exploit your trust in the platform, making it harder to recognize the deception. The more convincing the message, the more likely you are to fall for it.
+You might also notice variations of this scam, such as direct messages on Instagram or texts that appear to come from a familiar number. Some messages may claim that you’ve won a prize or that your account is being targeted for a special promotion. Each variation is designed to catch your attention and prompt you to act without thinking. They can be quite sophisticated, mimicking the style and language of actual Instagram communications, which makes it even harder to discern what’s real and what’s not.
 
-If you do fall for this scam, the consequences can be severe. Scammers can gain access to your account, change your password, and lock you out entirely. They may use your account to send spam or phishing messages to your friends, further spreading the scam. In some cases, they might even steal your personal information, leading to identity theft or financial loss. The emotional toll of realizing you've been duped can be overwhelming, leaving you feeling vulnerable and exposed.
+Falling for this type of scam can have serious consequences. If you provide your login details or personal information, you risk losing access to your account entirely. Scammers can take control of your profile, potentially using it to spread further scams or to steal information from your followers. Beyond the immediate loss of your account, there’s the risk of identity theft or financial loss if your personal data is misused. The emotional toll of realizing you’ve been duped can linger long after the incident, leaving you feeling vulnerable and distrustful.
 <p>That difference matters because a real notice related to Instagram Support Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Suspicious Link Message is a common question when something like a phishing email feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>Many Instagram Suspicious Link Message scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a phishing email. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You might have recently received a message on Instagram that looks like it’s from a friend or a well-known account, urging you to click on a link. The message often includes phrases like “Check this out!” or “You won’t believe what I found!” accompanied by a shortened URL. At first glance, it seems harmless, but the urgency in the tone and the casual familiarity can make it feel like a genuine recommendation. You might even notice that the sender's profile looks legitimate, with a recognizable name and profile picture, which can lead you to let your guard down.
+You might have received a message on Instagram that looks like it’s from someone you know, but the link they sent seems a bit off. It could be a simple text saying, “Check this out!” followed by a shortened URL. The sender’s account may even have a familiar profile picture and bio, making it hard to believe that it’s anything but genuine. This kind of message can easily catch you off guard, especially if it’s from a friend or someone you trust. The casual tone and familiar context can make it feel like a harmless invitation to view something interesting.
 
-These messages create a sense of urgency, making you feel like you need to act quickly to avoid missing out on something important. The sender may claim that you’ve been tagged in a post or that there’s a limited-time offer waiting for you. This pressure to click immediately can cloud your judgment, especially if you trust the person who sent it. The emotional pull of curiosity or fear of missing out can easily lead you to click the link without thinking twice.
+The urgency of these messages is often what makes them so compelling. They might say things like, “You need to see this before it’s gone!” or “I can’t believe you haven’t seen this yet!” This kind of pressure can push you to click the link without thinking twice. It plays on your curiosity and the fear of missing out, making you feel like you need to act quickly. The sender may even follow up with more messages if you don’t respond right away, reinforcing that sense of urgency and making it harder to resist.
 
-Scammers often use variations of this tactic, adapting their approach to fit different scenarios. You might see messages that appear to come from a brand you follow, offering exclusive deals or giveaways, or even alerts about account security that prompt you to verify your information. Each variation is designed to look credible, using familiar logos or language that mimics official communications. Even if you think you’re savvy enough to spot a scam, these messages can be surprisingly convincing, making it easy to overlook the signs.
+You might also notice variations in these messages. Sometimes, the link could be disguised as a video or an exclusive offer, and other times, it might appear to come from an official Instagram account. Scammers are clever, often using similar usernames or even creating fake accounts that mimic real ones. They adapt their tactics, so what you see today might be different from what someone else encounters tomorrow. This constant evolution makes it tricky to spot the red flags, especially when they seem to come from people you know.
 
-Falling for one of these scams can have serious consequences. Clicking on the link may lead you to a phishing site designed to steal your personal information or login credentials. This could result in unauthorized access to your account, leading to identity theft or financial loss. Even if the immediate threat seems minor, the long-term implications can be devastating, affecting your online security and trust in the platforms you use. It’s crucial to stay vigilant and recognize that not everything that looks legitimate is safe.
+Falling for this kind of scam can lead to serious consequences. Clicking on the link might install malware on your device or lead you to a phishing site designed to steal your personal information. You could find your account compromised, leading to unauthorized access or even financial loss. Once scammers have your details, they can exploit them in ways you might not even realize until it’s too late. The aftermath can be stressful and time-consuming, leaving you to deal with the fallout while questioning who you can trust online.
 <p>Phishing-related scams connected to Instagram Suspicious Link Message often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a phishing email is used to build trust.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

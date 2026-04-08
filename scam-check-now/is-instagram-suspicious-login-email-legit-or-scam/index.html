@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Instagram Suspicious Login Email is a common question when something like a login alert email appears without context. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Instagram Suspicious Login Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming that there was a suspicious login attempt on your Instagram account. The message often includes details like the location of the login and a prompt to click a link to secure your account. The email may look official, complete with Instagram branding and logos, making it hard to tell if it's a genuine alert or a clever trap. It’s designed to catch your eye and provoke concern, leading you to act quickly without thinking.
+You might have received an email from Instagram recently, claiming that there’s been a suspicious login attempt on your account. The message could look official, complete with Instagram’s logo and a link that appears to direct you to their website. It may state that someone tried to access your account from an unfamiliar location or device, urging you to verify your identity immediately. The email could even include a warning about potential account suspension if you don’t act quickly, making it feel urgent and legitimate.
 
-The urgency in these emails is palpable. They often state that your account will be locked or compromised if you don’t take immediate action. This pressure can make you feel like you have no choice but to click the link provided. The email may even include a friendly tone, addressing you by name and reassuring you that your account is important to them, which builds a false sense of trust. This combination of urgency and familiarity can cloud your judgment, pushing you to act before you fully assess the situation.
+This sense of urgency is a powerful tactic used by scammers. They know that when you feel pressured, you’re more likely to click on links without thinking. The email may encourage you to reset your password or confirm your account details, creating a false sense of security. By mimicking the tone and style of genuine communications from Instagram, these messages can easily trick you into believing they are real, especially if you’ve recently had concerns about your account security.
 
-Variations of this scam can appear in different forms. You might receive a text message instead, or even see a pop-up on a website claiming to be Instagram. Some versions may ask you to verify your identity through a form that looks legitimate, while others might direct you to a fake login page that mimics the real Instagram site. Each variation is crafted to exploit your concern for your account’s security, making it easy to mistake them for authentic communications from Instagram.
+Scammers often adapt their tactics, so you might see variations of this email. Some may come from slightly altered email addresses that seem similar to Instagram’s official domain, while others might use different wording or claim to be from customer support. You could also receive a text message or a direct message on social media that mimics this same theme of suspicious activity, making it even harder to discern what’s real and what’s not. Each variation is designed to exploit your fear of losing access to your account.
 
-Falling for this scam can have serious consequences. If you enter your credentials on a fake site, you’re handing over your account to cybercriminals who can then take control, potentially leading to identity theft or financial loss. They might use your account to send spam to your contacts or even sell your information on the dark web. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling violated and anxious about your online security.
+If you fall for this scam, the consequences can be severe. Providing your login information could give scammers full access to your Instagram account, allowing them to change your password, lock you out, or even use your account to scam your friends. In some cases, they may also gain access to personal information linked to your account, leading to further identity theft. The emotional toll of losing control over your online presence can be overwhelming, making it crucial to stay vigilant and question any unexpected communications about your account.
 <p>Account-security scams connected to Instagram Suspicious Login Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a login alert email.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
