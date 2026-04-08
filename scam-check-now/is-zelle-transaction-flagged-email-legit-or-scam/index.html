@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Zelle Transaction Flagged Email is a common question when something like an Amazon payment warning feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common Zelle Transaction Flagged Email scenario starts with something like an Amazon payment warning, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming that your Zelle transaction has been flagged for suspicious activity. The message often looks official, complete with Zelle's logo and a professional layout. It may include details about a transaction you don’t recognize, urging you to click on a link to verify your account. The email might even address you by name, making it feel more legitimate. This familiarity can easily catch you off guard, especially if you’ve recently used Zelle for a payment.
+You might have received an email that looks like it’s from your bank, claiming that your recent Zelle transaction has been flagged for unusual activity. The message often includes your name, transaction details, and a sense of urgency, urging you to click a link to verify your account. The email may even feature your bank's logo and a professional layout, making it seem legitimate at first glance. However, the real intent is to trick you into providing personal information or login credentials.
 
-The email typically creates a sense of urgency, suggesting that your account will be frozen or that you risk losing access if you don't act immediately. This pressure can lead you to click on the provided link without thinking twice. The language used in these messages is often alarming, designed to provoke a quick response. You might feel compelled to resolve the issue right away, making it easy to overlook red flags that would usually raise your suspicions.
+The urgency in these emails is palpable. They often state that your account will be locked or that you need to act immediately to avoid further issues. This pressure can make you feel anxious, pushing you to click the link without thinking twice. The email may also include a customer service number that seems trustworthy, but calling it could lead you to scammers who are ready to extract more information from you.
 
-Scammers often adapt their tactics, so you might see variations of this email that claim to be from your bank or another financial service. Some messages may ask you to verify your identity by providing personal information, while others might direct you to a fake website that mimics Zelle’s login page. The goal remains the same: to trick you into giving away sensitive information or access to your accounts. Each variation is crafted to exploit your trust and urgency, making it harder to spot the deception.
+Scammers are clever and will often tweak their tactics to keep you off balance. You might see variations of this scam where the email claims to be from a different payment service or even a government agency. Some messages may come as text alerts instead of emails, or they might use slightly different wording to bypass spam filters. Each variation is designed to exploit your trust and catch you off guard, making it difficult to discern what’s real and what’s not.
 
-If you fall for this scam, the consequences can be severe. You could unknowingly provide your banking credentials, leading to unauthorized transactions or identity theft. Once scammers have your information, they can drain your account or use your identity for further fraudulent activities. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Recognizing these scams is crucial to protecting yourself and your hard-earned money.
+Falling for this scam can have serious consequences. If you provide your information, scammers can access your bank account, leading to unauthorized transactions and financial loss. Beyond the immediate monetary impact, there’s also the emotional toll of feeling violated and vulnerable. Your personal information could be used for identity theft, leaving you to deal with the aftermath long after the initial scam. Recognizing these tactics is crucial to protecting yourself and your finances.
 <p>Payment-related scams connected to Zelle Transaction Flagged Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like an Amazon payment warning is involved.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ If you fall for this scam, the consequences can be severe. You could unknowingly
 <li><a href="/scam-check-now/is-zelle-security-warning-email-legit-or-scam/">Is Zelle Security Warning Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-suspicious-payment-email-legit-or-scam/">Is Zelle Suspicious Payment Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-suspicious-transfer-email-legit-or-scam/">Is Zelle Suspicious Transfer Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-zelle-transfer-cancellation-email-legit-or-scam/">Is Zelle Transfer Cancellation Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-unauthorized-payment-email-legit-or-scam/">Is Zelle Unauthorized Payment Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-unusual-login-email-legit-or-scam/">Is Zelle Unusual Login Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-zelle-account-fraud-alert-email-legit-or-scam/">Is Zelle Account Fraud Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

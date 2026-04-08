@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Zelle Transfer Confirmation Text is a common question when something like a bank fraud alert text feels suspicious. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A real payment alert usually survives independent checking inside the official app, while a scam version often starts with something like a bank fraud alert text and pressures you to sign in, approve a change, or call a fake support line before you verify anything yourself.</p>
-You might have recently received a text claiming to be from Zelle, stating that a transfer has been initiated or completed. The message often includes details like the amount and the sender’s name, making it look official. It may even prompt you to click a link to confirm the transaction or to call a number for assistance. The language used is typically straightforward, designed to mimic real notifications you’d expect from your bank or payment service, making it easy to overlook any red flags.
+You might receive a text that looks like it’s from Zelle, telling you that a transfer has been made to your account. The message often includes your name, a transaction amount, and a link to confirm the details. It feels official, complete with Zelle's logo and a sense of urgency, suggesting that you need to act quickly to verify the transaction. This can catch you off guard, especially if you weren’t expecting any money to be sent or received.
 
-These messages often create a sense of urgency, suggesting that your account is at risk or that immediate action is required to prevent unauthorized transactions. You might feel pressured to respond quickly, fearing that any delay could lead to financial loss. The use of familiar branding and language can foster a false sense of security, making you believe that the message is legitimate and that you need to act fast to protect your funds.
+The urgency in these texts is designed to make you act without thinking. They often say something like “Your confirmation is needed immediately to avoid issues with your account.” This pressure can lead you to click on the link or provide personal information, believing that you’re safeguarding your finances. The more convincing the message seems, the more likely you are to trust it, especially if it uses familiar language or references your bank.
 
-Variations of this scam can appear in different forms, such as emails that look like they come from your bank or even phone calls where someone claims to be a customer service representative. Some might even use spoofed phone numbers that resemble your bank’s contact information. The messages may differ slightly in wording or the urgency they convey, but they all share the same goal: to trick you into providing sensitive information or authorizing a payment.
+You might also see variations of this scam, such as emails that appear to come from your bank or a fake customer service number claiming to be Zelle. Some messages might even claim that your account has been compromised and that you need to log in to a secure site to resolve the issue. Each version plays on your familiarity with financial transactions, making it harder to spot the red flags.
 
-Falling for this scam can have serious consequences. If you provide your personal information or click on links, you risk having your bank account drained or your identity stolen. Scammers can use your details to access your accounts, leading to unauthorized transactions and financial chaos. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your security. It’s crucial to remain vigilant and question any unexpected messages, especially when they involve your money.
+Falling for this scam can lead to serious consequences. If you click on the link and enter your information, you could be giving scammers access to your bank account or personal details. This can result in unauthorized transactions, identity theft, and a long process to recover your funds. The emotional toll can be just as damaging, leaving you feeling vulnerable and anxious about your financial security.
 <p>That difference matters because a real notice related to Zelle Transfer Confirmation Text should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ Falling for this scam can have serious consequences. If you provide your persona
 <li><a href="/scam-check-now/is-zelle-transfer-cancellation-email-legit-or-scam/">Is Zelle Transfer Cancellation Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-verification-code-text-legit-or-scam/">Is Zelle Verification Code Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-verification-request-text-legit-or-scam/">Is Zelle Verification Request Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-zelle-transfer-request-from-unknown-legit-or-scam/">Is Zelle Transfer Request from Unknown or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-zelle-text/">Did I Get Scammed by Zelle Text?</a></li>
 <li><a href="/scam-check-now/is-zelle-account-locked-email-legit-or-scam/">Is Zelle Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-account-restriction-email-legit-or-scam/">Is Zelle Account Restriction Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-zelle-account-suspension-email-legit-or-scam/">Is Zelle Account Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-zelle-account-verification-email-legit-or-scam/">Is Zelle Account Verification Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
