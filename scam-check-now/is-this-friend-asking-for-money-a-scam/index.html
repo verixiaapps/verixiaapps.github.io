@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Friend Asking for Money is a common question when something like an unexpected email feels suspicious. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common This Friend Asking for Money flow starts with something like an unexpected email, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You receive a message from a friend that seems a bit off. They say they’re in a tight spot and urgently need money for an unexpected expense, like a car repair or a medical bill. The tone feels familiar, but there’s something about the wording that raises a flag. They might even mention they’ve tried to reach you by phone but couldn’t get through, making you feel guilty for not responding sooner. It’s a situation that pulls at your heartstrings, and you might find yourself questioning if you should help out.
+You open your messaging app to find a text from a friend you haven’t spoken to in a while. They’re in a tough spot, claiming they need money urgently to cover an unexpected expense. The message feels personal, filled with details about their situation that tug at your heartstrings. They might even mention how they’ve tried other options but are reaching out to you because they trust you. The request for money seems genuine, and the urgency in their tone makes it hard to ignore.
 
-The message creates a sense of urgency that’s hard to ignore. Your friend claims they need the money immediately to avoid a crisis, which makes you feel pressured to act quickly. They might even promise to pay you back as soon as they get their next paycheck, making it seem like a safe bet. This emotional appeal can cloud your judgment, leading you to overlook the signs that something isn’t quite right. You want to help, but that urgency can push you into a hasty decision.
+The message creates an immediate sense of pressure. Your friend’s situation sounds dire, and they might emphasize that they need the funds quickly to avoid serious consequences. They could even mention that they’ll pay you back as soon as they can, which adds a layer of trust. You might feel a strong impulse to help, thinking about how you would want someone to do the same for you if the roles were reversed. This emotional appeal can cloud your judgment, making it difficult to see the red flags.
 
-You might notice variations in how this scam is presented. Sometimes, the message comes from a hacked social media account, where the scammer has taken over your friend’s profile. Other times, it could be a text from an unknown number claiming to be your friend who’s in trouble. The details may change—maybe it’s a lost wallet or a sudden travel expense—but the core message remains the same: they need money, and they need it fast. This inconsistency can make it harder to spot the scam.
+You might also notice variations in how these requests come through. Sometimes, the message might come from a social media account that appears to be your friend’s, but upon closer inspection, there are subtle differences in the profile or the way they communicate. Other times, it could be a phone call from someone claiming to be your friend, using their name and details to sound convincing. Each variation is crafted to exploit your trust and familiarity, making it even harder to recognize the deception.
 
-If you fall for this trap, the consequences can be severe. You could end up sending money to someone who isn’t your friend at all, leaving you out of pocket and potentially exposing your financial information to further scams. The emotional toll can also be significant, as you may grapple with feelings of betrayal and guilt. Recognizing these scams is crucial to protecting yourself and your loved ones from falling victim to a situation that could have been avoided.
+If you fall for this scam, the consequences can be significant. You might end up sending money that you’ll never see again, leaving you in a difficult financial situation. Beyond the loss of funds, there’s the emotional toll of realizing you were deceived by someone you thought you could trust. This can lead to feelings of guilt, shame, and betrayal, not just towards the scammer but also towards yourself for not seeing the signs. The impact can linger, causing you to second-guess future interactions and relationships.
 <p>This is why step-by-step checking matters. Once a message related to This Friend Asking for Money moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ If you fall for this trap, the consequences can be severe. You could end up send
 <li><a href="/scam-check-now/is-this-unexpected-charge-email-a-scam/">Is This Unexpected Charge Email a Scam</a></li>
 <li><a href="/scam-check-now/is-this-website-legit-or-a-scam/">Is This Website or a Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-this-text-message/">Did I Get Scammed by This Text Message?</a></li>
-<li><a href="/scam-check-now/is-this-giveaway-message-legit-or-scam/">Is This Giveaway Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-inheritance-email-a-scam/">Is This Inheritance Email a Scam</a></li>
 <li><a href="/scam-check-now/is-this-interview-request-email-legit-or-fake/">Is This Interview Request Email or Fake Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-invoice-email-a-scam-or-legit/">Is This Invoice Email a Scam or Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-lottery-email-legit-or-scam/">Is This Lottery Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

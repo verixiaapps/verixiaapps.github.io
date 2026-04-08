@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Instagram Message is a common question when something like an unexpected email feels suspicious. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many This Instagram Message situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You open your Instagram app and see a direct message from someone claiming to be a brand you love. The message is friendly and personalized, mentioning your recent posts and inviting you to join an exclusive promotion. They say you’ve been selected for a special giveaway or a chance to collaborate, complete with a link that promises to lead you to more details. The profile looks legitimate, with a decent number of followers and posts, making it easy to feel like this is a genuine opportunity.
+You receive a direct message on Instagram from someone claiming to be a well-known brand or influencer. The message looks polished, complete with their logo and a friendly tone, inviting you to participate in an exclusive giveaway or a special promotion. They might ask you to click on a link to claim your prize or verify your account details. The urgency is palpable, suggesting that the offer is only available for a limited time and that you need to act fast to secure your spot. Everything seems legitimate at first glance, but something feels off.
 
-As you read the message, a sense of excitement builds. The sender creates urgency by stating that the offer is only available for a limited time and that you need to act quickly to secure your spot. They might even mention that only a few people have been chosen, making you feel special and chosen. This kind of pressure can cloud your judgment, pushing you to click that link without thinking twice about the potential risks involved.
+The sender creates a sense of urgency by emphasizing that this is a once-in-a-lifetime opportunity. They might mention that only a few people have been selected or that the offer expires within hours. This pressure can make you feel like you must act immediately, pushing aside any doubts you may have. The friendly tone and the promise of a reward can easily build a false sense of trust, making you more likely to overlook any red flags. You might find yourself thinking, “This could be my big break,” and that excitement can cloud your judgment.
 
-You might notice variations of this message appearing in your inbox. Sometimes, it could be a request for a small fee to unlock the giveaway or an invitation to a private group where you can learn more. Other times, the message may come from a fake account that mimics a well-known influencer or brand. Each time, the approach feels tailored to catch your attention, making it harder to discern what's real and what's not.
+Variations of this scam can come in different forms. Sometimes, the message might appear to be from a verified account or even a friend whose account has been hacked. Other times, it could be a fake profile created to mimic a popular brand. The language might change slightly, or the offer could shift from a giveaway to a limited-time discount. Regardless of the specifics, the core tactic remains the same: lure you in with something enticing while masking the true intent behind the message.
 
-Falling for this kind of scam can lead to serious consequences. Clicking the link might take you to a phishing site designed to steal your personal information, or you could end up downloading malware onto your device. In some cases, you might even find yourself sharing sensitive data, thinking you’re signing up for a legitimate opportunity. The aftermath can be frustrating and damaging, leaving you vulnerable to identity theft or financial loss.
+If you fall for this scam, the consequences can be serious. You might end up providing personal information that can be used for identity theft or financial fraud. Clicking on a malicious link can lead to your device being infected with malware, compromising your security. Even if it seems harmless, sharing your details can lead to unwanted solicitations or further scams. The initial thrill of a potential win can quickly turn into a nightmare, leaving you feeling violated and vulnerable.
 <p>The strongest clue is usually not one isolated detail. With This Instagram Message, the risk often becomes clearer when something like an unexpected email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

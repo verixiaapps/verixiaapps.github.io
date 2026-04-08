@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Bank Alert Email Legit or Fake is a common question when something like a bank fraud alert text feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common This Bank Alert Email Legit or Fake scenario starts with something like a bank fraud alert text, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You open your email to find a message that appears to be from your bank, complete with their logo and official-looking formatting. The subject line reads, "Important: Your Account Requires Immediate Attention." Inside, the email claims there has been suspicious activity on your account and urges you to click a link to verify your identity. The language is alarming, mentioning unauthorized transactions and potential account suspension if you don’t act quickly. It feels urgent, and you can’t help but wonder if this is a legitimate warning or a cleverly disguised trap.
+You just received an email that looks like it’s from your bank, complete with their logo and a message that claims there’s been suspicious activity on your account. The email urges you to click a link to verify your information immediately. The language is formal, and it even includes a customer service number that looks legitimate. You might feel a rush of anxiety as you read it, wondering if your account is at risk. The email feels real, but something about it gives you pause.
 
-This message plays on your emotions, creating a sense of urgency that makes it hard to think clearly. You might feel a rush of anxiety as you read about potential fraud, pushing you to act before it’s too late. The email often includes phrases like “immediate action required” or “failure to respond may result in account closure,” making you feel pressured to click the link without taking a moment to scrutinize the details. The design and tone are crafted to build trust, making you believe that this is a genuine communication from your bank.
+The urgency in the message is palpable. It states that if you don’t act quickly, your account could be suspended or compromised. This tactic is designed to make you feel panicked and pressured to respond without thinking. The email might even mention a recent transaction you made, which adds a layer of trust and makes it harder to dismiss. You might find yourself second-guessing your instincts, thinking that it’s better to be safe than sorry.
 
-Scammers are skilled at adapting their tactics, so you might encounter variations of this email that look slightly different but convey the same message. Some may come from addresses that mimic your bank’s domain, while others might include fake customer service numbers. You might also see similar alerts via text messages or even phone calls, where a voice on the other end claims to be from your bank, urging you to provide personal information to resolve an issue. Each variation is designed to catch you off guard and exploit your trust.
+Variations of this scam can appear in different forms. You might get a text message instead of an email, or perhaps a phone call from someone claiming to be a bank representative. Each version has the same core message: there’s an urgent issue with your account that requires immediate action. Some scams may even use your name or other personal details to make the message feel more credible. The more personalized it is, the more likely you are to let your guard down.
 
-Falling for this scam can have serious consequences. If you click the link and enter your personal information, you risk giving scammers access to your bank account, potentially leading to unauthorized transactions and identity theft. The aftermath can be devastating, not just financially but emotionally, as you navigate the process of reporting the fraud and trying to recover your lost funds. The feeling of violation can linger long after the incident, making you wary of future communications and eroding your trust in legitimate institutions.
+If you fall for this trap, the consequences can be severe. Clicking that link may take you to a fake website designed to steal your login credentials. Once the scammers have your information, they can drain your account or even open new accounts in your name. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s a harsh reminder that not everything that looks official is what it seems.
 <p>The strongest clue is usually not one isolated detail. With This Bank Alert Email Legit or Fake, the risk often becomes clearer when something like a bank fraud alert text is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

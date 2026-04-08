@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Amazon Email is a common question when something like a PayPal refund email feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common This Amazon Email scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email that looks just like an official Amazon message, complete with their logo and familiar layout. It may claim there's an issue with your account, stating that you need to verify your information or confirm a recent purchase. The sender’s email address might seem legitimate at first glance, but a closer look reveals subtle discrepancies. Perhaps the link directs you to a website that mimics Amazon's but has a slightly altered URL. This kind of email can easily trick even the most cautious users.
+You open your email and see a message that looks like it’s from Amazon, complete with the logo and familiar layout. The subject line reads, “Your account has been compromised!” Inside, there’s a message urging you to click a link to verify your account details. The email may even include a sense of urgency, claiming that your account will be suspended if you don’t act immediately. It feels convincing, almost like a routine notification you might expect from a service you use regularly.
 
-The urgency in these emails is palpable. They often use phrases like “Immediate action required” or “Your account will be suspended” if you don’t respond quickly. This pressure can make you act without thinking, leading you to click on links or provide personal information before you’ve had a chance to verify the source. The message is crafted to instill fear and prompt a hasty reaction, making it hard to pause and consider whether the email is genuine.
+The email plays on your emotions, creating a sense of panic. You might feel your heart race as you read that your account is at risk. The sender’s address appears legitimate at first glance, and the language used is designed to make you trust it. They might even reference recent orders or your Prime membership, making it seem like they know you. This tactic is effective because it pushes you to act quickly, often bypassing your usual caution.
 
-You might also notice variations of this scam, such as texts or phone calls claiming to be from Amazon. Some may offer fake discounts or promotions, enticing you to click a link or call a number. Others might impersonate customer service, asking for your account details to “assist” you. Each variation is designed to exploit your trust in Amazon, making it easy to overlook the signs that something isn’t right. The more convincing the message, the more likely you are to let your guard down.
+Variations of this scam can pop up in your inbox with slight tweaks. You might receive a text message instead, claiming that your package is delayed and requiring you to confirm your address. Or, you could encounter a pop-up on a website that looks like Amazon, asking you to log in to resolve an issue. Each version is crafted to look authentic, using familiar branding and language to lower your guard. Even a phone call could come through, with someone posing as customer service, asking for your personal information.
 
-Falling for this scam can lead to serious consequences. If you provide your login details, scammers can access your account, make unauthorized purchases, or even steal your identity. You might find your bank account drained or your credit card information compromised. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your online security. It’s crucial to take a moment to verify any unexpected communication before taking action, as the cost of a hasty decision can be significant.
+Falling for this scam can lead to serious consequences. If you click the link and enter your information, you might unknowingly hand over your login credentials to criminals. This could result in unauthorized purchases, identity theft, or even financial loss. Your personal data could be sold on the dark web, leaving you vulnerable long after the initial incident. The emotional toll of realizing you’ve been scammed can be just as damaging, leaving you feeling violated and anxious about your online security.
 <p>Payment-related scams connected to This Amazon Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a PayPal refund email is involved.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

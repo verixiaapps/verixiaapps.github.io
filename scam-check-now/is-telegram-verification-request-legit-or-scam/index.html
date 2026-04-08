@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Verification Request is a common question when something like a suspicious link feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Telegram Verification Request flow starts with something like a suspicious link, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have received a message on Telegram that asks you to verify your account by clicking a link or entering a code. The message often looks official, perhaps even mimicking the platform's design, claiming there’s a problem with your account or that you need to confirm your identity to continue using the service. It might even come from a contact you know, making it feel more legitimate. The urgency of the request can catch you off guard, prompting you to act quickly without thinking it through.
+You might have recently received a Telegram verification request that seemed a bit off. Perhaps it came through an email or a text message, asking you to verify your account by clicking on a link or entering a code. The message may have included official-looking logos or even mentioned that your account would be suspended if you didn’t act quickly. It’s designed to look authentic, making you think it’s a routine security check from Telegram, but something about it just doesn’t feel right.
 
-Scammers know how to create a sense of urgency that can make you feel anxious. They might say your account will be suspended unless you verify it immediately, or that there’s been suspicious activity that requires your prompt attention. This pressure can push you to click on links or provide personal information without taking a moment to consider the risks. The message often feels personal, as if it’s tailored just for you, which can make it even harder to resist.
+The urgency in these messages is palpable. They often claim that your account has been compromised or that there’s been suspicious activity, pushing you to act fast. This pressure can make you feel anxious, as if you’re on the verge of losing access to your chats or important contacts. The sender may even use a friendly tone or reference your recent activity, creating a false sense of trust. You might find yourself questioning if you should take immediate action, which is exactly what they want.
 
-These verification requests can appear in various forms. You might see them as direct messages, emails that look like they come from Telegram, or even through social media channels. Some variations may use slightly different language, like claiming to be from customer support or mentioning a recent security update. Regardless of the format, they all share the same goal: to trick you into providing sensitive information or clicking on malicious links.
+You may encounter variations of this scam that look slightly different but carry the same deceptive intent. Some messages might come from accounts that impersonate Telegram support, while others might use a different platform altogether, like a social media site. They might even offer you a reward or claim you’ve won something, urging you to verify your identity as part of the process. Each version is crafted to exploit your trust and urgency, making it harder to spot the red flags.
 
-Falling for this scam can lead to serious consequences. If you provide your verification code or personal details, scammers can gain access to your account, potentially leading to identity theft or financial loss. They might use your account to scam your contacts, further spreading the deception. The aftermath can leave you feeling violated and vulnerable, as recovering your account and personal information can be a long and difficult process.
+Falling for this scam can lead to serious consequences. If you provide your information, you could lose access to your Telegram account and potentially have your personal data compromised. Scammers may use your credentials to access other accounts, leading to identity theft or financial loss. The emotional toll can be significant, leaving you feeling violated and vulnerable. It’s crucial to recognize these tactics to protect yourself and your information from falling into the wrong hands.
 <p>This is why step-by-step checking matters. Once a message related to Telegram Verification Request moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

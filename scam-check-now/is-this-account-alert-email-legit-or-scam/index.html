@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Account Alert Email is a common question when something like a suspicious link feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many This Account Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You open your email to find a message that looks like it’s from your bank, complete with their logo and a subject line that reads, “Important Account Alert: Action Required.” The email urges you to click a link to verify your account information or risk being locked out. The language is formal yet alarming, mentioning suspicious activity that could compromise your funds. Everything seems to check out at first glance, but there’s an unsettling feeling in your gut as you read through the message.
+You open your email to find a message that appears to be from your bank, complete with their logo and a subject line that reads “Account Alert: Immediate Action Required.” The email claims there’s been unusual activity on your account and urges you to click a link to verify your identity. The language is alarming, mentioning potential unauthorized transactions and the risk of account suspension. Everything looks official at first glance, but the urgency of the message makes you pause. You wonder if this is a legitimate warning or a clever ploy to get your personal information.
 
-The urgency in the email is palpable. It tells you that immediate action is needed to prevent your account from being frozen, creating a sense of panic. You might feel the pressure to act quickly, fearing that any delay could lead to financial loss. The message may even include a phone number to call for immediate assistance, making it seem more legitimate. This combination of urgency and trust can easily cloud your judgment, pushing you to click that link without a second thought.
+The email creates a sense of urgency that makes it hard to think clearly. It tells you that you must act quickly to avoid losing access to your funds or having your account compromised. This pressure can lead you to click the link without considering the potential risks. The sender’s tone is authoritative, making it seem like they genuinely care about your security. They might even include a phone number for “immediate assistance,” which can further convince you that this is a legitimate communication from your bank.
 
-Scammers are skilled at adapting their tactics, so you might see variations of this email that look slightly different. Some may come from addresses that mimic your bank’s domain but have subtle differences, while others might claim to be from a payment service or an online retailer. They may even use familiar names or phrases to make the communication feel more personal. Each version is designed to catch you off guard, making it harder to spot the red flags.
+Scammers often use variations of this tactic, and you might see similar messages claiming to be from popular online retailers or service providers. Sometimes, they might even pretend to be a tech support team alerting you to a supposed virus on your device. The logos and formatting may change, but the core message remains the same: act now or face dire consequences. You might receive a text message or a call that echoes the same alarming tone, making it difficult to discern what is real and what is not.
 
-Falling for this kind of scam can lead to serious consequences. If you enter your personal information, you could find your bank account drained or your identity stolen. Scammers often use the information they gather to commit further fraud, leaving you to deal with the aftermath. The emotional toll can be just as damaging, as you grapple with the violation of your trust and the financial repercussions. It’s a situation that can escalate quickly, making it crucial to pause and verify before taking any action.
+Falling for this type of scam can have serious consequences. If you provide your personal information, such as your login credentials or financial details, you could find your accounts drained or your identity stolen. The aftermath can be overwhelming, involving lengthy processes to recover your funds or restore your credit. The emotional toll can be just as damaging, leaving you feeling violated and anxious about future communications. It’s crucial to take a moment to verify the source before acting on any urgent requests.
 <p>The strongest clue is usually not one isolated detail. With This Account Alert Email, the risk often becomes clearer when something like a suspicious link is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

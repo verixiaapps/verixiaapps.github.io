@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Facebook Message Real or Fake is a common question when something like a suspicious link feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many This Facebook Message Real or Fake situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received a Facebook message that seems to come from a friend or a trusted source, claiming they’ve found a way to earn easy money or access exclusive deals. The message often includes a link that promises something enticing, like a gift card or a prize, and it might even have a friendly tone, making it feel personal and genuine. You may notice that it uses your friend’s profile picture and name, which can make it even harder to question its authenticity. It feels like a casual chat, but something about it just doesn’t sit right.
+You open your Facebook Messenger to find a message from a friend that seems a bit off. It starts with a casual greeting, but then quickly dives into an urgent request for help. They mention something about a limited-time offer or an unexpected financial opportunity that requires immediate action. The tone feels familiar, but the message lacks the usual warmth and personal touch you expect from your friend. Instead, it’s filled with links and instructions that make you pause. You can’t shake the feeling that something isn’t right.
 
-The urgency in these messages can be overwhelming. They often say things like “act fast” or “limited time offer,” pushing you to click the link before you have a chance to think it through. The sender might even mention that others are already taking advantage of this opportunity, creating a sense of FOMO—fear of missing out. This pressure can make you feel like you need to respond immediately, which is exactly what the scammer wants. You might find yourself racing to click the link, thinking you could miss out on something great.
+The urgency in the message is palpable. It might say something like, “I need you to act fast; this could change your life!” or “You have to click this link before it’s too late!” This creates a sense of panic, pushing you to respond quickly without thinking it through. The sender might even reference a shared experience or inside joke to build trust, making it harder for you to question the authenticity. You feel compelled to help your friend, but the pressure to act fast raises a red flag in your mind.
 
-You may also notice variations of this scam popping up in your feed. Sometimes, the message could come from a fake account that closely mimics a friend’s profile, or it might appear as a comment on a post, urging you to check your inbox. Other times, it could be a group message that includes several people, making it seem more legitimate. Each variation is designed to catch your attention and exploit your trust, making it difficult to discern what’s real and what’s not.
+You might notice variations of this message appearing in your feed or inbox, with different names or slightly altered details. Sometimes, it could be a fake profile impersonating someone you know, or it might come from a group chat that includes people you don’t recognize. The language can change, too—sometimes it’s casual and friendly, other times it’s more formal and business-like. Regardless of the specifics, the core message remains the same: an urgent plea that tugs at your emotions and makes you question your instincts.
 
-Falling for this kind of scam can lead to serious consequences. Once you click the link, you might unknowingly provide your personal information, which can be used for identity theft or financial fraud. In some cases, clicking the link could even install malware on your device, compromising your security and privacy. The aftermath can leave you feeling violated and anxious, as you scramble to secure your accounts and deal with the fallout. It’s a reminder that even seemingly harmless messages can carry significant risks.
+Falling for this type of scam can lead to serious consequences. You might unknowingly give away personal information, click on malicious links, or even send money to someone who has no intention of helping you. The fallout can be more than just financial; it can damage your relationships if your friend’s account is compromised and used to target others. The emotional toll of realizing you’ve been duped can linger, leaving you feeling vulnerable and distrustful. Recognizing these red flags is crucial to protecting yourself and your loved ones from potential harm.
 <p>Scams connected to This Facebook Message Real or Fake often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

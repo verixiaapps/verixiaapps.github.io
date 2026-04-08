@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Suspicious Activity Email is a common question when something like a suspicious link feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Telegram Suspicious Activity Email flow starts with something like a suspicious link, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have received an email claiming to be from Telegram, warning you about suspicious activity on your account. It often includes alarming language, stating that your account has been compromised or that someone is trying to access it from an unrecognized device. The email may urge you to click on a link to verify your identity or reset your password. The sender's address might look official at first glance, but a closer inspection reveals inconsistencies that raise red flags. Such messages can easily catch you off guard, especially if you use Telegram frequently.
+You might have recently received an email claiming to be from Telegram, warning you about suspicious activity on your account. The message often looks official, complete with the Telegram logo and a professional tone. It may include details like an unfamiliar login attempt or a request to verify your identity. The email typically urges you to click on a link to secure your account, leading you to a page that resembles the real Telegram login. The urgency in the message makes it hard to ignore, especially if you’re concerned about your account security.
 
-The urgency conveyed in these emails is designed to provoke immediate action. You may feel a rush of anxiety, prompting you to act quickly without thinking. The message might suggest that your account will be locked or that you could lose access if you don’t respond within a specific timeframe. This pressure can cloud your judgment, making it easier for scammers to manipulate you into providing personal information or clicking on harmful links. The fear of losing access to your conversations or contacts can make you more susceptible to their tactics.
+This type of email is designed to create a sense of urgency, making you feel like you need to act quickly to protect your account. The sender might mention that your account will be suspended if you don’t respond within a certain timeframe. This pressure can cloud your judgment, pushing you to click on the link without taking a moment to think. The email may also include reassuring language, making it seem like a legitimate communication from a trusted source, which can further lower your defenses.
 
-These scams can take on various forms, often mimicking legitimate communications from Telegram. You might see similar emails claiming to be from other messaging platforms or social media sites, each with a slightly different twist. Some might even offer a fake support number to call, where you could be further misled. The visual design of these emails can be convincing, featuring Telegram’s logo and colors, which adds to their legitimacy. Even a text message could arrive with a similar warning, making it hard to discern what’s real and what’s not.
+You might encounter variations of this scam that come in different forms. Some emails may claim to be from a different messaging service or even a payment platform, but the core tactic remains the same. They often use familiar branding and language to make their messages more convincing. You could also receive a text message or even a phone call with similar warnings, all designed to catch you off guard. Each variation aims to exploit your concern for security, making it easy to mistake the scam for a genuine alert.
 
-Falling for this scam can have serious consequences. If you provide your login credentials, scammers can gain full access to your account, potentially leading to identity theft or unauthorized transactions. They may use your account to scam your contacts, further spreading the deception. You might find yourself dealing with the aftermath of compromised personal information, which can take time and effort to rectify. The emotional toll can be significant, leaving you feeling violated and anxious about your online security.
+If you fall for this scam, the consequences can be severe. By clicking on the link and entering your credentials, you risk giving scammers access to your Telegram account and potentially other linked accounts. They could use this access to impersonate you, steal personal information, or even engage in fraudulent activities. The fallout can extend beyond just your Telegram account, affecting your privacy and security across various platforms. Recognizing these scams is crucial to protecting yourself from the dangers that lurk in your inbox.
 <p>This is why step-by-step checking matters. Once a message related to Telegram Suspicious Activity Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Verification Code Text is a common question when something like an account locked warning appears without context. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an account locked warning and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might receive a text message that looks like it’s from Telegram, containing a verification code you didn’t request. The message may say something like, “Your verification code is 123456. If you didn’t request this, please ignore this message.” It’s designed to appear legitimate, using official Telegram branding and language that makes it seem like a standard security measure. You might be confused, wondering why you’re getting this code, especially if you’ve never tried to log into Telegram or create an account.
+You receive a text message claiming to be from Telegram, complete with their logo and a friendly greeting. The message states that your account has been logged in from a new device and provides a verification code to confirm it’s you. It’s alarming, especially if you didn’t initiate any login. The urgency in the message makes you feel like you need to act quickly, as it suggests that your account might be at risk if you don’t verify your identity immediately.
 
-Scammers often use urgency to manipulate you into acting quickly. They may follow up with a call or another message, insisting that your account is at risk or that someone is trying to access it. This pressure can make you feel like you need to respond immediately, pushing you to enter the code or provide personal information without thinking it through. The goal is to create a sense of panic, making it easier for them to exploit your trust.
+The text creates a sense of pressure by implying that someone is trying to access your account. It might even mention that you need to respond within a certain timeframe to prevent unauthorized access. This tactic plays on your fear of losing control over your personal information, making you more likely to trust the sender. You might feel compelled to enter the code right away, believing it’s the only way to secure your account.
 
-You might also see variations of this scam, such as messages claiming to be from other services or apps you use. They may say you need to verify your identity for a payment, a subscription, or a security check. Sometimes, these messages come from phone numbers that look familiar or are spoofed to appear as if they’re coming from a trusted source. Each variation is crafted to fit the context of your online activities, making them feel even more believable.
+Variations of this scam can pop up in different forms. You might receive a similar message claiming to be from another app or service, or it could come from a phone number that looks familiar. Some messages may even include links that lead to fake login pages designed to steal your credentials. The language and urgency may change, but the underlying tactic remains the same: to trick you into providing sensitive information under the guise of security.
 
-Falling for this scam can lead to serious consequences. If you enter the verification code, the scammer can gain access to your Telegram account or other linked accounts, allowing them to steal personal information or even impersonate you. This can result in financial loss, identity theft, and a cascade of issues that can take time and effort to resolve. The emotional toll can be significant as well, leaving you feeling violated and vulnerable in your online interactions.
+Falling for this scam can have serious consequences. If you enter the verification code, you might inadvertently give a scammer access to your Telegram account, allowing them to impersonate you and reach out to your contacts. This could lead to further scams targeting your friends or family, as they may trust messages coming from your account. The ripple effect of this deception can be damaging, not just for you but for everyone in your network.
 <p>That difference matters because a real notice related to Telegram Verification Code Text should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

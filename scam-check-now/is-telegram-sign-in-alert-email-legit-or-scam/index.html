@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Sign in Alert Email is a common question when something like a suspicious link feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Telegram Sign in Alert Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might receive an email claiming to be a Telegram sign-in alert, notifying you that someone is trying to access your account. The message often includes details like your phone number, a login attempt location, and a prompt to click a link to secure your account. The email may look official, featuring the Telegram logo and a professional layout, making it seem like a legitimate warning. However, the urgency in the message can catch you off guard, prompting you to act quickly without fully analyzing the situation.
+You might have recently received an email claiming that someone is trying to sign in to your Telegram account from an unfamiliar device or location. The message often looks official, featuring the Telegram logo and a sense of urgency, urging you to take immediate action to secure your account. It may include a link that prompts you to verify your identity or reset your password. The email might even mention specific details, like your account's last login time, making it seem more credible and tailored to you.
 
-The email typically creates a sense of urgency by stating that your account is at risk and that immediate action is required to prevent unauthorized access. You might feel a rush of anxiety, thinking about the possibility of someone accessing your private messages or personal information. This pressure can lead you to click on the provided link without considering the potential risks, as the email plays on your fear of losing access to your account or having your data compromised.
+This type of email typically creates a sense of urgency, suggesting that your account is at risk and that you need to act fast. The message may emphasize the importance of protecting your personal information or warn you about potential unauthorized access. By instilling fear and urgency, it pushes you to click on the provided link without taking the time to verify its authenticity. The combination of urgency and a seemingly official tone can easily lead you to believe that this is a legitimate notification from Telegram.
 
-Variations of this scam can appear in different forms, such as text messages or even phone calls. A text might inform you that your Telegram account has been temporarily suspended, urging you to verify your identity through a link. In some cases, scammers may impersonate customer support, claiming they need to verify your account details over the phone. Each version aims to exploit your trust and urgency, making it easy to overlook the signs that something isn’t right.
+You might also encounter variations of this scam, such as text messages or direct messages on social media platforms that mimic the same warning. Some versions may even claim to be from customer support, offering help to resolve the supposed security issue. Others might use different platforms or services, but the core tactic remains the same: instilling fear and urgency to get you to act quickly. These variations can make it even harder to distinguish between a legitimate alert and a cleverly disguised scam.
 
-Falling for this scam can have serious consequences. If you click the link and enter your login credentials, you may unknowingly give scammers access to your account, allowing them to steal personal information or send messages to your contacts. This can lead to identity theft, financial loss, and even a compromised social circle, as your friends may receive similar messages from your account. The emotional and financial fallout can be significant, making it crucial to remain vigilant and skeptical of unexpected alerts.
+Falling for this scam can have serious consequences. If you click on the link and enter your credentials, you might inadvertently hand over your account information to scammers, who can then access your personal data or even take over your account. This could lead to identity theft, financial loss, or further scams targeting your contacts. The emotional toll of realizing you've been deceived can be just as damaging as the potential financial repercussions, leaving you feeling vulnerable and exposed.
 <p>The strongest clue is usually not one isolated detail. With Telegram Sign in Alert Email, the risk often becomes clearer when something like a suspicious link is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

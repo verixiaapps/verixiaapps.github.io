@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Unusual Login Email is a common question when something like a password reset message appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Telegram Unusual Login Email flow starts with something like a password reset message, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received an email claiming that there’s been an unusual login attempt on your Telegram account. The message often looks official, complete with the Telegram logo and a sense of urgency. It may say something like, “We detected a login from a new device. If this wasn’t you, please secure your account immediately.” This email might even include a link that appears to lead to the Telegram website, making it seem legitimate at first glance. If you’ve been using Telegram, this could easily catch your attention and prompt you to take action.
+You may have recently received an email claiming that there was an unusual login attempt on your Telegram account. The message might have included details like the location of the login attempt, the device used, and a prompt to verify your identity by clicking a link. It often looks official, complete with the Telegram logo and a professional tone, making it seem like a legitimate security alert. This kind of email can easily catch you off guard, especially if you’ve been using Telegram regularly and are concerned about your account security.
 
-The email is designed to create a sense of urgency, making you feel like your account is at risk. It may mention that your account will be locked or compromised if you don’t act quickly. This pressure can cloud your judgment, pushing you to click on the provided link without thinking twice. The message often employs a tone that feels personal, as if they are genuinely concerned about your security. This tactic is effective because it plays on your emotions and the natural instinct to protect your online presence.
+The email typically creates a sense of urgency, suggesting that your account is at risk and that immediate action is required. It may state that if you don’t verify your identity within a specific timeframe, your account could be locked or compromised. This pressure can make you act quickly, bypassing your usual caution. The fear of losing access to your messages or contacts can lead you to click the link without thinking twice, believing you’re protecting your account from a potential threat.
 
-You might also encounter variations of this scam, such as text messages or even direct messages on social media platforms that mimic Telegram’s style. Some versions might claim that your account has been flagged for suspicious activity or that you need to verify your identity to continue using the service. Each variation maintains that same urgent tone and often includes a link that leads to a fake login page designed to harvest your credentials. The consistency across these messages can make them all the more convincing, especially if you’re not on high alert.
+You might also encounter variations of this scam, such as text messages or even direct messages on social media platforms that mimic the same urgency and branding. Some versions may claim to be from Telegram support, offering assistance with a supposed security issue. Others might come disguised as notifications from a trusted friend who has supposedly shared a link with you. Each variation aims to exploit your trust in the platform or your social circle, making it harder to recognize the deception.
 
-Falling for this scam can have serious consequences. If you enter your login information on a fraudulent site, you’re handing over your account credentials to scammers who can then access your personal messages, contacts, and sensitive information. This not only compromises your privacy but can also lead to further financial scams if they gain access to linked accounts. The aftermath can be stressful and time-consuming as you try to regain control of your account and protect your information from further exploitation.
+Falling for this scam can have serious consequences. If you click the link and enter your login credentials, the scammers gain access to your account, potentially leading to unauthorized access to your personal messages, contacts, and even sensitive information. This not only puts your privacy at risk but can also lead to further scams targeting your contacts, as the scammers may impersonate you. The aftermath can be overwhelming, leaving you to deal with the fallout of your compromised account and the breach of trust with those you communicate with.
 <p>This is why step-by-step checking matters. Once a message related to Telegram Unusual Login Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

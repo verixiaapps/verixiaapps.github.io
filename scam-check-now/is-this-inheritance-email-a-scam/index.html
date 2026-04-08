@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Inheritance Email is a common question when something like a suspicious link feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common This Inheritance Email flow starts with something like a suspicious link, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming you’ve inherited a substantial sum of money from a distant relative you’ve never heard of. The message often includes official-looking logos, a sense of formality, and might even reference a specific estate or legal firm managing the inheritance. It usually contains an urgent request for your personal information, such as your full name, address, and bank details, to facilitate the transfer. The sender often claims that time is of the essence, pushing you to respond quickly to secure your supposed fortune.
+You might have received an email claiming you’ve inherited a substantial sum of money from a distant relative you didn’t even know existed. The message often includes official-looking logos, legal jargon, and a sense of urgency, urging you to respond quickly to claim your inheritance. It may even mention a law firm or a government agency to lend credibility, making it seem like a legitimate opportunity. The sender often provides a phone number or a link to a website that looks professional, but everything about it feels just a bit off, leaving you questioning its authenticity.
 
-This type of email is designed to create a sense of urgency and trust. The sender may mention a limited time frame to claim your inheritance, suggesting that if you don’t act fast, the opportunity will vanish. They might even include a fake phone number for you to call, where someone will speak to you in a reassuring tone, further convincing you that this is a legitimate matter. The combination of urgency and a seemingly trustworthy persona can make it hard to resist responding.
+The urgency in these emails is palpable. They often state that you must act fast to secure your inheritance, or you risk losing it forever. They might say that there’s a deadline for claiming the funds or that legal fees will accrue if you don’t respond immediately. This pressure can make you feel anxious, pushing you to act without thinking it through. The promise of sudden wealth can cloud your judgment, making you more likely to overlook red flags.
 
-You may also encounter variations of this scam, such as text messages or social media direct messages that claim you’ve won a prize or are eligible for a financial windfall. Some messages may come from fake charities claiming you’ve been selected for a special grant. Each version typically maintains the same core elements: an unexpected financial gain, a request for personal information, and a push for immediate action. The details may change, but the underlying tactic remains the same, making it easy to overlook the red flags.
+You may also encounter variations of this scam that come in different forms. Some emails might claim to be from a bank, notifying you of a dormant account that belongs to you. Others may come as messages from social media platforms, saying you’ve been tagged in a post about your inheritance. Each version is designed to catch your eye and manipulate your emotions, but they all share the same goal: to get you to provide personal information or send money to secure your “inheritance.”
 
-If you fall for this scam, the consequences can be severe. Providing your personal information can lead to identity theft, where scammers use your details to open accounts in your name or drain your bank accounts. Additionally, you might be asked to pay upfront fees or taxes to release the inheritance, only to find that the entire scheme was fabricated. The emotional and financial toll can be devastating, leaving you not only out of pocket but also feeling violated and misled.
+Falling for this scam can lead to serious consequences. If you respond, you might end up sharing sensitive information like your Social Security number or bank details, putting your identity at risk. In some cases, you could be asked to pay upfront fees to release the funds, only to find out that the entire situation was fabricated. The emotional toll can be significant, leaving you feeling embarrassed and vulnerable. Understanding how these scams operate is crucial to protecting yourself from their deceitful tactics.
 <p>This is why step-by-step checking matters. Once a message related to This Inheritance Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

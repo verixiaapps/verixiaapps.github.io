@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Suspicious Link Message is a common question when something like a suspicious sign-in link feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious sign-in link and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received a message on Telegram that seemed innocuous at first glance, perhaps promising a prize, a special offer, or even a missed delivery notification. The message often includes a link that urges you to click for more details. It might look like it’s coming from a trusted contact or even a well-known company, complete with logos and professional language. The sender might claim that you need to act quickly to claim your reward or avoid missing out, making it hard to resist the temptation to click.
+You might have received a message on Telegram that looks innocuous at first glance, perhaps from a contact or a group you’re part of. It could be a link promising exclusive content, a special offer, or even an urgent request for help. The message might be crafted to appear as if it’s coming from someone you know, complete with familiar language and emojis. But as you hover over the link, a sense of unease creeps in. Is it really safe to click, or is it a trap waiting to ensnare you?
 
-The pressure to act fast is a common tactic used in these messages. You might feel a sense of urgency, as if you’re about to miss out on something important or that you need to verify your account immediately. This can create a false sense of security, especially if the message seems personalized or references something familiar to you. The goal is to make you feel like you can trust the source, which can lead you to overlook any red flags that might suggest otherwise.
+The urgency in these messages is often palpable. You might feel a sudden push to act quickly, whether it’s because the offer is “limited-time only” or because the sender claims they need your immediate assistance. This pressure can cloud your judgment, making you more likely to overlook red flags. The familiarity of the sender's name or the casual tone can create a false sense of security, leading you to believe that this is a legitimate communication rather than a potential scam.
 
-Variations of this scam can appear in many forms, often tailored to current events or trends. You might see messages claiming to be from a delivery service, a social media platform, or even a financial institution. Each variation is designed to exploit your interests or concerns, whether it’s a notification about a package you never ordered, a warning about your account security, or an enticing offer that seems too good to be true. The links may lead to fake websites that mimic legitimate ones, further blurring the lines between reality and deception.
+You may also notice variations of this scam that come in different forms. Sometimes, the message might be a direct request for you to verify your account or update your information, while other times, it might promise a prize or reward for clicking the link. Even if the wording changes, the underlying tactic remains the same: to lure you into a false sense of trust and prompt you to click without thinking. Each variation is designed to exploit your curiosity or concern, making it harder to resist.
 
-Falling for one of these scams can have serious consequences. Once you click the link, you might unknowingly provide personal information, download malware, or even give access to your accounts. This can lead to identity theft, financial loss, or even a compromised device. The damage isn’t just financial; it can also affect your peace of mind and trust in online communications. Recognizing these messages for what they are is crucial to protecting yourself in a landscape where scams are becoming increasingly sophisticated.
+Falling for this kind of scam can have serious consequences. Once you click the link, you could inadvertently download malware onto your device, exposing your personal information to cybercriminals. This might lead to identity theft, financial loss, or even unauthorized access to your accounts. The fallout can be extensive, affecting not just you but also your contacts if the scammer decides to use your identity to spread their deceit further. It’s crucial to remain vigilant and question any unsolicited messages that urge you to take immediate action.
 <p>That difference matters because a real notice related to Telegram Suspicious Link Message should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

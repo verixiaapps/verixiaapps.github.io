@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Telegram Support Email is a common question when something like a suspicious message feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Telegram Support Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Telegram support, complete with a professional-looking logo and a message that seems urgent. It could be about a supposed issue with your account, asking you to verify your information or click a link to resolve a problem. The email may even appear to come from a legitimate Telegram address, making it hard to distinguish between a genuine communication and a cleverly disguised scam. If you found yourself questioning the authenticity of that email, you’re not alone.
+You might have recently received an email claiming to be from Telegram support, asking you to verify your account or providing a link to reset your password. The message may look official, complete with the Telegram logo and a professional tone. It might even reference your account details to make it seem more credible. If you clicked on a link, you could have been directed to a website that closely resembles Telegram’s official site, but it’s designed to capture your personal information instead.
 
-Scammers often create a sense of urgency to manipulate your emotions. The message might suggest that your account will be suspended unless you act immediately, pushing you to click on links or provide personal information without thinking it through. They may use phrases that evoke trust, like “We value your security” or “Your account is important to us,” making it feel like a legitimate concern. This pressure can cloud your judgment, leading you to make hasty decisions.
+The urgency in these emails is often palpable. You might feel pressured to act quickly, with phrases like “Your account will be suspended unless you verify immediately” or “You have a limited time to secure your account.” This tactic is designed to bypass your better judgment, making you more likely to click on links or provide sensitive information without taking a moment to think it through. The fear of losing access to your messages or contacts can cloud your decision-making.
 
-You may also encounter variations of this scam, such as direct messages on Telegram itself or texts that appear to be from a friend who has been hacked. Sometimes, the scammer might even set up fake support websites that look almost identical to Telegram’s official site. Each variant has its own twist, but they all share the same goal: to trick you into providing sensitive information or clicking on harmful links. If you’ve seen messages that fit this pattern, it’s crucial to take a step back.
+Scammers can also vary their approach. You might receive a text message instead, claiming your account has been compromised and prompting you to click a link. Alternatively, you could encounter a pop-up on a website that mimics Telegram, urging you to enter your login details for “security purposes.” Each variation is crafted to exploit trust and urgency, making it easy to fall into their trap.
 
-Falling for this scam can have serious consequences. If you provide your login credentials, scammers can gain access to your account, potentially leading to identity theft or financial loss. Your personal information could be sold on the dark web, and your contacts might also be targeted next. The emotional toll can be significant, leaving you feeling violated and anxious about your online safety. It’s essential to remain vigilant and question any unexpected communications that seem off, especially when they involve your personal information.
+If you do fall for this scam, the consequences can be severe. Your account could be hacked, leading to unauthorized access to your personal messages and contacts. Scammers might use your account to reach out to your friends, asking them for money or personal information. In some cases, they may even sell your data on the dark web. The emotional and financial fallout can be significant, leaving you feeling violated and vulnerable.
 <p>Scams connected to Telegram Support Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious message is used as the starting point.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
