@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Verification Code Text is a common question when something like a two-factor code request appears without context. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Facebook Verification Code Text cases, the message starts with something like a two-factor code request and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received a text message claiming to be from Facebook, containing a verification code. It could say something like, “Your verification code is 123456. If you did not request this, please ignore this message.” At first glance, it seems harmless, maybe even a routine security measure. However, the unsettling truth is that this could be a scam designed to trick you into giving away your account information or access to your personal data.
+You might receive a text message claiming to be from Facebook, stating that someone is trying to access your account and that you need to enter a verification code to secure it. The message often looks official, complete with Facebook's branding and a sense of urgency, making it seem like a legitimate warning. You may even notice that it includes a six-digit code, encouraging you to act quickly to prevent unauthorized access. If you’re not expecting a code, this can catch you off guard and make you feel anxious about your account security.
 
-Scammers often create a sense of urgency in their messages, making you feel like immediate action is required. They might suggest that your account is at risk or that someone is trying to access it. This pressure can lead you to act quickly, bypassing your usual caution. The message may even include a link that appears legitimate, further instilling a false sense of security and trust. You might feel compelled to enter your details, thinking you’re protecting your account.
+The urgency in these messages is palpable. They often imply that immediate action is required to avoid losing access to your account or that your personal information is at risk. This sense of panic can push you to respond without thinking, leading you to enter the code on a website or app that isn’t actually Facebook. The message may also suggest that you need to verify your identity to keep your account safe, creating a false sense of trust that can be hard to resist.
 
-Variations of this scam are rampant. You might see similar texts claiming to be from other platforms, like your bank or an online shopping site, all using the same tactic of sending a verification code. Some might even call you, pretending to be customer support, asking for confirmation of your identity. Each version plays on your instincts to verify your identity or secure your accounts, making it easy to overlook the red flags.
+Variations of this scam can appear in different formats. Some might come as emails that look like they’re from Facebook, while others might be direct messages on social media platforms. You could even receive a phone call claiming to be from Facebook support, asking you to verify your identity with a code. Each version aims to exploit your concern for account security, making it easy to overlook the signs that something is off.
 
-If you fall for this scam, the consequences can be severe. Your Facebook account could be compromised, leading to unauthorized access to your personal information, photos, and messages. Scammers may use your account to send messages to your friends, potentially putting them at risk as well. In the worst-case scenario, they could gain access to other accounts linked to your Facebook, causing a ripple effect of identity theft or financial loss. Being aware of these tactics can help protect you from becoming another victim.
+If you fall for this scam, the consequences can be severe. By entering the verification code, you may inadvertently give scammers access to your Facebook account, allowing them to change your password and lock you out. This can lead to further identity theft, as they could access personal information, send messages to your contacts, or even use your account for malicious purposes. The emotional and financial fallout can be significant, leaving you feeling violated and vulnerable.
 <p>Account-security scams connected to Facebook Verification Code Text are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like a two-factor code request.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

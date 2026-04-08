@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Security Warning Email is a common question when something like a strange text feels suspicious. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Facebook Security Warning Email flow starts with something like a strange text, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email that looks like it’s from Facebook, warning you about unusual activity on your account. The message often includes your name, a link to “secure” your account, and a sense of urgency that makes you feel like you need to act immediately. It might say something like, “We’ve detected suspicious login attempts. Click here to verify your identity.” The email design may closely mimic Facebook’s branding, making it hard to distinguish from the real thing.
+You receive an email that looks like it’s from Facebook, complete with their logo and familiar layout. The subject line reads something alarming, like “Security Alert: Unusual Login Attempt.” Inside, the message claims that someone has accessed your account from an unrecognized device and urges you to click a link to secure your account. The email may even include a brief summary of your recent activity, making it feel authentic and personal. It’s designed to catch your eye and provoke concern, prompting you to act quickly without thinking.
 
-These emails are crafted to create a sense of urgency, pushing you to click the provided link without thinking twice. The message often implies that your account is at risk, and if you don’t act quickly, you could lose access or face other consequences. This pressure can make you feel anxious, prompting you to respond without fully considering the implications. The fear of losing your account can cloud your judgment, making it easier for scammers to manipulate you.
+This email creates a sense of urgency, making you feel like you need to respond immediately to protect your account. The language is carefully crafted to evoke fear and anxiety, suggesting that your personal information is at risk. You might notice phrases like “Your account will be locked unless you act now” or “Immediate action required.” This pressure can cloud your judgment, pushing you to click the link without verifying the source, as you focus on the potential consequences of inaction.
 
-You might also see variations of this scam, such as text messages or social media notifications that claim your account has been compromised. Some may even come from fake customer support accounts that seem legitimate. They often use familiar language and references to your recent activity to make the message feel more credible. The goal is the same: to trick you into providing personal information or clicking on malicious links that lead to phishing sites.
+Variations of this scam can appear in different forms, often mimicking other platforms or services you use. You might receive a text message claiming to be from your bank, or a pop-up on a website that looks like a legitimate security alert. Sometimes, the message may even reference recent transactions or activities to make it feel more credible. Each variation is designed to exploit your trust in well-known brands, making it harder to discern what’s real and what’s not.
 
-Falling for this scam can have serious consequences. If you enter your login credentials on a fake site, the scammers gain access to your Facebook account and potentially other linked accounts. They can then use your personal information for identity theft or to spread malware to your friends and family. The aftermath can be devastating, leading to financial loss, damaged relationships, and a long recovery process to regain control of your online presence.
+Falling for this scam can lead to serious consequences. If you click the link and enter your login details, you may unwittingly hand over your account to cybercriminals. They can then access your personal information, send messages to your contacts, or even steal your identity. The aftermath can be devastating, not just financially but also in terms of your online reputation and security. The emotional toll of realizing you’ve been scammed can linger long after the incident, making it crucial to stay vigilant and informed.
 <p>This is why step-by-step checking matters. Once a message related to Facebook Security Warning Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1385,8 +1385,8 @@ Falling for this scam can have serious consequences. If you enter your login cre
 <li><a href="/scam-check-now/is-facebook-marketplace-message-legit-or-scam/">Is Facebook Marketplace Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-facebook-message-from-unknown-user-legit-or-scam/">Is Facebook Message from Unknown User or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-apple-security-warning-email-legit-or-scam/">Is Apple Security Warning Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-security-warning-email-legit-or-scam/">Is Bank Security Warning Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

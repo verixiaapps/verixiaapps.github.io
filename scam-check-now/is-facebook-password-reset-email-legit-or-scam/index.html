@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Password Reset Email is a common question when something like an account locked warning appears without context. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an account locked warning and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from Facebook, stating that your password needs to be reset. The email may look official, complete with the Facebook logo and a message urging you to click a link to secure your account. It might mention unusual activity detected on your profile, prompting you to act quickly to avoid losing access. The sender's address could appear similar to Facebook's, making it easy to overlook any red flags. If you’re feeling uncertain about whether this email is genuine, you’re not alone; many people encounter these deceptive messages.
+You might have recently received an email claiming to be from Facebook, stating that your password has been reset or that someone is trying to access your account. The message may look official, complete with Facebook’s logo and a link to reset your password. It could even address you by name, making it seem more credible. If you click on the link, it often leads to a website that looks almost identical to Facebook’s login page, designed to trick you into entering your credentials.
 
-Scammers often create a sense of urgency to pressure you into taking immediate action. The email might say that your account will be locked unless you reset your password within a specific timeframe. This tactic plays on your fear of losing access to your social media connections and important messages. By instilling panic, they hope you won't take the time to think critically about the email's authenticity. Instead, you might feel compelled to click the link without verifying its legitimacy, which is exactly what they want.
+These emails often create a sense of urgency, suggesting that your account may be compromised or that immediate action is required to secure it. You might feel a rush of anxiety, prompting you to act quickly without thinking. The message may include phrases like "Your account will be locked if you don't respond within 24 hours," pushing you to click on the link without verifying its authenticity. This pressure can cloud your judgment, making it easier for scammers to exploit your fear.
 
-You may also notice variations of this scam, such as text messages or social media direct messages that mimic the same style. Some messages might claim that your account has been compromised or that a friend has reported suspicious activity. Others may even include fake customer support numbers, making it seem like you’re reaching out to a legitimate source. Each version is designed to look credible, using familiar language and visuals to lower your guard. It’s easy to see how these messages can blend into your daily digital interactions, making it hard to distinguish between what’s real and what’s not.
+Variations of this scam can appear in different forms, such as text messages or even phone calls. You might receive a text alerting you of suspicious activity on your account, directing you to a link to verify your identity. Alternatively, a caller might impersonate a Facebook representative, claiming they need to verify your account details. Each version has the same goal: to get you to provide your personal information, often disguised in a way that seems harmless or routine.
 
-Falling for this scam can lead to serious consequences. If you click the link and enter your current password, you’re essentially handing over your account to the scammers. They could change your password, lock you out, and use your account to scam your friends or spread malware. Even if you don’t provide your password, simply clicking on a malicious link can expose your device to viruses or phishing attempts. The fallout can be extensive, affecting not just your online presence but also your personal information and security.
+Falling for this scam can lead to serious consequences. If you unknowingly provide your login details, scammers can gain access to your Facebook account and potentially use it for malicious purposes, such as spreading misinformation or stealing your contacts' information. This breach can extend beyond Facebook, as many people use the same password across multiple sites. The aftermath can be overwhelming, leaving you to deal with identity theft or unauthorized transactions, all because a simple email seemed legitimate.
 <p>That difference matters because a real notice related to Facebook Password Reset Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ Falling for this scam can lead to serious consequences. If you click the link an
 <li><a href="/scam-check-now/is-facebook-marketplace-message-legit-or-scam/">Is Facebook Marketplace Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-facebook-message-from-unknown-user-legit-or-scam/">Is Facebook Message from Unknown User or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-amazon-password-reset-email-legit-or-scam/">Is Amazon Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-password-reset-email-legit-or-scam/">Is Apple Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-binance-password-reset-email-legit-or-scam/">Is Binance Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-chase-password-reset-email-legit-or-scam/">Is Chase Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-password-reset-email-legit-or-scam/">Is Coinbase Password Reset Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-password-reset-email-legit-or-scam/">Is Google Password Reset Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

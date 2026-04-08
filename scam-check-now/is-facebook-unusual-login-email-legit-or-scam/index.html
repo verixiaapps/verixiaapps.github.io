@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Unusual Login Email is a common question when something like an account locked warning appears without context. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many Facebook Unusual Login Email cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email from Facebook stating that there was an unusual login attempt on your account. The message likely includes details like the time of the attempt, the device used, and a link to secure your account. It may even look official, featuring Facebook’s logo and familiar formatting. This email can catch your attention, especially if you’ve been active on the platform or have been worried about your account security. The urgency of the situation can make you feel compelled to act quickly, leaving you vulnerable to potential scams.
+You might have recently received an email from Facebook claiming that there was an unusual login attempt on your account. The message likely includes details like the time and location of the login, along with a prompt to verify your identity by clicking a link. The email may look official, featuring Facebook's logo and a familiar layout, making it easy to mistake it for a legitimate security alert. The urgency in the subject line, often something like "Immediate Action Required," can grab your attention and make you feel compelled to respond quickly.
 
-Scammers often exploit your fear of losing access to your account by creating a sense of urgency. The email may urge you to click a link immediately to secure your account or verify your identity. This pressure can make you feel like you need to respond right away, which is exactly what the scammer wants. They aim to build trust by mimicking Facebook’s tone and style, making it difficult to distinguish between a legitimate warning and a malicious attempt to steal your information.
+This type of email is designed to create a sense of urgency and fear. It plays on your concern for account security, making you feel like your personal information is at risk. The message may urge you to act fast, suggesting that failure to do so could lead to your account being compromised. By instilling this pressure, the scammer hopes you’ll bypass your usual caution and click on the link without thinking twice, believing you are protecting your account.
 
-You might also see variations of this scam, such as text messages or pop-up alerts that claim to be from Facebook. These messages might inform you that your account will be locked unless you take immediate action. Some versions may even include fake customer support numbers, directing you to call for assistance. Each variation is designed to look credible, often using familiar language and logos to trick you into believing they’re legitimate communications from Facebook.
+You might also see variations of this scam, such as texts or messages through other social media platforms. Some may even come with fake customer support phone numbers, where someone impersonates a Facebook representative to gain your trust. The language might change slightly, or the urgency might be ramped up even more, but the core tactic remains the same: instilling fear and urgency to prompt you into action. Each version is designed to look as convincing as possible, making it hard to distinguish from genuine communications.
 
-Falling for this scam can lead to serious consequences. If you click on the link and enter your login credentials, you may unknowingly hand over your account to the scammer, who can then access your personal information, contacts, and even financial details linked to your account. Once they gain control, recovering your account can be a lengthy and frustrating process, and you may find yourself facing identity theft or financial loss as a result. It's crucial to stay vigilant and verify any suspicious messages before taking action.
+Falling for this scam can have serious consequences. If you click the link and enter your credentials, you may inadvertently hand over your login information to the scammer. This can lead to unauthorized access to your account, allowing them to steal personal information, send spam to your contacts, or even commit identity theft. The fallout can be extensive, impacting not just you but also your friends and family who may be targeted next. It’s crucial to remain vigilant and question any unexpected messages, especially those that evoke a strong emotional response.
 <p>Account-security scams connected to Facebook Unusual Login Email are effective because the warning often sounds familiar. A fake alert may mention a password reset, unusual login, or account problem, but the safest response is always to open the real service directly rather than rely on the message link, especially if it begins with something like an account locked warning.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

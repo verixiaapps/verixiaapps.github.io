@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Support Email is a common question when something like an unexpected email feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like an unexpected email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from Facebook support, complete with their logo and a friendly greeting. The message often states that there’s an issue with your account, urging you to click a link to verify your information or reset your password. It may even include a sense of familiarity, using your name and referencing your recent activity to make it feel more legitimate. The email looks polished, and the sender’s address may seem close to an official Facebook domain, making it easy to overlook any red flags.
+You might have recently received an email that looks like it’s from Facebook support, claiming there’s an issue with your account. The message could be filled with Facebook logos and familiar language, urging you to click a link to verify your information or reset your password. It may even include a sense of urgency, like a warning that your account will be locked if you don’t act immediately. The email might seem legitimate at first glance, but it’s designed to trick you into providing personal information or credentials.
 
-The urgency in these emails is palpable. They often use phrases like “immediate action required” or “your account will be suspended” if you don’t respond quickly. This pressure can make you feel anxious, prompting you to act without thinking. The email may also include reassuring language, suggesting that they are here to help you resolve any issues. This combination of urgency and trust can cloud your judgment, making you more likely to click that link or provide your personal information.
+These messages often create a sense of urgency that makes you feel like you need to respond right away. They might say your account has been compromised or that you need to confirm your identity to avoid losing access. This pressure can cloud your judgment, making it easier to overlook red flags. The sender's email address might look similar to official Facebook addresses, further convincing you that it’s a genuine communication. The combination of urgency and trust can lead you to act quickly, without taking the time to verify the source.
 
-Variations of this scam can appear in different forms. You might see similar messages on social media platforms or even receive text messages that mimic Facebook’s tone. Some scams may claim to offer you a reward for completing a survey or ask you to confirm your identity for a supposed security upgrade. Each version aims to exploit your trust in Facebook, making it increasingly difficult to distinguish between genuine communication and fraudulent attempts.
+You could also encounter variations of this scam, such as fake Facebook ads or pop-up notifications while browsing. Some might come in the form of messages from friends who have unknowingly shared a compromised link. Others could appear as social media posts promising account recovery or rewards for sharing personal information. Each version is crafted to mimic the real Facebook experience closely, making it harder to distinguish between what’s real and what’s not. The more familiar the format, the more likely you are to let your guard down.
 
-Falling for this scam can have serious consequences. If you provide your login credentials, scammers can take control of your account, locking you out and potentially using it to target your friends and family. They may also steal your personal information, leading to identity theft or financial loss. The emotional toll can be significant, leaving you feeling violated and vulnerable. Recognizing the signs of these scams is crucial to protecting yourself and your online presence.
+Falling for this scam can have serious consequences. If you provide your login details, the scammer can take control of your account, potentially accessing your personal information, photos, and messages. They might use your account to scam your friends or spread malware. Even worse, if your financial information is compromised, it could lead to identity theft or unauthorized transactions. The implications can be far-reaching, affecting not just you but also those in your network. It’s crucial to remain vigilant and question any unexpected communication that seems out of place.
 <p>That difference matters because a real notice related to Facebook Support Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

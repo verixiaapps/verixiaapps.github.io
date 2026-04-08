@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Sign in Alert Email is a common question when something like a suspicious message feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Facebook Sign in Alert Email flow starts with something like a suspicious message, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming that someone is trying to sign into your Facebook account from an unfamiliar device or location. The message typically includes details like the device type and location, along with a link urging you to secure your account immediately. The email often features Facebook's logo and a professional layout, making it look legitimate at first glance. It may even include a friendly greeting with your name, which can make it feel personal and trustworthy. 
+You might have received an email that looks like it’s from Facebook, alerting you about a new sign-in attempt from an unfamiliar location or device. The message often includes details like the time of the attempt and a link to secure your account. It may even feature the Facebook logo and use a friendly tone, making it seem credible. The email might urge you to act quickly, claiming that your account is at risk if you don’t respond immediately. This can create a sense of panic, prompting you to click on the provided link without thinking twice.
 
-The urgency in these emails is palpable; they often state that your account will be locked unless you take immediate action. This pressure can make you feel anxious, prompting you to click the link without thinking twice. The message may also suggest that your account is at risk of being hacked, which can heighten your fear and push you to act quickly. Scammers know how to exploit your emotions, making you feel like you must respond right away to protect your online presence.
+The urgency in these emails is a key tactic. They often state that your account will be locked or compromised if you don’t verify your identity right away. This pressure can make you feel like you need to act fast, overriding your instincts to pause and think critically about the situation. The language used is designed to build trust, often including phrases like "we value your security" or "we're here to help." This emotional manipulation can make it hard to see the red flags.
 
-Variations of this scam can appear in different forms, such as text messages or even phone calls claiming to be from Facebook support. You might receive a text saying your account has been compromised, or a call from someone pretending to be a customer service representative, asking for your login details. Each version is designed to look convincing, often using familiar language and logos to create a false sense of security. The tactics may change, but the goal remains the same: to trick you into giving up your personal information.
+You might also encounter variations of this scam, such as text messages or social media notifications that claim to be from Facebook. Some may even appear to come from friends or family, as scammers can spoof accounts to make their messages look legitimate. Others might use different tactics, like claiming that your account has been flagged for suspicious activity and directing you to a fake login page. Each version is crafted to exploit your trust in Facebook and your concern for your online security.
 
-If you fall for this scam, the consequences can be severe. Scammers can gain access to your Facebook account, which may lead to identity theft, unauthorized transactions, or even the spread of malicious content to your friends and family. Once they have your account, they can manipulate it for their own gain, potentially causing long-term damage to your online reputation and personal security. It's crucial to stay vigilant and recognize these tactics before they put you at risk.
+Falling for this type of scam can have serious consequences. If you click the link and enter your login credentials, you’re handing over your account to the scammers. They can then take control of your profile, access your personal information, and even use your account to scam others. The aftermath can be devastating, leading to identity theft, financial loss, and the emotional toll of feeling violated. It’s crucial to take a step back and verify any alerts before taking action, ensuring your online safety.
 <p>This is why step-by-step checking matters. Once a message related to Facebook Sign in Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1386,7 +1386,7 @@ If you fall for this scam, the consequences can be severe. Scammers can gain acc
 <li><a href="/scam-check-now/is-facebook-payment-request-message-legit-or-scam/">Is Facebook Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-facebook-marketplace-message-legit-or-scam/">Is Facebook Marketplace Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
-<li><a href="/scam-check-now/is-amazon-sign-in-alert-email-legit-or-scam/">Is Amazon Sign in Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

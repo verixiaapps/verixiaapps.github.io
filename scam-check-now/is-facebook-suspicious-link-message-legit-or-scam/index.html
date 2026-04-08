@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Suspicious Link Message is a common question when something like a phishing email feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>Many Facebook Suspicious Link Message scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a phishing email. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You might have received a message on Facebook that looks like it’s from a friend, containing a link that claims to show you something interesting or important. The message may say something like, “Check this out! I thought you’d love it!” or “You won’t believe what I found about you!” The link often appears legitimate, sometimes even shortened to look cleaner, making it easy to overlook any red flags. You might feel compelled to click, especially since it seems to come from someone you know.
+You might have received a message on Facebook that seems harmless at first glance, perhaps from a friend or a familiar contact. It could be a link that promises exciting content, like a funny video or an unbelievable deal. The message might even include a friendly note, urging you to check it out because they thought of you. It feels personal, making it easy to overlook any red flags. But once you click on that link, you could find yourself on a website that looks legitimate yet is designed to steal your information or infect your device with malware.
 
-The urgency in these messages can be striking. They often create a sense of immediacy, suggesting that you need to act fast to see something before it’s gone or to avoid missing out on important information. This tactic plays on your curiosity and fear of missing out, making it hard to resist the temptation to click. The familiarity of the sender’s name can also build a false sense of trust, leading you to believe that it’s safe to engage with the content.
+These messages often create a sense of urgency, making you feel like you need to act fast. You might see phrases like “You won’t believe this!” or “Hurry, it’s only available for a limited time!” This pressure can push you to click without thinking twice. The sender may even claim they’ve already tried it and loved it, which adds a layer of trust. The combination of familiarity and urgency can be disarming, making it easy to forget that this could be a trap.
 
-You may encounter variations of this scam that look slightly different but carry the same deceptive intent. Some messages may come from fake accounts that mimic your friends or even from pages that appear to be official Facebook communications. Others might use different platforms, such as Instagram or WhatsApp, but the core message remains the same: a link that promises something enticing. Regardless of the platform, the goal is to trick you into clicking.
+Scammers are clever and often adapt their tactics to appear more convincing. You might encounter variations of the message that look slightly different, such as a different sender or a slightly altered link. Some may come disguised as notifications from Facebook itself, claiming you have a new friend request or a message waiting. Others might even use fake accounts that mimic real ones, making it harder to discern what's genuine. Each version is designed to lure you in, playing on your curiosity and trust.
 
-Falling for this scam can have serious consequences. Once you click the link, you may unknowingly expose your personal information or download malware onto your device. This could lead to identity theft, unauthorized access to your accounts, or even financial loss. The ripple effect can extend beyond you, potentially putting your friends at risk if your account is compromised and used to send similar messages. The danger lies not just in the immediate effects but in the long-term implications for your online safety and privacy.
+Falling for this type of scam can have serious consequences. If you click the link, you might inadvertently provide personal information, allowing scammers to access your accounts or even steal your identity. Your device could become infected with malware, leading to further issues like data loss or financial theft. The aftermath can be stressful and time-consuming, as you scramble to secure your accounts and remove harmful software. It’s not just an inconvenience; it can lead to significant emotional and financial distress.
 <p>Phishing-related scams connected to Facebook Suspicious Link Message often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a phishing email is used to build trust.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

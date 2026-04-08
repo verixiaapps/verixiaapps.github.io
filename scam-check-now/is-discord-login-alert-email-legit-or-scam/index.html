@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Discord Login Alert Email is a common question when something like a two-factor code request appears without context. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Discord Login Alert Email flow starts with something like a two-factor code request, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have received an email recently that claims to be a Discord login alert, warning you of a suspicious sign-in attempt. The message often includes your username, a timestamp, and a location that seems familiar, making it feel legitimate. It might even provide a link to secure your account, urging you to act immediately. The design mimics official Discord communications, complete with logos and formatting that look professional, which can easily trick you into believing it’s a genuine alert.
+You might have recently received an email that looks like a Discord login alert, claiming that someone has accessed your account from an unfamiliar location. The message often includes the Discord logo and a professional-looking layout, making it seem genuine. It may urge you to click a link to secure your account, promising that your personal information is at risk. The urgency in the email can be alarming, making you feel like you need to act quickly to prevent unauthorized access.
 
-The urgency in these emails is palpable. They often state that your account will be compromised unless you take action right away, creating a sense of panic. You might feel compelled to click the link without thinking twice, especially if you’re concerned about your account security. This pressure can cloud your judgment, making it difficult to pause and assess the situation. Scammers know how to exploit your fear of losing access to your account, pushing you to act quickly.
+These emails often create a sense of urgency, pushing you to click on the provided link without taking a moment to think. They may mention that your account will be locked or that your friends are at risk if you don’t respond immediately. This pressure can cloud your judgment, making you more likely to overlook red flags. The tone is often friendly yet alarming, designed to build trust while simultaneously instilling fear about your account security.
 
-Variations of this scam can appear in different forms, such as texts or messages on social media platforms. Some might claim that your account has been flagged for suspicious activity, while others may promise rewards for verifying your identity. The language used can vary from formal to casual, but the core message remains the same: they want you to click a link or provide personal information. Each version is designed to catch you off guard, making it easy to overlook the signs that something isn’t right.
+You might also see variations of this scam, such as messages claiming to be from Discord support or notifications about a password reset. Some may even come in the form of direct messages on Discord itself, appearing to be from friends or trusted contacts. These messages can be tailored to mimic real interactions, making it harder to distinguish between legitimate alerts and scams. Each version plays on your concern for security, making you more susceptible to falling for the trap.
 
-If you fall for this scam, the consequences can be severe. Your Discord account could be compromised, leading to unauthorized access to your personal information, private messages, and even financial details if linked to payment methods. Scammers can use your account to spread malware or phishing attempts to your friends, further extending the damage. It’s not just about losing access; it’s about the ripple effect that can impact your online presence and relationships.
+If you do click on the link and provide your login details, you risk losing access to your account and potentially compromising your personal information. Scammers can use your account to engage in further malicious activities, such as sending spam to your friends or stealing sensitive data. The consequences can extend beyond just your Discord account, affecting your other online accounts if you reuse passwords. Understanding the tactics behind these scams can help you stay vigilant and protect yourself from potential threats.
 <p>This is why step-by-step checking matters. Once a message related to Discord Login Alert Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1366,7 +1366,7 @@ If you fall for this scam, the consequences can be severe. Your Discord account 
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-discord-nitro-gift-message-legit-or-scam/">Is Discord Nitro Gift Message or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-discord-account-flagged-message-legit-or-scam/">Is Discord Account Flagged Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-discord-message/">Did I Get Scammed by Discord Message?</a></li>
 <li><a href="/scam-check-now/fake-login-alert-email-scam/">Is Fake Login Alert Email a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-login-alert-email-legit-or-scam/">Is Bank Login Alert Email or Scam Legit or a Scam?</a></li>
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Suspicious Activity Alert is a common question when something like a suspicious message feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Facebook Suspicious Activity Alert situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have received a message from Facebook alerting you about suspicious activity on your account, claiming that someone from a different location has tried to log in. The message often looks official, complete with Facebook’s logo and familiar formatting, making it easy to mistake for a genuine warning. It may urge you to click on a link to verify your identity or secure your account. The urgency in the message can make it feel like you need to act immediately to protect your information.
+You might have recently received a Facebook alert claiming suspicious activity on your account, perhaps via email or a pop-up notification while browsing. The message may urge you to click a link to verify your identity or secure your account. It often features Facebook’s logo and familiar language, making it seem authentic. The urgency of the situation is palpable, as it suggests that your account could be compromised if you don’t act quickly. You may even notice that the email addresses or links look similar to Facebook’s official ones, further blurring the lines between real and fake.
 
-This alert typically creates a sense of urgency, suggesting that your account is at risk and that you must take action right away. It might say something like, "Your account will be locked if you don’t respond within 24 hours." This pressure can lead you to click the link without thinking twice, believing that you are safeguarding your personal information. The combination of fear and urgency is a powerful tactic that scammers use to manipulate your emotions and prompt quick action.
+This type of alert typically creates a sense of urgency, pushing you to respond immediately. The message may state that your account will be locked or that you could lose access if you don’t verify your information right away. This pressure can make you feel like you must act fast, which is exactly what the scammer wants. By fostering a sense of panic, they aim to bypass your usual caution and get you to click that link or provide sensitive information without thinking it through.
 
-You may also encounter variations of this scam, such as messages claiming to be from Facebook support or even fake friend requests that direct you to a similar alert. Some might come as emails that appear to be from a legitimate Facebook address, while others could show up as direct messages in your inbox. Each version is designed to look credible, often using slightly different language or scenarios to catch you off guard, making it harder to recognize the deception.
+You may encounter variations of this scam that appear in different forms. Some might come as direct messages on Facebook, while others could be text messages claiming to be from Facebook support. They may even reference recent activity that seems relevant to you, like a login attempt from an unfamiliar device. Each version is designed to look credible, often using language that mimics Facebook’s customer service tone, making it all the more convincing. The goal is to exploit your trust in the platform, regardless of how the message is delivered.
 
-Falling for this scam can have serious consequences. If you provide your login information, you risk losing access to your account and exposing your personal data to malicious actors. They could use your account to send out more phishing messages to your contacts, further spreading the scam. In some cases, they may even access sensitive information linked to your Facebook account, leading to identity theft or financial loss. The stakes are high, and recognizing these alerts as potential scams is crucial to protecting yourself online.
+Falling for this scam can lead to serious consequences. If you provide your login information, scammers can take over your account, sending messages to your friends or even using your profile to solicit money. Your personal information could be at risk, leading to identity theft or financial loss. The emotional toll can be significant, as you may feel violated or embarrassed for having been duped. The danger lies not only in the immediate loss but also in the long-term impact on your online security and peace of mind.
 <p>The strongest clue is usually not one isolated detail. With Facebook Suspicious Activity Alert, the risk often becomes clearer when something like a suspicious message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

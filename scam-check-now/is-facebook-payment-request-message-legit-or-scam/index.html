@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Payment Request Message is a common question when something like a PayPal refund email feels suspicious. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A common Facebook Payment Request Message scenario starts with something like a PayPal refund email, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might receive a message on Facebook that looks like it’s from a friend or a trusted contact, asking you to approve a payment request. The message often includes a link or a prompt to click, claiming that it’s for a shared expense or a service you supposedly agreed to. It might even mention a specific amount, making it seem legitimate. The sender’s profile may look normal, with familiar photos and posts, but this can be deceiving. Scammers often clone profiles or hack into accounts to send these requests, making it hard to tell at first glance if it’s genuine.
+You might have received a Facebook payment request that looks surprisingly legitimate, complete with your friend's name and a friendly message asking for money. The request may claim it's for a shared expense, a gift, or even a service they provided. The sender's profile seems genuine, and the message is casual, making it easy to overlook any red flags. You might feel inclined to respond quickly, especially if it seems like a simple transaction among friends.
 
-The urgency in these messages can be overwhelming. You might feel pressured to act quickly, especially if the sender claims that the payment is time-sensitive or that you’ll miss out on something important. They might use phrases like “I need this done ASAP” or “Don’t let this opportunity slip away.” This tactic plays on your emotions, making you more likely to overlook red flags. The familiarity of the sender’s name or profile can create a false sense of security, leading you to trust the request without verifying it.
+Scammers often create a sense of urgency to push you into making a hasty decision. The message might say things like, "I need this money right away," or "I’ll pay you back immediately." This pressure can make you feel like you’re missing out on something important or that you’re letting a friend down. The friendly tone and familiar name can easily build trust, making it harder to question the request.
 
-Variations of this scam can appear in different forms. Sometimes, the message might come from a fake account that closely resembles someone you know, or it could be a group chat where multiple contacts seem to be involved. Other times, the payment request could be disguised as a promotional offer or a prize you’ve supposedly won. Even if the message looks slightly different, the underlying tactic remains the same: to trick you into sending money or sharing personal information without thinking it through.
+You may also encounter variations of this scam, such as a message claiming to be from a charity or a business asking for payment in exchange for a prize. Sometimes, the request might come from a hacked account of someone you know, making it even more convincing. The message could include links to fake websites that mimic legitimate services, further blurring the lines between what’s real and what’s not. These variations can catch you off guard, especially if they seem to come from a trusted source.
 
-Falling for this scam can lead to serious consequences. If you send money, it’s often unrecoverable, leaving you out of pocket and feeling vulnerable. Additionally, if you unknowingly share personal information, such as your bank details or passwords, it can lead to identity theft or further financial loss. The emotional toll can be significant as well, leaving you feeling embarrassed or violated. Recognizing these tactics is crucial to protecting yourself and your finances from potential harm.
+If you fall for this scam, the consequences can be severe. You might end up losing money without any way to recover it, leaving you feeling frustrated and vulnerable. Additionally, if your personal information is compromised, it could lead to further scams or identity theft. The emotional toll can be just as damaging, as you might feel embarrassed for being deceived. Recognizing these tactics can help you protect yourself and avoid falling into the trap.
 <p>The strongest clue is usually not one isolated detail. With Facebook Payment Request Message, the risk often becomes clearer when something like a PayPal refund email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ Falling for this scam can lead to serious consequences. If you send money, it’
 <li><a href="/scam-check-now/is-facebook-password-reset-email-legit-or-scam/">Is Facebook Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-facebook-login-from-new-device-email-legit-or-scam/">Is Facebook Login from New Device Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-instagram-payment-request-message-legit-or-scam/">Is Instagram Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-telegram-payment-request-message-legit-or-scam/">Is Telegram Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-payment-request-message-legit-or-scam/">Is WhatsApp Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-payment-request-message-legit-or-scam/">Is Payment Request Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-payment-declined-message-legit-or-scam/">Is Bank Payment Declined Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

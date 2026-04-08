@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Recovery Email is a common question when something like a suspicious link feels suspicious. The safest way to evaluate it is to slow down and separate the claim from the pressure around it. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Facebook Recovery Email situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received an email claiming to be from Facebook, stating that there’s been suspicious activity on your account and urging you to click a link to verify your identity. The email might look official, complete with the Facebook logo and a message that seems to come from a legitimate Facebook address. It may even include details like your name or a recent login attempt, making it feel personal and authentic. This kind of message can easily catch your attention, especially if you’re concerned about the security of your account.
+You might receive an email claiming to be from Facebook, stating that there's been suspicious activity on your account and urging you to click a link to secure it. The message often includes Facebook's logo and a friendly greeting, making it seem legitimate. It may even reference your recent login attempts or ask you to confirm your identity by entering your password. The urgency in the email can be alarming, making you feel like you need to act quickly to protect your account.
 
-The urgency in these emails is palpable. They often use phrases like “immediate action required” or “your account will be locked” to push you into a quick response. This pressure can make it difficult to think critically. You might feel a rush of anxiety, prompting you to click the link without fully considering the implications. Scammers know how to exploit your emotions, making it seem like your account is at risk and that the only way to protect it is to act fast.
+The email creates a sense of urgency by suggesting that your account is at risk of being compromised. It may say that you have a limited time to respond, or that failure to act could result in your account being locked or permanently deleted. This pressure can lead you to click on the provided link without thinking twice, believing you are taking the necessary steps to safeguard your information. The message is designed to build trust, often using familiar language and visuals that mimic Facebook’s official communications.
 
-Variations of this scam are rampant. You might see similar messages claiming to be from other social media platforms or even financial institutions, all designed to mimic the style and tone of legitimate communications. Some may even come as text messages or direct messages on social media, all with the same goal: to trick you into providing personal information. The links may lead to fake websites that look nearly identical to the real ones, further blurring the lines between genuine and fraudulent.
+Variations of this scam can appear in different forms, such as text messages or even phone calls. You might receive a text that looks like it’s from Facebook, telling you to verify your account through a link. Alternatively, a caller may impersonate a Facebook support representative, claiming they need to help you secure your account. Regardless of the format, the core tactic remains the same: to make you believe there’s an immediate threat to your account, prompting you to act quickly without verifying the source.
 
-Falling for this scam can have serious consequences. If you provide your login details, scammers can gain access to your Facebook account, potentially using it for malicious purposes or selling your information. This not only compromises your privacy but can also lead to identity theft, financial loss, and a cascade of issues that can take months to resolve. The aftermath of such a breach can be overwhelming, leaving you feeling violated and vulnerable in an increasingly digital world.
+Falling for this scam can lead to serious consequences. If you enter your login details on a fraudulent site, you may inadvertently give scammers access to your Facebook account and any personal information linked to it. This can result in unauthorized posts, identity theft, or even financial loss if your account is connected to payment methods. The emotional toll can be significant as well, leaving you feeling violated and anxious about your online security.
 <p>Scams connected to Facebook Recovery Email often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -1383,10 +1383,10 @@ Falling for this scam can have serious consequences. If you provide your login d
 <li><a href="/scam-check-now/is-facebook-payment-request-message-legit-or-scam/">Is Facebook Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
 <li><a href="/scam-check-now/is-facebook-message-from-unknown-user-legit-or-scam/">Is Facebook Message from Unknown User or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-coinbase-recovery-email-legit-or-scam/">Is Coinbase Recovery Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-instagram-recovery-email-legit-or-scam/">Is Instagram Recovery Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-account-recovery-email-legit-or-scam/">Is Apple Account Recovery Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-wallet-recovery-email-legit-or-scam/">Is Coinbase Wallet Recovery Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

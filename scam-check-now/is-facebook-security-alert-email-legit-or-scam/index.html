@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Security Alert Email is a common question when something like a login alert email appears without context. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Facebook Security Alert Email cases, the message starts with something like a login alert email and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be a Facebook security alert, notifying you of suspicious activity on your account. The message often includes details like a login attempt from an unfamiliar location or device, along with a link to verify your account security. It may look official, complete with Facebook branding and a professional tone, making it seem like a legitimate warning that demands your immediate attention. You might even notice that it addresses you by name, which adds a personal touch that can make it feel more credible.
+You might have received an email claiming to be from Facebook, warning you about suspicious activity on your account. The message often looks official, featuring Facebook's logo and a professional layout. It might say something like, "We noticed a login attempt from an unrecognized device," and prompt you to click a link to secure your account. The urgency in the wording can make it feel like a legitimate warning, especially if you’ve recently logged in from a new location or device.
 
-The urgency in these emails is palpable. They often state that your account will be locked or compromised if you don’t act quickly. This pressure can trigger a sense of panic, pushing you to click the provided link without thinking twice. The email may also encourage you to verify your identity to protect your account, making you feel like you’re taking a necessary step to secure your personal information. This tactic is designed to bypass your skepticism by making you feel like you’re in a race against time.
+This type of email is designed to create a sense of urgency. It may use phrases like "Immediate action required" or "Your account will be locked if you don’t respond." The sender often tries to build trust by including familiar details, such as your name or a partial account number. This can make you feel like you’re dealing with a genuine security issue, pushing you to act quickly without thinking it through.
 
-You might encounter variations of this scam through different channels, such as text messages or even phone calls. Some messages might claim to be from Facebook's support team, asking you to confirm your identity to prevent account suspension. Others may use slightly altered email addresses that look similar to Facebook’s official domain, making it harder to spot the difference. Even the language can change, with some messages appearing more casual or urgent than others, but the core tactic remains the same: to get you to act without verifying the source.
+You might also see variations of this scam, such as texts or social media messages that mimic Facebook’s tone and style. Some may claim to be from Facebook support, offering help with account recovery or asking you to verify your identity. Others might come as notifications in your Facebook app, urging you to click a link to resolve an issue. Each version plays on your concern for account security, making it easy to overlook the signs that something isn’t right.
 
-Falling for this scam can have serious consequences. If you click the link and enter your login credentials, you’re essentially handing over access to your account to the scammers. They could then use your profile to spread misinformation, steal personal data, or even manipulate your friends and family. The aftermath can be devastating, not just for you but for those in your network who may also fall victim to the same trap. It’s a reminder of how quickly a simple email can lead to a cascade of problems that extend far beyond your own account.
+If you fall for this scam, the consequences can be severe. Clicking on the link may lead you to a fake login page, where entering your credentials hands over your account to the scammers. They could then lock you out, steal your personal information, or use your account to scam your friends. The emotional toll of losing access to your social media, along with the potential for identity theft, makes it crucial to stay vigilant against these deceptive tactics.
 <p>The strongest clue is usually not one isolated detail. With Facebook Security Alert Email, the risk often becomes clearer when something like a login alert email is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1384,9 +1384,9 @@ Falling for this scam can have serious consequences. If you click the link and e
 <li><a href="/scam-check-now/is-facebook-marketplace-message-legit-or-scam/">Is Facebook Marketplace Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-facebook-message-from-unknown-user-legit-or-scam/">Is Facebook Message from Unknown User or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-amazon-security-alert-email-legit-or-scam/">Is Amazon Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-binance-security-alert-email-legit-or-scam/">Is Binance Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-chase-security-alert-email-legit-or-scam/">Is Chase Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-apple-security-alert-email-legit-or-scam/">Is Apple Security Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

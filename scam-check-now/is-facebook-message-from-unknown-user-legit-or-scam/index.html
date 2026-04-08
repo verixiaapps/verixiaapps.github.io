@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Facebook Message from Unknown User is a common question when something like a suspicious message feels suspicious. The difference usually comes down to whether the sender is asking you to trust the message itself or verify the claim independently. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a suspicious message and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You receive a Facebook message from someone you don’t recognize, claiming to be a friend of a friend. They start off friendly, mentioning a recent event or mutual connection to grab your attention. The message may include a link that promises exclusive content, a special offer, or even a heartfelt story that tugs at your emotions. At first glance, it seems harmless, but the unfamiliarity of the sender raises a red flag. You might feel a mix of curiosity and caution as you read through their message, wondering if it’s worth your time to engage.
+You might receive a Facebook message from someone you don’t recognize, claiming to be a friend of a friend or even someone from your past. The message often starts innocently enough, perhaps with a friendly greeting or a question about a shared interest. As you read on, you notice the sender is eager to chat and quickly brings up a link or an opportunity that sounds too good to be true. They may even share a photo or a story that seems relatable, making it easy to let your guard down.
 
-The urgency in their tone is palpable. They might say you need to act quickly to claim a prize or that your account is at risk and requires immediate verification. This tactic is designed to bypass your rational thinking, pushing you to respond before you have a chance to second-guess the situation. The sender may also use flattery or a sense of camaraderie, making you feel like you’re part of an exclusive group or that you’re missing out on something important. This emotional manipulation can cloud your judgment, making it harder to see the potential danger.
+The urgency in their tone can be hard to ignore. They might say that you need to act fast to secure a limited-time offer or that they have important information that you must see right away. This pressure can make you feel like you’re missing out on something valuable, and before you know it, you’re tempted to click on the link or respond with personal information. The sender’s friendly demeanor can create a false sense of trust, making it easy to overlook the red flags.
 
-You might encounter variations of this scam, such as messages claiming to be from a charity asking for donations or someone offering a business opportunity that seems too good to be true. Sometimes, the sender will impersonate a well-known brand or service, asking you to verify your account details or provide personal information. Each version has its own twist, but the core tactic remains the same: create a sense of trust and urgency to get you to act without thinking. The familiarity of the platform adds another layer of deception, making it easy to overlook the warning signs.
+These messages can take on various forms, often tailored to catch your attention. One moment, it could be a fake lottery win, and the next, it might be an offer for a job that seems perfect for you. Some variations even include impersonating a well-known brand or service, claiming you’ve won a prize or are eligible for a special promotion. Each version is crafted to resonate with your interests or fears, making it difficult to discern the truth at a glance.
 
-Falling for this type of scam can lead to serious consequences. You might unknowingly provide sensitive information, such as your login credentials or financial details, which can be used for identity theft or unauthorized transactions. Even if you don’t share personal information, clicking on malicious links can expose your device to malware or phishing attempts. The aftermath can leave you feeling violated and anxious, knowing that your trust was exploited. It’s not just about losing money; it’s about the breach of trust and the emotional toll that comes with realizing you were deceived.
+Falling for this type of scam can lead to serious consequences. If you click on a malicious link, you might unknowingly download malware onto your device, putting your personal information at risk. Sharing any details could open the door to identity theft or financial loss. The emotional toll can be just as damaging, leaving you feeling embarrassed or violated. Recognizing these tactics is crucial to protecting yourself from the potential fallout of a seemingly harmless message.
 <p>That difference matters because a real notice related to Facebook Message from Unknown User should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1380,13 +1380,13 @@ Falling for this type of scam can lead to serious consequences. You might unknow
       <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-facebook-login-attempt-notification-legit-or-scam/">Is Facebook Login Attempt Notification or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-facebook-login-blocked-email-legit-or-scam/">Is Facebook Login Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/did-i-get-scammed-by-facebook/">Did I Get Scammed by Facebook?</a></li>
+<li><a href="/scam-check-now/is-this-facebook-message-real-or-fake/">Is This Facebook Message Real or Fake</a></li>
 <li><a href="/scam-check-now/is-instagram-message-from-unknown-user-legit-or-scam/">Is Instagram Message from Unknown User or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-message-from-unknown-sender-legit-or-scam/">Is Crypto Message from Unknown Sender or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-message-from-unknown-sender-legit-or-scam/">Is Google Message from Unknown Sender or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-irs-message-from-unknown-sender-legit-or-scam/">Is IRS Message from Unknown Sender or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-telegram-message-from-unknown-contact-legit-or-scam/">Is Telegram Message from Unknown Contact or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-message-from-unknown-number-legit-or-scam/">Is WhatsApp Message from Unknown Number or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-job-offer-from-unknown-recruiter-legit-or-scam/">Is Job Offer from Unknown Recruiter or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
