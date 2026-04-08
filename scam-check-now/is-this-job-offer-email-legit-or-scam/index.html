@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Job Offer Email is a common question when something like an onboarding payment request feels too fast, too vague, or too good to be true. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. In many cases, the answer comes down to whether the sender, company, pay, and hiring process can be verified independently.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>A typical This Job Offer Email case may involve something like an onboarding payment request, a job offer that feels unusually fast, easy, or high-paying, or a request for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>
-You open your inbox and spot a job offer that seems too good to be true. The email is professionally formatted, complete with a company logo and an enticing subject line promising a lucrative salary for a remote position. As you read through the message, it outlines a simple application process, a brief description of the role, and a request for your personal information. The sender claims to be a hiring manager eager to bring you on board, and they encourage you to respond quickly to secure your spot. Everything looks polished, but something feels off.
+You open your inbox to find an enticing job offer that seems too good to be true. The email is professionally formatted, complete with a company logo and a sender address that closely resembles a well-known organization. The message promises a high salary, flexible hours, and the chance to work from home. As you read through the details, you notice a few grammatical errors and awkward phrases, but the overall presentation is convincing enough to catch your attention. You can't help but wonder if this opportunity is genuine or just another scam lurking in your inbox.
 
-The urgency in the email is palpable. You notice phrases like "limited openings" and "act now to avoid missing out." This pressure can make you feel like you need to respond immediately, pushing you to overlook any red flags. The sender might even include a phone number for a quick chat, making it feel more personal and trustworthy. They may also mention a tight deadline for applications, which can heighten your anxiety and compel you to share your details without taking a moment to think it through.
+As you delve deeper into the email, a sense of urgency creeps in. The sender emphasizes that this position is in high demand, and they need you to respond quickly to secure your spot. They might even mention that a limited number of positions are available, creating a pressure cooker environment that makes you feel like you need to act fast. The tone is friendly and welcoming, designed to build trust and make you feel like you’re already part of the team. This emotional manipulation can cloud your judgment, making it harder to spot the red flags.
 
-Variations of this scam can pop up in different forms. You might receive a LinkedIn message with a similar job offer, or see an ad on social media that leads to a website mimicking a legitimate company. Sometimes, the email might come from a free email service instead of a corporate domain, or it could include a link to a fake job portal. The language can vary, but the underlying tactics remain the same: enticing offers, a sense of urgency, and a push for personal information.
+You might notice variations of this scam that come in different forms. Some emails may claim to be from a recruitment agency, while others might appear to come from a legitimate company but use a slightly altered email address. You could also receive messages through social media platforms or job boards, where scammers often set up fake profiles to lure in unsuspecting job seekers. Each variation is crafted to look authentic, making it difficult to distinguish between a real opportunity and a cleverly disguised trap.
 
-Falling for this kind of scam can have serious consequences. If you share your personal information, you risk identity theft, which can lead to financial loss and long-term damage to your credit. Even if you don’t provide sensitive data, engaging with the scammer can expose you to further phishing attempts or malware. The emotional toll of realizing you’ve been deceived can also linger, leaving you feeling vulnerable and distrustful. It's crucial to take a moment to evaluate any job offer that seems too perfect, ensuring you protect yourself from potential harm.
+Falling for this type of scam can lead to serious consequences. You may be asked to provide personal information, such as your Social Security number or bank details, under the guise of a background check. Once they have your information, it could be used for identity theft or financial fraud. Even if you don't share sensitive data, the emotional toll of realizing you were deceived can be significant. You might feel embarrassed or anxious, questioning your ability to discern legitimate offers from scams in the future.
 <p>The strongest clue is usually not one isolated detail. With This Job Offer Email, the risk often becomes clearer when something like an onboarding payment request is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Remote Job Offer is a common question when something like an onboarding payment request feels too fast, too vague, or too good to be true. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to whether the sender, company, pay, and hiring process can be verified independently.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common This Remote Job Offer flow starts with something like an onboarding payment request, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You receive an email about a remote job offer that seems too good to be true. The sender claims to be from a reputable company, and the position promises a high salary with flexible hours. The email includes a link to a professional-looking website and even a brief video introduction from someone who appears to be a hiring manager. Everything seems polished, but there’s an underlying sense of urgency as they encourage you to respond quickly to secure your spot. You might feel a mix of excitement and skepticism, wondering if this could be your next big opportunity.
+You might have received an email or a message on social media about a remote job that sounds too good to be true. It promises high pay for minimal work, often featuring vague job descriptions and an overly enthusiastic tone. The sender might claim to be from a reputable company, complete with a polished logo and official-looking email address. They might even ask you to fill out an application or provide personal information right away, making it feel like a legitimate opportunity. If you’re feeling excited about the prospect of working from home, it’s easy to overlook the red flags.
 
-The message creates a sense of urgency by stating that they are looking to fill the position immediately and that only a few spots are available. You might feel pressured to act fast, which can cloud your judgment. They often include phrases like “don’t miss out” or “apply now to avoid disappointment,” making it seem like a rare chance. This pressure can lead you to overlook red flags, especially when the offer seems to align perfectly with what you’ve been searching for in a job.
+The urgency in these messages can be overwhelming. You might be told that positions are limited or that you need to act fast to secure your spot. This pressure can make you feel like you’re missing out on a golden opportunity, pushing you to respond quickly without doing your due diligence. Some scammers even create a sense of trust by including testimonials or fake reviews, making it seem like others have successfully landed the job. This emotional manipulation can cloud your judgment, leading you to believe that this job is a safe bet.
 
-Variations of this scam can appear in different formats, such as text messages or social media ads. You might see a job listing on a popular job board that mirrors the email you received, complete with similar language and promises. Sometimes, the scammer may even reach out via LinkedIn, presenting themselves as a recruiter. Each version is crafted to look legitimate, often using logos and branding from real companies, making it harder to distinguish between what’s real and what’s not.
+There are countless variations of these remote job scams. You might see job postings on popular job boards or receive direct messages on professional networking sites. Some scams masquerade as freelance gigs, while others might involve multi-level marketing schemes disguised as remote work. They can also appear as "work-from-home" offers that require you to pay upfront for training or materials. Each variation has its own twist, but they all share the common goal of luring you in with promises of easy money and flexibility.
 
-Falling for this scam can have serious consequences. If you provide personal information, such as your address, Social Security number, or banking details, you could become a victim of identity theft. Additionally, you might end up paying for training materials or background checks that never lead to a job. The emotional toll can also be significant, as the initial excitement turns into disappointment and frustration. It’s crucial to take a step back and evaluate the offer critically before getting too invested.
+Falling for one of these scams can lead to serious consequences. You may end up sharing sensitive personal information, which can be used for identity theft or financial fraud. Even if you don’t provide personal details, you might lose money if you’re asked to pay for training or supplies. The emotional toll can be significant as well, leaving you feeling embarrassed or anxious about your judgment. It’s crucial to take a step back and evaluate any job offer carefully, especially when it seems too perfect to be real.
 <p>This is why step-by-step checking matters. Once a message related to This Remote Job Offer moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

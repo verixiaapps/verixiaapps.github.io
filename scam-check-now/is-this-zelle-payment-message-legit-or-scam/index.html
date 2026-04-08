@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>This Zelle Payment Message is a common question when something like a bank fraud alert text feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common This Zelle Payment Message flow starts with something like a bank fraud alert text, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might receive a message that looks like it’s from Zelle, claiming that there’s a problem with your account or that a payment has been initiated. The text may include your name, a transaction amount, and a link to "verify" your information. It feels official, almost like a notification you’d expect from your bank. The sender may use a familiar phone number or email address, making it seem even more credible. You might think it’s just a routine alert, but that’s where the danger lies.
+You receive a text message that appears to be from your bank, claiming that there’s been an unauthorized Zelle transaction on your account. The message includes a link to verify your identity and prevent the transaction from going through. It looks official, complete with your bank's logo and a familiar tone. You might even see a phone number that seems to match your bank’s customer service line. The urgency of the message makes your heart race, prompting you to act quickly to protect your funds.
 
-The message often creates a sense of urgency, telling you that your account will be locked or that you need to act immediately to prevent unauthorized transactions. This pressure can make you feel anxious, pushing you to click the link without thinking twice. The language used is designed to build trust, often including phrases that sound reassuring, like “We value your security” or “Your account is important to us.” This combination of urgency and trust can cloud your judgment, leading you to believe the message is legitimate.
+The scam plays on your emotions, creating a sense of panic that pushes you to respond immediately. It might say something like, “Your account will be locked if you don’t verify your information within the next hour.” This pressure can make it hard to think clearly. You trust that your bank would reach out to you in such a critical situation, and the fear of losing access to your money can cloud your judgment, leading you to click the link without a second thought.
 
-Scammers are clever and may use various tactics to disguise their attempts. You might see a message that claims to be from a friend who “accidentally” sent money and needs you to confirm your details. Alternatively, you could receive an email that appears to come from your bank, asking you to log in via a link to resolve an issue. Each variation is crafted to catch you off guard, making it difficult to discern what’s real and what’s not.
+You might encounter variations of this scam that look slightly different but carry the same intent. For instance, you could receive an email that appears to be a security alert from Zelle, or a phone call from someone claiming to be a bank representative. They might ask you to confirm your account details or send a verification code to “secure” your account. Each version is designed to exploit your trust and urgency, making it easy to overlook the warning signs.
 
-If you fall for this scam, the consequences can be severe. You might unknowingly provide your personal information, allowing scammers to access your bank account or steal your identity. Once they have your details, they can drain your funds or make unauthorized transactions, leaving you in a difficult financial situation. The emotional toll can be just as damaging, as you grapple with the realization that you’ve been deceived. It’s crucial to stay vigilant and question any unexpected messages that request your information.
+Falling for this scam can have serious consequences. If you provide your personal information, you risk losing access to your bank account, and your financial information may be sold on the dark web. You could face unauthorized transactions that drain your funds, and the aftermath of dealing with identity theft can be overwhelming. The emotional toll of realizing you’ve been scammed can linger long after the financial damage is done, leaving you feeling vulnerable and anxious about future transactions.
 <p>This is why step-by-step checking matters. Once a message related to This Zelle Payment Message moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
