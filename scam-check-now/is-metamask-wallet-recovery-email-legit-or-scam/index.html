@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>MetaMask Wallet Recovery Email is a common question when something like a crypto recovery message creates urgency around crypto. A common pattern starts when someone receives something that looks routine at first glance. These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many MetaMask Wallet Recovery Email scams involve things like a crypto recovery message, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might have received an email claiming to be from MetaMask, urging you to recover your wallet due to suspicious activity. The message often includes official-looking logos and a sense of urgency, stating that your account will be locked unless you take immediate action. It may ask you to click on a link to verify your identity or reset your password. The email can feel legitimate, mimicking the tone and style of official communications, making it easy to overlook the red flags.
+You might have recently received an email claiming to be from MetaMask, urging you to recover your wallet. The message may look official, complete with the MetaMask logo and familiar language, asking you to click a link to verify your account or restore access. It might even mention a recent suspicious login attempt, making it seem urgent. The email could include a sense of familiarity, as if it’s addressing you directly, making it easy to overlook the signs that something isn’t right.
 
-The pressure in these messages is palpable. They often create a sense of urgency, suggesting that your funds are at risk or that you must act quickly to avoid losing access to your wallet. This tactic plays on your emotions, making you feel anxious and compelled to respond without thinking critically. The goal is to get you to act fast, bypassing your usual caution and leading you straight into a trap.
+The urgency in the email is palpable, designed to make you act quickly without thinking. Phrases like "immediate action required" or "your funds are at risk" can create a sense of panic, pushing you to click the link before you have a chance to question its authenticity. The sender may even provide a phone number for support, making it feel like a legitimate lifeline. This pressure can cloud your judgment, leading you to believe that responding is the only way to protect your assets.
 
-You might also see variations of this scam, such as texts or social media messages that appear to come from MetaMask support. These could include fake customer service numbers or links to counterfeit websites that look almost identical to the real MetaMask site. Sometimes, the message might even claim that you’ve won a prize or that there’s a new feature that requires your immediate attention. Each variation is designed to exploit your trust and prompt quick action.
+You might also see variations of this scam, such as text messages or social media direct messages that mimic MetaMask's tone and branding. Some messages might claim to offer a new feature or security update, encouraging you to log in through a provided link. Others may promise rewards or bonuses for verifying your account, using enticing language that makes it hard to resist. Each version is crafted to exploit your trust in MetaMask, making it crucial to recognize these tactics.
 
-Falling for this scam can have serious consequences. If you provide your recovery phrase or personal information, scammers can gain access to your wallet and drain your funds. Once they have your credentials, it’s nearly impossible to recover your assets. The emotional and financial impact can be devastating, leaving you not only with a loss of money but also with a lingering sense of betrayal and vulnerability.
+Falling for this scam can have serious consequences. If you click the link and enter your credentials, you could unwittingly hand over access to your wallet, leading to the loss of your funds. Scammers can drain your account in moments, leaving you with little recourse to recover your assets. The emotional and financial toll can be significant, as you grapple with the realization that a simple click led to a devastating breach of trust and security.
 <p>Crypto-related scams connected to MetaMask Wallet Recovery Email often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like a crypto recovery message.</p>
 </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

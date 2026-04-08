@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Microsoft Login Attempt Email is a common question when something like a login alert email appears without context. A legitimate version and a scam version of the same message often look similar on the surface but behave very differently once you verify them. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How Legitimate And Scam Versions Usually Differ</h2>
 <p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like a login alert email and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>
-You might have recently received an email claiming to be from Microsoft, notifying you of a login attempt from an unfamiliar device or location. The message often includes details like the time of the attempt, the IP address, and a link to secure your account. At first glance, it appears official, complete with Microsoft branding and a professional tone. However, if you look closely, you might notice subtle inconsistencies in the sender's email address or the URL linked in the message, which could indicate that it's not what it seems.
+You might have recently received an email claiming to be from Microsoft, alerting you about a login attempt from an unfamiliar device or location. The message often includes your name, a timestamp, and a link to verify your account. It may look polished, complete with the Microsoft logo, and might even reference your recent activities to make it feel more legitimate. The urgency in the tone suggests that immediate action is required to secure your account, which can make anyone pause and consider whether it’s real or not.
 
-Scammers know how to create a sense of urgency to make you act quickly. In these emails, phrases like “immediate action required” or “your account will be locked” are common, prompting you to click on a link without thinking twice. This pressure can lead you to believe that you need to resolve a potential security breach right away. The emotional response of fear and concern for your account security makes it easier for them to manipulate you into providing sensitive information.
+Scammers know how to play on your emotions. They create a sense of urgency by stating that your account will be locked if you don't act quickly. This pressure can lead you to click on links or provide personal information without fully thinking it through. The message may also include reassuring phrases about your account security or mention that they are protecting you from unauthorized access, which can build trust and make you feel safe in responding to their demands.
 
-Variations of this scam are rampant. You might encounter similar messages claiming to be from other services, like Google or PayPal, using the same tactics of urgency and fear. Some might even come as text messages or phone calls, where the caller impersonates a Microsoft representative, urging you to verify your account details. Each version is designed to exploit your trust and prompt you to take action without verifying the source.
+These phishing attempts can vary slightly in their presentation. Some emails might claim to be from a different service, like OneDrive or Outlook, but still use the same tactics. You might see variations in the sender's email address, which may look similar to a legitimate Microsoft address but have subtle differences. Other versions might come as text messages or pop-up alerts while you’re browsing, all designed to catch you off guard and prompt a hasty reaction.
 
-Falling for this scam can have serious consequences. If you click on the link and enter your credentials, you’re handing over your account access to cybercriminals. They can then use your account to steal personal information, make unauthorized purchases, or even compromise your contacts. The ripple effect can extend to your friends and family, as scammers may use your account to target them next. Protecting yourself means being vigilant and questioning the legitimacy of such messages before taking any action.
+If you fall for this scam, the consequences can be severe. Providing your login details can give scammers full access to your account, allowing them to steal personal information, make unauthorized purchases, or even lock you out entirely. The fallout can extend beyond just your Microsoft account, potentially compromising other linked accounts and leading to identity theft. The emotional and financial toll can be significant, leaving you feeling vulnerable and exposed.
 <p>That difference matters because a real notice related to Microsoft Login Attempt Email should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ Falling for this scam can have serious consequences. If you click on the link an
 <li><a href="/scam-check-now/is-google-login-blocked-email-legit-or-scam/">Is Google Login Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-suspicious-login-email-legit-or-scam/">Is Google Suspicious Login Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-unusual-login-email-legit-or-scam/">Is Google Unusual Login Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-netflix-login-alert-email-legit-or-scam/">Is Netflix Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-linkedin-login-alert-email-legit-or-scam/">Is Linkedin Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-suspicious-login-alert-email-legit-or-scam/">Is Suspicious Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-login-request-email-legit-or-scam/">Is This Login Request Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-id-login-alert-email-legit-or-scam/">Is Apple Id Login Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-random-email-asking-for-login-legit-or-scam/">Is Random Email Asking for Login or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-suspicious-login-email-legit-or-scam/">Is Suspicious Login Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

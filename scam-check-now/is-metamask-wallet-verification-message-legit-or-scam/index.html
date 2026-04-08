@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>MetaMask Wallet Verification Message is a common question when something like an exchange support DM creates urgency around crypto. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. These scams often depend on speed, trust, and technical confusion to push people into approving actions too quickly.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many MetaMask Wallet Verification Message scams involve things like an exchange support DM, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>
-You might have recently received a message claiming to be from MetaMask, asking you to verify your wallet. It could look like a professional email, complete with logos and links that seem legitimate. The sender may urge you to click on a link to confirm your account details or to log in to a website that resembles the official MetaMask interface. Everything appears polished, and the urgency in the tone makes it hard to ignore, especially if you’ve been using MetaMask for your transactions.
+You might have recently received a message claiming to be from MetaMask, asking you to verify your wallet for security reasons. This message could appear in your email inbox or as a direct message on social media, often featuring official-looking logos and language that mimics genuine MetaMask communications. It may instruct you to click on a link to confirm your identity or to provide personal information, creating an illusion of legitimacy that can easily catch anyone off guard.
 
-These messages often create a sense of urgency, suggesting that your account is at risk or that you need to act quickly to avoid losing access to your funds. The language may include phrases like “immediate action required” or “your account will be suspended.” This pressure can make you feel like you have no choice but to comply, especially if you’re worried about the security of your assets. The familiarity of the brand adds a layer of trust, making it easier to overlook the red flags.
+The urgency in these messages is palpable. They often state that your wallet will be suspended or that you risk losing your funds if you don’t act immediately. This pressure can lead you to make hasty decisions, especially if you’re already feeling anxious about your crypto investments. The message may also include reassurances that your account is at risk, making you feel compelled to respond quickly to protect your assets. This tactic plays on your fears and can cloud your judgment.
 
-You might also encounter variations of this scam, such as text messages or social media direct messages that mimic the same style. Some may even come from fake support accounts claiming to assist you with your MetaMask wallet. These variations can be subtle; they might alter the sender’s email address slightly or change the website's URL just enough to seem credible. Regardless of the format, the goal remains the same: to trick you into revealing sensitive information.
+Variations of this scam can appear in many forms, such as fake websites that look almost identical to the official MetaMask site or messages that claim to offer a new feature requiring verification. Some might even come from accounts that seem to be affiliated with MetaMask, using slight misspellings or altered URLs to trick you. You might see a message that promises a bonus for verifying your wallet or an alert about a supposed security breach, all designed to lure you into providing sensitive information.
 
-Falling for this scam can have serious consequences. If you provide your wallet credentials or private keys, the scammers can drain your account in a matter of minutes. The loss can be devastating, not just financially but also in terms of trust in the platforms you use. Once your assets are gone, recovering them is nearly impossible, leaving you vulnerable and frustrated. It’s crucial to stay vigilant and recognize that not every message claiming to be from MetaMask is what it seems.
+Falling for this scam can have dire consequences. If you provide your wallet information or click on a malicious link, you could lose access to your funds almost instantly. Scammers can drain your wallet, leaving you with nothing. Additionally, your personal information could be sold on the dark web, leading to further identity theft or fraud. The aftermath can be devastating, both financially and emotionally, as you grapple with the realization that you’ve been deceived.
 <p>Crypto-related scams connected to MetaMask Wallet Verification Message often succeed by making risky actions feel routine. A message may talk about support, recovery, verification, or returns, but the safest habit is to independently confirm the platform, domain, and wallet action before doing anything irreversible, especially if it begins with something like an exchange support DM.</p>
 </div>
 
@@ -1386,7 +1386,7 @@ Falling for this scam can have serious consequences. If you provide your wallet 
 <li><a href="/scam-check-now/did-i-get-scammed-by-metamask/">Did I Get Scammed by MetaMask?</a></li>
 <li><a href="/scam-check-now/is-crypto-wallet-verification-message-legit-or-scam/">Is Crypto Wallet Verification Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/crypto-wallet-verification-scam/">Is Crypto Wallet Verification a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-account-verification-email-legit-or-scam/">Is Coinbase Account Verification Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-verification-code-message-legit-or-scam/">Is Coinbase Verification Code Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

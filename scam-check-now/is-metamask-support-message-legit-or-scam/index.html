@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>MetaMask Support Message is a common question when something like a suspicious link feels suspicious. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common MetaMask Support Message flow starts with something like a suspicious link, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received a message claiming to be from MetaMask support, urging you to verify your account or reset your password. The message may look official, complete with logos and professional language, and it often includes a link that directs you to a website that closely resembles the real MetaMask site. It might even come from an email address that seems legitimate at first glance, making it easy to mistake for genuine communication from the wallet service you trust.
+You might have recently received a message claiming to be from MetaMask support, perhaps through email or a direct message on social media. It often starts with a friendly greeting and references a recent transaction or issue with your wallet, urging you to verify your account or reset your password. The message may include a link that appears to lead to the official MetaMask website but is actually a cleverly disguised phishing site. The language used is often reassuring, making it seem like a routine security check, which can easily catch you off guard.
 
-The urgency in these messages is palpable. They often state that your account has been compromised or that you need to act immediately to avoid losing your funds. This pressure can be overwhelming, especially if you’re already feeling anxious about your cryptocurrency investments. The scammers know how to exploit your fears, making you feel like you have no choice but to click the link and provide the information they request, all while assuring you that this is a necessary step to keep your assets safe.
+The urgency in these messages is palpable. They often state that your account will be locked or compromised if you don’t act immediately. This pressure can make you feel like you have no choice but to respond quickly, pushing you to click on links or provide personal information without taking a moment to think. The scammers know how to exploit your emotions, making you feel anxious about your funds and more likely to comply with their demands without questioning their legitimacy.
 
-Scammers are constantly adapting their tactics, and the MetaMask support scam is no exception. You might see variations where they claim to offer a security upgrade or a new feature that requires your immediate attention. Sometimes, they may even impersonate a well-known figure in the crypto community, claiming to help you with a special promotion or investment opportunity. Each version is designed to catch you off guard, making it seem like a legitimate outreach from a trusted source.
+You may also encounter variations of this scam that look slightly different but carry the same deceptive intent. Some messages might come from fake social media accounts that impersonate MetaMask support, while others could be in the form of pop-up notifications on websites. They may even use official logos and branding to create a false sense of security. Regardless of the format, the core message remains the same: they want you to act quickly and provide sensitive information under the guise of support.
 
-Falling for this scam can have serious consequences. If you provide your login details or private keys, you could lose access to your wallet and all the assets within it. Scammers are skilled at siphoning off funds quickly, leaving you with no recourse to recover your money. The emotional toll can be just as damaging, as you may feel a mix of anger and regret for having trusted a message that seemed so real. Protecting yourself means being vigilant and questioning any communication that seems even slightly off.
+Falling for this scam can have serious consequences. If you provide your private keys or recovery phrases, you could lose access to your wallet and all your assets in a matter of minutes. Scammers can drain your funds and leave you with no recourse to recover your losses. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your online security. It’s crucial to remain vigilant and verify any communication before taking action, especially when it involves your financial assets.
 <p>This is why step-by-step checking matters. Once a message related to MetaMask Support Message moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1385,8 +1385,8 @@ Falling for this scam can have serious consequences. If you provide your login d
 <li><a href="/scam-check-now/is-crypto-investment-message-legit-or-scam/">Is Crypto Investment Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-presale-message-legit-or-scam/">Is Crypto Presale Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-locked-message-legit-or-scam/">Is Coinbase Account Locked Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-crypto-trading-signal-message-legit-or-scam/">Is Crypto Trading Signal Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-crypto-wallet-verification-message-legit-or-scam/">Is Crypto Wallet Verification Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-fraud-alert-message-legit-or-scam/">Is Coinbase Fraud Alert Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-verification-code-message-legit-or-scam/">Is Coinbase Verification Code Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

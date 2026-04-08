@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Netflix Account Suspended Email is a common question when something like a login alert email appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Netflix Account Suspended Email flow starts with something like a login alert email, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You might have recently received an email claiming that your Netflix account has been suspended due to unusual activity. The message often looks official, complete with Netflix branding and a sense of urgency, urging you to click a link to verify your account information. It may even include a warning that your account will be permanently closed if you don’t act quickly. The sender's email address might appear similar to Netflix’s, making it easy to overlook any red flags. This type of communication can easily catch you off guard, especially if you’re a regular user.
+You might have recently received an email that claims your Netflix account is suspended due to an issue with your payment information. The message often looks convincing, featuring Netflix's logo and a professional layout. It typically includes a link that urges you to verify your account details to regain access. The email may even mention specific details like your last payment date or the last show you watched, making it feel personal and legitimate. You might find yourself questioning whether this is a real notification or just another phishing attempt.
 
-The urgency in these emails is designed to provoke an emotional response, pushing you to act without thinking. Phrases like "Immediate action required" or "Your account will be permanently suspended" are common tactics that create a sense of panic. The goal is to make you feel that your account is at risk, compelling you to click on the provided link or provide personal information to resolve the issue. This pressure can lead you to overlook details that might indicate the email isn’t legitimate.
+The urgency in these emails is palpable. They often state that your account will be permanently suspended unless you act immediately. This pressure can make you feel anxious, prompting you to click on the link without thinking twice. The email may even suggest that you could lose access to your favorite shows or that your subscription will be canceled if you don’t respond quickly. This tactic plays on your emotions, making it harder to take a step back and evaluate the situation calmly.
 
-Scammers often use variations of this tactic, sometimes claiming that your payment method needs to be updated or that there’s a problem with your subscription. You might see different logos, colors, or even different names for the service, but the core message remains the same: your account is in jeopardy. Some may even impersonate customer service representatives, reaching out via text or phone calls to further convince you that immediate action is necessary. These variations can make it challenging to discern what’s real and what’s a trap.
+You may also encounter variations of this scam. Some versions might come as a text message instead of an email, while others could appear as pop-up notifications while browsing the web. They might use different wording or claim to be from customer support, but the underlying message remains the same: your account is in jeopardy, and you need to act fast. Scammers are constantly refining their tactics, so what looks like a harmless message could easily be a trap designed to steal your personal information.
 
-Falling for this scam can have serious consequences. If you provide your login credentials or personal information, you risk losing access to your Netflix account and potentially exposing your financial information to identity thieves. Scammers can use your details to access other accounts, leading to further financial loss or fraud. The emotional toll of realizing you've been duped can also be significant, leaving you feeling vulnerable and anxious about your online security.
+Falling for this scam can lead to serious consequences. If you provide your login credentials or payment information, scammers can access your Netflix account and potentially other accounts linked to the same email. They may use your information for identity theft or unauthorized purchases, leaving you with financial losses and a headache. The emotional toll can be significant as well, knowing that a moment of panic led to a breach of your personal security. It's crucial to remain vigilant and verify any suspicious messages before taking action.
 <p>This is why step-by-step checking matters. Once a message related to Netflix Account Suspended Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1382,11 +1382,11 @@ Falling for this scam can have serious consequences. If you provide your login c
 <li><a href="/scam-check-now/is-google-account-flagged-email-legit-or-scam/">Is Google Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-account-suspension-email-legit-or-scam/">Is Google Account Suspension Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-account-warning-email-legit-or-scam/">Is Google Account Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-account-alert-email-legit-or-scam/">Is This Account Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-verify-your-account-email-legit-or-scam/">Is Verify Your Account Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/account-warning-email-scam-example/">Is Account Warning Email Scam Example a Scam?</a></li>
 <li><a href="/scam-check-now/is-account-locked-email-legit-or-scam/">Is Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-account-warning-email-legit-or-scam/">Is Account Warning Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-account-access-alert-email-legit-or-scam/">Is Apple Account Access Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

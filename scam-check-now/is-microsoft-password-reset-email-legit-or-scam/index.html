@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Microsoft Password Reset Email is a common question when something like an account locked warning appears without context. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Microsoft Password Reset Email flow starts with something like an account locked warning, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You may have recently received an email claiming to be from Microsoft, notifying you that your password has been reset. The message might include a link that urges you to click immediately to confirm the change, often featuring Microsoft’s logo and a professional layout that mimics their official communications. The sender’s email address may seem legitimate at first glance, but a closer look reveals subtle discrepancies that raise suspicion. This email looks like a typical notification, but it’s designed to trick you into taking action without thinking.
+You might have recently received an email claiming to be from Microsoft, notifying you of a password reset request. The message often looks official, complete with Microsoft branding, and may even include a link that appears to direct you to the Microsoft website. It might say something like, “We received a request to reset your password. If you didn’t make this request, please click here.” The email may seem legitimate at first glance, but it’s crucial to take a closer look before acting on it.
 
-The urgency in the email can be overwhelming. Phrases like “Your account will be locked if you don’t respond within 24 hours” create a sense of panic, pushing you to act quickly. This tactic is effective because it plays on your fear of losing access to important files or services. The email might also reassure you with statements about their commitment to security, making you feel like you can trust the message. This combination of urgency and trust is a classic strategy used by scammers to manipulate your emotions.
+These emails are designed to create a sense of urgency. They often mention that your account will be locked if you don’t take immediate action, playing on your fear of losing access to important information. The language is crafted to instill trust, using phrases that make it seem like they are looking out for your security. You might feel compelled to click the link quickly, thinking you’re protecting your account, but this is exactly what the scammers want you to do.
 
-You might encounter variations of this scam, such as a text message or a pop-up notification while browsing the web. In some cases, the message may claim that suspicious activity has been detected on your account, prompting you to verify your identity. Other versions may ask you to provide personal information to “secure” your account. Each of these variations is crafted to look legitimate, often using familiar branding and language that makes it easy to overlook the warning signs.
+You may also encounter variations of this scam that come in different forms. For instance, you might receive a text message or a phone call instead of an email, all claiming to be from Microsoft. Some messages might even reference recent activity on your account, making them feel more personalized and convincing. Scammers often adapt their tactics, so what looks like a straightforward password reset request could be a cleverly disguised attempt to steal your information.
 
-Falling for this scam can lead to serious consequences. If you click the link and enter your information, you could unknowingly give scammers access to your Microsoft account and any sensitive data linked to it. This could result in identity theft, unauthorized transactions, or even further phishing attempts targeting your contacts. The fallout can be extensive, affecting not just you but also those in your network, as scammers may use your compromised account to launch additional attacks.
+Falling for this scam can lead to serious consequences. If you click the link and enter your credentials, you’re handing over your account information to criminals who can then access your emails, files, and personal data. This can result in identity theft, unauthorized transactions, and a long, stressful process to regain control of your accounts. What starts as a simple email can spiral into a nightmare, leaving you vulnerable and exposed.
 <p>This is why step-by-step checking matters. Once a message related to Microsoft Password Reset Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1377,7 +1377,8 @@ Falling for this scam can lead to serious consequences. If you click the link an
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-apple-password-reset-text-legit-or-scam/">Is Apple Password Reset Text or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-this-password-reset-email-real-or-fake/">Is This Password Reset Email Real or Fake</a></li>
+<li><a href="/scam-check-now/is-apple-password-reset-text-legit-or-scam/">Is Apple Password Reset Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-password-reset-text-legit-or-scam/">Is Google Password Reset Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/inheritance-email-scam-example/">Is Inheritance Email Scam Example a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-billing-alert-email-legit-or-scam/">Is Apple Billing Alert Email or Scam Legit or a Scam?</a></li>
@@ -1386,7 +1387,6 @@ Falling for this scam can lead to serious consequences. If you click the link an
 <li><a href="/scam-check-now/is-apple-fraud-alert-email-legit-or-scam/">Is Apple Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-icloud-alert-email-legit-or-scam/">Is Apple iCloud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-payment-declined-email-legit-or-scam/">Is Apple Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-payment-failed-email-legit-or-scam/">Is Apple Payment Failed Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

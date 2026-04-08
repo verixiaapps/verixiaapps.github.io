@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>MetaMask Security Alert Email is a common question when something like a password reset message appears without context. This type of scam usually works by stacking multiple warning signs instead of relying on just one obvious red flag. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many MetaMask Security Alert Email cases, the message starts with something like a password reset message and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming to be from MetaMask, alerting you to unusual activity on your wallet. The message often includes your wallet address and warns you to take immediate action to secure your funds. It may even look convincing, complete with the MetaMask logo and professional formatting. The email might instruct you to click on a link to verify your identity or reset your password, making it seem urgent and necessary to protect your assets.
+You might have recently received an email claiming to be from MetaMask, warning you about suspicious activity on your wallet. The message may look official, featuring the MetaMask logo and urgent language urging you to verify your account immediately. It could include links that direct you to a website that closely resembles the real MetaMask site, asking you to log in or provide personal information. The email might even mention specific transactions or account details to make it seem more credible, leaving you uncertain about whether it’s a genuine alert or a clever ruse.
 
-The urgency in these emails is palpable. They often suggest that your account is at risk, creating a sense of panic that pushes you to act quickly without thinking. You might feel compelled to click the link right away, fearing that any delay could result in losing your funds. The language used is designed to build trust, often referencing security measures or recent updates, making it seem like a legitimate communication from MetaMask.
+The urgency of the email can be overwhelming. It often emphasizes that your account is at risk and that immediate action is required to prevent unauthorized access. Phrases like “act now” or “your funds are in danger” can create a sense of panic, pushing you to click on links without thinking twice. This pressure can cloud your judgment, making you more likely to overlook red flags. The design and language are crafted to build trust, making it hard to distinguish between a legitimate warning and a malicious attempt to steal your information.
 
-Scammers are known for their ability to adapt, so the email you received might not be the only version out there. Some variations may come as text messages or even phone calls, where the caller impersonates a MetaMask representative. They might ask for your private keys or seed phrases, claiming they need this information to assist you. Each variation is crafted to exploit your trust and urgency, making it difficult to discern what's real and what's not.
+You may encounter variations of this scam, such as text messages that mimic MetaMask alerts or social media posts claiming to offer security tips. Some might even come from fake customer support accounts that engage you in conversation, asking for your credentials to “help” secure your wallet. Each version is designed to exploit your trust in MetaMask and your fear of losing access to your assets. As these scams evolve, they become increasingly sophisticated, making it crucial to remain vigilant.
 
-Falling for this scam can have serious consequences. If you provide your private keys or click on a malicious link, you risk losing access to your wallet and all the funds within it. Scammers can drain your account in seconds, leaving you with little recourse to recover your assets. The emotional toll can be significant, as the realization that you’ve been deceived sinks in, often leaving you feeling vulnerable and exposed in the digital landscape.
+If you fall for one of these scams, the consequences can be severe. Providing your login information can lead to unauthorized access to your wallet, resulting in the loss of your cryptocurrencies and personal data. Once the scammers have your information, recovering your assets is nearly impossible. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. Recognizing the signs of these scams is essential to protect yourself and your investments.
 <p>The strongest clue is usually not one isolated detail. With MetaMask Security Alert Email, the risk often becomes clearer when something like a password reset message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1383,10 +1383,10 @@ Falling for this scam can have serious consequences. If you provide your private
 <li><a href="/scam-check-now/is-crypto-fraud-alert-email-legit-or-scam/">Is Crypto Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-security-warning-email-legit-or-scam/">Is Crypto Security Warning Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-transaction-alert-email-legit-or-scam/">Is Crypto Transaction Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-fraud-alert-message-legit-or-scam/">Is Coinbase Fraud Alert Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-suspicious-login-alert-legit-or-scam/">Is Coinbase Suspicious Login Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-suspicious-transaction-alert-legit-or-scam/">Is Coinbase Suspicious Transaction Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-unauthorized-transaction-alert-legit-or-scam/">Is Coinbase Unauthorized Transaction Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-crypto-exchange-login-alert-legit-or-scam/">Is Crypto Exchange Login Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-account-locked-email-legit-or-scam/">Is Coinbase Account Locked Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

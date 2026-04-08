@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>Linkedin Suspicious Activity Alert is a common question when something like a suspicious message feels suspicious. What makes these scams effective is that the message often looks ordinary until you isolate the warning signs one by one. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Linkedin Suspicious Activity Alert situations, the message is written to build trust and urgency at the same time. Something like a suspicious message may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently received a LinkedIn alert claiming suspicious activity on your account, urging you to take immediate action. The message may look official, complete with LinkedIn branding and a sense of urgency, prompting you to click a link to verify your identity or change your password. It could be an email or a direct message that seems to come from LinkedIn, making it hard to discern whether it’s a genuine alert or a cleverly disguised scam.
+You receive an email that looks like it’s from LinkedIn, alerting you to suspicious activity on your account. The message is polished, complete with LinkedIn’s logo and branding, and it claims that someone has tried to log in from an unfamiliar device. It urges you to click a link to verify your identity and secure your account. The urgency in the email is palpable, making you feel like you need to act quickly to protect your professional profile and connections.
 
-The urgency in these alerts is often palpable. The message might say something like, "Your account will be suspended unless you verify your information within 24 hours." This tactic plays on your fear of losing access to your professional network or missing out on job opportunities. Scammers know that the pressure to act quickly can cloud your judgment, making you more likely to click on links or provide personal information without thinking twice.
+The email creates a sense of urgency by suggesting that your account is at risk. It may mention that your profile could be compromised if you don’t take immediate action. This kind of pressure can make you feel anxious, pushing you to click the link without thinking twice. The message might even include a friendly tone, as if it’s coming from a trusted friend or colleague, which can further lower your defenses and make you more likely to comply.
 
-You may also encounter variations of this scam that appear in different forms. Some might come as a text message or even a phone call, claiming to be from LinkedIn support. Others may direct you to a fake login page that looks almost identical to the real site. Each variation is designed to exploit your trust in LinkedIn, making it easy to confuse a legitimate alert with a fraudulent one, especially if you’re already concerned about your account security.
+You might also encounter variations of this scam through text messages or social media notifications. Some messages may claim that your account has been flagged for unusual activity, while others might say that you need to update your payment information to avoid account suspension. Each version of the scam is designed to look legitimate, often mimicking the style and language used by LinkedIn, making it harder to discern what’s real and what’s not.
 
-Falling for this scam can lead to serious consequences. If you provide your login credentials, scammers can gain full access to your account, potentially using it to send out more phishing messages to your contacts. This not only jeopardizes your professional relationships but can also lead to identity theft or financial loss. The aftermath can be overwhelming, as you may find yourself scrambling to regain control of your account and protect your personal information.
+Falling for this scam can lead to serious consequences. If you click the link and provide your login details, you could inadvertently hand over access to your LinkedIn account to cybercriminals. They may use your profile to reach out to your connections, spreading the scam further or even stealing sensitive information. The aftermath can be damaging, not just to your online reputation but also to your professional relationships, as your contacts may be misled into trusting a fraudulent account.
 <p>The strongest clue is usually not one isolated detail. With Linkedin Suspicious Activity Alert, the risk often becomes clearer when something like a suspicious message is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1366,9 +1366,9 @@ Falling for this scam can lead to serious consequences. If you provide your logi
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-linkedin-message-from-recruiter-legit-or-scam/">Is Linkedin Message from Recruiter or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-linkedin-connection-request-message-legit-or-scam/">Is Linkedin Connection Request Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-linkedin-message-from-recruiter-legit-or-scam/">Is Linkedin Message from Recruiter or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-unusual-activity-alert-legit-or-scam/">Is Google Unusual Activity Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-microsoft-unusual-activity-alert-legit-or-scam/">Is Microsoft Unusual Activity Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-unusual-activity-alert-email-legit-or-scam/">Is Unusual Activity Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-unusual-activity-alert-legit-or-scam/">Is Unusual Activity Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-billing-alert-email-legit-or-scam/">Is Apple Billing Alert Email or Scam Legit or a Scam?</a></li>
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);

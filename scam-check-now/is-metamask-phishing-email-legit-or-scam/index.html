@@ -1342,13 +1342,13 @@ body{padding-top:84px;}
 <p>MetaMask Phishing Email is a common question when something like a copied account warning feels suspicious. The easiest way to understand the risk is to break down how this scam usually unfolds step by step. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common MetaMask Phishing Email flow starts with something like a copied account warning, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email that looks like it’s from MetaMask, claiming there’s an issue with your wallet or that you need to verify your account. The message often includes official logos and a professional tone, making it seem legitimate. It may ask you to click on a link to resolve the issue, leading you to a website that mimics the real MetaMask interface. The email may even include your name or other personal details, making it feel even more authentic and convincing.
+You might have recently received an email claiming to be from MetaMask, urging you to verify your account or update your security settings. The message often includes official-looking logos and language that mimics genuine communications from the service. It may ask you to click on a link that leads to a website that looks almost identical to the real MetaMask site, where you're prompted to enter your wallet credentials or personal information. This setup can be incredibly convincing, making it hard to distinguish between a legitimate request and a phishing attempt.
 
-The urgency in these emails is palpable. You might read phrases like “Immediate action required” or “Your account will be suspended if you don’t respond within 24 hours.” This pressure can make you feel anxious, prompting you to act without thinking. The sender often plays on your fear of losing access to your funds, which can push you to click that link or provide sensitive information without a second thought.
+The sense of urgency in these emails is palpable. You may notice phrases like “Immediate action required” or “Your account will be suspended if you don’t respond within 24 hours.” This tactic plays on your fear of losing access to your cryptocurrency or funds, pushing you to act quickly without taking the time to verify the source. The email may even include a friendly tone, making it seem like they’re looking out for your best interests, which can further build trust and lead you to let your guard down.
 
-You may also encounter variations of this scam. Some emails might claim to be from a different cryptocurrency service or even suggest that you’ve won a prize. Others may come as text messages or social media direct messages, all designed to catch you off guard. Each variation shares the same goal: to trick you into revealing your private keys or personal information. The more familiar the message feels, the more likely you are to fall for it.
+Phishing attempts can vary widely, with some emails appearing as notifications about a successful transaction or a security alert about suspicious activity. Others may come disguised as customer support inquiries, asking for your feedback or offering assistance. Each variation is designed to exploit your emotions and prompt you to take action without questioning the authenticity of the message. You might even receive follow-up texts or calls that echo the same themes, making it feel like there’s a genuine crisis that needs your immediate attention.
 
-If you do fall for this scam, the consequences can be severe. Once you provide your private keys or login information, the scammer can drain your wallet of funds, leaving you with little recourse to recover your losses. The emotional toll can be just as damaging, as you may feel violated and regretful for not recognizing the signs sooner. Protecting yourself from these scams is crucial, as the digital landscape is filled with threats that can compromise your financial security.
+Falling for one of these scams can have severe consequences. If you provide your credentials, scammers can drain your wallet, leaving you with nothing. The emotional toll can be just as damaging, as you may feel a mix of regret and anxiety over what happened. Once your information is compromised, it can be difficult to regain control, and you might find yourself facing ongoing issues with identity theft or financial loss. It’s essential to remain vigilant and question any unsolicited communication, especially when it involves your financial assets.
 <p>This is why step-by-step checking matters. Once a message related to MetaMask Phishing Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1381,12 +1381,12 @@ If you do fall for this scam, the consequences can be severe. Once you provide y
 <li><a href="/scam-check-now/is-crypto-deposit-email-legit-or-scam/">Is Crypto Deposit Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-support-email-legit-or-scam/">Is Crypto Support Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-crypto-withdrawal-email-legit-or-scam/">Is Crypto Withdrawal Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-crypto-email-legit-or-scam/">Is This Crypto Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-account-flagged-email-legit-or-scam/">Is Coinbase Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-locked-email-legit-or-scam/">Is Coinbase Account Locked Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-account-restricted-email-legit-or-scam/">Is Coinbase Account Restricted Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-account-restriction-email-legit-or-scam/">Is Coinbase Account Restriction Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-security-email-legit-or-scam/">Is Coinbase Account Security Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-account-suspension-email-legit-or-scam/">Is Coinbase Account Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-account-verification-email-legit-or-scam/">Is Coinbase Account Verification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-billing-issue-email-legit-or-scam/">Is Coinbase Billing Issue Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-fraud-alert-email-legit-or-scam/">Is Coinbase Fraud Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -2486,12 +2486,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2536,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
