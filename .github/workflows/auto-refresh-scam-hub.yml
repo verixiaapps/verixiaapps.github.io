@@ -32,7 +32,7 @@ jobs:
       DRY_RUN: ${{ inputs.dry_run || 'false' }}
       DEFAULT_COMMIT_MESSAGE: "Auto refresh scam hub"
       HUB_SCRIPT_PATH: "scripts/generate_hub.py"
-      HUB_FILE_PATH: "scam-check-now/hubs/all-scam-checks/index.html"
+      HUB_FILE_PATH: "scam-hub/index.html"
 
     steps:
       - name: Checkout repo
@@ -65,13 +65,6 @@ jobs:
             exit 1
           fi
 
-      - name: Ensure hub file exists
-        run: |
-          if [ ! -f "$HUB_FILE_PATH" ]; then
-            echo "Missing hub file: $HUB_FILE_PATH"
-            exit 1
-          fi
-
       - name: Run hub refresh script
         run: |
           python "$HUB_SCRIPT_PATH"
@@ -90,7 +83,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         run: |
           git add -- \
-            ':(glob)scam-check-now/hubs/**/index.html' \
+            'scam-hub/index.html' \
             ':(glob)scam-check-now/**/index.html' \
             ':(glob)scam-check-now-b/**/index.html' \
             ':(glob)scam-check-now-c/**/index.html'
