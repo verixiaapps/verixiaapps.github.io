@@ -19,43 +19,82 @@ REFRESH_SCOPE = os.getenv("REFRESH_SCOPE", "metadata").strip().lower()
 MAX_URLS = parse_positive_int(os.getenv("MAX_URLS_TO_REFRESH", "10"), 10)
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
 
-# Exact repo-root paths only for today's GSC-tested pages
+# Exact repo-root path only for the page being optimized right now
 TARGET_FILES: List[str] = [
-    "scam-check-now/is-venmo-security-alert-email-legit-or-scam/index.html",
-    "scam-check-now/is-google-security-warning-email-legit-or-scam/index.html",
-    "scam-check-now/is-security-alert-message-legit-or-scam/index.html",
-    "scam-check-now/is-apple-billing-update-email-legit-or-scam/index.html",
+    "scam-check-now-b/is-td-bank-fraud-alert-email-legit-or-scam/index.html",
 ]
 
-# Exact per-page SEO updates only: metadata + visible top-of-page content + matching JSON-LD
-PAGE_SEO: Dict[str, Dict[str, str]] = {
-    "scam-check-now/is-venmo-security-alert-email-legit-or-scam/index.html": {
-        "title": "Is Venmo Security Alert Email Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got a Venmo security alert email? Learn common scam warning signs, how to check if it is real or fake, and what to do before you click, log in, or reply.",
-        "h1": "Is Venmo Security Alert Email Legit or a Scam?",
-        "intro": "Got a Venmo security alert email? It could be a real account notice or a phishing scam. Learn the warning signs and how to check if it is legit or fake before you click, log in, reply, or share information.",
-    },
-    "scam-check-now/is-google-security-warning-email-legit-or-scam/index.html": {
-        "title": "Is Google Security Warning Email Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got a Google security warning email? Learn how to tell if it is legit or a scam, including phishing red flags, fake domains, and what to do before you click or sign in.",
-        "h1": "Is Google Security Warning Email Legit or a Scam?",
-        "intro": "Got a Google security warning email? Some are real, but many are phishing scams meant to steal your password or verification codes. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share information.",
-    },
-    "scam-check-now/is-security-alert-message-legit-or-scam/index.html": {
-        "title": "Is Security Alert Message Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got a security alert message or notification? Learn how to tell if it is legit or a scam, what red flags to watch for, and what to do before you click, reply, or log in.",
-        "h1": "Is Security Alert Message Legit or a Scam?",
-        "intro": "Got a security alert message or notification? Some alerts are legitimate, but many are scams designed to create panic and push you to click fast. Learn the warning signs and how to check if it is real or fake before you click, reply, log in, or share information.",
-    },
-    "scam-check-now/is-apple-billing-update-email-legit-or-scam/index.html": {
-        "title": "Is Apple Billing Update Email Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got an Apple billing update email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click or update payment details.",
-        "h1": "Is Apple Billing Update Email Legit or a Scam?",
-        "intro": "Got an Apple billing update email? It may be a real billing notice, but scammers also send fake Apple payment alerts to steal login and card details. Learn the warning signs and how to check if it is legit or fake before you click, sign in, update payment details, or share information.",
+# Exact per-page SEO updates only for this page:
+# metadata + visible top-of-page content + matching JSON-LD + long SEO body + FAQ
+PAGE_SEO: Dict[str, Dict[str, Any]] = {
+    "scam-check-now-b/is-td-bank-fraud-alert-email-legit-or-scam/index.html": {
+        "title": "Is TD Bank Fraud Alert Email Legit or a Scam? Real or Fake Warning Signs",
+        "description": "Got a TD Bank fraud alert email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click, sign in, reply, or share information.",
+        "h1": "Is TD Bank Fraud Alert Email Legit or a Scam?",
+        "intro": "Got a TD Bank fraud alert email? Some fraud alerts are real, but scammers also send fake TD Bank security notices to steal your login details, verification codes, or personal information. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share anything.",
+
+        "body_html": """
+<div class="content-block" data-context="banking" data-mode="comparison">
+<p>A TD Bank fraud alert email can be legitimate, but it is also a common phishing theme used by scammers. The safest way to judge it is not by how official the email looks, but by whether the alert still makes sense after you verify it directly through your TD Bank account, app, or official support channels.</p>
+
+<h2>How Real And Fake TD Bank Fraud Alerts Usually Differ</h2>
+<p>A legitimate TD Bank fraud alert usually points you back to your real account activity and can be confirmed independently through the official TD Bank website or mobile app. A scam version often tries to keep you inside the email itself by pushing you to click a link, call a number in the message, or share information before you verify anything on your own.</p>
+
+<p>Scammers know that banking alerts create immediate fear. A fake TD Bank fraud email may claim your account has suspicious activity, a locked card, an unusual login, or a transfer that needs urgent review. The goal is to make you act quickly before you slow down and confirm whether the alert is actually connected to your account.</p>
+
+<p>Many fake TD Bank fraud alert emails look polished. They may include the TD logo, account-related wording, security language, and a button that appears to lead to a login page. Some even include phone numbers or instructions that sound professional. But a convincing design does not make the message real. What matters is whether the email matches real account activity and whether the action path stays inside official TD Bank channels.</p>
+
+<p>Phishing versions often push one urgent next step. That may be logging in through a link, verifying your identity by email, sending a one-time code, or calling a supposed fraud department listed in the message. In some cases, the scam continues across text messages or phone calls after the email is opened, making the whole situation feel even more believable.</p>
+
+<p>If you interact with a fake TD Bank fraud alert email, the risks can be serious. Clicking a phishing link can lead to a fake sign-in page designed to capture your credentials. Replying with personal details or verification codes can help scammers take over your account. Even calling a fake support number may expose sensitive banking information that can later be used for fraud or identity theft.</p>
+
+<p>That is why independent verification matters so much. A real TD Bank fraud alert should still make sense when you ignore the email link and instead check your account through the official site, official app, or a trusted phone number you found yourself. A scam version usually falls apart the moment you stop relying on the message itself.</p>
+</div>
+
+<h2>Signs This Might Be A Scam</h2>
+<ul>
+<li>Unexpected TD Bank fraud alerts that arrive without matching account activity</li>
+<li>Links that push you to sign in or verify information directly from the email</li>
+<li>Requests for passwords, one-time codes, card details, or personal information</li>
+<li>Urgent wording about locked access, suspicious transfers, or immediate account review</li>
+<li>Phone numbers, reply instructions, or websites that do not clearly match official TD Bank channels</li>
+</ul>
+
+<h2>How To Respond Safely</h2>
+<p>A careful verification step can stop most TD Bank phishing scams before any damage happens.</p>
+<p>If you receive a TD Bank fraud alert email, do not click links or trust contact details inside the message right away. Open the official TD Bank app, visit the official website directly, or use a trusted support number you look up yourself. If the alert is real, it should still appear through those official channels. If it is fake, checking independently can keep you from handing over access, codes, or personal information to a scammer.</p>
+""".strip(),
+
+        "faq_entities": [
+            {
+                "@type": "Question",
+                "name": "Can a TD Bank fraud alert email be real?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, some TD Bank fraud alert emails can be legitimate, but scammers also imitate them. The safest step is to verify the alert directly through the official TD Bank website, mobile app, or a trusted support number you find yourself."
+                },
+            },
+            {
+                "@type": "Question",
+                "name": "How can I tell if a TD Bank fraud alert email is a scam?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Watch for urgent pressure, links that push you to log in immediately, requests for passwords or one-time codes, and contact details that only appear inside the email. A real alert should still make sense when you verify it independently through official TD Bank channels."
+                },
+            },
+            {
+                "@type": "Question",
+                "name": "What should I do if I clicked a fake TD Bank fraud alert email?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Stop entering information, close the page, and check your TD Bank account through the official app or website. If you entered login details or codes, change your credentials right away and contact TD Bank through an official support channel you looked up independently."
+                },
+            },
+        ],
     },
 }
 
-REQUIRED_SEO_KEYS = ("title", "description", "h1", "intro")
+REQUIRED_SEO_KEYS = ("title", "description", "h1", "intro", "body_html", "faq_entities")
 
 
 def repo_path_to_url(path: str) -> str:
@@ -96,9 +135,12 @@ def validate_config() -> None:
         if not path.endswith("/index.html"):
             raise ValueError(f"Unexpected PAGE_SEO path: {path}")
 
-        missing = [key for key in REQUIRED_SEO_KEYS if not str(seo.get(key, "")).strip()]
+        missing = [key for key in REQUIRED_SEO_KEYS if not seo.get(key)]
         if missing:
             raise ValueError(f"Missing SEO fields for {path}: {', '.join(missing)}")
+
+        if not isinstance(seo["faq_entities"], list) or not seo["faq_entities"]:
+            raise ValueError(f"faq_entities must be a non-empty list for {path}")
 
 
 def replace_title(content: str, new_title: str) -> str:
@@ -212,7 +254,22 @@ def replace_first_paragraph_after_h1(content: str, new_paragraph: str) -> str:
     return updated
 
 
-def update_jsonld_object(obj: Any, seo: Dict[str, str], page_url: str) -> None:
+def replace_element_inner_html_by_id(content: str, element_id: str, new_inner_html: str) -> str:
+    pattern = re.compile(
+        rf'(<(?P<tag>[a-zA-Z0-9]+)\b(?=[^>]*\bid=["\']{re.escape(element_id)}["\'])[^>]*>)(.*?)(</(?P=tag)>)',
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    updated, count = pattern.subn(
+        lambda m: f"{m.group(1)}{new_inner_html}{m.group(4)}",
+        content,
+        count=1,
+    )
+    if count == 0:
+        print(f"WARNING: element id '{element_id}' not found")
+    return updated
+
+
+def update_jsonld_object(obj: Any, seo: Dict[str, Any], page_url: str) -> None:
     if isinstance(obj, list):
         for item in obj:
             update_jsonld_object(item, seo, page_url)
@@ -225,9 +282,14 @@ def update_jsonld_object(obj: Any, seo: Dict[str, str], page_url: str) -> None:
     obj_url = obj.get("url")
     obj_name = obj.get("name", "")
 
-    if obj_type == "CollectionPage":
+    if obj_type in {"CollectionPage", "WebPage"}:
         obj["name"] = seo["title"]
         obj["description"] = seo["description"]
+        if obj.get("url") == page_url or obj_type == "WebPage":
+            obj["url"] = page_url
+
+    elif obj_type == "FAQPage":
+        obj["mainEntity"] = seo["faq_entities"]
 
     elif obj_type == "BreadcrumbList":
         items = obj.get("itemListElement")
@@ -256,7 +318,7 @@ def update_jsonld_object(obj: Any, seo: Dict[str, str], page_url: str) -> None:
         update_jsonld_object(value, seo, page_url)
 
 
-def replace_jsonld(content: str, seo: Dict[str, str], page_url: str) -> str:
+def replace_jsonld(content: str, seo: Dict[str, Any], page_url: str) -> str:
     pattern = re.compile(
         r'(<script[^>]*type=["\']application/ld\+json["\'][^>]*>)(.*?)(</script>)',
         flags=re.DOTALL | re.IGNORECASE,
@@ -317,6 +379,7 @@ def process_file(path: str) -> bool:
     updated = replace_meta(updated, "twitter:description", seo["description"], "name")
     updated = replace_first_h1(updated, seo["h1"])
     updated = replace_first_paragraph_after_h1(updated, seo["intro"])
+    updated = replace_element_inner_html_by_id(updated, "seoContent", seo["body_html"])
     updated = replace_jsonld(updated, seo, page_url)
 
     if updated == original:
@@ -340,7 +403,7 @@ def main() -> None:
     print(f"REFRESH_SCOPE={REFRESH_SCOPE}")
     print(f"DRY_RUN={DRY_RUN}")
     print(f"MAX_URLS_TO_REFRESH={MAX_URLS}")
-    print(f"Processing {len(files)} exact repo-root SEO pages...")
+    print(f"Processing {len(files)} exact repo-root SEO page(s)...")
 
     updated_count = 0
     for path in files:
