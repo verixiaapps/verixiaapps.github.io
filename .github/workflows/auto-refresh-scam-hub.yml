@@ -1,0 +1,137 @@
+name: Auto Refresh Scam Hub
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run without committing changes"
+        required: true
+        default: false
+        type: boolean
+      commit_message:
+        description: "Optional custom commit message"
+        required: false
+        default: ""
+        type: string
+  schedule:
+    - cron: "17 9 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-refresh-scam-hub
+  cancel-in-progress: false
+
+jobs:
+  refresh-hub:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+      DEFAULT_COMMIT_MESSAGE: "Auto refresh scam hub"
+      HUB_SCRIPT_PATH: "scripts/refresh_scam_hub.py"
+      HUB_FILE_PATH: "scam-check-now/hubs/all-scam-checks/index.html"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure git
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global user.name "hub-refresh-bot"
+          git config --global user.email "bot@users.noreply.github.com"
+
+      - name: Sync latest main before run
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+          git clean -fd
+
+      - name: Ensure hub script exists
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ ! -f "$HUB_SCRIPT_PATH" ]; then
+            echo "Missing script: $HUB_SCRIPT_PATH"
+            exit 1
+          fi
+
+      - name: Ensure hub file exists
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ ! -f "$HUB_FILE_PATH" ]; then
+            echo "Missing hub file: $HUB_FILE_PATH"
+            exit 1
+          fi
+
+      - name: Run hub refresh script
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$HUB_SCRIPT_PATH"
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          HUB_FILE_PATH: ${{ env.HUB_FILE_PATH }}
+
+      - name: Show changed files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+
+      - name: Stop on dry run
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Dry run complete. No commit or push performed."
+
+      - name: Commit hub changes
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git add -- \
+            ':(glob)scam-check-now/hubs/**/index.html' \
+            ':(glob)scam-check-now/**/index.html' \
+            ':(glob)scam-check-now-b/**/index.html' \
+            ':(glob)scam-check-now-c/**/index.html'
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          FINAL_COMMIT_MESSAGE="${{ github.event.inputs.commit_message }}"
+
+          if [ -z "$FINAL_COMMIT_MESSAGE" ]; then
+            FINAL_COMMIT_MESSAGE="$DEFAULT_COMMIT_MESSAGE"
+          fi
+
+          git commit -m "$FINAL_COMMIT_MESSAGE"
+
+      - name: Push hub changes
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:main
