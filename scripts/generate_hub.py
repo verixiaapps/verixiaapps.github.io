@@ -133,12 +133,19 @@ def discover_pages(root_folder: str, url_prefix: str) -> List[Dict[str, str]]:
     pages: List[Dict[str, str]] = []
 
     for file_path in sorted(folder.rglob("index.html")):
+        if not file_path.is_file():
+            continue
+
         normalized = normalize_path(str(file_path))
 
         if "/hubs/" in normalized:
             continue
 
-        slug = extract_slug_from_file(file_path, root_folder)
+        try:
+            slug = extract_slug_from_file(file_path, root_folder)
+        except ValueError:
+            continue
+
         if not slug:
             continue
 
@@ -162,34 +169,55 @@ def build_section_html(section_title: str, pages: List[Dict[str, str]], section_
     count_text = f"{len(pages)} page" if len(pages) == 1 else f"{len(pages)} pages"
 
     items = "\n".join(
-        f'        <li><a href="{escape_text(page["href"])}">{escape_text(page["title"])}</a></li>'
+        f'          <li><a href="{escape_text(page["href"])}">{escape_text(page["title"])}</a></li>'
         for page in pages
     )
 
-    return f"""    <div class="link-section" id="{escape_text(section_id)}">
-      <h3>{escape_text(section_title)} <span style="font-size:14px;color:#a7b7d3;font-weight:800;">({escape_text(count_text)})</span></h3>
-      <ul class="related-links">
+    return f"""      <div class="hub-section-card" id="{escape_text(section_id)}">
+        <div class="hub-section-top">
+          <div class="hub-section-kicker">Auto grouped section</div>
+          <h3>{escape_text(section_title)}</h3>
+          <div class="hub-count-pill">{escape_text(count_text)}</div>
+        </div>
+        <ul class="related-links">
 {items}
-      </ul>
-    </div>"""
+        </ul>
+      </div>"""
 
 
 def build_auto_sections() -> str:
     section_blocks: List[str] = []
-
     total_pages = 0
+
     for root_folder, label, url_prefix in ROOT_FOLDERS:
         pages = discover_pages(root_folder, url_prefix)
         total_pages += len(pages)
         section_id = f"auto-{root_folder.replace('/', '-').replace('_', '-')}"
         section_blocks.append(build_section_html(label, pages, section_id))
 
-    summary_block = f"""    <div class="content-bridge">
-      This hub pulls in published scam check pages across Templates A, B, and C so visitors can browse suspicious email, text, payment, delivery, recruiter, security, and account-warning topics from one place.
-      <div style="margin-top:10px;font-size:13px;color:#a7b7d3;font-weight:800;">Auto-indexed pages currently linked here: {total_pages}</div>
-    </div>"""
+    summary_block = f"""      <div class="content-bridge">
+        <div class="bridge-kicker">Live hub overview</div>
+        This hub pulls in published scam check pages across Templates A, B, and C so visitors can browse suspicious email, text, payment, delivery, recruiter, security, and account-warning topics from one premium index page.
+        <div class="hub-stats-row">
+          <div class="hub-stat-card">
+            <div class="hub-stat-label">Pages linked</div>
+            <div class="hub-stat-value">{total_pages}</div>
+          </div>
+          <div class="hub-stat-card">
+            <div class="hub-stat-label">Templates covered</div>
+            <div class="hub-stat-value">3</div>
+          </div>
+          <div class="hub-stat-card">
+            <div class="hub-stat-label">Refresh mode</div>
+            <div class="hub-stat-value">Auto</div>
+          </div>
+        </div>
+      </div>"""
 
-    return "\n".join([summary_block] + section_blocks)
+    grid_open = '      <div class="hub-grid">'
+    grid_close = "      </div>"
+
+    return "\n".join([summary_block, grid_open] + section_blocks + [grid_close])
 
 
 def build_starter_hub_html() -> str:
@@ -257,14 +285,6 @@ def build_starter_hub_html() -> str:
 --emerald:#18b67f;
 --emerald-2:#109466;
 --amber:#e7a93d;
---red:#d96574;
---red-2:#b94b5f;
-
---blue-soft:#dbeafe;
---violet-soft:#ede9fe;
---green-soft:#ecfdf5;
---amber-soft:#fffbeb;
---red-soft:#fef2f2;
 
 --shadow-xl:0 32px 90px rgba(2,6,23,.46);
 --shadow-lg:0 22px 56px rgba(2,6,23,.34);
@@ -393,7 +413,7 @@ background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.07)
 }}
 
 .page-shell{{
-max-width:940px;
+max-width:1120px;
 margin:0 auto;
 padding:0 14px 40px;
 }}
@@ -433,7 +453,7 @@ box-shadow:var(--shadow-xs);
 
 .hero h1{{
 margin:0;
-font-size:48px;
+font-size:54px;
 line-height:1.02;
 letter-spacing:-.05em;
 font-weight:950;
@@ -443,7 +463,7 @@ text-wrap:balance;
 
 .hero p{{
 margin:14px auto 0;
-max-width:760px;
+max-width:820px;
 font-size:19px;
 color:#c8d7ec;
 text-wrap:balance;
@@ -472,7 +492,7 @@ box-shadow:var(--shadow-xs);
 }}
 
 .content-section{{
-max-width:820px;
+max-width:1080px;
 margin:auto;
 padding:24px;
 border-radius:var(--radius-xl);
@@ -513,21 +533,9 @@ position:relative;
 z-index:1;
 }}
 
-.content-bridge{{
-margin:0 0 24px;
-padding:18px;
-border-radius:20px;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.08);
-font-size:15px;
-color:#d7e4f8;
-font-weight:800;
-line-height:1.68;
-}}
-
 .inline-info-card{{
 margin:0 0 22px;
-padding:18px;
+padding:20px;
 border-radius:24px;
 background:
 linear-gradient(135deg, rgba(91,140,255,.10) 0%, rgba(139,120,242,.08) 100%),
@@ -552,33 +560,126 @@ font-size:40px;
 
 .content-section h3{{
 font-size:28px;
-margin-top:30px;
+margin:0;
 }}
 
-.link-section{{
-margin-top:28px;
-padding-top:24px;
-border-top:1px solid rgba(255,255,255,.08);
+.content-bridge{{
+margin:0 0 24px;
+padding:22px;
+border-radius:24px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.045) 100%);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-md);
+font-size:15px;
+color:#d7e4f8;
+font-weight:800;
+line-height:1.72;
+}}
+
+.bridge-kicker{{
+margin-bottom:8px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#99eaff;
+}}
+
+.hub-stats-row{{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:12px;
+margin-top:16px;
+}}
+
+.hub-stat-card{{
+padding:16px;
+border-radius:20px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+box-shadow:var(--shadow-xs);
+}}
+
+.hub-stat-label{{
+font-size:12px;
+font-weight:900;
+letter-spacing:.04em;
+text-transform:uppercase;
+color:#a7b7d3;
+}}
+
+.hub-stat-value{{
+margin-top:6px;
+font-size:28px;
+font-weight:950;
+line-height:1;
+color:#ffffff;
+}}
+
+.hub-grid{{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:18px;
+margin-top:4px;
+}}
+
+.hub-section-card{{
+padding:20px;
+border-radius:24px;
+background:
+linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-md);
+}}
+
+.hub-section-top{{
+margin-bottom:14px;
+}}
+
+.hub-section-kicker{{
+margin-bottom:8px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}}
+
+.hub-count-pill{{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:8px 12px;
+border-radius:999px;
+font-size:12px;
+font-weight:900;
+color:#dde9fb;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
 }}
 
 .related-links{{
 margin:0;
-padding-left:22px;
+padding-left:20px;
 }}
 
 .related-links li{{
-margin-bottom:10px;
+margin-bottom:12px;
 }}
 
 .related-links a{{
 color:#9cecff;
 font-weight:800;
+line-height:1.5;
 }}
 
 .content-close{{
 margin-top:28px;
-padding:18px;
-border-radius:20px;
+padding:20px;
+border-radius:24px;
 background:rgba(255,255,255,.05);
 border:1px solid rgba(255,255,255,.08);
 font-size:15px;
@@ -602,6 +703,11 @@ color:#9cecff;
 font-weight:700;
 }}
 
+@media (max-width:900px){{
+.hub-grid{{grid-template-columns:1fr;}}
+.hub-stats-row{{grid-template-columns:1fr;}}
+}}
+
 @media (max-width:640px){{
 body{{padding-top:84px;}}
 .hero{{padding:14px 6px 18px;}}
@@ -616,6 +722,8 @@ body{{padding-top:84px;}}
 .content-section h3{{font-size:24px;}}
 .inline-info-card{{padding:14px 15px;}}
 .content-close{{padding:15px;}}
+.hub-section-card{{padding:16px;}}
+.hub-stat-value{{font-size:24px;}}
 }}
 </style>
 </head>
@@ -636,7 +744,7 @@ body{{padding-top:84px;}}
 
   <div class="hero">
     <div class="hero-badge-row">
-      <div class="hero-badge">Auto-updated scam hub</div>
+      <div class="hero-badge">Premium scam hub</div>
       <div class="hero-badge">Cross-template page discovery</div>
       <div class="hero-badge">Built for indexing and reuse</div>
     </div>
@@ -655,7 +763,7 @@ body{{padding-top:84px;}}
     <div class="inline-info-card">
       <h2 style="margin:0 0 8px;">Scam Check Now Hub</h2>
       <div style="font-size:15px;color:#d7e4f8;font-weight:800;line-height:1.68;">
-        This page brings together published scam check pages from all active templates so visitors can navigate across the full warning library from one clean location.
+        This page brings together published scam check pages from all active templates so visitors can navigate across the full warning library from one clean premium location.
       </div>
     </div>
 
@@ -684,21 +792,34 @@ body{{padding-top:84px;}}
 """
 
 
-def ensure_hub_file() -> Path:
-    hub_path = Path(HUB_FILE_PATH)
+def ensure_hub_parents_exist(hub_path: Path) -> None:
     parent = hub_path.parent
+    if parent.exists():
+        return
 
-    if not parent.exists():
-        print(f"CREATED DIRECTORY: {parent}")
-        if not DRY_RUN:
-            parent.mkdir(parents=True, exist_ok=True)
+    if DRY_RUN:
+        print(f"WOULD CREATE DIRECTORY: {parent}")
+        return
 
-    if not hub_path.exists():
-        print(f"CREATED HUB FILE: {HUB_FILE_PATH}")
-        if not DRY_RUN:
-            hub_path.write_text(build_starter_hub_html(), encoding="utf-8", newline="")
+    parent.mkdir(parents=True, exist_ok=True)
+    print(f"CREATED DIRECTORY: {parent}")
 
-    return hub_path
+
+def write_text_if_needed(path: Path, content: str) -> None:
+    if DRY_RUN:
+        print(f"WOULD WRITE FILE: {path}")
+        return
+
+    path.write_text(content, encoding="utf-8", newline="")
+    print(f"WROTE FILE: {path}")
+
+
+def load_or_build_hub_html(hub_path: Path) -> str:
+    if hub_path.exists():
+        return hub_path.read_text(encoding="utf-8")
+
+    print(f"HUB FILE NOT FOUND, BUILDING STARTER SHELL: {hub_path}")
+    return build_starter_hub_html()
 
 
 def replace_auto_section(content: str, new_inner_html: str) -> str:
@@ -718,8 +839,11 @@ def replace_auto_section(content: str, new_inner_html: str) -> str:
 
 
 def process_hub() -> bool:
-    hub_path = ensure_hub_file()
-    original = hub_path.read_text(encoding="utf-8")
+    hub_path = Path(HUB_FILE_PATH)
+
+    ensure_hub_parents_exist(hub_path)
+
+    original = load_or_build_hub_html(hub_path)
     auto_sections = build_auto_sections()
     updated = replace_auto_section(original, auto_sections)
 
@@ -727,11 +851,8 @@ def process_hub() -> bool:
         print("NO CHANGE: hub already up to date")
         return False
 
-    print(f"UPDATED: {HUB_FILE_PATH}")
-
-    if not DRY_RUN:
-        hub_path.write_text(updated, encoding="utf-8", newline="")
-
+    write_text_if_needed(hub_path, updated)
+    print(f"UPDATED HUB CONTENT: {HUB_FILE_PATH}")
     return True
 
 
