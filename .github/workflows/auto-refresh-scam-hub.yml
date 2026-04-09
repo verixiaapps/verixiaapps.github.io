@@ -82,11 +82,7 @@ jobs:
       - name: Commit hub changes
         if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         run: |
-          git add -- \
-            'scam-hub/index.html' \
-            ':(glob)scam-check-now/**/index.html' \
-            ':(glob)scam-check-now-b/**/index.html' \
-            ':(glob)scam-check-now-c/**/index.html'
+          git add -- 'scam-hub/index.html'
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
