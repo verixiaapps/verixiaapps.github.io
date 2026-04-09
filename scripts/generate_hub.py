@@ -19,11 +19,11 @@ AUTO_END = "<!-- AUTO_HUB_SECTIONS_END -->"
 
 
 def escape_text(text: str) -> str:
-    return html.escape(text, quote=False)
+    return html.escape(str(text), quote=False)
 
 
 def normalize_path(path: str) -> str:
-    return path.replace("\\", "/").strip()
+    return str(path).replace("\\", "/").strip()
 
 
 def slug_to_title(slug: str) -> str:
@@ -260,31 +260,15 @@ def build_starter_hub_html() -> str:
 --surface:rgba(255,255,255,.05);
 --surface-2:rgba(255,255,255,.07);
 --surface-3:rgba(255,255,255,.10);
---surface-4:#ffffff;
-
---card:#101c33;
---card-2:#15233d;
---card-3:#182a48;
 
 --ink:#e9f1ff;
 --ink-strong:#ffffff;
---ink-dark:#132033;
 --muted:#a7b7d3;
---muted-2:#8296b7;
-
---line:rgba(148,163,184,.18);
---line-2:rgba(255,255,255,.09);
---line-3:rgba(255,255,255,.14);
 
 --cyan:#66d9ef;
 --cyan-2:#28bfd9;
---blue:#5b8cff;
---blue-2:#3f72ee;
 --violet:#8b78f2;
---violet-2:#7460e8;
 --emerald:#18b67f;
---emerald-2:#109466;
---amber:#e7a93d;
 
 --shadow-xl:0 32px 90px rgba(2,6,23,.46);
 --shadow-lg:0 22px 56px rgba(2,6,23,.34);
@@ -295,7 +279,6 @@ def build_starter_hub_html() -> str:
 --radius-xl:30px;
 --radius-lg:24px;
 --radius-md:20px;
---radius-sm:16px;
 }}
 
 *{{
@@ -326,7 +309,7 @@ text-decoration:none;
 }}
 
 a:hover{{
-text-decoration:underline;
+text-decoration:none;
 }}
 
 @supports (padding:max(0px)) {{
@@ -377,7 +360,6 @@ text-decoration:none;
 }}
 
 .logo:hover{{
-text-decoration:none;
 border-color:rgba(255,255,255,.16);
 background:rgba(12,21,39,.72);
 }}
@@ -405,11 +387,14 @@ white-space:nowrap;
 background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.06) 100%);
 backdrop-filter:blur(10px);
 box-shadow:var(--shadow-xs);
+transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
 }}
 
 .app-top:hover{{
-text-decoration:none;
+transform:translateY(-1px);
+border-color:rgba(255,255,255,.18);
 background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.07) 100%);
+box-shadow:0 10px 24px rgba(2,6,23,.22);
 }}
 
 .page-shell{{
@@ -632,10 +617,21 @@ background:
 linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
 border:1px solid rgba(255,255,255,.10);
 box-shadow:var(--shadow-md);
+transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}}
+
+.hub-section-card:hover{{
+transform:translateY(-4px);
+border-color:rgba(255,255,255,.18);
+box-shadow:0 26px 60px rgba(2,6,23,.38);
+background:
+linear-gradient(180deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.045) 100%);
 }}
 
 .hub-section-top{{
 margin-bottom:14px;
+padding-bottom:12px;
+border-bottom:1px solid rgba(255,255,255,.08);
 }}
 
 .hub-section-kicker{{
@@ -664,6 +660,24 @@ box-shadow:var(--shadow-xs);
 .related-links{{
 margin:0;
 padding-left:20px;
+padding-right:6px;
+max-height:260px;
+overflow:auto;
+scrollbar-width:thin;
+scrollbar-color:rgba(156,236,255,.28) transparent;
+}}
+
+.related-links::-webkit-scrollbar{{
+width:8px;
+}}
+
+.related-links::-webkit-scrollbar-track{{
+background:transparent;
+}}
+
+.related-links::-webkit-scrollbar-thumb{{
+background:rgba(156,236,255,.22);
+border-radius:999px;
 }}
 
 .related-links li{{
@@ -674,6 +688,12 @@ margin-bottom:12px;
 color:#9cecff;
 font-weight:800;
 line-height:1.5;
+transition:color .18s ease, opacity .18s ease;
+}}
+
+.related-links a:hover{{
+color:#ffffff;
+opacity:.98;
 }}
 
 .content-close{{
@@ -706,6 +726,7 @@ font-weight:700;
 @media (max-width:900px){{
 .hub-grid{{grid-template-columns:1fr;}}
 .hub-stats-row{{grid-template-columns:1fr;}}
+.related-links{{max-height:none;overflow:visible;padding-right:0;}}
 }}
 
 @media (max-width:640px){{
