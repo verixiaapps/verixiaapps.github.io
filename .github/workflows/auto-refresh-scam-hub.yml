@@ -31,7 +31,7 @@ jobs:
     env:
       DRY_RUN: ${{ inputs.dry_run || 'false' }}
       DEFAULT_COMMIT_MESSAGE: "Auto refresh scam hub"
-      HUB_SCRIPT_PATH: "scripts/refresh_scam_hub.py"
+      HUB_SCRIPT_PATH: "scripts/generate_hub.py"
       HUB_FILE_PATH: "scam-check-now/hubs/all-scam-checks/index.html"
 
     steps:
@@ -47,69 +47,48 @@ jobs:
           python-version: "3.11"
 
       - name: Configure git
-        shell: bash
         run: |
-          set -euo pipefail
           git config --global user.name "hub-refresh-bot"
           git config --global user.email "bot@users.noreply.github.com"
 
       - name: Sync latest main before run
-        shell: bash
         run: |
-          set -euo pipefail
           git fetch origin main
           git checkout main
           git reset --hard origin/main
           git clean -fd
 
       - name: Ensure hub script exists
-        shell: bash
         run: |
-          set -euo pipefail
-
           if [ ! -f "$HUB_SCRIPT_PATH" ]; then
             echo "Missing script: $HUB_SCRIPT_PATH"
             exit 1
           fi
 
       - name: Ensure hub file exists
-        shell: bash
         run: |
-          set -euo pipefail
-
           if [ ! -f "$HUB_FILE_PATH" ]; then
             echo "Missing hub file: $HUB_FILE_PATH"
             exit 1
           fi
 
       - name: Run hub refresh script
-        shell: bash
         run: |
-          set -euo pipefail
           python "$HUB_SCRIPT_PATH"
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
           HUB_FILE_PATH: ${{ env.HUB_FILE_PATH }}
 
       - name: Show changed files
-        shell: bash
-        run: |
-          set -euo pipefail
-          git status --short
+        run: git status --short
 
       - name: Stop on dry run
         if: github.event_name == 'workflow_dispatch' && inputs.dry_run == true
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Dry run complete. No commit or push performed."
+        run: echo "Dry run complete. No commit or push performed."
 
       - name: Commit hub changes
         if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
-        shell: bash
         run: |
-          set -euo pipefail
-
           git add -- \
             ':(glob)scam-check-now/hubs/**/index.html' \
             ':(glob)scam-check-now/**/index.html' \
@@ -131,7 +110,4 @@ jobs:
 
       - name: Push hub changes
         if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
-        shell: bash
-        run: |
-          set -euo pipefail
-          git push origin HEAD:main
+        run: git push origin HEAD:main
