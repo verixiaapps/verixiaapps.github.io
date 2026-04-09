@@ -158,7 +158,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          git add -- ':(glob)scam-check-now/**/index.html'
+          git add -- ':(glob)scam-check-now/**/index.html' ':(glob)scam-check-now-b/**/index.html' ':(glob)scam-check-now-c/**/index.html'
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
@@ -168,7 +168,7 @@ jobs:
           FINAL_COMMIT_MESSAGE="${{ inputs.commit_message }}"
 
           if [ -z "$FINAL_COMMIT_MESSAGE" ]; then
-            FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | template=a | scope=${REFRESH_SCOPE} | count=${MAX_URLS_TO_REFRESH}"
+            FINAL_COMMIT_MESSAGE="${DEFAULT_COMMIT_MESSAGE} | scope=${REFRESH_SCOPE} | count=${MAX_URLS_TO_REFRESH}"
           fi
 
           git commit -m "$FINAL_COMMIT_MESSAGE"
