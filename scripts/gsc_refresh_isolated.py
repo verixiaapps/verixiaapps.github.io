@@ -32,7 +32,6 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
         "description": "Got a TD Bank fraud alert email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click, sign in, reply, or share information.",
         "h1": "Is TD Bank Fraud Alert Email Legit or a Scam?",
         "intro": "Got a TD Bank fraud alert email? Some fraud alerts are real, but scammers also send fake TD Bank security notices to steal your login details, verification codes, or personal information. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share anything.",
-
         "body_html": """
 <div class="content-block" data-context="banking" data-mode="comparison">
 <p>A TD Bank fraud alert email can be legitimate, but it is also a common phishing theme used by scammers. The safest way to judge it is not by how official the email looks, but by whether the alert still makes sense after you verify it directly through your TD Bank account, app, or official support channels.</p>
@@ -64,7 +63,6 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 <p>A careful verification step can stop most TD Bank phishing scams before any damage happens.</p>
 <p>If you receive a TD Bank fraud alert email, do not click links or trust contact details inside the message right away. Open the official TD Bank app, visit the official website directly, or use a trusted support number you look up yourself. If the alert is real, it should still appear through those official channels. If it is fake, checking independently can keep you from handing over access, codes, or personal information to a scammer.</p>
 """.strip(),
-
         "faq_entities": [
             {
                 "@type": "Question",
@@ -254,19 +252,53 @@ def replace_first_paragraph_after_h1(content: str, new_paragraph: str) -> str:
     return updated
 
 
-def replace_element_inner_html_by_id(content: str, element_id: str, new_inner_html: str) -> str:
-    pattern = re.compile(
-        rf'(<(?P<tag>[a-zA-Z0-9]+)\b(?=[^>]*\bid=["\']{re.escape(element_id)}["\'])[^>]*>)(.*?)(</(?P=tag)>)',
-        flags=re.DOTALL | re.IGNORECASE,
+def replace_seo_content_block(content: str, new_inner_html: str) -> str:
+    open_pattern = re.compile(
+        r'<div\b(?=[^>]*\bid=["\']seoContent["\'])[^>]*>',
+        flags=re.IGNORECASE,
     )
-    updated, count = pattern.subn(
-        lambda m: f"{m.group(1)}{new_inner_html}{m.group(4)}",
-        content,
-        count=1,
-    )
-    if count == 0:
-        print(f"WARNING: element id '{element_id}' not found")
-    return updated
+    open_match = open_pattern.search(content)
+    if not open_match:
+        print("WARNING: seoContent block not found")
+        return content
+
+    start_open = open_match.start()
+    end_open = open_match.end()
+
+    tag_pattern = re.compile(r'</?div\b[^>]*>', flags=re.IGNORECASE)
+    depth = 1
+    search_pos = end_open
+    close_end = None
+
+    while True:
+        tag_match = tag_pattern.search(content, search_pos)
+        if not tag_match:
+            break
+
+        tag_text = tag_match.group(0)
+        if tag_text.lower().startswith("</div"):
+            depth -= 1
+            if depth == 0:
+                close_end = tag_match.end()
+                break
+        else:
+            depth += 1
+
+        search_pos = tag_match.end()
+
+    if close_end is None:
+        print("WARNING: seoContent closing </div> not found")
+        return content
+
+    original_block = content[start_open:close_end]
+
+    opening_tag = content[start_open:end_open]
+    new_block = f"{opening_tag}{new_inner_html}</div>"
+
+    if original_block == new_block:
+        return content
+
+    return content[:start_open] + new_block + content[close_end:]
 
 
 def update_jsonld_object(obj: Any, seo: Dict[str, Any], page_url: str) -> None:
@@ -379,7 +411,7 @@ def process_file(path: str) -> bool:
     updated = replace_meta(updated, "twitter:description", seo["description"], "name")
     updated = replace_first_h1(updated, seo["h1"])
     updated = replace_first_paragraph_after_h1(updated, seo["intro"])
-    updated = replace_element_inner_html_by_id(updated, "seoContent", seo["body_html"])
+    updated = replace_seo_content_block(updated, seo["body_html"])
     updated = replace_jsonld(updated, seo, page_url)
 
     if updated == original:
