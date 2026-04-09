@@ -18,9 +18,10 @@ const repoRoot = process.cwd();
 const outputBlocks = [];
 const errors = [];
 
+// Split on any whitespace, not just line breaks
 const urls = rawInput
-  .split(/\r?\n/)
-  .map((line) => line.trim())
+  .split(/\s+/)
+  .map((value) => value.trim())
   .filter(Boolean);
 
 function extractFilePath(url) {
@@ -119,10 +120,17 @@ if (errors.length > 0) {
   finalParts.push(`ERRORS:\n${errors.join("\n")}`);
 }
 
-const finalOutput = finalParts.length > 0 ? `${finalParts.join("\n\n==================================================\n\n")}\n` : "";
+const finalOutput =
+  finalParts.length > 0
+    ? `${finalParts.join("\n\n==================================================\n\n")}\n`
+    : "";
 
 fs.mkdirSync(path.join(repoRoot, "exports"), { recursive: true });
-fs.writeFileSync(path.join(repoRoot, "exports", "page-html-export.txt"), finalOutput, "utf8");
+fs.writeFileSync(
+  path.join(repoRoot, "exports", "page-html-export.txt"),
+  finalOutput,
+  "utf8"
+);
 
 console.log(finalOutput);
 
