@@ -30,19 +30,21 @@ TARGET_FILES: List[str] = [
 PAGE_SEO: Dict[str, Dict[str, Any]] = {
     "scam-check-now/is-google-security-warning-email-legit-or-scam/index.html": {
         "title": "Is Google Security Warning Email Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got a Google security warning email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click, sign in, reply, or share information.",
+        "description": "Got a Google security warning email or Google Gmail security warning? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click, sign in, reply, or share information.",
         "h1": "Is Google Security Warning Email Legit or a Scam?",
-        "intro": "Got a Google security warning email? Some security alerts are real, but scammers also send fake Google warning emails to steal passwords, verification codes, or personal information. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share anything.",
+        "intro": "Got a Google security warning email or Google Gmail security warning? Some account security alerts are real, but scammers also send fake security alert messages and fake Google warning emails to steal passwords, verification codes, or personal information. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share anything.",
         "body_html": """
 <div class="content-block" data-context="security" data-mode="comparison">
-<p>A Google security warning email can be legitimate, but it is also a common phishing theme used by scammers. The safest way to judge it is not by how polished the email looks, but by whether the warning still makes sense after you verify it directly through your Google Account, Gmail settings, or official Google security pages.</p>
+<p>A Google security warning email can be legitimate, but it is also a common phishing theme used by scammers. The safest way to judge it is not by how polished the email looks, but by whether the warning still makes sense after you verify it directly through your Google Account, Gmail settings, or official Google security pages. That is especially true if the message looks like a Google Gmail security warning or a general security alert message.</p>
 
 <h2>How Real And Fake Google Security Warning Emails Usually Differ</h2>
 <p>A legitimate Google security warning email usually reflects real account activity and can be confirmed independently through your Google Account, Gmail app, or official Google account security dashboard. A scam version often tries to keep you inside the email itself by pushing you to click a link, sign in immediately, or share information before you verify anything on your own.</p>
 
-<p>Scammers use Google warning emails because account-security messages create immediate fear. A fake email may claim there was a suspicious login, unusual device activity, password reset attempt, or urgent problem with your Google account. The goal is to make you react quickly before you slow down and confirm whether the warning is actually real.</p>
+<p>Scammers use Google warning emails because account-security messages create immediate fear. A fake email may claim there was a suspicious login, unusual device activity, password reset attempt, or urgent problem with your Google account. Some fake messages are written more broadly as a security alert message, while others imitate a more specific Google Gmail security warning. The goal is the same: make you react quickly before you slow down and confirm whether the warning is actually real.</p>
 
 <p>Many fake Google security emails look convincing. They may include Google branding, security wording, account-related details, and a button that appears to lead to a real sign-in page. Some even copy the style of genuine Google alerts very closely. But a polished design does not make the email trustworthy. What matters is whether the alert matches real account activity and whether the action path stays inside official Google channels.</p>
+
+<p>A real Google alert should still make sense after you ignore the email itself and open your Google Account directly. If the message claims your Gmail account has a security issue, you should be able to confirm that inside your real account security settings without using the message link. A scam version often becomes weaker the moment you stop relying on the email.</p>
 
 <p>Phishing versions often push one urgent next step. That may be clicking a sign-in link, confirming your identity by email, entering a one-time code, or reviewing an account issue through a page linked from the message. In some cases, the scam continues after the click with fake Google login screens meant to capture credentials.</p>
 
@@ -53,8 +55,8 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 
 <h2>Signs This Might Be A Scam</h2>
 <ul>
-<li>Unexpected Google security warnings that do not match any real account activity</li>
-<li>Links that push you to sign in, verify identity, or review urgent account issues directly from the email</li>
+<li>Unexpected Google security warnings or security alert messages that do not match any real account activity</li>
+<li>Messages that claim to be a Google Gmail security warning but push you to sign in immediately from the email</li>
 <li>Requests for passwords, verification codes, or personal information</li>
 <li>Pressure about suspicious logins, locked access, or urgent account review</li>
 <li>Sender details, reply instructions, or websites that do not clearly match official Google channels</li>
@@ -75,27 +77,27 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
             },
             {
                 "@type": "Question",
+                "name": "What if the email looks like a Google Gmail security warning?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Even if it looks like a Google Gmail security warning, do not trust the email by itself. Open your Google Account directly and check recent security activity there. A real warning should still appear through official Google channels."
+                },
+            },
+            {
+                "@type": "Question",
                 "name": "How can I tell if a Google security warning email is a scam?",
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "Watch for urgent pressure, links that push you to sign in immediately, requests for passwords or verification codes, and sender details or websites that do not clearly match official Google channels. A real warning should still make sense when you verify it independently."
                 },
             },
-            {
-                "@type": "Question",
-                "name": "What should I do if I clicked a fake Google security warning email?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Stop entering information, close the page, and check your Google account directly through the official site or app. If you entered login details or codes, change your password right away and review your account security settings immediately."
-                },
-            },
         ],
     },
     "scam-check-now/paypal-suspicious-login-email-scam/index.html": {
         "title": "PayPal Suspicious Login Email Scam? Real or Fake Warning Signs",
-        "description": "Got a PayPal suspicious login email? Learn how to tell if it is real or a scam, what phishing red flags to watch for, and what to do before you click, sign in, or share information.",
+        "description": "Got a PayPal suspicious login email or PayPal security alert email? Learn how to tell if it is real or a scam, what phishing red flags to watch for, and what to do before you click, sign in, or share information.",
         "h1": "PayPal Suspicious Login Email Scam?",
-        "intro": "Got a PayPal suspicious login email? Some login alerts are real, but scammers also send fake PayPal warning emails to steal your password, payment details, or verification codes. Learn the warning signs and how to check if it is real or fake before you click, sign in, reply, or share anything.",
+        "intro": "Got a PayPal suspicious login email or PayPal security alert email? Some login alerts are real, but scammers also send fake PayPal warning emails to steal your password, payment details, or verification codes. Learn the warning signs and how to check if it is real or fake before you click, sign in, reply, or share anything.",
         "body_html": """
 <div class="content-block" data-context="payment" data-mode="comparison">
 <p>A PayPal suspicious login email can be legitimate, but it is also a common phishing tactic used by scammers. The safest way to judge it is not by how official the email looks, but by whether the alert still makes sense after you verify it directly through your PayPal account or official PayPal support channels.</p>
@@ -103,9 +105,11 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 <h2>How Real And Fake PayPal Suspicious Login Emails Usually Differ</h2>
 <p>A legitimate PayPal suspicious login email usually reflects real account activity and can be confirmed independently through your PayPal account, app, or official PayPal website. A scam version often tries to keep you inside the email itself by pushing you to click a link, sign in immediately, or confirm details before you verify anything on your own.</p>
 
-<p>Scammers use PayPal login alerts because money-related account messages create immediate fear. A fake email may claim there was an unrecognized login, unusual device activity, account limitation, or security problem that needs urgent review. The goal is to make you react quickly before you slow down and confirm whether the alert is actually real.</p>
+<p>Scammers use PayPal login alerts because money-related account messages create immediate fear. A fake email may claim there was an unrecognized login, unusual device activity, account limitation, or security problem that needs urgent review. Some versions are written more like a PayPal security alert email, but the goal is the same: make you react quickly before you slow down and confirm whether the alert is actually real.</p>
 
 <p>Many fake PayPal suspicious login emails look polished. They may include PayPal branding, account language, payment references, and buttons that appear to lead to a real sign-in page. Some even include case numbers, timestamps, or fake support instructions. But a convincing design does not make the message trustworthy. What matters is whether the alert matches real account activity and whether the action path stays inside official PayPal channels.</p>
+
+<p>A real PayPal suspicious login alert should still hold up when you open PayPal directly through the official app or website. If the email says there was unusual account access, recent login or security activity should make sense there too. A scam version usually depends on you trusting the email itself instead of verifying independently.</p>
 
 <p>Phishing versions often push one urgent next step. That may be clicking a sign-in link, confirming your identity by email, entering a one-time code, or reviewing account activity through a page linked from the message. In some cases, the scam continues after the click with fake PayPal login pages designed to capture credentials and payment information.</p>
 
@@ -116,7 +120,7 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 
 <h2>Signs This Might Be A Scam</h2>
 <ul>
-<li>Unexpected PayPal login alerts that do not match any real account activity</li>
+<li>Unexpected PayPal login alerts or PayPal security alert emails that do not match any real account activity</li>
 <li>Links that push you to sign in or review a suspicious login directly from the email</li>
 <li>Requests for passwords, one-time codes, card details, or personal information</li>
 <li>Pressure about account limitation, unusual device access, or urgent review</li>
@@ -138,10 +142,10 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
             },
             {
                 "@type": "Question",
-                "name": "How can I tell if a PayPal suspicious login email is a scam?",
+                "name": "Is a PayPal security alert email always a scam?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Watch for urgent pressure, links that push you to sign in immediately, requests for passwords or one-time codes, and sender details or websites that do not clearly match official PayPal channels. A real alert should still make sense when you verify it independently."
+                    "text": "No, some PayPal security alert emails are real, but you should never trust the email alone. Open PayPal directly through the official app or website and verify the alert there first."
                 },
             },
             {
@@ -156,9 +160,9 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
     },
     "scam-check-now/is-google-account-disabled-email-legit-or-scam/index.html": {
         "title": "Is Google Account Disabled Email Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got a Google account disabled email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click, sign in, or share information.",
+        "description": "Got a Google account disabled email or Google account suspension email? Learn how to tell if it is legit or a scam, what phishing red flags to watch for, and what to do before you click, sign in, or share information.",
         "h1": "Is Google Account Disabled Email Legit or a Scam?",
-        "intro": "Got a Google account disabled email? Some account notices are real, but scammers also send fake Google disabled-account emails to steal passwords, verification codes, or personal information. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share anything.",
+        "intro": "Got a Google account disabled email or Google account suspension email? Some account notices are real, but scammers also send fake Google disabled-account emails to steal passwords, verification codes, or personal information. Learn the warning signs and how to check if it is legit or fake before you click, sign in, reply, or share anything.",
         "body_html": """
 <div class="content-block" data-context="security" data-mode="comparison">
 <p>A Google account disabled email can be legitimate, but it is also a common phishing theme used by scammers. The safest way to judge it is not by how serious the email sounds, but by whether the notice still makes sense after you verify it directly through your Google account or official Google support pages.</p>
@@ -166,9 +170,11 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 <h2>How Real And Fake Google Account Disabled Emails Usually Differ</h2>
 <p>A legitimate Google account disabled email usually reflects a real account issue and can be confirmed independently through your Google Account, Gmail app, or official Google recovery pages. A scam version often tries to keep you inside the email itself by pushing you to click a link, submit an appeal, or confirm details before you verify anything on your own.</p>
 
-<p>Scammers use disabled-account warnings because account access messages create immediate panic. A fake email may claim your Google account was disabled, restricted, suspended, or flagged for policy or security issues. The goal is to make you react quickly before you slow down and confirm whether the notice is actually real.</p>
+<p>Scammers use disabled-account warnings because account access messages create immediate panic. A fake email may claim your Google account was disabled, restricted, suspended, or flagged for policy or security issues. Some versions are framed more like a Google account suspension email, but the goal stays the same: make you react quickly before you slow down and confirm whether the notice is actually real.</p>
 
 <p>Many fake Google account disabled emails look convincing. They may include Google branding, policy language, support wording, and buttons that appear to lead to a real recovery or appeal page. Some even mention deadlines, account review, or restored access after confirmation. But a polished design does not make the message trustworthy. What matters is whether the warning matches real account status and whether the action path stays inside official Google channels.</p>
+
+<p>A real Google account disabled notice should still make sense when you ignore the email and open your Google account directly through the official site or app. If the email says your account was suspended or disabled, the problem should still be visible through official recovery or support routes. A fake version often depends on the message itself for credibility.</p>
 
 <p>Phishing versions often push one urgent next step. That may be signing in through a link, submitting account details, entering a one-time code, or opening an appeal page linked from the email. In some cases, the scam continues after the click with fake login screens or recovery forms designed to capture credentials.</p>
 
@@ -179,7 +185,7 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 
 <h2>Signs This Might Be A Scam</h2>
 <ul>
-<li>Unexpected Google disabled-account notices that do not match your real account status</li>
+<li>Unexpected Google disabled-account notices or Google account suspension emails that do not match your real account status</li>
 <li>Links that push you to sign in, appeal, or verify information directly from the email</li>
 <li>Requests for passwords, verification codes, or personal information</li>
 <li>Pressure about deadlines, permanent loss of access, or urgent account review</li>
@@ -201,10 +207,10 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
             },
             {
                 "@type": "Question",
-                "name": "How can I tell if a Google account disabled email is a scam?",
+                "name": "What if the message says my Google account is suspended?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Watch for urgent pressure, links that push you to sign in or appeal immediately, requests for passwords or verification codes, and sender details or websites that do not clearly match official Google channels. A real notice should still make sense when you verify it independently."
+                    "text": "If the message says your Google account is suspended or disabled, do not trust the email alone. Open your Google account directly and use official Google recovery or support pages to verify whether the issue is real."
                 },
             },
             {
@@ -232,6 +238,8 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 <p>Scammers use Apple billing warnings because payment-related messages create immediate concern. A fake email may claim your payment method failed, your subscription will be interrupted, your account has a billing issue, or your Apple services will be disabled unless you act quickly. The goal is to make you react before you slow down and confirm whether the issue is actually real.</p>
 
 <p>Many fake Apple billing update emails look polished. They may include Apple branding, subscription wording, payment references, and buttons that appear to lead to a real billing page. Some even mention invoices, account review, or urgent verification. But a polished design does not make the message trustworthy. What matters is whether the billing issue matches real account activity and whether the action path stays inside official Apple channels.</p>
+
+<p>A real Apple billing notice should still make sense after you ignore the email and open your Apple account directly. If there is a real payment problem, subscription issue, or failed billing method, you should be able to confirm it inside official Apple settings without using the message link. A scam version often depends on speed and message-based trust.</p>
 
 <p>Phishing versions often push one urgent next step. That may be signing in through a link, updating payment details by email, entering a one-time code, or reviewing billing activity through a page linked from the message. In some cases, the scam continues after the click with fake Apple ID login pages designed to capture credentials and card details.</p>
 
@@ -282,9 +290,9 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
     },
     "scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/index.html": {
         "title": "Is Recruiter Email From Unknown Company Legit or a Scam? Real or Fake Warning Signs",
-        "description": "Got a recruiter email from an unknown company? Learn how to tell if it is legit or a scam, what red flags to watch for, and what to do before you reply, click, or share personal information.",
+        "description": "Got a recruiter email from an unknown company or a recruiter asking for money? Learn how to tell if it is legit or a scam, what red flags to watch for, and what to do before you reply, click, or share personal information.",
         "h1": "Is Recruiter Email From Unknown Company Legit or a Scam?",
-        "intro": "Got a recruiter email from an unknown company? Some recruiting messages are legitimate, but scammers also send fake recruiter emails to steal personal information, push fake job offers, or collect payment details. Learn the warning signs and how to check if it is legit or fake before you reply, click, interview, or share anything.",
+        "intro": "Got a recruiter email from an unknown company or a recruiter asking for money? Some recruiting messages are legitimate, but scammers also send fake recruiter emails to steal personal information, push fake job offers, or collect payment details. Learn the warning signs and how to check if it is legit or fake before you reply, click, interview, or share anything.",
         "body_html": """
 <div class="content-block" data-context="job" data-mode="comparison">
 <p>A recruiter email from an unknown company can be legitimate, but it is also a common scam setup used by fraudsters. The safest way to judge it is not by how professional the email sounds, but by whether the recruiter, company, and job still make sense after you verify them independently through official sources.</p>
@@ -292,11 +300,13 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 <h2>How Real And Fake Recruiter Emails Usually Differ</h2>
 <p>A legitimate recruiter email usually points back to a real company, a verifiable recruiter identity, and a role that can be confirmed independently through the company website, LinkedIn, or other trusted channels. A scam version often tries to keep you inside the email itself by pushing you to reply quickly, move to another app, or share personal information before you verify anything on your own.</p>
 
-<p>Scammers use recruiter emails because job opportunities create hope, urgency, and curiosity. A fake recruiter message may promise a high-paying role, remote flexibility, fast hiring, or immediate interview access. The goal is to make you react quickly before you slow down and confirm whether the recruiter and company are actually real.</p>
+<p>Scammers use recruiter emails because job opportunities create hope, urgency, and curiosity. A fake recruiter message may promise a high-paying role, remote flexibility, fast hiring, or immediate interview access. In many cases the scam becomes much clearer when the recruiter starts asking for money, background-check fees, equipment purchases, or payment details. The goal is to make you react quickly before you slow down and confirm whether the recruiter and company are actually real.</p>
 
 <p>Many fake recruiter emails look polished. They may include a realistic signature, job description, company wording, and professional-sounding next steps. Some even copy real job postings or use names that sound like legitimate hiring staff. But a polished design does not make the message trustworthy. What matters is whether the recruiter identity, company, and job survive independent checking.</p>
 
-<p>Scam versions often push one urgent next step. That may be replying with personal information, moving to Telegram or WhatsApp, paying for equipment, completing fake onboarding, or clicking a link to submit documents. In some cases, the scam continues after contact with fake interviews, fake offer letters, or direct payment requests.</p>
+<p>A real recruiter should still make sense after outside verification. You should be able to confirm the company, the recruiter, and the role through the official company website, LinkedIn, or another trusted source. A scam version often gets weaker the moment you stop relying on the email itself and start checking independently.</p>
+
+<p>Scam versions often push one urgent next step. That may be replying with personal information, moving to Telegram or WhatsApp, paying for equipment, completing fake onboarding, or clicking a link to submit documents. If a recruiter is asking for money early in the process, that is a major red flag. In some cases, the scam continues after contact with fake interviews, fake offer letters, or direct payment requests.</p>
 
 <p>If you interact with a fake recruiter email, the risks can be serious. Sharing your resume is usually not the main danger by itself, but sharing your address, date of birth, ID documents, banking details, or payment information can expose you to fraud or identity theft. In some scams, victims lose money through fake background check fees, equipment purchases, or payment-setup traps.</p>
 
@@ -309,7 +319,7 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
 <li>Pressure to reply fast, move to another app, or continue the process outside normal hiring channels</li>
 <li>Requests for sensitive personal information before any real interview process</li>
 <li>Promises of unusually high pay, fast hiring, or guaranteed remote work without screening</li>
-<li>Requests for money, equipment purchases, banking details, or payment setup early in the process</li>
+<li>A recruiter asking for money, equipment purchases, banking details, or payment setup early in the process</li>
 </ul>
 
 <h2>How To Respond Safely</h2>
@@ -327,10 +337,10 @@ PAGE_SEO: Dict[str, Dict[str, Any]] = {
             },
             {
                 "@type": "Question",
-                "name": "How can I tell if a recruiter email from an unknown company is a scam?",
+                "name": "Is a recruiter asking for money a scam?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Watch for pressure to move fast, requests for sensitive personal details, promises that seem unusually easy or high-paying, and recruiter or company information that cannot be verified independently. A real opportunity should still make sense after outside checking."
+                    "text": "A recruiter asking for money early in the process is a major red flag. Real employers and recruiters do not usually ask candidates to pay fees for equipment, background checks, or onboarding before a legitimate hiring process is confirmed."
                 },
             },
             {
