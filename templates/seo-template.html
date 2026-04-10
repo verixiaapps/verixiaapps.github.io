@@ -3966,4 +3966,416 @@ async function checkout(priceId) {
 })();
 </script>
 
+<script>
+(function () {
+  if (window.__SCAM_CHECK_AI_POLISH_LAYER_V3__) return;
+  window.__SCAM_CHECK_AI_POLISH_LAYER_V3__ = true;
+
+  function normalizeSpace(str) {
+    return String(str || "").replace(/\s+/g, " ").trim();
+  }
+
+  function smartCap(str) {
+    const text = normalizeSpace(str);
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+  }
+
+  function getRawKeyword() {
+    return normalizeSpace(
+      typeof RAW_KEYWORD !== "undefined" && RAW_KEYWORD ? RAW_KEYWORD : "{{KEYWORD}}"
+    );
+  }
+
+  function cleanKeywordBase(keyword) {
+    return normalizeSpace(
+      String(keyword || "")
+        .replace(/[–—]/g, "-")
+        .replace(/^\s*is\s+this\s+/i, "")
+        .replace(/^\s*is\s+/i, "")
+        .replace(/^\s*can\s+i\s+trust\s+/i, "")
+        .replace(/^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+/i, "")
+        .replace(/^\s*did\s+i\s+almost\s+get\s+scammed\s+(?:by|on|with)\s+/i, "")
+        .replace(/\s+a\s+scam$/i, "")
+        .replace(/\s+or\s+legit$/i, "")
+        .replace(/\s+or\s+scam$/i, "")
+        .replace(/\s+legit$/i, "")
+        .replace(/\s+real$/i, "")
+        .replace(/\s+safe$/i, "")
+        .replace(/\s+fake$/i, "")
+        .replace(/\s+scam$/i, "")
+        .replace(/\s+a$/i, "")
+    );
+  }
+
+  function cleanKeywordForSentence(keyword) {
+    return normalizeSpace(
+      cleanKeywordBase(keyword)
+        .replace(/\bmessage\b/gi, "")
+        .replace(/\bmessages\b/gi, "")
+        .replace(/\bemail\b/gi, "")
+        .replace(/\bemails\b/gi, "")
+        .replace(/\btext\b/gi, "")
+        .replace(/\btexts\b/gi, "")
+        .replace(/\blink\b/gi, "")
+        .replace(/\blinks\b/gi, "")
+        .replace(/\bwebsite\b/gi, "")
+        .replace(/\bwebsites\b/gi, "")
+        .replace(/\balert\b/gi, "")
+        .replace(/\balerts\b/gi, "")
+        .replace(/\bwarning\b/gi, "")
+        .replace(/\bwarnings\b/gi, "")
+        .replace(/\bnotification\b/gi, "")
+        .replace(/\bnotifications\b/gi, "")
+        .replace(/\brequest\b/gi, "")
+        .replace(/\brequests\b/gi, "")
+        .replace(/\boffer\b/gi, "")
+        .replace(/\boffers\b/gi, "")
+        .replace(/\bscam\b/gi, "")
+        .replace(/\bscams\b/gi, "")
+    );
+  }
+
+  function containsAny(text, phrases) {
+    const lower = String(text || "").toLowerCase();
+    return phrases.some(function (phrase) {
+      return lower.indexOf(String(phrase).toLowerCase()) !== -1;
+    });
+  }
+
+  function keywordContext(keyword) {
+    const lower = normalizeSpace(keyword).toLowerCase();
+
+    if (
+      containsAny(lower, [
+        "job",
+        "recruiter",
+        "interview",
+        "hiring",
+        "onboarding",
+        "background check",
+        "offer letter",
+        "employment",
+        "remote job"
+      ])
+    ) {
+      return {
+        opener: "can look like a normal hiring message at first",
+        visible: "a recruiter message, interview request, onboarding step, background-check note, or fast-moving job update",
+        pressure: "The pressure usually comes from speed. The message pushes you to reply quickly, move off-platform, send documents, or complete a step before you have time to slow down and check whether the role is real.",
+        variation: "Some versions sound polished and corporate, while others are shorter and more casual. The wording may change, but the goal stays the same: get personal details, banking details, ID documents, or money before you verify the company and the role.",
+        outcome: "If someone falls for it, the damage can turn into identity theft, payroll fraud, fake training fees, stolen banking details, or a longer scam sequence that keeps asking for more."
+      };
+    }
+
+    if (
+      containsAny(lower, [
+        "crypto",
+        "bitcoin",
+        "ethereum",
+        "wallet",
+        "coinbase",
+        "binance",
+        "metamask",
+        "airdrop",
+        "nft",
+        "trading",
+        "token",
+        "seed phrase",
+        "wallet connect",
+        "withdrawal"
+      ])
+    ) {
+      return {
+        opener: "can look real for a second, especially when it is tied to an account, wallet, withdrawal, support issue, or token claim",
+        visible: "a wallet prompt, exchange alert, support message, airdrop page, recovery claim, or withdrawal issue",
+        pressure: "The pressure usually comes from urgency and confusion. The page or message tries to rush you into connecting a wallet, entering a seed phrase, approving a transaction, or fixing a problem before you have time to verify what is really happening.",
+        variation: "Some versions look like support, some look like rewards, and some look like security or withdrawal issues. The layout changes, but the real target is usually wallet access, login details, or an irreversible transfer.",
+        outcome: "If someone falls for it, the loss can be immediate. A stolen wallet approval, seed phrase, or transfer can lead to drained funds, account takeover, or follow-up messages pretending to help recover what was lost."
+      };
+    }
+
+    if (
+      containsAny(lower, [
+        "usps",
+        "ups",
+        "fedex",
+        "dhl",
+        "delivery",
+        "package",
+        "shipment",
+        "tracking",
+        "redelivery",
+        "customs",
+        "parcel",
+        "missed delivery"
+      ])
+    ) {
+      return {
+        opener: "often starts like a normal package update",
+        visible: "a delivery text, tracking page, customs fee notice, redelivery request, or address confirmation alert",
+        pressure: "The pressure usually comes from routine urgency. It says there is a small fee, a missed delivery, a failed shipment, or a tracking issue that needs quick action before the package is delayed or returned.",
+        variation: "Some versions copy carrier branding closely, while others are stripped down and short. The link, sender, and wording may change, but the pattern stays familiar because it is built to feel like a normal shipping problem.",
+        outcome: "If someone falls for it, the result can be stolen card details, fake payment charges, phishing logins, or later scam attempts after the first click gives the sender more information."
+      };
+    }
+
+    if (
+      containsAny(lower, [
+        "bank",
+        "paypal",
+        "venmo",
+        "zelle",
+        "cash app",
+        "refund",
+        "payment",
+        "billing",
+        "invoice",
+        "charge",
+        "transaction",
+        "account alert",
+        "security alert",
+        "login alert",
+        "password reset",
+        "amazon",
+        "apple",
+        "google",
+        "microsoft",
+        "netflix"
+      ])
+    ) {
+      return {
+        opener: "can look exactly like the kind of account or payment alert people are used to seeing",
+        visible: "a login warning, refund notice, billing issue, account alert, verification prompt, suspicious charge message, or invoice notice",
+        pressure: "The pressure usually comes from panic. The message says something changed, failed, expired, was blocked, or needs confirmation right away, which pushes people toward a fast click instead of a calm check inside the real app or site.",
+        variation: "Some versions look polished and branded, while others rely on plain wording and urgency alone. The details shift from refunds to invoices to security warnings, but the core move is the same: get a click, a login, a code, or payment details.",
+        outcome: "If someone falls for it, the result can be a stolen login, card misuse, account takeover, unauthorized charges, or a second wave of messages once the scammer knows the target is responsive."
+      };
+    }
+
+    return {
+      opener: "can look believable at first",
+      visible: "a message, email, text, page, or alert that feels routine enough to lower your guard",
+      pressure: "The pressure usually comes from urgency, confusion, or trust. It tries to get a fast click, a quick reply, or some kind of confirmation before you stop and verify it properly.",
+      variation: "Some versions look polished, while others are short and rough. The wording may change across platforms and senders, but the goal stays the same: get information, money, access, or a risky action before you slow down.",
+      outcome: "If someone falls for it, the damage can turn into stolen details, payment loss, account access problems, or follow-up fraud that keeps building on the first mistake."
+    };
+  }
+
+  function splitSentences(text) {
+    return String(text || "").match(/[^.!?]+[.!?]*/g) || [];
+  }
+
+  function ensureSentenceEnd(text) {
+    const out = normalizeSpace(text);
+    if (!out) return out;
+    return /[.!?]$/.test(out) ? out : out + ".";
+  }
+
+  function collapseRepeatedSentences(text) {
+    const seen = new Set();
+    const kept = [];
+
+    splitSentences(text).forEach(function (sentence) {
+      const normalized = normalizeSpace(sentence).toLowerCase();
+      if (!normalized) return;
+      if (seen.has(normalized)) return;
+      seen.add(normalized);
+      kept.push(ensureSentenceEnd(sentence));
+    });
+
+    return normalizeSpace(kept.join(" "));
+  }
+
+  function stripAiFiller(text) {
+    return normalizeSpace(
+      String(text || "")
+        .replace(/\bscams often\b/gi, "")
+        .replace(/\bin today's digital age\b/gi, "")
+        .replace(/\bit is important to understand\b/gi, "")
+        .replace(/\busers should be cautious\b/gi, "")
+        .replace(/\bthis type of scam\b/gi, "this")
+        .replace(/\bthese scams can take many forms\b/gi, "")
+        .replace(/\bthat is why independent verification matters\b/gi, "Direct verification matters")
+        .replace(/\bthe goal is to\b/gi, "It is trying to")
+        .replace(/\bwarning signs include\b/gi, "")
+        .replace(/\bred flags include\b/gi, "")
+        .replace(/\s+,/g, ",")
+        .replace(/\s+\./g, ".")
+    );
+  }
+
+  function buildLeadParagraph(keyword, originalText) {
+    const cleanKeyword = smartCap(cleanKeywordForSentence(keyword) || cleanKeywordBase(keyword) || keyword);
+    const ctx = keywordContext(keyword);
+    const original = collapseRepeatedSentences(stripAiFiller(originalText));
+    const sentences = splitSentences(original).map(normalizeSpace).filter(Boolean);
+
+    const leadOptions = [
+      "You get " + cleanKeyword.toLowerCase() + " and it looks routine at first.",
+      "It starts with " + cleanKeyword.toLowerCase() + " that seems normal for a second.",
+      "You open " + cleanKeyword.toLowerCase() + " and it immediately looks like something real."
+    ];
+
+    const lead = leadOptions[keyword.length % leadOptions.length];
+    const parts = [
+      ensureSentenceEnd(lead),
+      ensureSentenceEnd("It usually shows up as " + ctx.visible),
+      sentences[0] ? ensureSentenceEnd(sentences[0]) : "",
+      sentences[1] ? ensureSentenceEnd(sentences[1]) : "",
+      ensureSentenceEnd(cleanKeyword + " " + ctx.opener)
+    ].filter(Boolean);
+
+    return normalizeSpace(parts.join(" "));
+  }
+
+  function buildPressureParagraph(keyword, originalText) {
+    const ctx = keywordContext(keyword);
+    const original = collapseRepeatedSentences(stripAiFiller(originalText));
+    const sentences = splitSentences(original).map(normalizeSpace).filter(Boolean);
+
+    const kept = sentences.filter(function (sentence) {
+      return /urgent|pressure|rush|panic|fear|click|verify|confirm|reply|immediately|right away|locked|suspended|expire|payment/i.test(sentence);
+    });
+
+    const parts = [];
+    if (kept[0]) parts.push(ensureSentenceEnd(kept[0]));
+    if (kept[1]) parts.push(ensureSentenceEnd(kept[1]));
+    parts.push(ensureSentenceEnd(ctx.pressure));
+
+    return normalizeSpace(parts.join(" "));
+  }
+
+  function buildVariationParagraph(keyword, originalText) {
+    const ctx = keywordContext(keyword);
+    const original = collapseRepeatedSentences(stripAiFiller(originalText));
+    const sentences = splitSentences(original).map(normalizeSpace).filter(Boolean);
+
+    const kept = sentences.filter(function (sentence) {
+      return /different|variation|versions|sometimes|other times|some|others|platform|layout|sender|wording/i.test(sentence);
+    });
+
+    const parts = [];
+    if (kept[0]) parts.push(ensureSentenceEnd(kept[0]));
+    if (kept[1]) parts.push(ensureSentenceEnd(kept[1]));
+    parts.push(ensureSentenceEnd(ctx.variation));
+
+    return normalizeSpace(parts.join(" "));
+  }
+
+  function buildFinalParagraph(keyword, originalText) {
+    const ctx = keywordContext(keyword);
+    const original = collapseRepeatedSentences(stripAiFiller(originalText));
+    const sentences = splitSentences(original).map(normalizeSpace).filter(Boolean);
+
+    const kept = sentences.filter(function (sentence) {
+      return /stolen|loss|identity|account|takeover|money|bank|wallet|fraud|login|payment|damage|danger/i.test(sentence);
+    });
+
+    const parts = [];
+    if (kept[0]) parts.push(ensureSentenceEnd(kept[0]));
+    if (kept[1]) parts.push(ensureSentenceEnd(kept[1]));
+    parts.push(ensureSentenceEnd(ctx.outcome));
+
+    if (!/official|verify|real app|real site|directly/i.test(parts.join(" "))) {
+      parts.push("The safest move is to stop and verify it through the official site or app before you click, reply, pay, or share anything.");
+    }
+
+    return normalizeSpace(parts.join(" "));
+  }
+
+  function polishParagraphs(keyword) {
+    const seoContent = document.getElementById("seoContent");
+    if (!seoContent) return;
+
+    const paragraphs = Array.from(seoContent.querySelectorAll("p"));
+    if (!paragraphs.length) return;
+
+    const originals = paragraphs.map(function (p) {
+      return normalizeSpace(p.textContent);
+    });
+
+    paragraphs.forEach(function (p, index) {
+      let rewritten = originals[index] || "";
+
+      if (index === 0) rewritten = buildLeadParagraph(keyword, originals[index]);
+      else if (index === 1) rewritten = buildPressureParagraph(keyword, originals[index]);
+      else if (index === 2) rewritten = buildVariationParagraph(keyword, originals[index]);
+      else if (index === paragraphs.length - 1) rewritten = buildFinalParagraph(keyword, originals[index]);
+
+      rewritten = normalizeSpace(rewritten);
+
+      if (rewritten) {
+        p.textContent = rewritten;
+      }
+    });
+  }
+
+  function polishSingleLine(el, keyword) {
+    if (!el) return;
+
+    let text = normalizeSpace(el.textContent);
+    if (!text) return;
+
+    const cleanKeyword = cleanKeywordForSentence(keyword) || cleanKeywordBase(keyword) || keyword;
+
+    text = collapseRepeatedSentences(stripAiFiller(text));
+
+    if (el.id === "heroSubheading") {
+      text = `Messages related to ${cleanKeyword.toLowerCase()} can be used to steal money, codes, or account access. Use the checker below before you click, reply, send money, or share information.`;
+    }
+
+    if (el.id === "contentBridge") {
+      text = `If this ${cleanKeyword.toLowerCase()} just showed up, use the checker above before you click links, reply, send money, or share information. Messages like this are one of the most common ways people lose money or hand over access without realizing it.`;
+    }
+
+    if (el.id === "previewSub") {
+      text = `Common signals found in similar ${cleanKeyword.toLowerCase()} scams`;
+    }
+
+    el.textContent = normalizeSpace(text);
+  }
+
+  function trimWeakListItems() {
+    const selectors = [
+      "#previewSignals .preview-signal span:last-child",
+      "#relatedLinks li a",
+      "#moreLinks li a"
+    ];
+
+    selectors.forEach(function (selector) {
+      document.querySelectorAll(selector).forEach(function (el) {
+        el.textContent = normalizeSpace(el.textContent.replace(/\*\*/g, ""));
+      });
+    });
+  }
+
+  function runAiPolishLayer() {
+    const keyword = getRawKeyword();
+
+    polishSingleLine(document.getElementById("heroSubheading"), keyword);
+    polishSingleLine(document.getElementById("contentBridge"), keyword);
+    polishSingleLine(document.getElementById("previewSub"), keyword);
+    polishParagraphs(keyword);
+    trimWeakListItems();
+  }
+
+  function boot() {
+    runAiPolishLayer();
+    setTimeout(runAiPolishLayer, 0);
+    setTimeout(runAiPolishLayer, 120);
+    setTimeout(runAiPolishLayer, 350);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+
+  window.addEventListener("load", function () {
+    setTimeout(runAiPolishLayer, 60);
+  });
+})();
+</script>
+
 </html>
