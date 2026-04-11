@@ -1,5 +1,3 @@
-Here’s the stronger runtime version. It is tighter, more aggressive about removing soft/generic lower-page content, keeps the best narrative paragraphs, sharpens bridge copy and badges, cleans duplicate sections better, and avoids touching core template structure.
-
 (function () {
   if (window.__SCAM_CHECK_RUNTIME__) return;
   window.__SCAM_CHECK_RUNTIME__ = true;
