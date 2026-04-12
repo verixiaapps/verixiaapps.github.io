@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="account-security" data-mode="breakdown">
 <p>Coinbase Login from New Device Email is a common question when something like a password reset message appears without context. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common Coinbase Login from New Device Email flow starts with something like a password reset message, creates urgency around account access, and then tries to move you onto a fake page or into sharing codes before you check the real service yourself.</p>
-You receive an email that looks just like any other notification from Coinbase, alerting you that your account is being accessed from a new device. The email includes your name and even a partial account number, making it seem legitimate. It urges you to click a link to verify your identity and secure your account. The design mimics the official Coinbase branding, complete with logos and colors that make it hard to distinguish from the real thing. You might even notice a sense of familiarity, as if you’ve received similar messages in the past, which can make you feel more at ease.
+You open your inbox and spot a subject line that reads “Coinbase: New Device Login Detected. ” The sender name looks right, and the email includes the Coinbase logo at the top, but the message urges you to “secure your account immediately” by clicking a blue “Verify Login” button. The wording feels urgent but familiar, referencing a login attempt from a device in “San Jose, CA” at a time just minutes ago. There’s a line about your account being at risk if you don’t act, and the button leads to a page that mimics the Coinbase login screen, complete with a fake address bar that almost matches the real domain.
 
-The email creates a sense of urgency, claiming that your account could be compromised if you don’t act immediately. It might say something like, "If this wasn't you, please verify your identity within the next 10 minutes." This pressure can make you feel anxious and prompt you to click the link without thinking twice. The message often includes a friendly tone, as if they genuinely care about your security, which can further build trust and make you feel like you’re dealing with a legitimate situation.
+A countdown timer appears as soon as the page loads, flashing “Session expires in 04:59” in red above the login fields. The message warns that if you don’t confirm your identity now, your withdrawals will be temporarily suspended. There’s a banner at the top that says “Unusual activity detected—immediate verification required. ” The pressure ramps up with each second, and the page disables the back button, making it harder to leave. The fake portal asks for your email, password, and sometimes even prompts for your 2FA code, all under the threat that your funds could be locked if you hesitate.
 
-Scammers often tweak these emails to look like they’re coming from different services or even use variations like text messages or pop-up alerts. You might see a similar message claiming to be from a bank or another financial service, using the same tactics of urgency and personalization. Some variations may even include fake customer support numbers, leading you to believe you’re speaking with a real representative when, in fact, you’re just giving your information to a scammer. The adaptability of these scams makes it easy for them to target a wide audience.
+Sometimes the details shift. The sender address might look like “security@coinbase-alert. com” instead of the real Coinbase domain, or the reply-to field is a string of random letters. The layout can change too—some versions use a plain white background, while others copy the exact shade of Coinbase blue. In a few cases, the email links to a “Connect Wallet” prompt or asks for your seed phrase under the guise of “recovery verification. ” Other times, a support chat window pops up, claiming your withdrawal is frozen until you complete the verification steps.
 
-If you fall for this scam, the consequences can be severe. Clicking the link may lead you to a fake website designed to steal your login credentials. Once the scammers have your information, they can drain your account, make unauthorized transactions, or sell your data on the dark web. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your financial security. It’s not just about losing money; it’s about the long-term impact on your peace of mind and trust in online transactions.
+If you enter your details, the fallout is immediate. The attackers log in to your real Coinbase account, drain your wallet, and sometimes trigger a withdrawal of your entire balance—often within minutes. If you provided your seed phrase, they can empty not just your Coinbase wallet but any linked crypto accounts. Some victims see a second wave of emails, now targeting them for “recovery help” or asking for a small fee to restore access. The original login alert vanishes, but the loss is permanent: funds are gone, and the account is compromised.
 <p>This is why step-by-step checking matters. Once a message related to Coinbase Login from New Device Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1368,25 +1474,25 @@ If you fall for this scam, the consequences can be severe. Clicking the link may
       <h3 id="relatedHeading">Check Similar Messages</h3>
       <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-coinbase-login-attempt-email-legit-or-scam/">Is Coinbase Login Attempt Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-login-attempt-text-legit-or-scam/">Is Coinbase Login Attempt Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-suspicious-login-text-legit-or-scam/">Is Coinbase Suspicious Login Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-flagged-email-legit-or-scam/">Is Coinbase Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-locked-email-legit-or-scam/">Is Coinbase Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-restricted-email-legit-or-scam/">Is Coinbase Account Restricted Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-account-restriction-email-legit-or-scam/">Is Coinbase Account Restriction Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-coinbase-account-security-email-legit-or-scam/">Is Coinbase Account Security Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-coinbase-account-restriction-email-legit-or-scam/">Is Coinbase Account Restriction Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-account-security-email-legit-or-scam/">Is Coinbase Account Security Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-suspension-email-legit-or-scam/">Is Coinbase Account Suspension Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-account-verification-email-legit-or-scam/">Is Coinbase Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-billing-issue-email-legit-or-scam/">Is Coinbase Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-coinbase-fraud-alert-email-legit-or-scam/">Is Coinbase Fraud Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-account-locked-message-legit-or-scam/">Is Coinbase Account Locked Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-coinbase-fraud-alert-message-legit-or-scam/">Is Coinbase Fraud Alert Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-coinbase/">Did I Get Scammed by Coinbase?</a></li>
-<li><a href="/scam-check-now/is-crypto-login-attempt-email-legit-or-scam/">Is Crypto Login Attempt Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-metamask-login-alert-email-legit-or-scam/">Is MetaMask Login Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-transaction-pending-email-legit-or-scam/">Is Coinbase Transaction Pending Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-unauthorized-transaction-email-legit-or-scam/">Is Coinbase Unauthorized Transaction Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-unusual-withdrawal-email-legit-or-scam/">Is Coinbase Unusual Withdrawal Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-coinbase-verification-code-email-legit-or-scam/">Is Coinbase Verification Code Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
