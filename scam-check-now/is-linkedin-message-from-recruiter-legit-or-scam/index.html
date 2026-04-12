@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="job" data-mode="scenario">
 <p>Linkedin Message from Recruiter is a common question when something like an interview request text feels too fast, too vague, or too good to be true. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to whether the sender, company, pay, and hiring process can be verified independently.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A typical Linkedin Message from Recruiter case may involve something like an interview request text, a job offer that feels unusually fast, easy, or high-paying, or a request for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>
-You open your LinkedIn inbox and see a message from a recruiter that seems too good to be true. The recruiter claims to represent a well-known company and offers you an exciting job opportunity that perfectly matches your skills. The message is personalized, referencing your recent achievements and even mentioning mutual connections. It feels genuine, but something about it gives you pause. The recruiter urges you to respond quickly, suggesting that the position is in high demand and that other candidates are already being considered. 
+A message pops up on LinkedIn: “Hi, I’m Emily from TalentFinders. I reviewed your profile and we’d like to fast-track you for a remote data analyst role at Stripe. ” The sender’s profile photo looks corporate, and there’s an attached PDF labeled “Offer Letter_Stripe. pdf” with a logo that’s just a touch off-center. The message ends with, “Please reply with your personal email so we can send next steps. ” In the browser tab, the LinkedIn logo sits next to a red notification dot, making it feel urgent to respond before the opportunity disappears.
 
-The urgency in their tone makes you feel like you need to act fast. They might even include a link to a professional-looking website or an official-looking email address that adds to the illusion of legitimacy. You might find yourself thinking, “This could be the breakthrough I’ve been waiting for.” The pressure to respond quickly can cloud your judgment, making it easy to overlook red flags. You might feel flattered and excited, convinced that this opportunity is a golden ticket to your dream job.
+Minutes later, a new email arrives with the subject line “Stripe Interview Confirmation – Action Needed Today. ” The sender’s address is stripecareers. hr@gmail. com, not a company domain. There’s a link labeled “Begin Onboarding,” and a prompt: “To secure your interview slot, please complete the attached background check form by 3 PM. ” The form asks for your SSN and a direct deposit number before you’ve even spoken to anyone live. Every line in the message is about speed—“slots fill quickly,” “HR needs documents now,” “failure to respond may delay your offer.
 
-However, these messages can come in various forms. Sometimes, they might ask for a brief phone call or a video chat to discuss the opportunity further. Other times, they might direct you to a seemingly official application page where you’re asked to submit personal information or pay a small fee for background checks. You might even receive follow-up messages that appear more urgent, claiming that the position will close soon or that you need to provide additional documentation to secure your spot. Each variation is designed to keep you engaged, making it harder to discern what’s real and what’s not.
+Sometimes the pattern shifts. The recruiter starts on LinkedIn, then a follow-up message urges you to move to WhatsApp for “faster onboarding. ” The PDF offer letter might have a Stripe logo, but the formatting is awkward or the reply-to is a free Gmail account. Other times, there’s a request for a small “training materials fee” or a promise to reimburse you for equipment after you send receipts. You might notice the portal link opens to a site like “stripe-careers-apply. com” instead of the real company domain. It always feels like you’re one step from a real job, but something in the layout or sender doesn’t quite add up.
 
-Falling for this type of scam can lead to serious consequences. You could end up sharing sensitive personal information, which might be used for identity theft or financial fraud. Even if you don’t provide your information, the emotional toll of being misled can leave you feeling vulnerable and distrustful of future opportunities. The excitement of a new job can quickly turn into anxiety and regret, making it crucial to take a step back and assess the situation before getting too involved.
+If you fill out the forms or send payment, the fallout is immediate and concrete. Your SSN and bank details might be used to open fraudulent accounts, drain your checking balance, or file for credit in your name. The $75 “training fee” is never refunded. Weeks later, you notice withdrawals or credit checks you didn’t authorize. The job never materializes, but your information is now in circulation, leaving you with real financial loss and a long trail to clean up.
 <p>Job-related scams connected to Linkedin Message from Recruiter often break normal hiring patterns. Real employers usually have a verifiable company presence, a clear role, and a consistent interview process, while scam messages often stay vague until they ask for money, documents, or account details, especially after something like an interview request text appears.</p>
 </div>
 
@@ -1369,24 +1475,24 @@ Falling for this type of scam can lead to serious consequences. You could end up
       <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-linkedin-connection-request-message-legit-or-scam/">Is Linkedin Connection Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-recruiter-email-from-gmail-legit-or-scam/">Is Recruiter Email from Gmail or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/">Is Recruiter Email from Unknown Company or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-recruiter-message-legit-or-scam/">Is This Recruiter Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-recruiter-message-asking-for-personal-info-legit-or-scam/">Is Recruiter Message Asking for Personal Info or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-recruiter-asking-for-fee-legit-or-scam/">Is Recruiter Asking for Fee or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-recruiter-asking-for-payment-legit-or-scam/">Is Recruiter Asking for Payment or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/recruiter-asking-for-ssn-scam/">Is Recruiter Asking for Ssn a Scam?</a></li>
-<li><a href="/scam-check-now/fake-recruiter-email-scam-example/">Is Fake Recruiter Email Scam Example a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-recruiter-asking-for-payment-legit-or-scam/">Is Recruiter Asking for Payment or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/recruiter-asking-for-ssn-scam/">Is Recruiter Asking for Ssn a Scam?</a></li>
 <li><a href="/scam-check-now/is-recruiter-email-asking-for-ssn-legit-or-scam/">Is Recruiter Email Asking for Ssn or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-this-recruiter-email-a-scam/">Is This Recruiter Email a Scam</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-fake-recruiter/">Did I Get Scammed by Fake Recruiter?</a></li>
 <li><a href="/scam-check-now/recruiter-email-scam-asking-for-info/">Is Recruiter Email Scam Asking for Info a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-message-from-unknown-sender-legit-or-scam/">Is Google Message from Unknown Sender or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/fake-google-warning-message-scam/">Is Fake Google Warning Message a Scam?</a></li>
 <li><a href="/scam-check-now/is-apple-id-locked-message-legit-or-scam/">Is Apple Id Locked Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-binance-security-alert-message-legit-or-scam/">Is Binance Security Alert Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-debit-card-blocked-message-legit-or-scam/">Is Debit Card Blocked Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-prepaid-card-request-message-legit-or-scam/">Is Prepaid Card Request Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
