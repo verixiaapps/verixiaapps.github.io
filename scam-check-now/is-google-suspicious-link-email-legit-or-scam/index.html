@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="phishing" data-mode="direct">
 <p>Google Suspicious Link Email is a common question when something like a fake login page feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>Many Google Suspicious Link Email scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a fake login page. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You might have recently received an email that appears to be from Google, warning you about suspicious activity on your account. The message often includes a link that claims you need to verify your identity or secure your account. It may look genuine, complete with Google’s logo and familiar formatting, but the language can feel slightly off, with urgent calls to action urging you to click immediately. If you’re like many, you might find yourself hesitating, wondering if this is a legitimate warning or something more sinister.
+The email subject line stares at you—“Google Security Alert: Suspicious Link Detected in Your Account. ” The sender name shows as “Google Support,” but the reply-to address underneath, “account-security@googl3-notify. com,” doesn’t look quite right. Below, a blue button reads “Review Suspicious Link,” and the email body warns, “Immediate action required to protect your account. ” A Google logo sits in the corner, almost convincing, and there’s a timestamp less than an hour old. You notice the message says your access may be restricted if you don’t respond within 15 minutes.
 
-These emails are designed to create a sense of urgency, making you feel like your account is at risk and that you must act fast to prevent a breach. They often use phrases like "immediate action required" or "your account will be suspended," which can trigger a panic response. This pressure can cloud your judgment, pushing you to click the link without taking a moment to verify the source. The scammers rely on this rush to get you to act before you think.
+Once you’re inside, the pressure dials up fast. A yellow banner across the top of the page flashes: “Your account will be locked in 09:41 unless you verify this activity. ” There’s a countdown timer, a prompt asking you to re-enter your password, and an input box labeled “Enter the verification code sent to your phone. ” The page copies Google’s color scheme, but the address bar shows “secure-login-google. com” instead of the real domain. The sense that something is off gets lost in the rush—the warning says “Update Now” and the button is pulsing, urging you to fix the issue before your files and emails become inaccessible.
 
-You may also notice variations of this scam, such as text messages or even phone calls that mimic Google’s customer service. Sometimes, they might claim that your payment information needs to be updated or that there’s unusual activity detected on your Google Drive. Each version has a similar goal: to trick you into providing personal information or clicking on malicious links. Even if the sender’s email address looks similar to Google’s, it’s often just a slight alteration that can be easy to overlook in a moment of panic.
+Variations keep showing up, making it harder to spot the pattern. Sometimes it’s a message from “Google Payments,” referencing a failed $15. 99 charge with a subject line like “Payment Declined – Update Billing Info. ” Other times, the email claims there’s an urgent password reset or a pending refund, each with a slightly tweaked logo and sender address like “support@account-google. com” or “alerts@security-goolge. net. ” The layout can shift from a plain text warning to a slick portal with a “Sign In to Continue” button, but the common thread is a sense of panic and a prompt leading straight to a page that asks for your credentials.
 
-Falling for this scam can have serious consequences. If you click the link and enter your information, you might unknowingly hand over your login credentials to cybercriminals, giving them access to your personal data, emails, and even financial accounts. This can lead to identity theft, unauthorized transactions, and a long, stressful process to regain control of your accounts. The danger is real, and it’s crucial to stay vigilant against these deceptive tactics that prey on your trust and urgency.
+When someone enters their details, the fallout is immediate and hard to undo. The attackers log in within minutes, change the recovery email and phone number, and begin draining any attached payment methods or stored gift card balances. You start seeing unauthorized charges—sometimes just a few dollars at first, sometimes hundreds—on your linked cards. Personal emails are sent from your account, spreading the same scam to contacts. If the same password was reused elsewhere, other accounts go down next, compounding the loss and leaving your digital life exposed.
 <p>Phishing-related scams connected to Google Suspicious Link Email often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a fake login page is used to build trust.</p>
 </div>
 
@@ -1366,27 +1472,27 @@ Falling for this scam can have serious consequences. If you click the link and e
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-google-fraud-alert-email-legit-or-scam/">Is Google Fraud Alert Email or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-google-suspicious-device-alert-email-legit-or-scam/">Is Google Suspicious Device Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-device-activity-email-legit-or-scam/">Is Google Device Activity Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-fraud-alert-email-legit-or-scam/">Is Google Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-password-reset-email-legit-or-scam/">Is Google Password Reset Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-payment-request-email-legit-or-scam/">Is Google Payment Request Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-security-alert-email-legit-or-scam/">Is Google Security Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-security-challenge-email-legit-or-scam/">Is Google Security Challenge Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-security-warning-email-legit-or-scam/">Is Google Security Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-recovery-warning-email-legit-or-scam/">Is Google Recovery Warning Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-google-sign-in-alert-email-legit-or-scam/">Is Google Sign in Alert Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-google-security-alert-email-legit-or-scam/">Is Google Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-security-challenge-email-legit-or-scam/">Is Google Security Challenge Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-security-notice-email-legit-or-scam/">Is Google Security Notice Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-security-prompt-email-legit-or-scam/">Is Google Security Prompt Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-security-review-email-legit-or-scam/">Is Google Security Review Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-security-warning-email-legit-or-scam/">Is Google Security Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-sign-in-alert-email-legit-or-scam/">Is Google Sign in Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-sign-in-blocked-email-legit-or-scam/">Is Google Sign in Blocked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-support-email-legit-or-scam/">Is Google Support Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-google-email/">Did I Get Scammed by Google Email?</a></li>
 <li><a href="/scam-check-now/is-google-sign-in-alert-email-real-or-fake/">Is Google Sign in Alert Email Real or Fake</a></li>
-<li><a href="/scam-check-now/is-google-password-change-alert-legit-or-scam/">Is Google Password Change Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-password-reset-text-legit-or-scam/">Is Google Password Reset Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-device-sign-in-alert-legit-or-scam/">Is Google Device Sign in Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-google-message-from-unknown-sender-legit-or-scam/">Is Google Message from Unknown Sender or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-suspicious-activity-email-legit-or-scam/">Is Apple Suspicious Activity Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-google-docs-email-safe-or-scam/">Is This Google Docs Email Safe or Scam</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>

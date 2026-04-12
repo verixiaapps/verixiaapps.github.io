@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="government" data-mode="direct">
 <p>Government Payment Alert is a common question when something like a Social Security notice feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Government Payment Alert scenario uses fear, urgency, or the promise of money to get a fast response, often through something like a Social Security notice. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>
-You might have recently received a text or email claiming to be from a government agency, notifying you about a payment or stimulus check that you need to claim. The message may include official-looking logos and language, urging you to click a link or provide personal information to confirm your eligibility. It often appears urgent, suggesting that you must act quickly to secure your funds or risk missing out. The message may even reference specific details about your financial situation, making it feel even more legitimate.
+You click open an email with the subject line “Government Payment Alert: Action Required,” and the first thing you see is a blue banner with a government-style seal and a bolded message: “Your payment is on hold. Confirm your details to receive funds. ” There’s a button labeled “Verify Now” right in the center, and the sender address looks official at a glance—something like payments@federal-alerts. com. The message says your recent application for relief funds or a tax refund can’t be processed until you complete verification. It feels urgent, but the wording is just a little off, and the logo in the corner looks slightly pixelated.
 
-This type of scam thrives on creating a sense of urgency. You might feel pressured to respond immediately, fearing that if you don’t act fast, you could lose out on money that’s rightfully yours. The scammers often use phrases like "limited time offer" or "act now to avoid delays," which can make you anxious and more likely to comply without thinking critically. They aim to build trust by mimicking official communication styles, which can easily trick even the most cautious individuals.
+A countdown timer starts ticking down from five minutes as soon as you land on the linked page. The banner at the top flashes: “Funds will be returned if not claimed by 11:59 PM. ” Below, a form asks for your full name, Social Security number, and bank account details, with a red warning: “Failure to respond will result in permanent loss of payment. ” The “Verify Now” button pulses in orange, and there’s a line in small print: “This is your final notice. ” Every element is designed to make you act before you think, pushing you to enter sensitive information before the timer runs out.
 
-You may encounter variations of this scam that look slightly different but carry the same deceptive intent. For instance, some messages might claim to be from a local government office, while others could pose as a well-known financial institution. They might use different payment amounts or deadlines, but the core tactic remains the same: to lure you into providing sensitive information or clicking on malicious links. You might see fake websites that look identical to official government sites, further blurring the lines of authenticity.
+Sometimes the sender changes—maybe it’s “gov-payments@usa-support. org” or “refunds@irs-gov-alerts. com. ” The layout might swap the blue banner for a green one, or the seal for a flag icon, but the core is always the same: a payment you supposedly missed, a deadline that’s about to expire, and a button that leads to a login page with a copied government logo. Some versions attach a PDF invoice labeled “Outstanding Payment Notice,” while others use a text message with a link that reads, “Track your refund status. ” The reply-to address almost never matches the real agency domain, but it’s easy to miss in the rush.
 
-Falling for this scam can have serious consequences. If you provide your personal information, you could find yourself a victim of identity theft, leading to financial loss and a long, complicated process to recover your identity. Even if you don’t lose money directly, the emotional toll and stress of dealing with the aftermath can be overwhelming. You may also inadvertently expose your financial accounts to further risks, making it crucial to recognize these scams before it’s too late.
+If you fill out the form, the fallout is immediate and concrete. Your bank account details and Social Security number are harvested, leading to unauthorized withdrawals or fraudulent benefit claims in your name. The next morning, you might see a transfer of $1,500 you never authorized, or get locked out of your own bank app after a password reset you didn’t request. The damage isn’t just a lost payment—it’s a drained account, a compromised identity, and weeks spent untangling the mess with your bank and the real government agency.
 <p>Government-related scams connected to Government Payment Alert often use the appearance of authority to push fast decisions. That is why it is important to verify any claim directly through the official agency website or number instead of trusting the message on its own, especially when something like a Social Security notice is used to create urgency.</p>
 </div>
 
@@ -1367,26 +1473,26 @@ Falling for this scam can have serious consequences. If you provide your persona
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
       <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-government-benefits-email-legit-or-scam/">Is Government Benefits Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-payment-request-email/">Did I Get Scammed by Payment Request Email?</a></li>
 <li><a href="/scam-check-now/is-payment-request-message-legit-or-scam/">Is Payment Request Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-security-alert-email-legit-or-scam/">Is Security Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-security-alert-message-legit-or-scam/">Is Security Alert Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-unauthorized-withdrawal-alert-legit-or-scam/">Is Unauthorized Withdrawal Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-browser-alert-legit-or-scam/">Is This Browser Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-payment-email-legit-or-scam/">Is This Payment Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-unusual-activity-alert-legit-or-scam/">Is Unusual Activity Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-billing-alert-email-legit-or-scam/">Is Apple Billing Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-fraud-alert-email-legit-or-scam/">Is Apple Fraud Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-icloud-alert-email-legit-or-scam/">Is Apple iCloud Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-payment-declined-email-legit-or-scam/">Is Apple Payment Declined Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-payment-failed-email-legit-or-scam/">Is Apple Payment Failed Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-security-alert-email-legit-or-scam/">Is Apple Security Alert Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-this-security-alert-legit-or-scam/">Is This Security Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-system-alert-legit-or-scam/">Is This System Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-virus-alert-legit-or-scam/">Is This Virus Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-unauthorized-withdrawal-alert-legit-or-scam/">Is Unauthorized Withdrawal Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-unusual-activity-alert-legit-or-scam/">Is Unusual Activity Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-atm-withdrawal-alert-email-legit-or-scam/">Is Atm Withdrawal Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-binance-payment-declined-email-legit-or-scam/">Is Binance Payment Declined Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-binance-security-alert-email-legit-or-scam/">Is Binance Security Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-binance-security-alert-message-legit-or-scam/">Is Binance Security Alert Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-binance-withdrawal-alert-email-legit-or-scam/">Is Binance Withdrawal Alert Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
