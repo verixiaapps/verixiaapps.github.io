@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="payment" data-mode="direct">
 <p>Telegram Payment Request Message is a common question when something like a Zelle transfer problem message feels suspicious. Most scam checks start with the same question: does the situation hold up when you verify it independently? In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>A common Telegram Payment Request Message scenario starts with something like a Zelle transfer problem message, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have received a Telegram message that seems to come from a friend or a business you trust, asking you to make a payment. The message often includes a link or a request for you to send money directly through the app. It might say something urgent, like your account is about to be suspended or you need to confirm a transaction. The language is casual, making it feel like a normal conversation, but there’s an underlying tension that makes you feel like you need to act quickly.
+You get a Telegram message from an unfamiliar contact, but the username almost matches someone you spoke to last week. The message says, “Payment request for $125 received—complete transaction to avoid interruption. ” There’s a blue button labeled “Pay Now” and a Telegram logo that looks just a bit off, the corners too sharp. The sender’s handle has a stray underscore, and the message pops up in your main chat list, right above a real group. At first glance, it feels routine—just another payment ping—but something in the layout nags at you.
 
-The urgency in these messages can be overwhelming. They often claim that you need to respond immediately to avoid losing access to a service or to take advantage of a limited-time offer. This pressure can make you second-guess your instincts, especially if the sender appears to be someone you know. The use of familiar names or profile pictures adds a layer of trust, making it harder to recognize that something is off. You might find yourself thinking, “This can’t be a scam; it’s from my friend.”
+The pressure ramps up the second you pause. A timer appears under the button, counting down from “04:59,” and the message warns, “This request will expire—your account may be restricted. ” There’s a second prompt below: “Confirm payment within 5 minutes to avoid service interruption. ” The urgency is blunt, almost jarring, and the fake support chat bubble at the bottom reads, “Telegram Billing Support (active now). ” You can see the “Reply to: billing-telegram. com” in the details, but it’s easy to miss in the rush.
 
-You may come across variations of this scam that look slightly different but carry the same deceptive tactics. Some messages might claim to be from a customer service representative, while others could pose as a charity seeking donations. Even if the wording changes, the core strategy remains the same: create a sense of urgency and trust to get you to act without thinking. The sender might use phrases like “urgent action required” or “limited time offer” to keep you on edge, making it easy to overlook red flags.
+Sometimes the message changes shape—a fake refund alert with the subject line “Telegram Refund Processed,” or an invoice attachment for a small fee, like $8. 99, with a button that says “View Invoice. ” Other times, the sender’s profile photo is copied from the official Telegram bot, or the domain in the payment link is just one letter off, like “teIegram-pay. com. ” The layout mimics Telegram’s style closely, with the same shade of blue and familiar lock icon, but a quick look at the address bar or the reply-to email can reveal the mismatch.
 
-Falling for this type of scam can have serious consequences. If you send money, you may never see it again, and your personal information could be compromised. Scammers often use this information to target you further, leading to more financial loss or identity theft. The emotional toll can be just as damaging, leaving you feeling embarrassed or anxious about your judgment. It’s crucial to take a moment to evaluate the situation before responding, as the pressure to act quickly can cloud your judgment and lead to costly mistakes.
+If you follow the payment link and enter your card details, the loss is immediate and real. The charge hits your statement with a generic merchant name, and your Telegram account suddenly locks you out, password changed. Saved payment methods get siphoned, and the same credentials start showing up on other platforms—Spotify, PayPal, even your email. What began as a single “Pay Now” click turns into drained balances, new charges, and a wave of password reset emails you never requested.
 <p>Payment-related scams connected to Telegram Payment Request Message often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a Zelle transfer problem message is involved.</p>
 </div>
 
@@ -1368,25 +1474,25 @@ Falling for this type of scam can have serious consequences. If you send money, 
       <h3 id="relatedHeading">Check Similar Messages</h3>
       <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-telegram-account-blocked-message-legit-or-scam/">Is Telegram Account Blocked Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-telegram-login-alert-message-legit-or-scam/">Is Telegram Login Alert Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-suspicious-activity-message-legit-or-scam/">Is Telegram Suspicious Activity Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-suspicious-link-message-legit-or-scam/">Is Telegram Suspicious Link Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-telegram-message-from-unknown-contact-legit-or-scam/">Is Telegram Message from Unknown Contact or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-verification-request-legit-or-scam/">Is Telegram Verification Request or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-telegram-account-blocked-alert-legit-or-scam/">Is Telegram Account Blocked Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-telegram-account-suspension-email-legit-or-scam/">Is Telegram Account Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-telegram-account-verification-email-legit-or-scam/">Is Telegram Account Verification Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-telegram-support-message-real-or-fake/">Is Telegram Support Message Real or Fake</a></li>
-<li><a href="/scam-check-now/is-telegram-account-blocked-alert-legit-or-scam/">Is Telegram Account Blocked Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-account-suspension-email-legit-or-scam/">Is Telegram Account Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-account-verification-email-legit-or-scam/">Is Telegram Account Verification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-fraud-alert-email-legit-or-scam/">Is Telegram Fraud Alert Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-telegram-fraud-alert-email-legit-or-scam/">Is Telegram Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-telegram-login-blocked-email-legit-or-scam/">Is Telegram Login Blocked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-security-warning-email-legit-or-scam/">Is Telegram Security Warning Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-suspicious-activity-email-legit-or-scam/">Is Telegram Suspicious Activity Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-unusual-login-email-legit-or-scam/">Is Telegram Unusual Login Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-telegram-verification-code-text-legit-or-scam/">Is Telegram Verification Code Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-telegram-login-from-new-device-email-legit-or-scam/">Is Telegram Login from New Device Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-recruiter-telegram-message-legit-or-scam/">Is Recruiter Telegram Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-telegram-message-a-scam/">Is This Telegram Message a Scam</a></li>
+<li><a href="/scam-check-now/is-facebook-payment-request-message-legit-or-scam/">Is Facebook Payment Request Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-instagram-payment-request-message-legit-or-scam/">Is Instagram Payment Request Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-whatsapp-payment-request-message-legit-or-scam/">Is WhatsApp Payment Request Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-payment-request-message-legit-or-scam/">Is Payment Request Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-payment-declined-message-legit-or-scam/">Is Bank Payment Declined Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
