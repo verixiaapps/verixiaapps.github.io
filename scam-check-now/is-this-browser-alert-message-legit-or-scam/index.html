@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="general" data-mode="scenario">
 <p>This Browser Alert Message is a common question when something like a suspicious link feels suspicious. Many people only realize the risk after the message creates just enough urgency to interrupt normal checking. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>In many This Browser Alert Message situations, the message is written to build trust and urgency at the same time. Something like a suspicious link may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You might have recently seen a pop-up alert on your browser claiming that your device is infected with malware or that your personal information is at risk. The message often looks official, featuring logos from well-known tech companies and a stern warning that you need to take immediate action. It may instruct you to call a toll-free number or click a link to resolve the issue. The urgency of the message can be alarming, making it hard to think clearly. You might even feel a rush of anxiety as you consider the potential consequences of ignoring it.
+You’re in the middle of reading an article when a browser alert pops up, blocking your screen with a message that says, “Your device is infected. Immediate action required. ” The window uses a familiar blue shield icon and the wording feels official, almost like something from your antivirus software. There’s a bright “Scan Now” button at the bottom, and the address bar still shows the site you were on, but now there’s a string of numbers and “security-check” tacked onto the end. For a moment, it looks routine—just another update or warning you’ve seen before—until you notice your browser’s tab title flickering between “Security Alert” and the page you were on.
 
-Scammers know how to exploit your emotions, and these messages are designed to create a sense of urgency. They often include phrases like “Your account will be suspended” or “Immediate action required” to push you into making a quick decision without fully assessing the situation. This pressure can lead you to act impulsively, whether it’s calling a number or clicking a link that promises to fix everything. The more they can make you feel like you’re in danger, the more likely you are to trust their claims and follow their instructions.
+The pressure ramps up as the alert flashes again, this time adding a countdown timer in red: “Scan will begin in 60 seconds unless you act. ” There’s a line above the button that reads, “Sensitive information at risk. Click to protect your data. ” The wording feels urgent, almost accusing, and the “Scan Now” button pulses slightly, drawing your eye. The message insists, “Failure to respond may result in permanent loss of files. ” Every new second, the timer ticks down, and the sense that you need to do something—anything—right now gets harder to ignore. You’re not given time to think, just a single path forward.
 
-You may encounter variations of this scam that appear as fake software updates, security alerts, or even messages claiming to be from your internet service provider. Each version is tailored to look legitimate, often mimicking the style and tone of real notifications you might receive. Some may even go as far as to use your own browsing history to make the alert seem more credible. The common thread is that they all aim to catch you off guard, making you believe you need to act fast to protect yourself.
+The same trick keeps showing up in different shapes. Sometimes the alert claims to be from “Windows Defender” with a pixel-perfect logo, other times it’s labeled “Apple Security” or even a fake “Google Chrome Support” window. The reply-to email on some pop-ups is a jumble like “alerts@secure-checkup. com,” and the page layout mimics real system dialogs, right down to a fake “X” in the corner that doesn’t close anything. Some versions swap out the button for “Resolve Issue” or “Update Now,” but the pressure is always the same. Even the web address can look close—just a single extra dash or odd subdomain, like “security-google. com” instead of the real thing.
 
-Falling for this scam can lead to serious consequences, such as giving away personal information or allowing malware to infect your device. Once you provide your details or download the suggested software, you may find yourself facing identity theft or financial loss. The aftermath can be overwhelming, leaving you not only with the stress of dealing with the fallout but also questioning how you could have been so easily misled. It’s a reminder that not everything that appears urgent or official is what it seems.
+If you click or fill out anything, the fallout starts fast. The page might ask for your email and password, or prompt for a card number to “remove threats for $2. 99. ” Once entered, your login details are sent straight to someone else. Within hours, you could see new charges on your account, find your inbox flooded with password reset attempts, or get locked out of your own profiles. Sometimes, the same people use your stolen details to run follow-up scams, sending you real-looking receipts or threatening emails from addresses like “support-alert@account-secure. com. ” One urgent-looking alert becomes days of damage—lost access, money gone, and private information exposed.
 <p>Scams connected to This Browser Alert Message often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like a suspicious link is used as the starting point.</p>
 </div>
 
@@ -1366,27 +1472,27 @@ Falling for this scam can lead to serious consequences, such as giving away pers
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-this-security-alert-message-legit-or-scam/">Is This Security Alert Message or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-this-fraud-alert-message-legit-or-scam/">Is This Fraud Alert Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-security-alert-message-legit-or-scam/">Is This Security Alert Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-this-virus-alert-message-legit-or-scam/">Is This Virus Alert Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-browser-alert-legit-or-scam/">Is This Browser Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-this-office-365-alert-legit-or-scam/">Is This Office 365 Alert or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-this-service-alert-email-legit-or-scam/">Is This Service Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-message-with-attachment-safe-or-scam/">Is This Message with Attachment Safe or Scam</a></li>
-<li><a href="/scam-check-now/is-this-qr-code-message-legit-or-scam/">Is This Qr Code Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-this-random-text-message-a-scam/">Is This Random Text Message a Scam</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-this-security-alert-legit-or-scam/">Is This Security Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-system-alert-legit-or-scam/">Is This System Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-virus-alert-legit-or-scam/">Is This Virus Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-alert-legit-or-scam/">Is This Alert or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-message-with-attachment-safe-or-scam/">Is This Message with Attachment Safe or Scam</a></li>
+<li><a href="/scam-check-now/is-this-pop-up-message-legit-or-scam/">Is This Pop Up Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-qr-code-message-legit-or-scam/">Is This Qr Code Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-random-text-message-a-scam/">Is This Random Text Message a Scam</a></li>
 <li><a href="/scam-check-now/is-this-tech-support-message-legit-or-scam/">Is This Tech Support Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-this-text-message/">Did I Get Scammed by This Text Message?</a></li>
-<li><a href="/scam-check-now/is-this-giveaway-message-legit-or-scam/">Is This Giveaway Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-message-asking-for-payment-a-scam/">Is This Message Asking for Payment a Scam</a></li>
-<li><a href="/scam-check-now/is-this-smishing-message-legit-or-scam/">Is This Smishing Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-toll-road-text-message-legit-or-scam/">Is This Toll Road Text Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-two-factor-authentication-message-legit-or-scam/">Is This Two-Factor Authentication Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-voicemail-message-a-scam/">Is This Voicemail Message a Scam</a></li>
-<li><a href="/scam-check-now/is-this-message-asking-me-to-click-legit-or-scam/">Is This Message Asking Me to Click or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-urgent-help-message-legit-or-scam/">Is This Urgent Help Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
