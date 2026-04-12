@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="payment" data-mode="breakdown">
 <p>PayPal Payment Confirmation Email is a common question when something like a PayPal refund email feels suspicious. When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common PayPal Payment Confirmation Email flow starts with something like a PayPal refund email, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received an email claiming to be from PayPal, notifying you of a payment confirmation. The message looks official, complete with the PayPal logo and a professional layout. It may include details like transaction amounts, recipient information, and even a link to view your account. At first glance, everything seems legitimate, but something about it feels off. You might notice odd phrasing or a sense of urgency urging you to click a link to verify your account or dispute a transaction.
+A message lands in your inbox with the subject line “Your PayPal payment confirmation – Action Required. ” The sender display name shows “PayPal Services,” but the actual reply-to address reads something like “support@paypalsecure-alert. com. ” The email claims you’ve just authorized a $499. 99 payment to a store you don’t recognize. There’s a blue “View Transaction” button in the middle of the message, sitting just below a block of text that says, “If you did not make this payment, please log in to secure your account. ” The PayPal logo in the header looks right, but the edges seem slightly off.
 
-The email often creates a sense of urgency, making you feel like immediate action is required. It may state that your account will be suspended if you don’t respond quickly or that there’s a problem with a recent transaction. This pressure can cloud your judgment, pushing you to click on links without thinking twice. The message might even include a friendly tone, making it seem like PayPal is genuinely trying to help you resolve an issue, which can further build trust and lead you to act impulsively.
+The email insists you must act now. A bold red banner says, “You have 24 hours to dispute this charge before your account is locked. ” There’s a timer counting down in the corner, making it feel like you’re running out of time with every second. The button text reads “Dispute Payment,” and clicking it opens a page that looks almost identical to PayPal’s real sign-in screen. It asks for your email, password, and then immediately prompts for a verification code. You feel cornered. There’s no time to think.
 
-Variations of this scam can be quite clever. You might receive a text message instead, or even a phone call from someone claiming to be a PayPal representative. Some scammers may send you a fake invoice that looks like it’s from a reputable seller, prompting you to confirm payment. Others may create a fake PayPal login page that mirrors the real one, tricking you into entering your credentials. Each version is designed to exploit your trust in PayPal, using familiar branding and language to make you believe it’s a genuine communication.
+Sometimes the same trick comes in a different wrapper. Instead of a payment confirmation, you might see “PayPal Refund Processed” or “Billing Issue – Update Required” in the subject line. The sender might be “PayPal Billing” or “Service@paypal. com,” but the domain is always just a little off—maybe “paypa1. com” or “paypal-securemail. com. ” Some versions attach a PDF invoice showing a fake charge, while others use a support chat window that looks like it’s loading inside the email. The branding, the button placement, even the font size all mimic the real thing, but something about the reply-to or the login page’s address bar doesn’t quite match.
 
-Falling for this scam can have serious consequences. If you click on a malicious link or provide your login information, you risk losing access to your PayPal account and potentially your bank account. Scammers can use your details to make unauthorized transactions, leaving you with financial losses and the headache of trying to recover your funds. Additionally, your personal information may be sold or used for further scams, putting your identity at risk. The emotional toll of realizing you’ve been scammed can also linger, making you wary of future online transactions.
+If you enter your login details or verification code on that fake page, your credentials go straight to someone else. Within minutes, your real PayPal account can be taken over, with unauthorized payments sent out or linked cards drained. Saved addresses and payment methods get exposed, and the same password—if reused—can unlock other accounts. Refunds vanish, and the original “confirmation” email is just the start of a string of losses you never agreed to.
 <p>This is why step-by-step checking matters. Once a message related to PayPal Payment Confirmation Email moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1366,27 +1472,27 @@ Falling for this scam can have serious consequences. If you click on a malicious
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-paypal-payment-failed-email-legit-or-scam/">Is PayPal Payment Failed Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-payment-request-email-legit-or-scam/">Is PayPal Payment Request Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-payment-reversal-email-legit-or-scam/">Is PayPal Payment Reversal Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-suspicious-payment-text-legit-or-scam/">Is PayPal Suspicious Payment Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-payment-request-from-stranger-legit-or-scam/">Is PayPal Payment Request from Stranger or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-account-limited-email-legit-or-scam/">Is PayPal Account Limited Email or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-paypal-account-limited-email-legit-or-scam/">Is PayPal Account Limited Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-account-locked-email-legit-or-scam/">Is PayPal Account Locked Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-account-restriction-email-legit-or-scam/">Is PayPal Account Restriction Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-account-suspension-email-legit-or-scam/">Is PayPal Account Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-account-unlock-email-legit-or-scam/">Is PayPal Account Unlock Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-account-verification-email-legit-or-scam/">Is PayPal Account Verification Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-paypal-account-locked-email-legit-or-scam/">Is PayPal Account Locked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-account-restriction-email-legit-or-scam/">Is PayPal Account Restriction Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-account-suspension-email-legit-or-scam/">Is PayPal Account Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-account-unlock-email-legit-or-scam/">Is PayPal Account Unlock Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-account-verification-email-legit-or-scam/">Is PayPal Account Verification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-paypal-account-warning-email-legit-or-scam/">Is PayPal Account Warning Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-paypal-account-warning-email-legit-or-scam/">Is PayPal Account Warning Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-paypal-billing-issue-email-legit-or-scam/">Is PayPal Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-paypal-billing-update-email-legit-or-scam/">Is PayPal Billing Update Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-paypal-fraud-alert-email-legit-or-scam/">Is PayPal Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-paypal-invoice-reminder-email-legit-or-scam/">Is PayPal Invoice Reminder Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-login-attempt-email-legit-or-scam/">Is PayPal Login Attempt Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/paypal-suspicious-login-email-scam/">Is PayPal Suspicious Login Email a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-account-access-alert-email-legit-or-scam/">Is PayPal Account Access Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-email-asking-for-verification-code-legit-or-scam/">Is PayPal Email Asking for Verification Code or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-paypal-invoice-email-from-unknown-sender-legit-or-scam/">Is PayPal Invoice Email from Unknown Sender or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
