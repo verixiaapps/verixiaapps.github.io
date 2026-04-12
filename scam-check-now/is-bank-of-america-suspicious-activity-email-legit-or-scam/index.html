@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="payment" data-mode="scenario">
 <p>Bank of America Suspicious Activity Email is a common question when something like a bank fraud alert text feels suspicious. A common pattern starts when someone receives something that looks routine at first glance. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>A common Bank of America Suspicious Activity Email scenario starts with something like a bank fraud alert text, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>
-You might have recently received an email claiming to be from Bank of America, alerting you to suspicious activity on your account. The message often features the bank's logo, a sense of urgency, and a link that prompts you to verify your identity. It may include phrases like “immediate action required” or “your account will be locked,” designed to grab your attention and make you feel anxious. The sender’s email address may look similar to the official one, adding to the confusion and making it harder to discern if it’s real or a scam.
+You spot “Bank of America Security Alert: Suspicious Login Detected” at the top of your inbox, and the sender display name matches what you’d expect—until you hover and see the reply-to: “alerts@bofa-securemail. com. ” The email greets you by your full name, mentions a failed sign-in from Miami, and shows a red warning bar at the top. Right below, the logo looks just right, but the “®” is missing. A blue “Verify Now” button stands out in the middle, and the footer lists a phone number that’s off by one digit. The urgency feels real, but the details start to fray.
 
-These emails are crafted to create a sense of urgency, pushing you to act quickly without thinking. The message may mention recent transactions that you don’t recognize, making you feel vulnerable and prompting you to click the link to secure your account. Scammers know that fear can cloud judgment, so they often use language that suggests dire consequences if you don’t respond immediately. This tactic is effective because it plays on your instinct to protect your finances and personal information.
+A countdown clock sits above the button, reading “19:43 left to secure your account,” and the body warns, “Your account will be locked today if you do not act. ” There’s a second link, “Restore Access,” in smaller text just below, and a pop-up prompt appears when you click, demanding your Online ID, Passcode, and a code “just sent to your mobile. ” The page loads a fake verification screen that mimics the real Bank of America login, but the address bar shows “bofa-security-login. com. ” The pressure is all on you—every second lost feels like another door closing.
 
-You might also see variations of this scam, such as text messages or phone calls claiming to be from Bank of America. In some cases, the message might ask you to call a number to verify your account, while others may direct you to a website that looks almost identical to the bank’s official site. Sometimes, they might even reference a recent transaction that seems legitimate, making it harder to dismiss the message as a scam. Each version is designed to exploit your trust and urgency, making it crucial to stay vigilant.
+The subject line sometimes shifts to “Refund Notification – Confirm Your Details” or “Payment Failure: Action Required,” but the structure stays familiar. A PDF invoice for $1,278. 90 you never authorized might be attached, with a “Dispute Now” button that leads to a portal titled “Bank of America Secure Access. ” Other versions use “support@bofa. com-update. info” as the sender, or swap the call to action for “Unlock Account” or “Get Refund. ” Occasionally, a fake live chat box appears in the corner, echoing phrases from the real support site and nudging you to finish verification.
 
-Falling for this scam can have serious consequences. If you click on the link and enter your personal information, you could be handing over your login credentials to criminals who can drain your account or commit identity theft. Even if you don’t provide any information, the malware that might be installed on your device can compromise your security. The aftermath can be devastating, leading to financial loss, stress, and a long process of recovering your identity and finances. It’s essential to take a moment to verify any communication that seems off before taking action.
+If you enter your information on the spoofed portal, your Bank of America account can be drained before you see the first withdrawal alert. Transfers and bill payments you never made show up in your account summary, and the password reset locks you out entirely. If your passcode matches one you use elsewhere, fraud spills into your email or PayPal next. It starts with a single “payment processed” notification, and by the time you check your real account, the balance is already gone.
 <p>Payment-related scams connected to Bank of America Suspicious Activity Email often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like a bank fraud alert text is involved.</p>
 </div>
 
@@ -1377,16 +1483,16 @@ Falling for this scam can have serious consequences. If you click on the link an
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-of-america-transfer-alert-email-legit-or-scam/">Is Bank of America Transfer Alert Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-of-america-refund-email-legit-or-scam/">Is Bank of America Refund Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-bank-of-america-refund-email-legit-or-scam/">Is Bank of America Refund Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-of-america-fraud-alert-text-legit-or-scam/">Is Bank of America Fraud Alert Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-of-america-verification-code-text-legit-or-scam/">Is Bank of America Verification Code Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-suspicious-activity-email-legit-or-scam/">Is Bank Suspicious Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-activity-email-legit-or-scam/">Is Bank Account Activity Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-suspicious-transaction-email-legit-or-scam/">Is Bank Suspicious Transaction Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-bank-unusual-activity-email-legit-or-scam/">Is Bank Unusual Activity Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-temporarily-restricted-email-legit-or-scam/">Is Bank Account Temporarily Restricted Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-bank-account-verification-request-email-legit-or-scam/">Is Bank Account Verification Request Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-debit-card-suspension-email-legit-or-scam/">Is Bank Debit Card Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-login-alert-email-real-or-fake/">Is Bank Login Alert Email Real or Fake</a></li>
+<li><a href="/scam-check-now/is-bank-account-closure-email-legit-or-scam/">Is Bank Account Closure Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-account-locked-email-legit-or-scam/">Is Bank Account Locked Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-bank-account-reactivation-email-legit-or-scam/">Is Bank Account Reactivation Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
