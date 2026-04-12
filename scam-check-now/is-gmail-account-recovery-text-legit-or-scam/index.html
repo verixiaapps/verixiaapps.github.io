@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="general" data-mode="direct">
 <p>Gmail Account Recovery Text is a common question when something like an unexpected email feels suspicious. The main question is whether the message or request can be trusted. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>What This Scam Pattern Usually Looks Like</h2>
 <p>In many Gmail Account Recovery Text situations, the message is written to build trust and urgency at the same time. Something like an unexpected email may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>
-You receive a text message claiming to be from Gmail, stating that there’s been suspicious activity on your account. The message urges you to click a link to verify your identity or reset your password immediately. It looks official, complete with Google’s logo and a convincing tone. The urgency in the message makes it seem like you need to act fast to protect your account, and the link appears to lead to a familiar-looking Google page where you’re prompted to enter your credentials.
+A text pops up on your phone right after you tried to sign in to Gmail, with the subject line “Gmail Account Recovery” and a Google-colored logo that looks just right at a glance. The message says, “We’ve detected unusual activity. Reset your password now to secure your account,” and there’s a blue button labeled “Verify Now. ” The sender is just a phone number, not “Google,” but the layout feels like something you’ve seen before. Only when you look again does the link under the button—“gmaiI-support. com”—show the lowercase L swapped for a capital I.
 
-The pressure builds as the text emphasizes that your account will be locked if you don’t respond within a certain timeframe. It might even mention that your recent login attempts from an unfamiliar device have triggered this alert. This tactic is designed to create a sense of panic, making you feel like you have no choice but to comply. The familiarity of the message lulls you into a false sense of security, as it seems to come from a trusted source.
+The message presses you to act immediately: “If you do not respond within 10 minutes, your account access will be suspended. ” The timer starts counting down as soon as you tap the link, and a page loads that mimics Google’s recovery form, complete with a fake “Enter verification code” prompt. The page flashes a red warning—“Suspicious activity detected: Immediate action required”—and the only option is to enter your Gmail credentials or risk losing access. Every detail is designed to make you feel like you’re one step away from being locked out for good.
 
-Variations of this scam can come in different forms, such as emails that look like they’re from Google Support or even phone calls claiming to be from tech support. Some messages might offer a reward for completing a survey or alert you to a supposed prize you’ve won. Each version plays on your emotions, whether it’s fear of losing access to your account or excitement over a potential reward, making it easy to overlook the warning signs.
+The same trick keeps coming back in new forms. Sometimes the sender shows up as “Google Support” in your inbox, but when you click, the reply-to is a jumble like “recovery-team@secure-mail. info. ” Other times, the layout is nearly perfect except for a missing accent in the Google logo or a slightly off shade of blue on the “Continue” button. Subject lines change—“Unusual Sign-In Attempt,” “Password Reset Needed,” “Your Account Will Be Locked”—but the link always leads to a page that asks for your password before anything else. Even the browser tab title might read “Gmail Security Alert,” just convincing enough to keep you moving forward.
 
-Falling for this scam can lead to serious consequences, such as losing access to your Gmail account or having your personal information compromised. Once scammers have your login details, they can access sensitive data, send phishing emails to your contacts, or even steal your identity. The aftermath can be overwhelming, leaving you to deal with the fallout while feeling violated and anxious about your online security.
+If you type your password into the fake recovery page, everything unravels fast. The attacker logs into your real Gmail within minutes, changes your recovery options, and sets up forwarding rules to intercept future emails. You might notice new password reset requests for bank accounts or social media, or see payment confirmations for services you never used. In some cases, the first sign is friends replying to strange emails sent from your address. By then, your inbox, contacts, and even saved payment details are exposed—sometimes before you realize what happened.
 <p>Scams connected to Gmail Account Recovery Text often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like an unexpected email is used as the starting point.</p>
 </div>
 
@@ -1366,27 +1472,27 @@ Falling for this scam can lead to serious consequences, such as losing access to
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-apple-account-recovery-email-legit-or-scam/">Is Apple Account Recovery Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-account-recovery-message-legit-or-scam/">Is Apple Account Recovery Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-account-access-alert-text-legit-or-scam/">Is Apple Account Access Alert Text or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-gmail-unusual-login-text-legit-or-scam/">Is Gmail Unusual Login Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-account-recovery-attempt-email-legit-or-scam/">Is Google Account Recovery Attempt Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-this-account-recovery-email-real-or-fake/">Is This Account Recovery Email Real or Fake</a></li>
-<li><a href="/scam-check-now/google-account-suspension-email-scam/">Is Google Account Suspension Email a Scam?</a></li>
+<li><a href="/scam-check-now/is-apple-account-restricted-email-legit-or-scam/">Is Apple Account Restricted Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-apple-account-review-email-legit-or-scam/">Is Apple Account Review Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-binance-account-locked-email-legit-or-scam/">Is Binance Account Locked Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-apple-account-breach-email-legit-or-scam/">Is Apple Account Breach Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-account-locked-email-legit-or-scam/">Is Apple Account Locked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-apple-account-suspension-email-legit-or-scam/">Is Apple Account Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-binance-account-locked-email-legit-or-scam/">Is Binance Account Locked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-binance-account-suspension-email-legit-or-scam/">Is Binance Account Suspension Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-binance-account-suspension-email-legit-or-scam/">Is Binance Account Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-account-disabled-email-legit-or-scam/">Is Google Account Disabled Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-account-flagged-email-legit-or-scam/">Is Google Account Flagged Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-account-protection-email-legit-or-scam/">Is Google Account Protection Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-google-account-risk-email-legit-or-scam/">Is Google Account Risk Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-account-suspension-email-legit-or-scam/">Is Google Account Suspension Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-google-account-warning-email-legit-or-scam/">Is Google Account Warning Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-hsbc-account-locked-email-legit-or-scam/">Is Hsbc Account Locked Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-netflix-account-suspended-email-legit-or-scam/">Is Netflix Account Suspended Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-account-alert-email-legit-or-scam/">Is This Account Alert Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-santander-account-locked-email-legit-or-scam/">Is Santander Account Locked Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
