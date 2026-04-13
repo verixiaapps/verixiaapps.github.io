@@ -4,12 +4,6 @@ import https from "https";
 
 const SITE_URL = (process.env.SITE_URL || "").replace(/\/+$/, "");
 const SOURCE_SITEMAP_URL = process.env.SOURCE_SITEMAP_URL;
-const SECONDARY_SITEMAP_URL = process.env.SECONDARY_SITEMAP_URL;
-const TERTIARY_SITEMAP_URL = process.env.TERTIARY_SITEMAP_URL;
-const EXTRA_SITEMAP_URLS = (process.env.EXTRA_SITEMAP_URLS || "")
-  .split(",")
-  .map((v) => v.trim())
-  .filter(Boolean);
 
 const DISCOVERY_DIR = process.env.DISCOVERY_DIR || "discovery";
 const DISCOVERY_SITEMAP_PATH =
@@ -51,13 +45,6 @@ const REVISIT_START_OFFSET = 200;
 const REVISIT_END_OFFSET = 1200;
 
 const DISCOVERY_SEGMENT = String(DISCOVERY_DIR).replace(/^\/+|\/+$/g, "");
-
-const SOURCE_SITEMAP_URLS = [
-  SOURCE_SITEMAP_URL,
-  SECONDARY_SITEMAP_URL,
-  TERTIARY_SITEMAP_URL,
-  ...EXTRA_SITEMAP_URLS,
-].filter(Boolean);
 
 const STOPWORDS = new Set([
   "www",
@@ -940,7 +927,7 @@ function getPageMeta(title, kind = "generic") {
       kicker: "Latest discovery",
       eyebrow: "Newest pages added",
       intro:
-        "Browse the newest scam check pages discovered across your sitemap sources. This is the fastest way to see fresh suspicious message topics, account warning pages, delivery scam pages, and payment alert coverage in one place.",
+        "Browse the newest scam check pages discovered from your sitemap. This is the fastest way to see fresh suspicious message topics, account warning pages, delivery scam pages, and payment alert coverage in one place.",
       statA: "Newest additions",
       statB: "Fast discovery",
       statC: "Built for reuse",
@@ -966,7 +953,7 @@ function getPageMeta(title, kind = "generic") {
       kicker: "Weekly discovery",
       eyebrow: "Recent pages from this week",
       intro:
-        "Browse scam check pages discovered over the last week. This gives you a broader view of recent scam topics, warning patterns, and message types without having to dig through individual sitemap files.",
+        "Browse scam check pages discovered over the last week. This gives you a broader view of recent scam topics, warning patterns, and message types without having to dig through the sitemap manually.",
       statA: "7-day coverage",
       statB: "Broader view",
       statC: "Recent patterns",
@@ -1096,7 +1083,7 @@ function getPageMeta(title, kind = "generic") {
       kicker: "Grouped by repeated tokens",
       eyebrow: "Browse repeated pattern clusters",
       intro:
-        "Cluster pages are built from repeated URL patterns and terms found across your sitemap sources. They help expose additional related discovery surfaces at scale.",
+        "Cluster pages are built from repeated URL patterns and terms found across your sitemap. They help expose additional related discovery surfaces at scale.",
       statA: "Pattern grouping",
       statB: "Extra coverage",
       statC: "Scale support",
@@ -2062,30 +2049,28 @@ function createFallbackIndexItems() {
 
 async function main() {
   if (!SITE_URL) throw new Error("SITE_URL is required");
-  if (!SOURCE_SITEMAP_URLS.length) throw new Error("At least one sitemap URL is required");
+  if (!SOURCE_SITEMAP_URL) throw new Error("SOURCE_SITEMAP_URL is required");
 
   resetDiscoveryOutput();
 
-  console.log("Fetching sitemaps...");
+  console.log("Fetching sitemap...");
+  console.log(`Fetching: ${SOURCE_SITEMAP_URL}`);
 
   let allEntries = [];
   const visited = new Set();
 
-  for (const sitemapUrl of SOURCE_SITEMAP_URLS) {
-    try {
-      console.log(`Fetching: ${sitemapUrl}`);
-      const parsed = await collectEntriesFromSitemap(sitemapUrl, visited);
-      allEntries.push(...parsed);
-    } catch (err) {
-      console.error(`Failed to fetch sitemap: ${sitemapUrl}`, err.message);
-    }
+  try {
+    allEntries = await collectEntriesFromSitemap(SOURCE_SITEMAP_URL, visited);
+  } catch (err) {
+    console.error(`Failed to fetch sitemap: ${SOURCE_SITEMAP_URL}`, err.message);
+    throw err;
   }
 
   let entries = sanitizeEntries(allEntries);
   entries = uniqueByUrl(entries).map(annotateEntry);
   entries = sortNewestFirst(entries);
 
-  if (!entries.length) throw new Error("No valid URLs found in any sitemap");
+  if (!entries.length) throw new Error("No valid URLs found in sitemap");
 
   const latestEntries = entries.slice(0, MAX_LATEST);
   const todayRaw = filterToday(entries);
@@ -2166,7 +2151,7 @@ async function main() {
     "latest",
     {
       title: "Latest Pages",
-      intro: "Newest URLs discovered from all sitemap sources.",
+      intro: "Newest URLs discovered from the sitemap.",
       items: entriesToListItems(latestEntries),
       extraSections: [
         buildPagerSection("latest", latestChunks.length, 1, "Latest"),
@@ -2200,7 +2185,7 @@ async function main() {
       `latest/page-${pageNumber}`,
       {
         title: `Latest Pages - Page ${pageNumber}`,
-        intro: "More recently discovered URLs from all sitemap sources.",
+        intro: "More recently discovered URLs from the sitemap.",
         items: entriesToListItems(chunk),
         extraSections: [buildPagerSection("latest", latestChunks.length, pageNumber, "Latest")],
         kind: "latest",
@@ -2214,7 +2199,7 @@ async function main() {
     {
       title: `Pages Added ${todayString()}`,
       intro: todayRaw.length
-        ? "Today's URLs from all sitemap sources."
+        ? "Today's URLs from the sitemap."
         : "Freshness timestamps were limited, so this page falls back to the newest available URLs.",
       items: entriesToListItems(todayEntries),
       extraSections: [
@@ -2253,7 +2238,7 @@ async function main() {
     "this-week",
     {
       title: "Pages This Week",
-      intro: "Recent URLs from all sitemap sources over the last seven days.",
+      intro: "Recent URLs from the sitemap over the last seven days.",
       items: entriesToListItems(weekEntries),
       extraSections: [
         buildRelatedSection({
@@ -2403,7 +2388,7 @@ async function main() {
       "revisit",
       {
         title: "Revisit Pages",
-        intro: "Resurfaced older URLs from deeper in your sitemap sets.",
+        intro: "Resurfaced older URLs from deeper in your sitemap set.",
         items: revisitItems,
         extraSections: [
           buildRelatedSection({
@@ -2455,7 +2440,7 @@ async function main() {
       `topics/${group.slug}`,
       {
         title: group.title,
-        intro: `Focused discovery page for ${group.title.toLowerCase()} built from repeated URL patterns across your sitemap sources.`,
+        intro: `Focused discovery page for ${group.title.toLowerCase()} built from repeated URL patterns across your sitemap.`,
         items: entriesToListItems(group.entries),
         extraSections: [
           buildRelatedSection({
@@ -2569,7 +2554,7 @@ async function main() {
     "clusters",
     {
       title: "Discovery Clusters",
-      intro: "Cluster index built from repeated URL tokens discovered across your sitemap sources.",
+      intro: "Cluster index built from repeated URL tokens discovered across your sitemap.",
       items: hasItems(clusterIndexItems) ? clusterIndexItems : createFallbackIndexItems(),
       kind: "clusters",
     },
