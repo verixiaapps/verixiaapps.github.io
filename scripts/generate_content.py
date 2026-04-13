@@ -8,7 +8,7 @@ from html import unescape
 # CONFIG
 # -----------------------------
 RAILWAY_API = "https://awake-integrity-production-faa0.up.railway.app"
-TIMEOUT = 60
+TIMEOUT = 300
 
 logging.basicConfig(
     level=logging.INFO,
