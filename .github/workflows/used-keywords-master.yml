@@ -2,6 +2,17 @@ name: Used Keywords Master Builder
 
 "on":
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run without committing changes"
+        required: true
+        default: false
+        type: boolean
+      commit_message:
+        description: "Optional custom commit message"
+        required: false
+        default: ""
+        type: string
   schedule:
     - cron: "0 8 * * *"
 
@@ -18,11 +29,10 @@ jobs:
     timeout-minutes: 30
 
     env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
       MASTER_DIR: "data/used_keywords_master"
       MASTER_FILE: "data/used_keywords_master/used_keywords_master.txt"
       SOURCE_A: "data/generated_keywords.txt"
-      SOURCE_B: "data/generated_keywords_b.txt"
-      SOURCE_C: "data/generated_keywords_c.txt"
       DEFAULT_COMMIT_MESSAGE: "Update used keywords master"
 
     steps:
@@ -72,8 +82,7 @@ jobs:
           MASTER_DIR: ${{ env.MASTER_DIR }}
           MASTER_FILE: ${{ env.MASTER_FILE }}
           SOURCE_A: ${{ env.SOURCE_A }}
-          SOURCE_B: ${{ env.SOURCE_B }}
-          SOURCE_C: ${{ env.SOURCE_C }}
+          DRY_RUN: ${{ env.DRY_RUN }}
 
       - name: Show changed files
         shell: bash
@@ -81,31 +90,37 @@ jobs:
           set -euo pipefail
           git status --short
 
+      - name: Stop on dry run
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Dry run complete. No commit or push performed."
+
       - name: Commit used keywords master update
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         shell: bash
         run: |
           set -euo pipefail
 
-          git add -A
+          git add -- "$MASTER_FILE"
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
 
-          git commit -m "$DEFAULT_COMMIT_MESSAGE"
+          FINAL_COMMIT_MESSAGE="${{ github.event.inputs.commit_message }}"
+
+          if [ -z "$FINAL_COMMIT_MESSAGE" ]; then
+            FINAL_COMMIT_MESSAGE="$DEFAULT_COMMIT_MESSAGE"
+          fi
+
+          git commit -m "$FINAL_COMMIT_MESSAGE"
 
       - name: Push used keywords master update
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         shell: bash
         run: |
           set -euo pipefail
-
-          git fetch origin main
-
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
-            echo "Nothing to push"
-            exit 0
-          fi
-
-          git pull --rebase origin main
           git push origin HEAD:main
