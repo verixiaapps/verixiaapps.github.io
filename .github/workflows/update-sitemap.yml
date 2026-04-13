@@ -1,9 +1,9 @@
-name: Update Sitemap
+name: Sitemap Refresh - Scam Check Now
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 6 * * *" # runs daily (6am UTC)
-  workflow_dispatch: {} # allows manual run
 
 permissions:
   contents: write
@@ -36,11 +36,9 @@ jobs:
 
               if (stat && stat.isDirectory()) {
                 const indexFile = path.join(filePath, "index.html");
-                if (fs.existsSync(indexFile)) {
-                  const urlPath = filePath
-                    .replace(/\\/g, "/")
-                    .replace(/index\.html$/, "");
 
+                if (fs.existsSync(indexFile)) {
+                  const urlPath = filePath.replace(/\\/g, "/");
                   results.push(urlPath);
                 }
 
@@ -55,11 +53,14 @@ jobs:
 
           const urls = pages.map((p) => {
             const clean = p.replace(/index\.html$/, "");
+            const lastmod = new Date().toISOString();
+
             return `
   <url>
-    <loc>${BASE_URL}/${clean}</loc>
+    <loc>${BASE_URL}/${clean}/</loc>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>${p.includes("scam-hub") ? "1.0" : "0.8"}</priority>
   </url>`;
           });
 
