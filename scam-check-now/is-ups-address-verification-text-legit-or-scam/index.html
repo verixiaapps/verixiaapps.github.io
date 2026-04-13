@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="delivery" data-mode="breakdown">
 <p>UPS Address Verification Text is a common question when something like a USPS tracking text looks urgent but feels slightly off. Most versions follow a similar sequence: attention, urgency, action request, and then pressure before verification. The safest way to judge it is to ignore the message link and verify the shipment directly through the real carrier or merchant.</p>
 <h2>How This Scam Pattern Usually Unfolds</h2>
 <p>A common UPS Address Verification Text flow starts with something like a USPS tracking text, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>
-You might have recently received a text claiming to be from UPS, asking you to verify your address or confirm a delivery. The message often looks official, featuring the UPS logo and a link that seems to direct you to their website. It might say something like, "Your package is on the way! Please confirm your address to avoid delays." The urgency in the message can make it feel real, especially if you’re expecting a delivery. It’s designed to catch your attention and prompt you to act quickly, making you less likely to pause and think critically.
+A text flashes on your screen: “UPS: We could not deliver your parcel. Confirm address to avoid return. Track here: ups-tracking-alert. com/verify. ” It’s squeezed between real shipping alerts and a recent order confirmation, making it look routine. When you tap the link, the page loads a brown-and-gold UPS logo, your supposed tracking number, and a large prompt—“Verify address to release package. ” The address bar says “ups-tracking-alert. com,” not the usual ups. com, but at first glance, it feels official. A blinking code field sits under the heading, “Enter 6-digit verification code just sent to your phone.
 
-The pressure to respond is palpable. The message may imply that your package will be delayed or even returned if you don’t act immediately. This tactic plays on your fear of missing out on a delivery or facing inconvenience, making you more likely to click the link without second-guessing its authenticity. The sender may also use language that builds trust, such as referencing your previous shipments or even including your name, which can make the whole situation feel personal and legitimate.
+The screen starts to pulse with urgency. A countdown clock—four minutes, then three—ticks down at the top, and a bold message in red shouts, “Package will be returned today if not verified. ” The code prompt flashes, and a button marked “Verify & Pay $1. 49” waits below. A tiny line reads, “Fee is refundable upon delivery. ” The page demands your full name, address, and credit card number, all under the promise of instant package release. The language is clipped, each phrase pushing you to act before the time runs out. There’s no pause, just the sense you’re about to lose something if you hesitate.
 
-You might see variations of this scam, such as emails that look like they’re from UPS or even phone calls claiming to be customer service representatives. Some messages might ask for more sensitive information, like your credit card details or Social Security number, under the guise of confirming your identity. Others may include fake tracking numbers or links that lead to counterfeit websites designed to mimic UPS’s official site. Each version aims to exploit your trust and urgency, making it all the more confusing to discern what’s real.
+The details shift depending on the version. Sometimes the sender is “UPS Delivery Support,” other times it’s just a local cell number. Some links use “ups-confirm. info” or “ups-redelivery. com,” but every page copies the UPS colors and tracking layout. You might see a fake live chat in the corner with a “How can we help? ” bubble, or a browser tab labeled “UPS Delivery Exception. ” In some cases, the fee jumps to $2. 10, or the excuse changes—“Customs fee required,” “Address correction needed,” or a PDF with “UPS_Notice. pdf” in the subject line. The wording pivots, but it always circles back to a payment field and a timer.
 
-Falling for this scam can have serious consequences. If you provide any personal information, scammers can use it for identity theft, leading to financial loss and long-term damage to your credit. Even if you only click on the link, it could install malware on your device, compromising your security. The emotional toll can be significant, leaving you feeling violated and anxious about your personal information. It’s essential to take a moment to verify any unexpected messages before taking action, as the cost of a hasty decision can be much higher than you realize.
+If you follow through, the losses stack up fast. That $1. 49 charge is just bait—hours later, you’ll spot unfamiliar charges draining your account. Your address and card details, now in someone else’s hands, open the door to fresh fraud attempts, fake account registrations, or identity theft. The fake UPS page disappears as soon as the info goes through, leaving you with an emptied wallet, a compromised card, and a long road of disputes and password resets. What looked like a harmless address check turns into a costly breach you can’t undo.
 <p>This is why step-by-step checking matters. Once a message related to UPS Address Verification Text moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>
 </div>
 
@@ -1366,27 +1472,27 @@ Falling for this scam can have serious consequences. If you provide any personal
 
     <div class="link-section">
       <h3 id="relatedHeading">Check Similar Messages</h3>
-      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/did-i-get-scammed-by-ups-text/">Did I Get Scammed by UPS Text?</a></li>
-<li><a href="/scam-check-now/is-fedex-address-verification-text-legit-or-scam/">Is FedEx Address Verification Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-address-verification-email-legit-or-scam/">Is USPS Address Verification Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-ups-tracking-message-real-or-fake/">Is This UPS Tracking Message Real or Fake</a></li>
-<li><a href="/scam-check-now/is-fedex-delivery-alert-text-legit-or-scam/">Is FedEx Delivery Alert Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-fedex-missed-delivery-text-legit-or-scam/">Is FedEx Missed Delivery Text or Scam Legit or a Scam?</a></li>
+      <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-ups-missed-delivery-text-legit-or-scam/">Is UPS Missed Delivery Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-shipping-fee-text-legit-or-scam/">Is UPS Shipping Fee Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-tracking-link-text-legit-or-scam/">Is UPS Tracking Link Text or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/did-i-get-scammed-by-ups-text/">Did I Get Scammed by UPS Text?</a></li>
+<li><a href="/scam-check-now/is-ups-missed-delivery-message-legit-or-scam/">Is UPS Missed Delivery Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-package-held-message-legit-or-scam/">Is UPS Package Held Message or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-fedex-shipping-fee-text-legit-or-scam/">Is FedEx Shipping Fee Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-this-delivery-text-message-legit-or-scam/">Is This Delivery Text Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-delivery-failed-text-legit-or-scam/">Is USPS Delivery Failed Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-missed-delivery-text-legit-or-scam/">Is USPS Missed Delivery Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-package-problem-text-legit-or-scam/">Is USPS Package Problem Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-shipping-fee-text-legit-or-scam/">Is USPS Shipping Fee Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-tracking-link-text-legit-or-scam/">Is USPS Tracking Link Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/package-delivery-scam-text/">Is Package Delivery Scam Text a Scam?</a></li>
-<li><a href="/scam-check-now/is-fedex-tracking-text-legit-or-scam/">Is FedEx Tracking Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-usps-redelivery-text-legit-or-scam/">Is USPS Redelivery Text or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-ups-package-issue-email-legit-or-scam/">Is UPS Package Issue Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-package-reroute-email-legit-or-scam/">Is UPS Package Reroute Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-returned-package-email-legit-or-scam/">Is UPS Returned Package Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-shipment-delay-email-legit-or-scam/">Is UPS Shipment Delay Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-shipment-invoice-email-legit-or-scam/">Is UPS Shipment Invoice Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-shipping-problem-email-legit-or-scam/">Is UPS Shipping Problem Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-tracking-link-message-legit-or-scam/">Is UPS Tracking Link Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-tracking-update-email-legit-or-scam/">Is UPS Tracking Update Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-ups-tracking-message-legit-or-scam/">Is UPS Tracking Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-fedex-address-verification-text-legit-or-scam/">Is FedEx Address Verification Text or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
