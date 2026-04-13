@@ -183,34 +183,36 @@ function replaceTwitterDescription(html) {
 function replaceWebPageJsonLd(html) {
   if (!NEW_TITLE && !NEW_META) return html;
 
-  return html.replace(
+  const updated = html.replace(
     /<script type="application\/ld\+json">[\s\S]*?"@type":"WebPage"[\s\S]*?<\/script>/i,
     (block) => {
-      let updated = block;
+      let next = block;
 
       if (NEW_TITLE) {
-        updated = updated.replace(
+        next = next.replace(
           /"name":"([^"\\]|\\.)*"/i,
           `"name":"${escapeJsonString(NEW_TITLE)}"`
         );
       }
 
       if (NEW_META) {
-        updated = updated.replace(
+        next = next.replace(
           /"description":"([^"\\]|\\.)*"/i,
           `"description":"${escapeJsonString(NEW_META)}"`
         );
       }
 
-      if (updated === block) {
-        console.warn("No change for WebPage JSON-LD");
-        return block;
-      }
-
-      console.log("Updated WebPage JSON-LD");
-      return updated;
+      return next;
     }
   );
+
+  if (updated === html) {
+    console.warn("No change for WebPage JSON-LD");
+    return html;
+  }
+
+  console.log("Updated WebPage JSON-LD");
+  return updated;
 }
 
 function replaceFaqJsonLd(html) {
@@ -229,7 +231,7 @@ function replaceIntro(html) {
 
   const updated = html.replace(
     /(<div class="content-block"[^>]*>\s*)(<p>[\s\S]*?<\/p>)/i,
-    `${"$1"}${NEW_INTRO}`
+    `$1${NEW_INTRO}`
   );
 
   if (updated === html) {
@@ -241,12 +243,30 @@ function replaceIntro(html) {
   return updated;
 }
 
+function fixBrokenStoryParagraph(html) {
+  const updated = html.replace(
+    /(<div class="content-block"[^>]*>[\s\S]*?<p>[\s\S]*?<\/p>\s*<h2>[\s\S]*?<\/h2>\s*<p>[\s\S]*?<\/p>\s*)(A message lands in your inbox[\s\S]*?)(\s*<p>That difference matters because)/i,
+    (match, before, storyText, after) => {
+      const story = storyText.trim();
+      return `${before}<p>${story}</p>${after}`;
+    }
+  );
+
+  if (updated === html) {
+    console.warn("No change for broken story paragraph");
+    return html;
+  }
+
+  console.log("Fixed broken story paragraph");
+  return updated;
+}
+
 function replaceRelatedLinks(html) {
   if (!NEW_RELATED_LINKS) return html;
 
-  const listHTML = NEW_RELATED_LINKS.map(
-    (l) => `<li><a href="${l.href}">${l.text}</a></li>`
-  ).join("\n");
+  const listHTML = NEW_RELATED_LINKS
+    .map((l) => `<li><a href="${l.href}">${l.text}</a></li>`)
+    .join("\n");
 
   return replaceWithCheck(
     html,
@@ -274,6 +294,7 @@ updated = replaceTwitterDescription(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = replaceFaqJsonLd(updated);
 updated = replaceIntro(updated);
+updated = fixBrokenStoryParagraph(updated);
 updated = replaceRelatedLinks(updated);
 
 if (updated === original) {
