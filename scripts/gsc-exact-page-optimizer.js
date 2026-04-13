@@ -2,12 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SITE_ROOT = "https://verixiaapps.com";
-
-const ROOT_DIRS = [
-  "scam-check-now",
-  "scam-check-now-b",
-  "scam-check-now-c",
-];
+const ROOT_DIR = "scam-check-now";
 
 const TARGET_URLS = (process.env.TARGET_URLS || "")
   .split(",")
@@ -48,12 +43,10 @@ const STOP_WORDS = new Set([
   "is", "this", "that", "a", "an", "the", "or", "and", "real", "fake", "legit", "scam"
 ]);
 
-function toBool(v) {
-  return String(v) === "true";
-}
-
 function normalizeUrlToRelative(urlOrPath) {
-  let value = urlOrPath.trim();
+  let value = String(urlOrPath || "").trim();
+
+  if (!value) return "";
 
   if (value.startsWith(SITE_ROOT)) {
     value = value.slice(SITE_ROOT.length);
@@ -64,6 +57,10 @@ function normalizeUrlToRelative(urlOrPath) {
   }
 
   return value.replace(/\/+$/, "") + "/";
+}
+
+function isAllowedTarget(relativeUrl) {
+  return relativeUrl.startsWith(`/${ROOT_DIR}/`);
 }
 
 function relativeUrlToFilePath(relativeUrl) {
@@ -214,22 +211,6 @@ function buildIntroHtml(slug) {
 `;
 }
 
-function extractAllSeoPages() {
-  const pages = [];
-
-  for (const root of ROOT_DIRS) {
-    if (!fs.existsSync(root)) continue;
-    walk(root, filePath => {
-      if (filePath.endsWith(path.join("", "index.html"))) {
-        const relative = "/" + filePath.replace(/\\/g, "/").replace(/\/index\.html$/, "/");
-        pages.push(relative);
-      }
-    });
-  }
-
-  return pages;
-}
-
 function walk(dir, callback) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -241,10 +222,28 @@ function walk(dir, callback) {
   }
 }
 
+function extractAllSeoPages() {
+  const pages = [];
+
+  if (!fs.existsSync(ROOT_DIR)) return pages;
+
+  walk(ROOT_DIR, filePath => {
+    if (filePath.endsWith("index.html")) {
+      const relative = "/" + filePath.replace(/\\/g, "/").replace(/\/index\.html$/, "/");
+      pages.push(relative);
+    }
+  });
+
+  return pages;
+}
+
 function getRelatedPages(currentRelativeUrl, limit = 10) {
   const currentSlug = extractSlugFromRelativeUrl(currentRelativeUrl);
   const currentTerms = new Set(
-    currentSlug.split("-").map(x => x.toLowerCase()).filter(x => x && !STOP_WORDS.has(x))
+    currentSlug
+      .split("-")
+      .map(x => x.toLowerCase())
+      .filter(x => x && !STOP_WORDS.has(x))
   );
 
   const allPages = extractAllSeoPages().filter(p => p !== currentRelativeUrl);
@@ -295,6 +294,7 @@ function replaceTitle(html, newTitle) {
   if (/<title>[\s\S]*?<\/title>/i.test(html)) {
     return html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(newTitle)}</title>`);
   }
+
   return html.replace(/<head>/i, `<head>\n<title>${escapeHtml(newTitle)}</title>`);
 }
 
@@ -317,7 +317,10 @@ function replaceIntro(html, introHtml) {
   }
 
   if (/<main[^>]*>/i.test(html)) {
-    return html.replace(/<main[^>]*>/i, match => `${match}\n<section id="seo-intro">\n${introHtml.trim()}\n</section>`);
+    return html.replace(
+      /<main[^>]*>/i,
+      match => `${match}\n<section id="seo-intro">\n${introHtml.trim()}\n</section>`
+    );
   }
 
   return html;
@@ -353,6 +356,11 @@ function escapeHtmlAttr(text) {
 }
 
 function optimizeOne(relativeUrl) {
+  if (!isAllowedTarget(relativeUrl)) {
+    console.log(`Skipping non-A URL: ${relativeUrl}`);
+    return;
+  }
+
   const filePath = relativeUrlToFilePath(relativeUrl);
 
   if (!fileExists(filePath)) {
@@ -397,7 +405,9 @@ function main() {
     process.exit(1);
   }
 
-  const normalized = TARGET_URLS.map(normalizeUrlToRelative);
+  const normalized = TARGET_URLS
+    .map(normalizeUrlToRelative)
+    .filter(Boolean);
 
   console.log("Target URLs:");
   for (const url of normalized) {
