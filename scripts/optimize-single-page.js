@@ -1,5 +1,3 @@
-Use this exact same script structure, but pointed at the PayPal file with PayPal-specific values:
-
 const fs = require("fs");
 const path = require("path");
 
