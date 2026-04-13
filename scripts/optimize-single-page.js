@@ -1,3 +1,5 @@
+Use this full version:
+
 const fs = require("fs");
 const path = require("path");
 
@@ -21,14 +23,86 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  "PayPal Suspicious Login Email: Fake or Real? Warning Signs & What To Do";
+  "PayPal Suspicious Login Email Scam? How to Tell if It's Real or Fake";
 
 const NEW_META =
-  "Got a PayPal suspicious login email? Learn how to spot fake alerts, phishing links, and account takeover scams. See warning signs and how to verify safely.";
+  "Got a PayPal suspicious login email? Learn how to spot a fake PayPal login alert, phishing links, and account security email scams before you click.";
 
 const NEW_INTRO = `<p>A PayPal suspicious login email can be real, but it is also one of the most common phishing scams used to steal account access and money. These messages often look like official PayPal alerts warning about unusual activity or login attempts. Before clicking any link or responding, verify the alert directly through the official PayPal app or website.</p>`;
 
-const NEW_RELATED_LINKS = null;
+const NEW_QUICK_CHECK = `
+<h2>Is this PayPal suspicious login email a scam? Quick check</h2>
+<ul>
+  <li>If it asks you to click a login link, it may be a PayPal login phishing email.</li>
+  <li>If it creates urgency like "account locked," "verify now," or "act immediately," treat it as high risk.</li>
+  <li>If the sender email is not an official PayPal domain, it is likely a fake PayPal login alert.</li>
+  <li>If it asks for passwords, codes, payment details, or identity verification, do not trust it.</li>
+  <li>If you cannot confirm the alert inside your real PayPal account, treat it as a PayPal account security email scam.</li>
+</ul>
+<p>Real PayPal security emails will hold up when you verify them directly inside your account, while scam emails usually fall apart the moment you step outside the message.</p>
+`;
+
+const NEW_RELATED_LINKS = [
+  {
+    href: "/scam-check-now/is-paypal-suspicious-login-alert-email-legit-or-scam/",
+    text: "Is PayPal Suspicious Login Alert Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-login-attempt-email-legit-or-scam/",
+    text: "Is PayPal Login Attempt Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-unusual-login-email-legit-or-scam/",
+    text: "Is PayPal Unusual Login Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-login-from-new-device-email-legit-or-scam/",
+    text: "Is PayPal Login from New Device Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-suspicious-login-text-legit-or-scam/",
+    text: "Is PayPal Suspicious Login Text Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-login-alert-text-legit-or-scam/",
+    text: "Is PayPal Login Alert Text Legit or a Scam?"
+  }
+];
+
+const NEW_MORE_LINKS = [
+  {
+    href: "/scam-check-now/is-paypal-unauthorized-login-text-legit-or-scam/",
+    text: "Is PayPal Unauthorized Login Text Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-limited-email-legit-or-scam/",
+    text: "Is PayPal Account Limited Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-locked-email-legit-or-scam/",
+    text: "Is PayPal Account Locked Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-restriction-email-legit-or-scam/",
+    text: "Is PayPal Account Restriction Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-suspension-email-legit-or-scam/",
+    text: "Is PayPal Account Suspension Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-unlock-email-legit-or-scam/",
+    text: "Is PayPal Account Unlock Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-verification-email-legit-or-scam/",
+    text: "Is PayPal Account Verification Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-account-warning-email-legit-or-scam/",
+    text: "Is PayPal Account Warning Email Legit or a Scam?"
+  }
+];
 
 const NEW_FAQ_JSONLD = `{
   "@context":"https://schema.org",
@@ -246,10 +320,7 @@ function upsertFaqJsonLd(html) {
     return updated;
   }
 
-  const inserted = html.replace(
-    /<\/head>/i,
-    `${faqScript}\n</head>`
-  );
+  const inserted = html.replace(/<\/head>/i, `${faqScript}\n</head>`);
 
   if (inserted === html) {
     console.warn("No change for FAQ JSON-LD");
@@ -277,9 +348,41 @@ function replaceIntro(html) {
   return updated;
 }
 
+function upsertQuickCheck(html) {
+  if (!NEW_QUICK_CHECK) return html;
+
+  if (html.includes("Is this PayPal suspicious login email a scam? Quick check")) {
+    const updatedExisting = html.replace(
+      /<h2>Is this PayPal suspicious login email a scam\? Quick check<\/h2>[\s\S]*?(?=<h2>Red Flags To Watch For<\/h2>|<p>That difference matters because)/i,
+      NEW_QUICK_CHECK
+    );
+
+    if (updatedExisting === html) {
+      console.warn("No change for quick check block");
+      return html;
+    }
+
+    console.log("Updated quick check block");
+    return updatedExisting;
+  }
+
+  const inserted = html.replace(
+    /(<div class="content-block"[^>]*>\s*<p>[\s\S]*?<\/p>)/i,
+    `$1\n${NEW_QUICK_CHECK}`
+  );
+
+  if (inserted === html) {
+    console.warn("No change for quick check block");
+    return html;
+  }
+
+  console.log("Inserted quick check block");
+  return inserted;
+}
+
 function fixBrokenStoryParagraph(html) {
   const updated = html.replace(
-    /(<div class="content-block"[^>]*>[\s\S]*?<p>[\s\S]*?<\/p>\s*<h2>[\s\S]*?<\/h2>\s*<p>[\s\S]*?<\/p>\s*)(A message lands in your inbox[\s\S]*?)(\s*<p>That difference matters because)/i,
+    /(<div class="content-block"[^>]*>[\s\S]*?<p>[\s\S]*?<\/p>\s*(?:<h2>[\s\S]*?<\/h2>\s*<p>[\s\S]*?<\/p>\s*)?)(A message lands in your inbox[\s\S]*?)(\s*<p>That difference matters because|\s*<h2>Red Flags To Watch For<\/h2>)/i,
     (match, before, storyText, after) => {
       const story = storyText.trim();
       return `${before}<p>${story}</p>${after}`;
@@ -310,12 +413,27 @@ function replaceRelatedLinks(html) {
   );
 }
 
+function replaceMoreLinks(html) {
+  if (!NEW_MORE_LINKS) return html;
+
+  const listHTML = NEW_MORE_LINKS
+    .map((l) => `<li><a href="${l.href}">${l.text}</a></li>`)
+    .join("\n");
+
+  return replaceWithCheck(
+    html,
+    /<ul id="moreLinks"[^>]*>[\s\S]*?<\/ul>/i,
+    `<ul id="moreLinks" class="related-links">\n${listHTML}\n</ul>`,
+    "more links"
+  );
+}
+
 function upsertVisibleFaq(html) {
   if (!NEW_VISIBLE_FAQ) return html;
 
   if (html.includes('id="visibleFaqWrap"')) {
     const updatedExisting = html.replace(
-      /<div class="link-section" id="visibleFaqWrap">[\s\S]*?<\/div>\s*(?=<div class="content-close">)/i,
+      /<div class="link-section" id="visibleFaqWrap">[\s\S]*?<\/div>\s*(?=<div class="link-section">|<div class="content-close">)/i,
       NEW_VISIBLE_FAQ
     );
 
@@ -328,18 +446,28 @@ function upsertVisibleFaq(html) {
     return updatedExisting;
   }
 
-  const updatedInserted = html.replace(
-    /(\s*<div class="content-close">)/i,
-    `${NEW_VISIBLE_FAQ}$1`
+  const insertedBeforeLinks = html.replace(
+    /(\s*<div class="link-section">\s*<h3 id="relatedHeading">Check Similar Messages<\/h3>)/i,
+    `\n${NEW_VISIBLE_FAQ}\n$1`
   );
 
-  if (updatedInserted === html) {
+  if (insertedBeforeLinks !== html) {
+    console.log("Inserted visible FAQ before related links");
+    return insertedBeforeLinks;
+  }
+
+  const insertedBeforeClose = html.replace(
+    /(\s*<div class="content-close">)/i,
+    `\n${NEW_VISIBLE_FAQ}\n$1`
+  );
+
+  if (insertedBeforeClose === html) {
     console.warn("No change for visible FAQ");
     return html;
   }
 
-  console.log("Inserted visible FAQ");
-  return updatedInserted;
+  console.log("Inserted visible FAQ before closing section");
+  return insertedBeforeClose;
 }
 
 // -----------------------------
@@ -360,8 +488,10 @@ updated = replaceTwitterDescription(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
 updated = replaceIntro(updated);
+updated = upsertQuickCheck(updated);
 updated = fixBrokenStoryParagraph(updated);
 updated = replaceRelatedLinks(updated);
+updated = replaceMoreLinks(updated);
 updated = upsertVisibleFaq(updated);
 
 if (updated === original) {
