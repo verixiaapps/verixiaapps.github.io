@@ -61,6 +61,20 @@ const NEW_FAQ_JSONLD = `{
   ]
 }`;
 
+const NEW_VISIBLE_FAQ = `
+    <div class="link-section" id="visibleFaqWrap">
+      <h3>PayPal Suspicious Login Email FAQ</h3>
+
+      <div class="content-body">
+        <p><strong>Is a PayPal suspicious login email real or a scam?</strong><br>Some PayPal login alerts are real, but many are phishing emails designed to steal your login details or money. Always verify the alert through the official PayPal app or website.</p>
+
+        <p><strong>What should I do if I get one?</strong><br>Do not click links in the email. Open PayPal directly and check your account activity. If nothing appears there, the message is likely a scam.</p>
+
+        <p><strong>What happens if I clicked the link?</strong><br>You may have been sent to a fake login page. Change your password immediately, review recent account activity, and secure your account before any unauthorized access spreads.</p>
+      </div>
+    </div>
+`;
+
 // -----------------------------
 // HELPERS
 // -----------------------------
@@ -276,6 +290,38 @@ function replaceRelatedLinks(html) {
   );
 }
 
+function upsertVisibleFaq(html) {
+  if (!NEW_VISIBLE_FAQ) return html;
+
+  if (html.includes('id="visibleFaqWrap"')) {
+    const updatedExisting = html.replace(
+      /<div class="link-section" id="visibleFaqWrap">[\s\S]*?<\/div>\s*(?=<div class="content-close">)/i,
+      NEW_VISIBLE_FAQ
+    );
+
+    if (updatedExisting === html) {
+      console.warn("No change for visible FAQ");
+      return html;
+    }
+
+    console.log("Updated visible FAQ");
+    return updatedExisting;
+  }
+
+  const updatedInserted = html.replace(
+    /(\s*<div class="content-close">)/i,
+    `${NEW_VISIBLE_FAQ}$1`
+  );
+
+  if (updatedInserted === html) {
+    console.warn("No change for visible FAQ");
+    return html;
+  }
+
+  console.log("Inserted visible FAQ");
+  return updatedInserted;
+}
+
 // -----------------------------
 // MAIN
 // -----------------------------
@@ -296,6 +342,7 @@ updated = replaceFaqJsonLd(updated);
 updated = replaceIntro(updated);
 updated = fixBrokenStoryParagraph(updated);
 updated = replaceRelatedLinks(updated);
+updated = upsertVisibleFaq(updated);
 
 if (updated === original) {
   console.log("No changes made.");
