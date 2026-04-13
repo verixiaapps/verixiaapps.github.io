@@ -1,0 +1,82 @@
+name: GSC Single Page Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_page:
+        description: "Exact page path to update, for example scam-check-now/is-amazon-refund-email-legit-or-scam/index.html"
+        required: true
+        type: string
+      commit_message:
+        description: "Optional custom commit message"
+        required: false
+        type: string
+      dry_run:
+        description: "Run without writing changes"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gsc-single-page-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh-single-page:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate target page exists
+        shell: bash
+        run: |
+          if [ ! -f "${{ github.event.inputs.target_page }}" ]; then
+            echo "Target page not found: ${{ github.event.inputs.target_page }}"
+            exit 1
+          fi
+
+      - name: Ensure backup folder exists
+        shell: bash
+        run: mkdir -p backup
+
+      - name: Run single page refresh script
+        env:
+          TARGET_PAGE: ${{ github.event.inputs.target_page }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          node scripts/optimize-single-page.js
+
+      - name: Show git diff
+        if: ${{ github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == true }}
+        run: git --no-pager diff -- "${{ github.event.inputs.target_page }}" backup || true
+
+      - name: Commit changes
+        if: ${{ github.event.inputs.dry_run != 'true' && github.event.inputs.dry_run != true }}
+        shell: bash
+        run: |
+          if git diff --quiet --exit-code; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          COMMIT_MSG="${{ github.event.inputs.commit_message }}"
+          if [ -z "$COMMIT_MSG" ]; then
+            COMMIT_MSG="Refresh single SEO page: ${{ github.event.inputs.target_page }}"
+          fi
+
+          git add "${{ github.event.inputs.target_page }}" backup
+          git commit -m "$COMMIT_MSG"
+          git push
