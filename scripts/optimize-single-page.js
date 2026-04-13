@@ -3,13 +3,7 @@ const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
 const TARGET_PAGE = "scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/index.html";
-
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
-
-if (!TARGET_PAGE) {
-  console.error("Missing TARGET_PAGE env");
-  process.exit(1);
-}
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
   console.error("Only A pages allowed (scam-check-now)");
@@ -24,11 +18,12 @@ if (!fs.existsSync(TARGET_PAGE)) {
 const BACKUP_DIR = "backup";
 
 // -----------------------------
-// CUSTOMIZE PER PAGE
+// ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE = "Is Recruiter Email from Unknown Company Legit or a Scam? Warning Signs & What To Do";
 
-const NEW_META = "Got a recruiter email from an unknown company? Learn the warning signs, scam risks, and how to verify if a job offer is real before you reply, click, or share information.";
+const NEW_META =
+  "Got a recruiter email from an unknown company? Learn the warning signs, scam risks, and how to verify if a job offer is real before you reply, click, or share information.";
 
 const NEW_INTRO = `<p>Recruiter email from an unknown company is a common situation when a job message feels unexpected, too fast, or difficult to verify. Some messages are legitimate, but many follow scam patterns that rely on urgency, vague details, and requests for information before you can confirm the company independently.</p>`;
 
@@ -63,33 +58,144 @@ function createBackup(originalContent) {
   console.log("Backup created:", backupPath);
 }
 
+function escapeHtmlAttr(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeJsonString(str) {
+  return JSON.stringify(String(str)).slice(1, -1);
+}
+
+function replaceWithCheck(html, regex, replacement, label) {
+  const updated = html.replace(regex, replacement);
+
+  if (updated === html) {
+    console.warn(`No change for ${label}`);
+    return html;
+  }
+
+  console.log(`Updated ${label}`);
+  return updated;
+}
+
 function replaceTitle(html) {
   if (!NEW_TITLE) return html;
 
-  return html.replace(
-    /<title\b[^>]*>.*?<\/title>/i,
-    `<title>${NEW_TITLE}</title>`
+  return replaceWithCheck(
+    html,
+    /<title\b[^>]*>[\s\S]*?<\/title>/i,
+    `<title>${NEW_TITLE}</title>`,
+    "title"
   );
 }
 
 function replaceMetaDescription(html) {
   if (!NEW_META) return html;
 
-  return html.replace(
+  return replaceWithCheck(
+    html,
     /<meta\s+name=["']description["']\s+content=["'][^"']*["']\s*\/?>/i,
-    `<meta name="description" content="${NEW_META}">`
+    `<meta name="description" content="${escapeHtmlAttr(NEW_META)}">`,
+    "meta description"
+  );
+}
+
+function replaceOgTitle(html) {
+  if (!NEW_TITLE) return html;
+
+  return replaceWithCheck(
+    html,
+    /<meta\s+property=["']og:title["']\s+content=["'][^"']*["']\s*\/?>/i,
+    `<meta property="og:title" content="${escapeHtmlAttr(NEW_TITLE)}">`,
+    "og:title"
+  );
+}
+
+function replaceOgDescription(html) {
+  if (!NEW_META) return html;
+
+  return replaceWithCheck(
+    html,
+    /<meta\s+property=["']og:description["']\s+content=["'][^"']*["']\s*\/?>/i,
+    `<meta property="og:description" content="${escapeHtmlAttr(NEW_META)}">`,
+    "og:description"
+  );
+}
+
+function replaceTwitterTitle(html) {
+  if (!NEW_TITLE) return html;
+
+  return replaceWithCheck(
+    html,
+    /<meta\s+name=["']twitter:title["']\s+content=["'][^"']*["']\s*\/?>/i,
+    `<meta name="twitter:title" content="${escapeHtmlAttr(NEW_TITLE)}">`,
+    "twitter:title"
+  );
+}
+
+function replaceTwitterDescription(html) {
+  if (!NEW_META) return html;
+
+  return replaceWithCheck(
+    html,
+    /<meta\s+name=["']twitter:description["']\s+content=["'][^"']*["']\s*\/?>/i,
+    `<meta name="twitter:description" content="${escapeHtmlAttr(NEW_META)}">`,
+    "twitter:description"
+  );
+}
+
+function replaceWebPageJsonLd(html) {
+  if (!NEW_TITLE && !NEW_META) return html;
+
+  return html.replace(
+    /<script type="application\/ld\+json">[\s\S]*?"@type":"WebPage"[\s\S]*?<\/script>/i,
+    (block) => {
+      let updated = block;
+
+      if (NEW_TITLE) {
+        updated = updated.replace(
+          /"name":"([^"\\]|\\.)*"/i,
+          `"name":"${escapeJsonString(NEW_TITLE)}"`
+        );
+      }
+
+      if (NEW_META) {
+        updated = updated.replace(
+          /"description":"([^"\\]|\\.)*"/i,
+          `"description":"${escapeJsonString(NEW_META)}"`
+        );
+      }
+
+      if (updated === block) {
+        console.warn("No change for WebPage JSON-LD");
+        return block;
+      }
+
+      console.log("Updated WebPage JSON-LD");
+      return updated;
+    }
   );
 }
 
 function replaceIntro(html) {
   if (!NEW_INTRO) return html;
 
-  return html.replace(
-    /(<div class="content-block"[^>]*>)([\s\S]*?)(<p>[\s\S]*?<\/p>)/i,
-    (match, start, middle, firstP) => {
-      return `${start}${middle}${NEW_INTRO}`;
-    }
+  const updated = html.replace(
+    /(<div class="content-block"[^>]*>\s*)(<p>[\s\S]*?<\/p>)/i,
+    `${"$1"}${NEW_INTRO}`
   );
+
+  if (updated === html) {
+    console.warn("No change for intro paragraph");
+    return html;
+  }
+
+  console.log("Updated intro paragraph");
+  return updated;
 }
 
 function replaceRelatedLinks(html) {
@@ -99,9 +205,11 @@ function replaceRelatedLinks(html) {
     (l) => `<li><a href="${l.href}">${l.text}</a></li>`
   ).join("\n");
 
-  return html.replace(
-    /<ul id="relatedLinks">[\s\S]*?<\/ul>/i,
-    `<ul id="relatedLinks">\n${listHTML}\n</ul>`
+  return replaceWithCheck(
+    html,
+    /<ul id="relatedLinks"[^>]*>[\s\S]*?<\/ul>/i,
+    `<ul id="relatedLinks" class="related-links">\n${listHTML}\n</ul>`,
+    "related links"
   );
 }
 
@@ -116,6 +224,11 @@ let updated = original;
 
 updated = replaceTitle(updated);
 updated = replaceMetaDescription(updated);
+updated = replaceOgTitle(updated);
+updated = replaceOgDescription(updated);
+updated = replaceTwitterTitle(updated);
+updated = replaceTwitterDescription(updated);
+updated = replaceWebPageJsonLd(updated);
 updated = replaceIntro(updated);
 updated = replaceRelatedLinks(updated);
 
