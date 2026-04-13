@@ -1,0 +1,88 @@
+name: Update Sitemap
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # runs daily (6am UTC)
+  workflow_dispatch: {} # allows manual run
+
+permissions:
+  contents: write
+
+jobs:
+  update-sitemap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate sitemap
+        run: |
+          node << 'EOF'
+          const fs = require("fs");
+          const path = require("path");
+
+          const BASE_URL = "https://verixiaapps.com";
+          const TARGET_DIR = "scam-check-now";
+          const OUTPUT_FILE = "sitemap.xml";
+
+          function getAllPages(dir) {
+            let results = [];
+
+            const list = fs.readdirSync(dir);
+            list.forEach((file) => {
+              const filePath = path.join(dir, file);
+              const stat = fs.statSync(filePath);
+
+              if (stat && stat.isDirectory()) {
+                const indexFile = path.join(filePath, "index.html");
+                if (fs.existsSync(indexFile)) {
+                  const urlPath = filePath
+                    .replace(/\\/g, "/")
+                    .replace(/index\.html$/, "");
+
+                  results.push(urlPath);
+                }
+
+                results = results.concat(getAllPages(filePath));
+              }
+            });
+
+            return results;
+          }
+
+          const pages = getAllPages(TARGET_DIR);
+
+          const urls = pages.map((p) => {
+            const clean = p.replace(/index\.html$/, "");
+            return `
+  <url>
+    <loc>${BASE_URL}/${clean}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+          });
+
+          const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join("\n")}
+</urlset>`;
+
+          fs.writeFileSync(OUTPUT_FILE, sitemap.trim(), "utf8");
+
+          console.log("Sitemap updated with", pages.length, "pages");
+          EOF
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add sitemap.xml
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Auto update sitemap"
+            git push
+          fi
