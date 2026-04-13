@@ -20,14 +20,46 @@ const BACKUP_DIR = "backup";
 // -----------------------------
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
-const NEW_TITLE = "PayPal Suspicious Login Email: Fake or Real? Warning Signs & What To Do";
+const NEW_TITLE =
+  "PayPal Suspicious Login Email: Fake or Real? Warning Signs & What To Do";
 
 const NEW_META =
   "Got a PayPal suspicious login email? Learn how to spot fake alerts, phishing links, and account takeover scams. See warning signs and how to verify safely.";
 
-const NEW_INTRO = `<p>A PayPal suspicious login email can look urgent and legitimate, especially when it warns about unusual activity, account access, or security checks. While some PayPal alerts are real, scammers often send fake login emails designed to get you to click links, enter your password, or share verification details before you verify the alert through the official PayPal app or website.</p>`;
+const NEW_INTRO = `<p>A PayPal suspicious login email can be real, but it is also one of the most common phishing scams used to steal account access and money. These messages often look like official PayPal alerts warning about unusual activity or login attempts. Before clicking any link or responding, verify the alert directly through the official PayPal app or website.</p>`;
 
 const NEW_RELATED_LINKS = null;
+
+const NEW_FAQ_JSONLD = `{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {
+      "@type":"Question",
+      "name":"Is a PayPal suspicious login email real?",
+      "acceptedAnswer":{
+        "@type":"Answer",
+        "text":"Some PayPal login alerts are real, but many are phishing emails designed to steal your login details or money. Always verify the alert directly through the official PayPal app or website instead of clicking links in the email."
+      }
+    },
+    {
+      "@type":"Question",
+      "name":"How do I verify a PayPal login alert?",
+      "acceptedAnswer":{
+        "@type":"Answer",
+        "text":"Open the official PayPal app or type PayPal's website directly into your browser and check your account activity there. Real alerts will still make sense after independent verification."
+      }
+    },
+    {
+      "@type":"Question",
+      "name":"What happens if I click a fake PayPal email?",
+      "acceptedAnswer":{
+        "@type":"Answer",
+        "text":"Fake PayPal emails often lead to phishing pages that steal your login details, passwords, or verification codes. This can lead to account takeover, unauthorized payments, and linked bank or card fraud."
+      }
+    }
+  ]
+}`;
 
 // -----------------------------
 // HELPERS
@@ -181,6 +213,17 @@ function replaceWebPageJsonLd(html) {
   );
 }
 
+function replaceFaqJsonLd(html) {
+  if (!NEW_FAQ_JSONLD) return html;
+
+  return replaceWithCheck(
+    html,
+    /<script type="application\/ld\+json">[\s\S]*?"@type":"FAQPage"[\s\S]*?<\/script>/i,
+    `<script type="application/ld+json">\n${NEW_FAQ_JSONLD}\n</script>`,
+    "FAQ JSON-LD"
+  );
+}
+
 function replaceIntro(html) {
   if (!NEW_INTRO) return html;
 
@@ -229,6 +272,7 @@ updated = replaceOgDescription(updated);
 updated = replaceTwitterTitle(updated);
 updated = replaceTwitterDescription(updated);
 updated = replaceWebPageJsonLd(updated);
+updated = replaceFaqJsonLd(updated);
 updated = replaceIntro(updated);
 updated = replaceRelatedLinks(updated);
 
