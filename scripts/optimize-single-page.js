@@ -64,13 +64,10 @@ const NEW_FAQ_JSONLD = `{
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
       <h3>PayPal Suspicious Login Email FAQ</h3>
-
       <div class="content-body">
-        <p><strong>Is a PayPal suspicious login email real or a scam?</strong><br>Some PayPal login alerts are real, but many are phishing emails designed to steal your login details or money. Always verify the alert through the official PayPal app or website.</p>
-
-        <p><strong>What should I do if I get one?</strong><br>Do not click links in the email. Open PayPal directly and check your account activity. If nothing appears there, the message is likely a scam.</p>
-
-        <p><strong>What happens if I clicked the link?</strong><br>You may have been sent to a fake login page. Change your password immediately, review recent account activity, and secure your account before any unauthorized access spreads.</p>
+        <p><strong>Is a PayPal suspicious login email real?</strong><br>Some PayPal login alerts are real, but many are phishing emails designed to steal your login details or money. Always verify the alert through the official PayPal app or website instead of clicking links in the email.</p>
+        <p><strong>How do I verify a PayPal login alert?</strong><br>Open the official PayPal app or type PayPal's website directly into your browser and check your account activity there. Real alerts will still make sense after independent verification.</p>
+        <p><strong>What happens if I click a fake PayPal email?</strong><br>Fake PayPal emails often lead to phishing pages that steal your login details, passwords, or verification codes. This can lead to account takeover, unauthorized payments, and linked bank or card fraud.</p>
       </div>
     </div>
 `;
@@ -229,15 +226,38 @@ function replaceWebPageJsonLd(html) {
   return updated;
 }
 
-function replaceFaqJsonLd(html) {
+function upsertFaqJsonLd(html) {
   if (!NEW_FAQ_JSONLD) return html;
 
-  return replaceWithCheck(
-    html,
-    /<script type="application\/ld\+json">[\s\S]*?"@type":"FAQPage"[\s\S]*?<\/script>/i,
-    `<script type="application/ld+json">\n${NEW_FAQ_JSONLD}\n</script>`,
-    "FAQ JSON-LD"
+  const faqScript = `<script type="application/ld+json">\n${NEW_FAQ_JSONLD}\n</script>`;
+
+  if (/"@type":"FAQPage"/i.test(html) || /"@type"\s*:\s*"FAQPage"/i.test(html)) {
+    const updated = html.replace(
+      /<script type="application\/ld\+json">[\s\S]*?"@type"\s*:\s*"FAQPage"[\s\S]*?<\/script>|<script type="application\/ld\+json">[\s\S]*?"@type":"FAQPage"[\s\S]*?<\/script>/i,
+      faqScript
+    );
+
+    if (updated === html) {
+      console.warn("No change for FAQ JSON-LD");
+      return html;
+    }
+
+    console.log("Updated FAQ JSON-LD");
+    return updated;
+  }
+
+  const inserted = html.replace(
+    /<\/head>/i,
+    `${faqScript}\n</head>`
   );
+
+  if (inserted === html) {
+    console.warn("No change for FAQ JSON-LD");
+    return html;
+  }
+
+  console.log("Inserted FAQ JSON-LD");
+  return inserted;
 }
 
 function replaceIntro(html) {
@@ -338,7 +358,7 @@ updated = replaceOgDescription(updated);
 updated = replaceTwitterTitle(updated);
 updated = replaceTwitterDescription(updated);
 updated = replaceWebPageJsonLd(updated);
-updated = replaceFaqJsonLd(updated);
+updated = upsertFaqJsonLd(updated);
 updated = replaceIntro(updated);
 updated = fixBrokenStoryParagraph(updated);
 updated = replaceRelatedLinks(updated);
