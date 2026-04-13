@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="phishing" data-mode="scenario">
 <p>WhatsApp Phishing Message is a common question when something like a suspicious sign-in link feels suspicious. This usually becomes dangerous when the message feels familiar enough to trust and urgent enough to rush. In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>
 <h2>How This Situation Usually Plays Out</h2>
 <p>Many WhatsApp Phishing Message scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like a suspicious sign-in link. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>
-You might have received a WhatsApp message that looks like it’s from a trusted contact or even a well-known company, claiming there’s an urgent issue with your account. The message may ask you to click a link to verify your information or update your payment details. It often includes official logos and language that seems professional, making it easy to believe it’s legitimate. You might feel a sense of familiarity, especially if the sender’s name is someone you know, which can make it hard to question the authenticity of the message.
+You glance at your phone and see a WhatsApp notification: “Unusual Login Attempt Detected,” paired with a green shield icon and a sender name that almost matches the official support account. The message reads, “We noticed a new sign-in on your account. Verify now to keep your account secure. ” There’s a blue “Secure My Account” button, and the sender’s number is just a string of digits you don’t recognize. The WhatsApp logo sits above the message, and the timestamp lines up with your last activity. Even the reply-to address—noreply@whatsapp-alert. com—looks convincing at first glance.
 
-The urgency in these messages is palpable. They often say that your account will be suspended or that you need to act quickly to avoid losing access. This pressure can make you feel like you have no choice but to respond immediately. The message might even include phrases like "act now" or "limited time offer," which are designed to trigger a quick reaction. When you’re faced with a potential threat to your account, it’s natural to want to resolve the issue as fast as possible, which is exactly what the scammer is counting on.
+Tapping the button lands you on a page with a blinking “Session expires in 03:44” warning at the top. Underneath, a prompt demands your six-digit verification code, with the same green header and font as the real WhatsApp sign-in. Below the code box, bold red text flashes: “Account will be locked in 3 minutes if not verified. ” A second message immediately follows: “Final warning: failure to complete verification will result in permanent loss of access. ” The screen is stripped of extra options—no help link, no back button—just a countdown and a single field, pushing you to act before you can double-check.
 
-WhatsApp phishing messages can come in various forms. Some may appear as a simple text message, while others might include images or videos that seem to validate their claims. You might see messages that impersonate customer service representatives or even fake promotions that sound too good to pass up. The sender could be using a different number or a slightly altered name that resembles someone you know, making it harder to spot the deception. Each variation is crafted to exploit your trust and make you feel comfortable enough to engage.
+Other times, the message is about a failed payment: “Your WhatsApp Premium subscription could not be renewed—update your billing details now. ” A link labeled “Fix Payment Issue” leads to a lookalike payment screen, address bar reading “whatsapp-payments. info” instead of the real domain. There’s even a version with a PDF invoice attachment stating, “You are eligible for a $13. 99 refund,” and a sender address like support@whatsapp-refunds. com. Occasionally, the sender name is off by one letter, or the browser tab title says “WhatsApp Verification Portal,” not the usual branding. Even fake support chats mirror WhatsApp’s usual language, asking, “How can we help you restore access?
 
-If you fall for one of these scams, the consequences can be severe. You might unknowingly provide sensitive information, such as your passwords or credit card details, which can lead to identity theft or financial loss. Scammers can use your information to access your accounts, make unauthorized purchases, or even sell your data on the dark web. The emotional toll can be just as damaging, leaving you feeling violated and anxious about your security. It’s crucial to remain vigilant and question any message that seems off, no matter how legitimate it appears.
+If you hand over the code or payment info, the damage starts instantly. Control of your WhatsApp account shifts, locking you out while messages go out to your contacts asking for urgent help or payment. Cards saved to your account can be charged for hundreds of dollars in minutes. If your password matches any other login, those accounts can be breached too. Within an hour, you might see purchases you never made, friends getting odd requests from your number, and messages you didn’t send—each a reminder that recovery is slow, and the loss can be permanent.
 <p>Phishing-related scams connected to WhatsApp Phishing Message often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like a suspicious sign-in link is used to build trust.</p>
 </div>
 
@@ -1370,23 +1476,23 @@ If you fall for one of these scams, the consequences can be severe. You might un
 <li><a href="/scam-check-now/is-whatsapp-account-recovery-message-legit-or-scam/">Is WhatsApp Account Recovery Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-login-attempt-message-legit-or-scam/">Is WhatsApp Login Attempt Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-payment-request-message-legit-or-scam/">Is WhatsApp Payment Request Message or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-suspicious-link-message-legit-or-scam/">Is WhatsApp Suspicious Link Message or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-message-from-unknown-number-legit-or-scam/">Is WhatsApp Message from Unknown Number or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-whatsapp-account-suspension-email-legit-or-scam/">Is WhatsApp Account Suspension Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-whatsapp-verification-request-legit-or-scam/">Is WhatsApp Verification Request or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-account-suspension-email-legit-or-scam/">Is WhatsApp Account Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-account-verification-email-legit-or-scam/">Is WhatsApp Account Verification Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-whatsapp-account-verification-email-legit-or-scam/">Is WhatsApp Account Verification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-fraud-alert-email-legit-or-scam/">Is WhatsApp Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-whatsapp-login-blocked-email-legit-or-scam/">Is WhatsApp Login Blocked Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-suspicious-login-alert-legit-or-scam/">Is WhatsApp Suspicious Login Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-unusual-activity-alert-legit-or-scam/">Is WhatsApp Unusual Activity Alert or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-unusual-login-email-legit-or-scam/">Is WhatsApp Unusual Login Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-whatsapp-verification-code-text-legit-or-scam/">Is WhatsApp Verification Code Text or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-whatsapp/">Did I Get Scammed by WhatsApp?</a></li>
+<li><a href="/scam-check-now/is-whatsapp-login-from-new-device-email-legit-or-scam/">Is WhatsApp Login from New Device Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-whatsapp-message-legit-or-scam/">Is This WhatsApp Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-job-offer-whatsapp-message-legit-or-scam/">Is Job Offer WhatsApp Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-telegram-phishing-message-legit-or-scam/">Is Telegram Phishing Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-this-phishing-text-message-legit-or-scam/">Is This Phishing Text Message or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/phishing-security-alert-message-scam/">Is Phishing Security Alert Message a Scam?</a></li>
+<li><a href="/scam-check-now/is-binance-phishing-email-legit-or-scam/">Is Binance Phishing Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
