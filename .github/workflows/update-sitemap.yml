@@ -3,7 +3,7 @@ name: Sitemap Refresh - Scam Check Now
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 6 * * *" # runs daily (6am UTC)
+    - cron: "0 6 * * *"
 
 permissions:
   contents: write
@@ -17,8 +17,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate sitemap
+        shell: bash
         run: |
-          node << 'EOF'
+          cat > update-sitemap.js <<'EOF'
           const fs = require("fs");
           const path = require("path");
 
@@ -52,29 +53,33 @@ jobs:
           const pages = getAllPages(TARGET_DIR);
 
           const urls = pages.map((p) => {
-            const clean = p.replace(/index\.html$/, "");
             const lastmod = new Date().toISOString();
 
-            return `
-  <url>
-    <loc>${BASE_URL}/${clean}/</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>${p.includes("scam-hub") ? "1.0" : "0.8"}</priority>
-  </url>`;
+            return [
+              "  <url>",
+              `    <loc>${BASE_URL}/${p}/</loc>`,
+              `    <lastmod>${lastmod}</lastmod>`,
+              "    <changefreq>daily</changefreq>",
+              "    <priority>0.8</priority>",
+              "  </url>"
+            ].join("\n");
           });
 
-          const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.join("\n")}
-</urlset>`;
+          const sitemap = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            urls.join("\n"),
+            "</urlset>"
+          ].join("\n");
 
-          fs.writeFileSync(OUTPUT_FILE, sitemap.trim(), "utf8");
-
-          console.log("Sitemap updated with", pages.length, "pages");
+          fs.writeFileSync(OUTPUT_FILE, sitemap, "utf8");
+          console.log(`Sitemap updated with ${pages.length} pages`);
           EOF
 
+          node update-sitemap.js
+
       - name: Commit changes
+        shell: bash
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
