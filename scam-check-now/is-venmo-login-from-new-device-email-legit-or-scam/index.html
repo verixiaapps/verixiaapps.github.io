@@ -1112,6 +1112,41 @@ font-size:28px;
 margin-top:30px;
 }
 
+.content-recognition{
+margin:0 0 24px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
 .content-body{
 font-size:18px;
 color:#d7e4f8;
@@ -1128,6 +1163,51 @@ padding-left:22px;
 
 .content-body li{
 margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:16px;
+}
+
+.story-card{
+padding:20px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:17px;
+line-height:1.8;
+color:#dce8fb;
 }
 
 .link-section{
@@ -1213,6 +1293,12 @@ body{padding-top:84px;}
 .content-close{padding:15px;}
 .share-grid{grid-template-columns:1fr;}
 .share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.75;}
 }
 </style>
 </head>
@@ -1338,17 +1424,37 @@ body{padding-top:84px;}
     </div>
 
     <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What people notice first</span>
+        <span class="recognition-copy">Unexpected urgency, copied branding, or a request to act before checking the source.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What scammers want</span>
+        <span class="recognition-copy">A click, a reply, a login, a payment, a code, or one fast decision made under pressure.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why it feels believable</span>
+        <span class="recognition-copy">The message usually looks routine at first and only turns risky once it asks for action.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why this page helps</span>
+        <span class="recognition-copy">It is built to match the pattern quickly so you can compare what you saw against a familiar scam setup.</span>
+      </div>
+    </div>
+
     <div id="seoContent" class="content-body"><div class="content-block" data-context="account-security" data-mode="warning">
 <p>Venmo Login from New Device Email is a common question when something like an account locked warning appears without context. The strongest clue is often not one detail, but the combination of pressure, impersonation, and verification shortcuts. These messages often look routine, but they may be designed to capture your credentials or verification codes before you check the real account yourself.</p>
 <h2>Why The Warning Signs Matter</h2>
 <p>In many Venmo Login from New Device Email cases, the message starts with something like an account locked warning and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>
-You might have recently received an email claiming that your Venmo account was accessed from a new device. The message typically includes a warning about suspicious activity and prompts you to log in to verify your account. It often features official Venmo branding, complete with logos and a professional layout, making it look legitimate at first glance. The email may even include details like the type of device used or the approximate location, which can make it feel even more credible.
+You’re staring at an email with the subject line “Venmo: Login from New Device Detected,” and the sender display name reads “Venmo Security. ” The logo at the top looks right, and there’s a short paragraph about an attempted sign-in from “Houston, TX. ” Just below, a big blue button—“Secure Account Now”—stands out above a faint note: “If this wasn’t you, act immediately. ” The reply-to isn’t quite right; it ends in “venmo-notices. com” instead of venmo. com. The whole thing feels urgent, familiar, and just a little off, especially with a timestamp showing it landed in your inbox at 2:14 AM.
 
-The urgency in these emails is palpable. They often state that immediate action is required to secure your account, creating a sense of panic. You might feel compelled to click the link provided to prevent unauthorized access, especially if you’ve been using Venmo frequently. This pressure can cloud your judgment, leading you to act quickly without thoroughly checking the source of the email. Scammers know how to exploit your emotions to get you to respond without thinking.
+Clicking the button takes you to a login page that mirrors the real Venmo sign-in—same colors, same fonts, even a small padlock icon beside the password field. At the top, a red banner flashes: “Account locked in 19:48. ” There’s a countdown clock, and below it, a line in bold: “Immediate action required. ” It asks for your username and password, then immediately pops up a box asking for a “verification code sent to your device. ” The pressure is obvious. You feel like you have to move fast or lose access entirely.
 
-Variations of this scam can appear in different forms. You might see a text message that mimics the same urgent tone, or even a pop-up on a website that looks like a Venmo login page. Some scammers may even call you, claiming to be from Venmo’s customer service, asking for your login details to "verify" your account. Each version is designed to look trustworthy, and they often use similar language and tactics to lure you in, making it easy to mistake them for genuine communications.
+The next time, the subject line might read “Venmo: Suspicious Payment Attempted,” or the sender could appear as “Venmo Account Alert” with a reply-to like “alerts@venmo-secure-help. com. ” Sometimes the button is green, labeled “Verify Now,” or you’re shown a fake chat bubble in the corner with “Venmo Support” offering to help. Other variations swap the familiar Venmo tab icon for one that says “Venmo Verification Portal,” but the address bar shows something like “venmo-loginreview. ” The wording and layout keep shifting—refund offers, invoice warnings, or even PDF attachments promising details—each one crafted to look like the real thing but always with a detail just slightly wrong.
 
-Falling for this scam can have serious consequences. If you enter your login credentials into a fraudulent site, you risk losing access to your Venmo account, and the scammers could drain your funds or use your account for fraudulent transactions. The emotional toll can be significant, as you may feel violated and anxious about your financial security. Understanding how these scams operate can help you stay vigilant and protect your personal information from falling into the wrong hands.
+If you hand over your details on that fake page, your Venmo account can be emptied before you even log back in. You might see an instant transfer—$240, $500, or more—sent to a name you don’t recognize. Cards or bank accounts linked to Venmo may be used for unauthorized withdrawals. In some cases, your password lets them into your email or other accounts, multiplying the damage. Friends and family could get hit with scam requests from your profile. What started with a single email ends with real money lost, accounts locked, and your identity in someone else’s hands.
 <p>The strongest clue is usually not one isolated detail. With Venmo Login from New Device Email, the risk often becomes clearer when something like an account locked warning is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>
 </div>
 
@@ -1369,24 +1475,24 @@ Falling for this scam can have serious consequences. If you enter your login cre
       <ul id="relatedLinks" class="related-links"><li><a href="/scam-check-now/is-venmo-login-attempt-text-legit-or-scam/">Is Venmo Login Attempt Text or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-account-flagged-email-legit-or-scam/">Is Venmo Account Flagged Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-account-frozen-email-legit-or-scam/">Is Venmo Account Frozen Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-account-protection-email-legit-or-scam/">Is Venmo Account Protection Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-account-restricted-email-legit-or-scam/">Is Venmo Account Restricted Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-venmo-account-suspension-email-legit-or-scam/">Is Venmo Account Suspension Email or Scam Legit or a Scam?</a></li>
-<li><a href="/scam-check-now/is-venmo-account-verification-email-legit-or-scam/">Is Venmo Account Verification Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-account-review-email-legit-or-scam/">Is Venmo Account Review Email or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
     <div class="link-section" id="moreLinksWrap">
       <h3 id="moreLinksHeading">More Scam Checks</h3>
-      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-venmo-billing-issue-email-legit-or-scam/">Is Venmo Billing Issue Email or Scam Legit or a Scam?</a></li>
+      <ul id="moreLinks" class="related-links"><li><a href="/scam-check-now/is-venmo-account-suspension-email-legit-or-scam/">Is Venmo Account Suspension Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-account-verification-email-legit-or-scam/">Is Venmo Account Verification Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-billing-issue-email-legit-or-scam/">Is Venmo Billing Issue Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-charge-notification-email-legit-or-scam/">Is Venmo Charge Notification Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-fraud-alert-email-legit-or-scam/">Is Venmo Fraud Alert Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/is-venmo-fraud-prevention-email-legit-or-scam/">Is Venmo Fraud Prevention Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-identity-check-email-legit-or-scam/">Is Venmo Identity Check Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-chargeback-email-legit-or-scam/">Is Venmo Chargeback Email or Scam Legit or a Scam?</a></li>
 <li><a href="/scam-check-now/venmo-phishing-email-scam/">Is Venmo Phishing Email a Scam?</a></li>
-<li><a href="/scam-check-now/is-venmo-verification-code-text-real-or-fake/">Is Venmo Verification Code Text Real or Fake</a></li>
-<li><a href="/scam-check-now/venmo-scam-message-example/">Is Venmo Scam Message Example a Scam?</a></li>
-<li><a href="/scam-check-now/did-i-get-scammed-by-venmo/">Did I Get Scammed by Venmo?</a></li>
-<li><a href="/scam-check-now/is-this-venmo-message-real-or-fake/">Is This Venmo Message Real or Fake</a></li>
-<li><a href="/scam-check-now/is-apple-login-from-new-device-email-legit-or-scam/">Is Apple Login from New Device Email or Scam Legit or a Scam?</a></li>
+<li><a href="/scam-check-now/is-venmo-account-warning-text-legit-or-scam/">Is Venmo Account Warning Text or Scam Legit or a Scam?</a></li>
 </ul>
     </div>
 
@@ -1432,6 +1538,7 @@ window.addEventListener("load", function () {
   cleanRelatedLinks();
   cleanHubLink();
   cleanMoreLinks();
+  renderRecognitionChips();
 });
 
 function isBrowserSubscribed() {
@@ -1657,6 +1764,75 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["What people notice first", "A recruiter message that moves unusually fast, jumps off-platform, or asks for details before a real interview."],
+      ["What scammers want", "Personal documents, direct deposit information, ID images, or even money for fake equipment or screening steps."],
+      ["Why it feels believable", "The wording sounds routine because it copies normal hiring language, HR steps, and onboarding timing."],
+      ["What makes it risky", "The pressure usually starts before you have verified the company, domain, recruiter identity, or hiring process."]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["What people notice first", "A wallet prompt, support message, withdrawal issue, or token claim that looks urgent and easy to fix."],
+      ["What scammers want", "A connection approval, seed phrase, recovery detail, or fast transfer that cannot be reversed later."],
+      ["Why it feels believable", "The page copies exchange language, wallet prompts, support wording, and time pressure that feels technical."],
+      ["What makes it risky", "The first click often looks harmless until it turns into approvals, verification steps, or account access loss."]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["What people notice first", "A delivery issue, missed package alert, customs notice, or tracking prompt that feels routine at first glance."],
+      ["What scammers want", "A quick click, address confirmation, login, or small fee payment before you stop to verify the carrier."],
+      ["Why it feels believable", "Package delays and tracking problems are common, so even a weak fake message can feel plausible in the moment."],
+      ["What makes it risky", "These pages often hide card capture or fake login screens behind what looks like a normal delivery step."]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["What people notice first", "A billing alert, refund notice, charge warning, verification code, or login issue that triggers panic fast."],
+      ["What scammers want", "A sign-in, card detail, payment confirmation, or one rushed response before you check the real account."],
+      ["Why it feels believable", "The message copies brand names, invoice language, account alerts, and payment wording people already trust."],
+      ["What makes it risky", "The fake step usually appears right when the message makes the account problem feel urgent or expensive."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What people notice first", "A message or page that looks normal until it asks for a click, reply, payment, login, or code."],
+      ["What scammers want", "One fast decision made before the sender, link, page, or request has been checked properly."],
+      ["Why it feels believable", "Most scam messages borrow familiar wording and create pressure around a problem that feels real enough to fix."],
+      ["What makes it risky", "The page is useful when you need to compare a suspicious message against a pattern before acting."]
+    ];
+  }
+
+  return [
+    ["What people notice first", "A message, page, or alert that feels routine until it suddenly pushes urgent action."],
+    ["What scammers want", "A click, a reply, a code, a login, a payment, or some small piece of information that opens the door."],
+    ["Why it feels believable", "The wording often copies normal business language, familiar layouts, and everyday problems."],
+    ["What makes it risky", "The trap usually becomes clear only after the message has already nudged you toward action."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
   const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
@@ -1764,6 +1940,104 @@ function applyIntentToChecker() {
   inputHelp.textContent = "Examples: delivery text, PayPal alert, crypto message, job offer, account warning";
 }
 
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    return [
+      ["🧾", "What this job setup often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔁", "How the story changes across versions"],
+      ["💥", "What can happen if someone goes along with it"]
+    ];
+  }
+
+  if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    return [
+      ["🪙", "What this wallet or token setup often looks like"],
+      ["⏱️", "Where the urgency gets dangerous"],
+      ["🔁", "How the same trap appears in different forms"],
+      ["💥", "What happens after the wrong approval or transfer"]
+    ];
+  }
+
+  if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    return [
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"]
+    ];
+  }
+
+  if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"]
+    ];
+  }
+
+  return [
+    ["👀", "What this usually looks like"],
+    ["⏱️", "Where the pressure starts"],
+    ["🔁", "How the pattern changes"],
+    ["💥", "What can happen next"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function cleanSeoContent() {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
@@ -1772,6 +2046,13 @@ function cleanSeoContent() {
     .replace(/\*\*/g, "")
     .replace(/<p>\s*<\/p>/g, "")
     .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
 }
 
 function cleanRelatedLinks() {
@@ -2183,8 +2464,6 @@ async function checkout(priceId) {
 }
 </script>
 
-</body>
-
 <script>
 (function () {
   if (window.__SCAM_CHECK_EMBEDDED_UPGRADE__) return;
@@ -2486,12 +2765,15 @@ async function checkout(priceId) {
 
           if (parsedBody && typeof parsedBody === "object") {
             const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
             parsedBody.email = enteredEmail;
-
-            if (Object.prototype.hasOwnProperty.call(parsedBody, "subscribed")) {
-              delete parsedBody.subscribed;
-            }
-
+            parsedBody.subscribed = shouldSendSubscribed;
             init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
           }
         }
@@ -2533,7 +2815,7 @@ async function checkout(priceId) {
             if (data && data.limit === true) {
               setTimeout(function () {
                 hideLegacyUpgradeUI();
-                if (window.openEmbeddedUpgrade) {
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
                   window.openEmbeddedUpgrade("monthly");
                 }
               }, 0);
@@ -3094,4 +3376,5 @@ async function checkout(priceId) {
 })();
 </script>
 
+</body>
 </html>
