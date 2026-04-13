@@ -1,5 +1,3 @@
-Use this full version:
-
 const fs = require("fs");
 const path = require("path");
 
