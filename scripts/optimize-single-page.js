@@ -1,7 +1,9 @@
- const fs = require("fs");
+const fs = require("fs");
 const path = require("path");
 
-const TARGET_PAGE = process.env.TARGET_PAGE;
+// ✅ EXACT PAGE TARGETED
+const TARGET_PAGE = "scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/index.html";
+
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE) {
@@ -22,19 +24,15 @@ if (!fs.existsSync(TARGET_PAGE)) {
 const BACKUP_DIR = "backup";
 
 // -----------------------------
-// CUSTOMIZE PER PAGE (YOU/ME EDIT THIS PART ONLY)
+// CUSTOMIZE PER PAGE
 // -----------------------------
-const NEW_TITLE = null; // example: "Is Amazon Refund Email Legit or Scam? Warning Signs"
-const NEW_META = null;  // example: "Got an Amazon refund email? Learn warning signs and how to check if it's real or a scam."
+const NEW_TITLE = "Is Recruiter Email from Unknown Company Legit or a Scam? Warning Signs & What To Do";
 
-const NEW_INTRO = null; // example: "<p>...</p>"
+const NEW_META = "Got a recruiter email from an unknown company? Learn the warning signs, scam risks, and how to verify if a job offer is real before you reply, click, or share information.";
+
+const NEW_INTRO = `<p>Recruiter email from an unknown company is a common situation when a job message feels unexpected, too fast, or difficult to verify. Some messages are legitimate, but many follow scam patterns that rely on urgency, vague details, and requests for information before you can confirm the company independently.</p>`;
 
 const NEW_RELATED_LINKS = null;
-// example:
-// [
-//   { href: "/scam-check-now/page-1/", text: "Page 1" },
-//   { href: "/scam-check-now/page-2/", text: "Page 2" }
-// ]
 
 // -----------------------------
 // HELPERS
@@ -86,7 +84,6 @@ function replaceMetaDescription(html) {
 function replaceIntro(html) {
   if (!NEW_INTRO) return html;
 
-  // replace first <p> inside content-block
   return html.replace(
     /(<div class="content-block"[^>]*>)([\s\S]*?)(<p>[\s\S]*?<\/p>)/i,
     (match, start, middle, firstP) => {
