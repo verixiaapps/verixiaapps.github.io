@@ -1,8 +1,10 @@
+Use this exact same script structure, but pointed at the PayPal file with PayPal-specific values:
+
 const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/is-recruiter-email-from-unknown-company-legit-or-scam/index.html";
+const TARGET_PAGE = "scam-check-now/paypal-suspicious-login-email-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -20,12 +22,12 @@ const BACKUP_DIR = "backup";
 // -----------------------------
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
-const NEW_TITLE = "Is Recruiter Email from Unknown Company Legit or a Scam? Warning Signs & What To Do";
+const NEW_TITLE = "PayPal Suspicious Login Email: Fake or Real? Warning Signs & What To Do";
 
 const NEW_META =
-  "Got a recruiter email from an unknown company? Learn the warning signs, scam risks, and how to verify if a job offer is real before you reply, click, or share information.";
+  "Got a PayPal suspicious login email? Learn how to spot fake alerts, phishing links, and account takeover scams. See warning signs and how to verify safely.";
 
-const NEW_INTRO = `<p>Recruiter email from an unknown company is a common situation when a job message feels unexpected, too fast, or difficult to verify. Some messages are legitimate, but many follow scam patterns that rely on urgency, vague details, and requests for information before you can confirm the company independently.</p>`;
+const NEW_INTRO = `<p>A PayPal suspicious login email can look urgent and legitimate, especially when it warns about unusual activity, account access, or security checks. While some PayPal alerts are real, scammers often send fake login emails designed to get you to click links, enter your password, or share verification details before you verify the alert through the official PayPal app or website.</p>`;
 
 const NEW_RELATED_LINKS = null;
 
