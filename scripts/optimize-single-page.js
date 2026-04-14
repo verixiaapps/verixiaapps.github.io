@@ -28,25 +28,17 @@ const NEW_META =
 
 const NEW_SEO_CONTENT = `
 <div id="seoContent" class="content-body"><div class="content-block" data-context="account-security" data-mode="comparison">
-<p>A PayPal suspicious login email can be real, but it is also one of the most common phishing setups used to steal logins, verification codes, and money. The safest move is to stop inside the message and verify the alert directly in the official PayPal app or by typing PayPal's website into your browser yourself. If the warning only works when you stay inside the email, treat it like a scam until proven otherwise.</p>
+<p>A PayPal suspicious login email can be real, but it is also one of the most common phishing setups used to steal logins, verification codes, and money. If you received one, the safest move is to stop inside the message and verify the alert directly in the official PayPal app or by typing PayPal's website into your browser yourself. If the warning only works when you stay inside the email, treat it like a scam until proven otherwise.</p>
 
-<h2>Is this PayPal suspicious login email a scam? Quick check</h2>
-<ul>
-  <li>If the email pushes a login button instead of telling you to check your account directly, treat it as suspicious.</li>
-  <li>If it warns that your account will be locked, restricted, or limited unless you act immediately, that is a classic phishing pressure tactic.</li>
-  <li>If the sender address, reply-to address, or linked domain looks close to PayPal but not exact, it is likely fake.</li>
-  <li>If it asks for your password, one-time code, card details, or identity confirmation through the email flow, do not trust it.</li>
-  <li>If you cannot confirm the same alert inside your real PayPal account, assume the email is unsafe.</li>
-</ul>
-<p>Real security notices still make sense when you step away from the email. Scam versions usually collapse the moment you verify them outside the message.</p>
+<p>If you want a fast check, look for the biggest red flags first. A suspicious PayPal login email often pushes a login button instead of telling you to check your account directly. It may warn that your account will be locked, restricted, or limited unless you act immediately. It may also ask for your password, one-time code, card details, or identity confirmation through the email flow. If you cannot confirm the same alert inside your real PayPal account, assume the message is unsafe.</p>
 
-<p>A fake PayPal suspicious login email usually starts by looking routine. The subject line may say something like "Suspicious Login Detected," "Unusual Sign-In Attempt," or "Your Account Needs Attention," and the email often copies PayPal colors, logo placement, button styling, and generic account language closely enough to feel familiar. That surface-level polish is what gets people to lower their guard.</p>
+<p>A fake PayPal suspicious login email usually starts by looking routine. The subject line may say things like "Suspicious Login Detected," "Unusual Sign-In Attempt," or "Your Account Needs Attention," and the email often copies PayPal colors, logo placement, button styling, and generic account language closely enough to feel familiar. That surface-level polish is what gets people to lower their guard.</p>
 
-<p>The strongest warning sign is usually not the branding. It is the pressure. Scam versions often tell you your account will be locked in a few hours, that unauthorized payments may already be pending, or that you must verify activity immediately through a button inside the email. That is the part to slow down on. A real PayPal alert can be checked by opening the official app or signing in manually, while a phishing email depends on keeping you inside its own link path.</p>
+<p>The strongest warning sign is usually not the branding. It is the pressure. Scam versions often tell you your account will be locked in a few hours, that unauthorized payments may already be pending, or that you must verify activity immediately through a button inside the email. That is the point where many people click too quickly. A real PayPal alert can be checked by opening the official app or signing in manually, while a phishing email depends on keeping you inside its own link path.</p>
 
-<p>Many of these emails also reveal themselves through the sender and destination details. You may see a display name like "PayPal Security" while the actual address or reply-to field points somewhere unrelated, or the link preview leads to a domain that only looks PayPal-like at a glance. Common scam patterns include extra words, added hyphens, swapped letters, or a support-style domain that is not actually PayPal. That mismatch matters more than how professional the email looks.</p>
+<p>Many of these emails also reveal themselves through the sender and destination details. You may see a display name like "PayPal Security" while the actual sender address or reply-to field points somewhere unrelated, or the link preview leads to a domain that only looks PayPal-like at a glance. Common scam patterns include extra words, added hyphens, swapped letters, or a support-style domain that is not actually PayPal. That mismatch matters more than how professional the email looks.</p>
 
-<p>If you click through and enter your login, password, or verification code on a fake page, the damage can move fast. Attackers can take over the real account, attempt payments, use linked cards or bank accounts, and sometimes reuse the stolen details against other accounts too. That is why the safest rule is simple: never secure a PayPal account from inside a suspicious email. Verify the issue from the real PayPal app or website first, then act only from there.</p>
+<p>If you clicked through and entered your login, password, or verification code on a fake page, act quickly. Go directly to the real PayPal site or app, change your password, review recent activity, and secure any linked cards or bank accounts. Attackers can move fast once they get access, which is why the safest rule is simple: never secure a PayPal account from inside a suspicious email. Verify the issue from the real PayPal app or website first, then act only from there.</p>
 </div></div>
 `;
 
@@ -418,6 +410,24 @@ function upsertVisibleFaq(html) {
   return insertedBeforeClose;
 }
 
+function replaceEmailPlaceholder(html) {
+  return replaceWithCheck(
+    html,
+    /<input id="email" placeholder="[^"]*">/i,
+    `<input id="email" placeholder="Enter your subscription email">`,
+    "email placeholder"
+  );
+}
+
+function expandSeoCardLimit(html) {
+  return replaceWithCheck(
+    html,
+    /\.slice\(0,\s*4\)/,
+    `.slice(0, 6)`,
+    "seo card limit"
+  );
+}
+
 // -----------------------------
 // MAIN
 // -----------------------------
@@ -439,6 +449,8 @@ updated = replaceSeoContent(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
 updated = upsertVisibleFaq(updated);
+updated = replaceEmailPlaceholder(updated);
+updated = expandSeoCardLimit(updated);
 
 if (updated === original) {
   console.log("No changes made.");
