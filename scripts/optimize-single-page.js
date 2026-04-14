@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/paypal-suspicious-login-email-scam/index.html";
+const TARGET_PAGE = "scam-check-now/is-wells-fargo-payment-declined-email-legit-or-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -21,86 +21,78 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  "PayPal Suspicious Login Email Scam? How to Tell if It's Real or Fake";
+  "Wells Fargo Payment Declined Email Scam? How to Tell if It's Real or Fake";
 
 const NEW_META =
-  "Got a PayPal suspicious login email? Learn the real warning signs, fake sender tricks, phishing links, and account lock language scammers use before you click.";
+  "Got a Wells Fargo payment declined email? Learn the warning signs, fake sender tricks, phishing links, and urgent account language scammers use before you click.";
 
 const NEW_SEO_CONTENT = `
 <div id="seoContent" class="content-body"><div class="content-block" data-context="account-security" data-mode="comparison">
-<p>A PayPal suspicious login email can be real, but it is also one of the most common phishing setups used to steal logins, verification codes, and money. If you received one, the safest move is to stop inside the message and verify the alert directly in the official PayPal app or by typing PayPal's website into your browser yourself. If the warning only works when you stay inside the email, treat it like a scam until proven otherwise.</p>
+<p>A Wells Fargo payment declined email can sometimes be real, but it is also a common phishing setup used to steal login details, verification codes, and payment information. If you received one, the safest move is to stop inside the message and check your account directly in the official Wells Fargo app or by typing the Wells Fargo website into your browser yourself. If the alert only works when you stay inside the email, treat it like a scam until proven otherwise.</p>
 
-<p>If you want a fast check, look for the biggest red flags first. A suspicious PayPal login email often pushes a login button instead of telling you to check your account directly. It may warn that your account will be locked, restricted, or limited unless you act immediately. It may also ask for your password, one-time code, card details, or identity confirmation through the email flow. If you cannot confirm the same alert inside your real PayPal account, assume the message is unsafe.</p>
+<p>If you want a fast check, look for the biggest red flags first. A fake Wells Fargo payment declined email often pushes you to click a button to update billing information, verify your account, or fix a payment issue immediately. It may warn that your account will be restricted, locked, or unable to process payments unless you act fast. If you cannot confirm the same issue inside your real Wells Fargo account, assume the message is unsafe.</p>
 
-<p>A fake PayPal suspicious login email usually starts by looking routine. The subject line may say things like "Suspicious Login Detected," "Unusual Sign-In Attempt," or "Your Account Needs Attention," and the email often copies PayPal colors, logo placement, button styling, and generic account language closely enough to feel familiar. That surface-level polish is what gets people to lower their guard.</p>
+<p>Most scam versions start by looking routine. The subject line may say things like "Payment Declined," "Action Required," "Billing Issue Detected," or "Your Payment Could Not Be Processed," and the email often copies Wells Fargo branding, colors, and layout closely enough to feel legitimate. It may include a logo, a warning banner, and a button that looks like a normal account action, which is exactly why people click too quickly.</p>
 
-<p>The strongest warning sign is usually not the branding. It is the pressure. Scam versions often tell you your account will be locked in a few hours, that unauthorized payments may already be pending, or that you must verify activity immediately through a button inside the email. That is the point where many people click too quickly. A real PayPal alert can be checked by opening the official app or signing in manually, while a phishing email depends on keeping you inside its own link path.</p>
+<p>The strongest warning sign is usually the pressure. Scam emails often say your account may be restricted, your payment failed, or your access will be limited unless you fix the issue immediately. That urgency is what does most of the work. A real Wells Fargo alert can be checked safely by opening the official app or signing in manually, while a phishing email depends on keeping you inside its own link path.</p>
 
-<p>Many of these emails also reveal themselves through the sender and destination details. You may see a display name like "PayPal Security" while the actual sender address or reply-to field points somewhere unrelated, or the link preview leads to a domain that only looks PayPal-like at a glance. Common scam patterns include extra words, added hyphens, swapped letters, or a support-style domain that is not actually PayPal. That mismatch matters more than how professional the email looks.</p>
+<p>Another major signal is the sender and link mismatch. You might see a display name like "Wells Fargo Alerts," but the real sender address or reply-to field points somewhere unrelated. The link may also look correct at first glance while leading to a domain that is slightly altered, misspelled, or completely unrelated to Wells Fargo. Those small differences are often the clearest proof that the email is fake.</p>
 
-<p>If you clicked through and entered your login, password, or verification code on a fake page, act quickly. Go directly to the real PayPal site or app, change your password, review recent activity, and secure any linked cards or bank accounts. Attackers can move fast once they get access, which is why the safest rule is simple: never secure a PayPal account from inside a suspicious email. Verify the issue from the real PayPal app or website first, then act only from there.</p>
+<p>If you clicked the link or entered your login, password, or verification code, act quickly. Go directly to the real Wells Fargo website or app, change your password, review recent account activity, and secure any linked cards or accounts. Attackers can move fast once they get access, which is why you should never try to fix a Wells Fargo account problem from inside a suspicious email.</p>
 </div></div>
 `;
 
 const NEW_RELATED_LINKS = [
   {
-    href: "/scam-check-now/is-paypal-suspicious-login-alert-email-legit-or-scam/",
-    text: "Is PayPal Suspicious Login Alert Email Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-account-locked-email-legit-or-scam/",
+    text: "Is Wells Fargo Account Locked Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-login-attempt-email-legit-or-scam/",
-    text: "Is PayPal Login Attempt Email Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-fraud-alert-email-legit-or-scam/",
+    text: "Is Wells Fargo Fraud Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-unusual-login-email-legit-or-scam/",
-    text: "Is PayPal Unusual Login Email Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-login-alert-email-legit-or-scam/",
+    text: "Is Wells Fargo Login Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-login-from-new-device-email-legit-or-scam/",
-    text: "Is PayPal Login from New Device Email Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-password-reset-email-legit-or-scam/",
+    text: "Is Wells Fargo Password Reset Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-suspicious-login-text-legit-or-scam/",
-    text: "Is PayPal Suspicious Login Text Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-suspicious-activity-email-legit-or-scam/",
+    text: "Is Wells Fargo Suspicious Activity Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-login-alert-text-legit-or-scam/",
-    text: "Is PayPal Login Alert Text Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-transfer-alert-email-legit-or-scam/",
+    text: "Is Wells Fargo Transfer Alert Email Legit or a Scam?"
   }
 ];
 
 const NEW_MORE_LINKS = [
   {
-    href: "/scam-check-now/is-paypal-unauthorized-login-text-legit-or-scam/",
-    text: "Is PayPal Unauthorized Login Text Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-security-alert-message-legit-or-scam/",
+    text: "Is Wells Fargo Security Alert Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-account-limited-email-legit-or-scam/",
-    text: "Is PayPal Account Limited Email Legit or a Scam?"
+    href: "/scam-check-now/is-wells-fargo-verification-code-text-legit-or-scam/",
+    text: "Is Wells Fargo Verification Code Text Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-account-locked-email-legit-or-scam/",
-    text: "Is PayPal Account Locked Email Legit or a Scam?"
+    href: "/scam-check-now/is-bank-payment-declined-email-legit-or-scam/",
+    text: "Is Bank Payment Declined Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-account-restriction-email-legit-or-scam/",
-    text: "Is PayPal Account Restriction Email Legit or a Scam?"
+    href: "/scam-check-now/is-chase-payment-declined-email-legit-or-scam/",
+    text: "Is Chase Payment Declined Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-account-suspension-email-legit-or-scam/",
-    text: "Is PayPal Account Suspension Email Legit or a Scam?"
+    href: "/scam-check-now/is-bank-of-america-payment-declined-email-legit-or-scam/",
+    text: "Is Bank of America Payment Declined Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-paypal-account-unlock-email-legit-or-scam/",
-    text: "Is PayPal Account Unlock Email Legit or a Scam?"
-  },
-  {
-    href: "/scam-check-now/is-paypal-account-verification-email-legit-or-scam/",
-    text: "Is PayPal Account Verification Email Legit or a Scam?"
-  },
-  {
-    href: "/scam-check-now/is-paypal-account-warning-email-legit-or-scam/",
-    text: "Is PayPal Account Warning Email Legit or a Scam?"
+    href: "/scam-check-now/is-citizens-bank-payment-declined-email-legit-or-scam/",
+    text: "Is Citizens Bank Payment Declined Email Legit or a Scam?"
   }
 ];
 
@@ -110,26 +102,26 @@ const NEW_FAQ_JSONLD = `{
   "mainEntity":[
     {
       "@type":"Question",
-      "name":"Is a PayPal suspicious login email always fake?",
+      "name":"Is a Wells Fargo payment declined email always fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"No. Some PayPal login alerts are real, but many are phishing emails built to steal your login, code, or payment details. The safest way to tell is to ignore the email links and verify the alert directly in the official PayPal app or website."
+        "text":"No. Some Wells Fargo payment alerts are real, but many are phishing emails designed to steal login details, codes, or payment information. The safest way to check is to ignore the email links and verify the alert directly in the official Wells Fargo app or website."
       }
     },
     {
       "@type":"Question",
-      "name":"How can I tell if a PayPal sender address is fake?",
+      "name":"How can I tell if a Wells Fargo payment declined email is fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Check the full sender address, reply-to address, and link destination instead of relying on the display name alone. Scam emails often use addresses or domains that look similar to PayPal but are not actually PayPal."
+        "text":"Check the full sender address, reply-to address, and link destination instead of relying on the display name alone. Scam emails often use addresses and domains that look similar to Wells Fargo but are not official."
       }
     },
     {
       "@type":"Question",
-      "name":"What should I do if I clicked a fake PayPal login email?",
+      "name":"What should I do if I clicked a fake Wells Fargo payment declined email?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Go directly to the real PayPal site or app, change your password, review recent activity, and secure any linked cards or bank accounts. If you entered a one-time code or other sensitive details, treat it as urgent and lock down the account immediately."
+        "text":"Go directly to the official Wells Fargo site or app, change your password, review account activity, and secure any linked cards or accounts immediately. If you entered login details or a verification code, treat it as urgent."
       }
     }
   ]
@@ -137,11 +129,11 @@ const NEW_FAQ_JSONLD = `{
 
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
-      <h3>PayPal Suspicious Login Email FAQ</h3>
+      <h3>Wells Fargo Payment Declined Email FAQ</h3>
       <div class="content-body">
-        <p><strong>Is a PayPal suspicious login email always fake?</strong><br>No. Some PayPal login alerts are real, but many are phishing emails built to steal your login, code, or payment details. The safest way to tell is to ignore the email links and verify the alert directly in the official PayPal app or website.</p>
-        <p><strong>How can I tell if a PayPal sender address is fake?</strong><br>Check the full sender address, reply-to address, and link destination instead of relying on the display name alone. Scam emails often use addresses or domains that look similar to PayPal but are not actually PayPal.</p>
-        <p><strong>What should I do if I clicked a fake PayPal login email?</strong><br>Go directly to the real PayPal site or app, change your password, review recent activity, and secure any linked cards or bank accounts. If you entered a one-time code or other sensitive details, treat it as urgent and lock down the account immediately.</p>
+        <p><strong>Is a Wells Fargo payment declined email always fake?</strong><br>No. Some Wells Fargo payment alerts are real, but many are phishing emails designed to steal login details, codes, or payment information. The safest way to check is to ignore the email links and verify the alert directly in the official Wells Fargo app or website.</p>
+        <p><strong>How can I tell if a Wells Fargo payment declined email is fake?</strong><br>Check the full sender address, reply-to address, and link destination instead of relying on the display name alone. Scam emails often use addresses and domains that look similar to Wells Fargo but are not official.</p>
+        <p><strong>What should I do if I clicked a fake Wells Fargo payment declined email?</strong><br>Go directly to the official Wells Fargo site or app, change your password, review account activity, and secure any linked cards or accounts immediately. If you entered login details or a verification code, treat it as urgent.</p>
       </div>
     </div>
 `;
