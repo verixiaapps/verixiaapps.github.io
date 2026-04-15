@@ -410,9 +410,11 @@ function insertTopFreshnessBlock(html) {
 }
 
 function insertInstantVerdictCard(html) {
-  if (html.includes('id="instantVerdictCardWrap"')) {
-    console.log("Instant verdict already exists");
-    return html;
+  const existingRegex = /<div class="page-shell-top-block" id="instantVerdictCardWrap"[\s\S]*?<\/div>\s*<\/div>/i;
+
+  if (existingRegex.test(html)) {
+    console.log("Replaced existing instant verdict card");
+    return html.replace(existingRegex, NEW_INSTANT_VERDICT_CARD);
   }
 
   let updated = html.replace(
