@@ -26,8 +26,10 @@ const NEW_TITLE =
 const NEW_META =
   "Got a TD Bank fraud alert email? Learn the warning signs, fake login tricks, and what to do before you click a link, enter your password, or reply.";
 
+const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
+
 const NEW_TOP_BLOCK = `
-  <div class="page-shell-top-block" id="freshnessBlock" style="max-width:940px;margin:0 auto 14px;padding:0 14px;">
+  <div class="page-shell-top-block" id="freshnessBlock" style="max-width:940px;margin:18px auto 20px;padding:0 14px;">
     <div class="inline-info-card" style="margin-top:0;">
       <div style="font-size:13px;font-weight:900;color:#9cecff;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">
         Updated April 2026
@@ -279,6 +281,17 @@ function replaceTwitterDescription(html) {
   );
 }
 
+function replaceRawKeyword(html) {
+  if (!NEW_RAW_KEYWORD) return html;
+
+  return replaceWithCheck(
+    html,
+    /const\s+RAW_KEYWORD\s*=\s*"[^"]*";/i,
+    `const RAW_KEYWORD = "${escapeHtmlAttr(NEW_RAW_KEYWORD)}";`,
+    "RAW_KEYWORD"
+  );
+}
+
 function replaceWebPageJsonLd(html) {
   if (!NEW_TITLE && !NEW_META) return html;
 
@@ -374,6 +387,30 @@ function insertTopFreshnessBlock(html) {
   }
 
   console.log("Inserted freshness block");
+  return updated;
+}
+
+function replaceBankSeoCardTitles(html) {
+  const updated = html.replace(
+    /if\s*\(containsAny\(lower,\s*\["bank",\s*"paypal",\s*"venmo",\s*"zelle",\s*"cash app",\s*"amazon",\s*"refund",\s*"payment"\]\)\)\s*\{\s*return\s*\[\s*\["💳",\s*"What this account or payment setup often looks like"\],\s*\["⏱️",\s*"Where the panic starts doing the work"\],\s*\["🔁",\s*"How the account warning changes across versions"\],\s*\["💥",\s*"What happens after a login, code, or payment mistake"\]\s*\];\s*\}/i,
+    `if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    return [
+      ["💳", "What this account or payment setup often looks like"],
+      ["⏱️", "Where the panic starts doing the work"],
+      ["🔁", "How the account warning changes across versions"],
+      ["💥", "What happens after a login, code, or payment mistake"],
+      ["•", "What to do next"],
+      ["•", "Key safety rule"]
+    ];
+  }`
+  );
+
+  if (updated === html) {
+    console.warn("No change for bank seo card titles");
+    return html;
+  }
+
+  console.log("Updated bank seo card titles");
   return updated;
 }
 
@@ -515,9 +552,11 @@ updated = replaceOgTitle(updated);
 updated = replaceOgDescription(updated);
 updated = replaceTwitterTitle(updated);
 updated = replaceTwitterDescription(updated);
+updated = replaceRawKeyword(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
 updated = insertTopFreshnessBlock(updated);
+updated = replaceBankSeoCardTitles(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
