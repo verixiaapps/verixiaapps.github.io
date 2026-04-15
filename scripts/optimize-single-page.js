@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/is-venmo-verification-code-text-real-or-fake/index.html";
+const TARGET_PAGE = "scam-check-now/is-td-bank-fraud-alert-email-legit-or-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -21,78 +21,78 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  "Venmo Verification Code Text Scam? How to Tell if It's Real or Fake";
+  "TD Bank Fraud Alert Email Scam? How to Tell if It Is Real or Fake";
 
 const NEW_META =
-  "Got a Venmo verification code text you did not request? Learn the warning signs, account takeover tricks, and what to do before you share a code.";
+  "Got a TD Bank fraud alert email? Learn the warning signs, fake login tricks, and what to do before you click a link, enter your password, or reply.";
 
 const NEW_SEO_CONTENT = `
-<div id="seoContent" class="content-body"><div class="content-block" data-context="account-security" data-mode="comparison">
-<p>A Venmo verification code text can be real, but if you did not request it, the situation is often risky. In many cases, scammers trigger a login attempt on purpose so Venmo sends a legitimate code to your phone. The code itself may be real, but the scam is the attempt to get you to share it with someone else.</p>
+<div id="seoContent" class="content-body"><div class="content-block" data-context="bank-security" data-mode="comparison">
+<p>A TD Bank fraud alert email can look convincing because scammers copy the same words people expect to see in a real bank warning. The message usually says there was suspicious activity, an unusual login, a blocked transfer, or a security hold that needs immediate attention. The risk is that the email tries to pull you into a fake login page or push you into calling a fake support number before you verify anything through your real account.</p>
 
-<p>The most common pattern is simple. Someone tries to sign in to your Venmo account using your phone number or login details. Right after that, you receive a real verification code text. The attacker then contacts you pretending to be Venmo support, a buyer, or someone who claims they entered your number by mistake and asks you to send the code back. If you share it, they can get into your account.</p>
+<p>The most common scam version creates urgency first. It says your account is at risk, your card was flagged, or your access will be restricted unless you act now. A button like review activity, secure account, or verify identity then sends you to a page designed to look like TD Bank. Once there, the goal is usually to steal your username, password, one time code, card details, or other account information.</p>
 
-<p>That is why the safest rule is direct and simple: never share a Venmo verification code with anyone. Venmo will not ask you to read a code back over text, email, chat, or social media. Any person or message asking for that code is trying to bypass your account security.</p>
+<p>A real TD Bank alert should still make sense when you check it independently in the official TD Bank app or by going directly to the official website yourself. A scam version gets weaker the moment you stop relying on the email. That is one of the clearest differences. If the warning only works when you trust the email itself, the situation is not safe enough to treat as real.</p>
 
-<p>Another warning sign is urgency. Scam versions often try to create panic by saying there is suspicious activity, a locked account, a payment problem, or an urgent verification issue. The goal is to make you react quickly instead of stopping to think about why you received a code you never requested in the first place.</p>
+<p>Another common pattern is a fake support workflow. Instead of only asking you to log in, the email may tell you to call a number immediately to stop fraud. The person who answers may pretend to be TD Bank and ask for account details, verification codes, card numbers, or approval of a transaction you do not understand. This is designed to create panic and rush you past basic verification.</p>
 
-<p>If you got the code but did not share it, open the official Venmo app yourself and review your account activity. Change your password if anything looks off, and make sure your login information is still secure. If you did share the code, act immediately by changing your password, reviewing transfers, and securing any linked bank or card information.</p>
+<p>If you receive a TD Bank fraud alert email, do not click the link inside the message and do not call the number listed in the email. Open the official TD Bank app yourself or type the official site into your browser manually and check for alerts there. If you already clicked or entered information, change your password right away, review recent activity, and contact TD Bank through an official support channel you found independently.</p>
 
-<p>The clearest way to think about this is that a verification code is meant only for the person signing in. The moment someone else wants that code, the message is no longer safe. Treat unexpected Venmo verification code texts as possible account takeover attempts until you verify everything directly in the official app.</p>
+<p>The safest way to think about these emails is simple. A real bank warning can be verified outside the message. A scam depends on getting you to trust the message, the link, or the caller before you slow down. Treat any unexpected TD Bank fraud alert email as suspicious until you confirm it directly through the official app, website, or verified bank contact information.</p>
 </div></div>
 `;
 
 const NEW_RELATED_LINKS = [
   {
-    href: "/scam-check-now/is-venmo-payment-verification-text-legit-or-scam/",
-    text: "Is Venmo Payment Verification Text Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-account-access-alert-email-legit-or-scam/",
+    text: "Is TD Bank Account Access Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-transaction-verification-text-legit-or-scam/",
-    text: "Is Venmo Transaction Verification Text Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-banking-alert-email-legit-or-scam/",
+    text: "Is TD Bank Banking Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-account-verification-email-legit-or-scam/",
-    text: "Is Venmo Account Verification Email Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-sign-in-alert-email-legit-or-scam/",
+    text: "Is TD Bank Sign In Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-login-attempt-text-legit-or-scam/",
-    text: "Is Venmo Login Attempt Text Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-unusual-login-email-legit-or-scam/",
+    text: "Is TD Bank Unusual Login Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-security-code-message-legit-or-scam/",
-    text: "Is Venmo Security Code Message Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-fraud-department-email-legit-or-scam/",
+    text: "Is TD Bank Fraud Department Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-sign-in-alert-email-legit-or-scam/",
-    text: "Is Venmo Sign In Alert Email Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-secure-message-email-legit-or-scam/",
+    text: "Is TD Bank Secure Message Email Legit or a Scam?"
   }
 ];
 
 const NEW_MORE_LINKS = [
   {
-    href: "/scam-check-now/is-venmo-urgent-verification-message-legit-or-scam/",
-    text: "Is Venmo Urgent Verification Message Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-fraud-investigation-email-legit-or-scam/",
+    text: "Is TD Bank Fraud Investigation Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-login-from-new-device-email-legit-or-scam/",
-    text: "Is Venmo Login from New Device Email Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-account-verification-email-legit-or-scam/",
+    text: "Is TD Bank Account Verification Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-account-warning-text-legit-or-scam/",
-    text: "Is Venmo Account Warning Text Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-account-review-email-legit-or-scam/",
+    text: "Is TD Bank Account Review Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-suspicious-transfer-text-legit-or-scam/",
-    text: "Is Venmo Suspicious Transfer Text Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-payment-verification-email-legit-or-scam/",
+    text: "Is TD Bank Payment Verification Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-payment-request-from-unknown-legit-or-scam/",
-    text: "Is Venmo Payment Request from Unknown Legit or a Scam?"
+    href: "/scam-check-now/is-td-bank-suspicious-transfer-email-legit-or-scam/",
+    text: "Is TD Bank Suspicious Transfer Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-venmo-payment-alert-real-or-fake/",
-    text: "Is Venmo Payment Alert Real or Fake?"
+    href: "/scam-check-now/is-td-bank-card-security-alert-text-legit-or-scam/",
+    text: "Is TD Bank Card Security Alert Text Legit or a Scam?"
   }
 ];
 
@@ -102,26 +102,26 @@ const NEW_FAQ_JSONLD = `{
   "mainEntity":[
     {
       "@type":"Question",
-      "name":"Is a Venmo verification code text always a scam?",
+      "name":"Is a TD Bank fraud alert email always a scam?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"No. The code itself can be a real Venmo security code, but if you did not request it, it often means someone is trying to access your account. The scam usually happens when someone asks you to share that code."
+        "text":"No. Banks can send real fraud alerts, but scammers also copy the same type of warning. The safest approach is to verify the alert independently in the official TD Bank app or by using official contact details, not the link or number inside the email."
       }
     },
     {
       "@type":"Question",
-      "name":"Why did I get a Venmo verification code text I did not request?",
+      "name":"How can I tell if a TD Bank fraud alert email is fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"This often happens when someone tries to log in to your Venmo account using your phone number or other account details. Venmo sends a real code, but the risky part is the login attempt behind it."
+        "text":"Common warning signs include urgent pressure, suspicious links, fake support phone numbers, requests for login details or verification codes, and messages that only make sense if you trust the email itself. A real alert should still be verifiable outside the message."
       }
     },
     {
       "@type":"Question",
-      "name":"What should I do if I shared a Venmo verification code?",
+      "name":"What should I do if I clicked a TD Bank fraud alert email?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Open the official Venmo app immediately, change your password, review recent account activity, and secure any linked bank or card information. If anything looks suspicious, treat it as urgent and lock down the account right away."
+        "text":"If you clicked the link or entered information, change your password immediately, review account activity, and contact TD Bank through an official channel you found independently. If you shared sensitive details or codes, treat it as urgent and secure the account right away."
       }
     }
   ]
@@ -129,12 +129,18 @@ const NEW_FAQ_JSONLD = `{
 
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
-      <h3>Venmo Verification Code Text FAQ</h3>
+      <h3>TD Bank Fraud Alert Email FAQ</h3>
       <div class="content-body">
-        <p><strong>Is a Venmo verification code text always a scam?</strong><br>No. The code itself can be a real Venmo security code, but if you did not request it, it often means someone is trying to access your account. The scam usually happens when someone asks you to share that code.</p>
-        <p><strong>Why did I get a Venmo verification code text I did not request?</strong><br>This often happens when someone tries to log in to your Venmo account using your phone number or other account details. Venmo sends a real code, but the risky part is the login attempt behind it.</p>
-        <p><strong>What should I do if I shared a Venmo verification code?</strong><br>Open the official Venmo app immediately, change your password, review recent account activity, and secure any linked bank or card information. If anything looks suspicious, treat it as urgent and lock down the account right away.</p>
+        <p><strong>Is a TD Bank fraud alert email always a scam?</strong><br>No. Banks can send real fraud alerts, but scammers also copy the same type of warning. The safest approach is to verify the alert independently in the official TD Bank app or by using official contact details, not the link or number inside the email.</p>
+        <p><strong>How can I tell if a TD Bank fraud alert email is fake?</strong><br>Common warning signs include urgent pressure, suspicious links, fake support phone numbers, requests for login details or verification codes, and messages that only make sense if you trust the email itself. A real alert should still be verifiable outside the message.</p>
+        <p><strong>What should I do if I clicked a TD Bank fraud alert email?</strong><br>If you clicked the link or entered information, change your password immediately, review account activity, and contact TD Bank through an official channel you found independently. If you shared sensitive details or codes, treat it as urgent and secure the account right away.</p>
       </div>
+    </div>
+`;
+
+const NEW_HUB_LINK = `
+    <div class="inline-info-card" id="hubLinkWrap">
+      <a href="/scam-check-now/bank-scams/">Bank Scam Hub</a>
     </div>
 `;
 
@@ -207,7 +213,7 @@ function replaceMetaDescription(html) {
 
   return replaceWithCheck(
     html,
-    /<meta\s+name=["']description["']\s+content=["'][^"']*["']\s*\/?>/i,
+    /<meta\s+name=["']description["']\s+content=["'][^"]*["']\s*\/?>/i,
     `<meta name="description" content="${escapeHtmlAttr(NEW_META)}">`,
     "meta description"
   );
@@ -218,7 +224,7 @@ function replaceOgTitle(html) {
 
   return replaceWithCheck(
     html,
-    /<meta\s+property=["']og:title["']\s+content=["'][^"']*["']\s*\/?>/i,
+    /<meta\s+property=["']og:title["']\s+content=["'][^"]*["']\s*\/?>/i,
     `<meta property="og:title" content="${escapeHtmlAttr(NEW_TITLE)}">`,
     "og:title"
   );
@@ -229,7 +235,7 @@ function replaceOgDescription(html) {
 
   return replaceWithCheck(
     html,
-    /<meta\s+property=["']og:description["']\s+content=["'][^"']*["']\s*\/?>/i,
+    /<meta\s+property=["']og:description["']\s+content=["'][^"]*["']\s*\/?>/i,
     `<meta property="og:description" content="${escapeHtmlAttr(NEW_META)}">`,
     "og:description"
   );
@@ -240,7 +246,7 @@ function replaceTwitterTitle(html) {
 
   return replaceWithCheck(
     html,
-    /<meta\s+name=["']twitter:title["']\s+content=["'][^"']*["']\s*\/?>/i,
+    /<meta\s+name=["']twitter:title["']\s+content=["'][^"]*["']\s*\/?>/i,
     `<meta name="twitter:title" content="${escapeHtmlAttr(NEW_TITLE)}">`,
     "twitter:title"
   );
@@ -251,7 +257,7 @@ function replaceTwitterDescription(html) {
 
   return replaceWithCheck(
     html,
-    /<meta\s+name=["']twitter:description["']\s+content=["'][^"']*["']\s*\/?>/i,
+    /<meta\s+name=["']twitter:description["']\s+content=["'][^"]*["']\s*\/?>/i,
     `<meta name="twitter:description" content="${escapeHtmlAttr(NEW_META)}">`,
     "twitter:description"
   );
@@ -370,6 +376,17 @@ function replaceMoreLinks(html) {
   );
 }
 
+function replaceHubLink(html) {
+  if (!NEW_HUB_LINK) return html;
+
+  return replaceWithCheck(
+    html,
+    /<div class="inline-info-card" id="hubLinkWrap">[\s\S]*?<\/div>/i,
+    NEW_HUB_LINK.trim(),
+    "hub link"
+  );
+}
+
 function upsertVisibleFaq(html) {
   if (!NEW_VISIBLE_FAQ) return html;
 
@@ -440,6 +457,7 @@ updated = upsertFaqJsonLd(updated);
 updated = replaceSeoContent(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
+updated = replaceHubLink(updated);
 updated = upsertVisibleFaq(updated);
 updated = replaceEmailPlaceholder(updated);
 updated = expandSeoCardLimit(updated);
