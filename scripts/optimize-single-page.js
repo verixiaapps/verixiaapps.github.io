@@ -28,6 +28,20 @@ const NEW_META =
 
 const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
 
+const NEW_INSTANT_VERDICT_CARD = `
+  <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:0 auto 14px;padding:0 14px;">
+    <div class="story-card lead" id="instantVerdictCard" style="margin:0;">
+      <div class="story-card-title">
+        <span class="story-card-title-icon">🔎</span>
+        <span>Instant Verdict</span>
+      </div>
+      <p>TD Bank fraud alert emails are commonly used in phishing scams. While real alerts do exist, many messages using “suspicious activity,” “verify your account,” or “unusual login” are designed to push you into clicking a fake link or calling a fake support number.</p>
+      <p style="margin-top:14px;"><strong>Most versions follow a pattern:</strong> urgent warning → “secure your account” button → fake login page or scam call. If the message pressures you to act immediately or only makes sense when you trust the email itself, it should be treated as suspicious.</p>
+      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">Do not click links or call numbers in the message. Check directly in the official TD Bank app or website instead.</div>
+    </div>
+  </div>
+`;
+
 const NEW_TOP_BLOCK = `
   <div class="page-shell-top-block" id="freshnessBlock" style="max-width:940px;margin:18px auto 20px;padding:0 14px;">
     <div class="inline-info-card" style="margin-top:0;">
@@ -392,6 +406,26 @@ function insertTopFreshnessBlock(html) {
   return updated;
 }
 
+function insertInstantVerdictCard(html) {
+  if (html.includes('id="instantVerdictCardWrap"')) {
+    console.log("Instant verdict already exists");
+    return html;
+  }
+
+  const inserted = html.replace(
+    /(<div class="page-shell-top-block" id="freshnessBlock")/i,
+    `${NEW_INSTANT_VERDICT_CARD}\n$1`
+  );
+
+  if (inserted === html) {
+    console.warn("No change for instant verdict card");
+    return html;
+  }
+
+  console.log("Inserted instant verdict card");
+  return inserted;
+}
+
 function replaceBankSeoCardTitles(html) {
   const updated = html.replace(
     /if\s*\(containsAny\(lower,\s*\["bank",\s*"paypal",\s*"venmo",\s*"zelle",\s*"cash app",\s*"amazon",\s*"refund",\s*"payment"\]\)\)\s*\{\s*return\s*\[\s*\["💳",\s*"What this account or payment setup often looks like"\],\s*\["⏱️",\s*"Where the panic starts doing the work"\],\s*\["🔁",\s*"How the account warning changes across versions"\],\s*\["💥",\s*"What happens after a login, code, or payment mistake"\]\s*\];\s*\}/i,
@@ -558,6 +592,7 @@ updated = replaceRawKeyword(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
 updated = insertTopFreshnessBlock(updated);
+updated = insertInstantVerdictCard(updated);
 updated = replaceBankSeoCardTitles(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
