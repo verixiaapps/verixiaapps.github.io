@@ -26,6 +26,27 @@ const NEW_TITLE =
 const NEW_META =
   "Got a TD Bank fraud alert email? Learn the warning signs, fake login tricks, and what to do before you click a link, enter your password, or reply.";
 
+const NEW_TOP_BLOCK = `
+  <div class="page-shell-top-block" id="freshnessBlock" style="max-width:940px;margin:0 auto 14px;padding:0 14px;">
+    <div class="inline-info-card" style="margin-top:0;">
+      <div style="font-size:13px;font-weight:900;color:#9cecff;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">
+        Updated April 2026
+      </div>
+      <div style="font-size:15px;font-weight:800;line-height:1.6;color:#e6f0ff;">
+        Users are still receiving TD Bank fraud alert emails claiming:
+      </div>
+      <ul style="margin:10px 0 0 18px;color:#d7e4f8;font-weight:800;line-height:1.6;">
+        <li>“Suspicious activity detected”</li>
+        <li>“Verify your account immediately”</li>
+        <li>“Unusual login attempt”</li>
+      </ul>
+      <div style="margin-top:10px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">
+        These messages often link to fake TD Bank login pages or fake support numbers designed to steal your login details or verification codes.
+      </div>
+    </div>
+  </div>
+`;
+
 const NEW_EXAMPLE_CARD = `
     <div class="story-card" id="realExamplesCard">
       <div class="story-card-title">
@@ -324,6 +345,38 @@ function upsertFaqJsonLd(html) {
   return inserted;
 }
 
+function insertTopFreshnessBlock(html) {
+  if (!NEW_TOP_BLOCK) return html;
+
+  if (html.includes('id="freshnessBlock"')) {
+    console.log("Freshness block already exists");
+    return html;
+  }
+
+  const updated = html.replace(
+    /(<\/div>\s*)(<div class="container">)/i,
+    `$1\n${NEW_TOP_BLOCK}\n$2`
+  );
+
+  if (updated === html) {
+    const fallback = html.replace(
+      /<div class="container">/i,
+      `${NEW_TOP_BLOCK}\n<div class="container">`
+    );
+
+    if (fallback === html) {
+      console.warn("No change for top freshness block");
+      return html;
+    }
+
+    console.log("Inserted freshness block (fallback)");
+    return fallback;
+  }
+
+  console.log("Inserted freshness block");
+  return updated;
+}
+
 function upsertExampleCard(html) {
   if (!NEW_EXAMPLE_CARD) return html;
 
@@ -464,6 +517,7 @@ updated = replaceTwitterTitle(updated);
 updated = replaceTwitterDescription(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
+updated = insertTopFreshnessBlock(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
