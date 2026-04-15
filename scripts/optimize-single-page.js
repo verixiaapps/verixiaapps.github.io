@@ -30,14 +30,17 @@ const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
 
 const NEW_INSTANT_VERDICT_CARD = `
   <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:0 auto 14px;padding:0 14px;">
-    <div class="story-card lead" id="instantVerdictCard" style="margin:0;">
-      <div class="story-card-title">
-        <span class="story-card-title-icon">🔎</span>
-        <span>Instant Verdict</span>
+    <div class="story-card lead" id="instantVerdictCard" style="margin:0;display:flex;gap:14px;align-items:flex-start;">
+
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%23ff7b7b'/><stop offset='100%25' stop-color='%23d94b4b'/></linearGradient></defs><circle cx='32' cy='32' r='30' fill='url(%23g)'/><path d='M32 14 L50 46 H14 Z' fill='white' opacity='0.96'/><rect x='29' y='24' width='6' height='12' rx='3' fill='%23d94b4b'/><circle cx='32' cy='41' r='3' fill='%23d94b4b'/></svg>" alt="Warning" style="width:44px;height:44px;flex-shrink:0;margin-top:4px;">
+
+      <div>
+        <div style="font-size:16px;font-weight:900;color:#ffb3b3;">Risk Level: High</div>
+        <div style="font-size:14px;font-weight:800;color:#d7e4f8;margin-top:4px;">Creates urgency to trigger panic</div>
+        <div style="font-size:14px;font-weight:800;color:#d7e4f8;">Pushes fake links or support numbers</div>
+        <div style="font-size:14px;font-weight:900;color:#d7e4f8;">Do not click. Verify in the official TD Bank app.</div>
       </div>
-      <p>TD Bank fraud alert emails are commonly used in phishing scams. While real alerts do exist, many messages using “suspicious activity,” “verify your account,” or “unusual login” are designed to push you into clicking a fake link or calling a fake support number.</p>
-      <p style="margin-top:14px;"><strong>Most versions follow a pattern:</strong> urgent warning → “secure your account” button → fake login page or scam call. If the message pressures you to act immediately or only makes sense when you trust the email itself, it should be treated as suspicious.</p>
-      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">Do not click links or call numbers in the message. Check directly in the official TD Bank app or website instead.</div>
+
     </div>
   </div>
 `;
@@ -412,18 +415,28 @@ function insertInstantVerdictCard(html) {
     return html;
   }
 
-  const inserted = html.replace(
+  let updated = html.replace(
     /(<div class="page-shell-top-block" id="freshnessBlock")/i,
     `${NEW_INSTANT_VERDICT_CARD}\n$1`
   );
 
-  if (inserted === html) {
-    console.warn("No change for instant verdict card");
-    return html;
+  if (updated !== html) {
+    console.log("Inserted instant verdict card (before freshness)");
+    return updated;
   }
 
-  console.log("Inserted instant verdict card");
-  return inserted;
+  updated = html.replace(
+    /(<div class="container">)/i,
+    `$1\n${NEW_INSTANT_VERDICT_CARD}\n`
+  );
+
+  if (updated !== html) {
+    console.log("Inserted instant verdict card (container fallback)");
+    return updated;
+  }
+
+  console.warn("No change for instant verdict card");
+  return html;
 }
 
 function replaceBankSeoCardTitles(html) {
