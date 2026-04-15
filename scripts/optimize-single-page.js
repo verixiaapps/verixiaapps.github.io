@@ -30,15 +30,22 @@ const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
 
 const NEW_INSTANT_VERDICT_CARD = `
   <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:0 auto 14px;padding:0 14px;">
-    <div class="story-card lead" id="instantVerdictCard" style="margin:0;display:flex;gap:14px;align-items:flex-start;">
+    <div class="story-card lead" id="instantVerdictCard" style="margin:0;padding:20px 16px;text-align:center;">
 
-      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%23ff7b7b'/><stop offset='100%25' stop-color='%23d94b4b'/></linearGradient></defs><circle cx='32' cy='32' r='30' fill='url(%23g)'/><path d='M32 14 L50 46 H14 Z' fill='white' opacity='0.96'/><rect x='29' y='24' width='6' height='12' rx='3' fill='%23d94b4b'/><circle cx='32' cy='41' r='3' fill='%23d94b4b'/></svg>" alt="Warning" style="width:44px;height:44px;flex-shrink:0;margin-top:4px;">
+      <div style="margin-bottom:10px;">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%23ff7b7b'/><stop offset='100%25' stop-color='%23d94b4b'/></linearGradient></defs><circle cx='32' cy='32' r='30' fill='url(%23g)'/><path d='M32 14 L50 46 H14 Z' fill='white' opacity='0.96'/><rect x='29' y='24' width='6' height='12' rx='3' fill='%23d94b4b'/><circle cx='32' cy='41' r='3' fill='%23d94b4b'/></svg>" alt="Warning" style="width:56px;height:56px;">
+      </div>
 
-      <div>
-        <div style="font-size:16px;font-weight:900;color:#ffb3b3;">Risk Level: High</div>
-        <div style="font-size:14px;font-weight:800;color:#d7e4f8;margin-top:4px;">Creates urgency to trigger panic</div>
-        <div style="font-size:14px;font-weight:800;color:#d7e4f8;">Pushes fake links or support numbers</div>
-        <div style="font-size:14px;font-weight:900;color:#d7e4f8;">Do not click. Verify in the official TD Bank app.</div>
+      <div style="font-size:18px;font-weight:900;color:#ff9a9a;margin-bottom:6px;">
+        Risk Level: High
+      </div>
+
+      <div style="font-size:15px;font-weight:800;color:#e6f0ff;margin-bottom:4px;">
+        Fake TD fraud alert
+      </div>
+
+      <div style="font-size:15px;font-weight:900;color:#ffffff;">
+        Do not click. Use the TD Bank app or official site only.
       </div>
 
     </div>
@@ -410,11 +417,21 @@ function insertTopFreshnessBlock(html) {
 }
 
 function insertInstantVerdictCard(html) {
-  const existingRegex = /<div class="page-shell-top-block" id="instantVerdictCardWrap"[\s\S]*?<\/div>\s*<\/div>/i;
+  const startMarker = '<div class="page-shell-top-block" id="instantVerdictCardWrap"';
 
-  if (existingRegex.test(html)) {
-    console.log("Replaced existing instant verdict card");
-    return html.replace(existingRegex, NEW_INSTANT_VERDICT_CARD);
+  if (html.includes(startMarker)) {
+    const freshnessIndex = html.indexOf('<div class="page-shell-top-block" id="freshnessBlock"');
+    const startIndex = html.indexOf(startMarker);
+
+    if (startIndex !== -1 && freshnessIndex !== -1 && freshnessIndex > startIndex) {
+      console.log("Replaced existing instant verdict card");
+      return (
+        html.slice(0, startIndex) +
+        NEW_INSTANT_VERDICT_CARD +
+        "\n" +
+        html.slice(freshnessIndex)
+      );
+    }
   }
 
   let updated = html.replace(
