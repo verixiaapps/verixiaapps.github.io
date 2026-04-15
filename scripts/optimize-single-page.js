@@ -26,20 +26,15 @@ const NEW_TITLE =
 const NEW_META =
   "Got a TD Bank fraud alert email? Learn the warning signs, fake login tricks, and what to do before you click a link, enter your password, or reply.";
 
-const NEW_SEO_CONTENT = `
-<div id="seoContent" class="content-body"><div class="content-block" data-context="bank-security" data-mode="comparison">
-<p>A TD Bank fraud alert email can look convincing because scammers copy the same words people expect to see in a real bank warning. The message usually says there was suspicious activity, an unusual login, a blocked transfer, or a security hold that needs immediate attention. The risk is that the email tries to pull you into a fake login page or push you into calling a fake support number before you verify anything through your real account.</p>
-
-<p>The most common scam version creates urgency first. It says your account is at risk, your card was flagged, or your access will be restricted unless you act now. A button like review activity, secure account, or verify identity then sends you to a page designed to look like TD Bank. Once there, the goal is usually to steal your username, password, one time code, card details, or other account information.</p>
-
-<p>A real TD Bank alert should still make sense when you check it independently in the official TD Bank app or by going directly to the official website yourself. A scam version gets weaker the moment you stop relying on the email. That is one of the clearest differences. If the warning only works when you trust the email itself, the situation is not safe enough to treat as real.</p>
-
-<p>Another common pattern is a fake support workflow. Instead of only asking you to log in, the email may tell you to call a number immediately to stop fraud. The person who answers may pretend to be TD Bank and ask for account details, verification codes, card numbers, or approval of a transaction you do not understand. This is designed to create panic and rush you past basic verification.</p>
-
-<p>If you receive a TD Bank fraud alert email, do not click the link inside the message and do not call the number listed in the email. Open the official TD Bank app yourself or type the official site into your browser manually and check for alerts there. If you already clicked or entered information, change your password right away, review recent activity, and contact TD Bank through an official support channel you found independently.</p>
-
-<p>The safest way to think about these emails is simple. A real bank warning can be verified outside the message. A scam depends on getting you to trust the message, the link, or the caller before you slow down. Treat any unexpected TD Bank fraud alert email as suspicious until you confirm it directly through the official app, website, or verified bank contact information.</p>
-</div></div>
+const NEW_EXAMPLE_CARD = `
+    <div class="story-card" id="realExamplesCard">
+      <div class="story-card-title">
+        <span class="story-card-title-icon">📩</span>
+        <span>Real TD Bank Fraud Email Examples</span>
+      </div>
+      <p>People report receiving emails with subject lines like “TD Bank: Suspicious activity detected,” “Action required: verify your account,” or “Unusual login attempt.” These messages often claim a large transaction, a locked account, or a security issue that needs immediate attention.</p>
+      <p style="margin-top:14px;">The email usually includes a button such as “Secure Account,” “Verify Identity,” or “Review Activity.” Clicking it can lead to a fake TD Bank login page. Some versions also include a phone number that connects you to a fake fraud department, where the goal is to get your password, verification codes, or card details.</p>
+    </div>
 `;
 
 const NEW_RELATED_LINKS = [
@@ -329,21 +324,36 @@ function upsertFaqJsonLd(html) {
   return inserted;
 }
 
-function replaceSeoContent(html) {
-  if (!NEW_SEO_CONTENT) return html;
+function upsertExampleCard(html) {
+  if (!NEW_EXAMPLE_CARD) return html;
 
-  const updated = html.replace(
-    /<div id="seoContent" class="content-body">[\s\S]*?<\/div>\s*(?=<div class="link-section")/i,
-    `${NEW_SEO_CONTENT}\n\n    `
+  if (html.includes('id="realExamplesCard"')) {
+    const updatedExisting = html.replace(
+      /<div class="story-card" id="realExamplesCard">[\s\S]*?<\/div>\s*(?=<div class="link-section")/i,
+      `${NEW_EXAMPLE_CARD}\n\n    `
+    );
+
+    if (updatedExisting === html) {
+      console.warn("No change for example card");
+      return html;
+    }
+
+    console.log("Updated example card");
+    return updatedExisting;
+  }
+
+  const inserted = html.replace(
+    /(\s*<div class="link-section">)/i,
+    `\n${NEW_EXAMPLE_CARD}\n$1`
   );
 
-  if (updated === html) {
-    console.warn("No change for seo content");
+  if (inserted === html) {
+    console.warn("No change for example card");
     return html;
   }
 
-  console.log("Updated seo content");
-  return updated;
+  console.log("Inserted example card");
+  return inserted;
 }
 
 function replaceRelatedLinks(html) {
@@ -454,7 +464,7 @@ updated = replaceTwitterTitle(updated);
 updated = replaceTwitterDescription(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
-updated = replaceSeoContent(updated);
+updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
 updated = replaceHubLink(updated);
