@@ -29,7 +29,7 @@ const NEW_META =
 const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
 
 const NEW_INSTANT_VERDICT_CARD = `
-  <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:0 auto 14px;padding:0 14px;">
+  <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:-6px auto 12px;padding:0 14px;">
     <div class="story-card lead" id="instantVerdictCard" style="margin:0;padding:20px 16px;text-align:center;">
 
       <div style="margin-bottom:10px;">
