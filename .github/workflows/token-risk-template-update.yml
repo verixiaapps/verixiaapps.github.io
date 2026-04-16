@@ -1,5 +1,5 @@
-# .github/workflows/token-risk-template-update.yml
-name: Token Risk Template Update
+# .github/workflows/update-token-risk-template.yml
+name: Update Token Risk Template
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: token-risk-template-update
+  group: update-token-risk-template
   cancel-in-progress: false
 
 jobs:
@@ -50,7 +50,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add ${{ github.event.inputs.target_template_file }}
+          git add "${{ github.event.inputs.target_template_file }}"
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
