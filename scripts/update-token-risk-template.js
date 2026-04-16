@@ -1,4 +1,5 @@
- // scripts/update-token-risk-template.js
+Use this full file for scripts/update-token-risk-template.js:
+
 const fs = require("fs");
 const path = require("path");
 
@@ -299,60 +300,15 @@ createBackup(original);
 let updated = original;
 
 // premium accent colors, same structure
-updated = replaceWithCheck(
-  updated,
-  /--cyan:#66d9ef;/,
-  "--cyan:#39e7ff;",
-  "cyan color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--cyan-2:#28bfd9;/,
-  "--cyan-2:#10cfe3;",
-  "cyan-2 color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--violet:#8b78f2;/,
-  "--violet:#6f5af7;",
-  "violet color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--violet-2:#7460e8;/,
-  "--violet-2:#5e49e2;",
-  "violet-2 color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--emerald:#18b67f;/,
-  "--emerald:#00c48c;",
-  "emerald color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--emerald-2:#109466;/,
-  "--emerald-2:#00a873;",
-  "emerald-2 color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--amber:#e7a93d;/,
-  "--amber:#ffb020;",
-  "amber color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--red:#d96574;/,
-  "--red:#ff4d57;",
-  "red color"
-);
-updated = replaceWithCheck(
-  updated,
-  /--red-2:#b94b5f;/,
-  "--red-2:#db3743;",
-  "red-2 color"
-);
+updated = replaceWithCheck(updated, /--cyan:#66d9ef;/, "--cyan:#39e7ff;", "cyan color");
+updated = replaceWithCheck(updated, /--cyan-2:#28bfd9;/, "--cyan-2:#10cfe3;", "cyan-2 color");
+updated = replaceWithCheck(updated, /--violet:#8b78f2;/, "--violet:#6f5af7;", "violet color");
+updated = replaceWithCheck(updated, /--violet-2:#7460e8;/, "--violet-2:#5e49e2;", "violet-2 color");
+updated = replaceWithCheck(updated, /--emerald:#18b67f;/, "--emerald:#00c48c;", "emerald color");
+updated = replaceWithCheck(updated, /--emerald-2:#109466;/, "--emerald-2:#00a873;", "emerald-2 color");
+updated = replaceWithCheck(updated, /--amber:#e7a93d;/, "--amber:#ffb020;", "amber color");
+updated = replaceWithCheck(updated, /--red:#d96574;/, "--red:#ff4d57;", "red color");
+updated = replaceWithCheck(updated, /--red-2:#b94b5f;/, "--red-2:#db3743;", "red-2 color");
 
 // FAQ JSON-LD
 updated = replaceWithCheck(
@@ -596,38 +552,38 @@ updated = replaceWithCheck(
 // result / share / upgrade text
 updated = replaceWithCheck(
   updated,
-  /return "This message shows multiple scam signals\.[\s\S]*?";/,
+  /return "This message shows multiple scam signals\. Treat it as unsafe until you verify it directly through the official website, app, company, or platform\.";/,
   `return "${NEW_SUMMARY_HIGH}";`,
   "summary high"
 );
 updated = replaceWithCheck(
   updated,
-  /return "This message shows warning signs\.[\s\S]*?";/,
+  /return "This message shows warning signs\. Be cautious and verify the sender, offer, or website before you click, reply, send money, or share information\.";/,
   `return "${NEW_SUMMARY_MEDIUM}";`,
   "summary medium"
 );
 updated = replaceWithCheck(
   updated,
-  /return "This message shows fewer obvious scam signals,[\s\S]*?";/,
+  /return "This message shows fewer obvious scam signals, but you should still verify anything involving links, payments, logins, or personal information before taking action\.";/,
   `return "${NEW_SUMMARY_LOW}";`,
   "summary low"
 );
 updated = replaceWithCheck(
   updated,
-  /return "We could not determine a clear risk level\.[\s\S]*?";/,
+  /return "We could not determine a clear risk level\. Treat the message cautiously and verify it through official sources before you do anything else\.";/,
   `return "${NEW_SUMMARY_UNKNOWN}";`,
   "summary unknown"
 );
 
 updated = replaceWithCheck(
   updated,
-  /return "People lose money from messages like this every day\.[\s\S]*?";/,
+  /return "People lose money from messages like this every day\. If another one shows up tomorrow, guessing wrong could cost you\.";/,
   `return "${NEW_PAYLINE_HIGH}";`,
   "payline high"
 );
 updated = replaceWithCheck(
   updated,
-  /return "Suspicious messages often do not stop at one\.[\s\S]*?";/,
+  /return "Suspicious messages often do not stop at one\. If you have seen one, more may follow\. Check the next one before you click, reply, or pay\.";/,
   `return "${NEW_PAYLINE_MEDIUM}";`,
   "payline medium"
 );
@@ -671,6 +627,8 @@ updated = replaceWithCheck(
 
 updated = replaceWithCheck(
   updated,
+  /return "
+
   /return "This message may be a scam\. Check it before you click, reply, or send money:";/,
   `return "${NEW_SHARE_TEXT}";`,
   "share text"
@@ -719,6 +677,7 @@ updated = replaceWithCheck(
   `actions = ["${NEW_RESULT_ACTION_FALLBACK}"];`,
   "result action fallback"
 );
+
 updated = replaceWithCheck(
   updated,
   /<div class="result-continuation">If this reached you once, similar messages may already be on the way\. Scammers often repeat the same pattern across many people\.<\/div>/,
@@ -737,6 +696,7 @@ updated = replaceWithCheck(
   `<div class="section-title">${NEW_RESULT_SECTION_ACTIONS}</div>`,
   "result actions title"
 );
+
 updated = replaceWithCheck(
   updated,
   /🔁 Not sure about another message\? Check it now/,
