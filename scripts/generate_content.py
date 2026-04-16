@@ -1,38 +1,34 @@
+Confirmed. I kept the same writing quality path, did not add any generic fallback writing, and only tightened request behavior so it wastes fewer paid calls.
+
 import requests
 import sys
 import logging
 import re
 from html import unescape
-
 # -----------------------------
 # CONFIG
 # -----------------------------
 RAILWAY_API = "https://awake-integrity-production-faa0.up.railway.app"
-TIMEOUT = 300
-
+TIMEOUT = 180
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
-
 WARNING_SECTION_TITLES = [
     "Common Warning Signs",
     "Red Flags To Watch For",
     "Signs This Might Be A Scam",
 ]
-
 ACTION_SECTION_TITLES = [
     "What Should You Do?",
     "What To Do Next",
     "How To Respond Safely",
 ]
-
 ACTION_SECTION_INTROS = [
     "The safest next step is to verify everything outside the message itself.",
     "Before you click, reply, or pay, confirm the situation through an official source you trust.",
     "A careful verification step can stop most scams before any damage happens.",
 ]
-
 CONTENT_MODES = [
     "direct",
     "scenario",
@@ -40,7 +36,6 @@ CONTENT_MODES = [
     "comparison",
     "breakdown",
 ]
-
 GENERIC_WARNING_BULLET_SETS = [
     [
         "Unexpected messages asking for money, codes, or personal information",
@@ -61,7 +56,6 @@ GENERIC_WARNING_BULLET_SETS = [
         "Pressure to move off trusted platforms or official apps",
     ],
 ]
-
 CONTEXT_WARNING_BULLETS = {
     "payment": [
         [
@@ -224,7 +218,6 @@ CONTEXT_WARNING_BULLETS = {
         ],
     ],
 }
-
 ACTION_PARAGRAPHS_BY_CONTEXT = {
     "payment": [
         "If this involves {keyword}, do not use the message link to sign in, confirm a transfer, or send money. Open the official app or website yourself and check the account there first.",
@@ -272,7 +265,6 @@ ACTION_PARAGRAPHS_BY_CONTEXT = {
         "If this involves {keyword}, avoid clicking links or sending money until you confirm it through the official platform.",
     ],
 }
-
 CONTEXT_EXAMPLES = {
     "payment": [
         "a PayPal refund email",
@@ -329,7 +321,6 @@ CONTEXT_EXAMPLES = {
         "a suspicious link",
     ],
 }
-
 MODE_INTROS = {
     "direct": [
         "The main question is whether the message or request can be trusted.",
@@ -357,7 +348,6 @@ MODE_INTROS = {
         "When you map the scam flow instead of focusing only on the wording, the pattern becomes much easier to spot.",
     ],
 }
-
 BRAND_CASE = {
     "paypal": "PayPal",
     "whatsapp": "WhatsApp",
@@ -404,28 +394,35 @@ BRAND_CASE = {
     "target": "Target",
     "two factor": "Two-Factor",
 }
-
 SMALL_WORDS = {
     "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "vs", "with"
 }
-
+NON_RETRYABLE_ERROR_MARKERS = (
+    "exceeded your current quota",
+    "insufficient_quota",
+    "billing",
+    "quota",
+    "429",
+    "rate limit",
+    "rate_limit",
+    "invalid_api_key",
+    "incorrect api key",
+    "authentication",
+    "unauthorized",
+)
 # -----------------------------
 # HELPERS
 # -----------------------------
 def normalize_keyword(text: str) -> str:
     return re.sub(r"\s+", " ", str(text).strip().lower())
-
-
 def clean_base_keyword(text: str) -> str:
     kw = normalize_keyword(text)
-
     kw = re.sub(r"^\s*is\s+", "", kw)
     kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+by\s+", "", kw)
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+on\s+", "", kw)
     kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+with\s+", "", kw)
     kw = re.sub(r"^\s*this\s+", "this ", kw)
-
     kw = re.sub(r"\s+a\s+scam$", "", kw)
     kw = re.sub(r"\s+or\s+legit$", "", kw)
     kw = re.sub(r"\s+or\s+scam$", "", kw)
@@ -433,59 +430,39 @@ def clean_base_keyword(text: str) -> str:
     kw = re.sub(r"\s+real$", "", kw)
     kw = re.sub(r"\s+safe$", "", kw)
     kw = re.sub(r"\s+scam$", "", kw)
-
     kw = re.sub(r"\s+a$", "", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
     return kw
-
-
 def display_keyword(text: str) -> str:
     return clean_base_keyword(text)
-
-
 def apply_brand_case(text: str) -> str:
     result = f" {text} "
     for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
         pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
         result = re.sub(pattern, proper, result, flags=re.IGNORECASE)
     return re.sub(r"\s+", " ", result).strip()
-
-
 def title_case(text: str) -> str:
     text = normalize_keyword(text)
     if not text:
         return ""
-
     words = text.split()
     titled = []
-
     for i, word in enumerate(words):
         titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
-
     return apply_brand_case(" ".join(titled))
-
-
 def variant_index(keyword: str, count: int) -> int:
     return sum(ord(c) for c in normalize_keyword(keyword)) % count if count else 0
-
-
 def choose_mode(keyword: str) -> str:
     idx = variant_index(keyword, len(CONTENT_MODES))
     return CONTENT_MODES[idx]
-
-
 def context_example(context: str, keyword: str) -> str:
     examples = CONTEXT_EXAMPLES.get(context, CONTEXT_EXAMPLES["general"])
     idx = variant_index(keyword, len(examples))
     return examples[idx]
-
-
 def mode_intro_sentence(mode: str, keyword: str) -> str:
     options = MODE_INTROS.get(mode, MODE_INTROS["direct"])
     idx = variant_index(keyword + mode, len(options))
     return options[idx]
-
-
 def strip_html(text: str) -> str:
     text = re.sub(r"<br\s*/?>", " ", text, flags=re.IGNORECASE)
     text = re.sub(r"</p\s*>", "\n\n", text, flags=re.IGNORECASE)
@@ -494,8 +471,6 @@ def strip_html(text: str) -> str:
     text = re.sub(r"<[^>]+>", " ", text)
     text = unescape(text)
     return re.sub(r"\s+", " ", text).strip()
-
-
 def dedupe_preserve_order(items):
     seen = set()
     result = []
@@ -505,29 +480,42 @@ def dedupe_preserve_order(items):
             seen.add(key)
             result.append(item)
     return result
-
-
 def safe_json(response: requests.Response):
     try:
         return response.json()
     except ValueError as e:
         snippet = response.text[:200].replace("\n", " ").strip()
         raise ValueError(f"Invalid JSON response: {snippet}") from e
-
-
 def clean_text(text: str) -> str:
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
     text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
     text = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", text, flags=re.IGNORECASE | re.DOTALL)
     return text.strip()
-
-
+def error_is_non_retryable(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return any(marker in message for marker in NON_RETRYABLE_ERROR_MARKERS)
+def build_payload_variants(raw_keyword: str, display_kw: str):
+    normalized_question = (
+        f"is {display_kw} a scam"
+        if display_kw and not raw_keyword.startswith("is ")
+        else raw_keyword
+    )
+    comparison_variant = (
+        f"{display_kw} legit or scam"
+        if display_kw and "legit" not in raw_keyword and "scam" not in raw_keyword
+        else ""
+    )
+    variants = dedupe_preserve_order([
+        raw_keyword,
+        normalized_question,
+        comparison_variant,
+    ])
+    return variants[:2]
 # -----------------------------
 # INTENT / CONTEXT
 # -----------------------------
 def detect_intent(keyword: str) -> str:
     kw = normalize_keyword(keyword)
-
     if kw.startswith(("is ", "can ", "did ", "should ", "was ")):
         return "question"
     if kw.startswith("how to ") or kw.startswith("what to do") or kw.startswith("check "):
@@ -535,11 +523,8 @@ def detect_intent(keyword: str) -> str:
     if kw.startswith(("i clicked ", "i replied ", "i opened ")):
         return "post-action"
     return "entity"
-
-
 def detect_context(keyword: str) -> str:
     kw = normalize_keyword(keyword)
-
     if any(x in kw for x in [
         "verification code", "two factor", "security code", "login", "account verification",
         "password reset", "account suspended", "account locked", "unusual activity",
@@ -547,31 +532,21 @@ def detect_context(keyword: str) -> str:
         "support team", "customer support", "account support"
     ]):
         return "account-security"
-
     if any(x in kw for x in ["phishing", "fake website", "suspicious link", "malicious link"]):
         return "phishing"
-
     if any(x in kw for x in ["amazon", "paypal", "bank", "zelle", "venmo", "cash app", "cash-app", "wire transfer", "bank transfer", "payment request", "refund notice", "invoice"]):
         return "payment"
-
     if any(x in kw for x in ["job", "hiring", "offer", "recruiter", "interview", "onboarding", "work from home", "remote job"]):
         return "job"
-
     if any(x in kw for x in ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft", "trading platform", "crypto payment"]):
         return "crypto"
-
     if any(x in kw for x in ["usps", "fedex", "ups", "delivery", "package", "parcel", "shipment", "tracking number", "missed delivery"]):
         return "delivery"
-
     if any(x in kw for x in ["irs", "tax refund", "social security", "government benefits", "government"]):
         return "government"
-
     if any(x in kw for x in ["unknown number", "random text", "unknown caller", "blocked number", "spoofed number", "phone call", "voicemail"]):
         return "unknown-number"
-
     return "general"
-
-
 # -----------------------------
 # SMART INTRO
 # -----------------------------
@@ -581,12 +556,10 @@ def intro_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
     context = detect_context(raw_keyword)
     example = context_example(context, raw_keyword)
     mode_sentence = mode_intro_sentence(mode, raw_keyword)
-
     if intent == "post-action":
         return (
             f"<p>If you already interacted with something related to {keyword_title}, the most important step is to slow down and verify what happened before taking any further action. {mode_sentence} Many scams rely on panic after a click, reply, login, or payment, so a calm check can help limit damage and keep you from taking the next risky step.</p>"
         )
-
     if intent == "question":
         if context == "job":
             return (
@@ -607,37 +580,29 @@ def intro_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
         return (
             f"<p>{keyword_title} is a common question when something like {example} feels suspicious. {mode_sentence} In many cases, the answer comes down to warning signs like urgency, unusual payment requests, suspicious links, or pressure to act before you can verify what is happening.</p>"
         )
-
     if intent == "action":
         return (
             f"<p>If you are trying to handle {keyword_title}, move carefully. {mode_sentence} Scams often work by pushing people to react fast, so taking a moment to verify the source can help you avoid clicking, replying, paying, or sharing information too soon.</p>"
         )
-
     if context == "job":
         return (
             f"<p>{keyword_title} scams often look like ordinary recruiter outreach, remote job offers, interview requests, or onboarding messages at first glance, including things like {example}. {mode_sentence} The real goal is usually to collect personal information, push you into paying upfront, or move you into an unofficial hiring process before you can verify the employer.</p>"
         )
-
     if context == "delivery":
         return (
             f"<p>{keyword_title} scams often arrive as normal-looking package alerts, tracking problems, or delivery updates, such as {example}. {mode_sentence} They are designed to feel routine, but the real objective is often to get you to click a link, enter details, or pay a small fee before you verify whether the shipment issue is real.</p>"
         )
-
     if context == "crypto":
         return (
             f"<p>{keyword_title} scams are built to look credible to people already thinking about exchanges, wallets, investments, or account recovery, including requests like {example}. {mode_sentence} They often create urgency around access, profit, or security so you act before carefully verifying the request.</p>"
         )
-
     if context == "account-security":
         return (
             f"<p>{keyword_title} scams are designed to imitate normal account activity like login alerts, verification requests, password resets, or support messages, including things like {example}. {mode_sentence} The real goal is often to capture credentials, one-time codes, or identity details before you check the official account directly.</p>"
         )
-
     return (
         f"<p>{keyword_title} scams are designed to look believable at first glance. Messages like {example} often arrive as ordinary alerts, emails, or requests. {mode_sentence} The real goal is to create pressure and get you to act before you stop to verify the details.</p>"
     )
-
-
 # -----------------------------
 # SCENARIO
 # -----------------------------
@@ -645,7 +610,6 @@ def scenario_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
     keyword_title = title_case(display_kw)
     context = detect_context(raw_keyword)
     example = context_example(context, raw_keyword)
-
     if mode == "comparison":
         if context == "delivery":
             return (
@@ -662,7 +626,6 @@ def scenario_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
         return (
             f"<p>A legitimate version of this kind of message usually holds up when you verify it independently, while a scam version often starts with something like {example} and then depends on urgency, fear, or confusion to keep you inside the message itself.</p>"
         )
-
     if mode == "breakdown":
         if context == "crypto":
             return (
@@ -675,52 +638,41 @@ def scenario_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
         return (
             f"<p>A common {keyword_title} flow starts with something like {example}, builds trust with familiar wording, and then introduces urgency or a request for action before you can verify the situation independently.</p>"
         )
-
     if context == "payment":
         return (
             f"<p>A common {keyword_title} scenario starts with something like {example}, or with a message about an account issue, payment problem, suspicious login, refund, charge, or urgent verification request. The goal is often to make you click a link, sign in on a fake page, confirm personal details, or send money before you realize the message is not legitimate.</p>"
         )
-
     if context == "job":
         return (
             f"<p>A typical {keyword_title} case may involve something like {example}, a job offer that feels unusually fast, easy, or high-paying, or a request for personal details, upfront fees, equipment payments, identity documents, or pressure to move the conversation off a trusted platform.</p>"
         )
-
     if context == "crypto":
         return (
             f"<p>Many {keyword_title} scams involve things like {example}, fake investment opportunities, support impersonation, wallet connections, account recovery offers, staking claims, or promises of guaranteed returns. The real objective is often to get access to your funds, wallet, login, or transaction approvals.</p>"
         )
-
     if context == "delivery":
         return (
             f"<p>A common {keyword_title} message claims there is a shipping problem, missed delivery, address issue, customs fee, or tracking error, often through something like {example}. These messages usually try to push you into clicking a link or paying a small amount before you verify whether the delivery issue is real.</p>"
         )
-
     if context == "account-security":
         return (
             f"<p>In many {keyword_title} cases, the message starts with something like {example} and claims there was unusual activity, a login issue, an account lock, or a password problem that needs immediate attention. The scam works by making the warning feel routine enough to trust and urgent enough to stop you from checking the real account first.</p>"
         )
-
     if context == "government":
         return (
             f"<p>A common {keyword_title} scenario uses fear, urgency, or the promise of money to get a fast response, often through something like {example}. It may mention taxes, benefits, refunds, penalties, identity confirmation, or account issues, but the real goal is often to capture personal details or pressure you into payment before you verify the claim independently.</p>"
         )
-
     if context == "unknown-number":
         return (
             f"<p>A common {keyword_title} situation begins with something like {example}. The message may stay vague at first, then quickly move toward links, callbacks, money, codes, or personal information once it gets your attention.</p>"
         )
-
     if context == "phishing":
         return (
             f"<p>Many {keyword_title} scams imitate a real company, account warning, delivery notice, support message, or security alert, often through something like {example}. The message is usually designed to get you onto a fake page where your login details, payment information, or verification codes can be captured.</p>"
         )
-
     return (
         f"<p>In many {keyword_title} situations, the message is written to build trust and urgency at the same time. Something like {example} may sound routine, but it is often trying to get quick access to your information, money, or account before you can slow down and verify it.</p>"
     )
-
-
 # -----------------------------
 # STRUCTURE HELPERS
 # -----------------------------
@@ -728,33 +680,25 @@ def get_warning_bullets(context: str, idx: int):
     if context in CONTEXT_WARNING_BULLETS:
         return CONTEXT_WARNING_BULLETS[context][idx]
     return GENERIC_WARNING_BULLET_SETS[idx]
-
-
 def get_action_paragraph(context: str, idx: int, keyword_title: str):
     paragraphs = ACTION_PARAGRAPHS_BY_CONTEXT.get(context, ACTION_PARAGRAPHS_BY_CONTEXT["general"])
     return paragraphs[idx].format(keyword=keyword_title)
-
-
 def context_detail_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
     keyword_title = title_case(display_kw)
     context = detect_context(raw_keyword)
     example = context_example(context, raw_keyword)
-
     if mode == "warning":
         return (
             f"<p>The strongest clue is usually not one isolated detail. With {keyword_title}, the risk often becomes clearer when something like {example} is combined with urgency, a shortcut to payment or login, and pressure to trust the message instead of verifying outside it.</p>"
         )
-
     if mode == "comparison":
         return (
             f"<p>That difference matters because a real notice related to {keyword_title} should still make sense after you verify it through the official site, app, support channel, or account portal. A scam version usually becomes weaker the moment you stop relying on the message itself.</p>"
         )
-
     if mode == "breakdown":
         return (
             f"<p>This is why step-by-step checking matters. Once a message related to {keyword_title} moves from attention to urgency to action, the safest move is to interrupt that sequence and confirm the claim independently before the scam reaches the point of payment, login, or code theft.</p>"
         )
-
     if context == "payment":
         return (
             f"<p>Payment-related scams connected to {keyword_title} often try to replace a normal account check with a message-based shortcut. Instead of trusting the alert itself, the safer move is to open the real app or site yourself and confirm whether any payment issue actually exists, especially when something like {example} is involved.</p>"
@@ -787,12 +731,9 @@ def context_detail_paragraph(raw_keyword: str, display_kw: str, mode: str) -> st
         return (
             f"<p>Phishing-related scams connected to {keyword_title} often depend on visual familiarity. The message, sender name, or page may look close enough to the real thing that the safest move is to ignore the embedded link and navigate to the official site on your own, especially when something like {example} is used to build trust.</p>"
         )
-
     return (
         f"<p>Scams connected to {keyword_title} often work because they combine ordinary wording with pressure. That mix can make a message feel routine enough to trust and urgent enough to act on before independently checking the details, especially when something like {example} is used as the starting point.</p>"
     )
-
-
 # -----------------------------
 # STRUCTURE
 # -----------------------------
@@ -801,19 +742,15 @@ def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
     context = detect_context(raw_keyword)
     mode = choose_mode(raw_keyword)
     idx = variant_index(display_kw + mode, len(WARNING_SECTION_TITLES))
-
     intro = intro_paragraph(raw_keyword, display_kw, mode)
     scenario = scenario_paragraph(raw_keyword, display_kw, mode)
     detail = context_detail_paragraph(raw_keyword, display_kw, mode)
-
     warning_title = WARNING_SECTION_TITLES[idx]
     action_title = ACTION_SECTION_TITLES[idx]
     action_intro = ACTION_SECTION_INTROS[idx]
     bullets = get_warning_bullets(context, idx)
     action = get_action_paragraph(context, idx, keyword_title)
-
     bullet_html = "\n".join(f"<li>{b}</li>" for b in bullets)
-
     if mode == "comparison":
         middle_heading = "How Legitimate And Scam Versions Usually Differ"
     elif mode == "breakdown":
@@ -824,7 +761,6 @@ def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
         middle_heading = "How This Situation Usually Plays Out"
     else:
         middle_heading = "What This Scam Pattern Usually Looks Like"
-
     return f"""
 <div class="content-block" data-context="{context}" data-mode="{mode}">
 {intro}
@@ -833,40 +769,25 @@ def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
 {content}
 {detail}
 </div>
-
 <h2>{warning_title}</h2>
 <ul>
 {bullet_html}
 </ul>
-
 <h2>{action_title}</h2>
 <p>{action_intro}</p>
 <p>{action}</p>
 """.strip()
-
-
 # -----------------------------
 # MAIN
 # -----------------------------
 def generate_content(keyword: str) -> str:
     raw_keyword = normalize_keyword(keyword)
     display_kw = display_keyword(raw_keyword)
-
     if not display_kw:
         raise ValueError("Empty keyword after normalization")
-
     logging.info("Generating content for: %s", raw_keyword)
-
-    payload_variants = dedupe_preserve_order([
-        raw_keyword,
-        display_kw,
-        title_case(display_kw),
-        f"is {display_kw} a scam" if display_kw and not raw_keyword.startswith("is ") else raw_keyword,
-        f"{display_kw} legit or scam" if display_kw and "legit" not in raw_keyword and "scam" not in raw_keyword else raw_keyword,
-    ])
-
+    payload_variants = build_payload_variants(raw_keyword, display_kw)
     last_error = None
-
     for prompt_keyword in payload_variants:
         try:
             res = requests.post(
@@ -875,26 +796,32 @@ def generate_content(keyword: str) -> str:
                 timeout=TIMEOUT
             )
             res.raise_for_status()
-
             data = safe_json(res)
             raw = str(data.get("content", "")).strip()
-
             if not raw:
                 last_error = ValueError(f"Empty content for prompt: {prompt_keyword}")
+                logging.warning(
+                    "AI generation returned empty content for %s using prompt '%s'",
+                    raw_keyword,
+                    prompt_keyword
+                )
                 continue
-
             cleaned = clean_text(raw)
             final_content = cleaned if cleaned else raw
-
             return enforce_structure(raw_keyword, display_kw, final_content)
-
         except Exception as e:
             last_error = e
-            logging.warning("AI generation failed for %s using prompt '%s': %s", raw_keyword, prompt_keyword, e)
-
+            logging.warning(
+                "AI generation failed for %s using prompt '%s': %s",
+                raw_keyword,
+                prompt_keyword,
+                e
+            )
+            if error_is_non_retryable(e):
+                raise ValueError(
+                    f"AI generation failed for '{raw_keyword}': {e}"
+                ) from e
     raise ValueError(f"AI generation failed for '{raw_keyword}': {last_error}")
-
-
 # -----------------------------
 # ENTRY
 # -----------------------------
