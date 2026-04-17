@@ -158,6 +158,7 @@ function updateStaticCopy(html) {
 
   const exactReplacements = [
     ['<span>Scam Check Now</span>', '<span>Token Risk</span>'],
+    ['href="https://verixiaapps.com/check/"', 'href="https://verixiaapps.com/token-risk/"'],
     ['<div class="hero-badge">Live scam checking</div>', '<div class="hero-badge">Live token analysis</div>'],
     ['<div class="hero-badge">Shareable warning page</div>', '<div class="hero-badge">Liquidity-aware checks</div>'],
     ['<div class="hero-badge">Built for repeat use</div>', '<div class="hero-badge">Built for repeat use</div>'],
@@ -170,26 +171,27 @@ function updateStaticCopy(html) {
     ['<div class="preview-domain" id="previewDomain">Example suspicious message</div>', '<div class="preview-domain" id="previewDomain">Example token snapshot</div>'],
     ['<div class="preview-sub" id="previewSub">Common signals found in similar scams</div>', '<div class="preview-sub" id="previewSub">Common risk signals found in similar tokens</div>'],
     ['<div class="input-help">Examples: delivery text, PayPal alert, crypto message, job offer, account warning</div>', '<div class="input-help">Example: ERC-20, Solana, Base, or other supported token contract address</div>'],
-    ['<button class="check" onclick="check()">🔍 Check Scam Risk</button>', '<button class="check" onclick="checkToken()">🔍 Check Token Risk</button>'],
+    ['<button class="check" onclick="check()">🔍 Check Scam Risk</button>', '<button class="check" onclick="check()">🔍 Check Token Risk</button>'],
     ['<div class="note">No signup required • 1 free check • Results in seconds</div>', '<div class="note">No signup required • 1 free token check • Results in seconds</div>'],
     ['<div class="note">Get a clear risk level, key red flags, and what to do next</div>', '<div class="note">Get a clear risk level, liquidity confidence, token metrics, and what to do next</div>'],
     ['<h4>Check suspicious messages anytime</h4>', '<h4>Check token risk anytime</h4>'],
     ['Scam attempts often do not happen once. Use the app to check the next message before you click, reply, or send money.', 'Risky tokens move fast. Use the app to review the next token before you buy, swap, or connect your wallet.'],
     ['<h3>Don’t Miss the Next Scam</h3>', '<h3>Don’t Miss the Next Risky Token</h3>'],
-    ['Most scam attempts do not happen once. If you are seeing suspicious messages, links, or requests, more may follow. Check each one before it costs you.', 'Risky tokens do not appear once. If you are checking launches, trending coins, or fast-moving pairs, more will follow. Check each one before it costs you.'],
-    ['Built for ongoing protection against scams, phishing, impersonation, and risky payment requests', 'Built for ongoing token risk review across liquidity, volume, volatility, and market behavior'],
+    ['Most scam attempts do not happen once. If you are seeing suspicious messages, links, or requests, more may follow. Check each one before it costs you.', 'Risky tokens do not appear once. If you are checking launches, trending pairs, or fast-moving coins, more will follow. Check each one before it costs you.'],
+    ['Built for ongoing protection against scams, phishing, impersonation, and risky payment requests', 'Built for ongoing token review across liquidity, trading activity, pair age, and broader market behavior'],
     ['Unlimited scam checks • Cancel anytime', 'Unlimited token checks • Cancel anytime'],
     ['Weekly Protection', 'Weekly Access'],
     ['Monthly Protection', 'Monthly Access'],
     ['Yearly Protection', 'Yearly Access'],
     ['<h3 id="relatedHeading">Check Similar Messages</h3>', '<h3 id="relatedHeading">Check Similar Tokens</h3>'],
     ['<h3 id="moreLinksHeading">More Scam Checks</h3>', '<h3 id="moreLinksHeading">More Token Risk Checks</h3>'],
-    ['Messages like this are one of the most common ways people lose money, share codes, or hand over access without realizing it. When something feels off, pause and verify it through official sources before taking action.', 'Tokens like this can move fast and punish bad decisions quickly. When something feels off, pause and review liquidity, volume, pair age, and broader trust signals before taking action.'],
+    ['Messages like this are one of the most common ways people lose money, share codes, or hand over access without realizing it. When something feels off, pause and verify it through official sources before taking action.', 'Tokens like this can move fast and punish bad decisions quickly. When something feels off, pause and review liquidity, trading activity, pair age, and broader trust signals before taking action.'],
     ['Scam Check Now © 2026 • Scam detection and risk analysis tool', 'Token Risk © 2026 • Token risk analysis tool'],
+    ['✅ Payment successful — unlimited access is active on this browser', '✅ Payment successful — unlimited token access is active on this browser'],
     ['Unlimited scam checks are active with this account', 'Unlimited token checks are active with this account'],
     ['Unlock unlimited scam checks instantly', 'Unlock unlimited token checks instantly'],
-    ['Continue with your selected plan below.', 'Continue with your selected plan below.'],
-    ['🔓 Unlock Unlimited Checks', '🔓 Unlock Unlimited Token Checks']
+    ['🔓 Unlock Unlimited Checks', '🔓 Unlock Unlimited Token Checks'],
+    ['https://verixiaapps.com/website-policies/scam-check/', 'https://verixiaapps.com/website-policies/token-risk/']
   ];
 
   for (const [oldValue, newValue] of exactReplacements) {
@@ -205,13 +207,13 @@ function updateStaticCopy(html) {
   output = replaceAllRegex(
     output,
     /"name":"How can I tell if something is a scam\?"/g,
-    `"name":"How can I tell if a crypto token is risky?"`
+    `"name":"How can I tell if a token is risky?"`
   );
 
   output = replaceAllRegex(
     output,
     /Look for urgency, requests for money or codes, suspicious links, and messages that pressure you to act quickly\. Always verify through official sources\./g,
-    `Look for low liquidity, abnormal volume spikes, extreme price changes, and very new pairs. Always verify the token before buying, swapping, or connecting.`
+    `Look for weak liquidity, abnormal trading activity, very new pairs, and unstable price action. Always verify a token before buying, swapping, or connecting.`
   );
 
   output = replaceAllRegex(
@@ -223,13 +225,13 @@ function updateStaticCopy(html) {
   output = replaceAllRegex(
     output,
     /Avoid entering any information, close the page, run a security check on your device, and change important passwords if needed\./g,
-    `Liquidity confidence is a simple signal based on liquidity relative to trading activity. Weak liquidity can make exits, slippage, and sharp breakdowns more dangerous.`
+    `Liquidity confidence is a simple trust signal based on liquidity relative to trading activity. Weak liquidity can increase slippage, exit risk, and breakdown risk.`
   );
 
   output = replaceAllRegex(
     output,
     /"name":"Are scam messages common\?"/g,
-    `"name":"Can a token still be risky even if it has volume?"`
+    `"name":"Can a token still be risky even with volume?"`
   );
 
   output = replaceAllRegex(
@@ -249,7 +251,7 @@ function updateStaticCopy(html) {
   return output;
 }
 
-const CHECK_TOKEN_FUNCTION = `async function checkToken() {
+const CHECK_FUNCTION = `async function check() {
   const tokenAddress = document.getElementById("tokenAddress").value.trim();
   const emailEl = document.getElementById("email");
   const email = emailEl ? emailEl.value.trim().toLowerCase() : "";
@@ -263,7 +265,7 @@ const CHECK_TOKEN_FUNCTION = `async function checkToken() {
           <div class="risk unknown">⚪ Paste Token Address</div>
           <div class="result-chip">Awaiting Input</div>
         </div>
-        <div class="result-summary">Paste a token contract address to check liquidity, market signals, and token risk before you act.</div>
+        <div class="result-summary">Paste a token contract address to review liquidity, market behavior, and token risk before you act.</div>
       </div>
     \`;
     result.style.display = "block";
@@ -277,7 +279,7 @@ const CHECK_TOKEN_FUNCTION = `async function checkToken() {
         <div class="risk unknown">⚪ Analyzing...</div>
         <div class="result-chip">Token Scan In Progress</div>
       </div>
-      <div class="result-summary">Checking liquidity, volume, price behavior, and broader token risk signals.</div>
+      <div class="result-summary">Checking liquidity, volume, price behavior, pair age, and broader token risk signals.</div>
     </div>
   \`;
 
@@ -351,17 +353,28 @@ function formatTokenMetrics(metrics) {
     ["Price USD", metrics?.priceUsd],
     ["Market Cap", metrics?.marketCap],
     ["FDV", metrics?.fdv],
+    ["Buys 24h", metrics?.buys24h],
+    ["Sells 24h", metrics?.sells24h],
     ["Pair Age", metrics?.pairAge],
     ["Chain", metrics?.chainId],
-    ["DEX", metrics?.dexId]
+    ["DEX", metrics?.dexId],
+    ["Pair Address", metrics?.pairAddress],
+    ["Pair URL", metrics?.pairUrl]
   ];
 
-  return rows.map(([label, value]) => \`
-    <li class="signal-item">
-      <span class="signal-icon">•</span>
-      <span><strong>\${escapeHtml(label)}:</strong> \${escapeHtml(formatCompactMetricValue(label, value))}</span>
-    </li>
-  \`).join("");
+  return rows.map(([label, value]) => {
+    const renderedValue =
+      label === "Pair URL" && value
+        ? \`<a href="\${escapeHtml(String(value))}" target="_blank" rel="noopener noreferrer">Open pair</a>\`
+        : escapeHtml(formatCompactMetricValue(label, value));
+
+    return \`
+      <li class="signal-item">
+        <span class="signal-icon">•</span>
+        <span><strong>\${escapeHtml(label)}:</strong> \${renderedValue}</span>
+      </li>
+    \`;
+  }).join("");
 }
 
 function formatTokenList(items, emptyText) {
@@ -501,7 +514,7 @@ const BUILD_CONTENT_BRIDGE_FUNCTION = `function buildContentBridge(keywordRaw) {
 const BUILD_RECOGNITION_ITEMS_FUNCTION = `function buildRecognitionItems(keywordRaw) {
   const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
 
-  if (containsAny(lower, ["memecoin", "meme", "pump", "moon"])) {
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon"])) {
     return [
       ["What people notice first", "Fast hype, sharp price moves, and heavy attention before trust is established."],
       ["What matters most", "Liquidity, pair age, and whether volume looks supported by the pool."],
@@ -705,7 +718,7 @@ function main() {
 
   html = updateStaticCopy(html);
 
-  html = replaceFunction(html, "check", CHECK_TOKEN_FUNCTION);
+  html = replaceFunction(html, "check", CHECK_FUNCTION);
   html = replaceFunction(html, "scrollToTopCheck", SCROLL_TO_TOP_CHECK_FUNCTION);
   html = replaceFunction(html, "buildHeroTitle", BUILD_HERO_TITLE_FUNCTION);
   html = replaceFunction(html, "buildHeroSubheading", BUILD_HERO_SUBHEADING_FUNCTION);
@@ -723,12 +736,14 @@ function main() {
 
   ensureContains(html, "Token Risk", "Token Risk branding");
   ensureContains(html, 'id="tokenAddress"', "token address input");
-  ensureContains(html, 'onclick="checkToken()"', "token check button hook");
+  ensureContains(html, 'onclick="check()"', "token check button hook");
   ensureContains(html, 'fetch(API + "/token-risk"', "token risk endpoint");
   ensureContains(html, 'requestUrl.indexOf("/token-risk") !== -1', "token risk fetch watcher");
   ensureContains(html, "function formatTokenResult(data)", "token result formatter");
-  ensureContains(html, "async function checkToken()", "token check function");
+  ensureContains(html, "async function check()", "token check function");
   ensureContains(html, "Liquidity Confidence", "liquidity confidence UI");
+  ensureContains(html, "Pair Address", "pair address metric");
+  ensureContains(html, "Pair URL", "pair url metric");
   ensureContains(html, 'id="email"', "subscriber email field preserved");
   ensureContains(html, 'const API_BASE = "https://awake-integrity-production-faa0.up.railway.app";', "Railway API base preserved");
   ensureContains(html, 'const STRIPE_PUBLISHABLE_KEY = "pk_live_', "Stripe publishable key preserved");
@@ -736,7 +751,7 @@ function main() {
   ensureContains(html, 'create-checkout', "hosted checkout endpoint preserved");
 
   fs.writeFileSync(TEMPLATE_PATH, html, "utf8");
-  console.log(\`Updated \${TEMPLATE_PATH}\`);
+  console.log(`Updated ${TEMPLATE_PATH}`);
 }
 
 try {
