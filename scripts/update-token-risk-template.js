@@ -285,6 +285,53 @@ function replaceWithCheck(html, regex, replacement, label) {
   return updated;
 }
 
+function findMatchingDivEnd(html, startIndex) {
+  let i = startIndex;
+  let depth = 0;
+
+  while (i < html.length) {
+    const nextOpen = html.indexOf("<div", i);
+    const nextClose = html.indexOf("</div>", i);
+
+    if (nextClose === -1) return -1;
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1;
+      i = nextOpen + 4;
+      continue;
+    }
+
+    depth -= 1;
+    i = nextClose + 6;
+
+    if (depth === 0) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+function replaceDivBlockByMarker(html, marker, replacement, label) {
+  const start = html.indexOf(marker);
+
+  if (start === -1) {
+    console.warn(`No change for ${label}`);
+    return html;
+  }
+
+  const end = findMatchingDivEnd(html, start);
+
+  if (end === -1) {
+    console.warn(`No change for ${label} (unbalanced div structure)`);
+    return html;
+  }
+
+  const updated = html.slice(0, start) + replacement + html.slice(end);
+  console.log(`Updated ${label}`);
+  return updated;
+}
+
 // ------------------------------------
 // MAIN
 // ------------------------------------
@@ -315,15 +362,15 @@ ${NEW_FAQ_JSONLD}
 );
 
 // hero surface
-updated = replaceWithCheck(
+updated = replaceDivBlockByMarker(
   updated,
-  /<div class="hero-badge-row">[\s\S]*?<\/div>/i,
+  '<div class="hero-badge-row">',
   NEW_HERO_BADGES.trim(),
   "hero badges"
 );
-updated = replaceWithCheck(
+updated = replaceDivBlockByMarker(
   updated,
-  /<div class="hero-trust">[\s\S]*?<\/div>/i,
+  '<div class="hero-trust">',
   NEW_HERO_TRUST.trim(),
   "hero trust chips"
 );
@@ -347,13 +394,12 @@ updated = replaceWithCheck(
   `<div class="preview-sub" id="previewSub">${NEW_PREVIEW_SUB}</div>`,
   "preview sub"
 );
-updated = replaceWithCheck(
+updated = replaceDivBlockByMarker(
   updated,
-  /<div class="preview-signals" id="previewSignals">[\s\S]*?<\/div>\s*<\/div>/i,
+  '<div class="preview-signals" id="previewSignals">',
   `<div class="preview-signals" id="previewSignals">
 ${NEW_PREVIEW_SIGNALS}
-      </div>
-    </div>`,
+      </div>`,
   "preview signals markup"
 );
 
@@ -581,166 +627,4 @@ updated = replaceWithCheck(
 );
 updated = replaceWithCheck(
   updated,
-  /return "Even lower-risk messages can become expensive when later versions ask for logins, payments, codes, or urgent action\.";/,
-  `return "${NEW_PAYLINE_LOW}";`,
-  "payline low"
-);
-updated = replaceWithCheck(
-  updated,
-  /return "When the risk is unclear, the safest move is to pause, verify this one, and treat the next similar message carefully too\.";/,
-  `return "${NEW_PAYLINE_UNKNOWN}";`,
-  "payline unknown"
-);
-
-updated = replaceWithCheck(
-  updated,
-  /if \(risk === "high"\) return "Pattern Match: Strong";/,
-  `if (risk === "high") return "${NEW_CHIP_HIGH}";`,
-  "chip high"
-);
-updated = replaceWithCheck(
-  updated,
-  /if \(risk === "medium"\) return "Pattern Match: Moderate";/,
-  `if (risk === "medium") return "${NEW_CHIP_MEDIUM}";`,
-  "chip medium"
-);
-updated = replaceWithCheck(
-  updated,
-  /if \(risk === "low"\) return "Pattern Match: Lower Risk";/,
-  `if (risk === "low") return "${NEW_CHIP_LOW}";`,
-  "chip low"
-);
-updated = replaceWithCheck(
-  updated,
-  /return "Pattern Match: Review Needed";/,
-  `return "${NEW_CHIP_UNKNOWN}";`,
-  "chip unknown"
-);
-
-updated = replaceWithCheck(
-  updated,
-  /return "This message may be a scam\. Check it before you click, reply, or send money:";/,
-  `return "${NEW_SHARE_TEXT}";`,
-  "share text"
-);
-updated = replaceWithCheck(
-  updated,
-  /return `This message may be a scam\.\s*Check it before you click, reply, or send money:\s*\$\{getShareUrl$begin:math:text$$end:math:text$\}`;/,
-  `return \`${NEW_WARNING_MESSAGE}\`;`,
-  "warning message"
-); 
-
-updated = replaceWithCheck(
-  updated,
-  /Paste a suspicious message, email, website, link, job offer, or investment pitch to check scam risk before you act\./,
-  NEW_RESULT_EMPTY,
-  "empty result text"
-);
-updated = replaceWithCheck(
-  updated,
-  /Checking for scam signals, risky patterns, payment traps, impersonation, and suspicious links\./,
-  NEW_RESULT_LOADING,
-  "loading result text"
-);
-updated = replaceWithCheck(
-  updated,
-  /Unlock unlimited protection so you can check the next suspicious message, link, or request before it costs you\./,
-  NEW_LIMIT_CARD,
-  "limit card text"
-);
-updated = replaceWithCheck(
-  updated,
-  /We could not analyze this right now\. Please try again in a moment\./,
-  NEW_ERROR_CARD,
-  "error result text"
-);
-
-updated = replaceWithCheck(
-  updated,
-  /signals = \["Review the sender, links, and any requests for money, urgency, or personal information\."\];/,
-  `signals = ["${NEW_RESULT_SIGNAL_FALLBACK}"];`,
-  "result signal fallback"
-);
-updated = replaceWithCheck(
-  updated,
-  /actions = \["Do not reply, do not click links, and verify directly through the official website, app, company, or platform before taking action\."\];/,
-  `actions = ["${NEW_RESULT_ACTION_FALLBACK}"];`,
-  "result action fallback"
-);
-
-updated = replaceWithCheck(
-  updated,
-  /<div class="result-continuation">If this reached you once, similar messages may already be on the way\. Scammers often repeat the same pattern across many people\.<\/div>/,
-  `<div class="result-continuation">${NEW_RESULT_CONTINUATION}</div>`,
-  "result continuation"
-);
-updated = replaceWithCheck(
-  updated,
-  /<div class="section-title">Detected Signals<\/div>/,
-  `<div class="section-title">${NEW_RESULT_SECTION_SIGNALS}</div>`,
-  "result signals title"
-);
-updated = replaceWithCheck(
-  updated,
-  /<div class="section-title">Recommended Actions<\/div>/,
-  `<div class="section-title">${NEW_RESULT_SECTION_ACTIONS}</div>`,
-  "result actions title"
-);
-
-updated = replaceWithCheck(
-  updated,
-  /🔁 Not sure about another message\? Check it now/g,
-  NEW_RESULT_CTA,
-  "result cta"
-);
-updated = replaceWithCheck(
-  updated,
-  /⚠️ Messages like this are often sent in waves/g,
-  NEW_SHARE_ALERT,
-  "share alert"
-);
-updated = replaceWithCheck(
-  updated,
-  /Know someone who could receive this same message\? Send this warning before they click, reply, or send money\./g,
-  NEW_SHARE_COPY,
-  "share copy"
-);
-updated = replaceWithCheck(
-  updated,
-  /⚠️ Copy Warning/g,
-  NEW_COPY_WARNING_BTN,
-  "copy warning button"
-);
-
-// embedded upgrade wording only
-updated = replaceWithCheck(
-  updated,
-  /postPurchase\.textContent = "✅ Unlimited scam checks are active with this account";/,
-  `postPurchase.textContent = "${NEW_POST_PURCHASE}";`,
-  "post purchase text"
-);
-updated = replaceWithCheck(
-  updated,
-  /button\.innerText = "🔓 Unlock Unlimited Checks";/,
-  `button.innerText = "${NEW_EMBEDDED_BUTTON}";`,
-  "embedded unlock button"
-);
-updated = replaceWithCheck(
-  updated,
-  /title\.textContent = "Unlock unlimited scam checks instantly";/,
-  `title.textContent = "${NEW_EMBEDDED_TITLE}";`,
-  "embedded title"
-);
-
-if (updated === original) {
-  console.log("No changes made.");
-  process.exit(0);
-}
-
-if (DRY_RUN) {
-  console.log("DRY RUN - no file written");
-  process.exit(0);
-}
-
-fs.writeFileSync(TARGET_TEMPLATE_FILE, updated, "utf8");
-console.log("Updated token risk template:", TARGET_TEMPLATE_FILE);
+  /return "Even lower-risk messages can become expensive when later versions ask for logins
