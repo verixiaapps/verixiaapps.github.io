@@ -2172,3 +2172,576 @@ async function checkout(priceId) {
   }
 }
 <!-- END BLOCK 2 OF 4 -->
+
+<!-- START BLOCK 3 OF 4 -->
+<script>
+/* ====== Share helpers removed for token-focused flow ====== */
+
+(function () {
+  if (window.__TOKEN_RISK_EMBEDDED_UPGRADE__) return;
+  window.__TOKEN_RISK_EMBEDDED_UPGRADE__ = true;
+
+  const API_BASE = "https://awake-integrity-production-faa0.up.railway.app";
+  const STRIPE_PUBLISHABLE_KEY = "pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y";
+  const ADS_ID = "AW-17956428385";
+  const ADS_SEND_TO = "AW-17956428385/dE43CO04_IUcEOGopfJC";
+  const BROWSER_SUB_KEY = "scam_check_browser_subscribed";
+  const VERIFIED_SUB_EMAIL_KEY = "scam_check_verified_subscriber_email";
+
+  const PRICES = {
+    weekly: "price_1T8KOTJjMzyHDzeQDDg1A2TF",
+    monthly: "price_1T8KOUJjMzyHDzeQxaqPFOSB",
+    yearly: "price_1T8KOQJjMzyHDzeQfcU1C1MQ"
+  };
+
+  let stripe = null;
+  let checkoutInstance = null;
+  let selectedPlanKey = "monthly";
+  let isInitializingCheckout = false;
+  let stripeScriptPromise = null;
+  let legacyUpgradeObserver = null;
+
+  let wrapper;
+  let buttonRow;
+  let button;
+  let checkoutCard;
+  let compactRow;
+  let compactText;
+  let changePlanBtn;
+  let planRow;
+  let weeklyBtn;
+  let monthlyBtn;
+  let yearlyBtn;
+  let helper;
+  let checkoutContainer;
+  let status;
+  let closeBtn;
+
+  function normalizeEmail(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getEmailInput() {
+    return document.getElementById("email");
+  }
+
+  function getEnteredEmail() {
+    const input = getEmailInput();
+    return input ? normalizeEmail(input.value) : "";
+  }
+
+  function getStoredVerifiedEmail() {
+    return normalizeEmail(localStorage.getItem(VERIFIED_SUB_EMAIL_KEY) || "");
+  }
+
+  function setStoredVerifiedEmail(email) {
+    const normalized = normalizeEmail(email);
+    if (normalized) {
+      localStorage.setItem(VERIFIED_SUB_EMAIL_KEY, normalized);
+    }
+  }
+
+  function isBrowserSubscribed() {
+    return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+  }
+
+  function markBrowserSubscribed(value) {
+    if (value) {
+      localStorage.setItem(BROWSER_SUB_KEY, "true");
+    } else {
+      localStorage.removeItem(BROWSER_SUB_KEY);
+    }
+  }
+
+  function isVerifiedSubscriberForCurrentUser() {
+    const storedEmail = getStoredVerifiedEmail();
+    const enteredEmail = getEnteredEmail();
+
+    if (!isBrowserSubscribed()) return false;
+    if (!storedEmail) return false;
+    if (!enteredEmail) return false;
+
+    return enteredEmail === storedEmail;
+  }
+
+  function shouldSuppressUpgrade() {
+    return isVerifiedSubscriberForCurrentUser();
+  }
+
+  function syncPostPurchaseMessage() {
+    const postPurchase = document.getElementById("postPurchase");
+    if (!postPurchase) return;
+
+    postPurchase.textContent = "✅ Unlimited token checks are active";
+    postPurchase.style.display = shouldSuppressUpgrade() ? "block" : "none";
+  }
+
+  function setStatus(text) {
+    if (status) status.textContent = text || "";
+  }
+
+  function injectLegacyUpgradeKillCSS() {
+    if (document.getElementById("token-risk-hide-legacy-upgrade")) return;
+
+    const style = document.createElement("style");
+    style.id = "token-risk-hide-legacy-upgrade";
+    style.textContent = `
+      #upgrade {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+        max-height: 0 !important;
+        min-height: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function hideLegacyUpgradeUI() {
+    const oldUpgrade = document.getElementById("upgrade");
+    if (oldUpgrade) {
+      oldUpgrade.style.setProperty("display", "none", "important");
+      oldUpgrade.style.setProperty("visibility", "hidden", "important");
+      oldUpgrade.style.setProperty("pointer-events", "none", "important");
+      oldUpgrade.style.setProperty("opacity", "0", "important");
+      oldUpgrade.style.setProperty("max-height", "0", "important");
+      oldUpgrade.style.setProperty("min-height", "0", "important");
+      oldUpgrade.style.setProperty("height", "0", "important");
+      oldUpgrade.style.setProperty("overflow", "hidden", "important");
+      oldUpgrade.style.setProperty("margin", "0", "important");
+      oldUpgrade.style.setProperty("padding", "0", "important");
+      oldUpgrade.style.setProperty("border", "0", "important");
+      oldUpgrade.setAttribute("hidden", "");
+      oldUpgrade.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function watchLegacyUpgradeUI() {
+    if (legacyUpgradeObserver) return;
+
+    legacyUpgradeObserver = new MutationObserver(function () {
+      hideLegacyUpgradeUI();
+    });
+
+    legacyUpgradeObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"]
+    });
+  }
+
+  function ensureAdsScript() {
+    if (document.querySelector('script[src*="googletagmanager.com/gtag/js?id=' + ADS_ID + '"]')) {
+      return;
+    }
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + ADS_ID;
+    document.head.appendChild(s);
+  }
+
+  function ensureGtag() {
+    ensureAdsScript();
+    window.dataLayer = window.dataLayer || [];
+    if (!window.gtag) {
+      window.gtag = function () { window.dataLayer.push(arguments); };
+    }
+    try {
+      window.gtag("js", new Date());
+      window.gtag("config", ADS_ID);
+    } catch (e) {}
+  }
+
+  function handleReturnState() {
+    ensureGtag();
+
+    const params = new URLSearchParams(window.location.search);
+    const hasConversion = params.get("conversion") === "1";
+    const hasSubscribed = params.get("subscribed") === "true";
+
+    if (hasConversion && !sessionStorage.getItem("ads_conversion")) {
+      try {
+        window.gtag("event", "conversion", {
+          send_to: ADS_SEND_TO,
+          value: 10.0,
+          currency: "USD"
+        });
+        sessionStorage.setItem("ads_conversion", "1");
+      } catch (e) {}
+    }
+
+    if (hasSubscribed) {
+      markBrowserSubscribed(true);
+    }
+
+    syncPostPurchaseMessage();
+
+    if (hasConversion || hasSubscribed) {
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (e) {}
+    }
+  }
+
+  function patchTopUpgradeButton() {
+    const topBtn = document.querySelector(".upgrade-top");
+    if (!topBtn) return;
+    topBtn.setAttribute("type", "button");
+    topBtn.removeAttribute("onclick");
+    topBtn.onclick = function (e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return false;
+      }
+      hideLegacyUpgradeUI();
+      if (window.openEmbeddedUpgrade) {
+        window.openEmbeddedUpgrade("monthly");
+      }
+      return false;
+    };
+  }
+
+  function patchHostedCheckoutFallback() {
+    window.checkout = async function (priceId) {
+      if (shouldSuppressUpgrade()) {
+        hideLegacyUpgradeUI();
+        return;
+      }
+
+      const pageUrl = window.location.origin + window.location.pathname;
+
+      try {
+        const response = await fetch(API_BASE + "/create-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            priceId,
+            email: null,
+            successUrl: pageUrl + "?subscribed=true&conversion=1",
+            cancelUrl: pageUrl
+          })
+        });
+
+        const data = await response.json();
+
+        if (data && data.url) {
+          window.location = data.url;
+        } else {
+          alert("Checkout failed. Please try again.");
+        }
+      } catch (e) {
+        alert("Checkout failed. Please try again.");
+      }
+    };
+  }
+
+  function patchShowUpgrade() {
+    window.showUpgrade = function () {
+      hideLegacyUpgradeUI();
+      return;
+    };
+  }
+
+  function patchAnalyzeLimitAutoOpen() {
+    if (!window.fetch || window.__TOKEN_RISK_FETCH_PATCHED__) return;
+    window.__TOKEN_RISK_FETCH_PATCHED__ = true;
+
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async function (input, init) {
+      let requestUrl = "";
+      let isAnalyzeRequest = false;
+      let parsedBody = null;
+
+      try {
+        requestUrl = typeof input === "string" ? input : (input && input.url ? input.url : "");
+        isAnalyzeRequest = !!requestUrl && requestUrl.indexOf("/analyze") !== -1;
+
+        if (isAnalyzeRequest && init && typeof init.body === "string") {
+          try {
+            parsedBody = JSON.parse(init.body);
+          } catch (e) {
+            parsedBody = null;
+          }
+
+          if (parsedBody && typeof parsedBody === "object") {
+            const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+            const storedEmail = getStoredVerifiedEmail();
+            const shouldSendSubscribed =
+              !!enteredEmail &&
+              !!storedEmail &&
+              enteredEmail === storedEmail &&
+              isBrowserSubscribed();
+
+            parsedBody.email = enteredEmail;
+            parsedBody.subscribed = shouldSendSubscribed;
+            init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
+          }
+        }
+      } catch (e) {}
+
+      const response = await originalFetch(input, init);
+
+      try {
+        if (isAnalyzeRequest) {
+          const requestEmail = normalizeEmail((parsedBody && parsedBody.email) || getEnteredEmail());
+
+          response.clone().json().then(function (data) {
+            const backendConfirmedSubscribed = !!(
+              data &&
+              (
+                data.subscribed === true ||
+                data.activeSubscription === true ||
+                data.hasSubscription === true ||
+                data.unlimited === true
+              )
+            );
+
+            if (backendConfirmedSubscribed) {
+              markBrowserSubscribed(true);
+
+              if (requestEmail) {
+                setStoredVerifiedEmail(requestEmail);
+              } else if (data && data.email) {
+                setStoredVerifiedEmail(data.email);
+              }
+
+              syncPostPurchaseMessage();
+              hideLegacyUpgradeUI();
+              return;
+            }
+
+            syncPostPurchaseMessage();
+
+            if (data && data.limit === true) {
+              setTimeout(function () {
+                hideLegacyUpgradeUI();
+                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
+                  window.openEmbeddedUpgrade("monthly");
+                }
+              }, 0);
+            }
+          }).catch(function () {});
+        }
+      } catch (e) {}
+
+      return response;
+    };
+  }
+
+  function patchLegacyButtons() {
+    const buttons = Array.from(document.querySelectorAll('button[onclick], .upgrade-top'));
+    buttons.forEach(function (btn) {
+      const onclickText = (btn.getAttribute("onclick") || "").trim();
+      const text = (btn.textContent || "").toLowerCase().trim();
+
+      if (onclickText === "showUpgrade()" || text.includes("upgrade")) {
+        btn.removeAttribute("onclick");
+        btn.onclick = function (e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+
+          if (shouldSuppressUpgrade()) {
+            hideLegacyUpgradeUI();
+            return false;
+          }
+
+          hideLegacyUpgradeUI();
+          if (window.openEmbeddedUpgrade) {
+            window.openEmbeddedUpgrade("monthly");
+          }
+          return false;
+        };
+      }
+    });
+  }
+
+  function patchSubscriberEmailField() {
+    const input = getEmailInput();
+    if (!input || input.__TOKEN_RISK_EMAIL_PATCHED__) return;
+
+    input.__TOKEN_RISK_EMAIL_PATCHED__ = true;
+    input.addEventListener("input", function () {
+      syncPostPurchaseMessage();
+      hideLegacyUpgradeUI();
+    });
+  }
+
+  function ensureStripeScript() {
+    if (window.Stripe) return Promise.resolve();
+
+    if (stripeScriptPromise) return stripeScriptPromise;
+
+    stripeScriptPromise = new Promise(function (resolve, reject) {
+      const existing = document.querySelector('script[src="https://js.stripe.com/v3/"]');
+      if (existing) {
+        if (window.Stripe) {
+          resolve();
+          return;
+        }
+        existing.addEventListener("load", function () { resolve(); }, { once: true });
+        existing.addEventListener("error", function () { reject(new Error("Stripe failed to load.")); }, { once: true });
+        return;
+      }
+
+      const s = document.createElement("script");
+      s.src = "https://js.stripe.com/v3/";
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("Stripe failed to load.")); };
+      document.body.appendChild(s);
+    });
+
+    return stripeScriptPromise;
+  }
+
+  function getPlanButtonByKey(key) {
+    return { weekly: weeklyBtn, monthly: monthlyBtn, yearly: yearlyBtn }[key] || monthlyBtn;
+  }
+
+  function updateCompactSummary(key) {
+    const btn = getPlanButtonByKey(key);
+    if (!btn || !compactText) return;
+    compactText.innerHTML =
+      '<div style="font-size:12px;color:#d4e0f2;font-weight:700;">Selected plan</div>' +
+      '<div style="margin-top:2px;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + '</div>';
+  }
+
+  function setActivePlan(key) {
+    [weeklyBtn, monthlyBtn, yearlyBtn].forEach(function (btn) {
+      if (!btn) return;
+      const isActive = btn.dataset.planKey === key;
+      btn.dataset.active = isActive ? "true" : "false";
+      btn.style.background = isActive
+        ? "linear-gradient(135deg, rgba(134,121,247,.25) 0%, rgba(44,198,232,.22) 100%)"
+        : "rgba(255,255,255,.05)";
+      btn.style.borderColor = isActive
+        ? "rgba(102,217,239,.55)"
+        : "rgba(255,255,255,.12)";
+      btn.style.boxShadow = isActive
+        ? "0 0 0 1px rgba(102,217,239,.20) inset"
+        : "none";
+      btn.style.transform = "translateY(0)";
+    });
+
+    updateCompactSummary(key);
+  }
+
+  function showPlanSelector() {
+    if (!compactRow || !planRow || !helper) return;
+    compactRow.style.display = "none";
+    planRow.style.display = "grid";
+    helper.style.display = "block";
+  }
+
+  function showCompactSelector() {
+    if (!compactRow || !planRow || !helper) return;
+    compactRow.style.display = "flex";
+    planRow.style.display = "none";
+    helper.style.display = "none";
+  }
+
+  async function destroyEmbeddedCheckout() {
+    if (checkoutInstance && typeof checkoutInstance.destroy === "function") {
+      try {
+        await checkoutInstance.destroy();
+      } catch (e) {}
+    }
+
+    checkoutInstance = null;
+
+    if (checkoutContainer) {
+      checkoutContainer.innerHTML = "";
+      checkoutContainer.style.display = "none";
+      checkoutContainer.style.minHeight = "0";
+      checkoutContainer.style.paddingBottom = "0";
+    }
+  }
+
+  async function openCheckoutForPlan(planKey) {
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+    if (isInitializingCheckout) return;
+    if (!PRICES[planKey]) return;
+
+    isInitializingCheckout = true;
+    selectedPlanKey = planKey;
+    setActivePlan(planKey);
+    showCompactSelector();
+    helper.textContent = "Loading secure checkout...";
+    setStatus("");
+    checkoutContainer.style.display = "block";
+    checkoutContainer.style.minHeight = "360px";
+    checkoutContainer.innerHTML = "";
+
+    try {
+      await ensureStripeScript();
+
+      if (!window.Stripe) {
+        throw new Error("Stripe failed to load.");
+      }
+
+      if (!stripe) {
+        stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+      }
+
+      await destroyEmbeddedCheckout();
+
+      checkoutContainer.style.display = "block";
+      checkoutContainer.style.minHeight = "520px";
+      checkoutContainer.style.paddingBottom = "24px";
+
+      const fetchClientSecret = async function () {
+        const res = await fetch(API_BASE + "/create-embedded-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            priceId: PRICES[planKey],
+            returnUrl: window.location.origin + window.location.pathname + "?subscribed=true&conversion=1"
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data || !data.clientSecret) {
+          throw new Error((data && data.error) || "No clientSecret");
+        }
+
+        return data.clientSecret;
+      };
+
+      checkoutInstance = await stripe.createEmbeddedCheckoutPage({
+        fetchClientSecret: fetchClientSecret
+      });
+
+      checkoutInstance.mount("#embedded-checkout-mount");
+      helper.textContent = "Complete payment below.";
+    } catch (e) {
+      console.error("Embedded checkout error:", e);
+      await destroyEmbeddedCheckout();
+      showPlanSelector();
+      helper.textContent = "Select a plan to load secure checkout.";
+      checkoutContainer.innerHTML = "Unable to load checkout.";
+      checkoutContainer.style.display = "block";
+      checkoutContainer.style.minHeight = "100px";
+      setStatus("Please try again.");
+    } finally {
+      isInitializingCheckout = false;
+    }
+  }
+<!-- END BLOCK 3 OF 4 -->
