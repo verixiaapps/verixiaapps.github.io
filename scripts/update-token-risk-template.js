@@ -628,7 +628,7 @@ updated = replaceWithCheck(
   /return `This message may be a scam\.\s*Check it before you click, reply, or send money:\s*\$\{getShareUrl$begin:math:text$$end:math:text$\}`;/,
   `return \`${NEW_WARNING_MESSAGE}\`;`,
   "warning message"
-);
+); 
 
 updated = replaceWithCheck(
   updated,
