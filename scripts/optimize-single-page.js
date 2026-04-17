@@ -21,10 +21,10 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  "TD Bank Fraud Alert Email Scam? How to Tell if It Is Real or Fake";
+  "TD Bank Fraud Alert Email? How to Tell if It Is Real or Fake";
 
 const NEW_META =
-  "Got a TD Bank fraud alert email? Learn the warning signs, fake login tricks, and what to do before you click a link, enter your password, or reply.";
+  "Got a TD Bank fraud alert email? Learn the warning signs, fake login page tricks, and what to do before you click a link, enter your password, or call a number.";
 
 const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
 
@@ -41,11 +41,11 @@ const NEW_INSTANT_VERDICT_CARD = `
       </div>
 
       <div style="font-size:15px;font-weight:800;color:#e6f0ff;margin-bottom:4px;">
-        Fake TD fraud alert
+        Likely phishing or fake account alert
       </div>
 
       <div style="font-size:15px;font-weight:900;color:#ffffff;">
-        Do not click. Use the TD Bank app or official site only.
+        Do not click links or call numbers in the message. Use the official TD Bank app or website only.
       </div>
 
     </div>
@@ -59,7 +59,7 @@ const NEW_TOP_BLOCK = `
         Updated April 2026
       </div>
       <div style="font-size:15px;font-weight:800;line-height:1.6;color:#e6f0ff;">
-        Users are still receiving TD Bank fraud alert emails claiming:
+        People are still receiving TD Bank fraud alert emails and messages claiming:
       </div>
       <ul style="margin:10px 0 0 18px;color:#d7e4f8;font-weight:800;line-height:1.6;">
         <li>“Suspicious activity detected”</li>
@@ -77,12 +77,12 @@ const NEW_EXAMPLE_CARD = `
     <div class="story-card" id="realExamplesCard">
       <div class="story-card-title">
         <span class="story-card-title-icon">📩</span>
-        <span>Real TD Bank Fraud Email Examples</span>
+        <span>Common TD Bank Fraud Alert Email Examples</span>
       </div>
       <p>Reports show people receiving emails with subject lines like “TD Bank: Suspicious activity detected,” “Action required: verify your account,” or “Unusual login attempt.” These messages often reference a large transaction, a locked account, or a security issue that needs immediate attention.</p>
       <p style="margin-top:14px;">Most versions include buttons such as “Secure Account,” “Verify Identity,” or “Review Activity.” These links can lead to fake TD Bank login pages designed to capture usernames, passwords, and one-time verification codes.</p>
       <p style="margin-top:14px;">Some variations also include a phone number labeled as a fraud department or security team. Calling it can connect you to scammers who ask for login details, verification codes, or card information under pressure.</p>
-      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the message only feels real when you follow the link or call the number inside it, that is a strong warning sign. A legitimate alert should still be verifiable directly through the official TD Bank app or website.</div>
+      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the message only seems legitimate when you use the link or phone number inside it, that is a strong warning sign. A legitimate alert should still be verifiable directly through the official TD Bank app or website.</div>
     </div>
 `;
 
@@ -328,14 +328,14 @@ function replaceWebPageJsonLd(html) {
 
       if (NEW_TITLE) {
         next = next.replace(
-          /"name":"([^"\\]|\\.)*"/i,
+          /"name":"([^"\\\\]|\\\\.)*"/i,
           `"name":"${escapeJsonString(NEW_TITLE)}"`
         );
       }
 
       if (NEW_META) {
         next = next.replace(
-          /"description":"([^"\\]|\\.)*"/i,
+          /"description":"([^"\\\\]|\\\\.)*"/i,
           `"description":"${escapeJsonString(NEW_META)}"`
         );
       }
