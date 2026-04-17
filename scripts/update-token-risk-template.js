@@ -35,7 +35,7 @@ function escapeRegex(value) {
 
 function findFunctionRange(source, functionName) {
   const escapedName = escapeRegex(functionName);
-  const startRegex = new RegExp(`function\\s+${escapedName}\\s*\\(`);
+  const startRegex = new RegExp(`(?:async\\s+)?function\\s+${escapedName}\\s*\\(`);
   const startMatch = startRegex.exec(source);
 
   if (!startMatch) return null;
@@ -160,6 +160,7 @@ function updateStaticCopy(html) {
     ['<span>Scam Check Now</span>', '<span>Token Risk</span>'],
     ['<div class="hero-badge">Live scam checking</div>', '<div class="hero-badge">Live token analysis</div>'],
     ['<div class="hero-badge">Shareable warning page</div>', '<div class="hero-badge">Liquidity-aware checks</div>'],
+    ['<div class="hero-badge">Built for repeat use</div>', '<div class="hero-badge">Built for repeat use</div>'],
     ['<div class="hero-trust-chip">Check before you click</div>', '<div class="hero-trust-chip">Check before you buy</div>'],
     ['<div class="hero-trust-chip">Check before you reply</div>', '<div class="hero-trust-chip">Check before you swap</div>'],
     ['<div class="hero-trust-chip">Check before you send money</div>', '<div class="hero-trust-chip">Check before you connect</div>'],
@@ -170,7 +171,7 @@ function updateStaticCopy(html) {
     ['<div class="preview-sub" id="previewSub">Common signals found in similar scams</div>', '<div class="preview-sub" id="previewSub">Common risk signals found in similar tokens</div>'],
     ['<div class="input-help">Examples: delivery text, PayPal alert, crypto message, job offer, account warning</div>', '<div class="input-help">Example: ERC-20, Solana, Base, or other supported token contract address</div>'],
     ['<button class="check" onclick="check()">🔍 Check Scam Risk</button>', '<button class="check" onclick="checkToken()">🔍 Check Token Risk</button>'],
-    ['<button class="check" onclick="checkToken()">🔍 Check Scam Risk</button>', '<button class="check" onclick="checkToken()">🔍 Check Token Risk</button>'],
+    ['<div class="note">No signup required • 1 free check • Results in seconds</div>', '<div class="note">No signup required • 1 free token check • Results in seconds</div>'],
     ['<div class="note">Get a clear risk level, key red flags, and what to do next</div>', '<div class="note">Get a clear risk level, liquidity confidence, token metrics, and what to do next</div>'],
     ['<h4>Check suspicious messages anytime</h4>', '<h4>Check token risk anytime</h4>'],
     ['Scam attempts often do not happen once. Use the app to check the next message before you click, reply, or send money.', 'Risky tokens move fast. Use the app to review the next token before you buy, swap, or connect your wallet.'],
@@ -178,13 +179,17 @@ function updateStaticCopy(html) {
     ['Most scam attempts do not happen once. If you are seeing suspicious messages, links, or requests, more may follow. Check each one before it costs you.', 'Risky tokens do not appear once. If you are checking launches, trending coins, or fast-moving pairs, more will follow. Check each one before it costs you.'],
     ['Built for ongoing protection against scams, phishing, impersonation, and risky payment requests', 'Built for ongoing token risk review across liquidity, volume, volatility, and market behavior'],
     ['Unlimited scam checks • Cancel anytime', 'Unlimited token checks • Cancel anytime'],
-    ['>Weekly Protection</button>', '>Weekly Access</button>'],
-    ['>Monthly Protection</button>', '>Monthly Access</button>'],
-    ['>Yearly Protection</button>', '>Yearly Access</button>'],
+    ['Weekly Protection', 'Weekly Access'],
+    ['Monthly Protection', 'Monthly Access'],
+    ['Yearly Protection', 'Yearly Access'],
     ['<h3 id="relatedHeading">Check Similar Messages</h3>', '<h3 id="relatedHeading">Check Similar Tokens</h3>'],
     ['<h3 id="moreLinksHeading">More Scam Checks</h3>', '<h3 id="moreLinksHeading">More Token Risk Checks</h3>'],
     ['Messages like this are one of the most common ways people lose money, share codes, or hand over access without realizing it. When something feels off, pause and verify it through official sources before taking action.', 'Tokens like this can move fast and punish bad decisions quickly. When something feels off, pause and review liquidity, volume, pair age, and broader trust signals before taking action.'],
-    ['Scam Check Now © 2026 • Scam detection and risk analysis tool', 'Token Risk © 2026 • Token risk analysis tool']
+    ['Scam Check Now © 2026 • Scam detection and risk analysis tool', 'Token Risk © 2026 • Token risk analysis tool'],
+    ['Unlimited scam checks are active with this account', 'Unlimited token checks are active with this account'],
+    ['Unlock unlimited scam checks instantly', 'Unlock unlimited token checks instantly'],
+    ['Continue with your selected plan below.', 'Continue with your selected plan below.'],
+    ['🔓 Unlock Unlimited Checks', '🔓 Unlock Unlimited Token Checks']
   ];
 
   for (const [oldValue, newValue] of exactReplacements) {
@@ -193,45 +198,8 @@ function updateStaticCopy(html) {
 
   output = replaceAllRegex(
     output,
-    /<textarea id="text"[\s\S]*?<\/textarea>/g,
-    `<input id="tokenAddress" placeholder="Paste token contract address">`
-  );
-
-  output = replaceAllRegex(
-    output,
-    /requestUrl\.indexOf\("\/analyze"\)\s*!==\s*-1/g,
-    'requestUrl.indexOf("/token-risk") !== -1'
-  );
-
-  output = replaceAllRegex(
-    output,
-    /requestUrl\.indexOf$begin:math:text$\'\\\/analyze\'$end:math:text$\s*!==\s*-1/g,
-    'requestUrl.indexOf("/token-risk") !== -1'
-  );
-
-  output = replaceAllRegex(
-    output,
-    /fetch\(API\s*\+\s*"\/analyze"\s*,/g,
-    'fetch(API + "/token-risk",'
-  );
-
-  output = replaceAllRegex(
-    output,
-    /fetch\(API\s*\+\s*'\/analyze'\s*,/g,
-    'fetch(API + "/token-risk",'
-  );
-
-  output = replaceAllRegex(
-    output,
-    /"This message may be a scam\. Check it before you click, reply, or send money:"/g,
-    `"This token may be risky. Review it before you buy, swap, or connect:"`
-  );
-
-  output = replaceAllRegex(
-    output,
-    /This message may be a scam\.[\s\S]*?Check it before you click, reply, or send money:/g,
-    `This token may be risky.
-Review it before you buy, swap, or connect:`
+    /<textarea id="text"[^>]*><\/textarea>/g,
+    '<input id="tokenAddress" placeholder="Paste token contract address">'
   );
 
   output = replaceAllRegex(
@@ -281,9 +249,10 @@ Review it before you buy, swap, or connect:`
   return output;
 }
 
-const CHECK_TOKEN_FUNCTION = `function checkToken() {
+const CHECK_TOKEN_FUNCTION = `async function checkToken() {
   const tokenAddress = document.getElementById("tokenAddress").value.trim();
-  const email = document.getElementById("email").value.trim().toLowerCase();
+  const emailEl = document.getElementById("email");
+  const email = emailEl ? emailEl.value.trim().toLowerCase() : "";
   const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
@@ -312,65 +281,92 @@ const CHECK_TOKEN_FUNCTION = `function checkToken() {
     </div>
   \`;
 
-  fetch(API + "/token-risk", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tokenAddress, email, subscribed })
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.limit) {
-        result.innerHTML = \`
-          <div class="result-card medium">
-            <div class="result-top">
-              <div class="risk medium">🟠 Free Check Used</div>
-              <div class="result-chip">Upgrade Available</div>
-            </div>
-            <div class="result-summary">Unlock unlimited access so you can check the next token before you buy, swap, or connect.</div>
-          </div>
-        \`;
-        showUpgrade();
-        return;
-      }
+  try {
+    const response = await fetch(API + "/token-risk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tokenAddress, email, subscribed })
+    });
 
-      result.innerHTML = formatTokenResult(data || {});
-      showUpgrade();
-    })
-    .catch(() => {
+    const data = await response.json();
+
+    if (data.limit) {
       result.innerHTML = \`
-        <div class="result-card unknown">
+        <div class="result-card medium">
           <div class="result-top">
-            <div class="risk unknown">⚪ Unable To Analyze</div>
-            <div class="result-chip">Try Again</div>
+            <div class="risk medium">🟠 Free Check Used</div>
+            <div class="result-chip">Upgrade Available</div>
           </div>
-          <div class="result-summary">We could not analyze this token right now. Please try again in a moment.</div>
+          <div class="result-summary">Unlock unlimited access so you can check the next token before you buy, swap, or connect.</div>
         </div>
       \`;
-    });
+      showUpgrade();
+      return;
+    }
+
+    result.innerHTML = formatTokenResult(data || {});
+    showUpgrade();
+  } catch (e) {
+    result.innerHTML = \`
+      <div class="result-card unknown">
+        <div class="result-top">
+          <div class="risk unknown">⚪ Unable To Analyze</div>
+          <div class="result-chip">Try Again</div>
+        </div>
+        <div class="result-summary">We could not analyze this token right now. Please try again in a moment.</div>
+      </div>
+    \`;
+  }
 }`;
 
-const FORMATTER_BLOCK = `function formatTokenMetrics(metrics) {
+const FORMATTER_BLOCK = `function formatCompactMetricValue(label, value) {
+  if (value === null || value === undefined || value === "") return "N/A";
+
+  if (typeof value === "number") {
+    if (label === "Price Change 24h") {
+      const rounded = Math.round(value * 100) / 100;
+      return \`\${rounded}%\`;
+    }
+
+    if (label === "Price USD") {
+      if (value >= 1) return \`$\${value.toLocaleString(undefined, { maximumFractionDigits: 6 })}\`;
+      return \`$\${value.toFixed(8).replace(/0+$/, "").replace(/\\.$/, "")}\`;
+    }
+
+    if (["Liquidity", "Volume 24h", "Market Cap", "FDV"].includes(label)) {
+      return \`$\${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}\`;
+    }
+
+    return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+
+  return String(value);
+}
+
+function formatTokenMetrics(metrics) {
   const rows = [
     ["Liquidity", metrics?.liquidityUsd],
     ["Volume 24h", metrics?.volume24h],
     ["Price Change 24h", metrics?.priceChange24h],
+    ["Price USD", metrics?.priceUsd],
+    ["Market Cap", metrics?.marketCap],
+    ["FDV", metrics?.fdv],
     ["Pair Age", metrics?.pairAge],
-    ["FDV", metrics?.fdv]
+    ["Chain", metrics?.chainId],
+    ["DEX", metrics?.dexId]
   ];
 
-  return rows.map(([label, value]) => {
-    const safeValue = value === null || value === undefined || value === "" ? "N/A" : value;
-    return \`
-      <li class="signal-item">
-        <span class="signal-icon">•</span>
-        <span><strong>\${escapeHtml(label)}:</strong> \${escapeHtml(String(safeValue))}</span>
-      </li>
-    \`;
-  }).join("");
+  return rows.map(([label, value]) => \`
+    <li class="signal-item">
+      <span class="signal-icon">•</span>
+      <span><strong>\${escapeHtml(label)}:</strong> \${escapeHtml(formatCompactMetricValue(label, value))}</span>
+    </li>
+  \`).join("");
 }
 
 function formatTokenList(items, emptyText) {
   const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+
   if (!safeItems.length) {
     return \`<li class="signal-item"><span class="signal-icon">•</span><span>\${escapeHtml(emptyText)}</span></li>\`;
   }
@@ -395,7 +391,11 @@ function formatTokenResult(data) {
   const titleBits = [];
   if (tokenData.symbol) titleBits.push(tokenData.symbol);
   if (tokenData.name && tokenData.name !== tokenData.symbol) titleBits.push(tokenData.name);
+
   const assetTitle = titleBits.length ? titleBits.join(" • ") : "Token Risk Review";
+  const continuationLine = !pairFound
+    ? '<div class="result-continuation">No live Dexscreener pair was found for this token, so treat it cautiously until you verify the contract and market structure.</div>'
+    : "";
 
   return \`
   <div class="result-card \${safeRiskClass}">
@@ -405,6 +405,7 @@ function formatTokenResult(data) {
     </div>
 
     <div class="result-summary"><strong>\${escapeHtml(assetTitle)}</strong>\${tokenData.address ? "<br>" + escapeHtml(String(tokenData.address)) : ""}</div>
+    \${continuationLine}
 
     <div class="section">
       <div class="section-title">Summary</div>
@@ -428,7 +429,10 @@ function formatTokenResult(data) {
     <div class="section">
       <div class="section-title">Concerning Indicators</div>
       <ul class="signal-list">
-        \${formatTokenList(analysis.concerningIndicators, pairFound ? "No major concerning indicators were returned." : "No live pair data was found for this token.")}
+        \${formatTokenList(
+          analysis.concerningIndicators,
+          pairFound ? "No major concerning indicators were returned." : "No live pair data was found for this token."
+        )}
       </ul>
     </div>
 
@@ -447,8 +451,19 @@ function formatTokenResult(data) {
     </div>
 
     <div class="result-payline">\${escapeHtml(String(analysis.finalTake || "Proceed carefully and verify the token before taking action."))}</div>
+
+    <div class="result-actions">
+      <button class="check result-cta" onclick="scrollToTopCheck()">🔁 Want to check another token? Paste it now</button>
+    </div>
   </div>
   \`;
+}`;
+
+const SCROLL_TO_TOP_CHECK_FUNCTION = `function scrollToTopCheck() {
+  const tokenInput = document.getElementById("tokenAddress");
+  if (!tokenInput) return;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  setTimeout(() => tokenInput.focus(), 300);
 }`;
 
 const BUILD_HERO_TITLE_FUNCTION = `function buildHeroTitle(keywordRaw) {
@@ -470,7 +485,7 @@ const BUILD_HERO_SUBHEADING_FUNCTION = `function buildHeroSubheading(keywordRaw)
 const BUILD_CONTENT_HEADING_FUNCTION = `function buildContentHeading(keywordRaw) {
   const cleanTitle = displayCleanKeyword(keywordRaw);
   if (!cleanTitle) {
-    return "How To Review Token Risk Before You InterACT";
+    return "How To Review Token Risk Before You Interact";
   }
   return \`\${cleanTitle}: What To Review Before You Buy, Swap, or Connect\`;
 }`;
@@ -596,6 +611,93 @@ const BUILD_SEO_CARD_TITLES_FUNCTION = `function buildSeoCardTitles(keywordRaw) 
   ];
 }`;
 
+const PATCH_ANALYZE_LIMIT_AUTO_OPEN_FUNCTION = `function patchAnalyzeLimitAutoOpen() {
+  if (!window.fetch || window.__SCAM_CHECK_FETCH_PATCHED__) return;
+  window.__SCAM_CHECK_FETCH_PATCHED__ = true;
+
+  const originalFetch = window.fetch.bind(window);
+
+  window.fetch = async function (input, init) {
+    let requestUrl = "";
+    let isTokenRiskRequest = false;
+    let parsedBody = null;
+
+    try {
+      requestUrl = typeof input === "string" ? input : (input && input.url ? input.url : "");
+      isTokenRiskRequest = !!requestUrl && requestUrl.indexOf("/token-risk") !== -1;
+
+      if (isTokenRiskRequest && init && typeof init.body === "string") {
+        try {
+          parsedBody = JSON.parse(init.body);
+        } catch (e) {
+          parsedBody = null;
+        }
+
+        if (parsedBody && typeof parsedBody === "object") {
+          const enteredEmail = normalizeEmail(parsedBody.email || getEnteredEmail());
+          const storedEmail = getStoredVerifiedEmail();
+          const shouldSendSubscribed =
+            !!enteredEmail &&
+            !!storedEmail &&
+            enteredEmail === storedEmail &&
+            isBrowserSubscribed();
+
+          parsedBody.email = enteredEmail;
+          parsedBody.subscribed = shouldSendSubscribed;
+          init = Object.assign({}, init, { body: JSON.stringify(parsedBody) });
+        }
+      }
+    } catch (e) {}
+
+    const response = await originalFetch(input, init);
+
+    try {
+      if (isTokenRiskRequest) {
+        const requestEmail = normalizeEmail((parsedBody && parsedBody.email) || getEnteredEmail());
+
+        response.clone().json().then(function (data) {
+          const backendConfirmedSubscribed = !!(
+            data &&
+            (
+              data.subscribed === true ||
+              data.activeSubscription === true ||
+              data.hasSubscription === true ||
+              data.unlimited === true
+            )
+          );
+
+          if (backendConfirmedSubscribed) {
+            markBrowserSubscribed(true);
+
+            if (requestEmail) {
+              setStoredVerifiedEmail(requestEmail);
+            } else if (data && data.email) {
+              setStoredVerifiedEmail(data.email);
+            }
+
+            syncPostPurchaseMessage();
+            hideLegacyUpgradeUI();
+            return;
+          }
+
+          syncPostPurchaseMessage();
+
+          if (data && data.limit === true) {
+            setTimeout(function () {
+              hideLegacyUpgradeUI();
+              if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
+                window.openEmbeddedUpgrade("monthly");
+              }
+            }, 0);
+          }
+        }).catch(function () {});
+      }
+    } catch (e) {}
+
+    return response;
+  };
+}`;
+
 function main() {
   assertFileExists(TEMPLATE_PATH);
 
@@ -604,6 +706,7 @@ function main() {
   html = updateStaticCopy(html);
 
   html = replaceFunction(html, "check", CHECK_TOKEN_FUNCTION);
+  html = replaceFunction(html, "scrollToTopCheck", SCROLL_TO_TOP_CHECK_FUNCTION);
   html = replaceFunction(html, "buildHeroTitle", BUILD_HERO_TITLE_FUNCTION);
   html = replaceFunction(html, "buildHeroSubheading", BUILD_HERO_SUBHEADING_FUNCTION);
   html = replaceFunction(html, "buildContentHeading", BUILD_CONTENT_HEADING_FUNCTION);
@@ -612,6 +715,7 @@ function main() {
   html = replaceFunction(html, "applyPreviewCard", APPLY_PREVIEW_CARD_FUNCTION);
   html = replaceFunction(html, "applyIntentToChecker", APPLY_INTENT_TO_CHECKER_FUNCTION);
   html = replaceFunction(html, "buildSeoCardTitles", BUILD_SEO_CARD_TITLES_FUNCTION);
+  html = replaceFunction(html, "patchAnalyzeLimitAutoOpen", PATCH_ANALYZE_LIMIT_AUTO_OPEN_FUNCTION);
 
   if (!html.includes("function formatTokenResult(data)")) {
     html = insertBeforeFunction(html, "showUpgrade", FORMATTER_BLOCK);
@@ -621,12 +725,18 @@ function main() {
   ensureContains(html, 'id="tokenAddress"', "token address input");
   ensureContains(html, 'onclick="checkToken()"', "token check button hook");
   ensureContains(html, 'fetch(API + "/token-risk"', "token risk endpoint");
+  ensureContains(html, 'requestUrl.indexOf("/token-risk") !== -1', "token risk fetch watcher");
   ensureContains(html, "function formatTokenResult(data)", "token result formatter");
-  ensureContains(html, "function checkToken()", "token check function");
+  ensureContains(html, "async function checkToken()", "token check function");
   ensureContains(html, "Liquidity Confidence", "liquidity confidence UI");
+  ensureContains(html, 'id="email"', "subscriber email field preserved");
+  ensureContains(html, 'const API_BASE = "https://awake-integrity-production-faa0.up.railway.app";', "Railway API base preserved");
+  ensureContains(html, 'const STRIPE_PUBLISHABLE_KEY = "pk_live_', "Stripe publishable key preserved");
+  ensureContains(html, 'create-embedded-subscription', "embedded checkout endpoint preserved");
+  ensureContains(html, 'create-checkout', "hosted checkout endpoint preserved");
 
   fs.writeFileSync(TEMPLATE_PATH, html, "utf8");
-  console.log(`Updated ${TEMPLATE_PATH}`);
+  console.log(\`Updated \${TEMPLATE_PATH}\`);
 }
 
 try {
