@@ -85,6 +85,9 @@ const NEW_INPUT_HELP =
 
 const NEW_CHECK_BUTTON = "🪙 Check Token Risk";
 
+const NEW_TOP_NOTE =
+  "No signup required • 1 free check • Results in seconds";
+
 const NEW_TOOL_NOTE =
   "Get a clear risk level, token red flags, and what to do next";
 
@@ -122,13 +125,6 @@ const NEW_CONTENT_CLOSE = `
     </div>
 `;
 
-const NEW_RECOGNITION_BANK_BLOCK = `return [
-      ["What people notice first", "A token pushing fast hype, sudden momentum, or easy upside before the fundamentals are clear."],
-      ["What risky setups hide", "Weak liquidity, concentrated ownership, unsafe permissions, or contract behavior that puts buyers at risk."],
-      ["Why it feels legitimate", "The branding, chart action, and community posts can make a risky token look more established than it really is."],
-      ["Why this page helps", "It is built to surface token risk patterns quickly so you can slow down before you buy, connect, or approve."]
-    ];`;
-
 const NEW_RECOGNITION_CRYPTO_BLOCK = `return [
       ["What people notice first", "A token, contract, or wallet prompt that looks active, urgent, or easy to trust in the moment."],
       ["What risky setups hide", "Unsafe approvals, liquidity weakness, concentrated supply, or contract behavior that can hurt buyers fast."],
@@ -136,10 +132,11 @@ const NEW_RECOGNITION_CRYPTO_BLOCK = `return [
       ["Why this page helps", "It is built to highlight token risk signals before you buy, connect your wallet, or approve anything."]
     ];`;
 
-const NEW_PREVIEW_CRYPTO_BLOCK = `signals = [
-      "Contract behavior needs review",
-      "Liquidity or holder risk may be present",
-      "Buy or wallet pressure pattern detected"
+const NEW_RECOGNITION_BANK_BLOCK = `return [
+      ["What people notice first", "A token pushing fast hype, sudden momentum, or easy upside before the fundamentals are clear."],
+      ["What risky setups hide", "Weak liquidity, concentrated ownership, unsafe permissions, or contract behavior that puts buyers at risk."],
+      ["Why it feels legitimate", "The branding, chart action, and community posts can make a risky token look more established than it really is."],
+      ["Why this page helps", "It is built to surface token risk patterns quickly so you can slow down before you buy, connect, or approve."]
     ];`;
 
 const NEW_PREVIEW_FALLBACK_SIGNALS = `let signals = [
@@ -147,6 +144,12 @@ const NEW_PREVIEW_FALLBACK_SIGNALS = `let signals = [
     "Liquidity or holder risk may be present",
     "Buy or wallet pressure pattern detected"
   ];`;
+
+const NEW_PREVIEW_CRYPTO_BLOCK = `signals = [
+      "Contract behavior needs review",
+      "Liquidity or holder risk may be present",
+      "Buy or wallet pressure pattern detected"
+    ];`;
 
 const NEW_PREVIEW_BADGE = "🧨 Example Token Risk Pattern";
 const NEW_PREVIEW_SCORE = "Token Risk Example";
@@ -184,8 +187,6 @@ const NEW_BUILD_SEO_CARD_TITLES_CRYPTO = `return [
       ["🧨", "What can happen after you buy or approve"]
     ];`;
 
-const NEW_CLEAN_SEO_SLICE = ".slice(0, 4)";
-
 const NEW_SUMMARY_HIGH =
   "This token shows multiple high-risk indicators. Treat it as unsafe until you verify the contract, liquidity, ownership, and wallet permissions through trusted sources.";
 const NEW_SUMMARY_MEDIUM =
@@ -219,19 +220,14 @@ const NEW_RESULT_EMPTY =
   "Paste a token name, contract address, wallet prompt, project page, or DEX link to check token risk before you act.";
 const NEW_RESULT_LOADING =
   "Checking for token risk indicators, contract issues, liquidity concerns, wallet traps, and suspicious permission patterns.";
-
 const NEW_LIMIT_CARD =
   "Unlock unlimited protection so you can check the next token, contract, wallet prompt, or approval request before it costs you.";
-
 const NEW_ERROR_CARD =
   "We could not analyze this right now. Please try again in a moment.";
-
 const NEW_RESULT_ACTION_FALLBACK =
   "Do not buy, do not connect your wallet, and do not approve anything until you verify the token contract, liquidity, and permissions through trusted sources.";
-
 const NEW_RESULT_SIGNAL_FALLBACK =
   "Review the contract, wallet permissions, liquidity, holder concentration, and any pressure to buy or approve quickly.";
-
 const NEW_RESULT_CONTINUATION =
   "If this token reached you once, similar high-risk setups may already be circulating. Risky token patterns often repeat across projects and communities.";
 
@@ -379,6 +375,12 @@ updated = replaceWithCheck(
   /<button class="check" onclick="check\(\)">[\s\S]*?<\/button>/i,
   `<button class="check" onclick="check()">${NEW_CHECK_BUTTON}</button>`,
   "check button"
+);
+updated = replaceWithCheck(
+  updated,
+  /<div class="note">No signup required • 1 free check • Results in seconds<\/div>/i,
+  `<div class="note">${NEW_TOP_NOTE}</div>`,
+  "top note"
 );
 updated = replaceWithCheck(
   updated,
@@ -539,14 +541,6 @@ updated = replaceWithCheck(
   "seo card titles crypto"
 );
 
-// keep 4 cards
-updated = replaceWithCheck(
-  updated,
-  /\.slice\(0,\s*4\)/,
-  NEW_CLEAN_SEO_SLICE,
-  "seo slice limit"
-);
-
 // result / share / upgrade text
 updated = replaceWithCheck(
   updated,
@@ -625,8 +619,6 @@ updated = replaceWithCheck(
 
 updated = replaceWithCheck(
   updated,
-  /return "
-
   /return "This message may be a scam\. Check it before you click, reply, or send money:";/,
   `return "${NEW_SHARE_TEXT}";`,
   "share text"
@@ -697,19 +689,19 @@ updated = replaceWithCheck(
 
 updated = replaceWithCheck(
   updated,
-  /🔁 Not sure about another message\? Check it now/,
+  /🔁 Not sure about another message\? Check it now/g,
   NEW_RESULT_CTA,
   "result cta"
 );
 updated = replaceWithCheck(
   updated,
-  /⚠️ Messages like this are often sent in waves/,
+  /⚠️ Messages like this are often sent in waves/g,
   NEW_SHARE_ALERT,
   "share alert"
 );
 updated = replaceWithCheck(
   updated,
-  /Know someone who could receive this same message\? Send this warning before they click, reply, or send money\./,
+  /Know someone who could receive this same message\? Send this warning before they click, reply, or send money\./g,
   NEW_SHARE_COPY,
   "share copy"
 );
