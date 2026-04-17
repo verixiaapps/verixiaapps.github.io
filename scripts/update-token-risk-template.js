@@ -1,5 +1,3 @@
-Use this full file for scripts/update-token-risk-template.js:
-
 const fs = require("fs");
 const path = require("path");
 
