@@ -1,7 +1,3 @@
-Not yet. The biggest issue is that the file you pasted is cut off at the JSON-LD description, so it is not runnable as shown.
-
-Here is the full cleaned-up version I would use for the token-risk hub file:
-
 import os
 import re
 import html
