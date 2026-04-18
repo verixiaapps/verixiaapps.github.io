@@ -2021,33 +2021,13 @@ function applyPreviewCard() {
 }
 
 function applyIntentToChecker() {
-  const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
-  const lower = keywordRaw.toLowerCase();
-  const textarea = document.getElementById("text");
+  const tokenInput = document.getElementById("tokenAddress");
   const inputHelp = document.querySelector(".input-help");
 
-  if (!textarea || !inputHelp) return;
+  if (!tokenInput || !inputHelp) return;
 
-  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
-    textarea.placeholder = "Paste the token symbol, Dexscreener link, contract address, or promo thread you're unsure about...";
-    inputHelp.textContent = "Examples: meme coin chart, X post, contract address, launch page, Telegram hype message";
-    return;
-  }
-
-  if (containsAny(lower, ["presale", "launch", "airdrop", "fair launch"])) {
-    textarea.placeholder = "Paste the launch page, token claim, contract address, or early access message you're unsure about...";
-    inputHelp.textContent = "Examples: presale page, airdrop claim, whitelist message, launch thread, token contract";
-    return;
-  }
-
-  if (containsAny(lower, ["contract", "address", "token", "coin", "pair", "dexscreener"])) {
-    textarea.placeholder = "Paste the contract address, token page, Dexscreener link, website, or project details you're unsure about...";
-    inputHelp.textContent = "Examples: contract address, Dexscreener page, token website, Telegram pitch, X post, liquidity claim";
-    return;
-  }
-
-  textarea.placeholder = "Paste the token name, symbol, contract address, Dexscreener link, website, or project details you're unsure about...";
-  inputHelp.textContent = "Examples: contract address, Dexscreener page, token website, Telegram pitch, X post, liquidity claim";
+  tokenInput.placeholder = "Paste token contract address";
+  inputHelp.textContent = "Example: ERC-20, Solana, Base, or other supported token contract address";
 }
 
 function splitSeoParagraphsFromHtml(seoContent) {
@@ -2272,10 +2252,10 @@ function chipByRisk(risk) {
 }
 
 function scrollToTopCheck() {
-  const textarea = document.getElementById("text");
-  if (!textarea) return;
+  const tokenInput = document.getElementById("tokenAddress");
+  if (!tokenInput) return;
   window.scrollTo({ top: 0, behavior: "smooth" });
-  setTimeout(() => textarea.focus(), 300);
+  setTimeout(() => tokenInput.focus(), 300);
 }
 
 function getShareUrl() {
@@ -2684,6 +2664,8 @@ function scrollToEmail() {
 
 async function check() {
   const tokenAddress = document.getElementById("tokenAddress")?.value.trim();
+  const email = document.getElementById("email")?.value.trim().toLowerCase() || "";
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!tokenAddress) {
@@ -2715,7 +2697,7 @@ async function check() {
     const res = await fetch(API + "/token-risk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tokenAddress })
+      body: JSON.stringify({ tokenAddress, email, subscribed })
     });
 
     const data = await res.json();
