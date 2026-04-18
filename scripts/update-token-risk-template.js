@@ -1,10 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 
-const TEMPLATE_PATH = path.join(
-  process.cwd(),
-  "token-risk-template",
-  "token-risk-template-a.html"
+const TEMPLATE_PATH = process.env.TEMPLATE_PATH
+  ? path.join(process.cwd(), process.env.TEMPLATE_PATH)
+  : path.join(process.cwd(), "token-risk-template", "token-risk-template-a.html");
 );
 
 function assertFileExists(filePath) {
