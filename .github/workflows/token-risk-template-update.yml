@@ -1,0 +1,49 @@
+name: Token Risk Template Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      template_path:
+        description: "Path to template HTML file"
+        required: false
+        default: "token-risk-template/token-risk-template-a.html"
+      commit_changes:
+        description: "Commit & push changes (true/false)"
+        required: false
+        default: "true"
+
+permissions:
+  contents: write
+
+jobs:
+  update-template:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set template path env
+        run: echo "TEMPLATE_PATH_INPUT=${{ github.event.inputs.template_path }}" >> $GITHUB_ENV
+
+      - name: Run updater script
+        run: |
+          TEMPLATE_PATH="$TEMPLATE_PATH_INPUT" node update-token-risk-template.js
+
+      - name: Commit & push if enabled
+        if: ${{ github.event.inputs.commit_changes == 'true' }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "Token Risk template update"
+          git push
+
+      - name: Skip commit (dry run)
+        if: ${{ github.event.inputs.commit_changes != 'true' }}
+        run: echo "Dry run complete. No changes committed."
