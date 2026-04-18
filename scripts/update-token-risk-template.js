@@ -11,11 +11,6 @@ function assertFileExists(filePath) {
   }
 }
 
-function replaceAllExact(source, oldValue, newValue) {
-  if (!source.includes(oldValue)) return source;
-  return source.split(oldValue).join(newValue);
-}
-
 function replaceAllRegex(source, regex, newValue) {
   return source.replace(regex, newValue);
 }
@@ -26,8 +21,13 @@ function ensureContains(source, needle, label) {
   }
 }
 
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function findFunctionRange(source, functionName) {
-  const startRegex = new RegExp(`(?:async\\s+)?function\\s+${functionName}\\s*\\(`);
+  const escapedName = escapeRegex(functionName);
+  const startRegex = new RegExp(`(?:async\\s+)?function\\s+${escapedName}\\s*\\(`);
   const startMatch = startRegex.exec(source);
 
   if (!startMatch) return null;
@@ -43,10 +43,39 @@ function findFunctionRange(source, functionName) {
   let inSingle = false;
   let inDouble = false;
   let inTemplate = false;
+  let inLineComment = false;
+  let inBlockComment = false;
   let prev = "";
 
   for (let i = braceStart; i < source.length; i++) {
     const char = source[i];
+    const next = source[i + 1];
+
+    if (inLineComment) {
+      if (char === "\n") inLineComment = false;
+      prev = char;
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (prev === "*" && char === "/") inBlockComment = false;
+      prev = char;
+      continue;
+    }
+
+    if (!inSingle && !inDouble && !inTemplate) {
+      if (char === "/" && next === "/") {
+        inLineComment = true;
+        prev = char;
+        continue;
+      }
+
+      if (char === "/" && next === "*") {
+        inBlockComment = true;
+        prev = char;
+        continue;
+      }
+    }
 
     if (!inDouble && !inTemplate && char === "'" && prev !== "\\") {
       inSingle = !inSingle;
@@ -94,224 +123,46 @@ function upsertFunction(source, functionName, replacement, insertBeforeName) {
     throw new Error(`Function not found for insertion: ${insertBeforeName}`);
   }
 
-  return source.slice(0, insertRange.start) + replacement + "\n\n" + source.slice(insertRange.start);
+  return (
+    source.slice(0, insertRange.start) +
+    replacement +
+    "\n\n" +
+    source.slice(insertRange.start)
+  );
 }
 
-/* -------------------------
-   STATIC COPY UPDATE
--------------------------- */
+function main() {
+  assertFileExists(TEMPLATE_PATH);
 
-function updateStaticCopy(html) {
-  let output = html;
+  let html = fs.readFileSync(TEMPLATE_PATH, "utf8");
 
-  output = replaceAllExact(output, "Scam Check Now", "Token Risk");
-  output = replaceAllExact(output, "Check Scam Risk", "Check Token Risk");
-
-  output = replaceAllRegex(
-    output,
+  html = replaceAllRegex(
+    html,
     /<textarea[^>]*id="text"[^>]*><\/textarea>/g,
     '<input id="tokenAddress" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste token contract address">'
   );
 
-  return output;
-}
+  const APPLY_INTENT_TO_CHECKER_FUNCTION = `function applyIntentToChecker() {
+  const tokenInput = document.getElementById("tokenAddress");
+  const inputHelp = document.querySelector(".input-help");
 
-/* -------------------------
-   STYLE
--------------------------- */
+  if (!tokenInput || !inputHelp) return;
 
-const STYLE_BLOCK = `<style id="token-risk-analysis-style">
-.token-analysis-wrap{
-  margin-top:22px;
-  color:#f3f4f6;
-}
-.token-analysis-card{
-  background:#000;
-  border-radius:28px;
-  padding:22px 18px 20px;
-  color:#f3f4f6;
-  box-shadow:0 16px 44px rgba(0,0,0,.35);
-  border:1px solid rgba(255,255,255,.06);
-}
-.token-risk-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:14px 18px;
-  border-radius:20px;
-  font-weight:900;
-  font-size:18px;
-  margin-bottom:20px;
-  border:2px solid rgba(255,255,255,.12);
-}
-.token-risk-pill.high{
-  color:#ff5a00;
-  border-color:#ff5a00;
-  background:rgba(255,90,0,.12);
-}
-.token-risk-pill.medium{
-  color:#ffb020;
-  border-color:#ffb020;
-  background:rgba(255,176,32,.12);
-}
-.token-risk-pill.low{
-  color:#22c55e;
-  border-color:#22c55e;
-  background:rgba(34,197,94,.12);
-}
-.token-risk-pill.unknown{
-  color:#d1d5db;
-  border-color:rgba(255,255,255,.18);
-  background:rgba(255,255,255,.06);
-}
-.token-metric-stack{
-  display:grid;
-  gap:14px;
-  margin:0 0 28px;
-}
-.token-metric-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  padding:22px 28px;
-  border-radius:22px;
-  background:linear-gradient(90deg,#141414 0%, #1a1a1a 100%);
-}
-.token-metric-label{
-  font-size:18px;
-  color:rgba(255,255,255,.62);
-}
-.token-metric-value{
-  font-size:18px;
-  font-weight:900;
-  color:#f8fafc;
-  text-align:right;
-}
-.token-metric-value.positive{ color:#23ff35; }
-.token-metric-value.negative{ color:#ff5252; }
-.token-section{
-  margin-top:24px;
-}
-.token-section-title{
-  font-size:20px;
-  font-weight:950;
-  color:#fff;
-  text-transform:uppercase;
-  margin-bottom:16px;
-}
-.token-section-title.red{ color:#ff2a1a; }
-.token-section-title.green{ color:#23ff35; }
-.token-summary-text{
-  font-size:18px;
-  line-height:1.6;
-  color:rgba(255,255,255,.82);
-}
-.token-list{
-  list-style:none;
-  padding:0;
-  margin:0;
-  display:grid;
-  gap:14px;
-}
-.token-list-item{
-  font-size:18px;
-  line-height:1.6;
-  color:rgba(255,255,255,.82);
-}
-.token-list-item::before{
-  content:"• ";
-}
-.token-key-grid{
-  display:grid;
-  gap:12px;
-}
-.token-key-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:16px;
-  align-items:end;
-}
-.token-key-main{
-  font-size:18px;
-  line-height:1.4;
-  color:rgba(255,255,255,.72);
-}
-.token-key-main strong{
-  font-weight:500;
-  color:rgba(255,255,255,.72);
-}
-.token-key-value{
-  font-size:18px;
-  line-height:1.2;
-  font-weight:900;
-  color:#f8fafc;
-  text-align:right;
-  white-space:nowrap;
-}
-.token-key-value.low{ color:#ff2a1a; }
-.token-key-value.medium{ color:#ffb020; }
-.token-key-value.high{ color:#23ff35; }
-.token-key-sub{
-  margin-top:4px;
-  font-size:16px;
-  line-height:1.45;
-  font-style:italic;
-  color:rgba(255,255,255,.42);
-}
-.token-final-take{
-  font-size:20px;
-  font-weight:900;
-}
-.token-final-take.high{ color:#ff5a00; }
-.token-final-take.medium{ color:#ffb020; }
-.token-final-take.low{ color:#23ff35; }
-@media (max-width:640px){
-  .token-analysis-card{
-    padding:20px 16px 18px;
-    border-radius:24px;
-  }
-  .token-risk-pill{
-    font-size:17px;
-    padding:13px 16px;
-    border-radius:18px;
-    margin-bottom:18px;
-  }
-  .token-metric-stack{
-    gap:12px;
-    margin-bottom:24px;
-  }
-  .token-metric-row{
-    padding:18px 18px;
-    border-radius:18px;
-  }
-  .token-metric-label,
-  .token-metric-value,
-  .token-key-main,
-  .token-key-value,
-  .token-summary-text,
-  .token-list-item{
-    font-size:16px;
-  }
-  .token-key-sub{
-    font-size:15px;
-  }
-  .token-section-title{
-    font-size:17px;
-    margin-bottom:14px;
-  }
-  .token-final-take{
-    font-size:17px;
-  }
-}
-</style>`;
+  tokenInput.placeholder = "Paste token contract address";
+  inputHelp.textContent = "Example: ERC-20, Solana, Base, or other supported token contract address";
+}`;
 
-/* -------------------------
-   CHECK FUNCTION
--------------------------- */
+  const SCROLL_TO_TOP_CHECK_FUNCTION = `function scrollToTopCheck() {
+  const tokenInput = document.getElementById("tokenAddress");
+  if (!tokenInput) return;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  setTimeout(() => tokenInput.focus(), 300);
+}`;
 
-const CHECK_FUNCTION = `async function check() {
+  const CHECK_FUNCTION = `async function check() {
   const tokenAddress = document.getElementById("tokenAddress")?.value.trim();
+  const email = document.getElementById("email")?.value.trim().toLowerCase() || "";
+  const subscribed = isBrowserSubscribed();
   const result = document.getElementById("result");
 
   if (!tokenAddress) {
@@ -343,7 +194,7 @@ const CHECK_FUNCTION = `async function check() {
     const res = await fetch(API + "/token-risk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tokenAddress })
+      body: JSON.stringify({ tokenAddress, email, subscribed })
     });
 
     const data = await res.json();
@@ -376,11 +227,7 @@ const CHECK_FUNCTION = `async function check() {
   }
 }`;
 
-/* -------------------------
-   FORMAT RESULT HELPERS
--------------------------- */
-
-const COMPACT_MONEY_FUNCTION = `function compactMoney(value) {
+  const COMPACT_MONEY_FUNCTION = `function compactMoney(value) {
   if (value === null || value === undefined || value === "") return "N/A";
   const num = Number(value);
   if (!Number.isFinite(num)) return "N/A";
@@ -391,18 +238,18 @@ const COMPACT_MONEY_FUNCTION = `function compactMoney(value) {
   return \`$\${num.toLocaleString(undefined, { maximumFractionDigits: 2 })}\`;
 }`;
 
-const COMPACT_PERCENT_FUNCTION = `function compactPercent(value) {
+  const COMPACT_PERCENT_FUNCTION = `function compactPercent(value) {
   if (value === null || value === undefined || value === "") return "N/A";
   const num = Number(value);
   if (!Number.isFinite(num)) return "N/A";
   return \`\${num >= 0 ? "+" : ""}\${num.toFixed(2)}%\`;
 }`;
 
-const ESCAPE_MAYBE_FUNCTION = `function escapeMaybe(value) {
+  const ESCAPE_MAYBE_FUNCTION = `function escapeMaybe(value) {
   return escapeHtml(String(value == null ? "" : value));
 }`;
 
-const NORMALIZE_RISK_CLASS_FUNCTION = `function normalizeRiskClass(value) {
+  const NORMALIZE_RISK_CLASS_FUNCTION = `function normalizeRiskClass(value) {
   const lower = String(value || "").toLowerCase();
   if (lower === "high") return "high";
   if (lower === "medium") return "medium";
@@ -410,7 +257,7 @@ const NORMALIZE_RISK_CLASS_FUNCTION = `function normalizeRiskClass(value) {
   return "unknown";
 }`;
 
-const NORMALIZE_LIQUIDITY_CLASS_FUNCTION = `function normalizeLiquidityClass(value) {
+  const NORMALIZE_LIQUIDITY_CLASS_FUNCTION = `function normalizeLiquidityClass(value) {
   const lower = String(value || "").toLowerCase();
   if (lower === "high") return "high";
   if (lower === "medium") return "medium";
@@ -418,7 +265,7 @@ const NORMALIZE_LIQUIDITY_CLASS_FUNCTION = `function normalizeLiquidityClass(val
   return "unknown";
 }`;
 
-const RISK_PILL_LABEL_FUNCTION = `function riskPillLabel(value) {
+  const RISK_PILL_LABEL_FUNCTION = `function riskPillLabel(value) {
   const lower = normalizeRiskClass(value);
   if (lower === "high") return "Risk: High";
   if (lower === "medium") return "Risk: Medium";
@@ -426,7 +273,7 @@ const RISK_PILL_LABEL_FUNCTION = `function riskPillLabel(value) {
   return "Risk: Review";
 }`;
 
-const LIQUIDITY_SUBTEXT_FUNCTION = `function liquiditySubtext(value) {
+  const LIQUIDITY_SUBTEXT_FUNCTION = `function liquiditySubtext(value) {
   const lower = String(value || "").toLowerCase();
   if (lower === "high") return "Stronger liquidity relative to activity.";
   if (lower === "medium") return "Moderate liquidity support relative to activity.";
@@ -434,7 +281,7 @@ const LIQUIDITY_SUBTEXT_FUNCTION = `function liquiditySubtext(value) {
   return "Liquidity support is unclear.";
 }`;
 
-const METRIC_ROW_FUNCTION = `function metricRow(label, formattedValue, extraClass) {
+  const METRIC_ROW_FUNCTION = `function metricRow(label, formattedValue, extraClass) {
   const cls = extraClass ? \`token-metric-value \${extraClass}\` : "token-metric-value";
   return \`
     <div class="token-metric-row">
@@ -444,7 +291,7 @@ const METRIC_ROW_FUNCTION = `function metricRow(label, formattedValue, extraClas
   \`;
 }`;
 
-const FORMAT_SIMPLE_BULLET_LIST_FUNCTION = `function formatSimpleBulletList(items, fallbackText) {
+  const FORMAT_SIMPLE_BULLET_LIST_FUNCTION = `function formatSimpleBulletList(items, fallbackText) {
   const safe = Array.isArray(items)
     ? items.map(item => String(item || "").trim()).filter(Boolean)
     : [];
@@ -454,7 +301,7 @@ const FORMAT_SIMPLE_BULLET_LIST_FUNCTION = `function formatSimpleBulletList(item
   return rows.map(item => \`<li class="token-list-item">\${escapeMaybe(item)}</li>\`).join("");
 }`;
 
-const BUILD_KEY_SIGNAL_ROWS_FUNCTION = `function buildKeySignalRows(data) {
+  const BUILD_KEY_SIGNAL_ROWS_FUNCTION = `function buildKeySignalRows(data) {
   const metrics = data.tokenMetrics || {};
   const liquidityConfidence = data.liquidityConfidence || "Unknown";
   const lcClass = normalizeLiquidityClass(liquidityConfidence);
@@ -495,7 +342,7 @@ const BUILD_KEY_SIGNAL_ROWS_FUNCTION = `function buildKeySignalRows(data) {
   \`;
 }`;
 
-const FORMAT_TOKEN_RESULT_FUNCTION = `function formatTokenResult(data) {
+  const FORMAT_TOKEN_RESULT_FUNCTION = `function formatTokenResult(data) {
   const analysis = data.analysis || {};
   const metrics = data.tokenMetrics || {};
   const tokenData = data.tokenData || {};
@@ -590,21 +437,8 @@ const FORMAT_TOKEN_RESULT_FUNCTION = `function formatTokenResult(data) {
   \`;
 }`;
 
-/* -------------------------
-   MAIN
--------------------------- */
-
-function main() {
-  assertFileExists(TEMPLATE_PATH);
-
-  let html = fs.readFileSync(TEMPLATE_PATH, "utf8");
-
-  html = updateStaticCopy(html);
-
-  if (!html.includes('id="token-risk-analysis-style"')) {
-    html = replaceAllExact(html, "</head>", `${STYLE_BLOCK}\n</head>`);
-  }
-
+  html = upsertFunction(html, "applyIntentToChecker", APPLY_INTENT_TO_CHECKER_FUNCTION, "showUpgrade");
+  html = upsertFunction(html, "scrollToTopCheck", SCROLL_TO_TOP_CHECK_FUNCTION, "showUpgrade");
   html = upsertFunction(html, "check", CHECK_FUNCTION, "showUpgrade");
   html = upsertFunction(html, "compactMoney", COMPACT_MONEY_FUNCTION, "showUpgrade");
   html = upsertFunction(html, "compactPercent", COMPACT_PERCENT_FUNCTION, "showUpgrade");
@@ -618,15 +452,15 @@ function main() {
   html = upsertFunction(html, "buildKeySignalRows", BUILD_KEY_SIGNAL_ROWS_FUNCTION, "showUpgrade");
   html = upsertFunction(html, "formatTokenResult", FORMAT_TOKEN_RESULT_FUNCTION, "showUpgrade");
 
-  ensureContains(html, "tokenAddress", "input");
-  ensureContains(html, "/token-risk", "endpoint");
+  ensureContains(html, 'id="tokenAddress"', "token input");
+  ensureContains(html, 'fetch(API + "/token-risk"', "token risk endpoint");
+  ensureContains(html, "function formatTokenResult(data)", "token formatter");
   ensureContains(html, "Liquidity Confidence", "liquidity confidence");
-  ensureContains(html, 'id="token-risk-analysis-style"', "token analysis style");
-  ensureContains(html, "function formatTokenResult(data)", "formatter");
   ensureContains(html, "What To Watch", "what to watch");
+  ensureContains(html, 'JSON.stringify({ tokenAddress, email, subscribed })', "token request payload");
 
   fs.writeFileSync(TEMPLATE_PATH, html, "utf8");
-  console.log("Template updated");
+  console.log(`Template updated: ${TEMPLATE_PATH}`);
 }
 
 main();
