@@ -463,4 +463,4 @@ function main() {
   console.log(`Template updated: ${TEMPLATE_PATH}`);
 }
 
-main();
+main(); 
