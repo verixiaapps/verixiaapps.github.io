@@ -759,7 +759,7 @@ def load_or_build_hub_html(hub_path: Path, canonical_url: str) -> str:
     return build_starter_hub_html(canonical_url)
 def replace_auto_section(content: str, new_inner_html: str) -> str:
     pattern = re.compile(
-        rf"({re.escape(AUTO_START)})(.*)({re.escape(AUTO_END)})",
+        rf"({re.escape(AUTO_START)})(.*?)({re.escape(AUTO_END)})",
         flags=re.DOTALL,
     )
     replacement = f"{AUTO_START}\n{new_inner_html}\n{AUTO_END}"
