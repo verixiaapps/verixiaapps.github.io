@@ -23,7 +23,7 @@ function escapeRegex(value) {
 
 function findFunctionRange(source, functionName) {
   const escapedName = escapeRegex(functionName);
-  const startRegex = new RegExp(`(?:async\\s+)?function\\s+${escapedName}\\s*\\(`);
+  const startRegex = new RegExp(`(?:async\\s+)?function\s+${escapedName}\\s*\\(`);
   const startMatch = startRegex.exec(source);
 
   if (!startMatch) return null;
@@ -148,7 +148,7 @@ function upsertStyleBlock(source, styleId, css, insertBeforeTag = "</head>") {
 
 function extractFunctionNames(bundle) {
   const names = [];
-  const regex = /(?:async\\s+)?function\\s+([A-Za-z0-9_$]+)\s*\(/g;
+  const regex = /(?:async\\s+)?function\s+([A-Za-z0-9_$]+)\s*\(/g;
   let match;
 
   while ((match = regex.exec(bundle))) {
