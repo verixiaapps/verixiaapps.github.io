@@ -453,7 +453,7 @@ function main() {
   html = upsertFunction(html, "formatTokenResult", FORMAT_TOKEN_RESULT_FUNCTION, "showUpgrade");
 
   ensureContains(html, 'id="tokenAddress"', "token input");
-  ensureContains(html, 'fetch(API + "/token-risk"', "token risk endpoint");
+  ensureContains(html, 'fetch(API + "/analyze-token"', "token risk endpoint");
   ensureContains(html, "function formatTokenResult(data)", "token formatter");
   ensureContains(html, "Liquidity Confidence", "liquidity confidence");
   ensureContains(html, "What To Watch", "what to watch");
