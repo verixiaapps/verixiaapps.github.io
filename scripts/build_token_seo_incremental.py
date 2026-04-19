@@ -3,12 +3,13 @@ import re
 import sys
 from html import escape
 
-# Add repo root to path so "scripts.*" imports work
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
+SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
 
-from scripts.generate_token_content import generate_token_content
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
+
+from generate_token_content import generate_token_content
 
 # -----------------------------
 # CONFIG
