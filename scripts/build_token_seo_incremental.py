@@ -3,9 +3,12 @@ import re
 import sys
 from html import escape
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if BASE_DIR not in sys.path:
-    sys.path.append(BASE_DIR)
+SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+
+for p in (SCRIPT_DIR, BASE_DIR):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 from generate_token_content import generate_token_content
 
