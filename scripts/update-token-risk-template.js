@@ -146,6 +146,41 @@ function upsertStyleBlock(source, styleId, css, insertBeforeTag = "</head>") {
   return source.slice(0, insertIndex) + block + "\n" + source.slice(insertIndex);
 }
 
+function extractFunctionNames(bundle) {
+  const names = [];
+  const regex = /(?:async\\s+)?function\\s+([A-Za-z0-9_$]+)\\s*\\(/g;
+  let match;
+
+  while ((match = regex.exec(bundle))) {
+    names.push(match[1]);
+  }
+
+  return names;
+}
+
+function upsertFunctionBundle(source, bundle, insertBeforeName) {
+  let nextSource = source;
+  const names = extractFunctionNames(bundle);
+
+  if (!names.length) {
+    throw new Error("No functions found in bundle.");
+  }
+
+  for (let i = names.length - 1; i >= 0; i--) {
+    const name = names[i];
+    const range = findFunctionRange(bundle, name);
+
+    if (!range) {
+      throw new Error(`Could not isolate bundled function: ${name}`);
+    }
+
+    const fnSource = bundle.slice(range.start, range.end).trim();
+    nextSource = upsertFunction(nextSource, name, fnSource, insertBeforeName);
+  }
+
+  return nextSource;
+}
+
 function main() {
   assertFileExists(TEMPLATE_PATH);
 
@@ -201,7 +236,7 @@ function main() {
   padding-left:15px;
   margin:0;
   font-size:15px;
-  line-height:1.46;
+  line-height:1.42;
   color:#e5eefc;
   font-weight:800;
 }
@@ -227,7 +262,7 @@ function main() {
   #seoContent .story-card-list{ gap:8px; }
   #seoContent .story-card-item{
     font-size:14px;
-    line-height:1.44;
+    line-height:1.4;
     padding-left:14px;
   }
 }
@@ -246,17 +281,16 @@ function main() {
     .replace(/\\bcan't sell\\b/gi, "sell lock")
     .replace(/\\bi got scammed by\\b/gi, "")
     .replace(/\\bdid i get scammed by\\b/gi, "")
-    .replace(/\\bis this\\b/gi, "")
-    .replace(/\\bis\\b/gi, "")
-    .replace(/\\bshould i buy\\b/gi, "")
-    .replace(/\\bcan i trust\\b/gi, "")
+    .replace(/^\\s*is\\s+/i, "")
+    .replace(/^\\s*is this\\s+/i, "")
+    .replace(/^\\s*should i buy\\s+/i, "")
+    .replace(/^\\s*can i trust\\s+/i, "")
     .replace(/\\btoken risk check\\b/gi, "")
     .replace(/\\btoken risk\\b/gi, "")
     .replace(/\\bwarning signs\\b/gi, "")
     .replace(/\\brisks\\b/gi, "")
     .replace(/\\bwhat to know\\b/gi, "")
     .replace(/\\bwhat to check\\b/gi, "")
-    .replace(/\\btoken\\b/gi, "token")
     .replace(/\\s+/g, " ")
     .trim();
 
@@ -278,8 +312,14 @@ function makeReadableCopyLabel(keywordRaw) {
 }
 
 function trimCopySentence(text, maxWords) {
-  const words = String(text || "").replace(/[.!?]+$/g, "").trim().split(/\\s+/).filter(Boolean);
+  const words = String(text || "")
+    .replace(/[.!?]+$/g, "")
+    .trim()
+    .split(/\\s+/)
+    .filter(Boolean);
+
   if (!words.length) return "";
+
   const clipped = words.slice(0, maxWords).join(" ").replace(/[,:;\\-]+$/g, "").trim();
   return clipped ? clipped + "." : "";
 }
@@ -336,26 +376,26 @@ function buildPreviewSignals(keywordRaw) {
   }
 
   if (/(cannot sell|can't sell|honeypot|sell)/i.test(lower)) {
-    return `${label}: Sell Lock Warning Signs`;
+    return \`\${label}: Sell Lock Warning Signs\`;
   }
 
   if (/(presale|fair launch|launch|airdrop)/i.test(lower)) {
-    return `${label}: Launch Risk Warning Signs`;
+    return \`\${label}: Launch Risk Warning Signs\`;
   }
 
   if (/(meme|memecoin|pump|moon|100x)/i.test(lower)) {
-    return `${label}: Hype vs Real Risk`;
+    return \`\${label}: Hype vs Real Risk\`;
   }
 
   if (isGuidanceStyleKeyword(lower)) {
-    return `${displayKeyword(raw)}: What Actually Matters`;
+    return \`\${displayKeyword(raw)}: What Actually Matters\`;
   }
 
   if (isQuestionStyleKeyword(lower)) {
-    return `${displayKeyword(raw)}? Check the Structure First`;
+    return \`\${displayKeyword(raw)}? Check the Structure First\`;
   }
 
-  return `${label}: Token Risk Warning Signs`;
+  return \`\${label}: Token Risk Warning Signs\`;
 }`;
 
   const BUILD_HERO_SUBHEADING_FUNCTION = `function buildHeroSubheading(keywordRaw) {
@@ -392,18 +432,18 @@ function buildPreviewSignals(keywordRaw) {
   }
 
   if (/(cannot sell|can't sell|honeypot|sell)/i.test(lower)) {
-    return `Why ${label} Often Turns Ugly`;
+    return \`Why \${label} Often Turns Ugly\`;
   }
 
   if (/(presale|fair launch|launch|airdrop)/i.test(lower)) {
-    return `What To Watch In ${label}`;
+    return \`What To Watch In \${label}\`;
   }
 
   if (/(meme|memecoin|pump|moon|100x)/i.test(lower)) {
-    return `What Usually Breaks Under ${label}`;
+    return \`What Usually Breaks Under \${label}\`;
   }
 
-  return `What Usually Matters In ${label}`;
+  return \`What Usually Matters In \${label}\`;
 }`;
 
   const BUILD_CONTENT_BRIDGE_FUNCTION = `function buildContentBridge(keywordRaw) {
@@ -656,34 +696,43 @@ function bulletBucketKey(text, theme, cardIndex) {
     if (/(fomo|urgent|countdown|rush|pressure|now|fast)/.test(lower)) return "hype-urgency";
     if (/(viral|social|telegram|x post|thread|community|influencer|promo)/.test(lower)) return "hype-social";
     if (/(price|pump|moon|spike|trend|attention)/.test(lower)) return "hype-price";
+    if (/(launch|presale|airdrop|fair launch)/.test(lower)) return "hype-launch";
     return "hype-general";
   }
 
   if (cardIndex === 1) {
+    if (/(remove liquidity|drain liquidity|rug pull|unlocked liquidity)/.test(lower)) return "structure-liquidity-rug";
+    if (/(thin liquidity|low liquidity|shallow liquidity)/.test(lower)) return "structure-liquidity-thin";
     if (theme === "liquidity") return "structure-liquidity";
+    if (/(top wallet|top holder|few wallets|concentration|distribution)/.test(lower)) return "structure-holders-concentration";
     if (theme === "holders") return "structure-holders";
+    if (/(mint|blacklist|freeze|pause|owner|admin|proxy|upgradeable|permissions|control)/.test(lower)) return "structure-contract-control";
     if (theme === "contract") return "structure-contract";
     return "structure-general";
   }
 
   if (cardIndex === 2) {
     if (/(cannot sell|can't sell|honeypot|blocked sell|sell fails|exit)/.test(lower)) return "execution-sell";
-    if (/(approval|approve|wallet connect|permission)/.test(lower)) return "execution-approval";
-    if (/(dump|spike|volume|price|slippage|chart)/.test(lower)) return "execution-behavior";
+    if (/(approval|approve|wallet connect|permission|allowance)/.test(lower)) return "execution-approval";
+    if (/(tax|slippage)/.test(lower)) return "execution-tax";
+    if (/(dump|crash|collapse|exit wave)/.test(lower)) return "execution-dump";
+    if (/(price|chart|trend|volume|spike)/.test(lower)) return "execution-chart";
     return "execution-general";
   }
 
   if (cardIndex === 3) {
-    if (/(contract|owner|mint|blacklist|tax)/.test(lower)) return "action-contract";
-    if (/(liquidity|lp|pool|locked)/.test(lower)) return "action-liquidity";
-    if (/(holder|wallet|distribution)/.test(lower)) return "action-holders";
+    if (/(contract|owner|mint|blacklist|pause|freeze|admin|proxy|permissions)/.test(lower)) return "action-contract";
+    if (/(liquidity|lp|pool|locked|unlock|drain)/.test(lower)) return "action-liquidity";
+    if (/(holder|wallet|distribution|concentration)/.test(lower)) return "action-holders";
+    if (/(approve|approval|wallet connect|allowance|seed phrase|recovery)/.test(lower)) return "action-approval";
+    if (/(sell|honeypot|exit|slippage|tax)/.test(lower)) return "action-exit";
     return "action-general";
   }
 
   return "general";
 }
 
-function getTokenCardFallbacks(theme) {
+function buildDefaultTokenFallbacks(theme) {
   const lowerTheme = String(theme || "").toLowerCase();
 
   const common = {
@@ -741,94 +790,146 @@ function getTokenCardFallbacks(theme) {
   }
 
   return common;
-}`;
+}
 
-  const COMPRESS_TOKEN_BULLET_FUNCTION = `function compressTokenBullet(text, theme, cardIndex) {
-  let value = cleanRewriteInput(stripSeoFiller(String(text || "")));
+function normalizeMeaningText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\\s]/g, " ")
+    .replace(/\\s+/g, " ")
+    .trim();
+}
 
-  if (!value) return "";
+function sentenceHasAny(text, patterns) {
+  return patterns.some(pattern => pattern.test(text));
+}
 
-  const lower = value.toLowerCase();
-  const bulletTheme = classifyTokenBulletTheme(value);
-  const resolvedCard = typeof cardIndex === "number" ? cardIndex : classifyCardIndex(value, bulletTheme);
+function buildSentenceMeaning(text) {
+  const lower = normalizeMeaningText(text);
 
-  let rewritten = value;
+  return {
+    lower,
+    urgency: sentenceHasAny(lower, [/\\burgent\\b/, /\\burgency\\b/, /\\brush\\b/, /\\bfomo\\b/, /\\bpressure\\b/, /\\bcountdown\\b/, /\\bwhitelist\\b/, /\\bearly access\\b/]),
+    social: sentenceHasAny(lower, [/\\bviral\\b/, /\\btelegram\\b/, /\\bx post\\b/, /\\bthread\\b/, /\\bcommunity\\b/, /\\binfluencer\\b/, /\\bsocial\\b/, /\\bshill\\b/, /\\bpromo\\b/]),
+    chart: sentenceHasAny(lower, [/\\bprice\\b/, /\\bpump\\b/, /\\bmoon\\b/, /\\bspike\\b/, /\\btrend\\b/, /\\battention\\b/, /\\bchart\\b/, /\\bvolume\\b/]),
+    lockedLiquidity: sentenceHasAny(lower, [/\\blocked liquidity\\b/, /\\bliquidity locked\\b/, /\\blocked lp\\b/]),
+    thinLiquidity: sentenceHasAny(lower, [/\\bthin liquidity\\b/, /\\blow liquidity\\b/, /\\bsmall pool\\b/, /\\bshallow liquidity\\b/]),
+    unlockedLiquidity: sentenceHasAny(lower, [/\\bunlocked liquidity\\b/, /\\bliquidity unlocked\\b/, /\\bremove liquidity\\b/, /\\bdrain liquidity\\b/, /\\brug pull\\b/]),
+    concentration: sentenceHasAny(lower, [/\\bholder concentration\\b/, /\\bwallet concentration\\b/, /\\bconcentration\\b/, /\\bfew wallets\\b/, /\\btop wallet\\b/, /\\btop holder\\b/, /\\bwhale\\b/, /\\bdistribution\\b/]),
+    mint: sentenceHasAny(lower, [/\\bmint\\b/, /\\bminting\\b/, /\\bcreate supply\\b/, /\\bnew supply\\b/]),
+    blacklist: sentenceHasAny(lower, [/\\bblacklist\\b/, /\\bfreeze\\b/, /\\bpause trading\\b/, /\\bpause\\b/, /\\bblock wallets\\b/]),
+    ownership: sentenceHasAny(lower, [/\\bowner\\b/, /\\bownership\\b/, /\\badmin\\b/, /\\bproxy\\b/, /\\bupgradeable\\b/, /\\bcontrol\\b/, /\\brenounced\\b/, /\\bfunction\\b/, /\\bpermissions\\b/]),
+    approvals: sentenceHasAny(lower, [/\\bapproval\\b/, /\\bapprove\\b/, /\\bwallet connect\\b/, /\\bpermission\\b/, /\\ballowance\\b/]),
+    sellBlock: sentenceHasAny(lower, [/\\bcannot sell\\b/, /\\bcan t sell\\b/, /\\bblocked sell\\b/, /\\bsell fails\\b/, /\\bhoneypot\\b/]),
+    slippage: sentenceHasAny(lower, [/\\bslippage\\b/, /\\bhigh tax\\b/, /\\btax\\b/]),
+    dump: sentenceHasAny(lower, [/\\bdump\\b/, /\\bcrash\\b/, /\\bcollapse\\b/, /\\bexit wave\\b/]),
+    launch: sentenceHasAny(lower, [/\\bpresale\\b/, /\\bfair launch\\b/, /\\blaunch\\b/, /\\bairdrop\\b/]),
+    confidence: sentenceHasAny(lower, [/\\blooks safe\\b/, /\\bseems safe\\b/, /\\blooks legit\\b/, /\\btrust\\b/, /\\bconfidence\\b/, /\\bproof\\b/])
+  };
+}
 
-  if (resolvedCard === 0) {
-    if (/(urgent|urgency|rush|fomo|pressure|countdown|whitelist|early access)/i.test(lower)) {
-      rewritten = "Urgency shows up before real proof.";
-    } else if (/(viral|telegram|x post|thread|community|influencer|social|shill|promo)/i.test(lower)) {
-      rewritten = "Social hype looks stronger than the actual setup.";
-    } else if (/(price|pump|moon|spike|trend|attention)/i.test(lower)) {
-      rewritten = "Fast price action can fake conviction.";
-    } else {
-      rewritten = "The surface looks cleaner than the structure.";
-    }
+function buildMeaningRewrite(text, theme, cardIndex) {
+  const meaning = buildSentenceMeaning(text);
+  const lower = meaning.lower;
+
+  if (cardIndex === 0) {
+    if (meaning.urgency && meaning.launch) return "Launch pressure usually lands before the proof does.";
+    if (meaning.urgency) return "Urgency usually shows up before proof.";
+    if (meaning.social && meaning.chart) return "Crowd hype and chart heat can hide weak structure.";
+    if (meaning.social) return "Crowd noise can outrun real diligence.";
+    if (meaning.chart && /\\bpump\\b|\\bspike\\b|\\bmoon\\b/.test(lower)) return "A pump can hide weak guts.";
+    if (meaning.chart) return "The chart can sell a bad setup.";
+    if (meaning.launch) return "Launch excitement can bury obvious risk.";
+    return "Surface confidence can hide weak structure.";
   }
 
-  if (resolvedCard === 1) {
-    if (bulletTheme === "liquidity" || /(liquidity|pool|lp|locked|unlock|drain)/i.test(lower)) {
-      if (/(locked|lock)/i.test(lower)) {
-        rewritten = "Locked liquidity helps, but bad structure still wins.";
-      } else if (/(thin|low)/i.test(lower)) {
-        rewritten = "Thin liquidity makes exits ugly fast.";
-      } else {
-        rewritten = "Liquidity can look fine until sellers test it.";
-      }
-    } else if (bulletTheme === "holders" || /(holder|holders|wallet|wallets|whale|distribution|concentration)/i.test(lower)) {
-      rewritten = "Too few wallets can bully the entire chart.";
-    } else if (bulletTheme === "contract" || /(contract|owner|mint|blacklist|pause|freeze|admin|proxy|upgradeable|tax|function)/i.test(lower)) {
-      if (/(mint)/i.test(lower)) {
-        rewritten = "Mint control can wreck supply discipline.";
-      } else if (/(blacklist|freeze|pause)/i.test(lower)) {
-        rewritten = "Control functions give insiders too much power.";
-      } else {
-        rewritten = "Contract permissions matter more than branding.";
-      }
-    } else {
-      rewritten = "Weak structure hides under polished presentation.";
-    }
+  if (cardIndex === 1) {
+    if (meaning.unlockedLiquidity) return "Unsecured liquidity keeps the rug live.";
+    if (meaning.thinLiquidity) return "Thin liquidity makes exits ugly fast.";
+    if (meaning.lockedLiquidity) return "A liquidity lock does not fix bad structure.";
+    if (meaning.concentration && meaning.chart) return "Too few wallets can steer the whole chart.";
+    if (meaning.concentration) return "Too few wallets can own the move.";
+    if (meaning.mint) return "Mint control can wreck supply discipline.";
+    if (meaning.blacklist) return "Blacklist power kills buyer trust fast.";
+    if (meaning.ownership && meaning.approvals) return "Admin control plus wallet approvals is a bad mix.";
+    if (meaning.ownership) return "Admin control matters more than branding.";
+    if (theme === "liquidity") return "Liquidity quality decides how exits feel.";
+    if (theme === "holders") return "Wallet concentration can crush the chart.";
+    if (theme === "contract") return "Contract control sets the real risk.";
+    return "Weak structure breaks long before the story does.";
   }
 
-  if (resolvedCard === 2) {
-    if (/(cannot sell|can't sell|blocked sell|sell fails|honeypot|sell|selling|exit)/i.test(lower)) {
-      rewritten = "Buying may work long before selling does.";
-    } else if (/(approval|approve|wallet connect|permission)/i.test(lower)) {
-      rewritten = "Approval prompts can be the real trap.";
-    } else if (/(dump|spike|volume|slippage|price|chart|trend)/i.test(lower)) {
-      rewritten = "Price can hold until the first real exit wave.";
-    } else {
-      rewritten = "Execution risk usually appears after entry.";
-    }
+  if (cardIndex === 2) {
+    if (meaning.sellBlock && meaning.approvals) return "The buy and approval can work before exits fail.";
+    if (meaning.sellBlock) return "Entry can work before exits break.";
+    if (meaning.approvals) return "The approval can be the real trap.";
+    if (meaning.slippage && meaning.chart) return "Taxes and slippage can wreck a strong-looking chart.";
+    if (meaning.slippage) return "Taxes and slippage can trap late buyers.";
+    if (meaning.dump) return "The chart can snap once exits start.";
+    if (meaning.chart) return "Momentum usually dies at the exit test.";
+    return "Execution risk usually appears after entry.";
   }
 
-  if (resolvedCard === 3) {
-    if (/(contract|owner|mint|blacklist|pause|freeze|tax|function)/i.test(lower)) {
-      rewritten = "Check owner control and contract permissions.";
-    } else if (/(liquidity|pool|lp|locked|unlock)/i.test(lower)) {
-      rewritten = "Check whether liquidity is real and durable.";
-    } else if (/(holder|holders|wallet|wallets|distribution|concentration)/i.test(lower)) {
-      rewritten = "Check how much supply top wallets control.";
-    } else if (/(approval|approve|wallet connect|seed phrase|recovery)/i.test(lower)) {
-      rewritten = "Do not approve anything under pressure.";
-    } else {
-      rewritten = "Pause and verify the structure first.";
-    }
+  if (cardIndex === 3) {
+    if (meaning.ownership || meaning.mint || meaning.blacklist) return "Check contract permissions first.";
+    if (meaning.unlockedLiquidity || meaning.thinLiquidity || meaning.lockedLiquidity) return "Verify the liquidity setup first.";
+    if (meaning.concentration) return "Check top-wallet concentration next.";
+    if (meaning.approvals) return "Do not sign under pressure.";
+    if (meaning.sellBlock || meaning.slippage) return "Test the exit path before trusting it.";
+    return "Slow down and verify the setup.";
   }
 
-  rewritten = String(rewritten || "")
+  return "";
+}
+
+function scoreMeaningSpecificity(text) {
+  const meaning = buildSentenceMeaning(text);
+  let score = 0;
+
+  if (meaning.urgency) score += 2;
+  if (meaning.social) score += 2;
+  if (meaning.chart) score += 1;
+  if (meaning.lockedLiquidity) score += 3;
+  if (meaning.thinLiquidity) score += 3;
+  if (meaning.unlockedLiquidity) score += 4;
+  if (meaning.concentration) score += 3;
+  if (meaning.mint) score += 4;
+  if (meaning.blacklist) score += 4;
+  if (meaning.ownership) score += 3;
+  if (meaning.approvals) score += 3;
+  if (meaning.sellBlock) score += 4;
+  if (meaning.slippage) score += 2;
+  if (meaning.dump) score += 2;
+  if (meaning.launch) score += 2;
+  if (meaning.confidence) score += 1;
+
+  return score;
+}
+
+function finalPolishLine(text, cardIndex) {
+  let value = String(text || "")
     .replace(/\\s+/g, " ")
     .replace(/[,:;]+$/g, "")
     .trim();
 
-  if (!rewritten) return "";
+  if (!value) return "";
 
-  const maxWords = resolvedCard === 3 ? 12 : 11;
-  rewritten = trimCopySentence(rewritten, maxWords);
+  value = trimBulletHard(value, cardIndex === 3 ? 12 : 13);
 
-  if (!rewritten) return "";
+  if (!value) return "";
 
-  return rewritten.charAt(0).toUpperCase() + rewritten.slice(1);
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}`;
+
+  const COMPRESS_TOKEN_BULLET_FUNCTION = `function compressTokenBullet(text, theme, cardIndex) {
+  const cleaned = cleanRewriteInput(stripSeoFiller(String(text || "")));
+  if (!cleaned) return "";
+
+  const bulletTheme = classifyTokenBulletTheme(cleaned);
+  const resolvedCard = typeof cardIndex === "number" ? cardIndex : classifyCardIndex(cleaned, bulletTheme);
+
+  const rewritten = buildMeaningRewrite(cleaned, bulletTheme || theme, resolvedCard) || cleaned;
+  return finalPolishLine(rewritten, resolvedCard);
 }`;
 
   const BUILD_CARD_BULLET_POOL_FUNCTION = `function buildCardBulletPool(paragraphs, theme) {
@@ -857,41 +958,52 @@ function getTokenCardFallbacks(theme) {
     .filter(s => !/^signs the setup may be weak or risky$/i.test(s))
     .filter(s => !/^safer next steps$/i.test(s));
 
-  const seen = new Set();
-  const seenBuckets = new Set();
-  const unique = [];
-
-  for (const sentence of sentencePool) {
+  const candidates = sentencePool.map(sentence => {
     const rawTheme = classifyTokenBulletTheme(sentence);
     const cardIndex = classifyCardIndex(sentence, rawTheme);
     const compressed = compressTokenBullet(sentence, theme, cardIndex);
     const key = normalizeTokenBulletKey(compressed);
     const bucket = bulletBucketKey(sentence, rawTheme, cardIndex);
-    const bucketKey = bucket + "::" + key;
+    const specificity = scoreMeaningSpecificity(sentence);
 
-    if (!compressed || !key) continue;
-    if (seen.has(key)) continue;
-    if (seenBuckets.has(bucketKey)) continue;
-
-    unique.push({
+    return {
       original: sentence,
       text: compressed,
       theme: rawTheme,
       cardIndex,
-      bucket
+      bucket,
+      key,
+      specificity,
+      length: sentence.length
+    };
+  });
+
+  const seen = new Set();
+  const unique = [];
+
+  candidates
+    .filter(item => item.text && item.key)
+    .sort((a, b) => {
+      if (b.specificity !== a.specificity) return b.specificity - a.specificity;
+      return b.length - a.length;
+    })
+    .forEach(item => {
+      if (seen.has(item.key)) return;
+      seen.add(item.key);
+      unique.push(item);
     });
 
-    seen.add(key);
-    seenBuckets.add(bucketKey);
-  }
-
-  return unique;
+  return unique.sort((a, b) => {
+    if (a.cardIndex !== b.cardIndex) return a.cardIndex - b.cardIndex;
+    if (b.specificity !== a.specificity) return b.specificity - a.specificity;
+    return b.length - a.length;
+  });
 }`;
 
   const BUILD_SEO_CARD_GROUPS_FUNCTION = `function buildSeoCardGroups(paragraphs) {
   const theme = detectTokenTheme(RAW_KEYWORD || "", paragraphs);
   const bulletPool = buildCardBulletPool(paragraphs, theme);
-  const fallbackMap = getTokenCardFallbacks(theme);
+  const fallbackMap = buildDefaultTokenFallbacks(theme);
 
   const cards = [
     { titleIndex: 0, items: [], seenBuckets: new Set() },
@@ -907,16 +1019,18 @@ function getTokenCardFallbacks(theme) {
 
     const sourceText = typeof bullet === "string"
       ? bullet
-      : (bullet.text || bullet.original || "");
+      : (bullet.original || bullet.text || "");
 
-    const text = compressTokenBullet(sourceText, theme, cardIndex);
-    const normalized = normalizeTokenBulletKey(text);
     const themeName = typeof bullet === "string"
       ? classifyTokenBulletTheme(sourceText)
       : (bullet.theme || classifyTokenBulletTheme(sourceText));
+
     const bucket = typeof bullet === "string"
       ? bulletBucketKey(sourceText, themeName, cardIndex)
       : (bullet.bucket || bulletBucketKey(sourceText, themeName, cardIndex));
+
+    const text = compressTokenBullet(sourceText, theme, cardIndex);
+    const normalized = normalizeTokenBulletKey(text);
 
     if (!text || !normalized) return false;
     if (globalSeen.has(normalized)) return false;
@@ -1010,7 +1124,7 @@ function getTokenCardFallbacks(theme) {
 
   html = upsertStyleBlock(html, "token-risk-polish-style", TOKEN_RISK_POLISH_STYLE);
 
-  html = upsertFunction(html, "sanitizeKeywordForCopy", PAGE_COPY_TOOLS_FUNCTION, "buildHeroTitle");
+  html = upsertFunctionBundle(html, PAGE_COPY_TOOLS_FUNCTION, "buildHeroTitle");
   html = upsertFunction(html, "buildHeroTitle", BUILD_HERO_TITLE_FUNCTION, "buildHeroSubheading");
   html = upsertFunction(html, "buildHeroSubheading", BUILD_HERO_SUBHEADING_FUNCTION, "buildContentHeading");
   html = upsertFunction(html, "buildContentHeading", BUILD_CONTENT_HEADING_FUNCTION, "buildContentBridge");
@@ -1019,7 +1133,7 @@ function getTokenCardFallbacks(theme) {
   html = upsertFunction(html, "applyPreviewCard", APPLY_PREVIEW_CARD_FUNCTION, "applyIntentToChecker");
 
   html = upsertFunction(html, "extractSeoSourceBlocks", EXTRACT_SEO_SOURCE_BLOCKS_FUNCTION, "cleanSeoContent");
-  html = upsertFunction(html, "normalizeTokenBulletKey", TOKEN_BULLET_TOOLS_FUNCTION, "cleanSeoContent");
+  html = upsertFunctionBundle(html, TOKEN_BULLET_TOOLS_FUNCTION, "cleanSeoContent");
   html = upsertFunction(html, "compressTokenBullet", COMPRESS_TOKEN_BULLET_FUNCTION, "cleanSeoContent");
   html = upsertFunction(html, "buildCardBulletPool", BUILD_CARD_BULLET_POOL_FUNCTION, "cleanSeoContent");
   html = upsertFunction(html, "buildSeoCardGroups", BUILD_SEO_CARD_GROUPS_FUNCTION, "cleanSeoContent");
@@ -1038,12 +1152,18 @@ function getTokenCardFallbacks(theme) {
   ensureContains(html, "applyPreviewCard", "preview card override");
   ensureContains(html, "extractSeoSourceBlocks", "seo source extractor");
   ensureContains(html, "normalizeTokenBulletKey", "bullet key normalizer");
+  ensureContains(html, "trimBulletHard", "hard bullet trimmer");
   ensureContains(html, "cleanRewriteInput", "rewrite input cleaner");
-  ensureContains(html, "trimCopySentence", "copy sentence trimmer");
   ensureContains(html, "classifyTokenBulletTheme", "bullet theme classifier");
   ensureContains(html, "classifyCardIndex", "card classifier");
   ensureContains(html, "bulletBucketKey", "bucket deduper");
-  ensureContains(html, "getTokenCardFallbacks", "fallback map");
+  ensureContains(html, "buildDefaultTokenFallbacks", "fallback map");
+  ensureContains(html, "normalizeMeaningText", "meaning normalizer");
+  ensureContains(html, "sentenceHasAny", "pattern matcher");
+  ensureContains(html, "buildSentenceMeaning", "meaning extractor");
+  ensureContains(html, "buildMeaningRewrite", "meaning rewrite");
+  ensureContains(html, "scoreMeaningSpecificity", "specificity scorer");
+  ensureContains(html, "finalPolishLine", "final bullet polisher");
   ensureContains(html, "compressTokenBullet", "bullet compressor");
   ensureContains(html, "buildCardBulletPool", "bullet pool builder");
   ensureContains(html, "buildSeoCardGroups", "seo card grouping");
