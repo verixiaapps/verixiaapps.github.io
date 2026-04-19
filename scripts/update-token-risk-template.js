@@ -1177,4 +1177,4 @@ function finalPolishLine(text, cardIndex) {
   console.log("Perfected.");
 }
 
-main();
+main(); 
