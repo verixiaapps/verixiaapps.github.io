@@ -10,8 +10,6 @@ CLUSTERS = {
 
         "meme token",
 
-        "shitcoin",
-
         "microcap",
 
         "low cap",
