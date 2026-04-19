@@ -191,7 +191,7 @@ function main() {
   \`;
 
   try {
-    const res = await fetch(API + "/token-risk", {
+    const res = await fetch(API + "/analyze-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tokenAddress, email, subscribed })
