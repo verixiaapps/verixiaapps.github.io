@@ -11,10 +11,6 @@ function assertFileExists(filePath) {
   }
 }
 
-function replaceAllRegex(source, regex, newValue) {
-  return source.replace(regex, newValue);
-}
-
 function ensureContains(source, needle, label) {
   if (!source.includes(needle)) {
     throw new Error(`Missing: ${label}`);
@@ -155,323 +151,74 @@ function main() {
 
   let html = fs.readFileSync(TEMPLATE_PATH, "utf8");
 
-  html = replaceAllRegex(
-    html,
-    /<textarea[^>]*id="text"[^>]*><\/textarea>/g,
-    '<input id="tokenAddress" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste token contract address">'
-  );
-
   const TOKEN_RISK_POLISH_STYLE = `
-:root{
-  --bg:#04070f;
-  --bg-2:#07101a;
-  --bg-3:#0b1626;
-  --bg-4:#0f1d31;
-
-  --surface:rgba(255,255,255,.035);
-  --surface-2:rgba(255,255,255,.05);
-  --surface-3:rgba(255,255,255,.075);
-
-  --card:#0d1524;
-  --card-2:#101b2d;
-  --card-3:#152238;
-
-  --ink:#edf4ff;
-  --ink-strong:#ffffff;
-  --ink-dark:#111827;
-  --muted:#9caed0;
-  --muted-2:#8395b6;
-
-  --line:rgba(255,255,255,.08);
-  --line-2:rgba(255,255,255,.06);
-  --line-3:rgba(255,255,255,.12);
-
-  --cyan:#82b7ff;
-  --cyan-2:#5f94ff;
-  --blue:#668dff;
-  --blue-2:#4f74ed;
-  --violet:#8d82f6;
-  --violet-2:#7168e8;
-  --emerald:#2fc48d;
-  --emerald-2:#1ea875;
-  --amber:#f1ac3d;
-  --red:#ff7659;
-  --red-2:#ef6047;
-
-  --shadow-xl:0 30px 80px rgba(0,0,0,.42);
-  --shadow-lg:0 22px 56px rgba(0,0,0,.34);
-  --shadow-md:0 14px 34px rgba(0,0,0,.24);
-  --shadow-sm:0 10px 22px rgba(0,0,0,.18);
-  --shadow-xs:0 6px 14px rgba(0,0,0,.12);
-
-  --radius-xl:28px;
-  --radius-lg:22px;
-  --radius-md:18px;
-  --radius-sm:14px;
-}
-
-body{
-  background:
-    radial-gradient(circle at 16% 0%, rgba(97,141,255,.12), transparent 24%),
-    radial-gradient(circle at 86% 0%, rgba(141,130,246,.09), transparent 28%),
-    radial-gradient(circle at 50% 100%, rgba(47,196,141,.04), transparent 30%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 30%, var(--bg-3) 68%, var(--bg-4) 100%);
-}
-
-.logo,
-.app-top{
-  background:rgba(9,16,28,.72);
-  border-color:rgba(255,255,255,.10);
-  box-shadow:0 10px 24px rgba(0,0,0,.16);
-}
-
-.logo-dot{
-  box-shadow:0 0 0 4px rgba(95,148,255,.12);
-}
-
-.hero{
-  padding-bottom:28px;
-}
-
-.hero h1{
-  max-width:860px;
-  margin-left:auto;
-  margin-right:auto;
-  text-shadow:0 10px 26px rgba(0,0,0,.14);
-}
-
-.hero p{
-  max-width:740px;
-  color:#c6d4ea;
-}
-
-.hero-badge{
-  background:rgba(255,255,255,.055);
-  color:#dde9fb;
-  border-color:rgba(255,255,255,.09);
-  box-shadow:none;
-}
-
-.hero-trust-chip{
-  background:rgba(255,255,255,.04);
-  color:#dbe7fb;
-  border-color:rgba(255,255,255,.08);
-  box-shadow:none;
-}
-
-.container,
-.content-section{
-  border:1px solid var(--line);
-  background:
-    linear-gradient(180deg, rgba(13,20,34,.965) 0%, rgba(9,14,24,.987) 100%);
-  box-shadow:var(--shadow-xl);
-}
-
-.container::before,
-.content-section::before{
-  background:radial-gradient(circle, rgba(95,148,255,.12), transparent 66%);
-}
-
-.container::after,
-.content-section::after{
-  background:radial-gradient(circle, rgba(141,130,246,.09), transparent 68%);
-}
-
-.preview-card,
-.tool-shell,
-.app-link-card,
-.upgrade,
-.inline-info-card{
-  border:1px solid var(--line);
-  box-shadow:var(--shadow-md);
-}
-
-.preview-card{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.025) 100%);
-}
-
-.preview-badge{
-  box-shadow:0 10px 20px rgba(185,75,95,.12);
-}
-
-.preview-score{
-  background:rgba(255,255,255,.05);
-  color:#ecf2ff;
-}
-
-.preview-domain{
-  color:#ffffff;
-}
-
-.preview-sub{
-  color:#ccdaee;
-}
-
-.preview-signal{
-  background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.07);
-  color:#f6dfe3;
-}
-
-.tool-shell{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045) 0%, rgba(255,255,255,.02) 100%);
-  border-color:var(--line);
-}
-
-textarea,
-input{
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(7,12,21,.92);
-  box-shadow:none;
-}
-
-textarea:focus,
-input:focus{
-  border-color:rgba(95,148,255,.58);
-  box-shadow:0 0 0 4px rgba(95,148,255,.10);
-  background:rgba(8,14,24,.97);
-}
-
-.check,
-.plan,
-.plan.secondary,
-.plan.tertiary,
-.upgrade-top,
-.app-link-button{
-  box-shadow:0 14px 30px rgba(0,0,0,.20);
-}
-
-.check{
-  background:linear-gradient(135deg,#7b79f5 0%, #4e85ff 52%, #31c48d 100%);
-}
-
-.upgrade-top{
-  background:linear-gradient(135deg,#817cf4 0%, #4c84ff 52%, #2fc08a 100%);
-}
-
-.app-link-button{
-  background:linear-gradient(135deg,#4d73eb 0%, #31c48d 100%);
-}
-
-.app-link-card{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.02) 100%);
-}
-
-.inline-info-card,
-.content-bridge,
-.content-close,
-.story-card,
-.recognition-chip{
-  border:1px solid var(--line);
-  box-shadow:none;
-}
-
-.inline-info-card{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.02) 100%);
-}
-
-.content-bridge,
-.content-close{
-  background:rgba(255,255,255,.03);
-}
-
-.content-section h2{
-  font-size:38px;
-  letter-spacing:-.036em;
-}
-
-.content-section h3{
-  letter-spacing:-.03em;
-}
-
-.recognition-chip{
-  border-radius:20px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045) 0%, rgba(255,255,255,.02) 100%);
-}
-
-.recognition-label{
-  color:#96c9ff;
-}
-
-.recognition-copy{
-  color:#e7effd;
-}
-
-.story-stack{
+#seoContent .story-stack{
   display:grid;
   gap:14px;
+  margin-top:10px;
 }
 
-.story-card{
+#seoContent .story-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
   border-radius:20px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045) 0%, rgba(255,255,255,.02) 100%);
+  padding:18px 18px 16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.045) 0%, rgba(255,255,255,.02) 100%);
+  box-shadow:0 12px 30px rgba(0,0,0,.14);
 }
 
-.story-card.lead{
-  background:
-    linear-gradient(180deg, rgba(116,132,235,.16) 0%, rgba(255,255,255,.025) 100%);
-  border-color:rgba(141,132,247,.24);
+#seoContent .story-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg, rgba(159,203,255,.24), rgba(255,255,255,0));
 }
 
-.story-card-title{
-  color:#9ccbff;
+#seoContent .story-card.lead{
+  border-color:rgba(135,146,255,.28);
+  background:linear-gradient(180deg, rgba(108,126,255,.16) 0%, rgba(255,255,255,.03) 100%);
+  box-shadow:0 16px 36px rgba(0,0,0,.18);
 }
 
-.story-card p{
+#seoContent .story-card-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+  font-size:12px;
+  line-height:1.2;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  font-weight:800;
+  color:#9fcbff;
+}
+
+#seoContent .story-card-title-icon{
+  font-size:14px;
+  line-height:1;
+}
+
+#seoContent .story-card p{
   margin:0;
   font-size:16px;
   line-height:1.72;
-  color:#dde8fa;
-}
-
-.link-section{
-  border-top:1px solid rgba(255,255,255,.07);
-}
-
-.related-links a{
-  color:#9fd1ff;
-}
-
-.note{
-  color:#94a7c5;
-}
-
-.success{
-  color:#8ce9b6;
-}
-
-#email{
-  margin-top:14px;
-  background:rgba(255,255,255,.03);
-  border-color:rgba(255,255,255,.08);
-}
-
-#email::placeholder{
-  color:#8899b7;
-}
-
-#result{
-  margin-top:24px;
-}
-
-.footer{
-  color:#93a6c5;
-}
-
-.footer a{
-  color:#9fd1ff;
+  color:#e5eefc;
 }
 
 @media (max-width:640px){
-  .content-section h2{font-size:30px;}
-  .story-card p{font-size:15px;line-height:1.68;}
-  .recognition-chip{border-radius:16px;}
+  #seoContent .story-card{
+    padding:16px 16px 15px;
+    border-radius:18px;
+  }
+
+  #seoContent .story-card p{
+    font-size:15px;
+    line-height:1.68;
+  }
 }
 `;
 
@@ -482,42 +229,44 @@ input:focus{
   const parser = document.createElement("div");
   parser.innerHTML = html;
 
-  let paragraphs = Array.from(parser.querySelectorAll("p"))
-    .map(p => p.textContent.trim())
+  let paragraphs = Array.from(parser.querySelectorAll("p, li"))
+    .map(node => node.textContent.trim())
     .filter(Boolean);
 
   if (paragraphs.length) return paragraphs;
 
-  paragraphs = parser.innerHTML
+  return parser.innerHTML
     .replace(/<br\\s*\\/?>/gi, "\\n")
+    .replace(/<\\/p>/gi, "\\n\\n")
     .replace(/<\\/div>/gi, "\\n\\n")
     .replace(/<\\/section>/gi, "\\n\\n")
+    .replace(/<li>/gi, "\\n• ")
+    .replace(/<\\/li>/gi, "")
     .replace(/<[^>]+>/g, "")
-    .split(/\\n\\s*\\n/)
+    .split(/\\n\\s*\\n|\\n(?=•)/)
     .map(p => p.replace(/\\s+/g, " ").trim())
     .filter(Boolean);
-
-  return paragraphs;
 }`;
 
   const STRIP_SEO_FILLER_FUNCTION = `function stripSeoFiller(text) {
   return String(text || "")
-    .replace(/\\b(it is important to note that|it is worth noting that|in many cases|in some cases|in a lot of cases)\\b/gi, "")
+    .replace(/\\*\\*/g, "")
+    .replace(/\\b(it is important to note that|it is worth noting that|in many cases|in some cases|in a lot of cases|generally speaking|in general)\\b/gi, "")
     .replace(/\\b(this is because|the reason for this is that)\\b/gi, "because")
-    .replace(/\\b(as always|of course|basically|simply put|put simply)\\b/gi, "")
-    .replace(/\\b(when it comes to this|at the end of the day)\\b/gi, "")
-    .replace(/\\bkeep in mind that\\b/gi, "")
-    .replace(/\\bmake sure to\\b/gi, "")
+    .replace(/\\b(as always|of course|basically|simply put|put simply|at the end of the day|when it comes to this)\\b/gi, "")
+    .replace(/\\b(keep in mind that|make sure to|it can be helpful to|it helps to)\\b/gi, "")
+    .replace(/\\b(looks legit|seems legit)\\b/gi, "looks safer than it may be")
     .replace(/\\s+/g, " ")
+    .replace(/\\s+([,.;!?])/g, "$1")
     .trim();
 }`;
 
   const NORMALIZE_SEO_SENTENCE_FUNCTION = `function normalizeSeoSentence(sentence) {
   return stripSeoFiller(sentence)
     .replace(/^[-•]\\s*/, "")
-    .replace(/\\s+/g, " ")
-    .replace(/\\s+([,.;!?])/g, "$1")
+    .replace(/^[,:;]+\\s*/, "")
     .replace(/\\.{2,}/g, ".")
+    .replace(/\\s+/g, " ")
     .trim();
 }`;
 
@@ -542,13 +291,12 @@ input:focus{
     .replace(/\\s+/g, " ")
     .trim();
 
-  if (!lower) return false;
-  if (!lower.includes(keyword)) return false;
+  if (!lower || !lower.includes(keyword)) return false;
 
   const cleanKeyword = keyword.replace(/[^a-z0-9]+/g, " ").trim();
   const cleanSentence = lower.replace(/[^a-z0-9]+/g, " ").trim();
 
-  if (cleanSentence === cleanKeyword) return false;
+  if (!cleanKeyword || cleanSentence === cleanKeyword) return false;
   if (cleanSentence.startsWith(cleanKeyword + " ")) return true;
   if (cleanSentence.includes(" " + cleanKeyword + " ")) return true;
 
@@ -559,7 +307,7 @@ input:focus{
   const lower = String(sentence || "").toLowerCase().trim();
 
   if (!lower) return true;
-  if (lower.length < 24) return true;
+  if (lower.length < 28) return true;
 
   const genericStarts = [
     "this means",
@@ -568,126 +316,388 @@ input:focus{
     "this is because",
     "it is important",
     "it is worth",
-    "in many cases",
-    "in some cases",
     "there are many",
     "one thing to remember",
+    "in many cases",
+    "in some cases",
     "generally speaking",
     "in general"
   ];
 
+  const genericPhrases = [
+    "what stands out first",
+    "what deserves a deeper check",
+    "where people get caught",
+    "what to verify next",
+    "looks normal until",
+    "feels believable",
+    "narrative alone",
+    "structure supports",
+    "social excitement",
+    "setup looks stronger"
+  ];
+
   if (genericStarts.some(start => lower.startsWith(start))) return true;
+  if (genericPhrases.some(phrase => lower.includes(phrase))) return true;
 
   return false;
 }`;
 
-  const IS_SIGNAL_SENTENCE_FUNCTION = `function isSignalSentence(sentence) {
-  const lower = String(sentence || "").toLowerCase();
+  const DETECT_TOKEN_THEME_FUNCTION = `function detectTokenTheme(keywordRaw, paragraphs) {
+  const haystack = [String(keywordRaw || ""), ...(paragraphs || [])]
+    .join(" ")
+    .toLowerCase();
 
-  return (
-    lower.includes("risk") ||
-    lower.includes("liquidity") ||
-    lower.includes("volume") ||
-    lower.includes("price") ||
-    lower.includes("holders") ||
-    lower.includes("holder") ||
-    lower.includes("wallet") ||
-    lower.includes("contract") ||
-    lower.includes("permission") ||
-    lower.includes("approval") ||
-    lower.includes("buy") ||
-    lower.includes("sell") ||
-    lower.includes("token") ||
-    lower.includes("market") ||
-    lower.includes("launch") ||
-    lower.includes("trading") ||
-    lower.includes("honeypot") ||
-    lower.includes("exit")
-  );
+  if (/honeypot|can't sell|cant sell|cannot sell|sell blocked|sell tax|swap fails|can't swap|cant swap/.test(haystack)) {
+    return "honeypot";
+  }
+
+  if (/liquidity|thin liquidity|low liquidity|market depth|slippage/.test(haystack)) {
+    return "liquidity";
+  }
+
+  if (/holder|holders|wallet|wallets|distribution|concentration|top wallet/.test(haystack)) {
+    return "holders";
+  }
+
+  if (/approval|approve|permission|allowance|spender/.test(haystack)) {
+    return "approvals";
+  }
+
+  if (/presale|launch|airdrop|fair launch|new token|fresh launch/.test(haystack)) {
+    return "launch";
+  }
+
+  return "token";
+}`;
+
+  const SCORE_TOKEN_SENTENCE_FUNCTION = `function scoreTokenSentence(sentence) {
+  const lower = String(sentence || "").toLowerCase();
+  let score = 0;
+
+  const strongSignals = [
+    "liquidity","holder","holders","wallet","wallets","distribution","concentration",
+    "volume","slippage","exit","sell","swap","buy","contract","permission",
+    "approval","honeypot","market depth","trading","pair","bridge","market cap",
+    "locked","unlocked","tax"
+  ];
+
+  const dangerSignals = [
+    "risk","warning","red flag","collapse","fails","thin","drain","rug","dump",
+    "stuck","blocked","freeze","unsafe","danger"
+  ];
+
+  const actionSignals = [
+    "check","review","verify","confirm","watch","treat","avoid","compare"
+  ];
+
+  strongSignals.forEach(signal => {
+    if (lower.includes(signal)) score += 2;
+  });
+
+  dangerSignals.forEach(signal => {
+    if (lower.includes(signal)) score += 2;
+  });
+
+  actionSignals.forEach(signal => {
+    if (lower.includes(signal)) score += 1;
+  });
+
+  if (lower.length >= 70) score += 1;
+  if (lower.length >= 110) score += 1;
+  if (/\\d/.test(lower)) score += 1;
+  if (/(before|when|if)\\b/.test(lower)) score += 1;
+
+  return score;
+}`;
+
+  const BUILD_SOURCE_MATERIAL_FUNCTION = `function buildSourceMaterial(paragraphs) {
+  const directSentences = paragraphs
+    .flatMap(breakParagraphIntoSentences)
+    .map(normalizeSeoSentence)
+    .filter(Boolean);
+
+  const paragraphUnits = paragraphs
+    .map(normalizeSeoSentence)
+    .filter(Boolean);
+
+  const fragments = [];
+  const seen = new Set();
+
+  function pushUnique(text) {
+    const cleaned = normalizeSeoSentence(text);
+    const key = cleaned.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    if (!cleaned || !key || seen.has(key)) return;
+    seen.add(key);
+    fragments.push(cleaned);
+  }
+
+  directSentences.forEach(pushUnique);
+  paragraphUnits.forEach(pushUnique);
+
+  if (!fragments.length) {
+    const joined = paragraphUnits.join(" ").trim();
+    if (joined) pushUnique(joined);
+  }
+
+  return fragments;
+}`;
+
+  const GET_SOURCE_TEXT_FOR_CARD_FUNCTION = `function getSourceTextForCard(material, index) {
+  if (!material.length) return "";
+  if (material[index]) return material[index];
+
+  const joined = material.join(" ").trim();
+  if (!joined) return material[index % material.length];
+
+  if (index === 0) return material[0];
+  if (index === 1) return material[Math.min(1, material.length - 1)] || joined;
+  if (index === 2) return joined;
+  if (index === 3) {
+    return material.length > 1
+      ? material.slice().reverse().join(" ")
+      : joined;
+  }
+
+  return joined;
+}`;
+
+  const REWRITE_TOKEN_SENTENCE_FUNCTION = `function rewriteTokenSentence(sourceText, theme, index) {
+  const text = normalizeSeoSentence(sourceText);
+  const lower = text.toLowerCase();
+
+  const mentionsLiquidity = /liquidity|slippage|market depth|volume|pair/.test(lower);
+  const mentionsHolders = /holder|holders|wallet|wallets|distribution|concentration|top wallet/.test(lower);
+  const mentionsContract = /contract|permission|approval|allowance|spender|tax/.test(lower);
+  const mentionsSell = /sell|swap|exit|blocked|stuck|fails|cannot sell|can't sell|cant sell/.test(lower);
+  const mentionsLaunch = /launch|presale|airdrop|fresh launch|new token/.test(lower);
+
+  if (theme === "liquidity") {
+    if (index === 0) {
+      return "Low liquidity can make a token look active while still leaving weak market depth and unreliable exits once selling starts.";
+    }
+    if (index === 1) {
+      return "When liquidity stays thin, even modest selling can create sharp slippage, unstable pricing, or exits that feel worse than the chart suggests.";
+    }
+    if (index === 2) {
+      return mentionsHolders
+        ? "Liquidity looks even weaker when too few wallets control supply, because concentrated ownership can break support faster under pressure."
+        : "Compare liquidity, volume, and trading depth together, because fast price movement alone can hide a fragile setup.";
+    }
+    return mentionsContract
+      ? "Thin liquidity becomes more dangerous when contract controls are unclear, so verify both exit conditions and token permissions before acting."
+      : "Verify real liquidity support and market depth before treating the token as easier to buy or safer to exit.";
+  }
+
+  if (theme === "honeypot") {
+    if (index === 0) {
+      return "A token can feel easy to buy while contract behavior quietly makes selling harder, more expensive, or impossible once funds are in.";
+    }
+    if (index === 1) {
+      return mentionsContract
+        ? "That makes contract permissions more important than hype, because the real test is whether the token behaves normally when you try to exit."
+        : "Exit risk matters more than entry momentum, because the real test is whether selling and swapping still work without hidden friction.";
+    }
+    if (index === 2) {
+      return mentionsSell
+        ? "If selling stalls, fails, or behaves differently than buying, treat the setup as a serious risk even when the chart still looks active."
+        : "Watch for tokens where buying feels smooth but exit behavior is inconsistent, because that gap is often where traders get trapped.";
+    }
+    return "Review sell behavior, swap outcomes, and contract controls before assuming the token is tradable in both directions.";
+  }
+
+  if (theme === "holders") {
+    if (index === 0) {
+      return "A token can show activity while still depending on a small number of wallets that control too much supply or too much exit pressure.";
+    }
+    if (index === 1) {
+      return "Heavy holder concentration raises the chance of sudden dumps, weaker support, and price action that does not reflect broad demand.";
+    }
+    if (index === 2) {
+      return mentionsLiquidity
+        ? "Holder concentration becomes even riskier when liquidity is thin, because a few wallets can move price faster than most buyers expect."
+        : "Check top-wallet distribution before trusting momentum, because concentrated ownership can distort both support and exit conditions.";
+    }
+    return "Verify how supply is distributed across wallets before treating short-term price movement as proof of token strength.";
+  }
+
+  if (theme === "approvals") {
+    if (index === 0) {
+      return "Approval risk is easy to miss because the interface can look normal while the contract still asks for wallet access that deserves a closer review.";
+    }
+    if (index === 1) {
+      return "Before signing, verify what the approval allows, whether permissions can be abused, and whether contract behavior matches the token’s pitch.";
+    }
+    if (index === 2) {
+      return mentionsContract
+        ? "A token does not need to drain funds directly to be dangerous, because unclear permissions and contract controls can still create fast exposure."
+        : "Risk increases when approvals are broad but the token’s behavior is not transparent, especially if contract rules are hard to verify.";
+    }
+    return "Review approval scope, spender permissions, and contract behavior before giving the token access to your wallet.";
+  }
+
+  if (theme === "launch") {
+    if (index === 0) {
+      return "Early launch excitement can hide weak liquidity, concentrated holders, or contract risks that only become obvious after buyers are already in.";
+    }
+    if (index === 1) {
+      return "A new token deserves extra caution when urgency is high, because early volume does not always mean the setup is stable or easy to exit.";
+    }
+    if (index === 2) {
+      return mentionsLiquidity || mentionsHolders || mentionsContract
+        ? "Launch momentum matters less than structure, so check liquidity, wallet distribution, and contract behavior before trusting the first wave of demand."
+        : "Fast early attention can create false confidence, especially when token structure has not been verified beyond the initial chart move.";
+    }
+    return "Verify launch structure, token distribution, and exit conditions before committing funds on early momentum alone.";
+  }
+
+  if (index === 0) {
+    return mentionsLiquidity
+      ? "Liquidity deserves more attention than the chart, because weak depth can turn normal-looking activity into difficult exits very quickly."
+      : "Price movement alone is not enough to trust a token, because structure matters more than momentum once money is on the line.";
+  }
+
+  if (index === 1) {
+    return mentionsHolders
+      ? "Holder distribution affects real risk more than short-term excitement, because concentrated ownership can change support and sell pressure fast."
+      : "The strongest token checks focus on whether buying, selling, and swapping all work normally without hidden friction or weak support.";
+  }
+
+  if (index === 2) {
+    return mentionsContract || mentionsSell
+      ? "Contract behavior should confirm what the page promises, because unclear permissions or weak exit behavior can matter more than price action."
+      : "When liquidity is thin or ownership is concentrated, fast chart movement can create a false sense of safety that disappears on exit.";
+  }
+
+  return "Verify contract behavior, liquidity support, holder distribution, and exit conditions before treating the token as lower risk.";
 }`;
 
   const BUILD_SEO_CARD_GROUPS_FUNCTION = `function buildSeoCardGroups(paragraphs) {
-  const sentences = paragraphs
-    .flatMap(breakParagraphIntoSentences)
+  const theme = detectTokenTheme(RAW_KEYWORD || "", paragraphs);
+  const sourceMaterial = buildSourceMaterial(paragraphs);
+
+  const candidates = sourceMaterial
     .map(normalizeSeoSentence)
     .filter(Boolean)
     .filter(sentence => !containsKeywordLeak(sentence))
     .filter(sentence => !isTooGenericSentence(sentence))
-    .filter(isSignalSentence);
+    .map(sentence => ({
+      text: sentence,
+      score: scoreTokenSentence(sentence)
+    }))
+    .sort((a, b) => b.score - a.score);
 
-  const deduped = [];
+  const ranked = [];
   const seen = new Set();
 
-  for (const sentence of sentences) {
-    const key = sentence.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  for (const item of candidates) {
+    const key = item.text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    deduped.push(sentence);
+    ranked.push(item.text);
   }
 
-  const grouped = [];
-  let current = [];
+  const material = ranked.length
+    ? ranked
+    : sourceMaterial.length
+      ? sourceMaterial
+      : paragraphs.map(normalizeSeoSentence).filter(Boolean);
 
-  for (const sentence of deduped) {
-    const currentText = current.join(" ");
-    const projected = (currentText ? currentText + " " : "") + sentence;
+  if (!material.length) return [];
 
-    if (current.length >= 2 || projected.length > 220) {
-      if (current.length) grouped.push(current.join(" "));
-      current = [sentence];
-      continue;
+  const cards = [];
+  const cardSeen = new Set();
+
+  for (let i = 0; i < 4; i++) {
+    const source = getSourceTextForCard(material, i);
+    const rewritten = rewriteTokenSentence(source, theme, i)
+      .replace(/\\s+/g, " ")
+      .trim();
+
+    let finalText = rewritten;
+    let key = finalText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+    if (!key || cardSeen.has(key)) {
+      const alternateSource = getSourceTextForCard(material.slice().reverse(), i);
+      finalText = rewriteTokenSentence(alternateSource, theme, i)
+        .replace(/\\s+/g, " ")
+        .trim();
+      key = finalText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     }
 
-    current.push(sentence);
+    if (!key || cardSeen.has(key)) {
+      finalText = rewriteTokenSentence(material.join(" "), theme, i)
+        .replace(/\\s+/g, " ")
+        .trim();
+      key = finalText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    }
+
+    if (!key) continue;
+
+    cardSeen.add(key);
+    cards.push(finalText);
   }
 
-  if (current.length) grouped.push(current.join(" "));
-
-  return grouped
-    .map(group => group.replace(/\\s+/g, " ").trim())
-    .filter(Boolean)
-    .slice(0, 4);
+  return cards.slice(0, 4);
 }`;
 
-  const BUILD_SEO_CARD_TITLES_FUNCTION = `function buildSeoCardTitles(keywordRaw) {
-  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+  const BUILD_SEO_CARD_TITLES_FUNCTION = `function buildSeoCardTitles(keywordRaw, paragraphs) {
+  const theme = detectTokenTheme(keywordRaw, paragraphs);
 
-  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+  if (theme === "liquidity") {
     return [
-      ["🚀", "Why this setup pulls buyers in"],
-      ["🧱", "What usually looks weaker underneath"],
-      ["⚠️", "Where the trap starts tightening"],
-      ["🔍", "What to verify before acting"]
+      ["💧", "Why liquidity can look safer than it is"],
+      ["📉", "What starts breaking first"],
+      ["⚠️", "Where exits become the real risk"],
+      ["🔍", "What to verify before buying"]
     ];
   }
 
-  if (containsAny(lower, ["presale", "launch", "airdrop", "fair launch"])) {
+  if (theme === "honeypot") {
     return [
-      ["🪂", "Why the launch pitch works"],
-      ["🧱", "What buyers often fail to review"],
-      ["⚠️", "Where urgency gets expensive"],
-      ["🔍", "What to confirm before committing"]
-    ];
-  }
-
-  if (containsAny(lower, ["contract", "address", "token", "coin", "pair"])) {
-    return [
-      ["🧾", "What the setup suggests at first glance"],
-      ["🧱", "What needs a closer look"],
-      ["⚠️", "Where token risk can stay hidden"],
+      ["🚪", "Why entry can look easier than exit"],
+      ["🧾", "What the contract may be controlling"],
+      ["⚠️", "Where traders get trapped"],
       ["🔍", "What to confirm before acting"]
     ];
   }
 
+  if (theme === "holders") {
+    return [
+      ["👥", "Why distribution matters more than hype"],
+      ["🧱", "What concentration can break"],
+      ["⚠️", "Where sell pressure shows up"],
+      ["🔍", "What to verify before trusting momentum"]
+    ];
+  }
+
+  if (theme === "approvals") {
+    return [
+      ["🔐", "Why approvals deserve a closer look"],
+      ["🧾", "What the contract may still control"],
+      ["⚠️", "Where wallet risk starts"],
+      ["🔍", "What to verify before signing"]
+    ];
+  }
+
+  if (theme === "launch") {
+    return [
+      ["🚀", "Why early momentum can mislead"],
+      ["🧱", "What buyers often fail to review"],
+      ["⚠️", "Where launch risk gets expensive"],
+      ["🔍", "What to confirm before committing"]
+    ];
+  }
+
   return [
-    ["👀", "What stands out first"],
-    ["🧱", "What deserves a deeper check"],
-    ["⚠️", "Where people get caught"],
-    ["🔍", "What to verify next"]
+    ["🧾", "What the token setup shows"],
+    ["🧱", "What needs verification"],
+    ["⚠️", "Where the risk appears"],
+    ["🔍", "What to check before acting"]
   ];
 }`;
 
-  const RENDER_SEO_CONTENT_CARDS_FUNCTION = `function renderSeoContentCards(groups) {
+  const RENDER_SEO_CONTENT_CARDS_FUNCTION = `function renderSeoContentCards(groups, paragraphs) {
   const seoContent = document.getElementById("seoContent");
   if (!seoContent) return;
 
@@ -696,15 +706,15 @@ input:focus{
     return;
   }
 
-  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "", paragraphs || []);
 
   seoContent.innerHTML = \`
     <div class="story-stack">
       \${groups.map((group, index) => \`
         <article class="story-card\${index === 0 ? " lead" : ""}">
           <div class="story-card-title">
-            <span class="story-card-title-icon">\${titles[index] ? titles[index][0] : "•"}</span>
-            <span>\${titles[index] ? titles[index][1] : "More to know"}</span>
+            <span class="story-card-title-icon">\${titles[index][0]}</span>
+            <span>\${titles[index][1]}</span>
           </div>
           <p>\${escapeHtml(group)}</p>
         </article>
@@ -723,18 +733,12 @@ input:focus{
     .trim();
 
   const paragraphs = splitSeoParagraphsFromHtml(seoContent)
-    .map(p => stripSeoFiller(p))
+    .map(stripSeoFiller)
     .map(p => p.replace(/\\s+/g, " ").trim())
     .filter(Boolean);
 
   const groups = buildSeoCardGroups(paragraphs);
-
-  if (!groups.length) {
-    seoContent.innerHTML = "";
-    return;
-  }
-
-  renderSeoContentCards(groups);
+  renderSeoContentCards(groups, paragraphs);
 }`;
 
   html = upsertStyleBlock(html, "token-risk-polish-style", TOKEN_RISK_POLISH_STYLE);
@@ -783,8 +787,36 @@ input:focus{
 
   html = upsertFunction(
     html,
-    "isSignalSentence",
-    IS_SIGNAL_SENTENCE_FUNCTION,
+    "detectTokenTheme",
+    DETECT_TOKEN_THEME_FUNCTION,
+    "cleanSeoContent"
+  );
+
+  html = upsertFunction(
+    html,
+    "scoreTokenSentence",
+    SCORE_TOKEN_SENTENCE_FUNCTION,
+    "cleanSeoContent"
+  );
+
+  html = upsertFunction(
+    html,
+    "buildSourceMaterial",
+    BUILD_SOURCE_MATERIAL_FUNCTION,
+    "cleanSeoContent"
+  );
+
+  html = upsertFunction(
+    html,
+    "getSourceTextForCard",
+    GET_SOURCE_TEXT_FOR_CARD_FUNCTION,
+    "cleanSeoContent"
+  );
+
+  html = upsertFunction(
+    html,
+    "rewriteTokenSentence",
+    REWRITE_TOKEN_SENTENCE_FUNCTION,
     "cleanSeoContent"
   );
 
@@ -816,15 +848,20 @@ input:focus{
     "cleanRelatedLinks"
   );
 
-  ensureContains(html, 'id="tokenAddress"', "token input");
   ensureContains(html, "function splitSeoParagraphsFromHtml(seoContent)", "seo paragraph splitter");
   ensureContains(html, "function stripSeoFiller(text)", "seo filler stripper");
+  ensureContains(html, "function normalizeSeoSentence(sentence)", "seo sentence normalizer");
+  ensureContains(html, "function breakParagraphIntoSentences(paragraph)", "seo sentence splitter");
   ensureContains(html, "function containsKeywordLeak(sentence)", "keyword leak filter");
   ensureContains(html, "function isTooGenericSentence(sentence)", "generic sentence filter");
-  ensureContains(html, "function isSignalSentence(sentence)", "signal sentence filter");
+  ensureContains(html, "function detectTokenTheme(keywordRaw, paragraphs)", "theme detector");
+  ensureContains(html, "function scoreTokenSentence(sentence)", "sentence scorer");
+  ensureContains(html, "function buildSourceMaterial(paragraphs)", "source material builder");
+  ensureContains(html, "function getSourceTextForCard(material, index)", "card source selector");
+  ensureContains(html, "function rewriteTokenSentence(sourceText, theme, index)", "sentence rewriter");
   ensureContains(html, "function buildSeoCardGroups(paragraphs)", "seo card grouping");
-  ensureContains(html, "function buildSeoCardTitles(keywordRaw)", "seo card titles");
-  ensureContains(html, "function renderSeoContentCards(groups)", "seo card renderer");
+  ensureContains(html, "function buildSeoCardTitles(keywordRaw, paragraphs)", "seo card titles");
+  ensureContains(html, "function renderSeoContentCards(groups, paragraphs)", "seo card renderer");
   ensureContains(html, "function cleanSeoContent()", "seo content cleanup");
   ensureContains(html, 'style id="token-risk-polish-style"', "token polish style block");
 
