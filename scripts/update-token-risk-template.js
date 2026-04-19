@@ -608,10 +608,10 @@ function main() {
   const cards = [];
   const cardSeen = new Set();
 
-  for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
     const source = getSourceTextForCard(material, i);
     const rewritten = rewriteTokenSentence(source, theme, i)
-      .replace(/\\s+/g, " ")
+      .replace(/\s+/g, " ")
       .trim();
 
     let finalText = rewritten;
@@ -620,14 +620,14 @@ function main() {
     if (!key || cardSeen.has(key)) {
       const alternateSource = getSourceTextForCard(material.slice().reverse(), i);
       finalText = rewriteTokenSentence(alternateSource, theme, i)
-        .replace(/\\s+/g, " ")
+        .replace(/\s+/g, " ")
         .trim();
       key = finalText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     }
 
     if (!key || cardSeen.has(key)) {
       finalText = rewriteTokenSentence(material.join(" "), theme, i)
-        .replace(/\\s+/g, " ")
+        .replace(/\s+/g, " ")
         .trim();
       key = finalText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     }
@@ -636,6 +636,28 @@ function main() {
 
     cardSeen.add(key);
     cards.push(finalText);
+  }
+
+  // 🔥 GUARANTEED FILL (this is the missing piece)
+  let fillerIndex = 0;
+  while (cards.length < 4) {
+    const fallback = rewriteTokenSentence(
+      material.join(" ") + " " + fillerIndex,
+      theme,
+      cards.length
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const key = fallback.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+    if (key && !cardSeen.has(key)) {
+      cardSeen.add(key);
+      cards.push(fallback);
+    }
+
+    fillerIndex++;
+    if (fillerIndex > 10) break; // safety guard
   }
 
   return cards.slice(0, 4);
