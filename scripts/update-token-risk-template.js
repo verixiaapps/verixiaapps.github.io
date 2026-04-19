@@ -632,7 +632,7 @@ function main() {
       key = finalText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     }
 
-    if (!key) continue;
+    if (!key || cardSeen.has(key)) continue;
 
     cardSeen.add(key);
     cards.push(finalText);
