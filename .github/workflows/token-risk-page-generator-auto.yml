@@ -1,6 +1,6 @@
 name: Token Risk SEO Page Generator Auto
 
-"on":
+on:
   workflow_dispatch:
     inputs:
       manual_daily_limit:
@@ -137,14 +137,9 @@ jobs:
 
           git commit -m "Token Risk SEO auto generation"
 
-      - name: Pull latest main before push
-        shell: bash
-        run: |
-          set -euo pipefail
-          git pull --rebase origin main
-
       - name: Push changes
         shell: bash
         run: |
           set -euo pipefail
+          git pull --rebase origin main || true
           git push origin HEAD:main
