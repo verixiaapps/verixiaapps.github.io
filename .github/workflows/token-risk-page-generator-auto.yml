@@ -8,21 +8,6 @@ name: Token Risk SEO Page Generator Auto
         required: false
         default: "1000"
         type: string
-      full_rebuild:
-        description: "Optional manual rebuild of generated /token-risk/ pages only"
-        required: false
-        default: false
-        type: boolean
-      rebuild_daily_limit:
-        description: "Total pages to rebuild during this manual rebuild run (leave blank to rebuild all remaining pages in one run)"
-        required: false
-        default: ""
-        type: string
-      rebuild_batch_size:
-        description: "How many pages to rebuild per committed batch"
-        required: false
-        default: "50"
-        type: string
   schedule:
     - cron: "0 21 * * *"
 
@@ -43,10 +28,6 @@ jobs:
       GENERATED_KEYWORDS_FILE: "data/token_generated_keywords.txt"
       GENERATED_SLUGS_FILE: "data/token_generated_slugs.txt"
       OUTPUT_DIR: "token-risk"
-      PROTECTED_SLUG: ""
-      REBUILD_KEYWORDS_SOURCE_FILE: "data/rebuild_keywords_source_tokenrisk.txt"
-      REBUILD_SLUGS_SOURCE_FILE: "data/rebuild_slugs_source_tokenrisk.txt"
-      REBUILD_PROGRESS_FILE: "data/rebuild_progress_tokenrisk.txt"
 
     steps:
       - name: Checkout repo
@@ -95,9 +76,6 @@ jobs:
           mkdir -p "$(dirname "$KEYWORDS_FILE")"
           mkdir -p "$(dirname "$GENERATED_KEYWORDS_FILE")"
           mkdir -p "$(dirname "$GENERATED_SLUGS_FILE")"
-          mkdir -p "$(dirname "$REBUILD_KEYWORDS_SOURCE_FILE")"
-          mkdir -p "$(dirname "$REBUILD_SLUGS_SOURCE_FILE")"
-          mkdir -p "$(dirname "$REBUILD_PROGRESS_FILE")"
           mkdir -p "$OUTPUT_DIR"
 
           touch "$KEYWORDS_FILE"
@@ -159,9 +137,14 @@ jobs:
 
           git commit -m "Token Risk SEO auto generation"
 
+      - name: Pull latest main before push
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+
       - name: Push changes
         shell: bash
         run: |
           set -euo pipefail
-          git pull --rebase origin main || true
           git push origin HEAD:main
