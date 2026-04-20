@@ -1540,65 +1540,79 @@ body{padding-top:84px;}
 #seoContent .story-stack{
   display:grid;
   gap:12px;
-  margin-top:6px;
+  margin-top:8px;
 }
 #seoContent .story-card{
   position:relative;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.08);
   border-radius:20px;
-  padding:17px 17px 15px;
-  background:linear-gradient(180deg, rgba(255,255,255,.045) 0%, rgba(255,255,255,.02) 100%);
-  box-shadow:0 12px 30px rgba(0,0,0,.14);
+  padding:16px 16px 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.022) 100%);
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+#seoContent .story-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 34px rgba(0,0,0,.22);
+  border-color:rgba(159,203,255,.16);
 }
 #seoContent .story-card::before{
   content:"";
   position:absolute;
-  top:0; left:0; right:0;
+  top:0;
+  left:0;
+  right:0;
   height:1px;
-  background:linear-gradient(90deg, rgba(159,203,255,.24), rgba(255,255,255,0));
+  background:linear-gradient(90deg, rgba(159,203,255,.28), rgba(255,255,255,0));
 }
 #seoContent .story-card.lead{
-  border-color:rgba(135,146,255,.28);
-  background:linear-gradient(180deg, rgba(108,126,255,.16) 0%, rgba(255,255,255,.03) 100%);
-  box-shadow:0 16px 36px rgba(0,0,0,.18);
+  border-color:rgba(135,146,255,.34);
+  background:
+    linear-gradient(180deg, rgba(108,126,255,.19) 0%, rgba(255,255,255,.032) 100%);
+  box-shadow:0 14px 34px rgba(0,0,0,.18);
 }
 #seoContent .story-card-title{
   display:flex;
   align-items:center;
   gap:10px;
   margin-bottom:10px;
-  font-size:12px;
+  font-size:11px;
   letter-spacing:.18em;
   text-transform:uppercase;
-  font-weight:800;
+  font-weight:850;
   color:#9fcbff;
+}
+#seoContent .story-card-title-icon{
+  opacity:.95;
 }
 #seoContent .story-card-list{
   list-style:none;
   padding:0;
   margin:0;
   display:grid;
-  gap:9px;
+  gap:8px;
 }
 #seoContent .story-card-item{
   position:relative;
-  padding-left:15px;
+  padding-left:14px;
   margin:0;
-  font-size:15px;
-  line-height:1.58;
-  color:#e5eefc;
+  font-size:14px;
+  line-height:1.38;
+  color:#e8f0fc;
   font-weight:800;
+  letter-spacing:-.01em;
 }
 #seoContent .story-card-item::before{
   content:"";
   position:absolute;
   left:0;
-  top:.7em;
+  top:.68em;
   width:6px;
   height:6px;
   border-radius:50%;
-  background:rgba(159,203,255,.95);
+  background:rgba(159,203,255,.96);
   box-shadow:0 0 0 4px rgba(159,203,255,.10);
   transform:translateY(-50%);
 }
@@ -1607,12 +1621,25 @@ body{padding-top:84px;}
   box-shadow:0 0 0 4px rgba(167,177,255,.12);
 }
 @media (max-width:640px){
-  #seoContent .story-stack{ gap:10px; }
-  #seoContent .story-card{ padding:15px 15px 14px; border-radius:18px; }
-  #seoContent .story-card-list{ gap:8px; }
+  #seoContent .story-stack{
+    gap:10px;
+    margin-top:6px;
+  }
+  #seoContent .story-card{
+    padding:15px 15px 14px;
+    border-radius:18px;
+    transition:none;
+  }
+  #seoContent .story-card:hover{
+    transform:none;
+    box-shadow:0 10px 28px rgba(0,0,0,.16);
+  }
+  #seoContent .story-card-list{
+    gap:8px;
+  }
   #seoContent .story-card-item{
     font-size:14px;
-    line-height:1.52;
+    line-height:1.36;
     padding-left:14px;
   }
 }
@@ -2089,8 +2116,8 @@ function renderRecognitionChips() {
 
 function applyPreviewCard() {
   const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
-  const cleanTitle = displayCleanKeyword(keywordRaw) || "Risky Token Setup";
   const lower = keywordRaw.toLowerCase();
+  const label = makeReadableCopyLabel(keywordRaw) || "Token Setup";
 
   const previewDomain = document.getElementById("previewDomain");
   const previewSub = document.getElementById("previewSub");
@@ -2103,53 +2130,43 @@ function applyPreviewCard() {
     return;
   }
 
-  let riskLabel = "Example Token Risk";
-  let trustScore = "Risk Example";
-  let fillWidth = "18%";
-  let sub = "Common warning signs found in similar token launches";
-  let signals = [
-    "Liquidity setup looks unclear",
-    "Holder concentration may be high",
-    "Trading permissions may create risk"
-  ];
+  let badge = "🔴 Example Token Risk";
+  let score = "Pattern Review";
+  let fillWidth = "24%";
+  let sub = "Common structural warnings seen in risky token setups.";
 
-  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
-    signals = [
-      "Hype may be ahead of fundamentals",
-      "Wallet concentration could matter more than the chart",
-      "Fast reversals are common when attention drops"
-    ];
-  } else if (containsAny(lower, ["presale", "launch", "airdrop", "fair launch"])) {
-    signals = [
-      "Early access pressure can hide weak details",
-      "Token distribution may be unclear",
-      "Liquidity and ownership setup should be verified"
-    ];
-  } else if (containsAny(lower, ["contract", "address", "token", "coin", "pair"])) {
-    signals = [
-      "Contract permissions may matter",
-      "Liquidity and holder spread should be reviewed",
-      "Project claims may not match on-chain reality"
-    ];
-  } else if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
-    riskLabel = "Token Risk Check";
-    trustScore = "Pattern Review";
-    fillWidth = "34%";
-    signals = [
-      "Review contract, liquidity, and holders",
-      "Verify claims outside the promo thread",
-      "Do not buy or approve before checking"
-    ];
+  if (/(cannot sell|can't sell|honeypot|sell)/i.test(lower)) {
+    badge = "🔴 Sell Lock Pattern";
+    score = "Exit Risk: High";
+    fillWidth = "14%";
+    sub = "The entry can look normal right before exits break.";
+  } else if (/(presale|fair launch|launch|airdrop)/i.test(lower)) {
+    badge = "🔴 Launch Risk Pattern";
+    score = "Review Pressure";
+    fillWidth = "20%";
+    sub = "Launch hype often arrives before real structure gets tested.";
+  } else if (/(meme|memecoin|pump|moon|100x)/i.test(lower)) {
+    badge = "🔴 Hype Pattern";
+    score = "Noise vs Structure";
+    fillWidth = "18%";
+    sub = "Momentum can look strong while the setup underneath stays weak.";
+  } else if (/(contract|address|pair|dexscreener)/i.test(lower)) {
+    badge = "🔴 Structure Review";
+    score = "Control Check";
+    fillWidth = "22%";
+    sub = "Surface data does not prove a safe contract or safe exit path.";
   }
 
-  previewBadge.textContent = `🔴 ${riskLabel}`;
-  previewScore.textContent = trustScore;
+  previewBadge.textContent = badge;
+  previewScore.textContent = score;
   previewScoreFill.style.width = fillWidth;
-  previewDomain.textContent = cleanTitle;
+  previewDomain.textContent = label;
   previewSub.textContent = sub;
-  previewSignals.innerHTML = signals.map(signal =>
-    `<div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>${escapeHtml(signal)}</span></div>`
-  ).join("");
+
+  previewSignals.innerHTML = buildPreviewSignals(keywordRaw)
+    .slice(0, 3)
+    .map(signal => `<div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>${escapeHtml(signal)}</span></div>`)
+    .join("");
 }
 
 function applyIntentToChecker() {
@@ -2240,7 +2257,7 @@ function renderSeoContentCards(groups) {
     <div class="story-stack">
       ${groups.map((group) => {
         const titleIndex = group && typeof group.titleIndex === "number" ? group.titleIndex : 0;
-        const items = Array.isArray(group && group.items) ? group.items : (Array.isArray(group) ? group : []);
+        const items = Array.isArray(group && group.items) ? group.items.slice(0, 3) : [];
         const title = titles[titleIndex] || ["•", "More to know"];
 
         return `
@@ -2317,86 +2334,64 @@ function isTooGenericSentence(sentence) {
 function buildSeoCardGroups(paragraphs) {
   const theme = detectTokenTheme(RAW_KEYWORD || "", paragraphs);
   const bulletPool = buildCardBulletPool(paragraphs, theme);
-
-  if (!bulletPool.length) {
-    return [];
-  }
+  const fallbackMap = buildDefaultTokenFallbacks(theme);
 
   const cards = [
-    { titleIndex: 0, items: [] },
-    { titleIndex: 1, items: [] },
-    { titleIndex: 2, items: [] },
-    { titleIndex: 3, items: [] }
+    { titleIndex: 0, items: [], seenBuckets: new Set() },
+    { titleIndex: 1, items: [], seenBuckets: new Set() },
+    { titleIndex: 2, items: [], seenBuckets: new Set() },
+    { titleIndex: 3, items: [], seenBuckets: new Set() }
   ];
 
   const globalSeen = new Set();
-  const overflow = [];
 
-  function keyFor(text) {
-    return String(text || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  }
+  function pushBullet(cardIndex, bullet) {
+    if (!cards[cardIndex]) return false;
 
-  function pushBullet(cardIndex, text) {
-    const cleaned = compressTokenBullet(text, theme, cardIndex);
-    const key = keyFor(cleaned);
+    const sourceText = typeof bullet === "string"
+      ? bullet
+      : (bullet.original || bullet.text || "");
 
-    if (!cleaned || !key) return false;
-    if (globalSeen.has(key)) return false;
-    if (!cards[cardIndex] || cards[cardIndex].items.length >= 4) return false;
+    const themeName = typeof bullet === "string"
+      ? classifyTokenBulletTheme(sourceText)
+      : (bullet.theme || classifyTokenBulletTheme(sourceText));
 
-    globalSeen.add(key);
-    cards[cardIndex].items.push(cleaned);
+    const bucket = typeof bullet === "string"
+      ? bulletBucketKey(sourceText, themeName, cardIndex)
+      : (bullet.bucket || bulletBucketKey(sourceText, themeName, cardIndex));
+
+    const text = compressTokenBullet(sourceText, theme, cardIndex);
+    const normalized = normalizeTokenBulletKey(text);
+
+    if (!text || !normalized) return false;
+    if (globalSeen.has(normalized)) return false;
+    if (cards[cardIndex].seenBuckets.has(bucket)) return false;
+    if (cards[cardIndex].items.length >= 3) return false;
+
+    globalSeen.add(normalized);
+    cards[cardIndex].seenBuckets.add(bucket);
+    cards[cardIndex].items.push(text);
     return true;
   }
 
-  function classifyCardIndex(text) {
-    const lower = String(text || "").toLowerCase();
-
-    if (/(check|verify|confirm|review|look for|watch for|make sure)/i.test(lower)) {
-      return 3;
-    }
-
-    if (/(urgent|urgency|rush|fomo|pressure|countdown|whitelist|early access|viral|hype|social|thread|telegram|x post|community|influencer)/i.test(lower)) {
-      return 0;
-    }
-
-    if (/(liquidity|pool|lp|locked|holder|holders|wallet|wallets|distribution|concentration|contract|mint|owner|ownership|blacklist|tax|function)/i.test(lower)) {
-      return 1;
-    }
-
-    if (/(sell|selling|exit|honeypot|swap|approve|approval|permissions|price|volume|chart|pump|moon|spike|trend)/i.test(lower)) {
-      return 2;
-    }
-
-    return 2;
+  for (const bullet of bulletPool) {
+    pushBullet(bullet.cardIndex, bullet);
   }
 
-  for (const line of bulletPool) {
-    const targetIndex = classifyCardIndex(line);
-    if (!pushBullet(targetIndex, line)) {
-      const cleaned = compressTokenBullet(line, theme, targetIndex);
-      const key = keyFor(cleaned);
-      if (cleaned && key && !globalSeen.has(key)) {
-        overflow.push(line);
-      }
+  for (let i = 0; i < cards.length; i++) {
+    const fallbacks = fallbackMap[i] || [];
+    for (const fallback of fallbacks) {
+      if (cards[i].items.length >= 2) break;
+      pushBullet(i, fallback);
     }
-  }
-
-  for (const line of overflow) {
-    const nextCard = cards
-      .filter(card => card.items.length < 4)
-      .sort((a, b) => a.items.length - b.items.length)[0];
-
-    if (!nextCard) break;
-    pushBullet(nextCard.titleIndex, line);
   }
 
   return cards
-    .filter(card => card.items.length > 0)
     .map(card => ({
       titleIndex: card.titleIndex,
-      items: card.items.slice(0, 4)
-    }));
+      items: card.items.slice(0, 3)
+    }))
+    .filter(card => card.items.length > 0);
 }
 
 function containsKeywordLeak(sentence) {
@@ -2450,104 +2445,50 @@ function isSignalSentence(sentence) {
   );
 }
 
-function compressTokenBullet(text, theme, cardIndex) {
+function finalPolishLine(text, cardIndex) {
   let value = String(text || "")
     .replace(/\s+/g, " ")
-    .replace(/^[\-•]\s*/, "")
-    .trim();
-
-  if (!value) return "";
-
-  value = stripSeoFiller(value)
-    .replace(/\bthis means\b/gi, "")
-    .replace(/\bthis can mean\b/gi, "")
-    .replace(/\bthis matters because\b/gi, "")
-    .replace(/\bit is important to\b/gi, "")
-    .replace(/\bit is worth noting that\b/gi, "")
-    .replace(/\bin many cases\b/gi, "")
-    .replace(/\bin some cases\b/gi, "")
-    .replace(/\btokens can\b/gi, "")
-    .replace(/\ba token can\b/gi, "")
-    .replace(/\bprojects can\b/gi, "")
-    .replace(/\bthere is a risk that\b/gi, "")
-    .replace(/\bthis token\b/gi, "The setup")
-    .replace(/\bthe token\b/gi, "The setup")
-    .replace(/\bthe project\b/gi, "The setup")
-    .replace(/\busers\b/gi, "buyers")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  value = value
-    .replace(/^because\s+/i, "")
+    .replace(/[,:;]+$/g, "")
     .replace(/^and\s+/i, "")
     .replace(/^but\s+/i, "")
     .replace(/^so\s+/i, "")
-    .replace(/^while\s+/i, "")
-    .replace(/^if\s+/i, "")
-    .replace(/^when\s+/i, "")
-    .replace(/^there are\s+/i, "")
-    .replace(/^there is\s+/i, "")
     .trim();
 
   if (!value) return "";
 
-  value = value.charAt(0).toUpperCase() + value.slice(1);
+  value = trimBulletHard(value, cardIndex === 3 ? 10 : 11);
 
-  const rewrites = [
-    {
-      test: /(urgent|urgency|rush|fomo|pressure|countdown|whitelist|early access)/i,
-      value: "Urgency shows up before the setup is fully verified."
-    },
-    {
-      test: /(liquidity|pool|lp|locked)/i,
-      value: "Liquidity can look fine until exits matter more than entries."
-    },
-    {
-      test: /(holder|holders|wallet|wallets|distribution|concentration)/i,
-      value: "Holder concentration can change the risk fast once momentum fades."
-    },
-    {
-      test: /(sell|selling|exit|honeypot|swap|approve|approval|permissions)/i,
-      value: "Buying may feel easier than selling once the contract starts limiting exits."
-    },
-    {
-      test: /(price|volume|chart|pump|moon|spike|trend)/i,
-      value: "Fast chart movement can hide weak structure underneath."
-    },
-    {
-      test: /(social|viral|telegram|x post|thread|community|influencer|hype)/i,
-      value: "Social proof can feel stronger than the underlying proof."
-    },
-    {
-      test: /(contract|mint|owner|ownership|blacklist|tax|function)/i,
-      value: "Contract controls matter more than branding once money is committed."
-    }
-  ];
-
-  for (const rule of rewrites) {
-    if (rule.test.test(value)) {
-      value = rule.value;
-      break;
-    }
-  }
+  if (!value) return "";
 
   value = value
-    .replace(/[,:;]\s*$/, "")
-    .replace(/\.{2,}/g, ".")
+    .replace(/\bthe setup\s+can\s+/i, "The setup can ")
+    .replace(/\bthe setup\s+usually\s+/i, "The setup usually ")
+    .replace(/\s+/g, " ")
     .trim();
 
   if (!value) return "";
 
-  const maxLen = cardIndex === 3 ? 92 : 88;
-  if (value.length > maxLen) {
-    value = value.slice(0, maxLen).replace(/[,:;\s]+[^\s]*$/, "").trim();
-  }
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
 
-  value = value.replace(/[,:;\s]+$/g, "").trim();
+function compressTokenBullet(text, theme, cardIndex) {
+  const cleaned = cleanRewriteInput(stripSeoFiller(String(text || "")));
+  if (!cleaned) return "";
 
-  if (!/[.!?]$/.test(value)) {
-    value += ".";
-  }
+  const bulletTheme = classifyTokenBulletTheme(cleaned);
+  const resolvedCard = typeof cardIndex === "number" ? cardIndex : classifyCardIndex(cleaned, bulletTheme);
+  const rewritten = buildMeaningRewrite(cleaned, bulletTheme || theme, resolvedCard) || cleaned;
+
+  let value = finalPolishLine(rewritten, resolvedCard);
+
+  if (!value) return "";
+
+  value = value
+    .replace(/\bSurface confidence can hide weak structure\./i, "Surface confidence can hide weak structure.")
+    .replace(/\bWeak structure breaks long before the story does\./i, "Weak structure breaks before the story does.")
+    .replace(/\bExecution risk usually appears after entry\./i, "Execution risk often appears after entry.")
+    .replace(/\bSlow down and verify the setup\./i, "Slow down and verify the setup.")
+    .trim();
 
   return value;
 }
