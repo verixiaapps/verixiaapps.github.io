@@ -1,6 +1,7 @@
 import os
 import re
 from html import escape
+from pathlib import Path
 
 from generate_token_content import generate_token_content
 
@@ -165,7 +166,7 @@ ai_failure_count = 0
 # UTILITIES
 # -----------------------------
 def normalize_keyword(text):
-    return re.sub(r"\s+", " ", str(text).strip().lower())
+    return re.sub(r"\s+", " ", str(text or "").strip().lower())
 
 
 def slugify(text):
@@ -340,8 +341,19 @@ def validate_template_placeholders(template_html):
 def load_keywords():
     if not os.path.exists(KEYWORD_FILE):
         return []
+
+    seen = set()
+    ordered = []
+
     with open(KEYWORD_FILE, encoding="utf-8") as f:
-        return list(dict.fromkeys(normalize_keyword(k) for k in f if k.strip()))
+        for line in f:
+            keyword = normalize_keyword(line)
+            if not keyword or keyword in seen:
+                continue
+            seen.add(keyword)
+            ordered.append(keyword)
+
+    return ordered
 
 
 def load_template():
@@ -428,7 +440,7 @@ def dedupe_keywords(raw_keywords):
         groups.setdefault(key, []).append(keyword)
 
     canonical_keywords = []
-    seen = set()
+    seen_slugs = set()
 
     for _, group in groups.items():
         chosen = choose_canonical_keyword(group)
@@ -441,12 +453,12 @@ def dedupe_keywords(raw_keywords):
             skipped_weak_keywords_count += len(group)
             continue
 
-        if chosen_slug in seen:
+        if chosen_slug in seen_slugs:
             skipped_duplicate_keywords_count += len(group)
             continue
 
         canonical_keywords.append(chosen)
-        seen.add(chosen_slug)
+        seen_slugs.add(chosen_slug)
 
         if len(group) > 1:
             deduped_keywords_count += len(group) - 1
@@ -700,11 +712,15 @@ template = load_template()
 raw_keywords = load_keywords()
 keywords = dedupe_keywords(raw_keywords)
 
-pages = [
-    {"keyword": k, "slug": canonical_slug(k)}
-    for k in keywords
-    if canonical_slug(k) not in PROTECTED_SLUGS
-]
+pages = []
+seen_page_slugs = set()
+
+for keyword in keywords:
+    slug = canonical_slug(keyword)
+    if not slug or slug in PROTECTED_SLUGS or slug in seen_page_slugs:
+        continue
+    pages.append({"keyword": keyword, "slug": slug})
+    seen_page_slugs.add(slug)
 
 
 # -----------------------------
@@ -723,9 +739,9 @@ for page in pages:
         print("Skipping protected page:", slug)
         continue
 
-    folder = os.path.join(OUTPUT_DIR, slug)
-    path = os.path.join(folder, "index.html")
-    os.makedirs(folder, exist_ok=True)
+    folder = Path(OUTPUT_DIR) / slug
+    path = folder / "index.html"
+    folder.mkdir(parents=True, exist_ok=True)
 
     title = build_title(keyword)
     description = build_description(keyword)
