@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import logging
+from typing import List, Dict, Tuple, Optional
 
 import requests
 
@@ -33,6 +34,7 @@ NON_RETRYABLE_ERROR_MARKERS = (
     "incorrect api key",
     "authentication",
     "unauthorized",
+    "forbidden",
 )
 
 CONTENT_MODES = [
@@ -75,6 +77,7 @@ SMALL_WORDS = {
 }
 
 BRAND_CASE = {
+    "binance smart chain": "Binance Smart Chain",
     "market cap": "Market Cap",
     "pair age": "Pair Age",
     "price action": "Price Action",
@@ -166,6 +169,8 @@ SAFETY_HINTS = (
     "rug",
     "honeypot",
     "scam",
+    "sell lock",
+    "sell locked",
 )
 
 ALLOWED_INLINE_TAGS = ("strong", "em", "b", "i", "code")
@@ -195,7 +200,7 @@ RISK_WARNING_BULLETS = {
     "buy-intent": [
         [
             "Pressure to buy quickly before the setup is independently checked",
-            "Hype around upside is much stronger than evidence around liquidity, volume, or Pair Age",
+            "Hype around upside is much stronger than evidence around Liquidity, volume, or Pair Age",
             "People focus on potential gains while downplaying execution and exit risk",
             "The buy thesis depends more on excitement than on stable token structure",
         ],
@@ -363,6 +368,31 @@ MODE_INTROS = {
     ],
 }
 
+WEAK_MARKERS = (
+    "lorem ipsum",
+    "as an ai",
+    "here are some paragraphs",
+    "let me know if you want",
+    "i can't help with that",
+    "i cannot help with that",
+    "i’m sorry",
+    "i am sorry",
+    "cannot assist",
+    "can't assist",
+    "content policy",
+    "policy",
+)
+
+GENERIC_PATTERNS = (
+    "this is important",
+    "it is important",
+    "it is worth noting",
+    "in many cases",
+    "in some cases",
+    "generally speaking",
+    "at the end of the day",
+    "when it comes to this",
+)
 
 # -----------------------------
 # HELPERS
@@ -419,7 +449,7 @@ def title_case(text: str) -> str:
         return ""
 
     words = text.split()
-    titled = []
+    titled: List[str] = []
 
     for i, word in enumerate(words):
         titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
@@ -436,18 +466,7 @@ def choose_mode(keyword: str) -> str:
     return CONTENT_MODES[idx]
 
 
-def clean_text(text: str) -> str:
-    text = str(text or "")
-    text = re.sub(r"```(?:html)?\s*", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*```", "", text)
-    text = re.sub(r"<script\b[^>]*>.*?</script>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<style\b[^>]*>.*?</style>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
-    return text.strip()
-
-
-def safe_json(response: requests.Response):
+def safe_json(response: requests.Response) -> Dict:
     try:
         return response.json()
     except ValueError as e:
@@ -460,9 +479,9 @@ def error_is_non_retryable(exc: Exception) -> bool:
     return any(marker in message for marker in NON_RETRYABLE_ERROR_MARKERS)
 
 
-def dedupe_preserve_order(items):
+def dedupe_preserve_order(items: List[str]) -> List[str]:
     seen = set()
-    result = []
+    result: List[str] = []
 
     for item in items:
         key = normalize_keyword(item)
@@ -471,6 +490,43 @@ def dedupe_preserve_order(items):
             result.append(item)
 
     return result
+
+
+def clean_text(text: str) -> str:
+    text = str(text or "")
+    text = re.sub(r"```(?:html)?\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*```", "", text)
+    text = re.sub(r"<script\b[^>]*>.*?</script>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"<style\b[^>]*>.*?</style>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
+    return text.strip()
+
+
+def strip_all_tags(text: str) -> str:
+    return re.sub(r"<[^>]+>", " ", text)
+
+
+def is_usable_ai_text(text: str) -> bool:
+    if not text:
+        return False
+
+    raw = str(text).strip()
+    lowered = raw.lower()
+
+    if len(raw) < 280:
+        return False
+
+    if any(marker in lowered for marker in WEAK_MARKERS):
+        return False
+
+    paragraph_like = (
+        "<p>" in lowered
+        or "</p>" in lowered
+        or "<ul>" in lowered
+        or raw.count("\n") >= 3
+    )
+
+    return paragraph_like
 
 
 def normalize_ai_html(text: str) -> str:
@@ -487,11 +543,12 @@ def normalize_ai_html(text: str) -> str:
     raw = re.sub(r"<div[^>]*>", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"</div>", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"<a\b[^>]*>(.*?)</a>", r"\1", raw, flags=re.IGNORECASE | re.DOTALL)
+    raw = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", raw, flags=re.IGNORECASE | re.DOTALL)
 
     allowed_tag_names = set(ALLOWED_INLINE_TAGS + ALLOWED_BLOCK_TAGS)
     tag_pattern = r"<(/?)([a-z0-9]+)(?:\s[^>]*)?>"
 
-    def rebuild_allowed_tag(match):
+    def rebuild_allowed_tag(match: re.Match) -> str:
         slash = match.group(1)
         tag = match.group(2).lower()
         if tag in allowed_tag_names:
@@ -499,12 +556,12 @@ def normalize_ai_html(text: str) -> str:
         return ""
 
     raw = re.sub(tag_pattern, rebuild_allowed_tag, raw, flags=re.IGNORECASE)
+    raw = re.sub(r"\n{3,}", "\n\n", raw).strip()
 
     if re.search(r"</?(p|ul|ol|li|blockquote)\b", raw, flags=re.IGNORECASE):
-        raw = re.sub(r"\n{3,}", "\n\n", raw).strip()
         return raw
 
-    plain = re.sub(r"<[^>]+>", " ", raw)
+    plain = strip_all_tags(raw)
     plain = re.sub(r"\s+", " ", plain).strip()
 
     if not plain:
@@ -517,7 +574,62 @@ def normalize_ai_html(text: str) -> str:
     return "\n".join(f"<p>{part}</p>" for part in parts)
 
 
-def build_payload_variants(raw_keyword: str, display_kw: str):
+def split_sentences(text: str) -> List[str]:
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return []
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def trim_redundant_ai_html(html: str, raw_keyword: str) -> str:
+    if not html:
+        return ""
+
+    blocks = re.findall(r"<p>.*?</p>|<ul>.*?</ul>|<ol>.*?</ol>|<blockquote>.*?</blockquote>", html, flags=re.I | re.S)
+    if not blocks:
+        blocks = [html]
+
+    keyword_norm = normalize_keyword(raw_keyword)
+    keyword_clean = re.sub(r"[^a-z0-9]+", " ", keyword_norm).strip()
+
+    kept: List[str] = []
+    seen_text = set()
+
+    for block in blocks:
+        plain = strip_all_tags(block)
+        plain = re.sub(r"\s+", " ", plain).strip()
+        plain_lower = plain.lower()
+
+        if not plain or len(plain) < 35:
+            continue
+        if any(marker in plain_lower for marker in WEAK_MARKERS):
+            continue
+        if any(marker in plain_lower for marker in GENERIC_PATTERNS):
+            continue
+
+        normalized_plain = re.sub(r"[^a-z0-9]+", " ", plain_lower).strip()
+        if normalized_plain in seen_text:
+            continue
+
+        if keyword_clean:
+            keyword_mentions = normalized_plain.count(keyword_clean)
+            if keyword_mentions > 2:
+                continue
+
+        seen_text.add(normalized_plain)
+        kept.append(block.strip())
+
+    if not kept:
+        return html
+
+    if len(kept) > 4:
+        kept = kept[:4]
+
+    return "\n".join(kept)
+
+
+def build_payload_variants(raw_keyword: str, display_kw: str) -> List[str]:
     readable = title_case(display_kw)
     variants = dedupe_preserve_order([
         raw_keyword,
@@ -526,8 +638,9 @@ def build_payload_variants(raw_keyword: str, display_kw: str):
         f"{display_kw} token risk" if display_kw else "",
         f"is {display_kw} safe" if display_kw and not raw_keyword.startswith("is ") else "",
         f"should i buy {display_kw}" if display_kw and not contains_term_phrase(raw_keyword, "buy") else "",
+        f"{display_kw} liquidity risk" if display_kw and not contains_term_phrase(raw_keyword, "liquidity") else "",
     ])
-    return variants[:4]
+    return variants[:6]
 
 
 # -----------------------------
@@ -691,13 +804,13 @@ def context_detail_paragraph(raw_keyword: str, display_kw: str, mode: str) -> st
     )
 
 
-def get_warning_bullets(context: str, idx: int):
+def get_warning_bullets(context: str, idx: int) -> List[str]:
     if context in RISK_WARNING_BULLETS:
         return RISK_WARNING_BULLETS[context][idx]
     return RISK_WARNING_BULLETS["general"][idx]
 
 
-def get_action_paragraph(context: str, idx: int, keyword_title: str):
+def get_action_paragraph(context: str, idx: int, keyword_title: str) -> str:
     paragraphs = ACTION_PARAGRAPHS_BY_CONTEXT.get(context, ACTION_PARAGRAPHS_BY_CONTEXT["general"])
     return paragraphs[idx].format(keyword=keyword_title)
 
@@ -775,7 +888,21 @@ def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
 
 
 # -----------------------------
-# MAIN
+# API CALL
+# -----------------------------
+def fetch_ai(prompt_keyword: str) -> str:
+    response = requests.post(
+        f"{TOKEN_RISK_API}{TOKEN_RISK_ENDPOINT}",
+        json={"keyword": prompt_keyword, "type": "token-risk"},
+        timeout=TIMEOUT,
+    )
+    response.raise_for_status()
+    data = safe_json(response)
+    return str(data.get("content", "")).strip()
+
+
+# -----------------------------
+# MAIN GENERATOR
 # -----------------------------
 def generate_token_content(keyword: str) -> str:
     raw_keyword = normalize_keyword(keyword)
@@ -787,19 +914,11 @@ def generate_token_content(keyword: str) -> str:
     logging.info("Generating token content for: %s", raw_keyword)
 
     payload_variants = build_payload_variants(raw_keyword, display_kw)
-    last_error = None
+    last_error: Optional[Exception] = None
 
     for prompt_keyword in payload_variants:
         try:
-            res = requests.post(
-                f"{TOKEN_RISK_API}{TOKEN_RISK_ENDPOINT}",
-                json={"keyword": prompt_keyword, "type": "token-risk"},
-                timeout=TIMEOUT,
-            )
-            res.raise_for_status()
-
-            data = safe_json(res)
-            raw = str(data.get("content", "")).strip()
+            raw = fetch_ai(prompt_keyword)
 
             if not raw:
                 last_error = ValueError(f"Empty content for prompt: {prompt_keyword}")
@@ -810,7 +929,18 @@ def generate_token_content(keyword: str) -> str:
                 )
                 continue
 
+            if not is_usable_ai_text(raw):
+                last_error = ValueError(f"Thin or malformed output for prompt: {prompt_keyword}")
+                logging.warning(
+                    "Token AI generation returned thin content for %s using prompt '%s'",
+                    raw_keyword,
+                    prompt_keyword,
+                )
+                continue
+
             final_content = normalize_ai_html(raw)
+            final_content = trim_redundant_ai_html(final_content, raw_keyword)
+
             if not final_content:
                 last_error = ValueError(f"Sanitized content became empty for prompt: {prompt_keyword}")
                 logging.warning(
