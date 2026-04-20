@@ -858,4 +858,117 @@
     if (monthlyBtn) {
       monthlyBtn.addEventListener("click", function () {
         openCheckoutForPlan("monthly");
+        
+          });
+    }
+
+    if (yearlyBtn) {
+      yearlyBtn.addEventListener("click", function () {
+        openCheckoutForPlan("yearly");
+      });
+    }
+
+    closeBtn.addEventListener("click", function () {
+      closeCheckoutInternal();
+    });
+
+    changePlanBtn.addEventListener("click", async function () {
+      await destroyEmbeddedCheckout();
+      showPlanSelector();
+      helper.textContent = "Select a plan to load secure checkout.";
+      setStatus("");
+      setActivePlan(selectedPlanKey);
+    });
+
+    if (window.innerWidth <= 640) {
+      planRow.style.gridTemplateColumns = "1fr";
+      compactRow.style.flexDirection = "column";
+      compactRow.style.alignItems = "stretch";
+    }
+
+    setActivePlan(selectedPlanKey);
+  }
+
+  window.openSelector = async function () {
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+
+    await openSelectorInternal();
+
+    setTimeout(function () {
+      const el = document.getElementById("embedded-toggle-wrapper");
+      if (el) {
+        try {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (_) {}
+      }
+    }, 120);
+  };
+
+  window.openEmbeddedUpgrade = async function (planKey) {
+    if (shouldSuppressUpgrade()) {
+      hideLegacyUpgradeUI();
+      return;
+    }
+
+    await openSelectorInternal();
+
+    setTimeout(function () {
+      const el = document.getElementById("embedded-toggle-wrapper");
+      if (el) {
+        try {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (_) {}
+      }
+    }, 120);
+
+    if (planKey && PRICES[planKey]) {
+      openCheckoutForPlan(planKey);
+    }
+  };
+
+  function init() {
+    injectLegacyUpgradeKillCSS();
+    hideLegacyUpgradeUI();
+    watchLegacyUpgradeUI();
+    handleReturnState();
+    patchTopUpgradeButton();
+    patchHostedCheckoutFallback();
+    patchShowUpgrade();
+    patchAnalyzeLimitAutoOpen();
+    patchLegacyButtons();
+    patchSubscriberEmailField();
+    buildEmbeddedUI();
+    syncPostPurchaseMessage();
+
+    setTimeout(function () {
+      hideLegacyUpgradeUI();
+      patchLegacyButtons();
+      patchSubscriberEmailField();
+      syncPostPurchaseMessage();
+    }, 0);
+
+    setTimeout(function () {
+      hideLegacyUpgradeUI();
+      patchLegacyButtons();
+      patchSubscriberEmailField();
+      syncPostPurchaseMessage();
+    }, 150);
+  }
+
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  const api = {
+    init
+  };
+
+  window.TOKEN_RISK_UPGRADE = api;
+  return api;
+})();
      
