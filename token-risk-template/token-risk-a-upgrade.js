@@ -1,4 +1,4 @@
- const TOKEN_RISK_UPGRADE = (() => {
+const TOKEN_RISK_UPGRADE = (() => {
   if (window.__TOKEN_RISK_EMBEDDED_UPGRADE__) {
     return window.TOKEN_RISK_UPGRADE || {};
   }
@@ -108,7 +108,7 @@
     const postPurchase = document.getElementById("postPurchase");
     if (!postPurchase) return;
 
-    postPurchase.textContent = "✅ Unlimited token checks are active with this account";
+    postPurchase.textContent = "Unlimited token checks are active with this account";
     postPurchase.style.display = shouldSuppressUpgrade() ? "block" : "none";
   }
 
@@ -288,10 +288,10 @@
         if (data && data.url) {
           window.location = data.url;
         } else {
-          alert("Checkout failed. Please try again.");
+          alert("Checkout could not be started. Please try again.");
         }
       } catch (_) {
-        alert("Checkout failed. Please try again.");
+        alert("Checkout could not be started. Please try again.");
       }
     };
   }
@@ -479,8 +479,8 @@
     if (!btn || !compactText) return;
 
     compactText.innerHTML =
-      '<div style="font-size:12px;color:#d4e0f2;font-weight:700;">Selected plan</div>' +
-      '<div style="margin-top:2px;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + '</div>';
+      '<div style="font-size:12px;color:#cfd9eb;font-weight:700;letter-spacing:.02em;">Selected plan</div>' +
+      '<div style="margin-top:3px;font-size:14px;font-weight:800;color:#ffffff;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + "</div>";
   }
 
   function setActivePlan(key) {
@@ -490,13 +490,13 @@
       const isActive = btn.dataset.planKey === key;
       btn.dataset.active = isActive ? "true" : "false";
       btn.style.background = isActive
-        ? "linear-gradient(135deg, rgba(134,121,247,.25) 0%, rgba(44,198,232,.22) 100%)"
-        : "rgba(255,255,255,.05)";
+        ? "linear-gradient(135deg, rgba(128,116,247,.24) 0%, rgba(42,188,224,.20) 100%)"
+        : "rgba(255,255,255,.04)";
       btn.style.borderColor = isActive
-        ? "rgba(102,217,239,.55)"
-        : "rgba(255,255,255,.12)";
+        ? "rgba(102,217,239,.44)"
+        : "rgba(255,255,255,.10)";
       btn.style.boxShadow = isActive
-        ? "0 0 0 1px rgba(102,217,239,.20) inset"
+        ? "0 0 0 1px rgba(102,217,239,.12) inset"
         : "none";
       btn.style.transform = "translateY(0)";
     });
@@ -594,13 +594,13 @@
       });
 
       checkoutInstance.mount("#embedded-checkout-mount");
-      helper.textContent = "Complete payment below.";
+      helper.textContent = "Secure checkout is ready below.";
     } catch (e) {
       console.error("Embedded checkout error:", e);
       await destroyEmbeddedCheckout();
       showPlanSelector();
-      helper.textContent = "Select a plan to load secure checkout.";
-      checkoutContainer.innerHTML = "Unable to load checkout.";
+      helper.textContent = "Choose a plan to load secure checkout.";
+      checkoutContainer.innerHTML = "Checkout could not be loaded.";
       checkoutContainer.style.display = "block";
       checkoutContainer.style.minHeight = "100px";
       setStatus("Please try again.");
@@ -623,7 +623,7 @@
     checkoutCard.style.display = "block";
     setActivePlan(selectedPlanKey);
     showPlanSelector();
-    helper.textContent = "Select a plan to load secure checkout.";
+    helper.textContent = "Choose a plan to continue.";
     setStatus("");
   }
 
@@ -631,7 +631,7 @@
     await destroyEmbeddedCheckout();
     checkoutCard.style.display = "none";
     buttonRow.style.display = shouldSuppressUpgrade() ? "none" : "flex";
-    helper.textContent = "Select a plan to load secure checkout.";
+    helper.textContent = "Choose a plan to continue.";
     setStatus("");
     showPlanSelector();
   }
@@ -644,8 +644,8 @@
     btn.dataset.planSubLabel = sublabel;
     btn.style.padding = "12px 10px";
     btn.style.borderRadius = "14px";
-    btn.style.border = "1px solid rgba(255,255,255,.12)";
-    btn.style.background = "rgba(255,255,255,.05)";
+    btn.style.border = "1px solid rgba(255,255,255,.10)";
+    btn.style.background = "rgba(255,255,255,.04)";
     btn.style.color = "#fff";
     btn.style.cursor = "pointer";
     btn.style.textAlign = "left";
@@ -658,11 +658,12 @@
     top.style.fontSize = "14px";
     top.style.fontWeight = "900";
     top.style.lineHeight = "1.2";
+    top.style.letterSpacing = "-.01em";
 
     const bottom = document.createElement("div");
     bottom.textContent = sublabel;
     bottom.style.fontSize = "12px";
-    bottom.style.color = "#d4e0f2";
+    bottom.style.color = "#cfd9eb";
     bottom.style.marginTop = "5px";
     bottom.style.lineHeight = "1.3";
 
@@ -698,7 +699,7 @@
 
     button = document.createElement("button");
     button.type = "button";
-    button.innerText = "🔓 Unlock Unlimited Token Checks";
+    button.innerText = "Unlock Unlimited Token Checks";
     button.style.padding = "10px 14px";
     button.style.borderRadius = "999px";
     button.style.fontWeight = "900";
@@ -721,16 +722,18 @@
     checkoutCard.style.color = "#fff";
 
     const title = document.createElement("div");
-    title.textContent = "Unlock unlimited token checks instantly";
+    title.textContent = "Unlimited token checks";
     title.style.fontSize = "22px";
     title.style.fontWeight = "900";
     title.style.marginBottom = "6px";
+    title.style.letterSpacing = "-.02em";
 
     const sub = document.createElement("div");
-    sub.textContent = "Continue with your selected plan below.";
+    sub.textContent = "Choose a plan and continue through secure checkout.";
     sub.style.fontSize = "14px";
-    sub.style.color = "#d4e0f2";
+    sub.style.color = "#cfd9eb";
     sub.style.marginBottom = "12px";
+    sub.style.lineHeight = "1.5";
 
     compactRow = document.createElement("div");
     compactRow.style.display = "none";
@@ -740,8 +743,8 @@
     compactRow.style.marginBottom = "12px";
     compactRow.style.padding = "10px 12px";
     compactRow.style.borderRadius = "14px";
-    compactRow.style.background = "rgba(255,255,255,.05)";
-    compactRow.style.border = "1px solid rgba(255,255,255,.10)";
+    compactRow.style.background = "rgba(255,255,255,.04)";
+    compactRow.style.border = "1px solid rgba(255,255,255,.09)";
 
     compactText = document.createElement("div");
     compactText.style.fontSize = "13px";
@@ -754,8 +757,8 @@
     changePlanBtn.textContent = "Change";
     changePlanBtn.style.padding = "8px 12px";
     changePlanBtn.style.borderRadius = "999px";
-    changePlanBtn.style.border = "1px solid rgba(255,255,255,.14)";
-    changePlanBtn.style.background = "rgba(255,255,255,.06)";
+    changePlanBtn.style.border = "1px solid rgba(255,255,255,.12)";
+    changePlanBtn.style.background = "rgba(255,255,255,.05)";
     changePlanBtn.style.color = "#fff";
     changePlanBtn.style.fontWeight = "800";
     changePlanBtn.style.cursor = "pointer";
@@ -786,9 +789,9 @@
     }
 
     helper = document.createElement("div");
-    helper.textContent = "Select a plan to load secure checkout.";
+    helper.textContent = "Choose a plan to continue.";
     helper.style.fontSize = "13px";
-    helper.style.color = "#d4e0f2";
+    helper.style.color = "#cfd9eb";
     helper.style.marginBottom = "10px";
     helper.style.lineHeight = "1.45";
 
@@ -811,8 +814,8 @@
     closeBtn.style.marginTop = "12px";
     closeBtn.style.padding = "10px 14px";
     closeBtn.style.borderRadius = "12px";
-    closeBtn.style.border = "1px solid rgba(255,255,255,.14)";
-    closeBtn.style.background = "rgba(255,255,255,.06)";
+    closeBtn.style.border = "1px solid rgba(255,255,255,.12)";
+    closeBtn.style.background = "rgba(255,255,255,.05)";
     closeBtn.style.color = "#fff";
     closeBtn.style.fontWeight = "800";
     closeBtn.style.cursor = "pointer";
@@ -858,8 +861,7 @@
     if (monthlyBtn) {
       monthlyBtn.addEventListener("click", function () {
         openCheckoutForPlan("monthly");
-        
-          });
+      });
     }
 
     if (yearlyBtn) {
@@ -875,7 +877,7 @@
     changePlanBtn.addEventListener("click", async function () {
       await destroyEmbeddedCheckout();
       showPlanSelector();
-      helper.textContent = "Select a plan to load secure checkout.";
+      helper.textContent = "Choose a plan to continue.";
       setStatus("");
       setActivePlan(selectedPlanKey);
     });
@@ -971,4 +973,3 @@
   window.TOKEN_RISK_UPGRADE = api;
   return api;
 })();
-     
