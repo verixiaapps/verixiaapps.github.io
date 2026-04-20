@@ -108,7 +108,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     const postPurchase = document.getElementById("postPurchase");
     if (!postPurchase) return;
 
-    postPurchase.textContent = "Unlimited token checks are active with this account";
+    postPurchase.textContent = "✅ Unlimited token checks are active with this account";
     postPurchase.style.display = shouldSuppressUpgrade() ? "block" : "none";
   }
 
@@ -237,6 +237,20 @@ const TOKEN_RISK_UPGRADE = (() => {
     }
   }
 
+  function openUpgrade(planKey) {
+    hideLegacyUpgradeUI();
+
+    if (shouldSuppressUpgrade()) {
+      return false;
+    }
+
+    if (window.openEmbeddedUpgrade) {
+      window.openEmbeddedUpgrade(planKey || selectedPlanKey || "monthly");
+    }
+
+    return false;
+  }
+
   function patchTopUpgradeButton() {
     const topBtn = document.querySelector(".upgrade-top");
     if (!topBtn) return;
@@ -248,17 +262,7 @@ const TOKEN_RISK_UPGRADE = (() => {
         e.preventDefault();
         e.stopPropagation();
       }
-
-      if (shouldSuppressUpgrade()) {
-        hideLegacyUpgradeUI();
-        return false;
-      }
-
-      hideLegacyUpgradeUI();
-      if (window.openEmbeddedUpgrade) {
-        window.openEmbeddedUpgrade("monthly");
-      }
-      return false;
+      return openUpgrade("monthly");
     };
   }
 
@@ -288,18 +292,17 @@ const TOKEN_RISK_UPGRADE = (() => {
         if (data && data.url) {
           window.location = data.url;
         } else {
-          alert("Checkout could not be started. Please try again.");
+          alert("Checkout failed. Please try again.");
         }
       } catch (_) {
-        alert("Checkout could not be started. Please try again.");
+        alert("Checkout failed. Please try again.");
       }
     };
   }
 
   function patchShowUpgrade() {
     window.showUpgrade = function () {
-      hideLegacyUpgradeUI();
-      return;
+      return openUpgrade("monthly");
     };
   }
 
@@ -376,9 +379,8 @@ const TOKEN_RISK_UPGRADE = (() => {
 
             if (data && data.limit === true) {
               setTimeout(function () {
-                hideLegacyUpgradeUI();
-                if (!shouldSuppressUpgrade() && window.openEmbeddedUpgrade) {
-                  window.openEmbeddedUpgrade("monthly");
+                if (!shouldSuppressUpgrade()) {
+                  openUpgrade("monthly");
                 }
               }, 0);
             }
@@ -397,24 +399,19 @@ const TOKEN_RISK_UPGRADE = (() => {
       const onclickText = (btn.getAttribute("onclick") || "").trim();
       const text = (btn.textContent || "").toLowerCase().trim();
 
-      if (onclickText === "showUpgrade()" || text.includes("upgrade")) {
+      if (
+        onclickText === "showUpgrade()" ||
+        text === "upgrade" ||
+        text.includes("unlock") ||
+        text.includes("unlimited")
+      ) {
         btn.removeAttribute("onclick");
         btn.onclick = function (e) {
           if (e) {
             e.preventDefault();
             e.stopPropagation();
           }
-
-          if (shouldSuppressUpgrade()) {
-            hideLegacyUpgradeUI();
-            return false;
-          }
-
-          hideLegacyUpgradeUI();
-          if (window.openEmbeddedUpgrade) {
-            window.openEmbeddedUpgrade("monthly");
-          }
-          return false;
+          return openUpgrade("monthly");
         };
       }
     });
@@ -479,8 +476,8 @@ const TOKEN_RISK_UPGRADE = (() => {
     if (!btn || !compactText) return;
 
     compactText.innerHTML =
-      '<div style="font-size:12px;color:#cfd9eb;font-weight:700;letter-spacing:.02em;">Selected plan</div>' +
-      '<div style="margin-top:3px;font-size:14px;font-weight:800;color:#ffffff;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + "</div>";
+      '<div style="font-size:12px;color:#d4e0f2;font-weight:700;">Selected plan</div>' +
+      '<div style="margin-top:2px;">' + btn.dataset.planLabel + ' • ' + btn.dataset.planSubLabel + "</div>";
   }
 
   function setActivePlan(key) {
@@ -490,13 +487,13 @@ const TOKEN_RISK_UPGRADE = (() => {
       const isActive = btn.dataset.planKey === key;
       btn.dataset.active = isActive ? "true" : "false";
       btn.style.background = isActive
-        ? "linear-gradient(135deg, rgba(128,116,247,.24) 0%, rgba(42,188,224,.20) 100%)"
-        : "rgba(255,255,255,.04)";
+        ? "linear-gradient(135deg, rgba(134,121,247,.25) 0%, rgba(44,198,232,.22) 100%)"
+        : "rgba(255,255,255,.05)";
       btn.style.borderColor = isActive
-        ? "rgba(102,217,239,.44)"
-        : "rgba(255,255,255,.10)";
+        ? "rgba(102,217,239,.55)"
+        : "rgba(255,255,255,.12)";
       btn.style.boxShadow = isActive
-        ? "0 0 0 1px rgba(102,217,239,.12) inset"
+        ? "0 0 0 1px rgba(102,217,239,.20) inset"
         : "none";
       btn.style.transform = "translateY(0)";
     });
@@ -542,6 +539,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     }
     if (isInitializingCheckout) return;
     if (!PRICES[planKey]) return;
+    if (!API_BASE || !STRIPE_PUBLISHABLE_KEY) return;
 
     isInitializingCheckout = true;
     selectedPlanKey = planKey;
@@ -589,18 +587,17 @@ const TOKEN_RISK_UPGRADE = (() => {
         return data.clientSecret;
       };
 
-      checkoutInstance = await stripe.createEmbeddedCheckoutPage({
-        fetchClientSecret: fetchClientSecret
+      checkoutInstance = await stripe.initEmbeddedCheckout({
+        fetchClientSecret
       });
 
       checkoutInstance.mount("#embedded-checkout-mount");
-      helper.textContent = "Secure checkout is ready below.";
-    } catch (e) {
-      console.error("Embedded checkout error:", e);
+      helper.textContent = "Complete payment below.";
+    } catch (_) {
       await destroyEmbeddedCheckout();
       showPlanSelector();
-      helper.textContent = "Choose a plan to load secure checkout.";
-      checkoutContainer.innerHTML = "Checkout could not be loaded.";
+      helper.textContent = "Select a plan to load secure checkout.";
+      checkoutContainer.innerHTML = "Unable to load checkout.";
       checkoutContainer.style.display = "block";
       checkoutContainer.style.minHeight = "100px";
       setStatus("Please try again.");
@@ -623,7 +620,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     checkoutCard.style.display = "block";
     setActivePlan(selectedPlanKey);
     showPlanSelector();
-    helper.textContent = "Choose a plan to continue.";
+    helper.textContent = "Select a plan to load secure checkout.";
     setStatus("");
   }
 
@@ -631,7 +628,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     await destroyEmbeddedCheckout();
     checkoutCard.style.display = "none";
     buttonRow.style.display = shouldSuppressUpgrade() ? "none" : "flex";
-    helper.textContent = "Choose a plan to continue.";
+    helper.textContent = "Select a plan to load secure checkout.";
     setStatus("");
     showPlanSelector();
   }
@@ -644,8 +641,8 @@ const TOKEN_RISK_UPGRADE = (() => {
     btn.dataset.planSubLabel = sublabel;
     btn.style.padding = "12px 10px";
     btn.style.borderRadius = "14px";
-    btn.style.border = "1px solid rgba(255,255,255,.10)";
-    btn.style.background = "rgba(255,255,255,.04)";
+    btn.style.border = "1px solid rgba(255,255,255,.12)";
+    btn.style.background = "rgba(255,255,255,.05)";
     btn.style.color = "#fff";
     btn.style.cursor = "pointer";
     btn.style.textAlign = "left";
@@ -658,12 +655,11 @@ const TOKEN_RISK_UPGRADE = (() => {
     top.style.fontSize = "14px";
     top.style.fontWeight = "900";
     top.style.lineHeight = "1.2";
-    top.style.letterSpacing = "-.01em";
 
     const bottom = document.createElement("div");
     bottom.textContent = sublabel;
     bottom.style.fontSize = "12px";
-    bottom.style.color = "#cfd9eb";
+    bottom.style.color = "#d4e0f2";
     bottom.style.marginTop = "5px";
     bottom.style.lineHeight = "1.3";
 
@@ -685,6 +681,7 @@ const TOKEN_RISK_UPGRADE = (() => {
 
   function buildEmbeddedUI() {
     if (document.getElementById("embedded-toggle-wrapper")) return;
+    if (!API_BASE || !STRIPE_PUBLISHABLE_KEY) return;
 
     wrapper = document.createElement("div");
     wrapper.id = "embedded-toggle-wrapper";
@@ -699,7 +696,7 @@ const TOKEN_RISK_UPGRADE = (() => {
 
     button = document.createElement("button");
     button.type = "button";
-    button.innerText = "Unlock Unlimited Token Checks";
+    button.innerText = "🔓 Unlock Unlimited Checks";
     button.style.padding = "10px 14px";
     button.style.borderRadius = "999px";
     button.style.fontWeight = "900";
@@ -722,18 +719,16 @@ const TOKEN_RISK_UPGRADE = (() => {
     checkoutCard.style.color = "#fff";
 
     const title = document.createElement("div");
-    title.textContent = "Unlimited token checks";
+    title.textContent = "Unlock unlimited token checks instantly";
     title.style.fontSize = "22px";
     title.style.fontWeight = "900";
     title.style.marginBottom = "6px";
-    title.style.letterSpacing = "-.02em";
 
     const sub = document.createElement("div");
-    sub.textContent = "Choose a plan and continue through secure checkout.";
+    sub.textContent = "Continue with your selected plan below.";
     sub.style.fontSize = "14px";
-    sub.style.color = "#cfd9eb";
+    sub.style.color = "#d4e0f2";
     sub.style.marginBottom = "12px";
-    sub.style.lineHeight = "1.5";
 
     compactRow = document.createElement("div");
     compactRow.style.display = "none";
@@ -743,8 +738,8 @@ const TOKEN_RISK_UPGRADE = (() => {
     compactRow.style.marginBottom = "12px";
     compactRow.style.padding = "10px 12px";
     compactRow.style.borderRadius = "14px";
-    compactRow.style.background = "rgba(255,255,255,.04)";
-    compactRow.style.border = "1px solid rgba(255,255,255,.09)";
+    compactRow.style.background = "rgba(255,255,255,.05)";
+    compactRow.style.border = "1px solid rgba(255,255,255,.10)";
 
     compactText = document.createElement("div");
     compactText.style.fontSize = "13px";
@@ -757,8 +752,8 @@ const TOKEN_RISK_UPGRADE = (() => {
     changePlanBtn.textContent = "Change";
     changePlanBtn.style.padding = "8px 12px";
     changePlanBtn.style.borderRadius = "999px";
-    changePlanBtn.style.border = "1px solid rgba(255,255,255,.12)";
-    changePlanBtn.style.background = "rgba(255,255,255,.05)";
+    changePlanBtn.style.border = "1px solid rgba(255,255,255,.14)";
+    changePlanBtn.style.background = "rgba(255,255,255,.06)";
     changePlanBtn.style.color = "#fff";
     changePlanBtn.style.fontWeight = "800";
     changePlanBtn.style.cursor = "pointer";
@@ -789,9 +784,9 @@ const TOKEN_RISK_UPGRADE = (() => {
     }
 
     helper = document.createElement("div");
-    helper.textContent = "Choose a plan to continue.";
+    helper.textContent = "Select a plan to load secure checkout.";
     helper.style.fontSize = "13px";
-    helper.style.color = "#cfd9eb";
+    helper.style.color = "#d4e0f2";
     helper.style.marginBottom = "10px";
     helper.style.lineHeight = "1.45";
 
@@ -814,8 +809,8 @@ const TOKEN_RISK_UPGRADE = (() => {
     closeBtn.style.marginTop = "12px";
     closeBtn.style.padding = "10px 14px";
     closeBtn.style.borderRadius = "12px";
-    closeBtn.style.border = "1px solid rgba(255,255,255,.12)";
-    closeBtn.style.background = "rgba(255,255,255,.05)";
+    closeBtn.style.border = "1px solid rgba(255,255,255,.14)";
+    closeBtn.style.background = "rgba(255,255,255,.06)";
     closeBtn.style.color = "#fff";
     closeBtn.style.fontWeight = "800";
     closeBtn.style.cursor = "pointer";
@@ -845,11 +840,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     }
 
     button.addEventListener("click", function () {
-      if (shouldSuppressUpgrade()) {
-        hideLegacyUpgradeUI();
-        return;
-      }
-      window.openEmbeddedUpgrade(selectedPlanKey || "monthly");
+      openUpgrade(selectedPlanKey || "monthly");
     });
 
     if (weeklyBtn) {
@@ -877,7 +868,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     changePlanBtn.addEventListener("click", async function () {
       await destroyEmbeddedCheckout();
       showPlanSelector();
-      helper.textContent = "Choose a plan to continue.";
+      helper.textContent = "Select a plan to load secure checkout.";
       setStatus("");
       setActivePlan(selectedPlanKey);
     });
@@ -966,10 +957,7 @@ const TOKEN_RISK_UPGRADE = (() => {
     init();
   }
 
-  const api = {
-    init
-  };
-
+  const api = { init };
   window.TOKEN_RISK_UPGRADE = api;
   return api;
 })();
