@@ -152,7 +152,7 @@
 
       </div>
 
-      <h1 id="heroKeyword"></h1>
+      <h1 id="heroKeyword">{{KEYWORD}}</h1>
 
       <p id="heroSubheading"></p>
 
@@ -230,11 +230,111 @@
 
       <div class="tool-shell">
 
-        <input id="tokenAddress" type="text" placeholder="Paste token contract address">
+        <input
+
+          id="tokenAddress"
+
+          type="text"
+
+          autocomplete="off"
+
+          autocapitalize="off"
+
+          autocorrect="off"
+
+          spellcheck="false"
+
+          placeholder="Paste token contract address"
+
+        >
+
+        <div class="input-help">Example: ERC-20, Solana, Base, or other supported token contract address</div>
 
         <button class="check" type="button" onclick="check()">🔍 Check Token Risk</button>
 
+        <div class="note">No signup required • 1 free check • Results in seconds</div>
+
+        <input
+
+          id="email"
+
+          type="email"
+
+          autocomplete="email"
+
+          autocapitalize="off"
+
+          autocorrect="off"
+
+          spellcheck="false"
+
+          placeholder="Already subscribed? Enter your payment email to unlock unlimited token checks"
+
+        >
+
+        <div class="note">Use the same email you entered during checkout</div>
+
+        <div id="postPurchase" class="success">
+
+          ✅ Payment successful — unlimited access is active on this browser
+
+        </div>
+
+        <div class="note">Get a clear risk level, key signals, and what to watch before buying or interacting</div>
+
         <div id="result"></div>
+
+      </div>
+
+      <div class="app-link-card">
+
+        <h4>Check the next token before you buy</h4>
+
+        <p>Risk rarely shows up once. Use Token Risk to review the next contract, project page, liquidity claim, or promo thread before you buy, approve, or bridge.</p>
+
+        <a class="app-link-button" href="https://verixiaapps.com/token-risk/" target="_blank" rel="noopener noreferrer">Open Token Risk</a>
+
+      </div>
+
+      <div class="upgrade" id="upgrade">
+
+        <h3>Don’t Miss the Next Risky Token</h3>
+
+        <div class="upgrade-copy">
+
+          Most risky launches do not look obviously dangerous at first. If you are checking contracts, liquidity setups, or token claims, more will follow. Review each one before you buy.
+
+        </div>
+
+        <div class="upgrade-meta-line">
+
+          Built for ongoing token checks, contract review, holder risk, liquidity risk, and suspicious project claims
+
+        </div>
+
+        <div class="upgrade-meta-line upgrade-meta-line-tight">
+
+          Unlimited token checks • Cancel anytime
+
+        </div>
+
+        <button class="plan" type="button" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Protection</button>
+
+        <button class="plan secondary" type="button" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Protection</button>
+
+        <button class="plan tertiary" type="button" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Protection</button>
+
+        <div class="upgrade-meta-line">
+
+          Secure payments powered by Stripe
+
+        </div>
+
+        <div class="subscriber-link">
+
+          <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
+
+        </div>
 
       </div>
 
@@ -252,21 +352,63 @@
 
       <h2 id="contentHeading"></h2>
 
+      <div class="content-recognition" id="contentRecognition">
+
+        <div class="recognition-chip">
+
+          <span class="recognition-label">What people notice first</span>
+
+          <span class="recognition-copy">Fast price action, big claims, viral posts, or a token page that tries to create urgency before real review.</span>
+
+        </div>
+
+        <div class="recognition-chip">
+
+          <span class="recognition-label">What bad actors want</span>
+
+          <span class="recognition-copy">A buy, an approval, liquidity trust, or confidence before the contract, wallets, and setup have been checked.</span>
+
+        </div>
+
+        <div class="recognition-chip">
+
+          <span class="recognition-label">Why it feels believable</span>
+
+          <span class="recognition-copy">Many risky tokens borrow normal crypto language, polished branding, and social proof that looks convincing at first glance.</span>
+
+        </div>
+
+        <div class="recognition-chip">
+
+          <span class="recognition-label">Why this page helps</span>
+
+          <span class="recognition-copy">It is built to compare the token or project against common risk patterns before you buy, bridge, approve, or follow hype.</span>
+
+        </div>
+
+      </div>
+
       <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
       <div class="link-section">
 
-        <h3>Check Similar Tokens</h3>
+        <h3 id="relatedHeading">Check Similar Tokens</h3>
 
-        <ul class="related-links">{{RELATED_LINKS}}</ul>
+        <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
 
       </div>
 
-      <div class="link-section">
+      <div class="link-section" id="moreLinksWrap">
 
-        <h3>More Token Risk Checks</h3>
+        <h3 id="moreLinksHeading">More Token Risk Checks</h3>
 
-        <ul class="related-links">{{MORE_LINKS}}</ul>
+        <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+
+      </div>
+
+      <div class="content-close">
+
+        Tokens can look safe until liquidity changes, wallet concentration becomes obvious, contract controls are used, or hype fades and exits begin. When something feels off, pause and verify the contract, trading setup, and claims before taking action.
 
       </div>
 
@@ -276,15 +418,59 @@
 
       <div>
 
-        <a href="https://verixiaapps.com/website-policies/token-risk/">Terms and Privacy Policy</a>
+        By using this website you agree to our
+
+        <a href="https://verixiaapps.com/website-policies/token-risk/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
 
       </div>
 
-      <div>Token Risk © 2026</div>
+      <div class="footer-copy">
+
+        Token Risk © 2026 • Token risk analysis and warning tool
+
+      </div>
 
     </footer>
 
   </div>
+
+  <script>
+
+    window.TOKEN_RISK_CONFIG = {
+
+      apiBase: "https://awake-integrity-production-faa0.up.railway.app",
+
+      rawKeyword: "{{KEYWORD}}",
+
+      browserSubKey: "token_risk_browser_subscribed",
+
+      verifiedSubEmailKey: "token_risk_verified_subscriber_email",
+
+      adsId: "AW-17956428385",
+
+      adsSendTo: "AW-17956428385/dE43CO04_IUcEOGopfJC",
+
+      stripePublishableKey: "pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y",
+
+      prices: {
+
+        weekly: "price_1T8KOTJjMzyHDzeQDDg1A2TF",
+
+        monthly: "price_1T8KOUJjMzyHDzeQxaqPFOSB",
+
+        yearly: "price_1T8KOQJjMzyHDzeQfcU1C1MQ"
+
+      }
+
+    };
+
+  </script>
+
+  <script src="/token-risk-template/token-risk-a-seo.js"></script>
+
+  <script src="/token-risk-template/token-risk-a-checker.js"></script>
+
+  <script src="/token-risk-template/token-risk-a-upgrade.js"></script>
 
 </body>
 
