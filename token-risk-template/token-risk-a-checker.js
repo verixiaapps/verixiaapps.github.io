@@ -20,40 +20,62 @@ const TOKEN_RISK_APP = (() => {
       .replace(/'/g, "&#39;");
   }
 
-  function escapeMaybe(v) {
-    return escapeHtml(v == null ? "" : String(v));
-  }
-
-  function normalizeRiskClass(v) {
-    const x = String(v || "").toLowerCase().trim();
-    if (x === "high") return "high";
-    if (x === "medium") return "medium";
-    if (x === "low") return "low";
+  function normalizeRiskClass(value) {
+    const risk = String(value || "").toLowerCase().trim();
+    if (risk === "high") return "high";
+    if (risk === "medium") return "medium";
+    if (risk === "low") return "low";
     return "unknown";
   }
 
-  function riskLabel(risk) {
-    if (risk === "high") return "High Risk";
-    if (risk === "medium") return "Moderate Risk";
-    if (risk === "low") return "Lower Risk";
-    return "Review";
+  function iconForRisk(risk) {
+    if (risk === "high") return "🔴";
+    if (risk === "medium") return "🟠";
+    if (risk === "low") return "🟢";
+    return "⚪";
+  }
+
+  function signalIconForRisk(risk) {
+    if (risk === "low") return "✔️";
+    if (risk === "unknown") return "•";
+    return "⚠️";
+  }
+
+  function chipByRisk(risk) {
+    if (risk === "high") return "Pattern Match: Strong";
+    if (risk === "medium") return "Pattern Match: Moderate";
+    if (risk === "low") return "Pattern Match: Lower Risk";
+    return "Pattern Match: Review Needed";
   }
 
   function summaryForRisk(risk) {
     if (risk === "high") {
-      return "Multiple high-risk signals detected. Do not interact until the contract, liquidity, and ownership structure are verified.";
+      return "This token shows multiple high-risk signals. Do not interact until contract behavior, liquidity, and ownership concentration are verified.";
     }
     if (risk === "medium") {
-      return "Several warning signals detected. Review contract permissions, liquidity, and holder distribution before acting.";
+      return "This token shows warning signs. Review liquidity, wallet concentration, permissions, and trading behavior before taking action.";
     }
     if (risk === "low") {
-      return "Fewer immediate risk signals detected, but verification is still required before interacting.";
+      return "This token shows fewer immediate risk signals, but you should still verify contract behavior, liquidity, and concentration before interacting.";
     }
-    return "Risk level unclear. Verify contract, liquidity, and ownership before taking action.";
+    return "We could not determine a clear risk level. Treat this token cautiously and verify contract behavior, liquidity, and ownership before acting.";
   }
 
-  function compactMoney(v) {
-    const n = Number(v);
+  function paylineForRisk(risk) {
+    if (risk === "high") {
+      return "Risky tokens often look fine until liquidity changes, exits get harder, or concentration starts to matter. A wrong move can become expensive fast.";
+    }
+    if (risk === "medium") {
+      return "Many questionable tokens do not fail immediately. The risk often appears later through liquidity shifts, contract behavior, or wallet concentration.";
+    }
+    if (risk === "low") {
+      return "Even lower-risk tokens still need verification because liquidity, permissions, and concentration can change after launch.";
+    }
+    return "When the risk is unclear, the safest move is to pause and verify the token structure before you buy, approve, or interact.";
+  }
+
+  function compactMoney(value) {
+    const n = Number(value);
     if (!Number.isFinite(n)) return "N/A";
     if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
     if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
@@ -61,172 +83,198 @@ const TOKEN_RISK_APP = (() => {
     return `$${n.toLocaleString()}`;
   }
 
-  function compactPercent(v) {
-    const n = Number(v);
+  function compactPercent(value) {
+    const n = Number(value);
     if (!Number.isFinite(n)) return "N/A";
     return `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
   }
 
-  function metricRow(label, value, cls) {
-    return `
-      <div class="token-metric-row">
-        <div class="token-metric-label">${label}</div>
-        <div class="token-metric-value ${cls || ""}">${escapeMaybe(value)}</div>
-      </div>
-    `;
+  function safeText(value, fallback) {
+    const text = String(value || "").trim();
+    return text || fallback;
   }
 
-  function listBlock(items, fallback) {
-    const arr = Array.isArray(items)
-      ? items.map(x => String(x || "").trim()).filter(Boolean)
-      : [];
+  function buildMetricSignals(metrics) {
+    const signals = [];
 
-    const rows = arr.length ? arr : [fallback];
+    const liquidity = compactMoney(metrics.liquidityUsd);
+    const volume24h = compactMoney(metrics.volume24h);
+    const fdv = compactMoney(metrics.fdv);
+    const pairAge = safeText(metrics.pairAge, "N/A");
+    const price24h = compactPercent(metrics.priceChange24h);
 
-    return rows.map(x => `<li>${escapeMaybe(x)}</li>`).join("");
+    signals.push(`Liquidity: ${liquidity}`);
+    signals.push(`Volume 24h: ${volume24h}`);
+    signals.push(`Price 24h: ${price24h}`);
+    signals.push(`Pair age: ${pairAge}`);
+    signals.push(`FDV: ${fdv}`);
+
+    return signals;
+  }
+
+  function normalizeList(items) {
+    if (!Array.isArray(items)) return [];
+    return items
+      .map(item => String(item || "").trim())
+      .filter(Boolean);
   }
 
   function formatTokenResult(data) {
-    const a = data.analysis || {};
-    const m = data.tokenMetrics || {};
-    const t = data.tokenData || {};
-    const risk = normalizeRiskClass(a.riskLevel);
+    const analysis = data.analysis || {};
+    const metrics = data.tokenMetrics || {};
+    const tokenData = data.tokenData || {};
+    const risk = normalizeRiskClass(analysis.riskLevel);
 
-    const priceChange = Number(m.priceChange24h);
-    const priceCls = Number.isFinite(priceChange)
-      ? priceChange >= 0 ? "positive" : "negative"
+    const concerningIndicators = normalizeList(analysis.concerningIndicators);
+    const legitimateElements = normalizeList(analysis.legitimateElements);
+    const recommendations = normalizeList(analysis.recommendations);
+    const metricSignals = buildMetricSignals(metrics);
+
+    const tokenName = safeText(tokenData.symbol || tokenData.name, "Token");
+    const finalTake = safeText(
+      analysis.finalTake,
+      "Proceed carefully and verify contract behavior, liquidity, and ownership before interacting."
+    );
+
+    const detectedSignals = concerningIndicators.length
+      ? concerningIndicators
+      : ["No strong negative signals were returned, but token structure should still be verified."];
+
+    const positiveSignals = legitimateElements.length
+      ? legitimateElements
+      : ["No strong positive signals were returned."];
+
+    const watchItems = recommendations.length
+      ? recommendations
+      : ["Verify contract permissions, liquidity conditions, and holder distribution before interacting."];
+
+    const continuationLine = risk !== "low"
+      ? `<div class="result-continuation">If this token looks attractive now, risk can still show up later through liquidity changes, concentration, permissions, or trading behavior.</div>`
       : "";
 
     return `
-      <div class="token-analysis-wrap">
-        <div class="token-analysis-card">
+      <div class="result-card ${risk}">
+        <div class="result-top">
+          <div class="risk ${risk}">${iconForRisk(risk)} ${risk === "unknown" ? "Risk Level: REVIEW" : "Risk Level: " + risk.toUpperCase()}</div>
+          <div class="result-chip">${chipByRisk(risk)}</div>
+        </div>
 
-          <div class="token-risk-pill ${risk}">
-            ${riskLabel(risk)}
-          </div>
+        <div class="result-summary">${escapeHtml(summaryForRisk(risk))}</div>
+        ${continuationLine}
 
-          <div class="token-meta-line">
-            ${escapeMaybe(t.symbol || t.name || "Token")}
-          </div>
+        <div class="section">
+          <div class="section-title">Token Overview</div>
+          <ul class="signal-list">
+            <li class="signal-item"><span class="signal-icon">🪙</span><span>${escapeHtml(`Token: ${tokenName}`)}</span></li>
+            ${metricSignals.map(item => `
+              <li class="signal-item"><span class="signal-icon">📊</span><span>${escapeHtml(item)}</span></li>
+            `).join("")}
+          </ul>
+        </div>
 
-          <div class="token-summary-inline">
-            ${escapeMaybe(summaryForRisk(risk))}
-          </div>
+        <div class="section">
+          <div class="section-title">Key Risk Signals</div>
+          <ul class="signal-list">
+            ${detectedSignals.map(item => `
+              <li class="signal-item"><span class="signal-icon">${signalIconForRisk(risk)}</span><span>${escapeHtml(item)}</span></li>
+            `).join("")}
+          </ul>
+        </div>
 
-          <div class="token-metric-stack">
-            ${metricRow("Liquidity", compactMoney(m.liquidityUsd))}
-            ${metricRow("Volume 24h", compactMoney(m.volume24h))}
-            ${metricRow("Price 24h", compactPercent(m.priceChange24h), priceCls)}
-            ${metricRow("Pair Age", m.pairAge || "N/A")}
-            ${metricRow("FDV", compactMoney(m.fdv))}
-          </div>
+        <div class="section">
+          <div class="section-title">Positive Signals</div>
+          <ul class="signal-list">
+            ${positiveSignals.map(item => `
+              <li class="signal-item"><span class="signal-icon">✔️</span><span>${escapeHtml(item)}</span></li>
+            `).join("")}
+          </ul>
+        </div>
 
-          <div class="token-section">
-            <div class="token-section-title">Key Signals</div>
-            <ul class="token-list">
-              ${listBlock(
-                a.concerningIndicators,
-                "No strong negative signals were returned."
-              )}
-            </ul>
-          </div>
+        <div class="section">
+          <div class="section-title">What To Watch</div>
+          <div class="action-box">${escapeHtml(watchItems[0])}</div>
+        </div>
 
-          <div class="token-section">
-            <div class="token-section-title">Positive Signals</div>
-            <ul class="token-list">
-              ${listBlock(
-                a.legitimateElements,
-                "No strong positive signals were returned."
-              )}
-            </ul>
-          </div>
+        <div class="section">
+          <div class="section-title">Final Take</div>
+          <div class="action-box">${escapeHtml(finalTake)}</div>
+        </div>
 
-          <div class="token-section">
-            <div class="token-section-title">What To Watch</div>
-            <ul class="token-list">
-              ${listBlock(
-                a.recommendations,
-                "Verify before interacting with this token."
-              )}
-            </ul>
-          </div>
+        <div class="result-payline">${escapeHtml(paylineForRisk(risk))}</div>
 
-          <div class="token-section">
-            <div class="token-section-title">Final Take</div>
-            <div class="token-final-take ${risk}">
-              ${escapeMaybe(a.finalTake || "Proceed carefully.")}
-            </div>
-          </div>
-
-          <div class="token-cta-row">
-            <button class="check result-cta" onclick="scrollToTopCheck()">Check Another Token</button>
-          </div>
-
+        <div class="result-actions">
+          <button class="check result-cta" onclick="scrollToTopCheck()">🔁 Check Another Token</button>
         </div>
       </div>
     `;
   }
 
-  function renderState(title, sub, chip, cls) {
+  function renderState(title, summary, chip, riskClass) {
+    const cls = riskClass || "unknown";
     return `
-      <div class="result-card ${cls || "unknown"}">
+      <div class="result-card ${cls}">
         <div class="result-top">
-          <div class="risk">${title}</div>
-          <div class="result-chip">${chip}</div>
+          <div class="risk ${cls}">${escapeHtml(title)}</div>
+          <div class="result-chip">${escapeHtml(chip)}</div>
         </div>
-        <div class="result-summary">${sub}</div>
+        <div class="result-summary">${escapeHtml(summary)}</div>
       </div>
     `;
   }
 
   function renderEmpty() {
     return renderState(
-      "Paste Token Address",
-      "Enter a contract address to review token risk.",
-      "Awaiting Input"
+      "⚪ Paste Token Address",
+      "Paste a token contract address to review token risk before you buy, approve, or interact.",
+      "Awaiting Input",
+      "unknown"
     );
   }
 
   function renderLoading() {
     return renderState(
-      "Checking Token",
-      "Analyzing liquidity, trading behavior, and contract signals.",
-      "In Progress"
+      "⚪ Checking Token",
+      "Analyzing liquidity, ownership concentration, trading behavior, and contract signals.",
+      "Scan In Progress",
+      "unknown"
     );
   }
 
   function renderLimit() {
     return renderState(
-      "Free Limit Reached",
-      "Upgrade to continue checking tokens.",
-      "Upgrade",
+      "🟠 Free Check Used",
+      "Unlock unlimited token checks so you can review the next contract before you buy, approve, or interact.",
+      "Upgrade Available",
       "medium"
     );
   }
 
-  function renderError(msg) {
+  function renderError(message) {
     return renderState(
-      "Unable To Analyze",
-      msg || "Try again shortly.",
-      "Error"
+      "⚪ Unable To Analyze",
+      message || "We could not analyze this token right now. Please try again in a moment.",
+      "Try Again",
+      "unknown"
     );
   }
 
-  async function parseJsonSafe(res) {
+  async function parseJsonSafe(response) {
     try {
-      return await res.json();
-    } catch {
+      return await response.json();
+    } catch (_) {
       return null;
     }
   }
 
   async function check() {
     const tokenAddress = (document.getElementById("tokenAddress")?.value || "").trim();
-    const email = (document.getElementById("email")?.value || "").trim();
+    const email = (document.getElementById("email")?.value || "").trim().toLowerCase();
     const subscribed = isBrowserSubscribed();
     const result = document.getElementById("result");
 
     if (!result) return;
+
+    result.style.display = "block";
 
     if (!API) {
       result.innerHTML = renderError("API missing.");
@@ -241,63 +289,82 @@ const TOKEN_RISK_APP = (() => {
     result.innerHTML = renderLoading();
 
     try {
-      const res = await fetch(`${API}/analyze-token`, {
+      const response = await fetch(`${API}/analyze-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tokenAddress, email, subscribed })
+        body: JSON.stringify({
+          tokenAddress,
+          email,
+          subscribed
+        })
       });
 
-      const data = await parseJsonSafe(res);
+      const data = await parseJsonSafe(response);
 
-      if (!res.ok) {
-        result.innerHTML = renderError(data?.error);
+      if (!response.ok) {
+        result.innerHTML = renderError(data?.error || "The token could not be analyzed.");
         return;
       }
 
       if (data?.limit) {
         result.innerHTML = renderLimit();
-        window.showUpgrade?.();
+        if (typeof window.showUpgrade === "function") {
+          window.showUpgrade();
+        }
         return;
       }
 
       if (data?.analysis) {
         result.innerHTML = formatTokenResult(data);
+        if (typeof window.showUpgrade === "function") {
+          window.showUpgrade();
+        }
         return;
       }
 
       result.innerHTML = renderError("No analysis returned.");
-    } catch {
+    } catch (_) {
       result.innerHTML = renderError();
     }
   }
 
   function scrollToTopCheck() {
-    const el = document.getElementById("tokenAddress");
-    if (!el) return;
+    const input = document.getElementById("tokenAddress");
+    if (!input) return;
+
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(() => el.focus(), 300);
+    setTimeout(() => input.focus(), 300);
   }
 
   function init() {
     const params = new URLSearchParams(window.location.search);
-    const post = document.getElementById("postPurchase");
+    const postPurchase = document.getElementById("postPurchase");
 
     if (params.get("subscribed") === "true") {
-      try { localStorage.setItem(BROWSER_SUB_KEY, "true"); } catch {}
-      if (post) post.style.display = "block";
+      try {
+        localStorage.setItem(BROWSER_SUB_KEY, "true");
+      } catch (_) {}
+      if (postPurchase) {
+        postPurchase.style.display = "block";
+      }
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (_) {}
     }
 
-    if (isBrowserSubscribed() && post) {
-      post.style.display = "block";
+    if (isBrowserSubscribed() && postPurchase) {
+      postPurchase.style.display = "block";
     }
   }
 
   window.check = check;
   window.scrollToTopCheck = scrollToTopCheck;
 
-  document.readyState === "loading"
-    ? document.addEventListener("DOMContentLoaded", init)
-    : init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 
   return { check };
 })();
