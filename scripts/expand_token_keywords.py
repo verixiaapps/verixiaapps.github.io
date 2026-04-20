@@ -1,14 +1,3 @@
-This one is about 8.4/10 now. Good base, but not 9 yet.
-
-Main weak spots were:
-
-* exact-match dedupe only
-* repeated-term filtering was a little sloppy
-* some low-value phrases can still sneak through
-* ranking can be sharper for the best money keywords
-
-Here’s the full revised file:
-
 import os
 import re
 from collections import Counter
