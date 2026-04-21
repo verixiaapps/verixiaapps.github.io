@@ -83,6 +83,8 @@ jobs:
             const specialWords = {
               usps: 'USPS',
               ups: 'UPS',
+              dhl: 'DHL',
+              irs: 'IRS',
               fedex: 'FedEx',
               td: 'TD',
               bank: 'Bank',
@@ -127,49 +129,62 @@ jobs:
               real: 'Real',
               fake: 'Fake',
               legit: 'Legit',
-              scam: 'Scam'
+              scam: 'Scam',
+              unknown: 'Unknown',
+              needed: 'Needed',
+              free: 'Free',
+              trial: 'Trial',
+              from: 'From',
+              company: 'Company',
+              suspension: 'Suspension',
+              attempt: 'Attempt',
+              notice: 'Notice',
+              verification: 'Verification',
+              locked: 'Locked',
+              needed: 'Needed'
             };
 
             return specialWords[token] || token.charAt(0).toUpperCase() + token.slice(1);
           }
 
           function wordsToPhrase(words) {
-            return words.map(wordFromToken).join(' ');
+            return words.filter(Boolean).map(wordFromToken).join(' ');
           }
 
-          function cleanupQuestion(text) {
-            return text
-              .replace(/\s+Or\s+Scam$/i, ' Legit or a Scam')
-              .replace(/\s+Or\s+Legit$/i, ' Legit or a Scam')
-              .replace(/\s+Real\s+Or\s+Fake$/i, ' Real or Fake')
-              .replace(/\s+Safe\s+Or\s+Scam$/i, ' Safe or a Scam')
-              .replace(/\s+/g, ' ')
-              .trim();
+          function stripPrefix(slug, prefix) {
+            return slug.startsWith(prefix) ? slug.slice(prefix.length) : slug;
           }
 
           function titleFromSlug(slug) {
             if (!slug) return 'Check Similar Message';
 
             if (slug.startsWith('did-i-get-scammed-by-')) {
-              const coreWords = slug
-                .replace(/^did-i-get-scammed-by-/, '')
-                .split('-')
-                .filter(Boolean);
-
-              return `Did I Get Scammed by ${wordsToPhrase(coreWords)}?`;
+              const core = stripPrefix(slug, 'did-i-get-scammed-by-');
+              return `Did I Get Scammed by ${wordsToPhrase(core.split('-'))}?`;
             }
 
             if (slug.startsWith('is-')) {
-              const coreWords = slug
-                .replace(/^is-/, '')
-                .split('-')
-                .filter(Boolean);
+              const core = stripPrefix(slug, 'is-');
 
-              const core = cleanupQuestion(wordsToPhrase(coreWords));
-              return `Is ${core}?`;
+              if (core.endsWith('-legit-or-scam')) {
+                const subject = core.replace(/-legit-or-scam$/, '');
+                return `Is ${wordsToPhrase(subject.split('-'))} Legit or a Scam?`;
+              }
+
+              if (core.endsWith('-real-or-fake')) {
+                const subject = core.replace(/-real-or-fake$/, '');
+                return `Is ${wordsToPhrase(subject.split('-'))} Real or Fake?`;
+              }
+
+              if (core.endsWith('-safe-or-scam')) {
+                const subject = core.replace(/-safe-or-scam$/, '');
+                return `Is ${wordsToPhrase(subject.split('-'))} Safe or a Scam?`;
+              }
+
+              return `Is ${wordsToPhrase(core.split('-'))}?`;
             }
 
-            return wordsToPhrase(slug.split('-').filter(Boolean));
+            return wordsToPhrase(slug.split('-'));
           }
 
           function buildLinkHTML(links) {
