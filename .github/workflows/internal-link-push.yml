@@ -27,6 +27,11 @@ jobs:
           const RELATED_COUNT = 5;
           const MORE_COUNT = 10;
 
+          if (!fs.existsSync(ROOT)) {
+            console.error(`Missing root folder: ${ROOT}`);
+            process.exit(1);
+          }
+
           if (!fs.existsSync(BACKUP)) {
             fs.mkdirSync(BACKUP, { recursive: true });
           }
@@ -39,7 +44,7 @@ jobs:
               const fullPath = path.join(dir, file);
               const stat = fs.statSync(fullPath);
 
-              if (stat && stat.isDirectory()) {
+              if (stat.isDirectory()) {
                 results = results.concat(getAllPages(fullPath));
               } else if (file === 'index.html') {
                 results.push(fullPath);
@@ -63,19 +68,18 @@ jobs:
           }
 
           function hrefFromPath(filePath) {
-            return filePath
-              .replace(/\\/g, '/')
-              .replace(/^\.\//, '/')
-              .replace(/\/index\.html$/i, '/');
+            const normalized = filePath.replace(/\\/g, '/').replace(/^\.\//, '');
+            return '/' + normalized.replace(/\/index\.html$/i, '/');
           }
 
           function slugFromPath(filePath) {
             const normalized = filePath.replace(/\\/g, '/');
-            const folderPath = normalized.replace(/\/index\.html$/i, '');
-            return path.posix.basename(folderPath);
+            const withoutIndex = normalized.replace(/\/index\.html$/i, '');
+            const parts = withoutIndex.split('/').filter(Boolean);
+            return parts[parts.length - 1] || '';
           }
 
-          function titleFromSlug(slug) {
+          function wordFromToken(token) {
             const specialWords = {
               usps: 'USPS',
               ups: 'UPS',
@@ -121,30 +125,51 @@ jobs:
               delivery: 'Delivery',
               safe: 'Safe',
               real: 'Real',
-              fake: 'Fake'
+              fake: 'Fake',
+              legit: 'Legit',
+              scam: 'Scam'
             };
 
-            const words = slug
-              .replace(/^is-/, '')
-              .replace(/^did-i-get-scammed-by-/, '')
-              .split('-')
-              .filter(Boolean);
+            return specialWords[token] || token.charAt(0).toUpperCase() + token.slice(1);
+          }
+
+          function wordsToPhrase(words) {
+            return words.map(wordFromToken).join(' ');
+          }
+
+          function cleanupQuestion(text) {
+            return text
+              .replace(/\s+Or\s+Scam$/i, ' Legit or a Scam')
+              .replace(/\s+Or\s+Legit$/i, ' Legit or a Scam')
+              .replace(/\s+Real\s+Or\s+Fake$/i, ' Real or Fake')
+              .replace(/\s+Safe\s+Or\s+Scam$/i, ' Safe or a Scam')
+              .replace(/\s+/g, ' ')
+              .trim();
+          }
+
+          function titleFromSlug(slug) {
+            if (!slug) return 'Check Similar Message';
 
             if (slug.startsWith('did-i-get-scammed-by-')) {
-              const core = words.map(w => specialWords[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-              return `Did I Get Scammed by ${core}?`;
+              const coreWords = slug
+                .replace(/^did-i-get-scammed-by-/, '')
+                .split('-')
+                .filter(Boolean);
+
+              return `Did I Get Scammed by ${wordsToPhrase(coreWords)}?`;
             }
 
             if (slug.startsWith('is-')) {
-              const core = words.map(w => specialWords[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-              if (/real-or-fake$/i.test(slug)) return `Is ${core}?`;
-              if (/safe-or-scam$/i.test(slug)) return `Is ${core}?`;
+              const coreWords = slug
+                .replace(/^is-/, '')
+                .split('-')
+                .filter(Boolean);
+
+              const core = cleanupQuestion(wordsToPhrase(coreWords));
               return `Is ${core}?`;
             }
 
-            return words
-              .map(w => specialWords[w] || w.charAt(0).toUpperCase() + w.slice(1))
-              .join(' ');
+            return wordsToPhrase(slug.split('-').filter(Boolean));
           }
 
           function buildLinkHTML(links) {
