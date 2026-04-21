@@ -3,29 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Token Risk Checker — Check Crypto Token Risk Before You Buy</title>
-<meta name="description" content="Paste a token contract address to check crypto token risk before you buy. Review liquidity, volume, age, chain, trading activity, socials, and AI-powered warning signals before you swap.">
-<meta name="robots" content="index,follow">
+<title>Token Risk Checker: Check Crypto Token Risk Before You Buy</title>
+<meta name="description" content="Paste a token contract address to check crypto token risk before you buy. Review liquidity, volume, pair age, chain, socials, trading activity, and AI-backed warning signals before you swap.">
+<meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://verixiaapps.com/token-risk/">
-
-<meta property="og:title" content="Token Risk Checker — Check Crypto Token Risk Before You Buy">
-<meta property="og:description" content="Paste a token contract address to review token risk before you buy. Check liquidity, volume, age, chain, trading activity, socials, and warning signals.">
+<meta property="og:title" content="Token Risk Checker: Check Crypto Token Risk Before You Buy">
+<meta property="og:description" content="Paste a token contract address to review token risk before you buy. Check liquidity, volume, pair age, chain, trading activity, socials, and warning signals.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://verixiaapps.com/token-risk/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Token Risk Checker — Check Crypto Token Risk Before You Buy">
-<meta name="twitter:description" content="Paste a token contract address to review token risk before you buy. Check liquidity, volume, age, chain, trading activity, socials, and warning signals.">
+<meta name="twitter:title" content="Token Risk Checker: Check Crypto Token Risk Before You Buy">
+<meta name="twitter:description" content="Paste a token contract address to review token risk before you buy. Check liquidity, volume, pair age, chain, trading activity, socials, and warning signals.">
 
 <script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"WebPage",
-  "name":"Token Risk Checker — Check Crypto Token Risk Before You Buy",
-  "description":"Paste a token contract address to check crypto token risk before you buy. Review liquidity, volume, age, chain, trading activity, socials, and AI-powered warning signals before you swap.",
-  "url":"https://verixiaapps.com/token-risk/"
-}
+[
+  {
+    "@context":"https://schema.org",
+    "@type":"WebPage",
+    "name":"Token Risk Checker: Check Crypto Token Risk Before You Buy",
+    "description":"Paste a token contract address to check crypto token risk before you buy. Review liquidity, volume, pair age, chain, socials, trading activity, and AI-backed warning signals before you swap.",
+    "url":"https://verixiaapps.com/token-risk/"
+  },
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"What does the token risk checker look at?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"It looks at Dexscreener market context such as liquidity, volume, pair age, chain, trading activity, and available project links, then sends that context to the backend for structured AI-backed token risk analysis."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Does low risk mean a token is safe?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"No. Lower risk only means fewer obvious warning signals were detected from the available market context. It does not guarantee safety, legitimacy, or future performance."
+        }
+      }
+    ]
+  }
+]
 </script>
+
+<script src="https://js.stripe.com/v3/"></script>
 
 <style>
 :root{
@@ -54,10 +78,10 @@
 --emerald-2:#059669;
 --amber:#f59e0b;
 --red:#ef4444;
---red-soft:rgba(239,68,68,.10);
---red-line:rgba(239,68,68,.22);
 --green-soft:rgba(16,185,129,.12);
 --green-line:rgba(16,185,129,.26);
+--red-soft:rgba(239,68,68,.10);
+--red-line:rgba(239,68,68,.22);
 --amber-soft:rgba(245,158,11,.12);
 --amber-line:rgba(245,158,11,.26);
 --shadow-xl:0 32px 90px rgba(2,6,23,.42);
@@ -83,7 +107,7 @@ font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
 margin:0;
 padding-top:90px;
 color:var(--ink);
-line-height:1.65;
+line-height:1.7;
 background:
 radial-gradient(circle at 14% 8%, rgba(34,211,238,.16), transparent 22%),
 radial-gradient(circle at 84% 0%, rgba(139,92,246,.20), transparent 28%),
@@ -102,6 +126,11 @@ text-decoration:underline;
 
 button,input{
 font-family:inherit;
+}
+
+button{
+appearance:none;
+-webkit-appearance:none;
 }
 
 @supports (padding:max(0px)) {
@@ -184,7 +213,7 @@ box-shadow:var(--shadow-sm);
 text-decoration:none;
 }
 
-.upgrade-top{
+.checker-top{
 pointer-events:auto;
 padding:11px 15px;
 font-size:14px;
@@ -195,6 +224,12 @@ color:#fff;
 border:none;
 white-space:nowrap;
 box-shadow:0 16px 34px rgba(34,211,238,.16);
+cursor:pointer;
+}
+
+.checker-top:hover{
+text-decoration:none;
+transform:translateY(-1px);
 }
 
 .page-shell{
@@ -274,7 +309,7 @@ border:1px solid rgba(255,255,255,.10);
 box-shadow:var(--shadow-sm);
 }
 
-.container{
+.content-section{
 max-width:860px;
 margin:auto;
 padding:22px;
@@ -287,7 +322,7 @@ linear-gradient(180deg, rgba(17,28,51,.94) 0%, rgba(11,19,36,.98) 100%);
 box-shadow:var(--shadow-xl);
 }
 
-.container::before{
+.content-section::before{
 content:"";
 position:absolute;
 top:-120px;
@@ -299,104 +334,83 @@ background:radial-gradient(circle, rgba(34,211,238,.14), transparent 65%);
 pointer-events:none;
 }
 
-.container > *{
+.content-section > *{
 position:relative;
 z-index:1;
 }
 
-.preview-card,
+.breadcrumbs{
+margin:0 0 16px;
+font-size:13px;
+font-weight:900;
+color:#98adcf;
+line-height:1.6;
+}
+
+.breadcrumbs a{
+color:#9fdcf4;
+font-weight:900;
+}
+
+.info-box,
+.hero-panel,
 .tool-shell,
+.upgrade-card,
 .app-link-card,
-.upgrade-card{
+.section-card,
+.meta-strip,
+.embedded-checkout-shell{
 background:linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
 border:1px solid rgba(255,255,255,.10);
 border-radius:24px;
 box-shadow:var(--shadow-md);
 }
 
-.preview-card{
+.hero-panel{
 padding:22px;
-margin-bottom:18px;
+margin:0 0 18px;
 background:
-linear-gradient(135deg, rgba(239,68,68,.10) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(135deg, rgba(34,211,238,.12) 0%, rgba(139,92,246,.12) 100%),
 linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.05) 100%);
 }
 
-.preview-top{
-display:flex;
-align-items:flex-start;
-justify-content:space-between;
-gap:12px;
-flex-wrap:wrap;
-}
-
-.preview-badge{
-display:inline-flex;
-align-items:center;
-gap:8px;
-padding:8px 14px;
-border-radius:999px;
-background:linear-gradient(135deg,var(--red) 0%,#c02646 100%);
-color:#fff;
-font-size:11px;
+.hero-panel-kicker{
+font-size:12px;
 font-weight:900;
-letter-spacing:.03em;
-line-height:1;
-box-shadow:0 10px 20px rgba(185,75,95,.14);
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#8be9ff;
+margin-bottom:8px;
 }
 
-.preview-score{
-padding:8px 10px;
-border-radius:999px;
-background:rgba(255,255,255,.08);
-border:1px solid rgba(255,255,255,.11);
-font-size:11px;
-font-weight:900;
-color:#ffe2e6;
-text-align:center;
-line-height:1.1;
-}
-
-.preview-domain{
-margin-top:14px;
+.hero-panel h2{
+margin:0 0 8px;
 font-size:30px;
-font-weight:900;
-line-height:1.05;
-color:#fff;
+line-height:1.08;
 letter-spacing:-.03em;
-word-break:break-word;
+color:#fff;
 }
 
-.preview-sub{
-margin-top:6px;
-font-size:14px;
-color:#d8e5f8;
+.hero-panel p{
+margin:10px 0 0;
+font-size:15px;
 font-weight:800;
-line-height:1.6;
+color:#d8e5f8;
+line-height:1.75;
 }
 
-.preview-signals{
-margin-top:14px;
-display:grid;
-gap:10px;
-}
-
-.preview-signal{
-display:flex;
-align-items:flex-start;
-gap:10px;
-padding:12px 13px;
-border-radius:16px;
-background:rgba(255,255,255,.055);
-border:1px solid rgba(255,255,255,.08);
-font-size:13px;
-font-weight:850;
-color:#fde8ec;
-line-height:1.45;
+.info-box{
+margin:0 0 20px;
+padding:18px;
+font-size:15px;
+color:#d6e3f7;
+font-weight:800;
+line-height:1.7;
 }
 
 .tool-shell{
 padding:24px;
+margin:0 0 22px;
 background:
 linear-gradient(135deg, rgba(34,211,238,.10) 0%, rgba(139,92,246,.10) 100%),
 linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.045) 100%);
@@ -456,7 +470,12 @@ box-shadow:0 0 0 5px rgba(102,217,239,.08);
 background:rgba(8,18,33,.86);
 }
 
-button{
+.primary-btn,
+.secondary-btn,
+.plan,
+.share-btn,
+.pair-option,
+.embedded-checkout-close{
 border:none;
 border-radius:18px;
 cursor:pointer;
@@ -465,7 +484,7 @@ padding:16px;
 min-height:50px;
 }
 
-.check{
+.primary-btn{
 width:100%;
 background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
 color:#fff;
@@ -477,12 +496,12 @@ box-shadow:0 16px 34px rgba(40,191,217,.16);
 transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
 }
 
-.check:hover:not(:disabled){
+.primary-btn:hover:not(:disabled){
 transform:translateY(-1px);
 box-shadow:0 20px 40px rgba(40,191,217,.20);
 }
 
-.check:disabled{
+.primary-btn:disabled{
 opacity:.7;
 cursor:not-allowed;
 }
@@ -506,13 +525,43 @@ font-weight:900;
 display:none;
 }
 
+.inline-status{
+display:none;
+margin-top:16px;
+padding:14px 16px;
+border-radius:18px;
+font-size:14px;
+font-weight:900;
+line-height:1.55;
+text-align:center;
+border:1px solid rgba(255,255,255,.10);
+background:rgba(255,255,255,.06);
+color:#dbeafe;
+}
+
+.inline-status.show{
+display:block;
+}
+
+.inline-status.error{
+background:rgba(239,68,68,.10);
+border-color:rgba(239,68,68,.22);
+color:#ffe2e6;
+}
+
+.inline-status.good{
+background:rgba(16,185,129,.12);
+border-color:rgba(16,185,129,.26);
+color:#dcfce7;
+}
+
 #result{
 margin-top:24px;
 display:none;
 }
 
 .result-card{
-background:rgba(255,255,255,.97);
+background:rgba(255,255,255,.985);
 border-radius:26px;
 padding:22px;
 box-shadow:var(--shadow-lg);
@@ -822,9 +871,50 @@ font-weight:900;
 color:#0f172a;
 }
 
+.link-chip:hover{
+text-decoration:none;
+transform:translateY(-1px);
+}
+
+.pair-list{
+display:grid;
+gap:10px;
+margin-top:14px;
+}
+
+.pair-option{
+display:block;
+width:100%;
+text-align:left;
+padding:14px 15px;
+border:1px solid rgba(255,255,255,.10);
+background:rgba(255,255,255,.05);
+color:#eef6ff;
+font-size:14px;
+font-weight:900;
+}
+
+.pair-option:hover{
+transform:translateY(-1px);
+}
+
+.pair-option strong{
+display:block;
+font-size:15px;
+margin-bottom:4px;
+color:#fff;
+}
+
+.pair-option span{
+display:block;
+font-size:12px;
+color:#b8c8e0;
+font-weight:800;
+}
+
 .upgrade-card{
 display:none;
-margin-top:20px;
+margin:22px 0 0;
 padding:24px;
 text-align:center;
 background:
@@ -871,8 +961,62 @@ background:linear-gradient(135deg,#466ff0 0%,#29bfd9 100%);
 background:linear-gradient(135deg,#0e7b6f 0%,#18b67f 100%);
 }
 
+.embedded-checkout-shell{
+display:none;
+margin-top:18px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(34,211,238,.08) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.embedded-checkout-shell.show{
+display:block;
+}
+
+.embedded-checkout-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+margin-bottom:12px;
+flex-wrap:wrap;
+}
+
+.embedded-checkout-title{
+font-size:18px;
+font-weight:900;
+color:#fff;
+}
+
+.embedded-checkout-close{
+padding:10px 12px;
+min-height:auto;
+font-size:13px;
+font-weight:900;
+border-radius:14px;
+background:rgba(255,255,255,.10);
+color:#fff;
+border:1px solid rgba(255,255,255,.10);
+}
+
+#embeddedCheckoutMount{
+min-height:420px;
+border-radius:18px;
+overflow:hidden;
+background:#fff;
+}
+
+.checkout-status{
+margin-top:12px;
+font-size:13px;
+font-weight:900;
+color:#dbeafe;
+text-align:center;
+}
+
 .app-link-card{
-margin-top:20px;
+margin:22px 0 0;
 padding:22px;
 text-align:center;
 background:
@@ -880,7 +1024,7 @@ linear-gradient(135deg, rgba(24,182,127,.10) 0%, rgba(102,217,239,.08) 100%),
 linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
 }
 
-.app-link-card h4{
+.app-link-card h3{
 margin:0 0 6px;
 font-size:23px;
 color:#fff;
@@ -893,6 +1037,7 @@ margin:0 0 14px;
 font-size:14px;
 color:#cfddf1;
 line-height:1.7;
+font-weight:800;
 }
 
 .app-link-button{
@@ -913,28 +1058,97 @@ text-decoration:none;
 text-decoration:none;
 }
 
+.section-card{
+padding:20px;
+}
+
+.section-card p:last-child,
+.section-card ul:last-child{
+margin-bottom:0;
+}
+
+.warning-surface{
+background:
+linear-gradient(135deg, rgba(239,68,68,.10) 0%, rgba(139,92,246,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.verify-surface{
+background:
+linear-gradient(135deg, rgba(16,185,129,.10) 0%, rgba(34,211,238,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.faq-surface{
+background:
+linear-gradient(135deg, rgba(139,92,246,.10) 0%, rgba(34,211,238,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.meta-strip{
+margin:22px 0 0;
+padding:16px 18px;
+font-size:14px;
+font-weight:900;
+color:#d8e5f8;
+line-height:1.7;
+}
+
+.section-divider{
+height:1px;
+background:linear-gradient(90deg, transparent, rgba(139,92,246,.45), rgba(34,211,238,.45), transparent);
+margin:28px 0;
+}
+
+.faq-item + .faq-item{
+margin-top:12px;
+padding-top:12px;
+border-top:1px solid rgba(255,255,255,.10);
+}
+
+.faq-item h3{
+font-size:20px;
+margin-bottom:8px;
+color:#fff;
+}
+
+.faq-item p{
+margin:0;
+font-size:16px;
+color:#d7e4f8;
+}
+
+h1,h2,h3{
+text-wrap:balance;
+}
+
+p{
+margin:0 0 16px;
+font-size:17px;
+color:#d7e4f8;
+}
+
 @media (max-width:640px){
-body{padding-top:84px}
-.top-bar{padding:10px 10px}
-.top-actions{gap:8px;margin-right:0}
-.logo{font-size:13px;margin-left:2px;padding:9px 12px}
-.app-top{font-size:13px;padding:8px 10px}
-.upgrade-top{font-size:13px;padding:8px 10px;margin-right:0}
-.page-shell{padding:0 12px 34px}
-.hero{padding:14px 6px 18px}
-.hero h1{font-size:34px}
-.hero p{margin-top:10px;font-size:17px}
-.container{padding:18px;border-radius:24px}
-.tool-title{font-size:24px}
-.preview-domain{font-size:20px}
-.metric-grid{grid-template-columns:1fr}
-.plan-row{grid-template-columns:1fr}
-.share-grid{grid-template-columns:1fr}
-.risk{font-size:19px;padding:10px 14px}
+body{padding-top:84px;}
+.top-bar{padding:10px 10px;}
+.top-actions{gap:8px;margin-right:0;}
+.logo{font-size:13px;margin-left:2px;padding:9px 12px;}
+.app-top{font-size:13px;padding:8px 10px;}
+.checker-top{font-size:13px;padding:8px 10px;margin-right:0;}
+.page-shell{padding:0 12px 34px;}
+.hero{padding:14px 6px 18px;}
+.hero h1{font-size:34px;}
+.hero p{margin-top:10px;font-size:17px;}
+.content-section{padding:18px;border-radius:24px;}
+.hero-panel h2{font-size:24px;}
+.tool-title{font-size:24px;}
+.metric-grid{grid-template-columns:1fr;}
+.plan-row{grid-template-columns:1fr;}
+.share-grid{grid-template-columns:1fr;}
+.risk{font-size:19px;padding:10px 14px;}
 }
 </style>
 </head>
-
 <body>
 
 <div class="top-bar">
@@ -944,7 +1158,7 @@ body{padding-top:84px}
   </a>
   <div class="top-actions">
     <a class="app-top" href="https://verixiaapps.com/check/" target="_blank" rel="noopener noreferrer">🛡️ Scam Check Now</a>
-    <button class="upgrade-top" type="button" onclick="showUpgrade()">Upgrade</button>
+    <button class="checker-top" type="button" id="upgradeTopBtn">Upgrade</button>
   </div>
 </div>
 
@@ -958,81 +1172,136 @@ body{padding-top:84px}
     </div>
 
     <h1>Check Token Risk Before You Buy</h1>
-    <p>Paste a token contract address to review liquidity, volume, pair age, chain context, socials, and AI-powered warning signals before you swap, connect, or follow the chart.</p>
+    <p>Paste a token contract address to review liquidity, volume, pair age, chain context, socials, and AI-backed warning signals before you swap, approve, or connect.</p>
 
     <div class="hero-trust">
       <div class="hero-trust-chip">Token address only</div>
-      <div class="hero-trust-chip">Stripe email support</div>
-      <div class="hero-trust-chip">Built for fast decisions</div>
+      <div class="hero-trust-chip">Dexscreener first</div>
+      <div class="hero-trust-chip">Backend AI analysis</div>
     </div>
   </div>
 
-  <div class="container">
+  <main class="content-section">
+    <div class="breadcrumbs">
+      <a href="https://verixiaapps.com/check">Scam Check Now</a> / <span>Token Risk Checker</span>
+    </div>
 
-    <div class="preview-card">
-      <div class="preview-top">
-        <div class="preview-badge">🔴 Example High Risk Pattern</div>
-        <div class="preview-score">Thin liquidity • Fresh pair • Unstable setup</div>
-      </div>
+    <div class="hero-panel">
+      <div class="hero-panel-kicker">Live checker</div>
+      <h2>Review structure before hype takes over</h2>
+      <p>This page checks live Dexscreener market context first, then sends the selected token data to your backend for structured AI-backed token risk analysis. The goal is not prediction. The goal is helping people slow down before a bad buy.</p>
+    </div>
 
-      <div class="preview-domain">Fast hype does not cancel structural risk</div>
-      <div class="preview-sub">Bad token outcomes usually begin before the buyer realizes the setup underneath the chart is weak.</div>
-
-      <div class="preview-signals">
-        <div class="preview-signal">⚠️ Liquidity can be too thin for the attention around the token.</div>
-        <div class="preview-signal">⚠️ Very new pairs often have less trust history and more unstable behavior.</div>
-        <div class="preview-signal">⚠️ Strong momentum can hide weak structure until exits get harder.</div>
-      </div>
+    <div class="info-box">
+      Fast token momentum can hide weak structure. Thin liquidity, very new pairs, unstable volume, low-trust project signals, and strange market context can all matter before the chart tells the full story.
     </div>
 
     <div class="tool-shell">
-      <div class="tool-kicker">Live checker</div>
+      <div class="tool-kicker">Token checker</div>
       <h2 class="tool-title">Paste a token contract address</h2>
-      <p class="tool-sub">This checker is built for contract addresses only. It pulls token market context, then returns a structured AI-backed risk read with key signals, recommendations, and shareable results.</p>
+      <p class="tool-sub">Accepted input: token contract address only. Not token names, Dexscreener URLs, pair URLs, or screenshots.</p>
 
       <input id="address" autocomplete="off" spellcheck="false" placeholder="Paste token contract address only">
       <input id="email" autocomplete="email" placeholder="Subscriber email (optional)">
 
-      <div class="input-help">Accepted input: token contract address only. Not token names, pair links, or Dexscreener URLs.</div>
-      <div class="field-note">Use your Stripe checkout email if you already subscribed.</div>
+      <div class="input-help">Use your Stripe checkout email if you already subscribed.</div>
+      <div class="field-note">1 free check, then unlock unlimited token checks with embedded checkout.</div>
 
-      <button id="checkBtn" class="check" type="button" onclick="checkToken()">🔍 Check Token Risk Now</button>
+      <button id="checkBtn" class="primary-btn" type="button">🔍 Check Token Risk Now</button>
 
-      <div class="note">1 free check • Then upgrade for unlimited token checks</div>
       <div id="postPurchase" class="success">✅ Unlimited token checks are active on this browser</div>
-
+      <div id="inlineStatus" class="inline-status" aria-live="polite"></div>
       <div id="result"></div>
+    </div>
 
-      <div id="upgradeCard" class="upgrade-card">
-        <h3>You’ve Used Your Free Token Check</h3>
-        <p>If you’re scanning fast-moving tokens, more setups are already coming. Unlock unlimited token checks so you can review the next contract before you buy, approve, or connect.</p>
+    <div id="upgradeCard" class="upgrade-card">
+      <h3>You’ve Used Your Free Token Check</h3>
+      <p>Unlock unlimited token checks so you can review the next token contract before you buy, connect a wallet, approve spending, or follow the chart into a risky setup.</p>
 
-        <div class="plan-row">
-          <button class="plan" type="button" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Protection</button>
-          <button class="plan secondary" type="button" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Protection</button>
-          <button class="plan tertiary" type="button" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Protection</button>
+      <div class="plan-row">
+        <button class="plan" type="button" data-price-id="price_1T8KOTJjMzyHDzeQDDg1A2TF">Weekly Protection</button>
+        <button class="plan secondary" type="button" data-price-id="price_1T8KOUJjMzyHDzeQxaqPFOSB">Monthly Protection</button>
+        <button class="plan tertiary" type="button" data-price-id="price_1T8KOQJjMzyHDzeQfcU1C1MQ">Yearly Protection</button>
+      </div>
+
+      <p style="margin-top:12px;font-size:13px;font-weight:900;">Secure payments powered by Stripe</p>
+
+      <div id="embeddedCheckoutShell" class="embedded-checkout-shell">
+        <div class="embedded-checkout-head">
+          <div class="embedded-checkout-title">Complete your upgrade</div>
+          <button id="closeEmbeddedCheckoutBtn" class="embedded-checkout-close" type="button">Close</button>
         </div>
-
-        <p style="margin-top:12px;font-size:13px;">Secure payments powered by Stripe</p>
+        <div id="embeddedCheckoutMount"></div>
+        <div id="checkoutStatus" class="checkout-status"></div>
       </div>
     </div>
 
+    <div class="section-divider"></div>
+
+    <section class="section-card warning-surface" aria-labelledby="warning-signs-heading">
+      <h2 id="warning-signs-heading">Common Token Risk Signals</h2>
+      <p>These are the kinds of patterns this flow is built to help people slow down and inspect before they buy.</p>
+      <ul style="margin:0;padding-left:20px;color:#d7e4f8;">
+        <li>Very low liquidity relative to attention and trading volume</li>
+        <li>Extremely fresh pair age with little trust history</li>
+        <li>Chaotic price action without enough structural support</li>
+        <li>Weak or missing project links and supporting context</li>
+        <li>Momentum that can pull buyers in before exits get harder</li>
+      </ul>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="section-card verify-surface" aria-labelledby="how-to-use-heading">
+      <h2 id="how-to-use-heading">How To Use This Checker Safely</h2>
+      <p>Paste the token contract address, review the selected pair carefully, then treat the result as a risk-screening step rather than a guarantee. Lower risk does not mean safe. High risk does not mean prediction. It means the available setup deserves more caution.</p>
+    </section>
+
     <div class="app-link-card">
-      <h4>Check the next token before the next mistake</h4>
-      <p>Risky tokens usually do not look dangerous at first glance. They look early, exciting, and fast. The expensive part often starts after the buy.</p>
+      <h3>Check suspicious links and messages too</h3>
+      <p>Token scams often overlap with fake support, phishing pages, fake airdrops, wallet drainer links, and impersonation. Use Scam Check Now for those non-token checks.</p>
       <a class="app-link-button" href="https://verixiaapps.com/check/" target="_blank" rel="noopener noreferrer">Use Scam Check Now Too</a>
     </div>
 
-  </div>
+    <div class="section-divider"></div>
+
+    <div class="section-card faq-surface">
+      <section aria-labelledby="faq-heading">
+        <h2 id="faq-heading">Frequently Asked Questions</h2>
+        <div class="faq-item">
+          <h3>What does the token risk checker look at?</h3>
+          <p>It looks at Dexscreener market context such as liquidity, volume, pair age, chain, trading activity, and available project links, then sends that context to the backend for structured AI-backed token risk analysis.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Does low risk mean a token is safe?</h3>
+          <p>No. Lower risk only means fewer obvious warning signals were detected from the available market context. It does not guarantee safety, legitimacy, or future performance.</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="meta-strip">
+      Check the structure before the story. When the setup is unclear, caution matters more than speed.
+    </div>
+  </main>
 </div>
 
 <script>
 const API = "https://awake-integrity-production-faa0.up.railway.app";
 const ANALYZE_ROUTE = "/analyze-token";
+const DEX_SEARCH_URL = "https://api.dexscreener.com/latest/dex/search/?q=";
 const BROWSER_SUB_KEY = "token_risk_browser_subscribed";
+const STRIPE_PUBLISHABLE_KEY =
+  window.STRIPE_PUBLISHABLE_KEY ||
+  document.documentElement.getAttribute("data-stripe-publishable-key") ||
+  "";
+const stripe = STRIPE_PUBLISHABLE_KEY ? Stripe(STRIPE_PUBLISHABLE_KEY) : null;
+
+let embeddedCheckoutController = null;
+let currentAnalysisPayload = null;
+window.__tokenRiskPairs = [];
 
 function escapeHtml(value) {
-  return String(value || "")
+  return String(value == null ? "" : value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -1040,16 +1309,29 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function payloadValue(value) {
+  return value === null || value === undefined || value === "" ? "N/A" : String(value);
+}
+
+function numberOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
 function isBrowserSubscribed() {
-  return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+  try {
+    return localStorage.getItem(BROWSER_SUB_KEY) === "true";
+  } catch (e) {
+    return false;
+  }
 }
 
 function setBrowserSubscribed(value) {
-  if (value) {
-    localStorage.setItem(BROWSER_SUB_KEY, "true");
-  } else {
-    localStorage.removeItem(BROWSER_SUB_KEY);
-  }
+  try {
+    if (value) localStorage.setItem(BROWSER_SUB_KEY, "true");
+    else localStorage.removeItem(BROWSER_SUB_KEY);
+  } catch (e) {}
 }
 
 function syncPostPurchaseMessage() {
@@ -1058,23 +1340,40 @@ function syncPostPurchaseMessage() {
   postPurchase.style.display = isBrowserSubscribed() ? "block" : "none";
 }
 
+function showInlineStatus(message, variant) {
+  const el = document.getElementById("inlineStatus");
+  if (!el) return;
+  el.className = "inline-status show" + (variant ? " " + variant : "");
+  el.textContent = message || "";
+}
+
+function hideInlineStatus() {
+  const el = document.getElementById("inlineStatus");
+  if (!el) return;
+  el.className = "inline-status";
+  el.textContent = "";
+}
+
 window.addEventListener("load", function () {
   const params = new URLSearchParams(window.location.search);
   if (params.get("subscribed") === "true") {
     setBrowserSubscribed(true);
+    syncPostPurchaseMessage();
+    showInlineStatus("Unlimited token checks are active on this browser.", "good");
     try {
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (e) {}
+  } else {
+    syncPostPurchaseMessage();
   }
-  syncPostPurchaseMessage();
 });
 
 function isValidEvmAddress(value) {
-  return /^0x[a-fA-F0-9]{40}$/.test(value);
+  return /^0x[a-fA-F0-9]{40}$/.test(String(value || "").trim());
 }
 
 function isValidBase58Address(value) {
-  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value);
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(String(value || "").trim());
 }
 
 function validAddress(value) {
@@ -1106,16 +1405,15 @@ function iconForRisk(risk) {
 }
 
 function signalIconForRisk(risk) {
-  if (risk === "low") return "✔️";
-  return "⚠️";
+  return risk === "low" ? "✔️" : "⚠️";
 }
 
 function summaryForRisk(riskClass) {
   if (riskClass === "high") {
-    return "This token setup shows multiple warning signals. Treat it as high risk until you verify liquidity, trading context, and the overall structure more carefully.";
+    return "This token setup shows multiple warning signals. Treat it as high risk until you verify liquidity, trading context, and structural support more carefully.";
   }
   if (riskClass === "medium") {
-    return "This token setup shows meaningful warning signs. Slow down and verify the market structure before you buy, swap, connect a wallet, or approve anything.";
+    return "This token setup shows meaningful warning signs. Slow down and verify the market structure before you buy, swap, approve, or connect.";
   }
   if (riskClass === "low") {
     return "This token setup shows fewer obvious warning signs from the available data, but lower risk does not mean no risk. Verify the basics before you buy.";
@@ -1125,15 +1423,15 @@ function summaryForRisk(riskClass) {
 
 function paylineForRisk(riskClass) {
   if (riskClass === "high") {
-    return "People lose money by rushing into setups like this. A fast buy can become an expensive lesson when the warning signs were already there.";
+    return "Fast momentum does not cancel structural risk. When multiple signals stack up, missing one trade is often safer than forcing a bad entry.";
   }
   if (riskClass === "medium") {
-    return "Questionable token setups often show mixed signals before the real damage appears. The safest move is to slow the decision down.";
+    return "Mixed setups deserve slower decisions. The safest move is usually to verify more before you commit money or wallet permissions.";
   }
   if (riskClass === "low") {
-    return "Even lower-risk setups deserve a pause when money, approvals, and wallet access are involved.";
+    return "Lower risk is not the same as safe. Keep position size, approvals, and downside in mind before acting.";
   }
-  return "When the token risk is unclear, caution matters more than speed. It is better to miss a trade than rush into a dangerous one.";
+  return "When the token risk is unclear, caution matters more than speed. It is better to miss a trade than rush into a bad setup.";
 }
 
 function formatMoney(value) {
@@ -1158,16 +1456,164 @@ function formatPercent(value) {
   return (num > 0 ? "+" : "") + num.toFixed(2) + "%";
 }
 
+function formatPairAge(pairCreatedAt) {
+  const created = Number(pairCreatedAt);
+  if (!Number.isFinite(created) || created <= 0) return "N/A";
+  const diffMs = Date.now() - created;
+  if (diffMs <= 0) return "N/A";
+  const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  if (days <= 0) return totalHours + "h";
+  return days + "d " + hours + "h";
+}
+
+function calculateLiquidityConfidence(liquidity, volume) {
+  const safeLiquidity = Number(liquidity || 0);
+  const safeVolume = Number(volume || 0);
+
+  if (safeLiquidity <= 0) return "Low";
+  if (safeVolume > safeLiquidity * 3) return "Low";
+  if (safeLiquidity >= 150000 && safeLiquidity >= safeVolume * 0.5) return "High";
+  if (safeLiquidity >= 50000 && safeLiquidity >= safeVolume * 0.3) return "Medium";
+  return "Low";
+}
+
+function buildPairPayload(pair, tokenAddress) {
+  const tokenMetrics = {
+    liquidityUsd: numberOrNull(pair && pair.liquidity && pair.liquidity.usd),
+    volume24h: numberOrNull(pair && pair.volume && pair.volume.h24),
+    priceChange24h: numberOrNull(pair && pair.priceChange && pair.priceChange.h24),
+    priceUsd: numberOrNull(pair && pair.priceUsd),
+    marketCap: numberOrNull(pair && (pair.marketCap != null ? pair.marketCap : pair.fdv)),
+    fdv: numberOrNull(pair && pair.fdv),
+    buys24h: numberOrNull(pair && pair.txns && pair.txns.h24 && pair.txns.h24.buys),
+    sells24h: numberOrNull(pair && pair.txns && pair.txns.h24 && pair.txns.h24.sells),
+    pairAge: formatPairAge(pair && pair.pairCreatedAt),
+    pairCreatedAt: numberOrNull(pair && pair.pairCreatedAt),
+    chainId: payloadValue(pair && pair.chainId) === "N/A" ? null : String(pair.chainId),
+    dexId: payloadValue(pair && pair.dexId) === "N/A" ? null : String(pair.dexId),
+    pairAddress: payloadValue(pair && pair.pairAddress) === "N/A" ? null : String(pair.pairAddress),
+    pairUrl: payloadValue(pair && pair.url) === "N/A" ? null : String(pair.url),
+    holders: numberOrNull(pair && pair.info && pair.info.holders),
+    website: Array.isArray(pair && pair.info && pair.info.websites) && pair.info.websites[0]
+      ? String(pair.info.websites[0].url || pair.info.websites[0])
+      : null,
+    social: Array.isArray(pair && pair.info && pair.info.socials)
+      ? pair.info.socials.map(function (item) {
+          return {
+            type: item && item.type ? String(item.type) : null,
+            url: item && item.url ? String(item.url) : null
+          };
+        }).filter(function (item) {
+          return item.url;
+        })
+      : []
+  };
+
+  const tokenData = {
+    name: pair && pair.baseToken && pair.baseToken.name ? String(pair.baseToken.name) : null,
+    symbol: pair && pair.baseToken && pair.baseToken.symbol ? String(pair.baseToken.symbol) : null,
+    address: pair && pair.baseToken && pair.baseToken.address ? String(pair.baseToken.address) : tokenAddress
+  };
+
+  return {
+    dexPair: pair,
+    tokenData: tokenData,
+    tokenMetrics: tokenMetrics,
+    liquidityConfidence: calculateLiquidityConfidence(tokenMetrics.liquidityUsd, tokenMetrics.volume24h)
+  };
+}
+
+function scorePairForSelection(pair, tokenAddress) {
+  let score = 0;
+  const baseAddress = String(pair && pair.baseToken && pair.baseToken.address || "").toLowerCase();
+  const quoteAddress = String(pair && pair.quoteToken && pair.quoteToken.address || "").toLowerCase();
+  const target = String(tokenAddress || "").toLowerCase();
+
+  if (baseAddress === target) score += 200;
+  if (quoteAddress === target) score += 40;
+
+  if (pair && Array.isArray(pair.labels) && pair.labels.includes("honeypot")) score -= 15;
+  if (pair && pair.liquidity && pair.liquidity.usd) score += Math.min(Number(pair.liquidity.usd) / 1000, 150);
+  if (pair && pair.volume && pair.volume.h24) score += Math.min(Number(pair.volume.h24) / 2500, 120);
+
+  if (pair && pair.txns && pair.txns.h24) {
+    score += Math.min((Number(pair.txns.h24.buys || 0) + Number(pair.txns.h24.sells || 0)) / 20, 40);
+  }
+
+  if (pair && pair.pairCreatedAt) {
+    const ageHours = (Date.now() - Number(pair.pairCreatedAt)) / (1000 * 60 * 60);
+    if (ageHours > 24) score += 10;
+    if (ageHours > 168) score += 8;
+  }
+
+  if (pair && pair.url) score += 5;
+
+  return score;
+}
+
+async function fetchDexPairs(tokenAddress) {
+  const response = await fetch(DEX_SEARCH_URL + encodeURIComponent(tokenAddress), {
+    method: "GET",
+    headers: { "Accept": "application/json" }
+  });
+
+  if (!response.ok) {
+    throw new Error("Dexscreener lookup failed");
+  }
+
+  const data = await response.json();
+  const pairs = Array.isArray(data && data.pairs) ? data.pairs : [];
+  const target = String(tokenAddress || "").toLowerCase();
+
+  return pairs
+    .filter(function (pair) {
+      const baseAddress = String(pair && pair.baseToken && pair.baseToken.address || "").toLowerCase();
+      const quoteAddress = String(pair && pair.quoteToken && pair.quoteToken.address || "").toLowerCase();
+      return baseAddress === target || quoteAddress === target;
+    })
+    .sort(function (a, b) {
+      return scorePairForSelection(b, tokenAddress) - scorePairForSelection(a, tokenAddress);
+    });
+}
+
+function renderDexPairChooser(pairs, tokenAddress) {
+  return `
+    <div class="result-card unknown">
+      <div class="result-top">
+        <div class="risk unknown">⚪ Multiple Pairs Found</div>
+        <div class="result-chip">Choose Best Match</div>
+      </div>
+      <div class="result-summary">We found more than one matching Dexscreener pair for this contract. Pick the pair you want analyzed.</div>
+      <div class="pair-list">
+        ${pairs.slice(0, 6).map(function (pair, index) {
+          const base = pair && pair.baseToken && (pair.baseToken.symbol || pair.baseToken.name) || "Token";
+          const quote = pair && pair.quoteToken && (pair.quoteToken.symbol || pair.quoteToken.name) || "Pair";
+          const chain = pair && pair.chainId ? pair.chainId : "unknown chain";
+          return `
+            <button class="pair-option" type="button" onclick="analyzeSpecificPair(${index}, '${escapeHtml(tokenAddress)}')">
+              <strong>${escapeHtml(base)} / ${escapeHtml(quote)} • ${escapeHtml(chain)}</strong>
+              <span>Liquidity ${escapeHtml(formatMoney(pair && pair.liquidity && pair.liquidity.usd))} • Volume ${escapeHtml(formatMoney(pair && pair.volume && pair.volume.h24))} • Age ${escapeHtml(formatPairAge(pair && pair.pairCreatedAt))}</span>
+            </button>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
 function hideUpgrade() {
   const el = document.getElementById("upgradeCard");
   if (el) el.style.display = "none";
+  closeEmbeddedCheckout();
 }
 
 function showUpgrade() {
   const el = document.getElementById("upgradeCard");
   if (!el) return;
   el.style.display = "block";
-  setTimeout(() => {
+  setTimeout(function () {
     try {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {}
@@ -1183,44 +1629,34 @@ function setLoadingState(isLoading) {
 
 function buildMetrics(tokenData, tokenMetrics, liquidityConfidence) {
   return [
-    { label: "Token", value: tokenData?.symbol || tokenData?.name || "N/A" },
-    { label: "Chain", value: tokenMetrics?.chainId || "N/A" },
-    { label: "Liquidity", value: formatMoney(tokenMetrics?.liquidityUsd) },
-    { label: "24h Volume", value: formatMoney(tokenMetrics?.volume24h) },
-    { label: "Price", value: formatMoney(tokenMetrics?.priceUsd) },
-    { label: "24h Change", value: formatPercent(tokenMetrics?.priceChange24h) },
-    { label: "Market Cap", value: formatMoney(tokenMetrics?.marketCap) },
-    { label: "FDV", value: formatMoney(tokenMetrics?.fdv) },
-    { label: "Buys (24h)", value: formatNumber(tokenMetrics?.buys24h) },
-    { label: "Sells (24h)", value: formatNumber(tokenMetrics?.sells24h) },
-    { label: "Pair Age", value: tokenMetrics?.pairAge || "N/A" },
+    { label: "Token", value: tokenData && (tokenData.symbol || tokenData.name) || "N/A" },
+    { label: "Chain", value: tokenMetrics && tokenMetrics.chainId || "N/A" },
+    { label: "Liquidity", value: formatMoney(tokenMetrics && tokenMetrics.liquidityUsd) },
+    { label: "24h Volume", value: formatMoney(tokenMetrics && tokenMetrics.volume24h) },
+    { label: "Price", value: formatMoney(tokenMetrics && tokenMetrics.priceUsd) },
+    { label: "24h Change", value: formatPercent(tokenMetrics && tokenMetrics.priceChange24h) },
+    { label: "Market Cap", value: formatMoney(tokenMetrics && tokenMetrics.marketCap) },
+    { label: "FDV", value: formatMoney(tokenMetrics && tokenMetrics.fdv) },
+    { label: "Buys (24h)", value: formatNumber(tokenMetrics && tokenMetrics.buys24h) },
+    { label: "Sells (24h)", value: formatNumber(tokenMetrics && tokenMetrics.sells24h) },
+    { label: "Pair Age", value: tokenMetrics && tokenMetrics.pairAge || "N/A" },
     { label: "Liquidity Confidence", value: payloadValue(liquidityConfidence) }
   ];
-}
-
-function payloadValue(value) {
-  return value === null || value === undefined || value === "" ? "N/A" : String(value);
 }
 
 function formatExternalLinks(tokenMetrics) {
   const links = [];
 
-  if (tokenMetrics?.website) {
-    links.push({
-      label: "Website",
-      url: tokenMetrics.website
-    });
+  if (tokenMetrics && tokenMetrics.website) {
+    links.push({ label: "Website", url: tokenMetrics.website });
   }
 
-  if (tokenMetrics?.pairUrl) {
-    links.push({
-      label: "Dexscreener Pair",
-      url: tokenMetrics.pairUrl
-    });
+  if (tokenMetrics && tokenMetrics.pairUrl) {
+    links.push({ label: "Dexscreener Pair", url: tokenMetrics.pairUrl });
   }
 
-  if (Array.isArray(tokenMetrics?.social)) {
-    tokenMetrics.social.forEach((item) => {
+  if (tokenMetrics && Array.isArray(tokenMetrics.social)) {
+    tokenMetrics.social.forEach(function (item) {
       if (item && item.url) {
         links.push({
           label: item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1) : "Social",
@@ -1233,12 +1669,12 @@ function formatExternalLinks(tokenMetrics) {
   const unique = [];
   const seen = new Set();
 
-  for (const item of links) {
+  links.forEach(function (item) {
     const key = String(item.url || "").trim().toLowerCase();
-    if (!key || seen.has(key)) continue;
+    if (!key || seen.has(key)) return;
     seen.add(key);
     unique.push(item);
-  }
+  });
 
   if (!unique.length) return "";
 
@@ -1246,38 +1682,38 @@ function formatExternalLinks(tokenMetrics) {
     <div class="section">
       <div class="section-title">Project Links</div>
       <div class="link-list">
-        ${unique.map(item => `
-          <a class="link-chip" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
-            <span>${escapeHtml(item.label)}</span>
-            <span>↗</span>
-          </a>
-        `).join("")}
+        ${unique.map(function (item) {
+          return `
+            <a class="link-chip" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+              <span>${escapeHtml(item.label)}</span>
+              <span>↗</span>
+            </a>
+          `;
+        }).join("")}
       </div>
     </div>
   `;
 }
 
 function shareTextFromPayload(payload) {
-  const analysis = payload?.analysis || {};
-  const tokenData = payload?.tokenData || {};
-  const tokenMetrics = payload?.tokenMetrics || {};
-  const riskClass = cardClassForRisk(normalizeRiskValue(analysis?.riskLevel || analysis?.risk || analysis?.level));
-  const tokenName = tokenData?.symbol || tokenData?.name || "this token";
-  const chain = tokenMetrics?.chainId ? ` on ${tokenMetrics.chainId}` : "";
-  const line = analysis?.finalTake || summaryForRisk(riskClass);
-
-  return `${tokenName}${chain}: ${line}`;
+  const analysis = payload && payload.analysis || {};
+  const tokenData = payload && payload.tokenData || {};
+  const tokenMetrics = payload && payload.tokenMetrics || {};
+  const riskClass = cardClassForRisk(normalizeRiskValue(analysis.riskLevel || analysis.risk || analysis.level));
+  const tokenName = tokenData.symbol || tokenData.name || "this token";
+  const chain = tokenMetrics.chainId ? " on " + tokenMetrics.chainId : "";
+  const line = analysis.finalTake || summaryForRisk(riskClass);
+  return tokenName + chain + ": " + line;
 }
 
 function buildShareBlock(payload) {
-  const shareMessage = shareTextFromPayload(payload);
-
+  const encoded = encodeURIComponent(shareTextFromPayload(payload));
   return `
     <div class="section">
       <div class="section-title">Share This Result</div>
       <div class="share-grid">
-        <button type="button" class="share-btn primary" onclick="shareNative(${encodeURIComponent(JSON.stringify(shareMessage))})">📤 Share Result</button>
-        <button type="button" class="share-btn dark" onclick="copyShareText(${encodeURIComponent(JSON.stringify(shareMessage))})">🔗 Copy Share Text</button>
+        <button type="button" class="share-btn primary" onclick="shareNative('${encoded}')">📤 Share Result</button>
+        <button type="button" class="share-btn dark" onclick="copyShareText('${encoded}')">🔗 Copy Share Text</button>
       </div>
       <div id="shareStatus" class="share-status" aria-live="polite"></div>
     </div>
@@ -1285,25 +1721,27 @@ function buildShareBlock(payload) {
 }
 
 function formatResult(payload) {
-  const analysis = payload?.analysis || payload || {};
-  const riskClass = cardClassForRisk(normalizeRiskValue(analysis?.riskLevel || analysis?.risk || analysis?.level));
+  currentAnalysisPayload = payload;
+
+  const analysis = payload && payload.analysis || payload || {};
+  const riskClass = cardClassForRisk(normalizeRiskValue(analysis.riskLevel || analysis.risk || analysis.level));
   const riskLabel = riskClass === "unknown" ? "REVIEW" : riskClass.toUpperCase();
 
-  const tokenData = payload?.tokenData || {};
-  const tokenMetrics = payload?.tokenMetrics || payload?.metrics || {};
-  const liquidityConfidence = payload?.liquidityConfidence || "";
-  const tokenName = tokenData?.name || tokenData?.symbol || "Submitted Token";
-  const tokenMeta = tokenMetrics?.chainId ? `${tokenName} • ${tokenMetrics.chainId}` : tokenName;
+  const tokenData = payload && payload.tokenData || {};
+  const tokenMetrics = payload && payload.tokenMetrics || payload && payload.metrics || {};
+  const liquidityConfidence = payload && payload.liquidityConfidence || "";
+  const tokenName = tokenData.symbol || tokenData.name || "Submitted Token";
+  const tokenMeta = tokenMetrics.chainId ? tokenName + " • " + tokenMetrics.chainId : tokenName;
 
   const metrics = buildMetrics(tokenData, tokenMetrics, liquidityConfidence);
 
   const signals = []
-    .concat(Array.isArray(analysis?.keySignals) ? analysis.keySignals : [])
-    .concat(Array.isArray(analysis?.concerningIndicators) ? analysis.concerningIndicators : [])
+    .concat(Array.isArray(analysis.keySignals) ? analysis.keySignals : [])
+    .concat(Array.isArray(analysis.concerningIndicators) ? analysis.concerningIndicators : [])
     .filter(Boolean);
 
-  const legit = Array.isArray(analysis?.legitimateElements) ? analysis.legitimateElements.filter(Boolean) : [];
-  const actions = Array.isArray(analysis?.recommendations) ? analysis.recommendations.filter(Boolean) : [];
+  const legit = Array.isArray(analysis.legitimateElements) ? analysis.legitimateElements.filter(Boolean) : [];
+  const actions = Array.isArray(analysis.recommendations) ? analysis.recommendations.filter(Boolean) : [];
 
   const safeSignals = signals.length
     ? signals
@@ -1318,7 +1756,9 @@ function formatResult(payload) {
       <div class="section">
         <div class="section-title">Supportive Signals</div>
         <ul class="signal-list">
-          ${legit.map(item => `<li class="signal-item"><span class="signal-icon">✔️</span><span>${escapeHtml(item)}</span></li>`).join("")}
+          ${legit.map(function (item) {
+            return `<li class="signal-item"><span class="signal-icon">✔️</span><span>${escapeHtml(item)}</span></li>`;
+          }).join("")}
         </ul>
       </div>
     `
@@ -1326,11 +1766,11 @@ function formatResult(payload) {
 
   const continuationLine = `
     <div class="result-continuation">
-      ${escapeHtml(analysis?.summary || summaryForRisk(riskClass))}
+      ${escapeHtml(analysis.summary || summaryForRisk(riskClass))}
     </div>
   `;
 
-  const finalTake = analysis?.finalTake || paylineForRisk(riskClass);
+  const finalTake = analysis.finalTake || paylineForRisk(riskClass);
   const projectLinks = formatExternalLinks(tokenMetrics);
   const shareBlock = buildShareBlock(payload);
 
@@ -1347,19 +1787,23 @@ function formatResult(payload) {
       <div class="section">
         <div class="section-title">Token Data</div>
         <div class="metric-grid">
-          ${metrics.map(item => `
-            <div class="metric-box">
-              <span class="metric-label">${escapeHtml(item.label)}</span>
-              <span class="metric-value">${escapeHtml(item.value)}</span>
-            </div>
-          `).join("")}
+          ${metrics.map(function (item) {
+            return `
+              <div class="metric-box">
+                <span class="metric-label">${escapeHtml(item.label)}</span>
+                <span class="metric-value">${escapeHtml(item.value)}</span>
+              </div>
+            `;
+          }).join("")}
         </div>
       </div>
 
       <div class="section">
         <div class="section-title">Detected Signals</div>
         <ul class="signal-list">
-          ${safeSignals.map(item => `<li class="signal-item"><span class="signal-icon">${signalIconForRisk(riskClass)}</span><span>${escapeHtml(item)}</span></li>`).join("")}
+          ${safeSignals.map(function (item) {
+            return `<li class="signal-item"><span class="signal-icon">${signalIconForRisk(riskClass)}</span><span>${escapeHtml(item)}</span></li>`;
+          }).join("")}
         </ul>
       </div>
 
@@ -1368,7 +1812,9 @@ function formatResult(payload) {
       <div class="section">
         <div class="section-title">Recommended Actions</div>
         <div class="action-list">
-          ${safeActions.map(item => `<div class="action-box">${escapeHtml(item)}</div>`).join("")}
+          ${safeActions.map(function (item) {
+            return `<div class="action-box">${escapeHtml(item)}</div>`;
+          }).join("")}
         </div>
       </div>
 
@@ -1401,7 +1847,9 @@ function scrollToTopCheck() {
   const input = document.getElementById("address");
   if (!input) return;
   window.scrollTo({ top: 0, behavior: "smooth" });
-  setTimeout(() => input.focus(), 250);
+  setTimeout(function () {
+    try { input.focus(); } catch (e) {}
+  }, 250);
 }
 
 function showShareStatus(message) {
@@ -1409,25 +1857,9 @@ function showShareStatus(message) {
   if (!el) return;
   el.textContent = message;
   clearTimeout(showShareStatus._timer);
-  showShareStatus._timer = setTimeout(() => {
+  showShareStatus._timer = setTimeout(function () {
     el.textContent = "";
   }, 2200);
-}
-
-function copyText(value, successMessage) {
-  const text = String(value || "").trim();
-  if (!text) return;
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      showShareStatus(successMessage || "Copied.");
-    }).catch(() => {
-      fallbackCopy(text, successMessage || "Copied.");
-    });
-    return;
-  }
-
-  fallbackCopy(text, successMessage || "Copied.");
 }
 
 function fallbackCopy(value, successMessage) {
@@ -1439,27 +1871,43 @@ function fallbackCopy(value, successMessage) {
   document.body.appendChild(input);
   input.select();
   input.setSelectionRange(0, 99999);
-  document.execCommand("copy");
+  try {
+    document.execCommand("copy");
+  } catch (e) {}
   document.body.removeChild(input);
   showShareStatus(successMessage || "Copied.");
 }
 
+function copyText(value, successMessage) {
+  const text = String(value || "").trim();
+  if (!text) return;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () {
+      showShareStatus(successMessage || "Copied.");
+    }).catch(function () {
+      fallbackCopy(text, successMessage || "Copied.");
+    });
+    return;
+  }
+
+  fallbackCopy(text, successMessage || "Copied.");
+}
+
 function copyShareText(encodedMessage) {
   try {
-    const message = JSON.parse(decodeURIComponent(encodedMessage));
-    copyText(`${message}\n${window.location.href}`, "Share text copied.");
+    const message = decodeURIComponent(encodedMessage);
+    copyText(message + "\n" + window.location.href, "Share text copied.");
   } catch (e) {
     copyText(window.location.href, "Link copied.");
   }
 }
 
 function shareNative(encodedMessage) {
-  let message = "";
+  let message = "Token risk result";
   try {
-    message = JSON.parse(decodeURIComponent(encodedMessage));
-  } catch (e) {
-    message = "Token risk result";
-  }
+    message = decodeURIComponent(encodedMessage);
+  } catch (e) {}
 
   const shareData = {
     title: document.title,
@@ -1468,18 +1916,107 @@ function shareNative(encodedMessage) {
   };
 
   if (navigator.share) {
-    navigator.share(shareData).catch(() => {});
+    navigator.share(shareData).catch(function () {});
     return;
   }
 
-  copyText(`${message}\n${window.location.href}`, "Share text copied.");
+  copyText(message + "\n" + window.location.href, "Share text copied.");
+}
+
+async function analyzeSpecificPair(index, tokenAddress) {
+  const pairs = window.__tokenRiskPairs || [];
+  const pair = pairs[index];
+  if (!pair) return;
+  await analyzeWithPair(pair, tokenAddress);
+}
+
+async function analyzeWithPair(pair, tokenAddress) {
+  const emailEl = document.getElementById("email");
+  const result = document.getElementById("result");
+  const email = emailEl ? emailEl.value.trim().toLowerCase() : "";
+
+  result.style.display = "block";
+  result.innerHTML = renderStateCard(
+    "⚪ Analyzing...",
+    "Selected Pair",
+    "Sending Dexscreener token data to the backend and building an AI-backed token risk analysis.",
+    "unknown"
+  );
+
+  const frontendPayload = buildPairPayload(pair, tokenAddress);
+
+  try {
+    const response = await fetch(API + ANALYZE_ROUTE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tokenAddress: tokenAddress,
+        email: email,
+        subscribed: isBrowserSubscribed(),
+        dexPair: frontendPayload.dexPair,
+        tokenData: frontendPayload.tokenData,
+        tokenMetrics: frontendPayload.tokenMetrics,
+        liquidityConfidence: frontendPayload.liquidityConfidence
+      })
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = {};
+    }
+
+    if (data.activeSubscription === true || data.subscribed === true) {
+      setBrowserSubscribed(true);
+      syncPostPurchaseMessage();
+    }
+
+    if (data.limit) {
+      result.innerHTML = renderStateCard(
+        "🟠 Free Check Used",
+        "Upgrade Available",
+        "You’ve used your free token check. Unlock unlimited token checks so you can review the next contract before you buy, approve, or connect.",
+        "medium"
+      );
+      showUpgrade();
+      return;
+    }
+
+    if ((!response.ok || data.error) && !data.analysis) {
+      result.innerHTML = renderStateCard(
+        "⚪ Unable To Analyze",
+        "Try Again",
+        data.error || "We could not analyze this token right now. Please try again in a moment.",
+        "unknown"
+      );
+      return;
+    }
+
+    const mergedPayload = {
+      ...data,
+      tokenData: data.tokenData || frontendPayload.tokenData,
+      tokenMetrics: data.tokenMetrics || frontendPayload.tokenMetrics,
+      liquidityConfidence: data.liquidityConfidence || frontendPayload.liquidityConfidence
+    };
+
+    result.innerHTML = formatResult(mergedPayload);
+  } catch (error) {
+    result.innerHTML = renderStateCard(
+      "⚪ Unable To Analyze",
+      "Try Again",
+      "We could not analyze this token right now. Please try again in a moment.",
+      "unknown"
+    );
+  }
 }
 
 async function checkToken() {
-  const address = document.getElementById("address").value.trim();
-  const email = document.getElementById("email").value.trim().toLowerCase();
+  const addressEl = document.getElementById("address");
   const result = document.getElementById("result");
+  const address = addressEl ? addressEl.value.trim() : "";
 
+  hideInlineStatus();
   hideUpgrade();
 
   if (!validAddress(address)) {
@@ -1495,59 +2032,39 @@ async function checkToken() {
 
   result.style.display = "block";
   result.innerHTML = renderStateCard(
-    "⚪ Analyzing...",
-    "Token Scan In Progress",
-    "Pulling token data and building an AI-backed token risk analysis. This checks liquidity, volume, pair age, socials, trading activity, and market context.",
+    "⚪ Searching Dexscreener...",
+    "Live Market Lookup",
+    "Looking up matching Dexscreener pairs for this token contract before the AI analysis runs.",
     "unknown"
   );
 
   setLoadingState(true);
 
   try {
-    const response = await fetch(API + ANALYZE_ROUTE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tokenAddress: address,
-        email: email,
-        subscribed: isBrowserSubscribed()
-      })
-    });
+    const pairs = await fetchDexPairs(address);
+    window.__tokenRiskPairs = pairs;
 
-    const data = await response.json();
-
-    if (data?.activeSubscription === true || data?.subscribed === true) {
-      setBrowserSubscribed(true);
-      syncPostPurchaseMessage();
-    }
-
-    if (data?.limit) {
+    if (!pairs.length) {
       result.innerHTML = renderStateCard(
-        "🟠 Free Check Used",
-        "Upgrade Available",
-        "You’ve used your free token check. Unlock unlimited token checks so you can review the next contract before you buy, approve, or connect.",
-        "medium"
-      );
-      showUpgrade();
-      return;
-    }
-
-    if (data?.error && !data?.analysis) {
-      result.innerHTML = renderStateCard(
-        "⚪ Unable To Analyze",
-        "Try Again",
-        data.error || "We could not analyze this token right now. Please try again in a moment.",
+        "⚪ No Dex Pair Found",
+        "No Match",
+        "We could not find a live Dexscreener pair for this token contract yet. Double-check the contract address and try again.",
         "unknown"
       );
       return;
     }
 
-    result.innerHTML = formatResult(data);
+    if (pairs.length > 1) {
+      result.innerHTML = renderDexPairChooser(pairs, address);
+      return;
+    }
+
+    await analyzeWithPair(pairs[0], address);
   } catch (error) {
     result.innerHTML = renderStateCard(
-      "⚪ Unable To Analyze",
+      "⚪ Unable To Load Dex Data",
       "Try Again",
-      "We could not analyze this token right now. Please try again in a moment.",
+      "We could not load token market data from Dexscreener right now. Please try again in a moment.",
       "unknown"
     );
   } finally {
@@ -1555,31 +2072,129 @@ async function checkToken() {
   }
 }
 
-async function checkout(priceId) {
-  const pageUrl = window.location.origin + window.location.pathname;
+function getReturnUrl() {
+  return window.location.origin + window.location.pathname + "?subscribed=true";
+}
+
+function setCheckoutStatus(message) {
+  const el = document.getElementById("checkoutStatus");
+  if (!el) return;
+  el.textContent = message || "";
+}
+
+async function openEmbeddedCheckout(priceId) {
+  const shell = document.getElementById("embeddedCheckoutShell");
+  const mount = document.getElementById("embeddedCheckoutMount");
+
+  if (!shell || !mount) return;
+
+  if (!stripe) {
+    setCheckoutStatus("Missing Stripe publishable key on this page.");
+    shell.classList.add("show");
+    showUpgrade();
+    return;
+  }
+
+  shell.classList.add("show");
+  showUpgrade();
+  setCheckoutStatus("Preparing secure checkout...");
+
+  if (embeddedCheckoutController && embeddedCheckoutController.destroy) {
+    try {
+      embeddedCheckoutController.destroy();
+    } catch (e) {}
+    embeddedCheckoutController = null;
+  }
+
+  mount.innerHTML = "";
+
   try {
-    const response = await fetch(API + "/create-checkout", {
+    const response = await fetch(API + "/create-embedded-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        priceId,
-        email: document.getElementById("email").value.trim().toLowerCase() || null,
-        successUrl: pageUrl + "?subscribed=true",
-        cancelUrl: pageUrl
+        priceId: priceId,
+        returnUrl: getReturnUrl()
       })
     });
 
-    const data = await response.json();
-
-    if (data && data.url) {
-      window.location = data.url;
-    } else {
-      alert("Checkout failed.");
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = {};
     }
+
+    if (!response.ok || !data.clientSecret) {
+      throw new Error(data.error || "Unable to create embedded checkout session");
+    }
+
+    const checkout = await stripe.initEmbeddedCheckout({
+      clientSecret: data.clientSecret
+    });
+
+    embeddedCheckoutController = checkout;
+    checkout.mount("#embeddedCheckoutMount");
+    setCheckoutStatus("");
   } catch (error) {
-    alert("Checkout failed.");
+    setCheckoutStatus("Checkout could not be loaded right now.");
   }
 }
+
+function closeEmbeddedCheckout() {
+  const shell = document.getElementById("embeddedCheckoutShell");
+  const mount = document.getElementById("embeddedCheckoutMount");
+
+  if (embeddedCheckoutController && embeddedCheckoutController.destroy) {
+    try {
+      embeddedCheckoutController.destroy();
+    } catch (e) {}
+    embeddedCheckoutController = null;
+  }
+
+  if (mount) mount.innerHTML = "";
+  if (shell) shell.classList.remove("show");
+  setCheckoutStatus("");
+}
+
+(function initTokenRiskPage() {
+  const checkBtn = document.getElementById("checkBtn");
+  const upgradeTopBtn = document.getElementById("upgradeTopBtn");
+  const closeEmbeddedCheckoutBtn = document.getElementById("closeEmbeddedCheckoutBtn");
+  const addressInput = document.getElementById("address");
+
+  if (checkBtn) {
+    checkBtn.addEventListener("click", checkToken);
+  }
+
+  if (upgradeTopBtn) {
+    upgradeTopBtn.addEventListener("click", function () {
+      showUpgrade();
+    });
+  }
+
+  if (closeEmbeddedCheckoutBtn) {
+    closeEmbeddedCheckoutBtn.addEventListener("click", function () {
+      closeEmbeddedCheckout();
+    });
+  }
+
+  document.querySelectorAll("[data-price-id]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const priceId = button.getAttribute("data-price-id");
+      openEmbeddedCheckout(priceId);
+    });
+  });
+
+  if (addressInput) {
+    addressInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        checkToken();
+      }
+    });
+  }
+})();
 </script>
 
 </body>
