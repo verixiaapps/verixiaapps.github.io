@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/is-td-bank-fraud-alert-email-legit-or-scam/index.html";
+const TARGET_PAGE = "scam-check-now/is-usps-package-held-email-legit-or-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -21,12 +21,12 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  "TD Bank Fraud Alert Email? How to Tell if It Is Real or Fake";
+  'USPS "Package Held" Email Scam? How to Tell if It Is Real or Fake';
 
 const NEW_META =
-  "Got a TD Bank fraud alert email? Learn the warning signs, fake login page tricks, and what to do before you click a link, enter your password, or call a number.";
+  'Got a USPS "package held" email? Learn the warning signs, fake tracking link tricks, and what to do before you click, pay a redelivery fee, or enter your details.';
 
-const NEW_RAW_KEYWORD = "TD Bank fraud alert email";
+const NEW_RAW_KEYWORD = "USPS package held email";
 
 const NEW_INSTANT_VERDICT_CARD = `
   <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:-6px auto 12px;padding:0 14px;">
@@ -41,11 +41,11 @@ const NEW_INSTANT_VERDICT_CARD = `
       </div>
 
       <div style="font-size:15px;font-weight:800;color:#e6f0ff;margin-bottom:4px;">
-        Likely phishing or fake account alert
+        Likely fake delivery alert or phishing email
       </div>
 
       <div style="font-size:15px;font-weight:900;color:#ffffff;">
-        Do not click links or call numbers in the message. Use the official TD Bank app or website only.
+        Do not click links or pay any fee inside the message. Verify tracking only through the official USPS website or app.
       </div>
 
     </div>
@@ -59,15 +59,15 @@ const NEW_TOP_BLOCK = `
         Updated April 2026
       </div>
       <div style="font-size:15px;font-weight:800;line-height:1.6;color:#e6f0ff;">
-        People are still receiving TD Bank fraud alert emails and messages claiming:
+        People are still receiving USPS package held emails and messages claiming:
       </div>
       <ul style="margin:10px 0 0 18px;color:#d7e4f8;font-weight:800;line-height:1.6;">
-        <li>“Suspicious activity detected”</li>
-        <li>“Verify your account immediately”</li>
-        <li>“Unusual login attempt”</li>
+        <li>“Your package is being held”</li>
+        <li>“Redelivery fee required”</li>
+        <li>“Address confirmation needed”</li>
       </ul>
       <div style="margin-top:10px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">
-        These messages often link to fake TD Bank login pages or fake support numbers designed to steal your login details or verification codes.
+        These messages often lead to fake USPS tracking pages or payment screens designed to steal card details, addresses, or personal information.
       </div>
     </div>
   </div>
@@ -77,66 +77,66 @@ const NEW_EXAMPLE_CARD = `
     <div class="story-card" id="realExamplesCard">
       <div class="story-card-title">
         <span class="story-card-title-icon">📩</span>
-        <span>Common TD Bank Fraud Alert Email Examples</span>
+        <span>Common USPS Package Held Email Examples</span>
       </div>
-      <p>Reports show people receiving emails with subject lines like “TD Bank: Suspicious activity detected,” “Action required: verify your account,” or “Unusual login attempt.” These messages often reference a large transaction, a locked account, or a security issue that needs immediate attention.</p>
-      <p style="margin-top:14px;">Most versions include buttons such as “Secure Account,” “Verify Identity,” or “Review Activity.” These links can lead to fake TD Bank login pages designed to capture usernames, passwords, and one-time verification codes.</p>
-      <p style="margin-top:14px;">Some variations also include a phone number labeled as a fraud department or security team. Calling it can connect you to scammers who ask for login details, verification codes, or card information under pressure.</p>
-      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the message only seems legitimate when you use the link or phone number inside it, that is a strong warning sign. A legitimate alert should still be verifiable directly through the official TD Bank app or website.</div>
+      <p>Reports show people receiving emails with subject lines like “USPS Package Held,” “Delivery Issue Detected,” or “Action Required to Release Package.” These messages often claim there is a tracking problem, address issue, customs fee, or failed delivery that needs urgent attention.</p>
+      <p style="margin-top:14px;">Most versions include buttons such as “Track Package,” “Confirm Delivery,” or “Release Shipment.” These links can lead to fake USPS pages designed to capture payment details, home addresses, and other personal information.</p>
+      <p style="margin-top:14px;">Some versions also request a small redelivery or handling fee, often under the excuse that the package cannot move forward until payment is completed. The amount is usually small enough to feel believable but is only there to get card details.</p>
+      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the email only feels legitimate when you use the link inside it, that is a strong warning sign. A real delivery issue should still be verifiable directly through the official USPS website or app.</div>
     </div>
 `;
 
 const NEW_RELATED_LINKS = [
   {
-    href: "/scam-check-now/is-td-bank-account-access-alert-email-legit-or-scam/",
-    text: "Is TD Bank Account Access Alert Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-package-delay-email-legit-or-scam/",
+    text: "Is USPS Package Delay Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-banking-alert-email-legit-or-scam/",
-    text: "Is TD Bank Banking Alert Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-address-verification-email-legit-or-scam/",
+    text: "Is USPS Address Verification Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-sign-in-alert-email-legit-or-scam/",
-    text: "Is TD Bank Sign In Alert Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-customs-fee-email-legit-or-scam/",
+    text: "Is USPS Customs Fee Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-unusual-login-email-legit-or-scam/",
-    text: "Is TD Bank Unusual Login Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-delivery-alert-email-legit-or-scam/",
+    text: "Is USPS Delivery Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-fraud-department-email-legit-or-scam/",
-    text: "Is TD Bank Fraud Department Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-delivery-confirmation-email-legit-or-scam/",
+    text: "Is USPS Delivery Confirmation Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-secure-message-email-legit-or-scam/",
-    text: "Is TD Bank Secure Message Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-delivery-notification-email-legit-or-scam/",
+    text: "Is USPS Delivery Notification Email Legit or a Scam?"
   }
 ];
 
 const NEW_MORE_LINKS = [
   {
-    href: "/scam-check-now/is-td-bank-fraud-investigation-email-legit-or-scam/",
-    text: "Is TD Bank Fraud Investigation Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-failed-shipment-email-legit-or-scam/",
+    text: "Is USPS Failed Shipment Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-account-verification-email-legit-or-scam/",
-    text: "Is TD Bank Account Verification Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-delivery-attempt-notice-legit-or-scam/",
+    text: "Is USPS Delivery Attempt Notice Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-account-review-email-legit-or-scam/",
-    text: "Is TD Bank Account Review Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-delivery-failed-message-legit-or-scam/",
+    text: "Is USPS Delivery Failed Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-payment-verification-email-legit-or-scam/",
-    text: "Is TD Bank Payment Verification Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-delivery-failed-text-legit-or-scam/",
+    text: "Is USPS Delivery Failed Text Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-suspicious-transfer-email-legit-or-scam/",
-    text: "Is TD Bank Suspicious Transfer Email Legit or a Scam?"
+    href: "/scam-check-now/is-usps-missed-delivery-text-legit-or-scam/",
+    text: "Is USPS Missed Delivery Text Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-td-bank-card-security-alert-text-legit-or-scam/",
-    text: "Is TD Bank Card Security Alert Text Legit or a Scam?"
+    href: "/scam-check-now/usps-delivery-text-scam/",
+    text: "Is USPS Delivery Text a Scam?"
   }
 ];
 
@@ -146,26 +146,26 @@ const NEW_FAQ_JSONLD = `{
   "mainEntity":[
     {
       "@type":"Question",
-      "name":"Is a TD Bank fraud alert email always a scam?",
+      "name":"Is a USPS package held email always a scam?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"No. Banks can send real fraud alerts, but scammers also copy the same type of warning. The safest approach is to verify the alert independently in the official TD Bank app or by using official contact details, not the link or number inside the email."
+        "text":"No. Delivery issues can be real, but scammers frequently copy USPS-style alerts to create panic. The safest approach is to verify the shipment independently through the official USPS website or app, not through the link inside the message."
       }
     },
     {
       "@type":"Question",
-      "name":"How can I tell if a TD Bank fraud alert email is fake?",
+      "name":"How can I tell if a USPS package held email is fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Common warning signs include urgent pressure, suspicious links, fake support phone numbers, requests for login details or verification codes, and messages that only make sense if you trust the email itself. A real alert should still be verifiable outside the message."
+        "text":"Common warning signs include urgent pressure, requests for a small redelivery fee, suspicious links, strange sender domains, and messages asking you to confirm personal or payment details. A real delivery issue should still be verifiable outside the email."
       }
     },
     {
       "@type":"Question",
-      "name":"What should I do if I clicked a TD Bank fraud alert email?",
+      "name":"What should I do if I clicked a USPS package held email?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"If you clicked the link or entered information, change your password immediately, review account activity, and contact TD Bank through an official channel you found independently. If you shared sensitive details or codes, treat it as urgent and secure the account right away."
+        "text":"If you clicked the link or entered information, treat it as urgent. Review your card activity, secure any affected accounts, and verify your shipment directly through USPS using an official source you opened yourself."
       }
     }
   ]
@@ -173,18 +173,18 @@ const NEW_FAQ_JSONLD = `{
 
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
-      <h3>TD Bank Fraud Alert Email FAQ</h3>
+      <h3>USPS Package Held Email FAQ</h3>
       <div class="content-body">
-        <p><strong>Is a TD Bank fraud alert email always a scam?</strong><br>No. Banks can send real fraud alerts, but scammers also copy the same type of warning. The safest approach is to verify the alert independently in the official TD Bank app or by using official contact details, not the link or number inside the email.</p>
-        <p><strong>How can I tell if a TD Bank fraud alert email is fake?</strong><br>Common warning signs include urgent pressure, suspicious links, fake support phone numbers, requests for login details or verification codes, and messages that only make sense if you trust the email itself. A real alert should still be verifiable outside the message.</p>
-        <p><strong>What should I do if I clicked a TD Bank fraud alert email?</strong><br>If you clicked the link or entered information, change your password immediately, review account activity, and contact TD Bank through an official channel you found independently. If you shared sensitive details or codes, treat it as urgent and secure the account right away.</p>
+        <p><strong>Is a USPS package held email always a scam?</strong><br>No. Delivery issues can be real, but scammers frequently copy USPS-style alerts to create panic. The safest approach is to verify the shipment independently through the official USPS website or app, not through the link inside the message.</p>
+        <p><strong>How can I tell if a USPS package held email is fake?</strong><br>Common warning signs include urgent pressure, requests for a small redelivery fee, suspicious links, strange sender domains, and messages asking you to confirm personal or payment details. A real delivery issue should still be verifiable outside the email.</p>
+        <p><strong>What should I do if I clicked a USPS package held email?</strong><br>If you clicked the link or entered information, treat it as urgent. Review your card activity, secure any affected accounts, and verify your shipment directly through USPS using an official source you opened yourself.</p>
       </div>
     </div>
 `;
 
 const NEW_HUB_LINK = `
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="/scam-check-now/bank-scams/">Bank Scam Hub</a>
+      <a href="/scam-check-now/package-delivery-scams/">Package Delivery Scam Hub</a>
     </div>
 `;
 
@@ -458,15 +458,15 @@ function insertInstantVerdictCard(html) {
   return html;
 }
 
-function replaceBankSeoCardTitles(html) {
+function replaceDeliverySeoCardTitles(html) {
   const updated = html.replace(
-    /if\s*\(containsAny\(lower,\s*\["bank",\s*"paypal",\s*"venmo",\s*"zelle",\s*"cash app",\s*"amazon",\s*"refund",\s*"payment"\]\)\)\s*\{\s*return\s*\[\s*\["💳",\s*"What this account or payment setup often looks like"\],\s*\["⏱️",\s*"Where the panic starts doing the work"\],\s*\["🔁",\s*"How the account warning changes across versions"\],\s*\["💥",\s*"What happens after a login, code, or payment mistake"\]\s*\];\s*\}/i,
-    `if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    /if\s*\(containsAny\(lower,\s*\["delivery",\s*"usps",\s*"ups",\s*"fedex",\s*"package",\s*"shipment",\s*"parcel"\]\)\)\s*\{\s*return\s*\[\s*\["📦",\s*"What this delivery setup often looks like"\],\s*\["⏱️",\s*"Where the message pushes quick action"\],\s*\["🔁",\s*"How the carrier story changes across versions"\],\s*\["💥",\s*"What happens after the click or payment"\]\s*\];\s*\}/i,
+    `if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
     return [
-      ["💳", "What this account or payment setup often looks like"],
-      ["⏱️", "Where the panic starts doing the work"],
-      ["🔁", "How the account warning changes across versions"],
-      ["💥", "What happens after a login, code, or payment mistake"],
+      ["📦", "What this delivery setup often looks like"],
+      ["⏱️", "Where the message pushes quick action"],
+      ["🔁", "How the carrier story changes across versions"],
+      ["💥", "What happens after the click or payment"],
       ["•", "What to do next"],
       ["•", "Key safety rule"]
     ];
@@ -474,11 +474,11 @@ function replaceBankSeoCardTitles(html) {
   );
 
   if (updated === html) {
-    console.warn("No change for bank seo card titles");
+    console.warn("No change for delivery seo card titles");
     return html;
   }
 
-  console.log("Updated bank seo card titles");
+  console.log("Updated delivery seo card titles");
   return updated;
 }
 
@@ -625,7 +625,7 @@ updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
 updated = insertTopFreshnessBlock(updated);
 updated = insertInstantVerdictCard(updated);
-updated = replaceBankSeoCardTitles(updated);
+updated = replaceDeliverySeoCardTitles(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
