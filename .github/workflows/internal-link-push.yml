@@ -1,4 +1,4 @@
-name: Auto SEO Internal Linking + Backup
+name: Auto Scam Check Linking + Homepage + Recent Hub + Category Hubs + Sitemap
 
 on:
   schedule:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Run auto linking script
+      - name: Run auto SEO script
         run: |
           node << 'EOF'
           const fs = require('fs');
@@ -24,8 +24,20 @@ jobs:
 
           const ROOT = './scam-check-now';
           const BACKUP = './backup';
+          const HOMEPAGE = './check/index.html';
+          const RECENT_DIR = './check/recent';
+          const RECENT_PAGE = './check/recent/index.html';
+          const HUBS_DIR = './check/hubs';
+          const SITEMAP_PATH = './sitemap.xml';
+          const ROBOTS_PATH = './robots.txt';
+
           const RELATED_COUNT = 5;
           const MORE_COUNT = 10;
+          const HOMEPAGE_COUNT = 15;
+          const RECENT_COUNT = 80;
+          const HUB_COUNT = 40;
+          const MAX_HUBS = 12;
+          const MIN_HUB_SIZE = 6;
 
           if (!fs.existsSync(ROOT)) {
             console.error(`Missing root folder: ${ROOT}`);
@@ -34,6 +46,28 @@ jobs:
 
           if (!fs.existsSync(BACKUP)) {
             fs.mkdirSync(BACKUP, { recursive: true });
+          }
+
+          function ensureDir(dir) {
+            if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir, { recursive: true });
+            }
+          }
+
+          function readFile(filePath) {
+            return fs.readFileSync(filePath, 'utf8');
+          }
+
+          function hasFileChanged(filePath, content) {
+            const existing = fs.existsSync(filePath) ? readFile(filePath) : null;
+            return existing !== content;
+          }
+
+          function backupFile(filePath) {
+            if (!fs.existsSync(filePath)) return;
+            const backupName = filePath.replace(/[\\/]/g, '_');
+            const backupPath = path.join(BACKUP, backupName);
+            fs.writeFileSync(backupPath, readFile(filePath));
           }
 
           function getAllPages(dir) {
@@ -63,17 +97,33 @@ jobs:
             return copy;
           }
 
-          function pickLinks(allPages, current, count) {
-            return shuffle(allPages.filter(p => p !== current)).slice(0, count);
+          function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+              hash = ((hash << 5) - hash) + str.charCodeAt(i);
+              hash |= 0;
+            }
+            return Math.abs(hash);
+          }
+
+          function rotateByDay(items, seed) {
+            if (!items.length) return items;
+            const day = Math.floor(Date.now() / 86400000);
+            const offset = (hashString(seed) + day) % items.length;
+            return items.slice(offset).concat(items.slice(0, offset));
+          }
+
+          function normalizedPath(filePath) {
+            return filePath.replace(/\\/g, '/');
           }
 
           function hrefFromPath(filePath) {
-            const normalized = filePath.replace(/\\/g, '/').replace(/^\.\//, '');
+            const normalized = normalizedPath(filePath).replace(/^\.\//, '');
             return '/' + normalized.replace(/\/index\.html$/i, '/');
           }
 
           function slugFromPath(filePath) {
-            const normalized = filePath.replace(/\\/g, '/');
+            const normalized = normalizedPath(filePath);
             const withoutIndex = normalized.replace(/\/index\.html$/i, '');
             const parts = withoutIndex.split('/').filter(Boolean);
             return parts[parts.length - 1] || '';
@@ -102,6 +152,11 @@ jobs:
               telegram: 'Telegram',
               whatsapp: 'WhatsApp',
               google: 'Google',
+              microsoft: 'Microsoft',
+              netflix: 'Netflix',
+              walmart: 'Walmart',
+              target: 'Target',
+              paypalbusiness: 'PayPal Business',
               login: 'Login',
               text: 'Text',
               email: 'Email',
@@ -139,9 +194,22 @@ jobs:
               suspension: 'Suspension',
               attempt: 'Attempt',
               notice: 'Notice',
-              verification: 'Verification',
               locked: 'Locked',
-              needed: 'Needed'
+              payment: 'Payment',
+              security: 'Security',
+              warning: 'Warning',
+              blocked: 'Blocked',
+              update: 'Update',
+              contact: 'Contact',
+              charge: 'Charge',
+              hold: 'Hold',
+              request: 'Request',
+              flagged: 'Flagged',
+              review: 'Review',
+              processing: 'Processing',
+              confirmation: 'Confirmation',
+              delay: 'Delay',
+              recovery: 'Recovery'
             };
 
             return specialWords[token] || token.charAt(0).toUpperCase() + token.slice(1);
@@ -209,31 +277,505 @@ jobs:
             );
           }
 
-          const pages = getAllPages(ROOT);
+          function getCategoryTokens(slug) {
+            let core = slug;
+
+            if (core.startsWith('did-i-get-scammed-by-')) {
+              core = core.replace(/^did-i-get-scammed-by-/, '');
+            } else if (core.startsWith('is-')) {
+              core = core.replace(/^is-/, '');
+            }
+
+            core = core
+              .replace(/-legit-or-scam$/, '')
+              .replace(/-real-or-fake$/, '')
+              .replace(/-safe-or-scam$/, '');
+
+            const stopWords = new Set([
+              'is','did','i','get','scammed','by','or','a','the','this','that','real','fake','safe','scam','legit',
+              'message','email','text','alert','link','issue','notice','request','update','warning','confirmation',
+              'processing','review','activity','attempt','account','login','support','contact'
+            ]);
+
+            return core
+              .split('-')
+              .filter(Boolean)
+              .filter(token => !stopWords.has(token));
+          }
+
+          function buildCategoryMap(pages) {
+            const map = new Map();
+
+            pages.forEach(page => {
+              const slug = slugFromPath(page);
+              const tokens = getCategoryTokens(slug);
+
+              tokens.forEach(token => {
+                if (!map.has(token)) {
+                  map.set(token, []);
+                }
+                map.get(token).push(page);
+              });
+            });
+
+            return map;
+          }
+
+          function chooseHubCategories(categoryMap) {
+            return [...categoryMap.entries()]
+              .filter(([, tokenPages]) => tokenPages.length >= MIN_HUB_SIZE)
+              .sort((a, b) => {
+                if (b[1].length !== a[1].length) return b[1].length - a[1].length;
+                return a[0].localeCompare(b[0]);
+              })
+              .slice(0, MAX_HUBS)
+              .map(([token]) => token);
+          }
+
+          function hubTitleFromToken(token) {
+            return `${wordFromToken(token)} Scam Checks`;
+          }
+
+          function hubUrlFromToken(token) {
+            return `/check/hubs/${token}/`;
+          }
+
+          function buildHubHTML(token, linksHTML) {
+            const title = hubTitleFromToken(token);
+            const tokenLabel = wordFromToken(token);
+
+            return `<!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>${title}</title>
+          <meta name="description" content="Browse ${tokenLabel} scam check pages including suspicious messages, alerts, refund setups, phishing pages, and account warning scams.">
+          <meta name="robots" content="index,follow">
+          <link rel="canonical" href="https://verixiaapps.com${hubUrlFromToken(token)}">
+          <style>
+          :root{
+            --bg:#07121f;
+            --bg2:#0d1b31;
+            --card:rgba(255,255,255,.05);
+            --line:rgba(255,255,255,.09);
+            --ink:#eef6ff;
+            --muted:#c9d8ec;
+            --cyan:#9cecff;
+            --violet:#8b78f2;
+          }
+          *{box-sizing:border-box}
+          body{
+            margin:0;
+            font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
+            color:var(--ink);
+            line-height:1.6;
+            background:
+              radial-gradient(circle at top right, rgba(139,120,242,.12), transparent 25%),
+              radial-gradient(circle at top left, rgba(102,217,239,.10), transparent 24%),
+              linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
+          }
+          .wrap{max-width:980px;margin:0 auto;padding:40px 16px 60px}
+          .card{
+            border-radius:28px;
+            padding:28px;
+            background:linear-gradient(180deg, rgba(14,25,44,.96) 0%, rgba(9,18,33,.98) 100%);
+            border:1px solid var(--line);
+            box-shadow:0 24px 64px rgba(2,6,23,.28);
+          }
+          h1{
+            margin:0 0 12px;
+            font-size:42px;
+            line-height:1.02;
+            letter-spacing:-.04em;
+            font-weight:950;
+            color:#fff;
+          }
+          p{
+            margin:0 0 20px;
+            font-size:17px;
+            color:var(--muted);
+            font-weight:700;
+          }
+          ul{
+            margin:0;
+            padding-left:22px;
+            display:grid;
+            gap:12px;
+          }
+          li{color:var(--muted)}
+          a{
+            color:var(--cyan);
+            text-decoration:none;
+            font-weight:900;
+          }
+          a:hover{text-decoration:underline}
+          .toplink{
+            display:inline-block;
+            margin-top:20px;
+            padding:12px 16px;
+            border-radius:14px;
+            background:linear-gradient(135deg,var(--violet) 0%, #2fc6e4 100%);
+            color:#fff;
+            text-decoration:none;
+            font-weight:900;
+          }
+          </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <div class="card">
+                <h1>${title}</h1>
+                <p>Updated automatically to surface scam check pages related to ${tokenLabel} messages, fake alerts, phishing attempts, payment pressure, and suspicious account activity.</p>
+                <ul>
+          ${linksHTML}
+                </ul>
+                <a class="toplink" href="/check/">Back to Scam Check Now</a>
+              </div>
+            </div>
+          </body>
+          </html>`;
+          }
+
+          function buildHubNavHTML(tokens) {
+            return tokens.map(token => {
+              return `<li><a href="${hubUrlFromToken(token)}">${hubTitleFromToken(token)}</a></li>`;
+            }).join('\n');
+          }
+
+          function upsertHomepageLinks(homepageHtml, linksHTML, hubLinksHTML) {
+            const sectionHtml = `
+          <section id="autoScamCheckHomepageLinks" style="max-width:1100px;margin:28px auto 0;padding:0 16px 32px;">
+            <div style="border-radius:24px;padding:24px;background:linear-gradient(180deg, rgba(7,18,35,.96) 0%, rgba(10,23,45,.98) 100%);border:1px solid rgba(255,255,255,.08);box-shadow:0 22px 56px rgba(2,6,23,.22);">
+              <h2 style="margin:0 0 14px;font-size:34px;line-height:1.05;font-weight:900;color:#ffffff;letter-spacing:-.03em;">Recent Scam Checks</h2>
+              <div style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#d7e4f8;font-weight:700;">
+                Explore recent scam warning pages across package alerts, account warnings, refund scams, payment requests, and phishing messages.
+              </div>
+              <ul id="homepageLinks" style="margin:0;padding-left:22px;display:grid;gap:10px;color:#d7e4f8;">
+          ${linksHTML}
+              </ul>
+              <div style="margin-top:18px;">
+                <a href="/check/recent/" style="display:inline-block;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,#7d6cf4 0%, #38c8e7 100%);color:#fff;text-decoration:none;font-weight:900;">View More Scam Check Pages</a>
+              </div>
+            </div>
+
+            <div style="border-radius:24px;padding:24px;margin-top:18px;background:linear-gradient(180deg, rgba(7,18,35,.96) 0%, rgba(10,23,45,.98) 100%);border:1px solid rgba(255,255,255,.08);box-shadow:0 22px 56px rgba(2,6,23,.22);">
+              <h2 style="margin:0 0 14px;font-size:30px;line-height:1.05;font-weight:900;color:#ffffff;letter-spacing:-.03em;">Scam Categories</h2>
+              <div style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#d7e4f8;font-weight:700;">
+                Browse grouped scam check pages by brand, platform, or scam pattern.
+              </div>
+              <ul id="homepageHubLinks" style="margin:0;padding-left:22px;display:grid;gap:10px;color:#d7e4f8;">
+          ${hubLinksHTML}
+              </ul>
+            </div>
+          </section>`;
+
+            if (/id="autoScamCheckHomepageLinks"/i.test(homepageHtml)) {
+              return homepageHtml.replace(
+                /<section id="autoScamCheckHomepageLinks"[\s\S]*?<\/section>/i,
+                sectionHtml.trim()
+              );
+            }
+
+            if (/<\/main>/i.test(homepageHtml)) {
+              return homepageHtml.replace(/<\/main>/i, `${sectionHtml}\n</main>`);
+            }
+
+            return homepageHtml.replace(/<\/body>/i, `${sectionHtml}\n</body>`);
+          }
+
+          function buildRecentHubHTML(linksHTML, hubLinksHTML) {
+            return `<!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>Recent Scam Check Pages</title>
+          <meta name="description" content="Browse recent Scam Check Now pages covering scam messages, phishing emails, package alerts, fake payment requests, and account warning scams.">
+          <meta name="robots" content="index,follow">
+          <link rel="canonical" href="https://verixiaapps.com/check/recent/">
+          <style>
+          :root{
+            --bg:#07121f;
+            --bg2:#0d1b31;
+            --card:rgba(255,255,255,.05);
+            --line:rgba(255,255,255,.09);
+            --ink:#eef6ff;
+            --muted:#c9d8ec;
+            --cyan:#9cecff;
+            --violet:#8b78f2;
+          }
+          *{box-sizing:border-box}
+          body{
+            margin:0;
+            font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
+            color:var(--ink);
+            line-height:1.6;
+            background:
+              radial-gradient(circle at top right, rgba(139,120,242,.12), transparent 25%),
+              radial-gradient(circle at top left, rgba(102,217,239,.10), transparent 24%),
+              linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
+          }
+          .wrap{max-width:980px;margin:0 auto;padding:40px 16px 60px}
+          .card{
+            border-radius:28px;
+            padding:28px;
+            background:linear-gradient(180deg, rgba(14,25,44,.96) 0%, rgba(9,18,33,.98) 100%);
+            border:1px solid var(--line);
+            box-shadow:0 24px 64px rgba(2,6,23,.28);
+          }
+          h1,h2{
+            margin:0 0 12px;
+            line-height:1.02;
+            letter-spacing:-.04em;
+            font-weight:950;
+            color:#fff;
+          }
+          h1{font-size:42px}
+          h2{font-size:28px;margin-top:26px}
+          p{
+            margin:0 0 20px;
+            font-size:17px;
+            color:var(--muted);
+            font-weight:700;
+          }
+          ul{
+            margin:0;
+            padding-left:22px;
+            display:grid;
+            gap:12px;
+          }
+          li{color:var(--muted)}
+          a{
+            color:var(--cyan);
+            text-decoration:none;
+            font-weight:900;
+          }
+          a:hover{text-decoration:underline}
+          .toplink{
+            display:inline-block;
+            margin-top:20px;
+            padding:12px 16px;
+            border-radius:14px;
+            background:linear-gradient(135deg,var(--violet) 0%, #2fc6e4 100%);
+            color:#fff;
+            text-decoration:none;
+            font-weight:900;
+          }
+          </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <div class="card">
+                <h1>Recent Scam Check Pages</h1>
+                <p>Updated automatically to surface recent scam warning pages across shipping scams, refund emails, fake alerts, account security messages, payment requests, and phishing pages.</p>
+                <ul>
+          ${linksHTML}
+                </ul>
+
+                <h2>Scam Categories</h2>
+                <p>Jump into grouped scam pages by brand, service, or scam pattern.</p>
+                <ul>
+          ${hubLinksHTML}
+                </ul>
+
+                <a class="toplink" href="/check/">Back to Scam Check Now</a>
+              </div>
+            </div>
+          </body>
+          </html>`;
+          }
+
+          function xmlEscape(value) {
+            return String(value)
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&apos;');
+          }
+
+          function uniqueUrls(urls) {
+            return [...new Set(urls)];
+          }
+
+          function buildSitemap(urls) {
+            const today = new Date().toISOString().split('T')[0];
+            const entries = uniqueUrls(urls).map(url => {
+              return `  <url>
+              <loc>${xmlEscape(url)}</loc>
+              <lastmod>${today}</lastmod>
+            </url>`;
+            }).join('\n');
+
+            return `<?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          ${entries}
+          </urlset>`;
+          }
+
+          function ensureRobotsReference() {
+            const sitemapLine = 'Sitemap: https://verixiaapps.com/sitemap.xml';
+
+            if (!fs.existsSync(ROBOTS_PATH)) {
+              fs.writeFileSync(ROBOTS_PATH, `${sitemapLine}\n`);
+              return;
+            }
+
+            const robots = readFile(ROBOTS_PATH);
+            if (robots.includes(sitemapLine)) return;
+
+            const updated = robots.trimEnd() + '\n' + sitemapLine + '\n';
+            backupFile(ROBOTS_PATH);
+            fs.writeFileSync(ROBOTS_PATH, updated);
+          }
+
+          function selectDailyLinks(pages, count, seed) {
+            return rotateByDay(shuffle([...pages]), seed).slice(0, count);
+          }
+
+          function scoreRelatedPages(currentPage, allPages) {
+            const currentTokens = new Set(getCategoryTokens(slugFromPath(currentPage)));
+            const currentSlug = slugFromPath(currentPage);
+
+            return allPages
+              .filter(page => page !== currentPage)
+              .map(page => {
+                const pageSlug = slugFromPath(page);
+                const pageTokens = getCategoryTokens(pageSlug);
+                let score = 0;
+
+                pageTokens.forEach(token => {
+                  if (currentTokens.has(token)) score += 3;
+                });
+
+                if (pageSlug.includes('email') && currentSlug.includes('email')) score += 2;
+                if (pageSlug.includes('text') && currentSlug.includes('text')) score += 2;
+                if (pageSlug.includes('message') && currentSlug.includes('message')) score += 2;
+                if (pageSlug.includes('alert') && currentSlug.includes('alert')) score += 2;
+
+                return { page, score, slug: pageSlug };
+              })
+              .sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return a.slug.localeCompare(b.slug);
+              });
+          }
+
+          function pickSmarterLinks(allPages, currentPage, count, seed) {
+            const scored = scoreRelatedPages(currentPage, allPages);
+            const strong = scored.filter(item => item.score > 0).map(item => item.page);
+            const weak = scored.filter(item => item.score <= 0).map(item => item.page);
+
+            const strongCount = Math.min(Math.ceil(count * 0.7), strong.length);
+            const weakCount = Math.max(0, count - strongCount);
+
+            const selectedStrong = rotateByDay(strong, `${seed}-strong`).slice(0, strongCount);
+            const selectedWeak = rotateByDay(weak, `${seed}-weak`).slice(0, weakCount);
+
+            return [...selectedStrong, ...selectedWeak].slice(0, count);
+          }
+
+          const pages = getAllPages(ROOT).sort();
+          const homepageLinks = buildLinkHTML(selectDailyLinks(pages, HOMEPAGE_COUNT, 'homepage-links'));
+          const recentLinks = buildLinkHTML(selectDailyLinks(pages, RECENT_COUNT, 'recent-links'));
+
+          const categoryMap = buildCategoryMap(pages);
+          const hubTokens = chooseHubCategories(categoryMap);
+          const hubLinksHTML = buildHubNavHTML(hubTokens);
 
           pages.forEach(page => {
-            const original = fs.readFileSync(page, 'utf8');
+            const original = readFile(page);
 
-            const backupName = page.replace(/[\\/]/g, '_');
-            const backupPath = path.join(BACKUP, backupName);
-            fs.writeFileSync(backupPath, original);
-
-            const related = buildLinkHTML(pickLinks(pages, page, RELATED_COUNT));
-            const more = buildLinkHTML(pickLinks(pages, page, MORE_COUNT));
+            const relatedPages = pickSmarterLinks(pages, page, RELATED_COUNT, `related-${slugFromPath(page)}`);
+            const morePages = pickSmarterLinks(pages, page, MORE_COUNT, `more-${slugFromPath(page)}`);
 
             let updated = original;
-            updated = updateSection(updated, 'relatedLinks', related);
-            updated = updateSection(updated, 'moreLinks', more);
+            updated = updateSection(updated, 'relatedLinks', buildLinkHTML(relatedPages));
+            updated = updateSection(updated, 'moreLinks', buildLinkHTML(morePages));
 
             if (updated !== original) {
+              backupFile(page);
               fs.writeFileSync(page, updated);
-              console.log(`Updated: ${page}`);
+              console.log(`Updated page links: ${page}`);
             } else {
-              console.log(`Skipped: ${page}`);
+              console.log(`Skipped page: ${page}`);
             }
           });
 
-          console.log(`Processed ${pages.length} pages`);
+          if (fs.existsSync(HOMEPAGE)) {
+            const homepageOriginal = readFile(HOMEPAGE);
+            const homepageUpdated = upsertHomepageLinks(homepageOriginal, homepageLinks, hubLinksHTML);
+
+            if (homepageUpdated !== homepageOriginal) {
+              backupFile(HOMEPAGE);
+              fs.writeFileSync(HOMEPAGE, homepageUpdated);
+              console.log(`Updated homepage links: ${HOMEPAGE}`);
+            } else {
+              console.log(`Skipped homepage links: ${HOMEPAGE}`);
+            }
+          } else {
+            console.warn(`Homepage not found: ${HOMEPAGE}`);
+          }
+
+          ensureDir(RECENT_DIR);
+          const recentHtml = buildRecentHubHTML(recentLinks, hubLinksHTML);
+          if (hasFileChanged(RECENT_PAGE, recentHtml)) {
+            if (fs.existsSync(RECENT_PAGE)) backupFile(RECENT_PAGE);
+            fs.writeFileSync(RECENT_PAGE, recentHtml);
+            console.log(`Updated recent hub: ${RECENT_PAGE}`);
+          } else {
+            console.log(`Skipped recent hub: ${RECENT_PAGE}`);
+          }
+
+          ensureDir(HUBS_DIR);
+          const hubUrls = [];
+
+          hubTokens.forEach(token => {
+            const hubDir = path.join(HUBS_DIR, token);
+            const hubPage = path.join(hubDir, 'index.html');
+            ensureDir(hubDir);
+
+            const tokenPages = categoryMap.get(token) || [];
+            const hubPages = rotateByDay(tokenPages, `hub-${token}`).slice(0, HUB_COUNT);
+            const hubHtml = buildHubHTML(token, buildLinkHTML(hubPages));
+
+            if (hasFileChanged(hubPage, hubHtml)) {
+              if (fs.existsSync(hubPage)) backupFile(hubPage);
+              fs.writeFileSync(hubPage, hubHtml);
+              console.log(`Updated category hub: ${hubPage}`);
+            } else {
+              console.log(`Skipped category hub: ${hubPage}`);
+            }
+
+            hubUrls.push(`https://verixiaapps.com${hubUrlFromToken(token)}`);
+          });
+
+          const sitemapUrls = [
+            'https://verixiaapps.com/check/',
+            'https://verixiaapps.com/check/recent/',
+            ...hubUrls,
+            ...pages.map(page => 'https://verixiaapps.com' + hrefFromPath(page))
+          ];
+          const sitemapXml = buildSitemap(sitemapUrls);
+
+          if (fs.existsSync(SITEMAP_PATH)) {
+            const existingSitemap = readFile(SITEMAP_PATH);
+            if (existingSitemap !== sitemapXml) {
+              backupFile(SITEMAP_PATH);
+              fs.writeFileSync(SITEMAP_PATH, sitemapXml);
+              console.log(`Updated sitemap: ${SITEMAP_PATH}`);
+            } else {
+              console.log(`Skipped sitemap: ${SITEMAP_PATH}`);
+            }
+          } else {
+            fs.writeFileSync(SITEMAP_PATH, sitemapXml);
+            console.log(`Created sitemap: ${SITEMAP_PATH}`);
+          }
+
+          ensureRobotsReference();
+
+          console.log(`Processed ${pages.length} scam-check pages and ${hubTokens.length} category hubs`);
           EOF
 
       - name: Commit changes
@@ -241,5 +783,5 @@ jobs:
           git config user.name "seo-bot"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Auto internal linking + backup update" || echo "No changes"
+          git commit -m "Auto scam check linking + homepage + hubs + sitemap update" || echo "No changes"
           git push
