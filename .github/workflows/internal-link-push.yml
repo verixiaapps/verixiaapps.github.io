@@ -695,15 +695,23 @@ jobs:
             return [...selectedStrong, ...selectedWeak].slice(0, count);
           }
 
-          function findMatchingCloseTag(html, startIndex, tagName) {
+          function findEndOfExactElement(html, startIndex, openingTagStart) {
+            const firstGt = html.indexOf('>', openingTagStart);
+            if (firstGt === -1) return -1;
+
+            const openingTagText = html.slice(openingTagStart, firstGt + 1);
+            const tagMatch = openingTagText.match(/^<([a-z0-9]+)/i);
+            if (!tagMatch) return -1;
+
+            const tagName = tagMatch[1].toLowerCase();
             const openTagRegex = new RegExp(`<${tagName}(\\s|>)`, 'gi');
             const closeTagRegex = new RegExp(`</${tagName}>`, 'gi');
 
-            openTagRegex.lastIndex = startIndex;
-            closeTagRegex.lastIndex = startIndex;
+            openTagRegex.lastIndex = openingTagStart;
+            closeTagRegex.lastIndex = openingTagStart;
 
             let depth = 0;
-            let cursor = startIndex;
+            let cursor = openingTagStart;
 
             while (cursor < html.length) {
               openTagRegex.lastIndex = cursor;
@@ -717,16 +725,16 @@ jobs:
 
               if (nextOpen !== -1 && (nextOpen < nextClose || nextClose === -1)) {
                 depth += 1;
-                cursor = openMatch.index + 1;
+                cursor = nextOpen + 1;
                 continue;
               }
 
               if (nextClose !== -1) {
                 depth -= 1;
-                if (depth === 0) {
-                  return nextClose + closeMatch[0].length;
-                }
                 cursor = nextClose + closeMatch[0].length;
+                if (depth === 0) {
+                  return cursor;
+                }
                 continue;
               }
 
@@ -736,10 +744,11 @@ jobs:
             return -1;
           }
 
-          function extractBalancedBlock(html, startMarker, tagName) {
-            const start = html.indexOf(startMarker);
+          function extractElementByExactStart(html, exactStart) {
+            const start = html.indexOf(exactStart);
             if (start === -1) return null;
-            const end = findMatchingCloseTag(html, start, tagName);
+
+            const end = findEndOfExactElement(html, start, start);
             if (end === -1) return null;
 
             return {
@@ -749,40 +758,65 @@ jobs:
             };
           }
 
-          function layoutVariantFromSlug(slug) {
-            const variants = ['a', 'b', 'c'];
-            return variants[hashString(slug) % variants.length];
+          function extractElementById(html, tagName, idValue) {
+            const regex = new RegExp(`<${tagName}[^>]*\\sid="${idValue}"[^>]*>`, 'i');
+            const match = regex.exec(html);
+            if (!match) return null;
+
+            const start = match.index;
+            const end = findEndOfExactElement(html, start, start);
+            if (end === -1) return null;
+
+            return {
+              start,
+              end,
+              block: html.slice(start, end)
+            };
           }
 
-          function getRotationTargetSet(pages) {
-            if (ROTATE_STRUCTURE_PAGES <= 0) return new Set();
+          function extractHeading(html) {
+            const match = html.match(/<h2 id="contentHeading"[\s\S]*?<\/h2>/i);
+            return match ? match[0] : '';
+          }
+
+          function extractSectionAfterHeading(html, headingHtml) {
+            if (!headingHtml) return null;
+            const headingIndex = html.indexOf(headingHtml);
+            if (headingIndex === -1) return null;
+
+            const searchStart = headingIndex + headingHtml.length;
+            const nextSectionIndex = html.indexOf('<div class="link-section">', searchStart);
+            if (nextSectionIndex === -1) return null;
+
+            return extractElementByExactStart(html, '<div class="link-section">');
+          }
+
+          function getRotationTargets(pages) {
+            if (ROTATE_STRUCTURE_PAGES <= 0) return [];
             const limit = Math.min(ROTATE_STRUCTURE_PAGES, pages.length);
-            const selected = rotateByDay([...pages], 'rotate-structure-pages').slice(0, limit);
-            return new Set(selected);
+            return rotateByDay([...pages], 'rotate-structure-pages').slice(0, limit);
           }
 
-          function rotateCardsForPage(html, pagePath) {
-            const sectionBlock = extractBalancedBlock(html, '<section class="content-section">', 'section');
+          function rotateCardsForPage(html, forcedVariant) {
+            const sectionBlock = extractElementByExactStart(html, '<section class="content-section">');
             if (!sectionBlock) return html;
 
             const sectionHtml = sectionBlock.block;
 
-            const bridgeCard = extractBalancedBlock(sectionHtml, '<div id="contentBridge" class="content-bridge">', 'div');
-            const hubCard = extractBalancedBlock(sectionHtml, '<div class="inline-info-card" id="hubLinkWrap">', 'div');
-            const recognitionCard = extractBalancedBlock(sectionHtml, '<div class="content-recognition" id="contentRecognition">', 'div');
-            const seoContentCard = extractBalancedBlock(sectionHtml, '<div id="seoContent" class="content-body">', 'div');
-            const relatedCard = extractBalancedBlock(sectionHtml, '<div class="link-section">', 'div');
-            const moreCard = extractBalancedBlock(sectionHtml, '<div class="link-section" id="moreLinksWrap">', 'div');
-            const closeCard = extractBalancedBlock(sectionHtml, '<div class="content-close">', 'div');
+            const bridgeCard = extractElementById(sectionHtml, 'div', 'contentBridge');
+            const hubCard = extractElementById(sectionHtml, 'div', 'hubLinkWrap');
+            const recognitionCard = extractElementById(sectionHtml, 'div', 'contentRecognition');
+            const seoContentCard = extractElementById(sectionHtml, 'div', 'seoContent');
+            const relatedCard = extractSectionAfterHeading(sectionHtml, extractHeading(sectionHtml));
+            const moreCard = extractElementById(sectionHtml, 'div', 'moreLinksWrap');
+            const closeCard = extractElementByExactStart(sectionHtml, '<div class="content-close">');
+            const headingHtml = extractHeading(sectionHtml);
 
-            const headingMatch = sectionHtml.match(/<h2 id="contentHeading"[\s\S]*?<\/h2>/i);
-            const headingCard = headingMatch ? headingMatch[0] : '';
-
-            if (!bridgeCard || !recognitionCard || !seoContentCard || !relatedCard || !moreCard || !closeCard || !headingCard) {
+            if (!bridgeCard || !recognitionCard || !seoContentCard || !relatedCard || !moreCard || !closeCard || !headingHtml) {
               return html;
             }
 
-            const seoCard = `${headingMatch[0]}\n\n    ${seoContentCard.block}`;
+            const seoCard = `${headingHtml}\n\n    ${seoContentCard.block}`;
 
             const cardMap = {
               bridge: bridgeCard.block,
@@ -794,15 +828,15 @@ jobs:
               close: closeCard.block
             };
 
-            const variant = layoutVariantFromSlug(slugFromPath(pagePath));
-
             const orders = {
               a: ['bridge', 'hub', 'recognition', 'seo', 'related', 'more', 'close'],
               b: ['hub', 'bridge', 'seo', 'recognition', 'related', 'more', 'close'],
               c: ['bridge', 'recognition', 'related', 'seo', 'hub', 'more', 'close']
             };
 
-            const order = orders[variant] || orders.a;
+            const variant = forcedVariant && orders[forcedVariant] ? forcedVariant : 'b';
+            const order = orders[variant];
+
             const orderedCards = order
               .map(key => cardMap[key])
               .filter(Boolean)
@@ -820,7 +854,12 @@ jobs:
           const categoryMap = buildCategoryMap(pages);
           const hubTokens = chooseHubCategories(categoryMap);
           const hubLinksHTML = buildHubNavHTML(hubTokens);
-          const rotationTargetSet = getRotationTargetSet(pages);
+
+          const rotationTargets = getRotationTargets(pages);
+          const rotationVariantMap = new Map();
+          rotationTargets.forEach((page, index) => {
+            rotationVariantMap.set(page, index % 2 === 0 ? 'b' : 'c');
+          });
 
           pages.forEach(page => {
             const original = readFile(page);
@@ -832,15 +871,16 @@ jobs:
             updated = updateSection(updated, 'relatedLinks', buildLinkHTML(relatedPages));
             updated = updateSection(updated, 'moreLinks', buildLinkHTML(morePages));
 
-            if (rotationTargetSet.has(page)) {
-              updated = rotateCardsForPage(updated, page);
+            const forcedVariant = rotationVariantMap.get(page) || null;
+            if (forcedVariant) {
+              updated = rotateCardsForPage(updated, forcedVariant);
             }
 
             if (updated !== original) {
               backupFile(page);
               fs.writeFileSync(page, updated);
-              if (rotationTargetSet.has(page)) {
-                console.log(`Updated page links + cards: ${page}`);
+              if (forcedVariant) {
+                console.log(`Updated page links + cards (${forcedVariant}): ${page}`);
               } else {
                 console.log(`Updated page links: ${page}`);
               }
@@ -910,7 +950,7 @@ jobs:
           ensureRobotsReference();
 
           console.log(`Processed ${pages.length} scam-check pages and ${hubTokens.length} category hubs`);
-          console.log(`Card structure rotation applied to ${rotationTargetSet.size} page(s)`);
+          console.log(`Card structure rotation targeted ${rotationTargets.length} page(s)`);
           EOF
 
       - name: Commit changes
