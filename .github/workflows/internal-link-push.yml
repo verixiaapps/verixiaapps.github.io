@@ -1,71 +1,123 @@
-name: Internal Link Push
+name: Auto SEO Internal Linking + Backup
 
 on:
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
-    inputs:
-      target_url:
-        description: "Target page URL path (example: /scam-check-now/is-telegram-suspicious-activity-message-legit-or-scam/)"
-        required: true
-        type: string
-      anchor_text:
-        description: "Anchor text to place"
-        required: true
-        type: string
-      max_links:
-        description: "How many pages to inject into"
-        required: false
-        default: "20"
-        type: string
-      dry_run:
-        description: "Dry run only"
-        required: false
-        default: true
-        type: boolean
 
 permissions:
   contents: write
 
-concurrency:
-  group: internal-link-push
-  cancel-in-progress: false
-
 jobs:
-  push-links:
+  update-pages:
     runs-on: ubuntu-latest
-    env:
-      TARGET_URL: ${{ inputs.target_url }}
-      ANCHOR_TEXT: ${{ inputs.anchor_text }}
-      MAX_LINKS: ${{ inputs.max_links }}
-      DRY_RUN: ${{ inputs.dry_run }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Validate target folder
+      - name: Run auto linking script
         run: |
-          if [[ "$TARGET_URL" != /scam-check-now/*/ ]]; then
-            echo "Target URL must start with /scam-check-now/ and end with /"
-            exit 1
-          fi
+          node << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
 
-      - name: Run internal link push script
-        run: node scripts/internal-link-push.js
+          const ROOT = './scam-check-now';
+          const BACKUP = './backup';
 
-      - name: Show changed files
-        run: git status --short
+          if (!fs.existsSync(BACKUP)) {
+            fs.mkdirSync(BACKUP);
+          }
+
+          function getAllPages(dir) {
+            let results = [];
+            const list = fs.readdirSync(dir);
+
+            list.forEach(file => {
+              const fullPath = path.join(dir, file);
+              const stat = fs.statSync(fullPath);
+
+              if (stat && stat.isDirectory()) {
+                results = results.concat(getAllPages(fullPath));
+              } else if (file === 'index.html') {
+                results.push(fullPath);
+              }
+            });
+
+            return results;
+          }
+
+          function slugFromPath(p) {
+            return p
+              .replace(ROOT, '')
+              .replace('/index.html', '')
+              .replace(/^\//, '');
+          }
+
+          function shuffle(arr) {
+            return arr.sort(() => 0.5 - Math.random());
+          }
+
+          function pickLinks(allPages, current, count) {
+            return shuffle(allPages.filter(p => p !== current)).slice(0, count);
+          }
+
+          function titleFromSlug(slug) {
+            return slug
+              .split('-')
+              .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' ');
+          }
+
+          function buildLinkHTML(links) {
+            return links.map(link => {
+              const slug = slugFromPath(link);
+              const text = titleFromSlug(slug);
+
+              const href = link
+                .replace('./scam-check-now', '/scam-check-now')
+                .replace('/index.html', '/');
+
+              return `<li><a href="${href}">${text}</a></li>`;
+            }).join('\n');
+          }
+
+          function updateSection(html, id, linksHTML) {
+            const regex = new RegExp(`<ul id="${id}"[\\s\\S]*?<\\/ul>`, 'i');
+
+            return html.replace(
+              regex,
+              `<ul id="${id}" class="related-links">\n${linksHTML}\n</ul>`
+            );
+          }
+
+          const pages = getAllPages(ROOT);
+
+          pages.forEach(page => {
+            const original = fs.readFileSync(page, 'utf8');
+
+            // backup
+            const backupName = page.replace(/\//g, '_');
+            const backupPath = path.join(BACKUP, backupName);
+            fs.writeFileSync(backupPath, original);
+
+            const related = buildLinkHTML(pickLinks(pages, page, 5));
+            const more = buildLinkHTML(pickLinks(pages, page, 10));
+
+            let updated = original;
+            updated = updateSection(updated, 'relatedLinks', related);
+            updated = updateSection(updated, 'moreLinks', more);
+
+            fs.writeFileSync(page, updated);
+          });
+
+          console.log(`Updated ${pages.length} pages`);
+          EOF
 
       - name: Commit changes
-        if: ${{ inputs.dry_run == false }}
         run: |
-          git config user.name "github-actions"
+          git config user.name "seo-bot"
           git config user.email "actions@github.com"
-          git add scam-check-now
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "Push internal links to $TARGET_URL"
+          git add .
+          git commit -m "Auto internal linking + backup update" || echo "No changes"
           git push
