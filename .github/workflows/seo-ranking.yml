@@ -1,395 +1,358 @@
-name: SEO Ranking + Indexing Engine (Manual Control)
+name: SEO Ranking + Indexing Engine (Identity Layer V1)
 
 on:
-
   schedule:
-
     - cron: '10 6 * * *'
-
   workflow_dispatch:
-
     inputs:
-
       limit:
-
         description: "How many pages to process (use 1 for testing)"
-
         required: false
-
         default: "10"
+      target_path:
+        description: "Optional: exact path to a specific page (e.g. scam-check-now/example/index.html)"
+        required: false
+        default: ""
 
 permissions:
-
   contents: write
 
 jobs:
-
   seo-engine:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repo
-
         uses: actions/checkout@v4
 
       - name: Run SEO ranking engine
-
         env:
-
           API_URL: https://verixiaapps.com/seo-content
-
           LIMIT: ${{ github.event.inputs.limit }}
-
+          TARGET_PATH: ${{ github.event.inputs.target_path }}
         run: |
-
           node << 'EOF'
-
           const fs = require("fs");
-
           const path = require("path");
 
           const ROOT = "./scam-check-now";
+          const ROOT_ABS = path.resolve(ROOT);
+          const LIMIT = Math.max(1, parseInt(process.env.LIMIT || "10", 10) || 10);
+          const TARGET_PATH = (process.env.TARGET_PATH || "").trim();
 
-          const LIMIT = parseInt(process.env.LIMIT || "10", 10);
-
-          /* =========================
-
-             PAGE DISCOVERY
-
-          ========================= */
+          const GENERATED_START = "<!-- SEO_ENGINE_CONTENT_START -->";
+          const GENERATED_END = "<!-- SEO_ENGINE_CONTENT_END -->";
 
           function getPages(dir) {
-
             let results = [];
 
             for (const file of fs.readdirSync(dir)) {
-
               const full = path.join(dir, file);
-
               const stat = fs.statSync(full);
 
               if (stat.isDirectory()) {
-
-                results = results.concat(getPages(full));
-
+                if (!file.startsWith(".")) {
+                  results = results.concat(getPages(full));
+                }
               } else if (file === "index.html") {
-
                 results.push(full);
-
               }
-
             }
 
-            return results;
+            return results.sort();
+          }
 
+          function resolveTargetPath(inputPath) {
+            if (!inputPath) return null;
+
+            const clean = inputPath.trim().replace(/\\/g, "/").replace(/^\.\//, "");
+
+            let candidate = clean.startsWith("scam-check-now/")
+              ? clean
+              : path.posix.join("scam-check-now", clean);
+
+            if (!candidate.endsWith("/index.html") && !candidate.endsWith("index.html")) {
+              candidate = candidate.replace(/\/+$/, "") + "/index.html";
+            }
+
+            const fullAbs = path.resolve(candidate);
+
+            if (!fullAbs.startsWith(ROOT_ABS + path.sep) && fullAbs !== path.join(ROOT_ABS, "index.html")) {
+              throw new Error(`Target path must stay inside ${ROOT}: ${inputPath}`);
+            }
+
+            if (!fs.existsSync(fullAbs)) {
+              throw new Error(`Target path not found: ${fullAbs}`);
+            }
+
+            return fullAbs;
           }
 
           function slugFromPath(p) {
-
-            return p
-
-              .replace("./scam-check-now/", "")
-
-              .replace("/index.html", "");
-
+            return path
+              .relative(ROOT_ABS, path.resolve(p))
+              .replace(/\\/g, "/")
+              .replace(/\/index\.html$/, "");
           }
 
-          /* =========================
+          function buildPageIdentity(slug) {
+            const s = slug.toLowerCase();
 
-             SEO CORE
+            let category = "general";
+            let threat = "unknown";
+            let userState = "neutral";
 
-          ========================= */
+            if (s.includes("login") || s.includes("account")) {
+              category = "account_security";
+              threat = "credential_theft";
+              userState = "fear_of_hijack";
+            } else if (s.includes("payment") || s.includes("money") || s.includes("refund")) {
+              category = "payment_fraud";
+              threat = "financial_scam";
+              userState = "financial_urgency";
+            } else if (s.includes("sms") || s.includes("text") || s.includes("message")) {
+              category = "sms_phishing";
+              threat = "social_engineering";
+              userState = "urgent_attention";
+            } else if (s.includes("email")) {
+              category = "email_phishing";
+              threat = "impersonation";
+              userState = "verification_doubt";
+            } else if (s.includes("crypto") || s.includes("wallet")) {
+              category = "crypto_scam";
+              threat = "wallet_drainer";
+              userState = "high_risk_action";
+            }
+
+            return { category, threat, userState };
+          }
 
           function detectIntent(slug) {
-
             const s = slug.toLowerCase();
 
             if (s.includes("did-i-get-scammed") || s.includes("what-to-do")) return "recovery";
-
             if (s.includes("vs") || s.includes("fake")) return "comparison";
-
             if (s.includes("how-to") || s.includes("avoid") || s.includes("prevent")) return "prevention";
-
             if (s.includes("login") || s.includes("account") || s.includes("alert")) return "security-check";
 
             return "verification";
-
           }
 
-          function buildKeywordSet(slug) {
-
-            const base = slug.replace(/-/g, " ");
-
-            const words = base.split(" ");
+          function buildKeywordSet(slug, identity) {
+            const base = slug.replace(/-/g, " ").trim();
+            const words = base.split(/\s+/).filter(Boolean);
 
             return {
-
-              primary: base,
-
-              longtail_1: words.join(" "),
-
-              longtail_2: words.slice(0, 4).join(" "),
-
-              longtail_3: words.slice(1).join(" "),
-
-              longtail_4: words.slice(-4).join(" ")
-
+              primary: `${base} ${identity.category} scam fraud check`.trim(),
+              longtail_1: `${words.join(" ")} scam check`.trim(),
+              longtail_2: `${words.slice(0, 4).join(" ")} is it real`.trim(),
+              longtail_3: `${words.slice(1).join(" ")} warning signs`.trim(),
+              longtail_4: `${words.slice(-4).join(" ")} verification`.trim()
             };
-
           }
 
-          function buildSERPAngle(intent, seed) {
-
+          function buildSERPAngle(intent, seed, identity) {
             const map = {
-
-              recovery: ["post-scam recovery actions", "fraud damage steps", "account recovery guide"],
-
-              prevention: ["avoid scams checklist", "fraud prevention guide", "safe browsing steps"],
-
-              comparison: ["real vs fake breakdown", "how to spot scams", "legit vs fraud guide"],
-
-              verification: ["is it legit analysis", "trust check guide", "risk evaluation"],
-
-              "security-check": ["security scan analysis", "account threat review", "alert verification"]
-
+              recovery: [
+                "what to do after scam exposure",
+                "recover compromised account safely",
+                "damage control after fraud event"
+              ],
+              prevention: [
+                "how to prevent phishing attacks",
+                "avoid online scam patterns",
+                "fraud prevention checklist guide"
+              ],
+              comparison: [
+                "real vs fake scam detection guide",
+                "how to identify fraudulent messages",
+                "comparison of scam vs real alerts"
+              ],
+              verification: [
+                "is this message legit or scam",
+                "trust verification breakdown guide",
+                "risk signal analysis system"
+              ],
+              "security-check": [
+                "security alert validation system",
+                "account compromise detection guide",
+                "threat analysis breakdown system"
+              ]
             };
 
-            const list = map[intent] || ["general risk analysis"];
-
-            return list[seed % list.length];
-
+            const base = map[intent] || ["general scam analysis"];
+            return `${base[seed % base.length]} (${identity.category})`;
           }
 
-          function buildCrawlSignals(slug) {
-
-            const seed = slug.length;
-
+          function buildCrawlSignals() {
             return {
-
-              freshness: new Date().toISOString().split("T")[0],
-
-              crawl_weight: (seed % 7) + 1,
-
-              uniqueness_boost: (seed % 5) + 1
-
+              freshness: new Date().toISOString().split("T")[0]
             };
-
           }
 
-          function buildContentDepth(intent, crawl) {
-
+          function buildContentDepth(intent, identity) {
             return {
-
-              style: intent,
-
-              depthLevel: crawl.uniqueness_boost
-
+              style: `${intent}_${identity.category}_${identity.threat}`,
+              tone: identity.userState
             };
-
           }
-
-          /* =========================
-
-             SAFE FETCH
-
-          ========================= */
-
-          const fetchFn =
-
-            global.fetch ||
-
-            ((...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args)));
 
           async function generate(payload) {
-
             try {
-
-              const res = await fetchFn(process.env.API_URL, {
-
+              const res = await fetch(process.env.API_URL, {
                 method: "POST",
-
                 headers: { "Content-Type": "application/json" },
-
                 body: JSON.stringify(payload)
-
               });
 
-              const data = await res.json();
+              if (!res.ok) return null;
 
-              const text = data?.content?.trim();
+              const data = await res.json().catch(() => null);
+              const text = typeof data?.content === "string" ? data.content.trim() : "";
 
-              if (!text || text.length < 20) return null;
+              if (!text || text.length < 60) return null;
 
               return text;
-
             } catch {
-
               return null;
-
             }
-
           }
 
-          /* =========================
+          function findMatchingDivEnd(html, openTagStart) {
+            let pos = openTagStart;
+            let depth = 0;
 
-             SAFE INJECTION (FIXED)
+            while (pos < html.length) {
+              const nextOpen = html.indexOf("<div", pos);
+              const nextClose = html.indexOf("</div>", pos);
 
-          ========================= */
+              if (nextClose === -1) return -1;
 
-          function inject(html, content, seed) {
+              if (nextOpen !== -1 && nextOpen < nextClose) {
+                depth++;
+                pos = nextOpen + 4;
+              } else {
+                depth--;
+                pos = nextClose + 6;
+                if (depth === 0) return pos;
+              }
+            }
 
+            return -1;
+          }
+
+          function findContentBlock(html) {
+            const re = /<div\b[^>]*class=(["'])[^"']*\bcontent-block\b[^"']*\1[^>]*>/i;
+            const match = re.exec(html);
+
+            if (!match) return null;
+
+            const start = match.index;
+            const openEnd = start + match[0].length;
+            const end = findMatchingDivEnd(html, start);
+
+            if (end === -1) return null;
+
+            return { start, openEnd, end };
+          }
+
+          function buildManagedBlock(content) {
+            return `${GENERATED_START}\n${content}\n${GENERATED_END}`;
+          }
+
+          function inject(html, content) {
             if (!content) return html;
 
-            // FORCE DIFFERENCE (this fixes "no commit" problem)
+            const managed = buildManagedBlock(content);
 
-            const stamped = content + `\n<!--seo:${seed}:${Date.now()}-->`;
+            const existingStart = html.indexOf(GENERATED_START);
+            const existingEnd = html.indexOf(GENERATED_END);
 
-            const tag = '<div class="content-block">';
-
-            const start = html.indexOf(tag);
-
-            if (start === -1) {
-
-              return html.replace(
-
-                "</body>",
-
-                `<div class="content-block">${stamped}</div></body>`
-
-              );
-
+            if (existingStart !== -1 && existingEnd !== -1 && existingEnd > existingStart) {
+              return html.slice(0, existingStart) + managed + html.slice(existingEnd + GENERATED_END.length);
             }
 
-            const after = start + tag.length;
+            const block = findContentBlock(html);
 
-            let depth = 1;
-
-            let i = after;
-
-            while (i < html.length) {
-
-              if (html.slice(i, i + 4) === "<div") depth++;
-
-              if (html.slice(i, i + 6) === "</div>") depth--;
-
-              i++;
-
-              if (depth === 0) break;
-
+            if (block) {
+              return html.slice(0, block.openEnd) + "\n" + managed + "\n" + html.slice(block.end - 6);
             }
 
-            if (depth !== 0) {
-
-              return html;
-
+            if (html.includes("</body>")) {
+              return html.replace("</body>", `<div class="content-block">\n${managed}\n</div>\n</body>`);
             }
 
-            return (
-
-              html.slice(0, after) +
-
-              stamped +
-
-              html.slice(i + 6)
-
-            );
-
+            return html + `\n<div class="content-block">\n${managed}\n</div>\n`;
           }
-
-          /* =========================
-
-             BACKUP
-
-          ========================= */
-
-          function backup(file, html) {
-
-            const dir = "./backup-ranking-engine";
-
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-            const safe = file.replace(/[\\/]/g, "_");
-
-            fs.writeFileSync(path.join(dir, safe), html);
-
-          }
-
-          /* =========================
-
-             MAIN
-
-          ========================= */
 
           async function main() {
-
-            const pages = getPages(ROOT).slice(0, LIMIT);
-
-            console.log("Processing pages:", pages.length);
-
-            for (const page of pages) {
-
-              const slug = slugFromPath(page);
-
-              const intent = detectIntent(slug);
-
-              const keywords = buildKeywordSet(slug);
-
-              const angle = buildSERPAngle(intent, slug.length);
-
-              const crawl = buildCrawlSignals(slug);
-
-              const depth = buildContentDepth(intent, crawl);
-
-              const html = fs.readFileSync(page, "utf8");
-
-              const content = await generate({
-
-                keyword: keywords,
-
-                intent,
-
-                angle,
-
-                crawl,
-
-                depth,
-
-                mode: "ranking_v3"
-
-              });
-
-              const updated = inject(html, content, slug.length);
-
-              // ALWAYS WRITE (guarantees Git diff every run)
-
-              backup(page, html);
-
-              fs.writeFileSync(page, updated);
-
-              console.log("Updated:", slug);
-
+            if (!fs.existsSync(ROOT)) {
+              throw new Error(`Root folder not found: ${ROOT}`);
             }
 
-            console.log("DONE");
+            let pages;
 
+            if (TARGET_PATH) {
+              const single = resolveTargetPath(TARGET_PATH);
+              pages = [single];
+              console.log("Processing single page:", single);
+            } else {
+              pages = getPages(ROOT).slice(0, LIMIT);
+              console.log("Processing pages:", pages.length);
+            }
+
+            let changed = false;
+
+            for (const page of pages) {
+              const slug = slugFromPath(page);
+              const identity = buildPageIdentity(slug);
+              const intent = detectIntent(slug);
+              const keywords = buildKeywordSet(slug, identity);
+              const crawl = buildCrawlSignals();
+              const depth = buildContentDepth(intent, identity);
+              const angle = buildSERPAngle(intent, slug.length, identity);
+              const html = fs.readFileSync(page, "utf8");
+
+              const apiContent = await generate({
+                keyword: keywords,
+                intent,
+                angle,
+                crawl,
+                depth,
+                identity,
+                mode: "ranking_v5",
+                seed: slug + "-" + Date.now()
+              });
+
+              if (!apiContent) {
+                console.log("Skipped:", slug);
+                continue;
+              }
+
+              const updated = inject(html, apiContent);
+
+              if (updated !== html) {
+                fs.writeFileSync(page, updated, "utf8");
+                changed = true;
+                console.log("Updated:", slug);
+              } else {
+                console.log("No change:", slug);
+              }
+            }
+
+            console.log(changed ? "DONE (changes applied)" : "DONE (no changes)");
           }
 
-          main();
-
+          main().catch((err) => {
+            console.error("Fatal error:", err && err.stack ? err.stack : err);
+            process.exit(1);
+          });
           EOF
 
       - name: Commit changes
-
         run: |
-
           git config user.name "seo-bot"
-
           git config user.email "actions@github.com"
-
-          git add .
-
-          git commit -m "SEO ranking engine v3.6 (guaranteed diff + stable indexing engine)" || echo "No changes"
-
-          git push 
+          git add scam-check-now
+          git commit -m "SEO engine v5.7 (forced mutation + safe targeting + production ready)" || echo "No changes"
+          git push
