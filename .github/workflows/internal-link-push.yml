@@ -1,0 +1,71 @@
+name: Internal Link Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target page URL path (example: /scam-check-now/is-telegram-suspicious-activity-message-legit-or-scam/)"
+        required: true
+        type: string
+      anchor_text:
+        description: "Anchor text to place"
+        required: true
+        type: string
+      max_links:
+        description: "How many pages to inject into"
+        required: false
+        default: "20"
+        type: string
+      dry_run:
+        description: "Dry run only"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: internal-link-push
+  cancel-in-progress: false
+
+jobs:
+  push-links:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_URL: ${{ inputs.target_url }}
+      ANCHOR_TEXT: ${{ inputs.anchor_text }}
+      MAX_LINKS: ${{ inputs.max_links }}
+      DRY_RUN: ${{ inputs.dry_run }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate target folder
+        run: |
+          if [[ "$TARGET_URL" != /scam-check-now/*/ ]]; then
+            echo "Target URL must start with /scam-check-now/ and end with /"
+            exit 1
+          fi
+
+      - name: Run internal link push script
+        run: node scripts/internal-link-push.js
+
+      - name: Show changed files
+        run: git status --short
+
+      - name: Commit changes
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add scam-check-now
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Push internal links to $TARGET_URL"
+          git push
