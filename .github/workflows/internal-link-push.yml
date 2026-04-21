@@ -24,9 +24,11 @@ jobs:
 
           const ROOT = './scam-check-now';
           const BACKUP = './backup';
+          const RELATED_COUNT = 5;
+          const MORE_COUNT = 10;
 
           if (!fs.existsSync(BACKUP)) {
-            fs.mkdirSync(BACKUP);
+            fs.mkdirSync(BACKUP, { recursive: true });
           }
 
           function getAllPages(dir) {
@@ -47,25 +49,101 @@ jobs:
             return results;
           }
 
-          function slugFromPath(p) {
-            return p
-              .replace(ROOT, '')
-              .replace('/index.html', '')
-              .replace(/^\//, '');
-          }
-
           function shuffle(arr) {
-            return arr.sort(() => 0.5 - Math.random());
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
           }
 
           function pickLinks(allPages, current, count) {
             return shuffle(allPages.filter(p => p !== current)).slice(0, count);
           }
 
+          function hrefFromPath(filePath) {
+            return filePath
+              .replace(/\\/g, '/')
+              .replace(/^\.\//, '/')
+              .replace(/\/index\.html$/i, '/');
+          }
+
+          function slugFromPath(filePath) {
+            const normalized = filePath.replace(/\\/g, '/');
+            const folderPath = normalized.replace(/\/index\.html$/i, '');
+            return path.posix.basename(folderPath);
+          }
+
           function titleFromSlug(slug) {
-            return slug
+            const specialWords = {
+              usps: 'USPS',
+              ups: 'UPS',
+              fedex: 'FedEx',
+              td: 'TD',
+              bank: 'Bank',
+              paypal: 'PayPal',
+              venmo: 'Venmo',
+              zelle: 'Zelle',
+              cash: 'Cash',
+              app: 'App',
+              amazon: 'Amazon',
+              coinbase: 'Coinbase',
+              chase: 'Chase',
+              ebay: 'eBay',
+              apple: 'Apple',
+              crypto: 'Crypto',
+              telegram: 'Telegram',
+              whatsapp: 'WhatsApp',
+              google: 'Google',
+              login: 'Login',
+              text: 'Text',
+              email: 'Email',
+              message: 'Message',
+              alert: 'Alert',
+              code: 'Code',
+              refund: 'Refund',
+              wire: 'Wire',
+              transfer: 'Transfer',
+              link: 'Link',
+              account: 'Account',
+              verification: 'Verification',
+              unusual: 'Unusual',
+              activity: 'Activity',
+              customs: 'Customs',
+              fee: 'Fee',
+              support: 'Support',
+              debit: 'Debit',
+              fraud: 'Fraud',
+              issue: 'Issue',
+              package: 'Package',
+              missed: 'Missed',
+              delivery: 'Delivery',
+              safe: 'Safe',
+              real: 'Real',
+              fake: 'Fake'
+            };
+
+            const words = slug
+              .replace(/^is-/, '')
+              .replace(/^did-i-get-scammed-by-/, '')
               .split('-')
-              .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+              .filter(Boolean);
+
+            if (slug.startsWith('did-i-get-scammed-by-')) {
+              const core = words.map(w => specialWords[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+              return `Did I Get Scammed by ${core}?`;
+            }
+
+            if (slug.startsWith('is-')) {
+              const core = words.map(w => specialWords[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+              if (/real-or-fake$/i.test(slug)) return `Is ${core}?`;
+              if (/safe-or-scam$/i.test(slug)) return `Is ${core}?`;
+              return `Is ${core}?`;
+            }
+
+            return words
+              .map(w => specialWords[w] || w.charAt(0).toUpperCase() + w.slice(1))
               .join(' ');
           }
 
@@ -73,17 +151,17 @@ jobs:
             return links.map(link => {
               const slug = slugFromPath(link);
               const text = titleFromSlug(slug);
-
-              const href = link
-                .replace('./scam-check-now', '/scam-check-now')
-                .replace('/index.html', '/');
-
+              const href = hrefFromPath(link);
               return `<li><a href="${href}">${text}</a></li>`;
             }).join('\n');
           }
 
           function updateSection(html, id, linksHTML) {
-            const regex = new RegExp(`<ul id="${id}"[\\s\\S]*?<\\/ul>`, 'i');
+            const regex = new RegExp(`<ul id="${id}"[^>]*>[\\s\\S]*?<\\/ul>`, 'i');
+
+            if (!regex.test(html)) {
+              return html;
+            }
 
             return html.replace(
               regex,
@@ -96,22 +174,26 @@ jobs:
           pages.forEach(page => {
             const original = fs.readFileSync(page, 'utf8');
 
-            // backup
-            const backupName = page.replace(/\//g, '_');
+            const backupName = page.replace(/[\\/]/g, '_');
             const backupPath = path.join(BACKUP, backupName);
             fs.writeFileSync(backupPath, original);
 
-            const related = buildLinkHTML(pickLinks(pages, page, 5));
-            const more = buildLinkHTML(pickLinks(pages, page, 10));
+            const related = buildLinkHTML(pickLinks(pages, page, RELATED_COUNT));
+            const more = buildLinkHTML(pickLinks(pages, page, MORE_COUNT));
 
             let updated = original;
             updated = updateSection(updated, 'relatedLinks', related);
             updated = updateSection(updated, 'moreLinks', more);
 
-            fs.writeFileSync(page, updated);
+            if (updated !== original) {
+              fs.writeFileSync(page, updated);
+              console.log(`Updated: ${page}`);
+            } else {
+              console.log(`Skipped: ${page}`);
+            }
           });
 
-          console.log(`Updated ${pages.length} pages`);
+          console.log(`Processed ${pages.length} pages`);
           EOF
 
       - name: Commit changes
