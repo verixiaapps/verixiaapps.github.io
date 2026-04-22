@@ -1559,3 +1559,801 @@ function countExplainerSignals(text) {
     "this type of token",
 
     "this kind of token",
+    
+        "it helps to",
+
+    "it is helpful to",
+
+    "a key thing to understand",
+
+    "what matters is",
+
+  ];
+
+  return phrases.filter((phrase) => t.includes(phrase)).length;
+
+}
+
+function countDistanceLanguage(text) {
+
+  const t = String(text || "").toLowerCase();
+
+  const phrases = [
+
+    "many investors",
+
+    "some investors",
+
+    "people should",
+
+    "investors should",
+
+    "before investing",
+
+    "before making any investment",
+
+    "this type of token",
+
+    "this kind of token",
+
+    "the main thing",
+
+    "in many cases",
+
+    "overall",
+
+    "in conclusion",
+
+    "to sum up",
+
+    "the crypto space",
+
+  ];
+
+  return phrases.filter((phrase) => t.includes(phrase)).length;
+
+}
+
+function hasNarrativeMarkers(text) {
+
+  const lower = String(text || "").toLowerCase();
+
+  const badPatterns = [
+
+    "imagine",
+
+    "picture this",
+
+    "you land on",
+
+    "you notice",
+
+    "you see",
+
+    "the page in front of you",
+
+    "the browser tab says",
+
+    "the address bar",
+
+    "a timer starts",
+
+    "the chat window",
+
+    "support:",
+
+    "telegram dm",
+
+    "noreply@",
+
+    "counting down",
+
+    "pulsing slightly",
+
+    "a small note says",
+
+    "the button turns red",
+
+    "within seconds",
+
+    "your wallet is empty",
+
+    "fake support chat",
+
+    "screenshot",
+
+    "email from",
+
+    "subject line",
+
+    "picture a",
+
+    "suppose you",
+
+    "you might get",
+
+    "you could see",
+
+    "the site says",
+
+    "the page flashes",
+
+    "a banner reads",
+
+  ];
+
+  return badPatterns.some((pattern) => lower.includes(pattern));
+
+}
+
+function paragraphHasOverlap(paragraphA, paragraphB) {
+
+  const a = new Set(
+
+    String(paragraphA || "")
+
+      .toLowerCase()
+
+      .split(/[^a-z0-9]+/)
+
+      .filter((w) => w.length >= 5)
+
+  );
+
+  const b = new Set(
+
+    String(paragraphB || "")
+
+      .toLowerCase()
+
+      .split(/[^a-z0-9]+/)
+
+      .filter((w) => w.length >= 5)
+
+  );
+
+  if (!a.size || !b.size) return false;
+
+  let overlap = 0;
+
+  for (const token of a) {
+
+    if (b.has(token)) overlap++;
+
+  }
+
+  return overlap >= 15;
+
+}
+
+function hasDuplicateParagraphStarts(paragraphs) {
+
+  const seen = new Set();
+
+  for (const paragraph of paragraphs) {
+
+    const start = getParagraphStartFingerprint(paragraph);
+
+    if (!start) continue;
+
+    if (seen.has(start)) return true;
+
+    seen.add(start);
+
+  }
+
+  return false;
+
+}
+
+function hasRepeatedSentenceStarts(paragraphs) {
+
+  const seen = new Set();
+
+  for (const paragraph of paragraphs) {
+
+    const sentences = splitSentences(paragraph).slice(0, 2);
+
+    for (const sentence of sentences) {
+
+      const fp = getSentenceStartFingerprint(sentence);
+
+      if (!fp) continue;
+
+      if (seen.has(fp)) return true;
+
+      seen.add(fp);
+
+    }
+
+  }
+
+  return false;
+
+}
+
+function hasStructuralOverlap(paragraphs) {
+
+  return (
+
+    (paragraphs[0] && paragraphs[1] && paragraphHasOverlap(paragraphs[0], paragraphs[1])) ||
+
+    (paragraphs[1] && paragraphs[2] && paragraphHasOverlap(paragraphs[1], paragraphs[2])) ||
+
+    (paragraphs[2] && paragraphs[3] && paragraphHasOverlap(paragraphs[2], paragraphs[3]))
+
+  );
+
+}
+
+function sentenceLengths(paragraph) {
+
+  return splitSentences(paragraph).map((sentence) => paragraphWordCount(sentence));
+
+}
+
+function hasFlatSentenceRhythm(paragraphs) {
+
+  const all = paragraphs.flatMap(sentenceLengths).filter(Boolean);
+
+  if (all.length < 8) return false;
+
+  const shortCount = all.filter((n) => n <= 6).length;
+
+  const longCount = all.filter((n) => n >= 24).length;
+
+  const average = all.reduce((sum, n) => sum + n, 0) / all.length;
+
+  return (shortCount === 0 && longCount === 0) || average < 7 || average > 19;
+
+}
+
+function countWeakTransitions(text) {
+
+  const lower = String(text || "").toLowerCase();
+
+  const phrases = [
+
+    "at the same time",
+
+    "in addition",
+
+    "in many cases",
+
+    "for example",
+
+    "however",
+
+    "that said",
+
+    "another thing",
+
+    "on the other hand",
+
+    "this is because",
+
+    "that is because",
+
+    "in other words",
+
+    "overall",
+
+    "to sum up",
+
+    "as a result",
+
+    "for that reason",
+
+  ];
+
+  return phrases.filter((phrase) => lower.includes(phrase)).length;
+
+}
+
+function countRiskSignalMatches(text, cues) {
+
+  const lower = String(text || "").toLowerCase();
+
+  return (cues || []).filter((cue) => lower.includes(String(cue).toLowerCase())).length;
+
+}
+
+function countStructuralTerms(text) {
+
+  const lower = String(text || "").toLowerCase();
+
+  const terms = [
+
+    "liquidity",
+
+    "liquidity depth",
+
+    "locked liquidity",
+
+    "unlocked liquidity",
+
+    "slippage",
+
+    "exit",
+
+    "sell pressure",
+
+    "holders",
+
+    "holder concentration",
+
+    "wallet concentration",
+
+    "distribution",
+
+    "ownership",
+
+    "top holders",
+
+    "whales",
+
+    "contract",
+
+    "permissions",
+
+    "renounced",
+
+    "mint",
+
+    "freeze",
+
+    "blacklist",
+
+    "control",
+
+    "volatility",
+
+    "launch",
+
+    "token age",
+
+    "momentum",
+
+    "market depth",
+
+    "confidence",
+
+    "trust",
+
+    "downside",
+
+    "fragile",
+
+    "weak structure",
+
+    "structural weakness",
+
+  ];
+
+  return terms.filter((term) => lower.includes(term)).length;
+
+}
+
+function countInterpretationTerms(text) {
+
+  const lower = String(text || "").toLowerCase();
+
+  const terms = [
+
+    "which matters because",
+
+    "that matters because",
+
+    "combined with",
+
+    "taken together",
+
+    "even if",
+
+    "can still",
+
+    "underneath",
+
+    "surface strength",
+
+    "surface momentum",
+
+    "structural weakness",
+
+    "trust breaks",
+
+    "confidence breaks",
+
+    "exit becomes harder",
+
+    "price behavior",
+
+    "risk profile",
+
+    "fragile underneath",
+
+    "when multiple signals combine",
+
+    "interaction between signals",
+
+    "repeatable pattern",
+
+    "once momentum fades",
+
+    "looks stable until",
+
+    "holds up until",
+
+    "appears strong until",
+
+  ];
+
+  return terms.filter((term) => lower.includes(term)).length;
+
+}
+
+function countConsequenceTerms(text) {
+
+  const lower = String(text || "").toLowerCase();
+
+  const terms = [
+
+    "losses",
+
+    "fast downside",
+
+    "rapid downside",
+
+    "difficulty exiting",
+
+    "exit difficulty",
+
+    "slippage",
+
+    "sell pressure",
+
+    "price drops",
+
+    "sharp sell-offs",
+
+    "reversals",
+
+    "buyers trapped",
+
+    "confidence breaks",
+
+    "volatility worsening",
+
+    "downside",
+
+    "loss conditions",
+
+    "losses accelerating",
+
+    "harder to exit",
+
+    "gets harder to exit",
+
+    "turns ugly fast",
+
+  ];
+
+  return terms.filter((term) => lower.includes(term)).length;
+
+}
+
+function countNounClusterRepetition(paragraphs) {
+
+  const clusters = [
+
+    "liquidity",
+
+    "holders",
+
+    "holder concentration",
+
+    "wallet concentration",
+
+    "distribution",
+
+    "ownership",
+
+    "contract",
+
+    "control",
+
+    "volatility",
+
+    "exit",
+
+    "risk",
+
+    "trust",
+
+    "momentum",
+
+  ];
+
+  let repetition = 0;
+
+  for (const cluster of clusters) {
+
+    let paragraphHits = 0;
+
+    for (const paragraph of paragraphs) {
+
+      if (String(paragraph || "").toLowerCase().includes(cluster)) paragraphHits++;
+
+    }
+
+    if (paragraphHits >= 4) repetition += 2;
+
+    else if (paragraphHits === 3) repetition += 1;
+
+  }
+
+  return repetition;
+
+}
+
+function hasFlexibleConceptCoverage(text, seoClass) {
+
+  const lower = String(text || "").toLowerCase();
+
+  const concepts = unique([
+
+    ...(seoClass.requiredTerms || []),
+
+    ...(seoClass.flexibleConcepts || []),
+
+  ]);
+
+  const matches = concepts.filter((term) =>
+
+    lower.includes(String(term).toLowerCase())
+
+  ).length;
+
+  return matches >= Math.min(3, concepts.length);
+
+}
+
+function paragraphFeelsSoft(paragraph, index) {
+
+  const lower = String(paragraph || "").toLowerCase();
+
+  if (!lower) return true;
+
+  if (index === 0) {
+
+    if (!/risk|trust|fragile|unsafe|safe|downside|token|structure|exposure/.test(lower)) {
+
+      return true;
+
+    }
+
+  }
+
+  if (index === 1) {
+
+    if (!/liquidity|holders|holder|wallet|distribution|contract|permissions|ownership|mint|freeze|slippage|exit|control/.test(lower)) {
+
+      return true;
+
+    }
+
+  }
+
+  if (index === 2) {
+
+    if (!/pattern|combined|taken together|even if|surface|momentum|repeatable|similar tokens|underneath|interaction|overlap/.test(lower)) {
+
+      return true;
+
+    }
+
+  }
+
+  if (index === 3) {
+
+    if (!/loss|downside|exit|slippage|sell-offs|reversals|buyers trapped|confidence breaks|volatility|difficulty/.test(lower)) {
+
+      return true;
+
+    }
+
+  }
+
+  return false;
+
+}
+
+function paragraphStartsWeak(paragraph, index) {
+
+  const start = safeLower(splitSentences(paragraph)[0] || paragraph);
+
+  if (!start) return true;
+
+  const weakStarts = [
+
+    "it is",
+
+    "in many cases",
+
+    "overall",
+
+    "in conclusion",
+
+    "to sum up",
+
+    "many investors",
+
+    "people should",
+
+    "another thing",
+
+    "for example",
+
+  ];
+
+  if (weakStarts.some((prefix) => start.startsWith(prefix))) {
+
+    return true;
+
+  }
+
+  if (
+
+    index === 0 &&
+
+    !/^(the risk|risk here|this token|tokens like this|elevated risk|structural risk)/.test(start)
+
+  ) {
+
+    if (!/risk|token|trust|structure|fragile|downside/.test(start)) {
+
+      return true;
+
+    }
+
+  }
+
+  return false;
+
+}
+
+function paragraphDetailScore(paragraph) {
+
+  return (
+
+    countStructuralTerms(paragraph) * 2 +
+
+    countInterpretationTerms(paragraph) * 2 +
+
+    countConsequenceTerms(paragraph)
+
+  );
+
+}
+
+function paragraphHasHardProof(paragraph) {
+
+  return /risk|liquidity|holders|holder|wallet|distribution|contract|ownership|volatility|exit|slippage|trust|control/i.test(
+
+    String(paragraph || "")
+
+  );
+
+}
+
+/* =========================
+
+   VALIDATION + SCORING
+
+========================= */
+
+function hasSeoFormattingProblems(text) {
+
+  const value = String(text || "");
+
+  const paragraphs = splitSeoParagraphs(value);
+
+  if (!value.trim()) return true;
+
+  if (paragraphs.length !== 4) return true;
+
+  const totalWords = seoWordCount(value);
+
+  if (totalWords < 165 || totalWords > 360) return true;
+
+  if (paragraphs.some((p) => paragraphWordCount(p) < 24 || paragraphWordCount(p) > 88)) {
+
+    return true;
+
+  }
+
+  if (paragraphs.some((p) => countSentences(p) < 2 || countSentences(p) > 4)) {
+
+    return true;
+
+  }
+
+  if (hasListFormatting(value)) return true;
+
+  if (hasHtmlFormatting(value)) return true;
+
+  if (hasNarrativeMarkers(value)) return true;
+
+  if (paragraphs.some((p) => hasOverlongSentence(p))) return true;
+
+  return false;
+
+}
+
+function finalizeSeoCandidate(text, keyword = "") {
+
+  if (!text) return null;
+
+  const sanitized = sanitizeSeoContent(text);
+
+  const rawParagraphs = splitSeoParagraphs(sanitized);
+
+  const seoClass = classifySeoKeyword(keyword || "");
+
+  const lower = sanitized.toLowerCase();
+
+  if (rawParagraphs.length !== 4) return null;
+
+  const cleanedParagraphs = rawParagraphs
+
+    .map(removeDuplicateSentencesFromParagraph)
+
+    .map((p) => sanitizeSeoContent(p))
+
+    .map((p) => p.replace(/\n+/g, " ").trim())
+
+    .filter(Boolean);
+
+  if (cleanedParagraphs.length !== 4) return null;
+
+  if (hasDuplicateParagraphStarts(cleanedParagraphs)) return null;
+
+  if (hasRepeatedSentenceStarts(cleanedParagraphs)) return null;
+
+  if (hasStructuralOverlap(cleanedParagraphs)) return null;
+
+  if (hasFlatSentenceRhythm(cleanedParagraphs)) return null;
+
+  if (cleanedParagraphs.some((p) => hasOverlongSentence(p))) return null;
+
+  const finalContent = cleanedParagraphs.join("\n\n").trim();
+
+  if (hasSeoFormattingProblems(finalContent)) return null;
+
+  if (looksGenericSeo(finalContent)) return null;
+
+  if (hasNarrativeMarkers(finalContent)) return null;
+
+  if (countExplainerSignals(finalContent) >= 2) return null;
+
+  if (countDistanceLanguage(finalContent) >= 2) return null;
+
+  if (countWeakTransitions(finalContent) >= 2) return null;
+
+  if (countStructuralTerms(finalContent) < 6) return null;
+
+  if (countInterpretationTerms(finalContent) < 3) return null;
+
+  if (countConsequenceTerms(finalContent) < 3) return null;
+
+  if (!paragraphHasHardProof(cleanedParagraphs[0])) return null;
+
+  if (!hasFlexibleConceptCoverage(finalContent, seoClass)) return null;
+
+  if (countNounClusterRepetition(cleanedParagraphs) >= 7) return null;
+
+  const requiredTermMatches = (seoClass.requiredTerms || []).filter((term) =>
+
+    lower.includes(String(term).toLowerCase())
+
+ 
