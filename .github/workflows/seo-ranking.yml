@@ -35,7 +35,7 @@ jobs:
 
       - name: Run SEO ranking engine
         env:
-          API_URL: https://verixiaapps.com/seo-content
+          BACKEND_BASE_URL: ${{ secrets.RAILWAY_BACKEND_URL }}
           MODE: ${{ github.event.inputs.mode }}
           LIMIT: ${{ github.event.inputs.limit }}
           TARGET_PATH: ${{ github.event.inputs.target_path }}
@@ -44,6 +44,10 @@ jobs:
           node << 'EOF'
           const fs = require("fs");
           const path = require("path");
+
+          if (typeof fetch !== "function") {
+            throw new Error("Global fetch is not available in this runner. Use a newer Node runtime on GitHub Actions.");
+          }
 
           const ROOT = "./scam-check-now";
           const ROOT_ABS = path.resolve(ROOT);
@@ -68,6 +72,20 @@ jobs:
           const MAX_CONTEXT_EXCERPT = 1800;
           const MAX_OVERLAP_EXCERPT = 520;
           const THIN_CONTENT_THRESHOLD = 500;
+          const REQUEST_TIMEOUT_MS = 60000;
+
+          function buildApiUrl() {
+            const base = String(process.env.BACKEND_BASE_URL || "").trim();
+            if (!base) {
+              throw new Error(
+                "Missing BACKEND_BASE_URL. Add repo secret RAILWAY_BACKEND_URL with your Railway backend URL, for example https://your-app.up.railway.app"
+              );
+            }
+            return `${base.replace(/\/+$/, "")}/seo-content`;
+          }
+
+          const API_URL = buildApiUrl();
+          console.log("Using backend:", API_URL);
 
           function getPages(dir) {
             let results = [];
@@ -187,7 +205,6 @@ jobs:
             if (!a.size || !b.size) return 0;
 
             let intersection = 0;
-
             for (const item of a) {
               if (b.has(item)) intersection++;
             }
@@ -645,23 +662,64 @@ jobs:
             return true;
           }
 
-          async function generate(payload, context, options = {}) {
+          async function postJsonWithTimeout(url, body) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
             try {
-              const res = await fetch(process.env.API_URL, {
+              const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(body),
+                signal: controller.signal
               });
 
+              return response;
+            } finally {
+              clearTimeout(timeout);
+            }
+          }
+
+          async function generate(payload, context, options = {}) {
+            try {
+              console.log(`Calling API for: ${context.slug}`);
+
+              const responsePayload = {
+                keyword: payload.keyword,
+                keywordSet: payload.keywordSet,
+                intent: payload.intent,
+                angle: payload.angle,
+                crawl: payload.crawl,
+                depth: payload.depth,
+                identity: payload.identity,
+                pageContext: payload.pageContext,
+                directives: payload.directives,
+                similarity: payload.similarity,
+                mode: payload.mode,
+                seed: payload.seed
+              };
+
+              const res = await postJsonWithTimeout(API_URL, responsePayload);
+
               if (!res.ok) {
+                const body = await res.text().catch(() => "");
                 console.log(`API request failed: ${res.status} ${res.statusText}`);
+                console.log(`Response body: ${body}`);
                 return null;
               }
 
               const data = await res.json().catch(() => null);
-              const text = typeof data?.content === "string" ? data.content.trim() : "";
+
+              if (!data || typeof data.content !== "string") {
+                console.log(`Invalid API response for ${context.slug}`);
+                return null;
+              }
+
+              const text = data.content.trim();
+              console.log(`Received content length for ${context.slug}: ${text.length}`);
 
               if (!validateGeneratedContent(text, context, options)) {
+                console.log(`Validation failed for ${context.slug}`);
                 return null;
               }
 
@@ -878,7 +936,8 @@ jobs:
                 : buildEditorialDirectives(slug, identity, intent, record.context, record.similarity);
 
               const payload = {
-                keyword: keywords,
+                keyword: keywords.primary,
+                keywordSet: keywords,
                 intent,
                 angle,
                 crawl,
@@ -939,5 +998,5 @@ jobs:
           git config user.name "seo-bot"
           git config user.email "actions@github.com"
           git add scam-check-now
-          git commit -m "SEO engine v11.0 (target page guaranteed rewrite)" || echo "No changes"
+          git commit -m "SEO engine v12.0 (railway backend + timeout + targeted rewrite hardening)" || echo "No changes"
           git push
