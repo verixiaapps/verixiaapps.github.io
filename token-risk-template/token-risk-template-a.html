@@ -60,6 +60,18 @@
 }
 </script>
 
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"Token Risk",
+  "applicationCategory":"FinanceApplication",
+  "operatingSystem":"Web",
+  "description":"Token risk checker for reviewing token addresses, Dexscreener links, project copy, and common warning signals before buying or connecting a wallet.",
+  "url":"{{CANONICAL_URL}}"
+}
+</script>
+
 <style>
 :root{
 --bg:#06101b;
@@ -264,9 +276,9 @@ padding:0 14px 40px;
 
 .hero{
 position:relative;
-padding:18px 8px 24px;
+padding:18px 8px 20px;
 max-width:980px;
-margin:0 auto 14px;
+margin:0 auto 10px;
 text-align:center;
 }
 
@@ -335,6 +347,43 @@ border:1px solid rgba(255,255,255,.09);
 box-shadow:var(--shadow-xs);
 }
 
+.hero-quick-grid{
+max-width:820px;
+margin:14px auto 18px;
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:12px;
+}
+
+.hero-quick-card{
+padding:16px 16px 15px;
+border-radius:20px;
+text-align:left;
+background:
+linear-gradient(135deg, rgba(91,140,255,.10) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-xs);
+}
+
+.hero-quick-label{
+display:block;
+margin-bottom:7px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.hero-quick-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e7f0ff;
+}
+
 .container,
 .content-section{
 max-width:820px;
@@ -399,7 +448,8 @@ text-align:center;
 .tool-shell,
 .app-link-card,
 .upgrade,
-.inline-info-card{
+.inline-info-card,
+.quick-checklist{
 background:linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
 border:1px solid rgba(255,255,255,.10);
 border-radius:var(--radius-lg);
@@ -537,6 +587,39 @@ justify-content:center;
 font-size:12px;
 flex:0 0 18px;
 line-height:1;
+}
+
+.quick-checklist{
+margin-bottom:20px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(24,182,127,.10) 0%, rgba(102,217,239,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.quick-checklist-title{
+margin:0 0 10px;
+font-size:18px;
+font-weight:900;
+letter-spacing:-.02em;
+color:#fff;
+}
+
+.quick-checklist-grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+
+.quick-checklist-item{
+padding:13px 14px;
+border-radius:16px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.09);
+font-size:14px;
+font-weight:850;
+color:#e8f2ff;
+line-height:1.45;
 }
 
 .tool-shell{
@@ -1259,9 +1342,11 @@ font-weight:700;
 
 @media (max-width:640px){
 body{padding-top:84px;}
-.hero{padding:14px 6px 18px;}
+.hero{padding:14px 6px 16px;}
 .hero h1{font-size:34px;}
 .hero p{margin-top:10px;font-size:17px;}
+.hero-quick-grid{grid-template-columns:1fr;gap:10px;margin:12px auto 16px;}
+.hero-quick-card{padding:14px 14px 13px;border-radius:18px;}
 .container,.content-section{margin-left:12px;margin-right:12px;padding:18px;border-radius:24px;}
 .top-bar{padding:10px 10px;}
 .top-actions{gap:8px;margin-right:0;}
@@ -1284,6 +1369,7 @@ body{padding-top:84px;}
 .preview-signals{margin-top:8px;gap:6px;}
 .preview-signal{padding:9px 10px;font-size:11px;gap:7px;border-radius:12px;}
 .preview-signal-icon{width:14px;height:14px;font-size:11px;flex:0 0 14px;}
+.quick-checklist-grid{grid-template-columns:1fr;}
 .result-top{align-items:flex-start;}
 .result-chip{font-size:12px;}
 .risk{font-size:19px;padding:10px 14px;}
@@ -1321,7 +1407,7 @@ body{padding-top:84px;}
   <div class="hero">
     <div class="hero-badge-row">
       <div class="hero-badge">Live token risk check</div>
-      <div class="hero-badge">Trust-first warning page</div>
+      <div class="hero-badge">Keyword-matched warning guide</div>
       <div class="hero-badge">Built for repeat reviews</div>
     </div>
 
@@ -1335,15 +1421,30 @@ body{padding-top:84px;}
     </div>
   </div>
 
+  <div class="hero-quick-grid" id="heroQuickGrid">
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">First check</span>
+      <span class="hero-quick-copy">Verify the exact token address or Dexscreener link before trusting anything else.</span>
+    </div>
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">Then review</span>
+      <span class="hero-quick-copy">Look at liquidity, trading behavior, project claims, wallet prompts, and buy pressure together.</span>
+    </div>
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">Safest move</span>
+      <span class="hero-quick-copy">Pause before buying, connecting, approving, or reacting to urgency, hype, or social proof.</span>
+    </div>
+  </div>
+
   <div class="container">
 
-    <div class="system-badge">Reference pattern • not a live verdict</div>
+    <div class="system-badge">Live checker plus keyword guide</div>
 
     <div class="preview-card">
       <div class="preview-top">
-        <div class="preview-badge" id="previewBadge">🔴 Example Risk Pattern</div>
+        <div class="preview-badge" id="previewBadge">🔴 Common Warning Pattern</div>
         <div class="preview-score-wrap">
-          <div class="preview-score" id="previewScore">Pattern Example</div>
+          <div class="preview-score" id="previewScore">Pattern Snapshot</div>
           <div class="preview-score-bar"><div class="preview-score-fill" id="previewScoreFill"></div></div>
         </div>
       </div>
@@ -1355,6 +1456,16 @@ body{padding-top:84px;}
         <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Thin liquidity or unstable trading setup</span></div>
         <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Heavy hype with weak underlying structure</span></div>
         <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Pressure to move before proper review</span></div>
+      </div>
+    </div>
+
+    <div class="quick-checklist">
+      <div class="quick-checklist-title" id="quickChecklistTitle">Fast token risk checklist before you act</div>
+      <div class="quick-checklist-grid" id="quickChecklistGrid">
+        <div class="quick-checklist-item">Check the exact token address and source first.</div>
+        <div class="quick-checklist-item">Review liquidity and current trading activity together.</div>
+        <div class="quick-checklist-item">Slow down if hype or urgency is doing most of the work.</div>
+        <div class="quick-checklist-item">Do not buy or connect until the setup still looks solid after review.</div>
       </div>
     </div>
 
@@ -1502,6 +1613,8 @@ window.addEventListener("load", function () {
   cleanHubLink();
   cleanMoreLinks();
   renderRecognitionChips();
+  renderHeroQuickGrid();
+  renderQuickChecklist();
 });
 
 function isBrowserSubscribed() {
@@ -1639,29 +1752,29 @@ function buildHeroTitle(keywordRaw) {
   }
 
   if (isGuidanceStyleKeyword(lower)) {
-    return `${readableTitle}: Token Risk, Warning Signs & What To Know`;
+    return `${readableTitle}: Token Risk Check, Warning Signs & What To Know`;
   }
 
   if (lower.startsWith("is this ")) {
-    return `${readableTitle}? Token Risk, Warning Signs & What To Know`;
+    return `${readableTitle}? Token Risk Check, Warning Signs & What To Know`;
   }
 
   if (lower.startsWith("is ") && lower.includes(" safe")) {
     const withoutSafe = raw.replace(/\s+safe\b/i, "").trim();
-    return `${displayKeyword(withoutSafe)} Safe? Token Risk, Warning Signs & What To Know`;
+    return `${displayKeyword(withoutSafe)} Safe? Token Risk Check, Warning Signs & What To Know`;
   }
 
   if (lower.startsWith("is ") && lower.includes(" legit")) {
     const withoutLegit = raw.replace(/\s+legit\b/i, "").trim();
-    return `${displayKeyword(withoutLegit)} Legit? Token Risk, Warning Signs & What To Know`;
+    return `${displayKeyword(withoutLegit)} Legit? Token Risk Check, Warning Signs & What To Know`;
   }
 
   if (lower.startsWith("should i buy")) {
-    return `${readableTitle}? Token Risk, Warning Signs & What To Consider`;
+    return `${readableTitle}? Token Risk Check, Warning Signs & What To Consider`;
   }
 
   if (isQuestionStyleKeyword(lower)) {
-    return `${readableTitle}? Token Risk, Warning Signs & What To Know`;
+    return `${readableTitle}? Token Risk Check, Warning Signs & What To Know`;
   }
 
   return `Is ${cleanTitle} Risky? Check Token Risk Before You Buy`;
@@ -1676,7 +1789,7 @@ function buildHeroSubheading(keywordRaw) {
     return "Use the checker below to review token addresses, contract details, project copy, launch pages, and momentum before you buy, connect, or take action.";
   }
 
-  return `Tokens related to ${readableKeyword} can carry structural risk even when the surface looks active. Paste it below before you buy, connect, or move on momentum alone.`;
+  return `Tokens related to ${readableKeyword} can carry structural risk even when the surface looks active. Paste the token address, Dexscreener link, or project copy below before you buy, connect, or move on momentum alone.`;
 }
 
 function buildContentHeading(keywordRaw) {
@@ -1698,7 +1811,7 @@ function buildContentBridge(keywordRaw) {
   const cleanSentenceKeyword = cleanKeywordForSentence(raw) || cleanKeywordBase(raw) || raw;
 
   if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
-    return "Use the checker above to review token addresses, contract details, project copy, launch pages, and hype before you buy, connect, or take action.";
+    return "Use the checker above to review token addresses, contract details, project copy, launch pages, wallet prompts, and hype before you buy, connect, or take action.";
   }
 
   return `${chooseBridgeIntro(cleanSentenceKeyword)} use the checker above before you buy, connect a wallet, approve anything, or act on hype. Weak token structure often looks strongest right before real exposure starts.`;
@@ -1711,6 +1824,107 @@ function setKeywordHeadings() {
   document.getElementById("heroSubheading").textContent = buildHeroSubheading(keywordRaw);
   document.getElementById("contentHeading").textContent = buildContentHeading(keywordRaw);
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
+}
+
+function buildHeroQuickItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return [
+      ["First check", "Verify the claim page, wallet prompt, or approval request away from the original source."],
+      ["Main risk", "A small-looking approval can create much bigger exposure if trust is misplaced."],
+      ["Safest move", "Do not connect or approve until the destination and purpose still make sense after review."]
+    ];
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return [
+      ["First check", "Verify the exact token address before hype, memes, or screenshots shape the decision."],
+      ["Main risk", "Momentum can make weak structure feel stronger than it really is."],
+      ["Safest move", "Slow the buy down until liquidity, exits, and project quality look real."]
+    ];
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    return [
+      ["First check", "Confirm the exact contract address and source before trusting anything else."],
+      ["Main risk", "Address trust is often extended faster than real project review."],
+      ["Safest move", "Review liquidity, pair behavior, and project claims before buying or connecting."]
+    ];
+  }
+
+  return [
+    ["First check", "Verify the exact token address or Dexscreener link before trusting anything else."],
+    ["Then review", "Look at liquidity, trading behavior, project claims, wallet prompts, and buy pressure together."],
+    ["Safest move", "Pause before buying, connecting, approving, or reacting to urgency, hype, or social proof."]
+  ];
+}
+
+function renderHeroQuickGrid() {
+  const wrap = document.getElementById("heroQuickGrid");
+  if (!wrap) return;
+
+  const items = buildHeroQuickItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">${escapeHtml(item[0])}</span>
+      <span class="hero-quick-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
+function buildQuickChecklistItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return [
+      "Check the destination before any wallet connection.",
+      "Treat approval requests as higher risk than they look.",
+      "Ignore urgency tied to claims, rewards, or verification prompts.",
+      "Do not connect until the full flow still looks safe after review."
+    ];
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return [
+      "Verify the exact token address before hype takes over.",
+      "Review liquidity next, not just momentum or price action.",
+      "Assume exits may be weaker than the upside pitch suggests.",
+      "Do not buy fast just because attention looks strong."
+    ];
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    return [
+      "Confirm the exact token or contract address first.",
+      "Check pair activity and liquidity together.",
+      "Treat fast trust in the address as a warning sign.",
+      "Review project quality before money or wallet access is exposed."
+    ];
+  }
+
+  return [
+    "Check the exact token address and source first.",
+    "Review liquidity and current trading activity together.",
+    "Slow down if hype or urgency is doing most of the work.",
+    "Do not buy or connect until the setup still looks solid after review."
+  ];
+}
+
+function renderQuickChecklist() {
+  const title = document.getElementById("quickChecklistTitle");
+  const grid = document.getElementById("quickChecklistGrid");
+  if (!title || !grid) return;
+
+  const cleanTitle = displayCleanKeyword(RAW_KEYWORD || "");
+  title.textContent = cleanTitle
+    ? `Fast ${cleanTitle} risk checklist before you act`
+    : "Fast token risk checklist before you act";
+
+  const items = buildQuickChecklistItems(RAW_KEYWORD || "");
+  grid.innerHTML = items.map(item =>
+    `<div class="quick-checklist-item">${escapeHtml(item)}</div>`
+  ).join("");
 }
 
 function buildRecognitionItems(keywordRaw) {
@@ -1789,8 +2003,8 @@ function applyPreviewCard() {
     return;
   }
 
-  let riskLabel = "Example Risk Pattern";
-  let trustScore = "Pattern Example";
+  let riskLabel = "Common Warning Pattern";
+  let trustScore = "Pattern Snapshot";
   let fillWidth = "18%";
   let sub = "Common structural signals found in similar token risk setups";
   let signals = [
@@ -1819,7 +2033,7 @@ function applyPreviewCard() {
     ];
   } else if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
     riskLabel = "Token Risk Check";
-    trustScore = "Pattern Review";
+    trustScore = "Review Pattern";
     fillWidth = "34%";
     signals = [
       "Review contract, liquidity, and wallet flow",
