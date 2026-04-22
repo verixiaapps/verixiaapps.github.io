@@ -1,4 +1,4 @@
-name: SEO Ranking + Indexing Engine (Identity Layer V5)
+name: SEO Ranking + Indexing Engine (Identity Layer V6)
 
 on:
   schedule:
@@ -51,6 +51,7 @@ jobs:
           const MODE = (process.env.MODE || "rewrite").trim().toLowerCase();
           const LIMIT = Math.max(1, parseInt(process.env.LIMIT || "10", 10) || 10);
           const TARGET_PATH = (process.env.TARGET_PATH || "").trim();
+          const IS_TARGETED_RUN = Boolean(TARGET_PATH);
 
           const SIMILARITY_THRESHOLD = Number(process.env.SIMILARITY_THRESHOLD || "0.82") || 0.82;
 
@@ -62,6 +63,7 @@ jobs:
           const TITLE_COMPARE_WEIGHT = 1.35;
           const BODY_COMPARE_WEIGHT = 1.0;
           const MIN_CONTENT_LENGTH = 180;
+          const TARGET_MIN_CONTENT_LENGTH = 120;
           const MAX_CONTENT_LENGTH = 9000;
           const MAX_CONTEXT_EXCERPT = 1800;
           const MAX_OVERLAP_EXCERPT = 520;
@@ -561,12 +563,12 @@ jobs:
 
             return {
               ...base,
-              editorialGoal: "Rewrite this specific page now. Prioritize a strong, useful, page-specific refresh over strict template validation.",
+              editorialGoal: "Rewrite this specific page now. This is a direct targeted rewrite request, so produce strong, useful, page-specific HTML that can replace the current generated block immediately.",
               structureRules: [
                 "Return HTML only.",
                 "Write a useful replacement block for this page now.",
-                "Prefer 3 h3 sections and one short ul list, but if the content is strong and specific it may still be accepted.",
-                "Keep the block skimmable, practical, and clearly better than generic filler.",
+                "Use short sections and keep it skimmable.",
+                "Prefer 3 h3 sections and one short ul list.",
                 "Aim for roughly 220 to 450 words."
               ],
               validationRequirements: [
@@ -629,7 +631,7 @@ jobs:
             if (content.length > MAX_CONTENT_LENGTH) return false;
 
             const plain = htmlToPlainText(content);
-            if (plain.length < (forceTargetRewrite ? 120 : MIN_CONTENT_LENGTH)) return false;
+            if (plain.length < (forceTargetRewrite ? TARGET_MIN_CONTENT_LENGTH : MIN_CONTENT_LENGTH)) return false;
             if (isGenericContent(plain)) return false;
             if (!looksAdditive(plain, context)) return false;
 
@@ -670,6 +672,40 @@ jobs:
             }
           }
 
+          async function generateTargetedContent(basePayload, context) {
+            const attempts = [
+              {
+                ...basePayload,
+                mode: "ranking_v10_targeted_force_rewrite",
+                seed: `${context.slug}-${Date.now()}-1`
+              },
+              {
+                ...basePayload,
+                mode: "ranking_v10_targeted_force_rewrite_retry",
+                directives: {
+                  ...basePayload.directives,
+                  editorialGoal: "Rewrite this page now with stronger specificity and clearer HTML structure. Use a practical intro, 3 h3 sections, and one short ul list.",
+                  structureRules: [
+                    "Return HTML only.",
+                    "Use one short intro paragraph.",
+                    "Use exactly 3 h3 headings.",
+                    "Include one short ul list.",
+                    "Keep it page-specific and useful.",
+                    "Aim for roughly 220 to 450 words."
+                  ]
+                },
+                seed: `${context.slug}-${Date.now()}-2`
+              }
+            ];
+
+            for (const payload of attempts) {
+              const content = await generate(payload, context, { forceTargetRewrite: true });
+              if (content) return content;
+            }
+
+            throw new Error(`Targeted rewrite failed for ${context.slug}: API returned no usable content`);
+          }
+
           function findMatchingDivEnd(html, openTagStart) {
             let pos = openTagStart;
             let depth = 0;
@@ -708,14 +744,15 @@ jobs:
             return { start, openEnd, end };
           }
 
-          function buildManagedBlock(content) {
-            return `${GENERATED_START}\n${content}\n${GENERATED_END}`;
+          function buildManagedBlock(content, { forceRewriteMarker = false } = {}) {
+            const marker = forceRewriteMarker ? `\n<!-- TARGET_REWRITE:${Date.now()} -->` : "";
+            return `${GENERATED_START}\n${content}${marker}\n${GENERATED_END}`;
           }
 
-          function inject(html, content) {
+          function inject(html, content, { forceRewriteMarker = false } = {}) {
             if (!content) return html;
 
-            const managed = buildManagedBlock(content);
+            const managed = buildManagedBlock(content, { forceRewriteMarker });
 
             const existingStart = html.indexOf(GENERATED_START);
             const existingEnd = html.indexOf(GENERATED_END);
@@ -755,9 +792,8 @@ jobs:
             }
 
             let pages;
-            const isTargetedRun = Boolean(TARGET_PATH);
 
-            if (isTargetedRun) {
+            if (IS_TARGETED_RUN) {
               const single = resolveTargetPath(TARGET_PATH);
               pages = [single];
               console.log("Processing single page:", single);
@@ -799,7 +835,7 @@ jobs:
               return enriched;
             });
 
-            if (!isTargetedRun) {
+            if (!IS_TARGETED_RUN) {
               queue = queue
                 .sort((a, b) => {
                   if (b.qualityScore !== a.qualityScore) {
@@ -817,7 +853,7 @@ jobs:
               );
             }
 
-            if (MODE === "audit" && !isTargetedRun) {
+            if (MODE === "audit" && !IS_TARGETED_RUN) {
               const report = buildAuditReport(queue);
               console.log("AUDIT REPORT:");
               console.log(JSON.stringify(report, null, 2));
@@ -837,36 +873,47 @@ jobs:
               const depth = buildContentDepth(intent, identity);
               const angle = buildSERPAngle(intent, slug.length, identity);
 
-              const directives = isTargetedRun
+              const directives = IS_TARGETED_RUN
                 ? buildTargetedEditorialDirectives(slug, identity, intent, record.context, record.similarity)
                 : buildEditorialDirectives(slug, identity, intent, record.context, record.similarity);
 
-              const apiContent = await generate(
-                {
-                  keyword: keywords,
-                  intent,
-                  angle,
-                  crawl,
-                  depth,
-                  identity,
-                  pageContext: record.context,
-                  directives,
-                  similarity: record.similarity,
-                  mode: isTargetedRun
-                    ? "ranking_v10_targeted_force_rewrite"
-                    : "ranking_v9_editorial_audit_rewrite",
-                  seed: `${slug}-${Date.now()}`
-                },
-                record.context,
-                { forceTargetRewrite: isTargetedRun }
-              );
+              const payload = {
+                keyword: keywords,
+                intent,
+                angle,
+                crawl,
+                depth,
+                identity,
+                pageContext: record.context,
+                directives,
+                similarity: record.similarity,
+                mode: IS_TARGETED_RUN
+                  ? "ranking_v10_targeted_force_rewrite"
+                  : "ranking_v9_editorial_audit_rewrite",
+                seed: `${slug}-${Date.now()}`
+              };
+
+              let apiContent;
+
+              if (IS_TARGETED_RUN) {
+                apiContent = await generateTargetedContent(payload, record.context);
+              } else {
+                apiContent = await generate(payload, record.context, { forceTargetRewrite: false });
+              }
 
               if (!apiContent) {
                 console.log(`Skipped: ${slug}`);
                 continue;
               }
 
-              const updated = inject(html, apiContent);
+              const updated = inject(html, apiContent, { forceRewriteMarker: IS_TARGETED_RUN });
+
+              if (IS_TARGETED_RUN) {
+                fs.writeFileSync(record.path, updated, "utf8");
+                changed = true;
+                console.log(`Force-updated: ${slug}`);
+                continue;
+              }
 
               if (updated !== html) {
                 fs.writeFileSync(record.path, updated, "utf8");
@@ -892,5 +939,5 @@ jobs:
           git config user.name "seo-bot"
           git config user.email "actions@github.com"
           git add scam-check-now
-          git commit -m "SEO engine v10.0 (target page force rewrite)" || echo "No changes"
+          git commit -m "SEO engine v11.0 (target page guaranteed rewrite)" || echo "No changes"
           git push
