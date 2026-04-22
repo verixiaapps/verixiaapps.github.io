@@ -1756,3 +1756,786 @@ Use these keyword-specific hints when useful:
 - Brands/platforms: ${keywordSignals.brandHints.join(", ") || "none forced"}
 - Actions being pushed: ${keywordSignals.actionHints.join(", ") || "none forced"}
 - Timing clues: ${keywordSignals.timingHints.join(", ") ||
+- Timing clues: ${keywordSignals.timingHints.join(", ") || "none forced"}
+
+- Mediums involved: ${keywordSignals.mediumHints.join(", ") || "none forced"}
+
+- Risk objects: ${keywordSignals.riskObjectHints.join(", ") || "none forced"}
+
+Rules:
+
+- Write exactly 4 paragraphs
+
+- Total length about 350 to 490 words
+
+- No headings, bullets, labels, markdown, or numbered lists
+
+- No blog-intro language
+
+- No moralizing
+
+- No generic internet-safety language
+
+- No broad explainer tone
+
+- Do not sound like a generic safety article
+
+- Do not end with advice
+
+- Prefer observed details over explanation
+
+- Prefer visible details over category words
+
+- If the keyword clearly blends two scam layers, let both appear naturally in the copy
+
+- Each paragraph must add new information
+
+- Paragraph 4 must end on fallout, damage, exposure, or loss
+
+- ${variationHint.rhythmStyle}
+
+Specificity requirements:
+
+- Include at least 6 concrete details that feel observed, not explained
+
+- Include at least 2 proof-like details such as quoted wording, a domain, an email, a subject line, a reply-to, an amount, or a UI label
+
+- Include one short realistic message, email line, button label, subject line fragment, or prompt line naturally in the prose
+
+- Include at least one post-click detail such as a login page, payment page, code field, support chat, wallet prompt, or copied portal screen
+
+- Include at least one insight moment where the fake breaks under closer inspection
+
+- If you include a domain, email, or fake portal wording, make it feel specific and slightly imperfect
+
+- Avoid textbook fake examples like "secure-bank-check.com" or "example.com"
+
+Paragraph roles:
+
+- Paragraph 1 should feel normal but slightly wrong. ${variationHint.openerStyle}
+
+- Paragraph 2 should feel pressuring, narrowing, or urgent. ${variationHint.paragraph2Style}
+
+- Paragraph 3 should feel revealing, like pattern recognition. ${variationHint.paragraph3Style}
+
+- Paragraph 4 should feel costly, sharp, and concrete. ${variationHint.paragraph4Style}
+
+The reader should feel: "This sounds like something I just saw."
+
+Output only the 4 paragraphs.
+
+`.trim();
+
+}
+
+function buildSeoUserPrompt(keyword) {
+
+  const cleanKeyword = normalizeSeoKeyword(keyword);
+
+  const seoClass = classifySeoKeyword(keyword);
+
+  const keywordSignals = extractKeywordSignals(keyword);
+
+  const variationHint = buildSeoVariationHint(keyword);
+
+  const contentAngle = pickContentAngle(keyword);
+
+  return `
+
+Write 4 paragraphs of SEO body content for this exact keyword:
+
+"${cleanKeyword}"
+
+Keep it tightly aligned to the keyword and make it feel recent, specific, realistic, and visual.
+
+Must-haves:
+
+- paragraph 1 starts inside a real message, email, page, alert, or call screen
+
+- paragraph 2 visibly tightens pressure
+
+- paragraph 3 shows variations of the same pattern
+
+- paragraph 4 ends on concrete consequences, not generic caution
+
+- include at least 6 observed details
+
+- include at least 2 proof-like details
+
+- include one realistic visible string in quotes if natural
+
+- include one post-click detail
+
+- include one insight moment where the fake breaks or stops making sense
+
+- if the keyword blends categories, let the copy reflect the blend naturally
+
+- avoid broad explainer language
+
+- avoid neat summary tone
+
+- ${variationHint.openerStyle}
+
+- ${variationHint.paragraph2Style}
+
+- ${variationHint.paragraph3Style}
+
+- ${variationHint.paragraph4Style}
+
+- ${variationHint.rhythmStyle}
+
+Primary angle:
+
+${contentAngle.label} — ${contentAngle.description}
+
+Useful source material:
+
+- ${seoClass.openerScenarios.slice(0, 4).join("; ")}
+
+- ${seoClass.urgencyCues.slice(0, 5).join("; ")}
+
+- ${seoClass.variationCues.slice(0, 5).join("; ")}
+
+- ${seoClass.consequenceCues.slice(0, 5).join("; ")}
+
+- ${seoClass.sceneLines.slice(0, 5).join("; ")}
+
+- ${(seoClass.proofHints || []).slice(0, 8).join("; ")}
+
+Keyword-specific context:
+
+- surfaces: ${keywordSignals.contextPhrases.length ? keywordSignals.contextPhrases.join(", ") : "message, email, page, or alert"}
+
+${keywordSignals.quotedPhrases.length ? `- quoted phrase to echo if natural: ${keywordSignals.quotedPhrases.join(", ")}` : ""}
+
+${keywordSignals.brandHints.length ? `- brands/platforms to keep plausible if relevant: ${keywordSignals.brandHints.join(", ")}` : ""}
+
+${keywordSignals.actionHints.length ? `- likely action being pushed: ${keywordSignals.actionHints.join(", ")}` : ""}
+
+${keywordSignals.moneyHints.length ? `- money details that may fit: ${keywordSignals.moneyHints.join(", ")}` : ""}
+
+${keywordSignals.timingHints.length ? `- timing details that may fit: ${keywordSignals.timingHints.join(", ")}` : ""}
+
+${keywordSignals.mediumHints.length ? `- likely mediums involved: ${keywordSignals.mediumHints.join(", ")}` : ""}
+
+${keywordSignals.riskObjectHints.length ? `- likely things at risk: ${keywordSignals.riskObjectHints.join(", ")}` : ""}
+
+`.trim();
+
+}
+
+function buildSeoRewritePrompt(keyword, content) {
+
+  const cleanKeyword = normalizeSeoKeyword(keyword);
+
+  const seoClass = classifySeoKeyword(keyword);
+
+  const keywordSignals = extractKeywordSignals(keyword);
+
+  const variationHint = buildSeoVariationHint(keyword);
+
+  const contentAngle = pickContentAngle(keyword);
+
+  return `
+
+Rewrite this SEO body content for the keyword "${cleanKeyword}".
+
+Make it stronger by:
+
+- opening with a more concrete real-world setup
+
+- adding more visible detail and less explanation
+
+- adding one stronger post-click detail
+
+- adding one stronger insight moment where the fake breaks when checked
+
+- keeping the same general length
+
+- keeping exactly 4 paragraphs
+
+- keeping the writing grounded, restrained, and realistic
+
+- removing repeated ideas and repeated sentence patterns
+
+- if the keyword blends categories, let both show up naturally instead of flattening to one bucket
+
+- avoiding generic fake examples like "secure-bank-check.com"
+
+- ${variationHint.openerStyle}
+
+- ${variationHint.paragraph2Style}
+
+- ${variationHint.paragraph3Style}
+
+- ${variationHint.paragraph4Style}
+
+- ${variationHint.rhythmStyle}
+
+Primary angle:
+
+${contentAngle.label} — ${contentAngle.description}
+
+Strong details for this keyword:
+
+- ${seoClass.openerScenarios.slice(0, 4).join("; ")}
+
+- ${seoClass.urgencyCues.slice(0, 5).join("; ")}
+
+- ${seoClass.variationCues.slice(0, 5).join("; ")}
+
+- ${seoClass.consequenceCues.slice(0, 5).join("; ")}
+
+- ${seoClass.sceneLines.slice(0, 5).join("; ")}
+
+- ${(seoClass.proofHints || []).slice(0, 8).join("; ")}
+
+Keyword-specific context:
+
+- likely surfaces: ${keywordSignals.contextPhrases.length ? keywordSignals.contextPhrases.join(", ") : "message, email, page, or alert"}
+
+${keywordSignals.brandHints.length ? `- plausible brand/platform tone if relevant: ${keywordSignals.brandHints.join(", ")}` : ""}
+
+${keywordSignals.actionHints.length ? `- likely action being pushed: ${keywordSignals.actionHints.join(", ")}` : ""}
+
+${keywordSignals.riskObjectHints.length ? `- likely things at risk: ${keywordSignals.riskObjectHints.join(", ")}` : ""}
+
+Bad output:
+
+- broad scam education
+
+- generic warnings
+
+- repeated transitions
+
+- abstract explanation
+
+- polished AI summary tone
+
+Good output:
+
+- specific
+
+- immediate
+
+- observed
+
+- visual
+
+- diagnostic
+
+- realistic
+
+- slightly uneven in rhythm
+
+Content to improve:
+
+${content}
+
+`.trim();
+
+}
+
+async function requestSeoContent({ systemPrompt, userPrompt, temperature }) {
+
+  let attempt = 0;
+
+  let lastError = null;
+
+  while (attempt < OPENAI_MAX_RETRIES) {
+
+    try {
+
+      const response = await fetchWithTimeout(
+
+        OPENAI_API_URL,
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type": "application/json",
+
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+
+          },
+
+          body: JSON.stringify({
+
+            model: OPENAI_MODEL,
+
+            temperature,
+
+            max_completion_tokens: 1200,
+
+            messages: [
+
+              {
+
+                role: "system",
+
+                content: systemPrompt,
+
+              },
+
+              {
+
+                role: "user",
+
+                content: userPrompt,
+
+              },
+
+            ],
+
+          }),
+
+        },
+
+        OPENAI_TIMEOUT_MS
+
+      );
+
+      const rawText = await response.text();
+
+      let data = {};
+
+      try {
+
+        data = rawText ? JSON.parse(rawText) : {};
+
+      } catch (error) {
+
+        throw new Error(`OpenAI SEO response was not valid JSON: ${rawText.slice(0, 400)}`);
+
+      }
+
+      if (!response.ok) {
+
+        const message = data?.error?.message || `OpenAI SEO request failed with status ${response.status}`;
+
+        const retryableError = new Error(message);
+
+        retryableError.retryable = shouldRetryStatus(response.status);
+
+        throw retryableError;
+
+      }
+
+      return sanitizeSeoContent(data.choices?.[0]?.message?.content || "");
+
+    } catch (error) {
+
+      lastError = error;
+
+      attempt += 1;
+
+      const aborted = error?.name === "AbortError";
+
+      const retryable = aborted || error?.retryable === true;
+
+      if (!retryable || attempt >= OPENAI_MAX_RETRIES) {
+
+        if (aborted) {
+
+          throw new Error(`OpenAI SEO request timed out after ${OPENAI_TIMEOUT_MS}ms`);
+
+        }
+
+        throw error;
+
+      }
+
+      await sleep(500 * attempt);
+
+    }
+
+  }
+
+  throw lastError || new Error("OpenAI SEO request failed");
+
+}
+
+function isUsableSeoCandidate(text, keyword) {
+
+  const content = sanitizeSeoContent(text);
+
+  const paragraphs = splitSeoParagraphs(content);
+
+  if (!content) return false;
+
+  if (paragraphs.length !== 4) return false;
+
+  if (/^[-*•#]/m.test(content)) return false;
+
+  if (/<[a-z][\s\S]*>/i.test(content)) return false;
+
+  if (looksGenericSeo(content)) return false;
+
+  if (countExplainerSignals(content) >= 3) return false;
+
+  if (countDistanceLanguage(content) >= 3) return false;
+
+  if (countWeakTransitions(content) >= 4) return false;
+
+  if (hasDuplicateParagraphStarts(paragraphs)) return false;
+
+  if (hasRepeatedSentenceStarts(paragraphs)) return false;
+
+  const totalWords = seoWordCount(content);
+
+  if (totalWords < 330 || totalWords > 560) return false;
+
+  if (paragraphs.some((p) => paragraphWordCount(p) < 66 || paragraphWordCount(p) > 152)) {
+
+    return false;
+
+  }
+
+  if (countObservedDetailMatches(content) < 5) return false;
+
+  if (countProofSignals(content) < 2) return false;
+
+  if (!paragraphHasHardProof(paragraphs[0] || "")) return false;
+
+  if (hasGenericFakeExamples(content)) return false;
+
+  const premiumSignals = [
+
+    hasPostClickDetail(content),
+
+    hasMessageReconstruction(content),
+
+    countInsightSignals(content) >= 1,
+
+  ].filter(Boolean).length;
+
+  if (premiumSignals < 2) return false;
+
+  const score = scoreSeoContent(content, keyword);
+
+  return score >= 84;
+
+}
+
+async function buildCandidate({ systemPrompt, userPrompt, temperature, keyword }) {
+
+  const raw = await requestSeoContent({ systemPrompt, userPrompt, temperature });
+
+  const sanitized = sanitizeSeoContent(raw);
+
+  const validation = validateSeoCandidate(raw, keyword);
+
+  const finalized = validation.passed ? validation.content : null;
+
+  if (finalized) {
+
+    return {
+
+      content: finalized,
+
+      score: scoreSeoContent(finalized, keyword),
+
+      strictPassed: true,
+
+      reasons: [],
+
+    };
+
+  }
+
+  if (!sanitized) {
+
+    return null;
+
+  }
+
+  if (!isUsableSeoCandidate(sanitized, keyword)) {
+
+    return {
+
+      content: sanitized,
+
+      score: scoreSeoContent(sanitized, keyword),
+
+      strictPassed: false,
+
+      reasons: validation.reasons,
+
+      rejected: true,
+
+    };
+
+  }
+
+  return {
+
+    content: sanitized,
+
+    score: Math.max(1, scoreSeoContent(sanitized, keyword) - 2),
+
+    strictPassed: false,
+
+    reasons: validation.reasons,
+
+  };
+
+}
+
+function buildSeoTemplateFieldsFromContent(content) {
+
+  const paragraphs = splitSeoParagraphs(content);
+
+  return {
+
+    AI_HOOK: paragraphs[0] || "",
+
+    AI_BODY_1: paragraphs[1] || "",
+
+    AI_BODY_2: "",
+
+    AI_SUBHEAD: "What to Watch For",
+
+    AI_BODY_3: paragraphs[2] || "",
+
+    AI_LIST: "",
+
+    AI_CLOSE: paragraphs[3] || "",
+
+  };
+
+}
+
+async function generateSeoTemplateFields(keyword) {
+
+  const content = await generateSeoBestPass(keyword);
+
+  return buildSeoTemplateFieldsFromContent(content);
+
+}
+
+async function collectCandidateSeries({ inputs, cleanKeyword, label, stopWhen }) {
+
+  const candidates = [];
+
+  for (const input of inputs) {
+
+    try {
+
+      const candidate = await buildCandidate(input);
+
+      if (!candidate || candidate.rejected) continue;
+
+      candidates.push(candidate);
+
+      if (stopWhen?.(candidate)) {
+
+        break;
+
+      }
+
+    } catch (error) {
+
+      const descriptor =
+
+        label === "initial" ? `temp ${input.temperature}` : `rewrite ${input.rewriteIndex}`;
+
+      console.error(
+
+        `[SEO] ${label === "initial" ? "Initial" : "Rewrite"} candidate failed for "${cleanKeyword}" at ${descriptor}: ${error.message}`
+
+      );
+
+    }
+
+  }
+
+  return candidates;
+
+}
+
+async function generateSeoBestPass(keyword) {
+
+  const cleanKeyword = normalizeSeoKeyword(keyword);
+
+  const systemPrompt = buildSeoSystemPrompt(cleanKeyword);
+
+  const baseUserPrompt = buildSeoUserPrompt(cleanKeyword);
+
+  const candidateRequests = [
+
+    {
+
+      systemPrompt,
+
+      userPrompt: baseUserPrompt,
+
+      temperature: 0.28,
+
+      keyword: cleanKeyword,
+
+    },
+
+    {
+
+      systemPrompt,
+
+      userPrompt: `${baseUserPrompt}
+
+Additional pass direction:
+
+- make the message reconstruction slightly stronger
+
+- include one stronger domain, sender, reply-to, or subject-line clue if natural
+
+- if the keyword implies a blended scam flow, let both layers show up
+
+- keep the writing restrained, not dramatic`,
+
+      temperature: 0.48,
+
+      keyword: cleanKeyword,
+
+    },
+
+    {
+
+      systemPrompt,
+
+      userPrompt: `${baseUserPrompt}
+
+Additional pass direction:
+
+- make the post-click detail stronger
+
+- make one sentence reveal the tiny mismatch that gives it away
+
+- let one sentence hit shorter and harder
+
+- do not flatten the situation into just one scam bucket if the query blends two`,
+
+      temperature: 0.64,
+
+      keyword: cleanKeyword,
+
+    },
+
+  ];
+
+  const initialCandidates = await collectCandidateSeries({
+
+    inputs: candidateRequests,
+
+    cleanKeyword,
+
+    label: "initial",
+
+    stopWhen: (candidate) =>
+
+      candidate.strictPassed && !looksGenericSeo(candidate.content) && candidate.score >= 93,
+
+  });
+
+  let bestCandidate =
+
+    initialCandidates.filter(Boolean).sort((a, b) => b.score - a.score)[0] || null;
+
+  if (bestCandidate && bestCandidate.score >= 93) {
+
+    return sanitizeSeoContent(bestCandidate.content);
+
+  }
+
+  const rewriteSeed = bestCandidate?.content || "";
+
+  const rewritePromptStrings = [
+
+    buildSeoRewritePrompt(cleanKeyword, rewriteSeed),
+
+    `${buildSeoRewritePrompt(cleanKeyword, rewriteSeed)}
+
+Extra enforcement:
+
+- sharpen paragraph 1 immediately
+
+- make paragraph 2 feel more urgent on the screen, not just in theory
+
+- make paragraph 3 feel more like pattern recognition
+
+- make paragraph 4 feel more expensive and harder to undo
+
+- keep any mixed scam layers visible if the keyword naturally supports them`,
+
+  ];
+
+  const rewriteCandidates = await collectCandidateSeries({
+
+    inputs: rewritePromptStrings.map((userPrompt, index) => ({
+
+      systemPrompt,
+
+      userPrompt,
+
+      temperature: index === 0 ? 0.56 : 0.72,
+
+      keyword: cleanKeyword,
+
+      rewriteIndex: index,
+
+    })),
+
+    cleanKeyword,
+
+    label: "rewrite",
+
+    stopWhen: (candidate) =>
+
+      candidate.strictPassed && !looksGenericSeo(candidate.content) && candidate.score >= 93,
+
+  });
+
+  const allCandidates = [...initialCandidates, ...rewriteCandidates]
+
+    .filter(Boolean)
+
+    .sort((a, b) => b.score - a.score);
+
+  bestCandidate = allCandidates[0] || null;
+
+  if (!bestCandidate) {
+
+    throw new Error(`No usable SEO candidate generated for "${cleanKeyword}"`);
+
+  }
+
+  const bestContent = sanitizeSeoContent(bestCandidate.content);
+
+  if (!isUsableSeoCandidate(bestContent, cleanKeyword)) {
+
+    const validation = validateSeoCandidate(bestContent, cleanKeyword);
+
+    throw new Error(
+
+      `Top SEO candidate failed usable-quality validation for "${cleanKeyword}": ${validation.reasons.join(", ")}`
+
+    );
+
+  }
+
+  return bestContent;
+
+}
+
+export {
+
+  normalizeSeoKeyword,
+
+  generateSeoBestPass,
+
+  generateSeoTemplateFields,
+
+  buildSeoTemplateFieldsFromContent,
+
+};
