@@ -2,33 +2,87 @@ import os
 import re
 import html
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
+
 HUB_FILE_PATH = os.getenv("HUB_FILE_PATH", "token-risk/all/index.html").strip()
 DRY_RUN = os.getenv("DRY_RUN", "false").strip().lower() == "true"
-ROOT_FOLDER = "token-risk"
-URL_PREFIX = "/token-risk/"
+ROOT_FOLDER = os.getenv("ROOT_FOLDER", "token-risk").strip()
+URL_PREFIX = os.getenv("URL_PREFIX", "/token-risk/").strip()
+
 AUTO_START = "<!-- AUTO_HUB_SECTIONS_START -->"
 AUTO_END = "<!-- AUTO_HUB_SECTIONS_END -->"
+
 EXCLUDED_SLUGS = {
     "",
     "all",
     "hub",
     "hubs",
 }
+
 EXCLUDED_PATH_PARTS = {
     "/all/",
     "/hub/",
     "/hubs/",
 }
+
+TITLE_SUFFIXES_TO_STRIP = [
+    " | Token Risk",
+    " - Token Risk",
+]
+
+SECTION_RULES: List[Tuple[str, List[str]]] = [
+    (
+        "Token Safety & Legitimacy",
+        [
+            "safe", "safety", "legit", "legitimate", "real", "fake", "trust",
+            "risky", "risk", "scam", "honeypot", "rug", "rugpull", "rug-pull"
+        ],
+    ),
+    (
+        "Liquidity, Volume & Market Structure",
+        [
+            "liquidity", "volume", "fdv", "market-cap", "market", "cap",
+            "pair", "age", "buyers", "sellers", "slippage", "price",
+            "entry", "exit", "chart", "momentum"
+        ],
+    ),
+    (
+        "Chains & Ecosystems",
+        [
+            "solana", "ethereum", "eth", "base", "bsc", "arbitrum",
+            "polygon", "avalanche", "blast", "sui", "ton", "tron", "bitcoin"
+        ],
+    ),
+    (
+        "Wallets, DEXs & Tools",
+        [
+            "wallet", "metamask", "phantom", "dexscreener",
+            "pancakeswap", "uniswap", "raydium", "jupiter"
+        ],
+    ),
+    (
+        "Meme Coins & Token Types",
+        [
+            "meme", "memecoin", "coin", "crypto", "cto", "token"
+        ],
+    ),
+]
+
+
 def escape_text(text: str) -> str:
     return html.escape(str(text), quote=False)
+
+
 def normalize_path(path: str) -> str:
     return str(path).replace("\\", "/").strip()
+
+
 def slug_to_title(slug: str) -> str:
     text = slug.strip().strip("/")
     if not text:
         return "Untitled Page"
-    words = text.split("-")
+
+    words = [word for word in text.split("-") if word]
     special = {
         "token": "Token",
         "risk": "Risk",
@@ -46,6 +100,7 @@ def slug_to_title(slug: str) -> str:
         "action": "Action",
         "change": "Change",
         "rug": "Rug",
+        "rugpull": "Rug Pull",
         "honeypot": "Honeypot",
         "safe": "Safe",
         "legit": "Legit",
@@ -80,10 +135,12 @@ def slug_to_title(slug: str) -> str:
         "trust": "Trust",
         "wallet": "Wallet",
         "cto": "CTO",
+        "marketcap": "Market Cap",
     }
     lower_words = {
         "a", "an", "and", "or", "the", "to", "for", "of", "in", "on", "from", "with", "vs"
     }
+
     out: List[str] = []
     for i, word in enumerate(words):
         lower = word.lower()
@@ -93,7 +150,10 @@ def slug_to_title(slug: str) -> str:
             out.append(lower)
         else:
             out.append(lower.capitalize())
+
     return " ".join(out).strip()
+
+
 def extract_slug_from_file(file_path: Path, root_folder: str) -> str:
     relative = normalize_path(str(file_path.relative_to(root_folder)))
     if relative == "index.html":
@@ -101,13 +161,23 @@ def extract_slug_from_file(file_path: Path, root_folder: str) -> str:
     if not relative.endswith("/index.html"):
         raise ValueError(f"Unexpected page path: {file_path}")
     return relative[:-11].strip("/")
+
+
 def extract_title_from_html(content: str) -> str:
     match = re.search(r"<title\b[^>]*>(.*?)</title>", content, flags=re.IGNORECASE | re.DOTALL)
     if not match:
         return ""
     return re.sub(r"\s+", " ", match.group(1)).strip()
+
+
 def clean_title(title: str) -> str:
-    return html.unescape(re.sub(r"\s+", " ", title).strip())
+    cleaned = html.unescape(re.sub(r"\s+", " ", title).strip())
+    for suffix in TITLE_SUFFIXES_TO_STRIP:
+        if cleaned.endswith(suffix):
+            cleaned = cleaned[:-len(suffix)].rstrip()
+    return cleaned
+
+
 def choose_display_title(file_path: Path, slug: str) -> str:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -117,64 +187,159 @@ def choose_display_title(file_path: Path, slug: str) -> str:
     except Exception:
         pass
     return slug_to_title(slug)
+
+
 def normalize_url_prefix(url_prefix: str) -> str:
     prefix = "/" + url_prefix.strip("/") + "/"
     return prefix if prefix != "//" else "/"
+
+
 def get_hub_slug_from_path(hub_path: Path) -> str:
     normalized = normalize_path(str(hub_path))
     if not normalized.endswith("/index.html") and normalized != "index.html":
         raise ValueError(f"HUB_FILE_PATH must point to an index.html file: {normalized}")
-    relative = normalized[:-10].strip("/")
-    return relative
+
+    if normalized == "index.html":
+        return ""
+
+    return normalized[:-10].strip("/")
+
+
 def build_public_url(site_base: str, url_path: str) -> str:
     clean_path = url_path.strip("/")
     if not clean_path:
         return f"{site_base.rstrip('/')}/"
     return f"{site_base.rstrip('/')}/{clean_path}/"
+
+
 def should_skip_slug(slug: str, normalized_path: str, hub_slug: str) -> bool:
     if not slug:
         return True
+
     slug_lower = slug.lower().strip("/")
+
     if slug_lower in EXCLUDED_SLUGS:
         return True
+
     if hub_slug and slug_lower == hub_slug.lower().strip("/"):
         return True
+
     if normalized_path.endswith("/token-risk/index.html"):
         return True
+
     for part in EXCLUDED_PATH_PARTS:
         if part in normalized_path:
             return True
+
     return False
+
+
+def build_sort_key(slug: str, title: str) -> str:
+    return f"{slug.lower()}::{title.lower()}"
+
+
 def discover_pages(root_folder: str, url_prefix: str, hub_slug: str) -> List[Dict[str, str]]:
     folder = Path(root_folder)
     if not folder.exists():
         return []
+
     pages: List[Dict[str, str]] = []
     normalized_prefix = normalize_url_prefix(url_prefix)
+
     for file_path in sorted(folder.rglob("index.html")):
         if not file_path.is_file():
             continue
+
         normalized = normalize_path(str(file_path))
+
         try:
             slug = extract_slug_from_file(file_path, root_folder)
         except ValueError:
             continue
+
         if should_skip_slug(slug, normalized, hub_slug):
             continue
+
         href = f"{normalized_prefix}{slug}/"
         title = choose_display_title(file_path, slug)
+
         pages.append(
             {
                 "title": title,
                 "href": href,
                 "slug": slug,
-                "sort_key": slug.lower(),
+                "sort_key": build_sort_key(slug, title),
             }
         )
+
     pages.sort(key=lambda x: x["sort_key"])
     return pages
+
+
+def tokenize_for_matching(value: str) -> List[str]:
+    cleaned = re.sub(r"[^a-z0-9]+", " ", value.lower())
+    return [part for part in cleaned.split() if part]
+
+
+def matches_keyword(tokens: List[str], combined_text: str, keyword: str) -> bool:
+    keyword = keyword.lower().strip()
+    if not keyword:
+        return False
+
+    if keyword in combined_text:
+        return True
+
+    if keyword in tokens:
+        return True
+
+    if "-" in keyword and keyword.replace("-", " ") in combined_text:
+        return True
+
+    if " " in keyword and keyword.replace(" ", "-") in combined_text:
+        return True
+
+    return False
+
+
+def classify_pages(pages: List[Dict[str, str]]) -> List[Tuple[str, List[Dict[str, str]]]]:
+    section_map: Dict[str, List[Dict[str, str]]] = {name: [] for name, _ in SECTION_RULES}
+    other_pages: List[Dict[str, str]] = []
+
+    for page in pages:
+        slug = page["slug"]
+        title = page["title"]
+        combined_text = f"{slug} {title}".lower()
+        tokens = tokenize_for_matching(combined_text)
+
+        matched_section = None
+        for section_name, keywords in SECTION_RULES:
+            if any(matches_keyword(tokens, combined_text, keyword) for keyword in keywords):
+                matched_section = section_name
+                break
+
+        if matched_section:
+            section_map[matched_section].append(page)
+        else:
+            other_pages.append(page)
+
+    output: List[Tuple[str, List[Dict[str, str]]]] = []
+    for section_name, _keywords in SECTION_RULES:
+        output.append((section_name, sorted(section_map[section_name], key=lambda x: x["sort_key"])))
+
+    if other_pages:
+        output.append(("Other Token Risk Pages", sorted(other_pages, key=lambda x: x["sort_key"])))
+
+    return output
+
+
+def slugify_for_id(value: str) -> str:
+    value = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return value or "section"
+
+
 def build_section_html(section_title: str, pages: List[Dict[str, str]], section_id: str) -> str:
     count_text = f"{len(pages)} page" if len(pages) == 1 else f"{len(pages)} pages"
+
     if pages:
         items = "\n".join(
             f'          <li><a href="{escape_text(page["href"])}">{escape_text(page["title"])}</a></li>'
@@ -182,6 +347,7 @@ def build_section_html(section_title: str, pages: List[Dict[str, str]], section_
         )
     else:
         items = "          <li>No token risk pages found yet.</li>"
+
     return f"""      <div class="hub-section-card" id="{escape_text(section_id)}">
         <div class="hub-section-top">
           <div class="hub-section-kicker">Auto grouped section</div>
@@ -192,20 +358,25 @@ def build_section_html(section_title: str, pages: List[Dict[str, str]], section_
 {items}
         </ul>
       </div>"""
+
+
 def build_auto_sections(hub_slug: str) -> str:
     pages = discover_pages(ROOT_FOLDER, URL_PREFIX, hub_slug)
     total_pages = len(pages)
+    grouped_sections = classify_pages(pages)
+    section_count = sum(1 for _name, section_pages in grouped_sections if section_pages)
+
     summary_block = f"""      <div class="content-bridge">
         <div class="bridge-kicker">Live token risk overview</div>
-        This hub pulls in published token risk pages from the token-risk folder so visitors can browse liquidity, volume, FDV, pair age, rug, honeypot, safety, buy-intent, and chain-specific topics from one premium index page.
+        This hub pulls in published token risk pages from the token-risk folder so visitors can browse token safety, legitimacy, liquidity, volume, FDV, pair age, rug, honeypot, wallets, tools, and chain-specific topics from one premium index page.
         <div class="hub-stats-row">
           <div class="hub-stat-card">
             <div class="hub-stat-label">Pages linked</div>
             <div class="hub-stat-value">{total_pages}</div>
           </div>
           <div class="hub-stat-card">
-            <div class="hub-stat-label">Folder covered</div>
-            <div class="hub-stat-value">1</div>
+            <div class="hub-stat-label">Sections</div>
+            <div class="hub-stat-value">{section_count}</div>
           </div>
           <div class="hub-stat-card">
             <div class="hub-stat-label">Refresh mode</div>
@@ -213,14 +384,34 @@ def build_auto_sections(hub_slug: str) -> str:
           </div>
         </div>
       </div>"""
+
+    section_blocks: List[str] = []
+    for section_name, section_pages in grouped_sections:
+        if not section_pages:
+            continue
+        section_blocks.append(
+            build_section_html(
+                section_title=section_name,
+                pages=section_pages,
+                section_id=f"auto-{slugify_for_id(section_name)}",
+            )
+        )
+
+    if not section_blocks:
+        section_blocks.append(
+            build_section_html(
+                section_title="Token Risk Pages",
+                pages=[],
+                section_id="auto-token-risk-pages",
+            )
+        )
+
     grid_open = '      <div class="hub-grid">'
     grid_close = "      </div>"
-    section_block = build_section_html(
-        section_title="Token Risk Pages",
-        pages=pages,
-        section_id="auto-token-risk-pages",
-    )
-    return "\n".join([summary_block, grid_open, section_block, grid_close])
+
+    return "\n".join([summary_block, grid_open, *section_blocks, grid_close])
+
+
 def build_starter_hub_html(canonical_url: str) -> str:
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -737,26 +928,38 @@ body{{padding-top:84px;}}
 </body>
 </html>
 """
+
+
 def ensure_hub_parents_exist(hub_path: Path) -> None:
     parent = hub_path.parent
     if parent.exists():
         return
+
     if DRY_RUN:
         print(f"WOULD CREATE DIRECTORY: {parent}")
         return
+
     parent.mkdir(parents=True, exist_ok=True)
     print(f"CREATED DIRECTORY: {parent}")
+
+
 def write_text_if_needed(path: Path, content: str) -> None:
     if DRY_RUN:
         print(f"WOULD WRITE FILE: {path}")
         return
+
     path.write_text(content, encoding="utf-8", newline="")
     print(f"WROTE FILE: {path}")
+
+
 def load_or_build_hub_html(hub_path: Path, canonical_url: str) -> str:
     if hub_path.exists():
         return hub_path.read_text(encoding="utf-8")
+
     print(f"HUB FILE NOT FOUND, BUILDING STARTER SHELL: {hub_path}")
     return build_starter_hub_html(canonical_url)
+
+
 def replace_auto_section(content: str, new_inner_html: str) -> str:
     pattern = re.compile(
         rf"({re.escape(AUTO_START)})(.*?)({re.escape(AUTO_END)})",
@@ -764,32 +967,48 @@ def replace_auto_section(content: str, new_inner_html: str) -> str:
     )
     replacement = f"{AUTO_START}\n{new_inner_html}\n{AUTO_END}"
     updated, count = pattern.subn(replacement, content, count=1)
+
     if count == 0:
         raise ValueError(
             f"Hub file must contain markers:\n{AUTO_START}\n...\n{AUTO_END}"
         )
+
     return updated
+
+
 def process_hub() -> bool:
     hub_path = Path(HUB_FILE_PATH)
     hub_slug = get_hub_slug_from_path(hub_path)
     canonical_url = build_public_url("https://verixiaapps.com", hub_slug)
+
     ensure_hub_parents_exist(hub_path)
+
     original = load_or_build_hub_html(hub_path, canonical_url)
     auto_sections = build_auto_sections(hub_slug)
     updated = replace_auto_section(original, auto_sections)
+
     if updated == original:
         print("NO CHANGE: hub already up to date")
         return False
+
     write_text_if_needed(hub_path, updated)
     print(f"UPDATED HUB CONTENT: {HUB_FILE_PATH}")
     return True
+
+
 def main() -> None:
     print(f"DRY_RUN={DRY_RUN}")
     print(f"HUB_FILE_PATH={HUB_FILE_PATH}")
+    print(f"ROOT_FOLDER={ROOT_FOLDER}")
+    print(f"URL_PREFIX={URL_PREFIX}")
+
     changed = process_hub()
+
     if changed:
         print("Hub refresh complete.")
     else:
         print("Hub refresh complete. Nothing changed.")
+
+
 if __name__ == "__main__":
     main()
