@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/is-fedex-customs-charge-email-legit-or-scam/index.html";
+const TARGET_PAGE = "scam-check-now/is-security-alert-message-legit-or-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -21,12 +21,12 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  "FedEx Customs Charge Email: Scam or Legit? Warning Signs & What To Do";
+  "Security Alert Message: Scam or Legit? Warning Signs & What To Do";
 
 const NEW_META =
-  "Got a FedEx customs charge email asking for payment? Learn the biggest warning signs, fake delivery fee tricks, and what to do before you click, enter payment details, or verify shipment information.";
+  "Got a security alert message about unusual activity, a login attempt, or account trouble? Learn the warning signs and what to do before you click a link or share a code.";
 
-const NEW_RAW_KEYWORD = "FedEx customs charge email";
+const NEW_RAW_KEYWORD = "security alert message";
 
 const NEW_INSTANT_VERDICT_CARD = `
   <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:-6px auto 12px;padding:0 14px;">
@@ -41,11 +41,11 @@ const NEW_INSTANT_VERDICT_CARD = `
       </div>
 
       <div style="font-size:15px;font-weight:800;color:#e6f0ff;margin-bottom:4px;">
-        Likely fake delivery fee or customs payment request
+        Could be a fake account warning, phishing alert, or login trap
       </div>
 
       <div style="font-size:15px;font-weight:900;color:#ffffff;">
-        Do not click the payment link inside the message. Check the shipment only through the official FedEx site or app you open yourself.
+        Do not use the link inside the alert until you verify the issue through the official app or website you open yourself.
       </div>
 
     </div>
@@ -59,15 +59,15 @@ const NEW_TOP_BLOCK = `
         Updated April 2026
       </div>
       <div style="font-size:15px;font-weight:800;line-height:1.6;color:#e6f0ff;">
-        People are still receiving FedEx customs charge emails claiming:
+        People are still receiving security alert messages claiming:
       </div>
       <ul style="margin:10px 0 0 18px;color:#d7e4f8;font-weight:800;line-height:1.6;">
-        <li>“Your package is being held at customs”</li>
-        <li>“Pay a small fee to release delivery”</li>
-        <li>“Complete payment now to avoid return or delay”</li>
+        <li>“Unusual sign-in attempt detected”</li>
+        <li>“Your account may be locked”</li>
+        <li>“Verify your identity immediately”</li>
       </ul>
       <div style="margin-top:10px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">
-        These messages often lead to fake FedEx payment or tracking pages designed to steal card details, personal information, or account access.
+        These messages often lead to fake login or verification pages designed to steal passwords, security codes, or account access.
       </div>
     </div>
   </div>
@@ -77,10 +77,10 @@ const NEW_SEO_CONTENT = `
 <div class="story-stack">
   <article class="story-card lead">
     <div class="story-card-title">
-      <span class="story-card-title-icon">📦</span>
-      <span>What this FedEx customs charge email often looks like</span>
+      <span class="story-card-title-icon">🚨</span>
+      <span>What this security alert message often looks like</span>
     </div>
-    <p>A FedEx customs charge email usually claims your package is delayed, held at customs, or waiting for a small payment before delivery can continue. The message is built to feel routine so you act fast before stopping to verify whether the shipment problem is real.</p>
+    <p>A security alert message usually claims there was an unusual login, suspicious activity, a password problem, or an account issue that needs immediate attention. The message is designed to feel urgent enough that you react before checking whether the alert is real.</p>
   </article>
 
   <article class="story-card">
@@ -88,15 +88,15 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">⏱️</span>
       <span>Where the pressure starts</span>
     </div>
-    <p>Most versions push urgency right away. They may warn that your shipment will be returned, cancelled, or delayed unless you pay immediately. That pressure is the point. Scammers want a fast click before you notice the sender, domain, or payment page does not fully add up.</p>
+    <p>Most versions create urgency immediately. They may warn that your account will be locked, suspended, or restricted unless you act now. That pressure is the point. Scammers want a fast click before you inspect the sender, domain, or login page closely.</p>
   </article>
 
   <article class="story-card">
     <div class="story-card-title">
-      <span class="story-card-title-icon">💳</span>
+      <span class="story-card-title-icon">🔐</span>
       <span>What scammers usually want</span>
     </div>
-    <p>The goal is often payment information, personal details, or both. Fake FedEx customs pages may ask for a small release fee, billing details, address confirmation, or other information that can later be used for larger charges or fraud.</p>
+    <p>The goal is often your password, verification code, or other recovery details. Some fake security alerts also try to collect billing details or personal information. Once those details are handed over, the attacker may try to take over the account or use it to target more accounts.</p>
   </article>
 
   <article class="story-card">
@@ -104,7 +104,7 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">🧭</span>
       <span>How to verify it safely</span>
     </div>
-    <p>The safest check is simple: do not use the link inside the email. Open FedEx yourself, check the tracking number through the official site or app, and only trust delivery or customs information you verify independently.</p>
+    <p>The safest check is simple: do not use the link inside the alert. Open the official app or website yourself, review your account activity there, and only trust security information you verify outside the message that reached you.</p>
   </article>
 
   <article class="story-card">
@@ -112,7 +112,7 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">✅</span>
       <span>What to do next</span>
     </div>
-    <p>If you have not clicked, stop there and verify the shipment through official channels before doing anything else. If you already clicked or entered payment details, treat it as urgent, monitor your card activity, and secure any information you shared.</p>
+    <p>If you have not clicked, stop there and check the real account directly. If you already clicked or entered any details, treat it as urgent, secure the affected account, update important credentials if needed, and review recent activity for anything suspicious.</p>
   </article>
 
   <article class="story-card">
@@ -120,7 +120,7 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">⚠️</span>
       <span>Key safety rule</span>
     </div>
-    <p>If the customs problem only feels real when you use the link inside the email, that is a strong warning sign. A real delivery issue should still be verifiable without relying on the message itself.</p>
+    <p>If the account problem only feels real when you use the link inside the message, that is a strong warning sign. A real security issue should still be verifiable through the official service you open on your own.</p>
   </article>
 </div>
 `;
@@ -129,66 +129,66 @@ const NEW_EXAMPLE_CARD = `
     <div class="story-card" id="realExamplesCard">
       <div class="story-card-title">
         <span class="story-card-title-icon">📩</span>
-        <span>Common FedEx Customs Charge Email Examples</span>
+        <span>Common Security Alert Message Examples</span>
       </div>
-      <p>Reports show people receiving FedEx-style emails saying a package is on hold, a customs fee is due, or a small payment is needed before delivery can continue. These messages usually make the request sound routine and low-risk.</p>
-      <p style="margin-top:14px;">Most versions include a payment button, tracking link, or fake support prompt telling you to release the shipment, confirm delivery details, or pay a customs charge immediately. These pages are often built to collect card details, personal information, or both.</p>
-      <p style="margin-top:14px;">Some versions also create urgency by warning that the package will be returned, cancelled, or delayed within hours if you do not pay right away. Small fees are often used because they feel believable and easy to approve without much thought.</p>
-      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the delivery problem only feels legitimate when you use the payment link inside the email, that is a strong warning sign. A real shipment issue should still be verifiable directly through official FedEx tracking.</div>
+      <p>Reports show people receiving messages that say there was a suspicious login, unusual activity, or an urgent need to verify account identity. These alerts often look routine because they copy the wording people expect from real security systems.</p>
+      <p style="margin-top:14px;">Most versions include a login button, verification link, or account recovery prompt that leads to a fake page. That page may ask for your password, security code, recovery details, or other information that gives the attacker access.</p>
+      <p style="margin-top:14px;">Some versions also create extra pressure by warning that your account will be locked, suspended, or restricted within minutes if you do not act right away. That urgency is one of the biggest warning signs.</p>
+      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the warning only feels legitimate when you use the link inside the alert, that is a strong warning sign. A real security issue should still be verifiable directly through the official service.</div>
     </div>
 `;
 
 const NEW_RELATED_LINKS = [
   {
-    href: "/scam-check-now/is-ups-delivery-text-legit-or-scam/",
-    text: "Is UPS Delivery Text Legit or a Scam?"
+    href: "/scam-check-now/is-google-security-alert-message-legit-or-scam/",
+    text: "Is Google Security Alert Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-fedex-delivery-legit-or-scam/",
-    text: "Is FedEx Delivery Message Legit or a Scam?"
+    href: "/scam-check-now/is-google-unusual-activity-message-legit-or-scam/",
+    text: "Is Google Unusual Activity Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-tracking-text-legit-or-scam/",
-    text: "Is USPS Tracking Text Legit or a Scam?"
+    href: "/scam-check-now/is-google-verification-code-message-legit-or-scam/",
+    text: "Is Google Verification Code Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/package-delivery-scams/",
-    text: "Package Delivery Scam Hub"
+    href: "/scam-check-now/is-instagram-login-alert-legit-or-scam/",
+    text: "Is Instagram Login Alert Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-amazon-delivery-problem-email-legit-or-scam/",
-    text: "Is Amazon Delivery Problem Email Legit or a Scam?"
+    href: "/scam-check-now/is-facebook-security-alert-email-legit-or-scam/",
+    text: "Is Facebook Security Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-missed-delivery-text-legit-or-scam/",
-    text: "Is Missed Delivery Text Legit or a Scam?"
+    href: "/scam-check-now/is-whatsapp-security-alert-legit-or-scam/",
+    text: "Is WhatsApp Security Alert Legit or a Scam?"
   }
 ];
 
 const NEW_MORE_LINKS = [
   {
-    href: "/scam-check-now/is-bank-account-closure-email-legit-or-scam/",
-    text: "Is Bank Account Closure Email Legit or a Scam?"
-  },
-  {
-    href: "/scam-check-now/is-paypal-security-alert-message-real-or-fake/",
-    text: "Is PayPal Security Alert Message Real or Fake?"
-  },
-  {
-    href: "/scam-check-now/is-amazon-refund-email-legit-or-scam/",
-    text: "Is Amazon Refund Email Legit or a Scam?"
+    href: "/scam-check-now/google-account-suspension-email-scam/",
+    text: "Is Google Account Suspension Email a Scam?"
   },
   {
     href: "/scam-check-now/is-google-account-disabled-email-legit-or-scam/",
     text: "Is Google Account Disabled Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-background-check-email-asking-for-payment-legit-or-scam/",
-    text: "Is Background Check Email Asking For Payment Legit or a Scam?"
+    href: "/scam-check-now/is-instagram-security-alert-email-legit-or-scam/",
+    text: "Is Instagram Security Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-apple-wallet-billing-email-legit-or-scam/",
-    text: "Is Apple Wallet Billing Email Legit or a Scam?"
+    href: "/scam-check-now/is-instagram-suspicious-login-alert-legit-or-scam/",
+    text: "Is Instagram Suspicious Login Alert Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-apple-account-verification-email-legit-or-scam/",
+    text: "Is Apple Account Verification Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-paypal-security-alert-message-real-or-fake/",
+    text: "Is PayPal Security Alert Message Real or Fake?"
   }
 ];
 
@@ -198,26 +198,26 @@ const NEW_FAQ_JSONLD = `{
   "mainEntity":[
     {
       "@type":"Question",
-      "name":"Is a FedEx customs charge email always a scam?",
+      "name":"Is a security alert message always a scam?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"No. Customs or delivery fees can sometimes be real, but scammers frequently copy FedEx-style payment requests to steal card details or personal information. The safest approach is to verify any shipment issue directly through the official FedEx site or app, not through the link in the email."
+        "text":"No. Security alerts can sometimes be real, but scammers frequently copy account-warning messages to steal passwords, security codes, or account access. The safest approach is to verify the alert directly through the official app or website, not through the link in the message."
       }
     },
     {
       "@type":"Question",
-      "name":"How can I tell if a FedEx customs charge email is fake?",
+      "name":"How can I tell if a security alert message is fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Common warning signs include urgent payment pressure, suspicious links, requests for card details, vague shipment information, and messages warning that the package will be returned unless you act immediately. A real delivery issue should still be verifiable outside the message itself."
+        "text":"Common warning signs include urgent pressure, suspicious links, unexpected login warnings, requests for passwords or verification codes, and messages warning that your account will be locked unless you act immediately. A real issue should still be verifiable outside the message itself."
       }
     },
     {
       "@type":"Question",
-      "name":"What should I do if I clicked a FedEx customs charge email?",
+      "name":"What should I do if I clicked a security alert message?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"If you clicked the link or entered any details, treat it as urgent. Monitor your payment accounts, secure any information you shared, and verify the shipment only through the official FedEx site or app you opened yourself."
+        "text":"If you clicked the link or entered any details, treat it as urgent. Secure the affected account, review recent activity, and verify the alert only through the official app or website you opened yourself."
       }
     }
   ]
@@ -225,18 +225,18 @@ const NEW_FAQ_JSONLD = `{
 
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
-      <h3>FedEx Customs Charge Email FAQ</h3>
+      <h3>Security Alert Message FAQ</h3>
       <div class="content-body">
-        <p><strong>Is a FedEx customs charge email always a scam?</strong><br>No. Customs or delivery fees can sometimes be real, but scammers frequently copy FedEx-style payment requests to steal card details or personal information. The safest approach is to verify any shipment issue directly through the official FedEx site or app, not through the link in the email.</p>
-        <p><strong>How can I tell if a FedEx customs charge email is fake?</strong><br>Common warning signs include urgent payment pressure, suspicious links, requests for card details, vague shipment information, and messages warning that the package will be returned unless you act immediately. A real delivery issue should still be verifiable outside the message itself.</p>
-        <p><strong>What should I do if I clicked a FedEx customs charge email?</strong><br>If you clicked the link or entered any details, treat it as urgent. Monitor your payment accounts, secure any information you shared, and verify the shipment only through the official FedEx site or app you opened yourself.</p>
+        <p><strong>Is a security alert message always a scam?</strong><br>No. Security alerts can sometimes be real, but scammers frequently copy account-warning messages to steal passwords, security codes, or account access. The safest approach is to verify the alert directly through the official app or website, not through the link in the message.</p>
+        <p><strong>How can I tell if a security alert message is fake?</strong><br>Common warning signs include urgent pressure, suspicious links, unexpected login warnings, requests for passwords or verification codes, and messages warning that your account will be locked unless you act immediately. A real issue should still be verifiable outside the message itself.</p>
+        <p><strong>What should I do if I clicked a security alert message?</strong><br>If you clicked the link or entered any details, treat it as urgent. Secure the affected account, review recent activity, and verify the alert only through the official app or website you opened yourself.</p>
       </div>
     </div>
 `;
 
 const NEW_HUB_LINK = `
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="/scam-check-now/package-delivery-scams/">Package Delivery Scam Hub</a>
+      <a href="/scam-check-now/general-scams/">Scam Hub</a>
     </div>
 `;
 
@@ -380,14 +380,14 @@ function replaceWebPageJsonLd(html) {
 
       if (NEW_TITLE) {
         next = next.replace(
-          /"name":"([^"\\\\]|\\\\.)*"/i,
+          /"name":"([^"\\]|\\.)*"/i,
           `"name":"${escapeJsonString(NEW_TITLE)}"`
         );
       }
 
       if (NEW_META) {
         next = next.replace(
-          /"description":"([^"\\\\]|\\\\.)*"/i,
+          /"description":"([^"\\]|\\.)*"/i,
           `"description":"${escapeJsonString(NEW_META)}"`
         );
       }
@@ -554,15 +554,15 @@ function replacePreviewSignals(html) {
     "Payment request via gift card"
   ];
 
-  if (containsAny(lower, ["fedex", "delivery", "package", "shipment", "parcel", "customs"])) {
+  if (containsAny(lower, ["security", "alert", "login", "sign-in", "account"])) {
     riskLabel = "Example Risk Pattern";
-    trustScore = "Delivery Risk Example";
+    trustScore = "Account Risk Example";
     fillWidth = "24%";
-    sub = "Common signals found in similar customs fee and delivery payment scams";
+    sub = "Common signals found in similar account-warning and login scams";
     signals = [
-      "Urgent delivery or customs payment request",
-      "Link may lead to a fake tracking or payment page",
-      "Requests for card details or shipment verification"
+      "Unexpected security warning",
+      "Link may lead to a fake login or verification page",
+      "Requests for passwords or security codes"
     ];
   } else if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
     signals = [
@@ -575,6 +575,12 @@ function replacePreviewSignals(html) {
       "Urgent transfer or wallet request",
       "High-return or recovery promise",
       "Support or investment impersonation risk"
+    ];
+  } else if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    signals = [
+      "Tracking or delivery pressure",
+      "Link may lead to a fake page",
+      "Small payment or verification request"
     ];
   } else if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
     signals = [
@@ -617,13 +623,13 @@ function replacePreviewSignals(html) {
   return updated;
 }
 
-function replaceFedexSeoCardTitles(html) {
+function replaceSecuritySeoCardTitles(html) {
   const updated = html.replace(
-    /return \[\s*\["📦",\s*"What this delivery setup often looks like"\],\s*\["⏱️",\s*"Where the message pushes quick action"\],\s*\["🔁",\s*"How the carrier story changes across versions"\],\s*\["💥",\s*"What happens after the click or payment"\]\s*\];/i,
+    /return \[\s*\["👀",\s*"What this usually looks like"\],\s*\["⏱️",\s*"Where the pressure starts"\],\s*\["🔁",\s*"How the pattern changes"\],\s*\["💥",\s*"What can happen next"\]\s*\];/i,
     `return [
-      ["📦", "What this FedEx customs charge email often looks like"],
+      ["🚨", "What this security alert message often looks like"],
       ["⏱️", "Where the pressure starts"],
-      ["💳", "What scammers usually want"],
+      ["🔐", "What scammers usually want"],
       ["🧭", "How to verify it safely"],
       ["✅", "What to do next"],
       ["⚠️", "Key safety rule"]
@@ -631,11 +637,11 @@ function replaceFedexSeoCardTitles(html) {
   );
 
   if (updated === html) {
-    console.warn("No change for fedex seo card titles");
+    console.warn("No change for security seo card titles");
     return html;
   }
 
-  console.log("Updated fedex seo card titles");
+  console.log("Updated security seo card titles");
   return updated;
 }
 
@@ -802,7 +808,7 @@ updated = upsertFaqJsonLd(updated);
 updated = replaceFreshnessBlock(updated);
 updated = insertInstantVerdictCard(updated);
 updated = replacePreviewSignals(updated);
-updated = replaceFedexSeoCardTitles(updated);
+updated = replaceSecuritySeoCardTitles(updated);
 updated = replaceSeoContent(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
