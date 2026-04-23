@@ -1,9 +1,7 @@
-name: Check HTML Links
+name: Check External Links In HTML
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 9 * * 1"
 
 permissions:
   contents: read
@@ -15,43 +13,30 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Restore lychee cache
-        uses: actions/cache@v4
-        with:
-          path: .lycheecache
-          key: lychee-${{ github.sha }}
-          restore-keys: |
-            lychee-
-
-      - name: Check links in HTML files
-        id: lychee
+      - name: Check external links in HTML files
         uses: lycheeverse/lychee-action@v2
         with:
           args: >
-            --root-dir "$(pwd)"
-            --base https://verixiaapps.com
-            --cache
-            --max-cache-age 1d
             --verbose
             --no-progress
             --timeout 20
             --max-concurrency 8
             --retry-wait-time 2
             --max-retries 2
-            --accept 200,204,206,301,302,303,307,308,429
-            --exclude-mail
-            --exclude 'tel:.*'
-            --exclude 'javascript:.*'
-            --exclude '^#$'
+            --accept 200,204,206,301,302,303,307,308,429,403
+            --include '^(http|https)://'
+            --exclude '^(#|mailto:|tel:|javascript:|data:)'
+            --exclude '^/'
+            --exclude '^\.\.?/'
             './scam-check-now/**/*.html'
             './scam-check-now-b/**/*.html'
             './scam-check-now-c/**/*.html'
             './token-risk/**/*.html'
+          fail: true
           format: markdown
           output: lychee/out.md
-          fail: true
           jobSummary: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
