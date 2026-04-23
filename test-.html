@@ -297,3 +297,290 @@ function getCacheEntry(key) {
 function setCacheEntry(key, value) {
   CONTEXT_CACHE.set(key, { ts: Date.now(), value });
 }
+
+/* =========================
+   TEXT SANITIZING / SHAPE
+========================= */
+
+function splitSeoParagraphs(text) {
+  return String(text || "")
+    .replace(/\r/g, "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+function sanitizeSeoContent(text) {
+  const cleaned = String(text || "")
+    .replace(/\r/g, "")
+    .replace(/\*\*/g, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^[*-]\s+/gm, "")
+    .replace(/^"+|"+$/g, "")
+    .replace(/^'+|'+$/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  const paragraphs = splitSeoParagraphs(cleaned).map((paragraph) =>
+    paragraph
+      .replace(/\s+/g, " ")
+      .replace(/\s+([,.!?;:])/g, "$1")
+      .replace(/\s{2,}/g, " ")
+      .replace(/\b(can not)\b/gi, "cannot")
+      .replace(/\bweb site\b/gi, "website")
+      .replace(/\blog in\b/gi, "log in")
+      .replace(/\bweb-page\b/gi, "web page")
+      .replace(/\butilise\b/gi, "use")
+      .trim()
+  );
+
+  return paragraphs.join("\n\n").trim();
+}
+
+function seoWordCount(text) {
+  return String(text || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+function paragraphWordCount(paragraph) {
+  return String(paragraph || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+function splitSentences(text) {
+  return String(text || "")
+    .replace(/\s+/g, " ")
+    .match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+}
+
+function countSentences(text) {
+  return splitSentences(text).length;
+}
+
+function normalizeSentenceFingerprint(sentence) {
+  return String(sentence || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
+}
+
+function removeDuplicateSentencesFromParagraph(paragraph) {
+  const sentences = splitSentences(paragraph);
+  const kept = [];
+  const seen = new Set();
+
+  for (const sentence of sentences) {
+    const fp = normalizeSentenceFingerprint(sentence);
+    if (!fp) continue;
+    if (seen.has(fp)) continue;
+    seen.add(fp);
+    kept.push(sentence.trim());
+  }
+
+  return kept.join(" ").trim();
+}
+
+function getParagraphStartFingerprint(paragraph) {
+  return String(paragraph || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+    .slice(0, 72);
+}
+
+function getSentenceStartFingerprint(sentence) {
+  return String(sentence || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+    .slice(0, 40);
+}
+
+function hasListFormatting(text) {
+  return /^[-*•#]/m.test(String(text || ""));
+}
+
+function hasHtmlFormatting(text) {
+  return /<[a-z][\s\S]*>/i.test(String(text || ""));
+}
+
+function hasOverlongSentence(text) {
+  return splitSentences(text).some(
+    (sentence) => paragraphWordCount(sentence) > 30
+  );
+}
+
+/* =========================
+   INTENT + CLASSIFICATION
+========================= */
+
+function keywordHasVerdictIntent(lower) {
+  return /safe|unsafe|legit|scam|rug pull|risk score|high risk|low risk|real or fake|should i buy|is this token safe|is token safe/.test(
+    String(lower || "")
+  );
+}
+
+function detectSeoIntent(keyword) {
+  const lower = normalizeSeoKeyword(keyword).toLowerCase();
+  const hasAddress = extractContractAddresses(keyword).length > 0;
+
+  if (
+    keywordHasVerdictIntent(lower) ||
+    /rug|honeypot|liquidity|holders|holder concentration|wallet concentration|renounced|mintable|blacklist|freeze|token risk|contract risk|lp|slippage/.test(
+      lower
+    )
+  ) {
+    return "token_risk";
+  }
+
+  if (/\bvs\b|versus|compare|comparison|better than|difference between/.test(lower)) {
+    return "comparison";
+  }
+
+  if (
+    /\bwhat is\b|\bhow\b|\bwhy\b|\bguide\b|\bexplained\b|\bmeaning\b|\bbeginners?\b/.test(
+      lower
+    )
+  ) {
+    return "education_explainer";
+  }
+
+  if (
+    /\becosystem\b|\bchain\b|\blayer 1\b|\blayer 2\b|\bl2\b|\bl1\b|\bnetwork\b/.test(
+      lower
+    )
+  ) {
+    return "chain_ecosystem";
+  }
+
+  if (
+    /\bai tokens?\b|\bdefi\b|\bdepin\b|\bgaming tokens?\b|\breal world assets?\b|\brwa\b|\bmeme coins?\b|\bstablecoins?\b|\bsector\b|\bcategory\b|\bnarrative\b/.test(
+      lower
+    )
+  ) {
+    return "category_theme";
+  }
+
+  if (
+    /\bprice\b|\bmarket cap\b|\bvolume\b|\btrending\b|\bgainers?\b|\blosers?\b|\bbullish\b|\bbearish\b|\bmarket\b|\boutlook\b/.test(
+      lower
+    )
+  ) {
+    return "market_context";
+  }
+
+  if (hasAddress || /\btoken\b|\bcoin\b/.test(lower)) {
+    return "token_profile";
+  }
+
+  return "general_crypto";
+}
+
+/* =========================
+   CATEGORY MAP (CORE)
+========================= */
+
+function buildSeoClassMap() {
+  return {
+    liquidity: {
+      type: "liquidity",
+      contextLabel: "token liquidity risk",
+      coreSignals: [
+        "liquidity",
+        "liquidity depth",
+        "locked liquidity",
+        "unlocked liquidity",
+        "pool",
+        "thin liquidity",
+        "slippage",
+        "exit",
+        "sell pressure",
+        "volatility",
+      ],
+      supportingSignals: [
+        "holder concentration",
+        "contract control",
+        "supply distribution",
+        "token age",
+        "launch pattern",
+      ],
+      requiredTerms: ["liquidity", "risk"],
+      flexibleConcepts: ["slippage", "exit", "pool"],
+      triggerTerms: [
+        "liquidity",
+        "lp lock",
+        "burned lp",
+        "pool",
+        "dex liquidity",
+        "slippage",
+      ],
+    },
+
+    holders: {
+      type: "holders",
+      contextLabel: "holder concentration risk",
+      coreSignals: [
+        "holders",
+        "distribution",
+        "ownership",
+        "whales",
+        "control",
+        "volatility",
+      ],
+      supportingSignals: ["liquidity", "contract permissions"],
+      requiredTerms: ["holder", "risk"],
+      flexibleConcepts: ["wallet", "distribution", "ownership"],
+      triggerTerms: ["holder", "holders", "wallet", "whales", "distribution"],
+    },
+
+    contract: {
+      type: "contract",
+      contextLabel: "contract control risk",
+      coreSignals: [
+        "contract",
+        "ownership",
+        "renounced",
+        "mint",
+        "freeze",
+        "blacklist",
+        "control",
+      ],
+      supportingSignals: ["liquidity", "distribution"],
+      requiredTerms: ["contract", "risk"],
+      flexibleConcepts: ["permissions", "ownership", "control"],
+      triggerTerms: [
+        "contract",
+        "renounced",
+        "mint",
+        "freeze",
+        "blacklist",
+        "owner",
+      ],
+    },
+
+    general_token_risk: {
+      type: "general_token_risk",
+      contextLabel: "broad token risk evaluation",
+      coreSignals: [
+        "risk",
+        "liquidity",
+        "holders",
+        "contract",
+        "control",
+        "volatility",
+        "exit",
+      ],
+      supportingSignals: ["confidence", "market behavior"],
+      requiredTerms: ["risk"],
+      flexibleConcepts: ["liquidity", "holders", "contract"],
+      triggerTerms: ["risk", "scam", "safe", "unsafe"],
+    },
+  };
+}
