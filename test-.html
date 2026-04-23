@@ -1799,3 +1799,318 @@ function buildSeoVariationHint(keyword) {
     rhythmStyle: rhythmStyles[(hash >> 8) % rhythmStyles.length],
   };
 }
+
+/* =========================
+   QUALITY DETECTION (CONTINUED)
+========================= */
+
+function looksGenericSeo(text) {
+  const t = String(text || "").toLowerCase();
+
+  const badSignals = [
+    "in today's digital age",
+    "it is important to",
+    "users should",
+    "many investors",
+    "there are many factors",
+    "there are several factors",
+    "one important factor",
+    "another important factor",
+    "in many cases",
+    "for example",
+    "at the end of the day",
+    "the main thing",
+    "it is worth noting",
+    "one thing to remember",
+    "another thing to remember",
+    "it can be difficult to know",
+    "do your own research",
+    "always do your own research",
+    "invest responsibly",
+    "nothing in crypto is guaranteed",
+    "you should always",
+    "it is always a good idea",
+    "in conclusion",
+    "overall",
+    "to sum up",
+    "navigating the crypto market",
+    "volatile world of crypto",
+    "the crypto space",
+    "the world of cryptocurrency",
+    "before investing",
+    "before making any investment",
+    "helps investors make informed decisions",
+    "can help investors",
+    "investors should be careful",
+  ];
+
+  return badSignals.some((phrase) => t.includes(phrase));
+}
+
+function countExplainerSignals(text) {
+  const t = String(text || "").toLowerCase();
+  const phrases = [
+    "this means that",
+    "this is because",
+    "the reason is",
+    "in other words",
+    "it is important to note",
+    "it is worth noting",
+  ];
+  return phrases.filter((p) => t.includes(p)).length;
+}
+
+function countDistanceLanguage(text) {
+  const t = String(text || "").toLowerCase();
+  const phrases = [
+    "many investors",
+    "some investors",
+    "people should",
+    "investors should",
+    "overall",
+    "in conclusion",
+  ];
+  return phrases.filter((p) => t.includes(p)).length;
+}
+
+function hasNarrativeMarkers(text) {
+  const lower = String(text || "").toLowerCase();
+  const badPatterns = [
+    "imagine",
+    "picture this",
+    "you see",
+    "you notice",
+    "the page",
+    "the browser",
+    "within seconds",
+    "your wallet is empty",
+  ];
+  return badPatterns.some((p) => lower.includes(p));
+}
+
+function paragraphHasOverlap(a, b) {
+  const setA = new Set(
+    String(a || "")
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 4)
+  );
+  const setB = new Set(
+    String(b || "")
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 4)
+  );
+
+  let overlap = 0;
+  for (const word of setA) {
+    if (setB.has(word)) overlap++;
+  }
+
+  return overlap >= 10;
+}
+
+function hasStructuralOverlap(paragraphs) {
+  for (let i = 0; i < paragraphs.length - 1; i++) {
+    if (paragraphHasOverlap(paragraphs[i], paragraphs[i + 1])) return true;
+  }
+  return false;
+}
+
+function countWeakTransitions(text) {
+  const lower = String(text || "").toLowerCase();
+  const phrases = [
+    "however",
+    "in addition",
+    "for example",
+    "on the other hand",
+    "as a result",
+  ];
+  return phrases.filter((p) => lower.includes(p)).length;
+}
+
+function countStructuralTerms(text) {
+  const lower = String(text || "").toLowerCase();
+  const terms = [
+    "liquidity",
+    "holders",
+    "contract",
+    "volatility",
+    "market cap",
+    "volume",
+    "distribution",
+    "ownership",
+  ];
+  return terms.filter((t) => lower.includes(t)).length;
+}
+
+function countInterpretationTerms(text) {
+  const lower = String(text || "").toLowerCase();
+  const terms = [
+    "which matters because",
+    "that matters because",
+    "combined with",
+    "taken together",
+    "even if",
+    "can still",
+    "underneath",
+    "surface strength",
+    "structural weakness",
+  ];
+  return terms.filter((t) => lower.includes(t)).length;
+}
+
+function countConsequenceTerms(text) {
+  const lower = String(text || "").toLowerCase();
+  const terms = [
+    "losses",
+    "downside",
+    "slippage",
+    "sell pressure",
+    "reversal",
+    "trapped",
+    "volatility",
+  ];
+  return terms.filter((t) => lower.includes(t)).length;
+}
+
+/* =========================
+   SCORING ENGINE
+========================= */
+
+function scoreSeoContent(text) {
+  const paragraphs = splitSeoParagraphs(text);
+
+  let score = 100;
+
+  if (looksGenericSeo(text)) score -= 15;
+  if (hasNarrativeMarkers(text)) score -= 10;
+  if (hasStructuralOverlap(paragraphs)) score -= 10;
+
+  score -= countExplainerSignals(text) * 2;
+  score -= countDistanceLanguage(text) * 2;
+  score -= countWeakTransitions(text) * 1.5;
+
+  score += countStructuralTerms(text) * 1.5;
+  score += countInterpretationTerms(text) * 2;
+  score += countConsequenceTerms(text) * 2;
+
+  return clamp(Math.round(score), 0, 100);
+}
+
+/* =========================
+   GENERATION CORE
+========================= */
+
+async function generateSeoText(prompt) {
+  ensureOpenAiConfig();
+
+  const res = await fetch(OPENAI_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: OPENAI_MAX_TOKENS,
+      temperature: 0.7,
+    }),
+  });
+
+  const json = await res.json();
+  return json?.choices?.[0]?.message?.content || "";
+}
+
+function buildPrompt(keyword, contextSummary, angle, variation) {
+  return `
+Write 4 tight paragraphs about "${keyword}".
+
+Rules:
+- No fluff
+- No generic SEO language
+- No advice phrases
+- Focus on structure, risk, and mechanics
+- Use real crypto reasoning
+
+Context:
+${contextSummary}
+
+Angle:
+${angle.description}
+
+Style:
+${variation.openerStyle}
+${variation.paragraph2Style}
+${variation.paragraph3Style}
+${variation.paragraph4Style}
+${variation.rhythmStyle}
+`;
+}
+
+/* =========================
+   MULTI PASS ENGINE
+========================= */
+
+async function generateHighQualitySeo(keyword) {
+  const context = await fetchCryptoContext(keyword);
+
+  const angle = pickContentAngle(keyword);
+  const variation = buildSeoVariationHint(keyword);
+
+  let best = "";
+  let bestScore = 0;
+
+  for (let i = 0; i < MAX_INITIAL_PASSES; i++) {
+    const prompt = buildPrompt(
+      keyword,
+      context.contextSummary,
+      angle,
+      variation
+    );
+
+    const output = sanitizeSeoContent(await generateSeoText(prompt));
+    const score = scoreSeoContent(output);
+
+    if (score > bestScore) {
+      best = output;
+      bestScore = score;
+    }
+
+    if (score >= EARLY_ACCEPT_SCORE) break;
+  }
+
+  for (let i = 0; i < MAX_REWRITE_PASSES; i++) {
+    if (bestScore >= MIN_STRONG_SCORE) break;
+
+    const rewritePrompt = `
+Rewrite this stronger, tighter, and less generic:
+
+${best}
+`;
+
+    const improved = sanitizeSeoContent(await generateSeoText(rewritePrompt));
+    const score = scoreSeoContent(improved);
+
+    if (score > bestScore) {
+      best = improved;
+      bestScore = score;
+    }
+  }
+
+  return {
+    keyword,
+    content: best,
+    score: bestScore,
+    contextConfidence: context.contextConfidence,
+  };
+}
+
+/* =========================
+   EXPORT
+========================= */
+
+export async function generateTokenRiskSeo(keyword) {
+  return generateHighQualitySeo(keyword);
+}
