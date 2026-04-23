@@ -45,15 +45,15 @@
       "name":"What should I do before buying a token?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Pause before buying, verify the token address carefully, review liquidity and holder structure, check whether trading behavior looks abnormal, and avoid acting only on hype or urgency."
+        "text":"Pause before buying, verify the token address carefully, review liquidity, liquidity confidence, and holder structure, check whether trading behavior looks abnormal, and avoid acting only on hype or urgency."
       }
     },
     {
       "@type":"Question",
-      "name":"Are risky tokens common?",
+      "name":"Why does liquidity confidence matter?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Yes. New tokens and promoted launches can carry major risk. Some are legitimate but highly volatile, while others may be built around weak liquidity, exit risk, approval abuse, or hype-driven pressure."
+        "text":"Liquidity confidence helps show whether the trading setup looks sturdy or fragile. Lower-confidence liquidity can increase slippage, exit risk, and the chance that surface momentum hides structural weakness."
       }
     }
   ]
@@ -67,7 +67,7 @@
   "name":"Token Risk",
   "applicationCategory":"FinanceApplication",
   "operatingSystem":"Web",
-  "description":"Token risk checker for reviewing token addresses, Dexscreener links, project copy, and common warning signals before buying or connecting a wallet.",
+  "description":"Token risk checker for reviewing token addresses, Dexscreener links, project copy, liquidity confidence, and common warning signals before buying or connecting a wallet.",
   "url":"{{CANONICAL_URL}}"
 }
 </script>
@@ -811,14 +811,17 @@ box-shadow:var(--shadow-sm);
 background:var(--red);
 color:#fff;
 }
+
 .risk.medium{
 background:var(--amber);
 color:#fff;
 }
+
 .risk.low{
 background:var(--emerald);
 color:#fff;
 }
+
 .risk.unknown{
 background:#e5e7eb;
 color:#374151;
@@ -833,6 +836,13 @@ background:#fff;
 border:1px solid #d9e2ec;
 color:#334155;
 box-shadow:var(--shadow-xs);
+}
+
+.result-meta-row{
+margin-top:12px;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
 }
 
 .result-summary{
@@ -989,6 +999,117 @@ gap:12px;
 
 .result-cta{
 margin-top:0;
+}
+
+.liquidity-confidence-card{
+margin-top:18px;
+padding:18px;
+border-radius:20px;
+background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);
+border:1px solid #e2e8f0;
+box-shadow:var(--shadow-xs);
+}
+
+.liquidity-confidence-top{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap;
+}
+
+.liquidity-confidence-title{
+font-size:16px;
+font-weight:900;
+letter-spacing:-.01em;
+color:#0f172a;
+}
+
+.liquidity-confidence-badge{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:9px 13px;
+border-radius:999px;
+font-size:12px;
+font-weight:900;
+border:1px solid #d9e2ec;
+background:#fff;
+color:#334155;
+}
+
+.liquidity-confidence-badge.high{
+background:#effcf4;
+border-color:#c2efd7;
+color:#166534;
+}
+
+.liquidity-confidence-badge.medium{
+background:#fffdf7;
+border-color:#f4ddb0;
+color:#8a5710;
+}
+
+.liquidity-confidence-badge.low{
+background:#fff8f9;
+border-color:#eed1d7;
+color:#7f1d2c;
+}
+
+.liquidity-confidence-copy{
+margin-top:10px;
+font-size:14px;
+font-weight:800;
+line-height:1.58;
+color:#475569;
+}
+
+.liquidity-confidence-meter{
+margin-top:12px;
+height:10px;
+border-radius:999px;
+background:#e2e8f0;
+overflow:hidden;
+border:1px solid #d9e2ec;
+}
+
+.liquidity-confidence-fill{
+height:100%;
+width:0%;
+border-radius:999px;
+background:linear-gradient(90deg,#d96574 0%, #e7a93d 52%, #18b67f 100%);
+transition:width .25s ease;
+}
+
+.liquidity-confidence-notes{
+margin-top:12px;
+display:grid;
+gap:10px;
+}
+
+.liquidity-confidence-item{
+display:flex;
+align-items:flex-start;
+gap:10px;
+padding:12px 13px;
+border-radius:16px;
+background:#fff;
+border:1px solid #e2e8f0;
+font-size:13px;
+font-weight:800;
+line-height:1.5;
+color:#334155;
+}
+
+.liquidity-confidence-icon{
+width:18px;
+height:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+line-height:1;
+flex:0 0 18px;
 }
 
 .share-wrap{
@@ -1385,6 +1506,9 @@ body{padding-top:84px;}
 .story-stack{gap:12px;}
 .story-card{padding:16px;border-radius:18px;}
 .story-card p{font-size:15px;line-height:1.7;}
+.liquidity-confidence-card{padding:15px;}
+.liquidity-confidence-copy{font-size:13px;}
+.liquidity-confidence-item{font-size:12px;padding:10px 11px;border-radius:12px;}
 }
 </style>
 </head>
@@ -1407,7 +1531,7 @@ body{padding-top:84px;}
   <div class="hero">
     <div class="hero-badge-row">
       <div class="hero-badge">Live token risk check</div>
-      <div class="hero-badge">Keyword-matched warning guide</div>
+      <div class="hero-badge">Liquidity confidence insight</div>
       <div class="hero-badge">Built for repeat reviews</div>
     </div>
 
@@ -1428,7 +1552,7 @@ body{padding-top:84px;}
     </div>
     <div class="hero-quick-card">
       <span class="hero-quick-label">Then review</span>
-      <span class="hero-quick-copy">Look at liquidity, trading behavior, project claims, wallet prompts, and buy pressure together.</span>
+      <span class="hero-quick-copy">Look at liquidity confidence, trading behavior, project claims, wallet prompts, and buy pressure together.</span>
     </div>
     <div class="hero-quick-card">
       <span class="hero-quick-label">Safest move</span>
@@ -1454,7 +1578,7 @@ body{padding-top:84px;}
 
       <div class="preview-signals" id="previewSignals">
         <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Thin liquidity or unstable trading setup</span></div>
-        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Heavy hype with weak underlying structure</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Weak liquidity confidence can increase exit risk</span></div>
         <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Pressure to move before proper review</span></div>
       </div>
     </div>
@@ -1463,7 +1587,7 @@ body{padding-top:84px;}
       <div class="quick-checklist-title" id="quickChecklistTitle">Fast token risk checklist before you act</div>
       <div class="quick-checklist-grid" id="quickChecklistGrid">
         <div class="quick-checklist-item">Check the exact token address and source first.</div>
-        <div class="quick-checklist-item">Review liquidity and current trading activity together.</div>
+        <div class="quick-checklist-item">Review liquidity confidence and current trading activity together.</div>
         <div class="quick-checklist-item">Slow down if hype or urgency is doing most of the work.</div>
         <div class="quick-checklist-item">Do not buy or connect until the setup still looks solid after review.</div>
       </div>
@@ -1486,7 +1610,7 @@ body{padding-top:84px;}
         ✅ Payment successful — unlimited access is active on this browser
       </div>
 
-      <div class="note">Get a clear risk level, key warning signals, and what to do next before buying</div>
+      <div class="note">Get a clear risk level, liquidity confidence, key warning signals, and what to do next before buying</div>
 
       <div id="result"></div>
     </div>
@@ -1501,11 +1625,11 @@ body{padding-top:84px;}
       <h3>Don’t Miss the Next Risky Token</h3>
 
       <div class="upgrade-copy">
-        Most token risk does not show up once. If you are seeing questionable launches, weak structures, low-trust projects, or buy pressure, more may follow. Check each one before it costs you.
+        Most token risk does not show up once. If you are seeing questionable launches, weak structures, low-trust projects, poor liquidity confidence, or buy pressure, more may follow. Check each one before it costs you.
       </div>
 
       <div style="margin-top:10px;font-size:13px;color:#d4e2f5;">
-        Built for ongoing token risk review, contract checks, hype filtering, and faster pre-buy decisions
+        Built for ongoing token risk review, liquidity confidence checks, hype filtering, and faster pre-buy decisions
       </div>
 
       <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#d4e2f5;">
@@ -1543,7 +1667,7 @@ body{padding-top:84px;}
       </div>
       <div class="recognition-chip">
         <span class="recognition-label">What weak setups need</span>
-        <span class="recognition-copy">A rushed decision before liquidity, ownership, wallet risk, or structural downside gets checked properly.</span>
+        <span class="recognition-copy">A rushed decision before liquidity confidence, ownership, wallet risk, or structural downside gets checked properly.</span>
       </div>
       <div class="recognition-chip">
         <span class="recognition-label">Why people miss it</span>
@@ -1752,29 +1876,29 @@ function buildHeroTitle(keywordRaw) {
   }
 
   if (isGuidanceStyleKeyword(lower)) {
-    return `${readableTitle}: Token Risk Check, Warning Signs & What To Know`;
+    return `${readableTitle}: Token Risk Check, Liquidity Confidence & Warning Signs`;
   }
 
   if (lower.startsWith("is this ")) {
-    return `${readableTitle}? Token Risk Check, Warning Signs & What To Know`;
+    return `${readableTitle}? Token Risk Check, Liquidity Confidence & Warning Signs`;
   }
 
   if (lower.startsWith("is ") && lower.includes(" safe")) {
     const withoutSafe = raw.replace(/\s+safe\b/i, "").trim();
-    return `${displayKeyword(withoutSafe)} Safe? Token Risk Check, Warning Signs & What To Know`;
+    return `${displayKeyword(withoutSafe)} Safe? Token Risk Check, Liquidity Confidence & Warning Signs`;
   }
 
   if (lower.startsWith("is ") && lower.includes(" legit")) {
     const withoutLegit = raw.replace(/\s+legit\b/i, "").trim();
-    return `${displayKeyword(withoutLegit)} Legit? Token Risk Check, Warning Signs & What To Know`;
+    return `${displayKeyword(withoutLegit)} Legit? Token Risk Check, Liquidity Confidence & Warning Signs`;
   }
 
   if (lower.startsWith("should i buy")) {
-    return `${readableTitle}? Token Risk Check, Warning Signs & What To Consider`;
+    return `${readableTitle}? Token Risk Check, Liquidity Confidence & What To Consider`;
   }
 
   if (isQuestionStyleKeyword(lower)) {
-    return `${readableTitle}? Token Risk Check, Warning Signs & What To Know`;
+    return `${readableTitle}? Token Risk Check, Liquidity Confidence & Warning Signs`;
   }
 
   return `Is ${cleanTitle} Risky? Check Token Risk Before You Buy`;
@@ -1786,7 +1910,7 @@ function buildHeroSubheading(keywordRaw) {
   const readableKeyword = displayKeyword(cleanKeywordForSentence(raw) || cleanKeywordBase(raw) || raw);
 
   if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
-    return "Use the checker below to review token addresses, contract details, project copy, launch pages, and momentum before you buy, connect, or take action.";
+    return "Use the checker below to review token addresses, contract details, project copy, launch pages, liquidity confidence, and momentum before you buy, connect, or take action.";
   }
 
   return `Tokens related to ${readableKeyword} can carry structural risk even when the surface looks active. Paste the token address, Dexscreener link, or project copy below before you buy, connect, or move on momentum alone.`;
@@ -1811,7 +1935,7 @@ function buildContentBridge(keywordRaw) {
   const cleanSentenceKeyword = cleanKeywordForSentence(raw) || cleanKeywordBase(raw) || raw;
 
   if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
-    return "Use the checker above to review token addresses, contract details, project copy, launch pages, wallet prompts, and hype before you buy, connect, or take action.";
+    return "Use the checker above to review token addresses, contract details, project copy, launch pages, liquidity confidence, wallet prompts, and hype before you buy, connect, or take action.";
   }
 
   return `${chooseBridgeIntro(cleanSentenceKeyword)} use the checker above before you buy, connect a wallet, approve anything, or act on hype. Weak token structure often looks strongest right before real exposure starts.`;
@@ -1841,7 +1965,7 @@ function buildHeroQuickItems(keywordRaw) {
     return [
       ["First check", "Verify the exact token address before hype, memes, or screenshots shape the decision."],
       ["Main risk", "Momentum can make weak structure feel stronger than it really is."],
-      ["Safest move", "Slow the buy down until liquidity, exits, and project quality look real."]
+      ["Safest move", "Slow the buy down until liquidity confidence, exits, and project quality look real."]
     ];
   }
 
@@ -1849,13 +1973,13 @@ function buildHeroQuickItems(keywordRaw) {
     return [
       ["First check", "Confirm the exact contract address and source before trusting anything else."],
       ["Main risk", "Address trust is often extended faster than real project review."],
-      ["Safest move", "Review liquidity, pair behavior, and project claims before buying or connecting."]
+      ["Safest move", "Review liquidity confidence, pair behavior, and project claims before buying or connecting."]
     ];
   }
 
   return [
     ["First check", "Verify the exact token address or Dexscreener link before trusting anything else."],
-    ["Then review", "Look at liquidity, trading behavior, project claims, wallet prompts, and buy pressure together."],
+    ["Then review", "Look at liquidity confidence, trading behavior, project claims, wallet prompts, and buy pressure together."],
     ["Safest move", "Pause before buying, connecting, approving, or reacting to urgency, hype, or social proof."]
   ];
 }
@@ -1888,7 +2012,7 @@ function buildQuickChecklistItems(keywordRaw) {
   if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
     return [
       "Verify the exact token address before hype takes over.",
-      "Review liquidity next, not just momentum or price action.",
+      "Review liquidity confidence next, not just momentum or price action.",
       "Assume exits may be weaker than the upside pitch suggests.",
       "Do not buy fast just because attention looks strong."
     ];
@@ -1897,7 +2021,7 @@ function buildQuickChecklistItems(keywordRaw) {
   if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
     return [
       "Confirm the exact token or contract address first.",
-      "Check pair activity and liquidity together.",
+      "Check pair activity and liquidity confidence together.",
       "Treat fast trust in the address as a warning sign.",
       "Review project quality before money or wallet access is exposed."
     ];
@@ -1905,7 +2029,7 @@ function buildQuickChecklistItems(keywordRaw) {
 
   return [
     "Check the exact token address and source first.",
-    "Review liquidity and current trading activity together.",
+    "Review liquidity confidence and current trading activity together.",
     "Slow down if hype or urgency is doing most of the work.",
     "Do not buy or connect until the setup still looks solid after review."
   ];
@@ -1933,7 +2057,7 @@ function buildRecognitionItems(keywordRaw) {
   if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
     return [
       ["What shows up first", "Fast interest around a chain, contract, or token address that seems active before there is time to verify the structure."],
-      ["What weak setups need", "A quick buy or blind trust in the address before liquidity, ownership, and project quality are reviewed."],
+      ["What weak setups need", "A quick buy or blind trust in the address before liquidity confidence, ownership, and project quality are reviewed."],
       ["Why people miss it", "The token may already be trading or getting shared in ways that make it feel more established than it is."],
       ["Where downside hides", "A token can look active on the surface and still carry weak structure underneath."]
     ];
@@ -1951,7 +2075,7 @@ function buildRecognitionItems(keywordRaw) {
   if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
     return [
       ["What shows up first", "Momentum, chart action, or fast attention that makes hesitation feel more dangerous than the token itself."],
-      ["What weak setups need", "A rushed buy made on emotion before structure, liquidity, and exit conditions are reviewed."],
+      ["What weak setups need", "A rushed buy made on emotion before structure, liquidity confidence, and exit conditions are reviewed."],
       ["Why people miss it", "Speed and social proof make the setup feel validated even when the underlying logic is thin."],
       ["Where downside hides", "The same speed that creates excitement can make reversals hit before buyers can react cleanly."]
     ];
@@ -1960,7 +2084,7 @@ function buildRecognitionItems(keywordRaw) {
   if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
     return [
       ["What shows up first", "A token, contract, or page that looks interesting until it becomes clear how little has actually been checked."],
-      ["What weak setups need", "One fast decision made before address quality, liquidity, wallet flow, or project structure are reviewed."],
+      ["What weak setups need", "One fast decision made before address quality, liquidity confidence, wallet flow, or project structure are reviewed."],
       ["Why people miss it", "Risky token pages often borrow normal crypto language and lean on urgency or surface activity."],
       ["Where downside hides", "The page helps slow the pattern down before buying or connecting turns a weak setup into a real loss."]
     ];
@@ -2009,7 +2133,7 @@ function applyPreviewCard() {
   let sub = "Common structural signals found in similar token risk setups";
   let signals = [
     "Thin liquidity or unstable trading setup",
-    "Heavy hype with weak underlying structure",
+    "Weak liquidity confidence can raise exit risk",
     "Pressure to move before proper review"
   ];
 
@@ -2022,13 +2146,13 @@ function applyPreviewCard() {
   } else if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
     signals = [
       "Momentum is doing most of the work",
-      "Buy pressure appears before clarity",
+      "Low liquidity confidence can magnify reversals",
       "Fast upside framing may hide weak exits"
     ];
   } else if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
     signals = [
       "Contract or address trust is assumed too fast",
-      "Project quality is still unclear",
+      "Liquidity confidence is still unclear",
       "Surface activity may outrun real review"
     ];
   } else if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
@@ -2036,7 +2160,7 @@ function applyPreviewCard() {
     trustScore = "Review Pattern";
     fillWidth = "34%";
     signals = [
-      "Review contract, liquidity, and wallet flow",
+      "Review contract, liquidity confidence, and wallet flow",
       "Verify away from the original source or pitch",
       "Do not buy or connect until the setup holds up"
     ];
@@ -2114,7 +2238,7 @@ function buildSeoCardTitles(keywordRaw) {
     return [
       ["🔐", "Risk setup"],
       ["🧩", "Permission weakness"],
-      ["🔁", "Repeatable pattern"],
+      ["💧", "Liquidity confidence"],
       ["💥", "Real downside"]
     ];
   }
@@ -2123,7 +2247,7 @@ function buildSeoCardTitles(keywordRaw) {
     return [
       ["🪙", "Risk setup"],
       ["🧩", "Structural weakness"],
-      ["🔁", "Repeatable pattern"],
+      ["💧", "Liquidity confidence"],
       ["💥", "Real downside"]
     ];
   }
@@ -2132,7 +2256,7 @@ function buildSeoCardTitles(keywordRaw) {
     return [
       ["📍", "Risk setup"],
       ["🧩", "Structural weakness"],
-      ["🔁", "Repeatable pattern"],
+      ["💧", "Liquidity confidence"],
       ["💥", "Real downside"]
     ];
   }
@@ -2140,7 +2264,7 @@ function buildSeoCardTitles(keywordRaw) {
   return [
     ["⚠️", "Risk setup"],
     ["🧩", "Structural weakness"],
-    ["🔁", "Repeatable pattern"],
+    ["💧", "Liquidity confidence"],
     ["💥", "Real downside"]
   ];
 }
@@ -2257,6 +2381,27 @@ function cardClassForRisk(risk) {
   return "unknown";
 }
 
+function liquidityConfidenceClass(confidence) {
+  const value = String(confidence || "").trim().toLowerCase();
+  if (value === "high" || value === "strong") return "high";
+  if (value === "medium" || value === "moderate" || value === "mixed") return "medium";
+  if (value === "low" || value === "weak") return "low";
+  return "medium";
+}
+
+function liquidityConfidenceLabel(confidence) {
+  const value = String(confidence || "").trim();
+  if (!value) return "Medium";
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
+
+function liquidityConfidencePercent(confidence) {
+  const normalized = liquidityConfidenceClass(confidence);
+  if (normalized === "high") return 78;
+  if (normalized === "low") return 24;
+  return 52;
+}
+
 function iconForRisk(risk) {
   if (risk === "high") return "🔴";
   if (risk === "medium") return "🟠";
@@ -2282,13 +2427,13 @@ function summaryForRisk(riskClass, summary) {
   if (summary) return summary;
 
   if (riskClass === "high") {
-    return "This token setup shows multiple warning signals. Treat it as high risk until you verify the address, project quality, liquidity, ownership structure, and trading behavior directly.";
+    return "This token setup shows multiple warning signals. Treat it as high risk until you verify the address, project quality, liquidity confidence, ownership structure, and trading behavior directly.";
   }
   if (riskClass === "medium") {
-    return "This token setup shows warning signs. Be cautious and verify the address, liquidity, ownership structure, and project claims before you buy or connect.";
+    return "This token setup shows warning signs. Be cautious and verify the address, liquidity confidence, ownership structure, and project claims before you buy or connect.";
   }
   if (riskClass === "low") {
-    return "This token setup shows fewer obvious warning signals, but you should still verify the address, liquidity, holder structure, and project context before acting.";
+    return "This token setup shows fewer obvious warning signals, but you should still verify the address, liquidity confidence, holder structure, and project context before acting.";
   }
   return "We could not determine a clear risk level. Treat the token cautiously and verify it through trusted sources before you buy, connect, or approve anything.";
 }
@@ -2306,6 +2451,46 @@ function paylineForRisk(riskClass, payline) {
     return "Even lower-risk looking tokens can turn expensive when later steps involve approvals, wallet connections, or stronger buy pressure.";
   }
   return "When the risk is unclear, the safest move is to pause, verify this one, and treat the next similar setup carefully too.";
+}
+
+function liquidityConfidenceCopy(confidenceClass, customCopy) {
+  if (customCopy) return customCopy;
+
+  if (confidenceClass === "high") {
+    return "Liquidity confidence looks stronger here, which can reduce some exit stress, but it does not remove risk. You still need to review ownership, trading behavior, wallet prompts, and project quality.";
+  }
+
+  if (confidenceClass === "low") {
+    return "Liquidity confidence looks weak here. That can make exits harder, increase slippage, and allow surface momentum to hide a fragile setup.";
+  }
+
+  return "Liquidity confidence looks mixed. That means the setup may not be obviously broken, but you should not treat the trading environment as fully sturdy without more review.";
+}
+
+function liquidityConfidenceNotes(confidenceClass, customNotes) {
+  if (Array.isArray(customNotes) && customNotes.length) return customNotes;
+
+  if (confidenceClass === "high") {
+    return [
+      "Stronger liquidity confidence can help support cleaner exits than fragile setups.",
+      "You still need to verify holder structure and project trust before acting.",
+      "Good-looking liquidity confidence does not cancel wallet, contract, or hype risk."
+    ];
+  }
+
+  if (confidenceClass === "low") {
+    return [
+      "Low liquidity confidence can raise slippage and make exits feel worse than expected.",
+      "Surface activity can look stronger than the actual trading foundation underneath.",
+      "Fast hype becomes more dangerous when the setup is fragile."
+    ];
+  }
+
+  return [
+    "Mixed liquidity confidence means the setup still needs more review before trust is extended.",
+    "Do not rely on one liquidity snapshot alone to decide whether the token is safe.",
+    "Combine liquidity confidence with ownership, behavior, and project-quality checks."
+  ];
 }
 
 function scrollToTopCheck() {
@@ -2453,6 +2638,9 @@ function normalizeTokenAnalysisPayload(data) {
   let symbol = "";
   let chain = "";
   let payline = "";
+  let liquidityConfidence = "";
+  let liquidityConfidenceCopyText = "";
+  let liquidityConfidenceNotesList = [];
 
   if (payload && typeof payload === "object" && !Array.isArray(payload)) {
     riskValue = firstNonEmpty(
@@ -2525,6 +2713,29 @@ function normalizeTokenAnalysisPayload(data) {
       payload.warningLine,
       payload.warning_line
     );
+
+    liquidityConfidence = firstNonEmpty(
+      payload.liquidityConfidence,
+      payload.liquidity_confidence,
+      payload.liquidityConfidenceLevel,
+      payload.liquidity_confidence_level,
+      payload.liquidityStrength,
+      payload.liquidity_strength
+    );
+
+    liquidityConfidenceCopyText = firstNonEmpty(
+      payload.liquidityConfidenceCopy,
+      payload.liquidity_confidence_copy,
+      payload.liquiditySummary,
+      payload.liquidity_summary
+    );
+
+    liquidityConfidenceNotesList = arrayFromUnknown(firstNonEmpty(
+      payload.liquidityConfidenceNotes,
+      payload.liquidity_confidence_notes,
+      payload.liquiditySignals,
+      payload.liquidity_signals
+    ));
   }
 
   if ((!riskValue || !signals.length) && typeof firstNonEmpty(data && data.result, data && data.analysisText, data && data.text) === "string") {
@@ -2537,19 +2748,25 @@ function normalizeTokenAnalysisPayload(data) {
   }
 
   const riskClass = cardClassForRisk(riskValue);
+  const liquidityClass = liquidityConfidenceClass(liquidityConfidence || riskClass);
 
   return {
     riskClass,
     riskLabel: riskClass === "unknown" ? "REVIEW" : riskClass.toUpperCase(),
     summary: summaryForRisk(riskClass, summary),
-    signals: signals.length ? signals : ["Review the token address, project quality, liquidity, holder structure, trading behavior, and any pressure to buy quickly."],
+    signals: signals.length ? signals : ["Review the token address, project quality, liquidity confidence, holder structure, trading behavior, and any pressure to buy quickly."],
     actions: actions.length ? actions : ["Do not buy, do not connect, and verify the token directly through trusted sources before taking action."],
     score,
     contractAddress,
     tokenName,
     symbol,
     chain,
-    payline: paylineForRisk(riskClass, payline)
+    payline: paylineForRisk(riskClass, payline),
+    liquidityConfidenceClass: liquidityClass,
+    liquidityConfidenceLabel: liquidityConfidenceLabel(liquidityConfidence || liquidityClass),
+    liquidityConfidencePercent: liquidityConfidencePercent(liquidityConfidence || liquidityClass),
+    liquidityConfidenceCopy: liquidityConfidenceCopy(liquidityClass, liquidityConfidenceCopyText),
+    liquidityConfidenceNotes: liquidityConfidenceNotes(liquidityClass, liquidityConfidenceNotesList)
   };
 }
 
@@ -2623,12 +2840,39 @@ function metaChipsHtml(payload) {
   if (payload.chain) chips.push(payload.chain);
   if (payload.contractAddress) chips.push(`Address: ${formatAddress(payload.contractAddress)}`);
   if (payload.score) chips.push(formatScore(payload.score));
-
-  if (!chips.length) return "";
+  chips.push(`Liquidity Confidence: ${payload.liquidityConfidenceLabel}`);
 
   return `
-    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">
+    <div class="result-meta-row">
       ${chips.map(chip => `<div class="result-chip">${escapeHtml(chip)}</div>`).join("")}
+    </div>
+  `;
+}
+
+function liquidityConfidenceHtml(payload) {
+  return `
+    <div class="liquidity-confidence-card">
+      <div class="liquidity-confidence-top">
+        <div class="liquidity-confidence-title">Liquidity Confidence</div>
+        <div class="liquidity-confidence-badge ${payload.liquidityConfidenceClass}">
+          💧 ${escapeHtml(payload.liquidityConfidenceLabel)}
+        </div>
+      </div>
+
+      <div class="liquidity-confidence-copy">${escapeHtml(payload.liquidityConfidenceCopy)}</div>
+
+      <div class="liquidity-confidence-meter">
+        <div class="liquidity-confidence-fill" style="width:${payload.liquidityConfidencePercent}%"></div>
+      </div>
+
+      <div class="liquidity-confidence-notes">
+        ${payload.liquidityConfidenceNotes.map(note => `
+          <div class="liquidity-confidence-item">
+            <span class="liquidity-confidence-icon">💧</span>
+            <span>${escapeHtml(note)}</span>
+          </div>
+        `).join("")}
+      </div>
     </div>
   `;
 }
@@ -2651,6 +2895,8 @@ function formatTokenResult(data) {
 
     <div class="result-summary">${escapeHtml(payload.summary)}</div>
     ${continuationLine}
+
+    ${liquidityConfidenceHtml(payload)}
 
     <div class="section">
       <div class="section-title">Detected Signals</div>
@@ -2731,7 +2977,7 @@ async function check() {
         <div class="risk unknown">⚪ Analyzing...</div>
         <div class="result-chip">Token Scan In Progress</div>
       </div>
-      <div class="result-summary">Checking token structure, liquidity risk, holder concentration, approval risk, hype pressure, and suspicious project behavior.</div>
+      <div class="result-summary">Checking token structure, liquidity confidence, liquidity risk, holder concentration, approval risk, hype pressure, and suspicious project behavior.</div>
     </div>
   `;
 
