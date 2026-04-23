@@ -2114,3 +2114,261 @@ ${best}
 export async function generateTokenRiskSeo(keyword) {
   return generateHighQualitySeo(keyword);
 }
+
+/* =========================
+   POST PROCESSING + HARDENING LAYER
+========================= */
+
+function enforceParagraphCount(text, min = 3, max = 4) {
+  const paragraphs = splitSeoParagraphs(text);
+
+  if (paragraphs.length >= min && paragraphs.length <= max) {
+    return paragraphs.slice(0, max).join("\n\n");
+  }
+
+  // If too long, trim
+  if (paragraphs.length > max) {
+    return paragraphs.slice(0, max).join("\n\n");
+  }
+
+  // If too short, attempt split
+  if (paragraphs.length < min) {
+    const sentences = splitSentences(text);
+    const chunkSize = Math.ceil(sentences.length / min);
+    const rebuilt = [];
+
+    for (let i = 0; i < sentences.length; i += chunkSize) {
+      rebuilt.push(sentences.slice(i, i + chunkSize).join(" ").trim());
+    }
+
+    return rebuilt.slice(0, max).join("\n\n");
+  }
+
+  return text;
+}
+
+function enforceSentenceDiversity(text) {
+  const paragraphs = splitSeoParagraphs(text);
+
+  const cleaned = paragraphs.map((p) =>
+    removeDuplicateSentencesFromParagraph(p)
+  );
+
+  return cleaned.join("\n\n");
+}
+
+function enforceLengthBounds(text, minWords = 120, maxWords = 260) {
+  const words = text.split(/\s+/).filter(Boolean);
+
+  if (words.length <= maxWords && words.length >= minWords) return text;
+
+  if (words.length > maxWords) {
+    return words.slice(0, maxWords).join(" ");
+  }
+
+  return text; // do not artificially pad
+}
+
+function enforceNoListFormatting(text) {
+  if (!hasListFormatting(text)) return text;
+
+  return text
+    .replace(/^[-*•]\s+/gm, "")
+    .replace(/\n[-*•]\s+/g, " ");
+}
+
+function enforceNoHtml(text) {
+  if (!hasHtmlFormatting(text)) return text;
+  return text.replace(/<[^>]+>/g, "");
+}
+
+function enforceSentenceLength(text) {
+  const paragraphs = splitSeoParagraphs(text);
+
+  const adjusted = paragraphs.map((p) => {
+    const sentences = splitSentences(p);
+    const fixed = sentences.map((s) => {
+      const wc = paragraphWordCount(s);
+      if (wc > 32) {
+        const parts = s.split(/,| and | but /);
+        return parts.slice(0, 2).join(". ").trim();
+      }
+      return s.trim();
+    });
+    return fixed.join(" ");
+  });
+
+  return adjusted.join("\n\n");
+}
+
+function enforceAntiGeneric(text) {
+  if (!looksGenericSeo(text)) return text;
+
+  return text
+    .replace(/it is important to/gi, "")
+    .replace(/in today's digital age/gi, "")
+    .replace(/investors should/gi, "")
+    .replace(/do your own research/gi, "")
+    .replace(/always do your own research/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function enforceStyleConstraints(text) {
+  let output = text;
+
+  output = enforceNoHtml(output);
+  output = enforceNoListFormatting(output);
+  output = enforceSentenceDiversity(output);
+  output = enforceSentenceLength(output);
+  output = enforceParagraphCount(output);
+  output = enforceLengthBounds(output);
+  output = enforceAntiGeneric(output);
+
+  return output.trim();
+}
+
+/* =========================
+   FINAL SCORING PASS
+========================= */
+
+function finalQualityCheck(text) {
+  const paragraphs = splitSeoParagraphs(text);
+
+  if (paragraphs.length < 3) return false;
+  if (paragraphs.length > 5) return false;
+
+  if (hasNarrativeMarkers(text)) return false;
+  if (looksGenericSeo(text)) return false;
+
+  if (countWeakTransitions(text) > 5) return false;
+  if (countExplainerSignals(text) > 5) return false;
+
+  if (countStructuralTerms(text) < 2) return false;
+
+  return true;
+}
+
+/* =========================
+   FULL PIPELINE (STRICT MODE)
+========================= */
+
+async function generateStrictSeo(keyword) {
+  const base = await generateHighQualitySeo(keyword);
+
+  let text = base.content;
+
+  text = enforceStyleConstraints(text);
+
+  let attempts = 0;
+
+  while (!finalQualityCheck(text) && attempts < 3) {
+    const retryPrompt = `
+Rewrite this with stronger structure, less filler, and tighter reasoning:
+
+${text}
+`;
+
+    const retry = sanitizeSeoContent(await generateSeoText(retryPrompt));
+    text = enforceStyleConstraints(retry);
+    attempts++;
+  }
+
+  return {
+    keyword,
+    content: text,
+    score: scoreSeoContent(text),
+    contextConfidence: base.contextConfidence,
+    strict: true,
+  };
+}
+
+/* =========================
+   BATCH GENERATION
+========================= */
+
+export async function generateBatchTokenRiskSeo(keywords = []) {
+  const results = [];
+
+  for (const keyword of keywords) {
+    try {
+      const result = await generateStrictSeo(keyword);
+      results.push(result);
+    } catch (err) {
+      results.push({
+        keyword,
+        error: err.message,
+      });
+    }
+  }
+
+  return results;
+}
+
+/* =========================
+   LIGHT MODE (FASTER / CHEAPER)
+========================= */
+
+export async function generateLightSeo(keyword) {
+  const context = await fetchCryptoContext(keyword);
+  const angle = pickContentAngle(keyword);
+
+  const prompt = `
+Write 3–4 tight paragraphs about "${keyword}".
+
+Focus on:
+- real crypto structure
+- no filler
+- no generic phrases
+- practical meaning
+
+Context:
+${context.contextSummary}
+
+Angle:
+${angle.description}
+`;
+
+  const raw = await generateSeoText(prompt);
+  const cleaned = enforceStyleConstraints(sanitizeSeoContent(raw));
+
+  return {
+    keyword,
+    content: cleaned,
+    score: scoreSeoContent(cleaned),
+    contextConfidence: context.contextConfidence,
+    mode: "light",
+  };
+}
+
+/* =========================
+   DEBUG / INSPECTION HELPERS
+========================= */
+
+export function debugSeoAnalysis(text) {
+  return {
+    wordCount: seoWordCount(text),
+    paragraphs: splitSeoParagraphs(text).length,
+    generic: looksGenericSeo(text),
+    narrative: hasNarrativeMarkers(text),
+    structuralTerms: countStructuralTerms(text),
+    interpretation: countInterpretationTerms(text),
+    consequence: countConsequenceTerms(text),
+    weakTransitions: countWeakTransitions(text),
+    explainerSignals: countExplainerSignals(text),
+    distanceLanguage: countDistanceLanguage(text),
+    score: scoreSeoContent(text),
+  };
+}
+
+/* =========================
+   FINAL EXPORT DEFAULT
+========================= */
+
+export default {
+  generateTokenRiskSeo,
+  generateBatchTokenRiskSeo,
+  generateLightSeo,
+  generateStrictSeo,
+  debugSeoAnalysis,
+};
