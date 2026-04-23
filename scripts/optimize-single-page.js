@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/is-telegram-suspicious-activity-message-legit-or-scam/index.html";
+const TARGET_PAGE = "scam-check-now/is-fedex-customs-charge-email-legit-or-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -21,31 +21,31 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  'Telegram "Suspicious Activity" Message Scam? How to Tell if It Is Real or Fake';
+  "FedEx Customs Charge Email: Scam or Legit? Warning Signs & What To Do";
 
 const NEW_META =
-  "Got a Telegram suspicious activity message? Learn the warning signs, fake verification link tricks, and what to do before you click, enter a code, or hand over account details.";
+  "Got a FedEx customs charge email asking for payment? Learn the biggest warning signs, fake delivery fee tricks, and what to do before you click, enter payment details, or verify shipment information.";
 
-const NEW_RAW_KEYWORD = "Telegram suspicious activity message";
+const NEW_RAW_KEYWORD = "FedEx customs charge email";
 
 const NEW_INSTANT_VERDICT_CARD = `
   <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:-6px auto 12px;padding:0 14px;">
     <div class="story-card lead" id="instantVerdictCard" style="margin:0;padding:20px 16px;text-align:center;">
 
       <div style="margin-bottom:10px;">
-        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%23ff7b7b'/><stop offset='100%25' stop-color='%23d94b4b'/></linearGradient></defs><circle cx='32' cy='32' r='30' fill='url(%23g)'/><path d='M32 14 L50 46 H14 Z' fill='white' opacity='0.96'/><rect x='29' y='24' width='6' height='12' rx='3' fill='%23d94b4b'/><circle cx='32' cy='41' r='3' fill='%23d94b4b'/></svg>" alt="Warning" style="width:56px;height:56px;">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%23ffb36b'/><stop offset='100%25' stop-color='%23d97706'/></linearGradient></defs><circle cx='32' cy='32' r='30' fill='url(%23g)'/><path d='M32 14 L50 46 H14 Z' fill='white' opacity='0.96'/><rect x='29' y='24' width='6' height='12' rx='3' fill='%23d97706'/><circle cx='32' cy='41' r='3' fill='%23d97706'/></svg>" alt="Warning" style="width:56px;height:56px;">
       </div>
 
-      <div style="font-size:18px;font-weight:900;color:#ff9a9a;margin-bottom:6px;">
-        Risk Level: High
+      <div style="font-size:18px;font-weight:900;color:#ffd39a;margin-bottom:6px;">
+        Risk Level: Medium to High
       </div>
 
       <div style="font-size:15px;font-weight:800;color:#e6f0ff;margin-bottom:4px;">
-        Likely fake security alert or account takeover attempt
+        Likely fake delivery fee or customs payment request
       </div>
 
       <div style="font-size:15px;font-weight:900;color:#ffffff;">
-        Do not click links or share login codes inside the message. Check your Telegram account only through the official app.
+        Do not click the payment link inside the message. Check the shipment only through the official FedEx site or app you open yourself.
       </div>
 
     </div>
@@ -59,15 +59,15 @@ const NEW_TOP_BLOCK = `
         Updated April 2026
       </div>
       <div style="font-size:15px;font-weight:800;line-height:1.6;color:#e6f0ff;">
-        People are still receiving Telegram suspicious activity messages claiming:
+        People are still receiving FedEx customs charge emails claiming:
       </div>
       <ul style="margin:10px 0 0 18px;color:#d7e4f8;font-weight:800;line-height:1.6;">
-        <li>“Unusual login detected”</li>
-        <li>“Verify your account immediately”</li>
-        <li>“Your Telegram account may be suspended”</li>
+        <li>“Your package is being held at customs”</li>
+        <li>“Pay a small fee to release delivery”</li>
+        <li>“Complete payment now to avoid return or delay”</li>
       </ul>
       <div style="margin-top:10px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">
-        These messages often lead to fake Telegram verification pages designed to steal phone numbers, login codes, or full account access.
+        These messages often lead to fake FedEx payment or tracking pages designed to steal card details, personal information, or account access.
       </div>
     </div>
   </div>
@@ -77,10 +77,10 @@ const NEW_SEO_CONTENT = `
 <div class="story-stack">
   <article class="story-card lead">
     <div class="story-card-title">
-      <span class="story-card-title-icon">📱</span>
-      <span>What this Telegram alert often looks like</span>
+      <span class="story-card-title-icon">📦</span>
+      <span>What this FedEx customs charge email often looks like</span>
     </div>
-    <p>A Telegram suspicious activity message usually claims there was an unusual login, a risky device, or a security problem tied to your account. The message is built to make you act fast before you slow down and verify whether anything is actually wrong inside the official Telegram app.</p>
+    <p>A FedEx customs charge email usually claims your package is delayed, held at customs, or waiting for a small payment before delivery can continue. The message is built to feel routine so you act fast before stopping to verify whether the shipment problem is real.</p>
   </article>
 
   <article class="story-card">
@@ -88,15 +88,15 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">⏱️</span>
       <span>Where the pressure starts</span>
     </div>
-    <p>Most versions create urgency right away. They may warn that your account will be locked, suspended, or restricted unless you confirm activity immediately. That pressure is the point. Scammers want a fast click before you notice the sender, link, or wording does not fully add up.</p>
+    <p>Most versions push urgency right away. They may warn that your shipment will be returned, cancelled, or delayed unless you pay immediately. That pressure is the point. Scammers want a fast click before you notice the sender, domain, or payment page does not fully add up.</p>
   </article>
 
   <article class="story-card">
     <div class="story-card-title">
-      <span class="story-card-title-icon">🔐</span>
+      <span class="story-card-title-icon">💳</span>
       <span>What scammers usually want</span>
     </div>
-    <p>The goal is often account takeover. Fake Telegram security pages may ask for your phone number, login code, password, or other recovery details. Once those details are handed over, the attacker can try to access your account, lock you out, or use your profile to target other people.</p>
+    <p>The goal is often payment information, personal details, or both. Fake FedEx customs pages may ask for a small release fee, billing details, address confirmation, or other information that can later be used for larger charges or fraud.</p>
   </article>
 
   <article class="story-card">
@@ -104,7 +104,7 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">🧭</span>
       <span>How to verify it safely</span>
     </div>
-    <p>The safest check is simple: do not use the link inside the message. Open Telegram yourself, review your account and active sessions there, and only trust security information you verify directly inside the official app or official Telegram resources you opened on your own.</p>
+    <p>The safest check is simple: do not use the link inside the email. Open FedEx yourself, check the tracking number through the official site or app, and only trust delivery or customs information you verify independently.</p>
   </article>
 
   <article class="story-card">
@@ -112,7 +112,7 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">✅</span>
       <span>What to do next</span>
     </div>
-    <p>If you have not clicked, stop there and delete the message after checking your account through official channels. If you already clicked or shared any details, treat it as urgent, secure your Telegram account, review active sessions, and change connected credentials if needed.</p>
+    <p>If you have not clicked, stop there and verify the shipment through official channels before doing anything else. If you already clicked or entered payment details, treat it as urgent, monitor your card activity, and secure any information you shared.</p>
   </article>
 
   <article class="story-card">
@@ -120,7 +120,7 @@ const NEW_SEO_CONTENT = `
       <span class="story-card-title-icon">⚠️</span>
       <span>Key safety rule</span>
     </div>
-    <p>If the message only feels real when you follow the link inside it, that is a strong warning sign. A real security issue should still be verifiable without using the message itself.</p>
+    <p>If the customs problem only feels real when you use the link inside the email, that is a strong warning sign. A real delivery issue should still be verifiable without relying on the message itself.</p>
   </article>
 </div>
 `;
@@ -129,66 +129,66 @@ const NEW_EXAMPLE_CARD = `
     <div class="story-card" id="realExamplesCard">
       <div class="story-card-title">
         <span class="story-card-title-icon">📩</span>
-        <span>Common Telegram Suspicious Activity Message Examples</span>
+        <span>Common FedEx Customs Charge Email Examples</span>
       </div>
-      <p>Reports show people receiving Telegram warnings that say “Suspicious activity detected,” “Unusual login attempt,” or “Immediate verification required.” These messages usually claim your account is at risk unless you act fast.</p>
-      <p style="margin-top:14px;">Most versions include a link, button, or fake support prompt telling you to review activity, secure your account, or confirm your identity. These pages are often built to collect your phone number, login code, or other account recovery details.</p>
-      <p style="margin-top:14px;">Some versions also pretend to come from Telegram support and create urgency by warning that your account will be locked, suspended, or compromised within minutes if you do not verify right away.</p>
-      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the message only feels legitimate when you use the link inside it, that is a strong warning sign. A real security concern should still be verifiable directly inside the official Telegram app.</div>
+      <p>Reports show people receiving FedEx-style emails saying a package is on hold, a customs fee is due, or a small payment is needed before delivery can continue. These messages usually make the request sound routine and low-risk.</p>
+      <p style="margin-top:14px;">Most versions include a payment button, tracking link, or fake support prompt telling you to release the shipment, confirm delivery details, or pay a customs charge immediately. These pages are often built to collect card details, personal information, or both.</p>
+      <p style="margin-top:14px;">Some versions also create urgency by warning that the package will be returned, cancelled, or delayed within hours if you do not pay right away. Small fees are often used because they feel believable and easy to approve without much thought.</p>
+      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the delivery problem only feels legitimate when you use the payment link inside the email, that is a strong warning sign. A real shipment issue should still be verifiable directly through official FedEx tracking.</div>
     </div>
 `;
 
 const NEW_RELATED_LINKS = [
   {
-    href: "/scam-check-now/is-whatsapp-security-alert-legit-or-scam/",
-    text: "Is WhatsApp Security Alert Legit or a Scam?"
+    href: "/scam-check-now/is-ups-delivery-text-legit-or-scam/",
+    text: "Is UPS Delivery Text Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-google-security-alert-message-legit-or-scam/",
-    text: "Is Google Security Alert Message Legit or a Scam?"
+    href: "/scam-check-now/is-fedex-delivery-legit-or-scam/",
+    text: "Is FedEx Delivery Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-google-unusual-activity-message-legit-or-scam/",
-    text: "Is Google Unusual Activity Message Legit or a Scam?"
+    href: "/scam-check-now/is-usps-tracking-text-legit-or-scam/",
+    text: "Is USPS Tracking Text Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-instagram-account-suspended-message-legit-or-scam/",
-    text: "Is Instagram Account Suspended Message Legit or a Scam?"
+    href: "/scam-check-now/package-delivery-scams/",
+    text: "Package Delivery Scam Hub"
   },
   {
-    href: "/scam-check-now/is-google-verification-code-message-legit-or-scam/",
-    text: "Is Google Verification Code Message Legit or a Scam?"
+    href: "/scam-check-now/is-amazon-delivery-problem-email-legit-or-scam/",
+    text: "Is Amazon Delivery Problem Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-telegram-message-from-unknown-user-legit-or-scam/",
-    text: "Is Telegram Message From Unknown User Legit or a Scam?"
+    href: "/scam-check-now/is-missed-delivery-text-legit-or-scam/",
+    text: "Is Missed Delivery Text Legit or a Scam?"
   }
 ];
 
 const NEW_MORE_LINKS = [
   {
-    href: "/scam-check-now/is-google-account-disabled-email-legit-or-scam/",
-    text: "Is Google Account Disabled Email Legit or a Scam?"
-  },
-  {
-    href: "/scam-check-now/google-account-suspension-email-scam/",
-    text: "Is Google Account Suspension Email a Scam?"
-  },
-  {
-    href: "/scam-check-now/is-instagram-security-alert-email-legit-or-scam/",
-    text: "Is Instagram Security Alert Email Legit or a Scam?"
-  },
-  {
-    href: "/scam-check-now/is-facebook-security-alert-email-legit-or-scam/",
-    text: "Is Facebook Security Alert Email Legit or a Scam?"
-  },
-  {
-    href: "/scam-check-now/is-apple-account-verification-email-legit-or-scam/",
-    text: "Is Apple Account Verification Email Legit or a Scam?"
+    href: "/scam-check-now/is-bank-account-closure-email-legit-or-scam/",
+    text: "Is Bank Account Closure Email Legit or a Scam?"
   },
   {
     href: "/scam-check-now/is-paypal-security-alert-message-real-or-fake/",
     text: "Is PayPal Security Alert Message Real or Fake?"
+  },
+  {
+    href: "/scam-check-now/is-amazon-refund-email-legit-or-scam/",
+    text: "Is Amazon Refund Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-google-account-disabled-email-legit-or-scam/",
+    text: "Is Google Account Disabled Email Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-background-check-email-asking-for-payment-legit-or-scam/",
+    text: "Is Background Check Email Asking For Payment Legit or a Scam?"
+  },
+  {
+    href: "/scam-check-now/is-apple-wallet-billing-email-legit-or-scam/",
+    text: "Is Apple Wallet Billing Email Legit or a Scam?"
   }
 ];
 
@@ -198,26 +198,26 @@ const NEW_FAQ_JSONLD = `{
   "mainEntity":[
     {
       "@type":"Question",
-      "name":"Is a Telegram suspicious activity message always a scam?",
+      "name":"Is a FedEx customs charge email always a scam?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"No. Security alerts can sometimes be real, but scammers frequently copy Telegram-style warnings to steal login codes or take over accounts. The safest approach is to verify any alert directly inside the official Telegram app, not through the link in the message."
+        "text":"No. Customs or delivery fees can sometimes be real, but scammers frequently copy FedEx-style payment requests to steal card details or personal information. The safest approach is to verify any shipment issue directly through the official FedEx site or app, not through the link in the email."
       }
     },
     {
       "@type":"Question",
-      "name":"How can I tell if a Telegram suspicious activity message is fake?",
+      "name":"How can I tell if a FedEx customs charge email is fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Common warning signs include urgent pressure, suspicious links, requests for login codes, fake support language, and messages warning that your account will be locked unless you act immediately. A real security issue should still be verifiable outside the message itself."
+        "text":"Common warning signs include urgent payment pressure, suspicious links, requests for card details, vague shipment information, and messages warning that the package will be returned unless you act immediately. A real delivery issue should still be verifiable outside the message itself."
       }
     },
     {
       "@type":"Question",
-      "name":"What should I do if I clicked a Telegram suspicious activity message?",
+      "name":"What should I do if I clicked a FedEx customs charge email?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"If you clicked the link or entered any details, treat it as urgent. Secure your Telegram account, review active sessions, and change any connected credentials if needed. Use only the official Telegram app or official sources you opened yourself."
+        "text":"If you clicked the link or entered any details, treat it as urgent. Monitor your payment accounts, secure any information you shared, and verify the shipment only through the official FedEx site or app you opened yourself."
       }
     }
   ]
@@ -225,18 +225,18 @@ const NEW_FAQ_JSONLD = `{
 
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
-      <h3>Telegram Suspicious Activity Message FAQ</h3>
+      <h3>FedEx Customs Charge Email FAQ</h3>
       <div class="content-body">
-        <p><strong>Is a Telegram suspicious activity message always a scam?</strong><br>No. Security alerts can sometimes be real, but scammers frequently copy Telegram-style warnings to steal login codes or take over accounts. The safest approach is to verify any alert directly inside the official Telegram app, not through the link in the message.</p>
-        <p><strong>How can I tell if a Telegram suspicious activity message is fake?</strong><br>Common warning signs include urgent pressure, suspicious links, requests for login codes, fake support language, and messages warning that your account will be locked unless you act immediately. A real security issue should still be verifiable outside the message itself.</p>
-        <p><strong>What should I do if I clicked a Telegram suspicious activity message?</strong><br>If you clicked the link or entered any details, treat it as urgent. Secure your Telegram account, review active sessions, and change any connected credentials if needed. Use only the official Telegram app or official sources you opened yourself.</p>
+        <p><strong>Is a FedEx customs charge email always a scam?</strong><br>No. Customs or delivery fees can sometimes be real, but scammers frequently copy FedEx-style payment requests to steal card details or personal information. The safest approach is to verify any shipment issue directly through the official FedEx site or app, not through the link in the email.</p>
+        <p><strong>How can I tell if a FedEx customs charge email is fake?</strong><br>Common warning signs include urgent payment pressure, suspicious links, requests for card details, vague shipment information, and messages warning that the package will be returned unless you act immediately. A real delivery issue should still be verifiable outside the message itself.</p>
+        <p><strong>What should I do if I clicked a FedEx customs charge email?</strong><br>If you clicked the link or entered any details, treat it as urgent. Monitor your payment accounts, secure any information you shared, and verify the shipment only through the official FedEx site or app you opened yourself.</p>
       </div>
     </div>
 `;
 
 const NEW_HUB_LINK = `
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="/scam-check-now/telegram-scams/">Telegram Scam Hub</a>
+      <a href="/scam-check-now/package-delivery-scams/">Package Delivery Scam Hub</a>
     </div>
 `;
 
@@ -554,15 +554,15 @@ function replacePreviewSignals(html) {
     "Payment request via gift card"
   ];
 
-  if (containsAny(lower, ["telegram"])) {
+  if (containsAny(lower, ["fedex", "delivery", "package", "shipment", "parcel", "customs"])) {
     riskLabel = "Example Risk Pattern";
-    trustScore = "Account Risk Example";
-    fillWidth = "22%";
-    sub = "Common signals found in similar Telegram account alert scams";
+    trustScore = "Delivery Risk Example";
+    fillWidth = "24%";
+    sub = "Common signals found in similar customs fee and delivery payment scams";
     signals = [
-      "Fake login or verification link",
-      "Pressure to act before account suspension",
-      "Requests for phone number or login code"
+      "Urgent delivery or customs payment request",
+      "Link may lead to a fake tracking or payment page",
+      "Requests for card details or shipment verification"
     ];
   } else if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
     signals = [
@@ -575,12 +575,6 @@ function replacePreviewSignals(html) {
       "Urgent transfer or wallet request",
       "High-return or recovery promise",
       "Support or investment impersonation risk"
-    ];
-  } else if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
-    signals = [
-      "Tracking or delivery pressure",
-      "Link may lead to a fake page",
-      "Small payment or verification request"
     ];
   } else if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
     signals = [
@@ -623,13 +617,13 @@ function replacePreviewSignals(html) {
   return updated;
 }
 
-function replaceTelegramSeoCardTitles(html) {
+function replaceFedexSeoCardTitles(html) {
   const updated = html.replace(
-    /return \[\s*\["📱",\s*"What this Telegram alert often looks like"\],\s*\["⏱️",\s*"Where the pressure starts"\],\s*\["🔁",\s*"How the account warning changes across versions"\],\s*\["💥",\s*"What happens after the click or code share"\],\s*\["•",\s*"What to do next"\],\s*\["•",\s*"Key safety rule"\]\s*\];/i,
+    /return \[\s*\["📦",\s*"What this delivery setup often looks like"\],\s*\["⏱️",\s*"Where the message pushes quick action"\],\s*\["🔁",\s*"How the carrier story changes across versions"\],\s*\["💥",\s*"What happens after the click or payment"\]\s*\];/i,
     `return [
-      ["📱", "What this Telegram alert often looks like"],
+      ["📦", "What this FedEx customs charge email often looks like"],
       ["⏱️", "Where the pressure starts"],
-      ["🔐", "What scammers usually want"],
+      ["💳", "What scammers usually want"],
       ["🧭", "How to verify it safely"],
       ["✅", "What to do next"],
       ["⚠️", "Key safety rule"]
@@ -637,11 +631,11 @@ function replaceTelegramSeoCardTitles(html) {
   );
 
   if (updated === html) {
-    console.warn("No change for telegram seo card titles");
+    console.warn("No change for fedex seo card titles");
     return html;
   }
 
-  console.log("Updated telegram seo card titles");
+  console.log("Updated fedex seo card titles");
   return updated;
 }
 
@@ -808,7 +802,7 @@ updated = upsertFaqJsonLd(updated);
 updated = replaceFreshnessBlock(updated);
 updated = insertInstantVerdictCard(updated);
 updated = replacePreviewSignals(updated);
-updated = replaceTelegramSeoCardTitles(updated);
+updated = replaceFedexSeoCardTitles(updated);
 updated = replaceSeoContent(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
