@@ -36,7 +36,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 1000
+    timeout-minutes: 180
 
     env:
       KEYWORDS_FILE: "data/token_keywords.txt"
@@ -76,8 +76,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git config --global user.name "token-risk-bot"
-          git config --global user.email "bot@users.noreply.github.com"
+          git config user.name "token-risk-bot"
+          git config user.email "bot@users.noreply.github.com"
 
       - name: Sync latest main before build
         shell: bash
@@ -117,8 +117,8 @@ jobs:
           set -euo pipefail
 
           FULL_REBUILD="false"
-          EFFECTIVE_DAILY_LIMIT="0"
-          REBUILD_BATCH_SIZE="1"
+          EFFECTIVE_DAILY_LIMIT="1000"
+          REBUILD_BATCH_SIZE="50"
           REBUILD_ALL_REMAINING="false"
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
@@ -296,20 +296,6 @@ jobs:
 
           git commit -m "Token Risk SEO auto generation + hub update + sitemap update"
 
-      - name: Rebase on latest main before push after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
-            echo "Nothing to push"
-            exit 0
-          fi
-
-          git pull --rebase origin main
-
       - name: Push generated pages and sitemap after standard run
         if: success() && steps.limits.outputs.full_rebuild != 'true'
         shell: bash
@@ -317,12 +303,12 @@ jobs:
           set -euo pipefail
           git fetch origin main
 
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
+          if git diff --quiet origin/main..HEAD; then
             echo "Nothing to push"
             exit 0
           fi
 
-          git push origin HEAD:main
+          git push --force-with-lease origin HEAD:main
 
       - name: Manual full rebuild in resumable batches
         if: success() && steps.limits.outputs.full_rebuild == 'true'
@@ -375,13 +361,12 @@ jobs:
             git commit -m "$commit_message"
             git fetch origin main
 
-            if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
+            if git diff --quiet origin/main..HEAD; then
               echo "Nothing to push for: $commit_message"
               return 0
             fi
 
-            git pull --rebase origin main
-            git push origin HEAD:main
+            git push --force-with-lease origin HEAD:main
           }
 
           total_processed_this_run=0
@@ -523,13 +508,12 @@ jobs:
           git commit -m "Finalize Token Risk rebuild state"
           git fetch origin main
 
-          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
+          if git diff --quiet origin/main..HEAD; then
             echo "Nothing to push"
             exit 0
           fi
 
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git push --force-with-lease origin HEAD:main
 
       - name: Cleanup temp batch files
         if: always() && steps.limits.outputs.full_rebuild == 'true'
