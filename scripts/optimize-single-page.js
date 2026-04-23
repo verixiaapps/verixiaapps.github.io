@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ EXACT PAGE TARGETED
-const TARGET_PAGE = "scam-check-now/is-usps-package-delay-email-legit-or-scam/index.html";
+const TARGET_PAGE = "scam-check-now/is-telegram-suspicious-activity-message-legit-or-scam/index.html";
 const DRY_RUN = String(process.env.DRY_RUN).toLowerCase() === "true";
 
 if (!TARGET_PAGE.startsWith("scam-check-now/")) {
@@ -21,12 +21,12 @@ const BACKUP_DIR = "backup";
 // ONE-PASS PAGE CUSTOMIZATION
 // -----------------------------
 const NEW_TITLE =
-  'USPS "Package Delay" Email Scam? How to Tell if It Is Real or Fake';
+  'Telegram "Suspicious Activity" Message Scam? How to Tell if It Is Real or Fake';
 
 const NEW_META =
-  'Got a USPS package delay email? Learn the warning signs, fake tracking link tricks, and what to do before you click, pay a fee, or enter your delivery details.';
+  "Got a Telegram suspicious activity message? Learn the warning signs, fake verification link tricks, and what to do before you click, enter a code, or hand over account details.";
 
-const NEW_RAW_KEYWORD = "USPS package delay email";
+const NEW_RAW_KEYWORD = "Telegram suspicious activity message";
 
 const NEW_INSTANT_VERDICT_CARD = `
   <div class="page-shell-top-block" id="instantVerdictCardWrap" style="max-width:940px;margin:-6px auto 12px;padding:0 14px;">
@@ -41,11 +41,11 @@ const NEW_INSTANT_VERDICT_CARD = `
       </div>
 
       <div style="font-size:15px;font-weight:800;color:#e6f0ff;margin-bottom:4px;">
-        Likely fake delivery delay alert or phishing email
+        Likely fake security alert or account takeover attempt
       </div>
 
       <div style="font-size:15px;font-weight:900;color:#ffffff;">
-        Do not click links or pay any fee inside the message. Verify tracking only through the official USPS website or app.
+        Do not click links or share login codes inside the message. Check your Telegram account only through the official app.
       </div>
 
     </div>
@@ -59,84 +59,136 @@ const NEW_TOP_BLOCK = `
         Updated April 2026
       </div>
       <div style="font-size:15px;font-weight:800;line-height:1.6;color:#e6f0ff;">
-        People are still receiving USPS package delay emails and messages claiming:
+        People are still receiving Telegram suspicious activity messages claiming:
       </div>
       <ul style="margin:10px 0 0 18px;color:#d7e4f8;font-weight:800;line-height:1.6;">
-        <li>“Your package has been delayed”</li>
-        <li>“Action required to avoid return to sender”</li>
-        <li>“Confirm address or pay a redelivery fee”</li>
+        <li>“Unusual login detected”</li>
+        <li>“Verify your account immediately”</li>
+        <li>“Your Telegram account may be suspended”</li>
       </ul>
       <div style="margin-top:10px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">
-        These messages often lead to fake USPS tracking pages or payment screens designed to steal card details, addresses, or personal information.
+        These messages often lead to fake Telegram verification pages designed to steal phone numbers, login codes, or full account access.
       </div>
     </div>
   </div>
+`;
+
+const NEW_SEO_CONTENT = `
+<div class="story-stack">
+  <article class="story-card lead">
+    <div class="story-card-title">
+      <span class="story-card-title-icon">📱</span>
+      <span>What this Telegram alert often looks like</span>
+    </div>
+    <p>A Telegram suspicious activity message usually claims there was an unusual login, a risky device, or a security problem tied to your account. The message is built to make you act fast before you slow down and verify whether anything is actually wrong inside the official Telegram app.</p>
+  </article>
+
+  <article class="story-card">
+    <div class="story-card-title">
+      <span class="story-card-title-icon">⏱️</span>
+      <span>Where the pressure starts</span>
+    </div>
+    <p>Most versions create urgency right away. They may warn that your account will be locked, suspended, or restricted unless you confirm activity immediately. That pressure is the point. Scammers want a fast click before you notice the sender, link, or wording does not fully add up.</p>
+  </article>
+
+  <article class="story-card">
+    <div class="story-card-title">
+      <span class="story-card-title-icon">🔐</span>
+      <span>What scammers usually want</span>
+    </div>
+    <p>The goal is often account takeover. Fake Telegram security pages may ask for your phone number, login code, password, or other recovery details. Once those details are handed over, the attacker can try to access your account, lock you out, or use your profile to target other people.</p>
+  </article>
+
+  <article class="story-card">
+    <div class="story-card-title">
+      <span class="story-card-title-icon">🧭</span>
+      <span>How to verify it safely</span>
+    </div>
+    <p>The safest check is simple: do not use the link inside the message. Open Telegram yourself, review your account and active sessions there, and only trust security information you verify directly inside the official app or official Telegram resources you opened on your own.</p>
+  </article>
+
+  <article class="story-card">
+    <div class="story-card-title">
+      <span class="story-card-title-icon">✅</span>
+      <span>What to do next</span>
+    </div>
+    <p>If you have not clicked, stop there and delete the message after checking your account through official channels. If you already clicked or shared any details, treat it as urgent, secure your Telegram account, review active sessions, and change connected credentials if needed.</p>
+  </article>
+
+  <article class="story-card">
+    <div class="story-card-title">
+      <span class="story-card-title-icon">⚠️</span>
+      <span>Key safety rule</span>
+    </div>
+    <p>If the message only feels real when you follow the link inside it, that is a strong warning sign. A real security issue should still be verifiable without using the message itself.</p>
+  </article>
+</div>
 `;
 
 const NEW_EXAMPLE_CARD = `
     <div class="story-card" id="realExamplesCard">
       <div class="story-card-title">
         <span class="story-card-title-icon">📩</span>
-        <span>Common USPS Package Delay Email Examples</span>
+        <span>Common Telegram Suspicious Activity Message Examples</span>
       </div>
-      <p>Reports show people receiving emails with subject lines like “USPS Package Delay,” “Delivery Delayed – Action Required,” or “Shipment On Hold.” These messages often claim there is a tracking issue, delivery delay, address problem, or missed shipment step that needs urgent action.</p>
-      <p style="margin-top:14px;">Most versions include buttons such as “Track Package,” “Confirm Delivery,” or “Resolve Delay.” These links can lead to fake USPS pages designed to capture payment details, home addresses, and other personal information.</p>
-      <p style="margin-top:14px;">Some versions also request a small redelivery, customs, or handling fee before the package can continue moving. The amount is usually small enough to feel believable but is only there to collect your card details.</p>
-      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the email only feels legitimate when you use the link inside it, that is a strong warning sign. A real delivery delay should still be verifiable directly through the official USPS website or app.</div>
+      <p>Reports show people receiving Telegram warnings that say “Suspicious activity detected,” “Unusual login attempt,” or “Immediate verification required.” These messages usually claim your account is at risk unless you act fast.</p>
+      <p style="margin-top:14px;">Most versions include a link, button, or fake support prompt telling you to review activity, secure your account, or confirm your identity. These pages are often built to collect your phone number, login code, or other account recovery details.</p>
+      <p style="margin-top:14px;">Some versions also pretend to come from Telegram support and create urgency by warning that your account will be locked, suspended, or compromised within minutes if you do not verify right away.</p>
+      <div style="margin-top:14px;font-size:14px;font-weight:800;color:#d7e4f8;line-height:1.6;">If the message only feels legitimate when you use the link inside it, that is a strong warning sign. A real security concern should still be verifiable directly inside the official Telegram app.</div>
     </div>
 `;
 
 const NEW_RELATED_LINKS = [
   {
-    href: "/scam-check-now/is-usps-package-held-email-legit-or-scam/",
-    text: "Is USPS Package Held Email Legit or a Scam?"
+    href: "/scam-check-now/is-whatsapp-security-alert-legit-or-scam/",
+    text: "Is WhatsApp Security Alert Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-address-verification-email-legit-or-scam/",
-    text: "Is USPS Address Verification Email Legit or a Scam?"
+    href: "/scam-check-now/is-google-security-alert-message-legit-or-scam/",
+    text: "Is Google Security Alert Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-customs-fee-email-legit-or-scam/",
-    text: "Is USPS Customs Fee Email Legit or a Scam?"
+    href: "/scam-check-now/is-google-unusual-activity-message-legit-or-scam/",
+    text: "Is Google Unusual Activity Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-delivery-alert-email-legit-or-scam/",
-    text: "Is USPS Delivery Alert Email Legit or a Scam?"
+    href: "/scam-check-now/is-instagram-account-suspended-message-legit-or-scam/",
+    text: "Is Instagram Account Suspended Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-delivery-confirmation-email-legit-or-scam/",
-    text: "Is USPS Delivery Confirmation Email Legit or a Scam?"
+    href: "/scam-check-now/is-google-verification-code-message-legit-or-scam/",
+    text: "Is Google Verification Code Message Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-delivery-notification-email-legit-or-scam/",
-    text: "Is USPS Delivery Notification Email Legit or a Scam?"
+    href: "/scam-check-now/is-telegram-message-from-unknown-user-legit-or-scam/",
+    text: "Is Telegram Message From Unknown User Legit or a Scam?"
   }
 ];
 
 const NEW_MORE_LINKS = [
   {
-    href: "/scam-check-now/is-usps-failed-shipment-email-legit-or-scam/",
-    text: "Is USPS Failed Shipment Email Legit or a Scam?"
+    href: "/scam-check-now/is-google-account-disabled-email-legit-or-scam/",
+    text: "Is Google Account Disabled Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-delivery-attempt-notice-legit-or-scam/",
-    text: "Is USPS Delivery Attempt Notice Legit or a Scam?"
+    href: "/scam-check-now/google-account-suspension-email-scam/",
+    text: "Is Google Account Suspension Email a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-delivery-failed-message-legit-or-scam/",
-    text: "Is USPS Delivery Failed Message Legit or a Scam?"
+    href: "/scam-check-now/is-instagram-security-alert-email-legit-or-scam/",
+    text: "Is Instagram Security Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-delivery-failed-text-legit-or-scam/",
-    text: "Is USPS Delivery Failed Text Legit or a Scam?"
+    href: "/scam-check-now/is-facebook-security-alert-email-legit-or-scam/",
+    text: "Is Facebook Security Alert Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/is-usps-missed-delivery-text-legit-or-scam/",
-    text: "Is USPS Missed Delivery Text Legit or a Scam?"
+    href: "/scam-check-now/is-apple-account-verification-email-legit-or-scam/",
+    text: "Is Apple Account Verification Email Legit or a Scam?"
   },
   {
-    href: "/scam-check-now/usps-delivery-text-scam/",
-    text: "Is USPS Delivery Text a Scam?"
+    href: "/scam-check-now/is-paypal-security-alert-message-real-or-fake/",
+    text: "Is PayPal Security Alert Message Real or Fake?"
   }
 ];
 
@@ -146,26 +198,26 @@ const NEW_FAQ_JSONLD = `{
   "mainEntity":[
     {
       "@type":"Question",
-      "name":"Is a USPS package delay email always a scam?",
+      "name":"Is a Telegram suspicious activity message always a scam?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"No. Delivery delays can be real, but scammers frequently copy USPS-style alerts to create urgency and collect payment or personal details. The safest approach is to verify the shipment independently through the official USPS website or app, not through the link inside the message."
+        "text":"No. Security alerts can sometimes be real, but scammers frequently copy Telegram-style warnings to steal login codes or take over accounts. The safest approach is to verify any alert directly inside the official Telegram app, not through the link in the message."
       }
     },
     {
       "@type":"Question",
-      "name":"How can I tell if a USPS package delay email is fake?",
+      "name":"How can I tell if a Telegram suspicious activity message is fake?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"Common warning signs include urgent pressure, requests for a small fee, suspicious links, strange sender domains, and messages asking you to confirm address or payment details. A real delivery issue should still be verifiable outside the email."
+        "text":"Common warning signs include urgent pressure, suspicious links, requests for login codes, fake support language, and messages warning that your account will be locked unless you act immediately. A real security issue should still be verifiable outside the message itself."
       }
     },
     {
       "@type":"Question",
-      "name":"What should I do if I clicked a USPS package delay email?",
+      "name":"What should I do if I clicked a Telegram suspicious activity message?",
       "acceptedAnswer":{
         "@type":"Answer",
-        "text":"If you clicked the link or entered information, treat it as urgent. Review your card activity, secure any affected accounts, and verify your shipment directly through USPS using an official source you opened yourself."
+        "text":"If you clicked the link or entered any details, treat it as urgent. Secure your Telegram account, review active sessions, and change any connected credentials if needed. Use only the official Telegram app or official sources you opened yourself."
       }
     }
   ]
@@ -173,18 +225,18 @@ const NEW_FAQ_JSONLD = `{
 
 const NEW_VISIBLE_FAQ = `
     <div class="link-section" id="visibleFaqWrap">
-      <h3>USPS Package Delay Email FAQ</h3>
+      <h3>Telegram Suspicious Activity Message FAQ</h3>
       <div class="content-body">
-        <p><strong>Is a USPS package delay email always a scam?</strong><br>No. Delivery delays can be real, but scammers frequently copy USPS-style alerts to create urgency and collect payment or personal details. The safest approach is to verify the shipment independently through the official USPS website or app, not through the link inside the message.</p>
-        <p><strong>How can I tell if a USPS package delay email is fake?</strong><br>Common warning signs include urgent pressure, requests for a small fee, suspicious links, strange sender domains, and messages asking you to confirm address or payment details. A real delivery issue should still be verifiable outside the email.</p>
-        <p><strong>What should I do if I clicked a USPS package delay email?</strong><br>If you clicked the link or entered information, treat it as urgent. Review your card activity, secure any affected accounts, and verify your shipment directly through USPS using an official source you opened yourself.</p>
+        <p><strong>Is a Telegram suspicious activity message always a scam?</strong><br>No. Security alerts can sometimes be real, but scammers frequently copy Telegram-style warnings to steal login codes or take over accounts. The safest approach is to verify any alert directly inside the official Telegram app, not through the link in the message.</p>
+        <p><strong>How can I tell if a Telegram suspicious activity message is fake?</strong><br>Common warning signs include urgent pressure, suspicious links, requests for login codes, fake support language, and messages warning that your account will be locked unless you act immediately. A real security issue should still be verifiable outside the message itself.</p>
+        <p><strong>What should I do if I clicked a Telegram suspicious activity message?</strong><br>If you clicked the link or entered any details, treat it as urgent. Secure your Telegram account, review active sessions, and change any connected credentials if needed. Use only the official Telegram app or official sources you opened yourself.</p>
       </div>
     </div>
 `;
 
 const NEW_HUB_LINK = `
     <div class="inline-info-card" id="hubLinkWrap">
-      <a href="/scam-check-now/package-delivery-scams/">Package Delivery Scam Hub</a>
+      <a href="/scam-check-now/telegram-scams/">Telegram Scam Hub</a>
     </div>
 `;
 
@@ -384,12 +436,19 @@ function upsertFaqJsonLd(html) {
   return inserted;
 }
 
-function insertTopFreshnessBlock(html) {
+function replaceFreshnessBlock(html) {
   if (!NEW_TOP_BLOCK) return html;
 
   if (html.includes('id="freshnessBlock"')) {
-    console.log("Freshness block already exists");
-    return html;
+    const updatedExisting = html.replace(
+      /<div class="page-shell-top-block" id="freshnessBlock"[\s\S]*?<\/div>\s*<\/div>\s*(?=<div class="container">|<div class="page-shell-top-block" id="instantVerdictCardWrap")/i,
+      `${NEW_TOP_BLOCK}\n`
+    );
+
+    if (updatedExisting !== html) {
+      console.log("Updated freshness block");
+      return updatedExisting;
+    }
   }
 
   const updated = html.replace(
@@ -404,7 +463,7 @@ function insertTopFreshnessBlock(html) {
     );
 
     if (fallback === html) {
-      console.warn("No change for top freshness block");
+      console.warn("No change for freshness block");
       return html;
     }
 
@@ -432,6 +491,16 @@ function insertInstantVerdictCard(html) {
         html.slice(freshnessIndex)
       );
     }
+
+    const updatedExisting = html.replace(
+      /<div class="page-shell-top-block" id="instantVerdictCardWrap"[\s\S]*?<\/div>\s*<\/div>/i,
+      NEW_INSTANT_VERDICT_CARD.trim()
+    );
+
+    if (updatedExisting !== html) {
+      console.log("Updated instant verdict card");
+      return updatedExisting;
+    }
   }
 
   let updated = html.replace(
@@ -458,27 +527,140 @@ function insertInstantVerdictCard(html) {
   return html;
 }
 
-function replaceDeliverySeoCardTitles(html) {
-  const updated = html.replace(
-    /if\s*\(containsAny\(lower,\s*\["delivery",\s*"usps",\s*"ups",\s*"fedex",\s*"package",\s*"shipment",\s*"parcel"\]\)\)\s*\{\s*return\s*\[\s*\["📦",\s*"What this delivery setup often looks like"\],\s*\["⏱️",\s*"Where the message pushes quick action"\],\s*\["🔁",\s*"How the carrier story changes across versions"\],\s*\["💥",\s*"What happens after the click or payment"\]\s*\];\s*\}/i,
-    `if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
-    return [
-      ["📦", "What this delivery setup often looks like"],
-      ["⏱️", "Where the message pushes quick action"],
-      ["🔁", "How the carrier story changes across versions"],
-      ["💥", "What happens after the click or payment"],
-      ["•", "What to do next"],
-      ["•", "Key safety rule"]
+function replacePreviewSignals(html) {
+  const replacement = `function applyPreviewCard() {
+  const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
+  const cleanTitle = displayCleanKeyword(keywordRaw) || "Suspicious Message";
+  const lower = keywordRaw.toLowerCase();
+
+  const previewDomain = document.getElementById("previewDomain");
+  const previewSub = document.getElementById("previewSub");
+  const previewBadge = document.getElementById("previewBadge");
+  const previewScore = document.getElementById("previewScore");
+  const previewScoreFill = document.getElementById("previewScoreFill");
+  const previewSignals = document.getElementById("previewSignals");
+
+  if (!previewDomain || !previewSub || !previewBadge || !previewScore || !previewScoreFill || !previewSignals) {
+    return;
+  }
+
+  let riskLabel = "Example Risk Pattern";
+  let trustScore = "Risk Example";
+  let fillWidth = "18%";
+  let sub = "Common signals found in similar scams";
+  let signals = [
+    "Suspicious domain mismatch",
+    "Urgent language detected",
+    "Payment request via gift card"
+  ];
+
+  if (containsAny(lower, ["telegram"])) {
+    riskLabel = "Example Risk Pattern";
+    trustScore = "Account Risk Example";
+    fillWidth = "22%";
+    sub = "Common signals found in similar Telegram account alert scams";
+    signals = [
+      "Fake login or verification link",
+      "Pressure to act before account suspension",
+      "Requests for phone number or login code"
     ];
-  }`
+  } else if (containsAny(lower, ["job", "recruiter", "interview", "hiring", "onboarding"])) {
+    signals = [
+      "Pressure to move quickly",
+      "Requests for personal details or fees",
+      "Offer appears unusually fast or high-paying"
+    ];
+  } else if (containsAny(lower, ["crypto", "bitcoin", "ethereum", "wallet", "airdrop", "nft"])) {
+    signals = [
+      "Urgent transfer or wallet request",
+      "High-return or recovery promise",
+      "Support or investment impersonation risk"
+    ];
+  } else if (containsAny(lower, ["delivery", "usps", "ups", "fedex", "package", "shipment", "parcel"])) {
+    signals = [
+      "Tracking or delivery pressure",
+      "Link may lead to a fake page",
+      "Small payment or verification request"
+    ];
+  } else if (containsAny(lower, ["bank", "paypal", "venmo", "zelle", "cash app", "amazon", "refund", "payment"])) {
+    signals = [
+      "Account or payment urgency",
+      "Possible fake login or verification page",
+      "Requests for money or sensitive details"
+    ];
+  } else if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    riskLabel = "Scam Risk Check";
+    trustScore = "Pattern Review";
+    fillWidth = "34%";
+    signals = [
+      "Review sender, links, and urgency",
+      "Verify outside the original message",
+      "Do not send money or codes until confirmed"
+    ];
+  }
+
+  previewBadge.textContent = \`🔴 \${riskLabel}\`;
+  previewScore.textContent = trustScore;
+  previewScoreFill.style.width = fillWidth;
+  previewDomain.textContent = cleanTitle;
+  previewSub.textContent = sub;
+  previewSignals.innerHTML = signals.map(signal =>
+    \`<div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>\${escapeHtml(signal)}</span></div>\`
+  ).join("");
+}`;
+
+  const updated = html.replace(
+    /function applyPreviewCard\(\) \{[\s\S]*?\n\}/,
+    replacement
   );
 
   if (updated === html) {
-    console.warn("No change for delivery seo card titles");
+    console.warn("No change for preview signals");
     return html;
   }
 
-  console.log("Updated delivery seo card titles");
+  console.log("Updated preview signals");
+  return updated;
+}
+
+function replaceTelegramSeoCardTitles(html) {
+  const updated = html.replace(
+    /return \[\s*\["📱",\s*"What this Telegram alert often looks like"\],\s*\["⏱️",\s*"Where the pressure starts"\],\s*\["🔁",\s*"How the account warning changes across versions"\],\s*\["💥",\s*"What happens after the click or code share"\],\s*\["•",\s*"What to do next"\],\s*\["•",\s*"Key safety rule"\]\s*\];/i,
+    `return [
+      ["📱", "What this Telegram alert often looks like"],
+      ["⏱️", "Where the pressure starts"],
+      ["🔐", "What scammers usually want"],
+      ["🧭", "How to verify it safely"],
+      ["✅", "What to do next"],
+      ["⚠️", "Key safety rule"]
+    ];`
+  );
+
+  if (updated === html) {
+    console.warn("No change for telegram seo card titles");
+    return html;
+  }
+
+  console.log("Updated telegram seo card titles");
+  return updated;
+}
+
+function replaceSeoContent(html) {
+  if (!NEW_SEO_CONTENT) return html;
+
+  const updated = html.replace(
+    /<div id="seoContent" class="content-body">[\s\S]*?<\/div>\s*\n\s*<div class="story-card" id="realExamplesCard">/i,
+    `<div id="seoContent" class="content-body">${NEW_SEO_CONTENT}</div>
+
+    <div class="story-card" id="realExamplesCard">`
+  );
+
+  if (updated === html) {
+    console.warn("No change for seo content");
+    return html;
+  }
+
+  console.log("Updated seo content");
   return updated;
 }
 
@@ -623,9 +805,11 @@ updated = replaceTwitterDescription(updated);
 updated = replaceRawKeyword(updated);
 updated = replaceWebPageJsonLd(updated);
 updated = upsertFaqJsonLd(updated);
-updated = insertTopFreshnessBlock(updated);
+updated = replaceFreshnessBlock(updated);
 updated = insertInstantVerdictCard(updated);
-updated = replaceDeliverySeoCardTitles(updated);
+updated = replacePreviewSignals(updated);
+updated = replaceTelegramSeoCardTitles(updated);
+updated = replaceSeoContent(updated);
 updated = upsertExampleCard(updated);
 updated = replaceRelatedLinks(updated);
 updated = replaceMoreLinks(updated);
