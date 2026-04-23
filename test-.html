@@ -2372,3 +2372,251 @@ export default {
   generateStrictSeo,
   debugSeoAnalysis,
 };
+
+/* =========================
+   ADVANCED REWRITE ENGINE (DEPTH PASS)
+========================= */
+
+function buildDeepRewritePrompt(original, keyword, contextSummary) {
+  return `
+Rewrite the following crypto analysis to be sharper, more structural, and less generic.
+
+Rules:
+- No filler or broad advice
+- No “investors should” language
+- No repeated phrasing
+- Focus on liquidity, holders, contract control, and exit behavior where relevant
+- Keep it tight, dense, and decision-relevant
+
+Keyword:
+${keyword}
+
+Context:
+${contextSummary}
+
+Text:
+${original}
+`;
+}
+
+async function deepRewritePass(text, keyword, contextSummary) {
+  const prompt = buildDeepRewritePrompt(text, keyword, contextSummary);
+  const rewritten = sanitizeSeoContent(await generateSeoText(prompt));
+  return enforceStyleConstraints(rewritten);
+}
+
+/* =========================
+   SIGNAL ENRICHMENT LAYER
+========================= */
+
+function injectMissingSignals(text, keyword) {
+  const lower = text.toLowerCase();
+
+  let additions = [];
+
+  if (!lower.includes("liquidity")) {
+    additions.push("Liquidity conditions matter because thin liquidity increases slippage and exit difficulty.");
+  }
+
+  if (!lower.includes("holders")) {
+    additions.push("Holder concentration can shift control quickly if large wallets move.");
+  }
+
+  if (!lower.includes("contract")) {
+    additions.push("Contract permissions influence whether control can change after launch.");
+  }
+
+  if (!lower.includes("volatility")) {
+    additions.push("Volatility tends to expand when structure weakens or liquidity thins.");
+  }
+
+  if (!additions.length) return text;
+
+  const paragraphs = splitSeoParagraphs(text);
+  paragraphs[paragraphs.length - 1] += " " + additions.join(" ");
+
+  return paragraphs.join("\n\n");
+}
+
+/* =========================
+   STRUCTURAL BALANCING
+========================= */
+
+function balanceParagraphLengths(text) {
+  const paragraphs = splitSeoParagraphs(text);
+  if (paragraphs.length < 2) return text;
+
+  const avg =
+    paragraphs.reduce((sum, p) => sum + paragraphWordCount(p), 0) /
+    paragraphs.length;
+
+  return paragraphs
+    .map((p) => {
+      const wc = paragraphWordCount(p);
+      if (wc > avg * 1.6) {
+        const sentences = splitSentences(p);
+        return sentences.slice(0, Math.ceil(sentences.length * 0.7)).join(" ");
+      }
+      return p;
+    })
+    .join("\n\n");
+}
+
+/* =========================
+   ANTI-REPETITION ENFORCER
+========================= */
+
+function removeRepeatedConcepts(text) {
+  const paragraphs = splitSeoParagraphs(text);
+
+  const seen = new Set();
+
+  const cleaned = paragraphs.map((p) => {
+    const tokens = tokenizeForEntityMatch(p);
+    const filtered = tokens.filter((t) => {
+      if (seen.has(t)) return false;
+      seen.add(t);
+      return true;
+    });
+
+    if (filtered.length < tokens.length / 2) {
+      return removeDuplicateSentencesFromParagraph(p);
+    }
+
+    return p;
+  });
+
+  return cleaned.join("\n\n");
+}
+
+/* =========================
+   FINAL POLISH PASS
+========================= */
+
+function polishFinalOutput(text) {
+  let output = text;
+
+  output = enforceStyleConstraints(output);
+  output = balanceParagraphLengths(output);
+  output = removeRepeatedConcepts(output);
+  output = enforceSentenceDiversity(output);
+
+  return output.trim();
+}
+
+/* =========================
+   ULTRA MODE (MAX QUALITY)
+========================= */
+
+export async function generateUltraSeo(keyword) {
+  const context = await fetchCryptoContext(keyword);
+
+  let result = await generateHighQualitySeo(keyword);
+  let text = result.content;
+
+  text = enforceStyleConstraints(text);
+
+  let passes = 0;
+
+  while (passes < 4) {
+    const improved = await deepRewritePass(
+      text,
+      keyword,
+      context.contextSummary
+    );
+
+    const enriched = injectMissingSignals(improved, keyword);
+    const polished = polishFinalOutput(enriched);
+
+    const newScore = scoreSeoContent(polished);
+
+    if (newScore > result.score) {
+      result.score = newScore;
+      text = polished;
+    }
+
+    if (newScore >= EARLY_ACCEPT_SCORE) break;
+
+    passes++;
+  }
+
+  return {
+    keyword,
+    content: text,
+    score: result.score,
+    contextConfidence: context.contextConfidence,
+    mode: "ultra",
+  };
+}
+
+/* =========================
+   INTERNAL TEST UTILITIES
+========================= */
+
+export async function testSeoPipeline(keyword) {
+  const base = await generateHighQualitySeo(keyword);
+  const strict = await generateStrictSeo(keyword);
+  const light = await generateLightSeo(keyword);
+  const ultra = await generateUltraSeo(keyword);
+
+  return {
+    keyword,
+    variants: {
+      base,
+      strict,
+      light,
+      ultra,
+    },
+  };
+}
+
+/* =========================
+   PERFORMANCE TIMER
+========================= */
+
+export async function benchmarkSeo(keyword) {
+  const start = Date.now();
+
+  const result = await generateUltraSeo(keyword);
+
+  const duration = Date.now() - start;
+
+  return {
+    keyword,
+    durationMs: duration,
+    score: result.score,
+    contextConfidence: result.contextConfidence,
+  };
+}
+
+/* =========================
+   SAFE WRAPPER (NO THROW)
+========================= */
+
+export async function safeGenerateSeo(keyword) {
+  try {
+    return await generateUltraSeo(keyword);
+  } catch (error) {
+    return {
+      keyword,
+      error: error.message,
+      fallback: true,
+    };
+  }
+}
+
+/* =========================
+   FINAL AGGREGATED EXPORT
+========================= */
+
+export const TokenRiskSEOEngine = {
+  generate: generateTokenRiskSeo,
+  strict: generateStrictSeo,
+  light: generateLightSeo,
+  ultra: generateUltraSeo,
+  batch: generateBatchTokenRiskSeo,
+  safe: safeGenerateSeo,
+  debug: debugSeoAnalysis,
+  test: testSeoPipeline,
+  benchmark: benchmarkSeo,
+};
