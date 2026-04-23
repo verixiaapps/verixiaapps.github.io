@@ -584,3 +584,706 @@ function buildSeoClassMap() {
     },
   };
 }
+
+function mergeSeoCategoryProfiles(profiles) {
+  return {
+    type: profiles[0]?.type || "general_token_risk",
+    contextLabel: profiles.map((p) => p.contextLabel).join(" + "),
+    coreSignals: unique(profiles.flatMap((p) => p.coreSignals || [])),
+    supportingSignals: unique(profiles.flatMap((p) => p.supportingSignals || [])),
+    requiredTerms: unique(profiles.flatMap((p) => p.requiredTerms || [])),
+    flexibleConcepts: unique(profiles.flatMap((p) => p.flexibleConcepts || [])),
+    triggerTerms: unique(profiles.flatMap((p) => p.triggerTerms || [])),
+  };
+}
+
+function classifySeoKeyword(keyword) {
+  const lower = normalizeSeoKeyword(keyword).toLowerCase();
+  const intent = detectSeoIntent(keyword);
+  const classes = buildSeoClassMap();
+
+  if (intent === "token_profile") {
+    return {
+      type: "token_profile",
+      contextLabel: "token profile and structure",
+      coreSignals: [
+        "token",
+        "coin",
+        "project",
+        "utility",
+        "ecosystem",
+        "supply",
+        "liquidity",
+        "holders",
+        "market cap",
+        "volume",
+      ],
+      supportingSignals: [
+        "narrative",
+        "exchange coverage",
+        "chain",
+        "trading activity",
+        "community",
+        "product fit",
+      ],
+      requiredTerms: ["token"],
+      flexibleConcepts: ["utility", "supply", "volume", "market cap", "ecosystem", "chain"],
+      triggerTerms: [],
+      primaryType: "token_profile",
+      secondaryTypes: [],
+      activeTypes: ["token_profile"],
+      mixStrength: 1,
+      intent,
+    };
+  }
+
+  if (intent === "market_context") {
+    return {
+      type: "market_context",
+      contextLabel: "crypto market context",
+      coreSignals: [
+        "price",
+        "volume",
+        "market cap",
+        "momentum",
+        "trend",
+        "liquidity",
+        "volatility",
+        "rotation",
+      ],
+      supportingSignals: [
+        "sentiment",
+        "sector strength",
+        "risk appetite",
+        "trading flow",
+        "macro pressure",
+      ],
+      requiredTerms: ["market"],
+      flexibleConcepts: ["price", "volume", "trend", "momentum", "volatility", "rotation"],
+      triggerTerms: [],
+      primaryType: "market_context",
+      secondaryTypes: [],
+      activeTypes: ["market_context"],
+      mixStrength: 1,
+      intent,
+    };
+  }
+
+  if (intent === "education_explainer") {
+    return {
+      type: "education_explainer",
+      contextLabel: "crypto explainer",
+      coreSignals: [
+        "crypto",
+        "token",
+        "market",
+        "liquidity",
+        "volatility",
+        "ownership",
+        "supply",
+        "trading",
+      ],
+      supportingSignals: ["context", "use case", "structure", "risk", "mechanics"],
+      requiredTerms: ["crypto"],
+      flexibleConcepts: ["structure", "market", "trading", "liquidity", "risk"],
+      triggerTerms: [],
+      primaryType: "education_explainer",
+      secondaryTypes: [],
+      activeTypes: ["education_explainer"],
+      mixStrength: 1,
+      intent,
+    };
+  }
+
+  if (keywordHasVerdictIntent(lower)) {
+    return {
+      type: "broad_risk",
+      contextLabel: "broad token risk evaluation",
+      coreSignals: [
+        "risk",
+        "token",
+        "liquidity",
+        "holders",
+        "ownership",
+        "contract",
+        "control",
+        "volatility",
+        "distribution",
+        "launch",
+        "momentum",
+        "exit",
+      ],
+      supportingSignals: [
+        "holder concentration",
+        "liquidity depth",
+        "contract permissions",
+        "token age",
+        "market behavior",
+        "confidence",
+      ],
+      requiredTerms: ["risk", "token"],
+      flexibleConcepts: ["liquidity", "holders", "contract", "control", "volatility", "exit"],
+      triggerTerms: [
+        "rug pull",
+        "scam",
+        "safe",
+        "unsafe",
+        "legit",
+        "real or fake",
+        "risk score",
+        "token risk",
+        "is this token safe",
+        "is token safe",
+        "high risk",
+        "low risk",
+        "presale",
+        "meme coin",
+        "meme token",
+        "new token",
+        "launch",
+        "launched",
+        "buy",
+        "should i buy",
+      ],
+      primaryType: "broad_risk",
+      secondaryTypes: [],
+      activeTypes: ["broad_risk"],
+      mixStrength: 1,
+      intent,
+    };
+  }
+
+  const specificClasses = [classes.liquidity, classes.holders, classes.contract];
+
+  const scored = specificClasses
+    .map((seoClass) => ({
+      seoClass,
+      score: countMatches(lower, seoClass.triggerTerms || []),
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  if (!scored.length) {
+    return {
+      ...classes.general_token_risk,
+      primaryType: "general_token_risk",
+      secondaryTypes: [],
+      activeTypes: ["general_token_risk"],
+      mixStrength: 1,
+      intent,
+    };
+  }
+
+  const topScore = scored[0].score;
+
+  const selected = scored
+    .filter((entry, index) => entry.score >= Math.max(1, topScore - 1) && index < 2)
+    .map((entry) => entry.seoClass);
+
+  const merged = mergeSeoCategoryProfiles(selected);
+
+  return {
+    ...merged,
+    primaryType: selected[0].type,
+    secondaryTypes: selected.slice(1).map((item) => item.type),
+    activeTypes: selected.map((item) => item.type),
+    mixStrength: selected.length,
+    intent,
+  };
+}
+
+function extractKeywordSignals(keyword) {
+  const clean = normalizeSeoKeyword(keyword);
+  const lower = clean.toLowerCase();
+  const tokens = tokenizeKeyword(clean);
+  const quotedPhrases = [];
+  const addresses = extractContractAddresses(clean);
+
+  const phrasePatterns = [/"([^"]+)"/g, /'([^']+)'/g];
+  for (const pattern of phrasePatterns) {
+    let match;
+    while ((match = pattern.exec(clean))) {
+      if (match[1] && match[1].trim()) {
+        quotedPhrases.push(match[1].trim());
+      }
+    }
+  }
+
+  const intentHints = [];
+  const chainHints = [];
+  const tokenStructureHints = [];
+  const signalHints = [];
+  const audienceIntentHints = [];
+  const entityHints = [];
+
+  if (/solana|phantom/.test(lower)) chainHints.push("solana");
+  if (/\bbase\b/.test(lower)) chainHints.push("base");
+  if (/ethereum|\beth\b/.test(lower)) chainHints.push("ethereum");
+  if (/bsc|binance smart chain/.test(lower)) chainHints.push("bsc");
+  if (/arbitrum/.test(lower)) chainHints.push("arbitrum");
+  if (/polygon/.test(lower)) chainHints.push("polygon");
+  if (/avalanche|avax/.test(lower)) chainHints.push("avalanche");
+  if (/sui/.test(lower)) chainHints.push("sui");
+  if (/optimism|\bop\b/.test(lower)) chainHints.push("optimism");
+
+  if (keywordHasVerdictIntent(lower)) {
+    intentHints.push("verdict");
+    audienceIntentHints.push("trust decision");
+  }
+
+  if (/liquidity|lp|lock|locked|unlock|unlocked|pool|slippage/.test(lower)) {
+    signalHints.push("liquidity");
+    tokenStructureHints.push("exit conditions");
+  }
+
+  if (/holder|holders|wallet|whale|distribution|supply/.test(lower)) {
+    signalHints.push("ownership concentration");
+    tokenStructureHints.push("distribution");
+  }
+
+  if (
+    /contract|renounced|mint|freeze|blacklist|permission|owner|ownership|admin|proxy|upgradeable/.test(
+      lower
+    )
+  ) {
+    signalHints.push("contract control");
+    tokenStructureHints.push("permissions");
+  }
+
+  if (/new token|launch|launched|presale|meme/.test(lower)) {
+    signalHints.push("early-stage risk");
+    tokenStructureHints.push("launch pattern");
+  }
+
+  if (/token|coin/.test(lower)) {
+    audienceIntentHints.push("buying decision");
+  }
+
+  if (/price|volume|market cap|trend|trending/.test(lower)) {
+    intentHints.push("market context");
+  }
+
+  if (/ecosystem|chain|network|layer 1|layer 2|l1|l2/.test(lower)) {
+    intentHints.push("ecosystem");
+  }
+
+  const filteredEntityCandidates = tokens.filter((token) => {
+    const normalized = normalizeEntityToken(token);
+    if (!normalized) return false;
+    if (STOPWORD_SET.has(normalized)) return false;
+    if (normalized.length < 2 || normalized.length > 24) return false;
+    return true;
+  });
+
+  const uppercaseTickers = tokens.filter((token) => isProbablyTicker(token));
+
+  entityHints.push(...filteredEntityCandidates.slice(0, 6));
+  entityHints.push(...uppercaseTickers.slice(0, 3));
+
+  return {
+    clean,
+    tokens,
+    quotedPhrases: unique(quotedPhrases),
+    addresses,
+    intentHints: unique(intentHints),
+    chainHints: unique(chainHints),
+    tokenStructureHints: unique(tokenStructureHints),
+    signalHints: unique(signalHints),
+    audienceIntentHints: unique(audienceIntentHints),
+    entityHints: unique(entityHints),
+  };
+}
+
+/* =========================
+   CRYPTO CONTEXT FETCHING
+========================= */
+
+function detectBestChainForAddresses(keywordSignals) {
+  const chainHints = keywordSignals?.chainHints || [];
+  const addresses = keywordSignals?.addresses || [];
+  if (!addresses.length) return "";
+
+  if (chainHints.includes("solana")) return "solana";
+  if (chainHints.includes("base")) return "base";
+  if (chainHints.includes("arbitrum")) return "arbitrum";
+  if (chainHints.includes("polygon")) return "polygon";
+  if (chainHints.includes("avalanche")) return "avalanche";
+  if (chainHints.includes("bsc")) return "bsc";
+  if (chainHints.includes("ethereum")) return "ethereum";
+
+  const first = addresses[0];
+  if (/^0x[a-f0-9]{40}$/i.test(first)) return "ethereum";
+  return "solana";
+}
+
+function buildCoinGeckoHeaders() {
+  const headers = { Accept: "application/json" };
+  if (process.env.COINGECKO_API_KEY) {
+    headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
+  }
+  return headers;
+}
+
+async function fetchJsonWithTimeout(url, options = {}, timeoutMs = CRYPTO_CONTEXT_TIMEOUT_MS) {
+  const response = await fetchWithTimeout(
+    url,
+    {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...(options.headers || {}),
+      },
+    },
+    timeoutMs
+  );
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    const error = new Error(
+      `HTTP ${response.status} for ${url}${text ? `: ${text.slice(0, 180)}` : ""}`
+    );
+    error.status = response.status;
+    throw error;
+  }
+
+  return response.json();
+}
+
+async function tryFetchJson(url, options = {}, timeoutMs = CRYPTO_CONTEXT_TIMEOUT_MS) {
+  try {
+    return await fetchJsonWithTimeout(url, options, timeoutMs);
+  } catch {
+    return null;
+  }
+}
+
+function summarizeCoinGeckoCoin(coin) {
+  if (!coin) return null;
+
+  return compactObject({
+    id: coin.id,
+    name: coin.name,
+    symbol: coin.symbol ? String(coin.symbol).toUpperCase() : "",
+    marketCapRank: coin.market_cap_rank,
+    categories: Array.isArray(coin.categories) ? coin.categories.slice(0, 6) : [],
+    description: truncateText(coin.description?.en || "", 320),
+    homepage: Array.isArray(coin.links?.homepage)
+      ? coin.links.homepage.filter(Boolean).slice(0, 2)
+      : [],
+    platforms: coin.platforms ? Object.keys(coin.platforms).filter(Boolean).slice(0, 8) : [],
+    genesisDate: coin.genesis_date || "",
+    sentimentUp: coin.sentiment_votes_up_percentage,
+    sentimentDown: coin.sentiment_votes_down_percentage,
+  });
+}
+
+function summarizeCoinGeckoMarket(coin) {
+  if (!coin) return null;
+
+  return compactObject({
+    id: coin.id,
+    name: coin.name,
+    symbol: coin.symbol ? String(coin.symbol).toUpperCase() : "",
+    priceUsd: coin.current_price,
+    marketCapUsd: coin.market_cap,
+    volume24hUsd: coin.total_volume,
+    priceChange24h: coin.price_change_percentage_24h,
+    marketCapRank: coin.market_cap_rank,
+  });
+}
+
+function summarizeDexScreenerPair(pair) {
+  if (!pair) return null;
+
+  return compactObject({
+    chainId: pair.chainId || "",
+    dexId: pair.dexId || "",
+    pairAddress: pair.pairAddress || "",
+    baseToken: compactObject({
+      name: pair.baseToken?.name || "",
+      symbol: pair.baseToken?.symbol || "",
+      address: pair.baseToken?.address || "",
+    }),
+    quoteToken: compactObject({
+      name: pair.quoteToken?.name || "",
+      symbol: pair.quoteToken?.symbol || "",
+      address: pair.quoteToken?.address || "",
+    }),
+    priceUsd: pair.priceUsd,
+    volume24h: pair.volume?.h24,
+    liquidityUsd: pair.liquidity?.usd,
+    marketCapUsd: pair.marketCap,
+    fdvUsd: pair.fdv,
+    pairCreatedAt: pair.pairCreatedAt,
+    labels: Array.isArray(pair.labels) ? pair.labels.slice(0, 4) : [],
+    url: pair.url || "",
+  });
+}
+
+function buildEntityQueries(keyword, keywordSignals) {
+  const queries = [];
+  const quoted = removeEmptyStrings(keywordSignals?.quotedPhrases);
+  const entities = removeEmptyStrings(keywordSignals?.entityHints);
+
+  if (quoted.length) queries.push(...quoted.slice(0, 2));
+
+  if (entities.length) {
+    const joined = entities.slice(0, 3).join(" ");
+    if (joined) queries.push(joined);
+    queries.push(...entities.slice(0, 3));
+  }
+
+  const tokenBased = tokenizeKeyword(keyword)
+    .filter((token) => !STOPWORD_SET.has(token.toLowerCase()))
+    .slice(0, 4)
+    .join(" ");
+
+  if (tokenBased) queries.push(tokenBased);
+  if (keywordSignals?.addresses?.length) queries.push(keywordSignals.addresses[0]);
+
+  return unique(queries).slice(0, 5);
+}
+
+async function fetchCoinGeckoSearch(keyword, keywordSignals) {
+  const queries = buildEntityQueries(keyword, keywordSignals);
+  if (!queries.length) return [];
+
+  const results = await Promise.all(
+    queries.map(async (query) => {
+      const url = `${COINGECKO_BASE_URL}/search?query=${encodeURIComponent(query)}`;
+      const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
+
+      if (!data || !Array.isArray(data.coins)) return [];
+
+      return data.coins.slice(0, CRYPTO_CONTEXT_MAX_ITEMS).map((coin) =>
+        compactObject({
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol ? String(coin.symbol).toUpperCase() : "",
+          marketCapRank: coin.market_cap_rank,
+          thumb: coin.thumb || "",
+        })
+      );
+    })
+  );
+
+  const merged = [];
+  const seen = new Set();
+
+  for (const group of results) {
+    for (const item of group || []) {
+      const key = String(item?.id || "");
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      merged.push(item);
+    }
+  }
+
+  return merged.slice(0, CRYPTO_CONTEXT_MAX_ITEMS);
+}
+
+async function fetchCoinGeckoMarketByIds(ids = []) {
+  const cleanIds = unique(ids).slice(0, CRYPTO_CONTEXT_MAX_ITEMS);
+  if (!cleanIds.length) return [];
+
+  const url =
+    `${COINGECKO_BASE_URL}/coins/markets?vs_currency=usd&ids=` +
+    encodeURIComponent(cleanIds.join(",")) +
+    "&price_change_percentage=24h";
+
+  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
+  if (!Array.isArray(data)) return [];
+
+  return data.map(summarizeCoinGeckoMarket).filter(Boolean);
+}
+
+async function fetchCoinGeckoCoinById(id) {
+  if (!id) return null;
+
+  const url =
+    `${COINGECKO_BASE_URL}/coins/${encodeURIComponent(id)}` +
+    "?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false";
+
+  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
+  return summarizeCoinGeckoCoin(data);
+}
+
+async function fetchCoinGeckoTrending() {
+  const url = `${COINGECKO_BASE_URL}/search/trending`;
+  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
+  if (!data || !Array.isArray(data.coins)) return [];
+
+  return data.coins.slice(0, CRYPTO_CONTEXT_MAX_ITEMS).map((entry) =>
+    compactObject({
+      id: entry.item?.id,
+      name: entry.item?.name,
+      symbol: entry.item?.symbol ? String(entry.item.symbol).toUpperCase() : "",
+      marketCapRank: entry.item?.market_cap_rank,
+      priceBtc: entry.item?.price_btc,
+    })
+  );
+}
+
+async function fetchCoinGeckoTokenByContract(chain, address) {
+  if (!chain || !address) return null;
+
+  const mapped = normalizeChainName(chain);
+  if (!mapped) return null;
+
+  const url =
+    `${COINGECKO_BASE_URL}/coins/${encodeURIComponent(mapped)}/contract/${encodeURIComponent(
+      address
+    )}` +
+    "?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false";
+
+  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
+  return summarizeCoinGeckoCoin(data);
+}
+
+async function fetchDexScreenerSearch(keyword, keywordSignals) {
+  const queries = buildEntityQueries(keyword, keywordSignals);
+  if (!queries.length) return [];
+
+  const results = await Promise.all(
+    queries.map(async (query) => {
+      const url = `${DEXSCREENER_BASE_URL}/latest/dex/search?q=${encodeURIComponent(query)}`;
+      const data = await tryFetchJson(url);
+
+      if (!data || !Array.isArray(data.pairs)) return [];
+
+      return data.pairs
+        .slice(0, CRYPTO_CONTEXT_MAX_ITEMS)
+        .map(summarizeDexScreenerPair)
+        .filter(Boolean);
+    })
+  );
+
+  const merged = [];
+  const seen = new Set();
+
+  for (const group of results) {
+    for (const item of group || []) {
+      const key = `${item?.chainId || ""}:${item?.pairAddress || ""}`;
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      merged.push(item);
+    }
+  }
+
+  return merged.slice(0, CRYPTO_CONTEXT_MAX_ITEMS);
+}
+
+async function fetchDexScreenerTokenPairs(chain, address) {
+  if (!chain || !address) return [];
+
+  const mappedChain = normalizeChainName(chain);
+  const url = `${DEXSCREENER_BASE_URL}/token-pairs/v1/${encodeURIComponent(
+    mappedChain
+  )}/${encodeURIComponent(address)}`;
+
+  const data = await tryFetchJson(url);
+  if (!Array.isArray(data)) return [];
+
+  return data
+    .slice(0, CRYPTO_CONTEXT_MAX_ITEMS)
+    .map(summarizeDexScreenerPair)
+    .filter(Boolean);
+}
+
+function scoreCoinGeckoCandidate(coin, keyword, keywordSignals, index = 0) {
+  let score = 0;
+
+  const fullKeyword = safeLower(keyword);
+  const name = safeLower(coin?.name);
+  const symbol = safeLower(coin?.symbol);
+  const entities = removeEmptyStrings(keywordSignals?.entityHints).map(normalizeEntityToken);
+  const quoted = removeEmptyStrings(keywordSignals?.quotedPhrases).map((value) => safeLower(value));
+  const chainHints = new Set((keywordSignals?.chainHints || []).map((item) => item.toLowerCase()));
+
+  if (
+    entities.some(
+      (hint) =>
+        hint &&
+        (normalizeEntityToken(name) === hint || normalizeEntityToken(symbol) === hint)
+    )
+  ) {
+    score += 16;
+  }
+
+  if (
+    entities.some(
+      (hint) =>
+        hint &&
+        (normalizeEntityToken(name).includes(hint) ||
+          normalizeEntityToken(symbol).includes(hint))
+    )
+  ) {
+    score += 10;
+  }
+
+  if (quoted.some((phrase) => phrase && (name.includes(phrase) || phrase.includes(name)))) {
+    score += 10;
+  }
+
+  score += tokenOverlapScore(fullKeyword, `${coin?.name || ""} ${coin?.symbol || ""}`) * 3;
+
+  if (Number.isFinite(Number(coin?.marketCapRank)) && Number(coin.marketCapRank) > 0) {
+    score += clamp(14 - Number(coin.marketCapRank) / 40, 0, 10);
+  }
+
+  if (index === 0) score += 1;
+  if (chainHints.size) score += 0.5;
+
+  return score;
+}
+
+function selectBestCoinGeckoMatch(searchResults, keyword, keywordSignals) {
+  if (!Array.isArray(searchResults) || !searchResults.length) return null;
+
+  const scored = searchResults
+    .map((coin, index) => ({
+      coin,
+      score: scoreCoinGeckoCandidate(coin, keyword, keywordSignals, index),
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.coin || null;
+}
+
+function scoreDexPairCandidate(pair, keyword, keywordSignals) {
+  let score = 0;
+
+  const nameBlob = `${pair?.baseToken?.name || ""} ${pair?.baseToken?.symbol || ""} ${
+    pair?.quoteToken?.name || ""
+  } ${pair?.quoteToken?.symbol || ""}`;
+
+  const entities = removeEmptyStrings(keywordSignals?.entityHints).map(normalizeEntityToken);
+  const fullLower = safeLower(keyword);
+  const chainHints = new Set((keywordSignals?.chainHints || []).map((item) => item.toLowerCase()));
+
+  score += tokenOverlapScore(fullLower, nameBlob) * 3;
+
+  if (entities.some((hint) => hint && normalizeEntityToken(nameBlob).includes(hint))) {
+    score += 8;
+  }
+
+  if (pair?.liquidityUsd != null) score += 2;
+  if (pair?.volume24h != null) score += 2;
+  if (pair?.marketCapUsd != null || pair?.fdvUsd != null) score += 2;
+  if (pair?.chainId && chainHints.has(String(pair.chainId).toLowerCase())) score += 4;
+
+  return score;
+}
+
+function selectBestDexPair(pairs, keyword, keywordSignals) {
+  if (!Array.isArray(pairs) || !pairs.length) return null;
+
+  const scored = pairs
+    .map((pair) => ({
+      pair,
+      score: scoreDexPairCandidate(pair, keyword, keywordSignals),
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.pair || null;
+}
