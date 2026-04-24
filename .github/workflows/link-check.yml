@@ -15,7 +15,39 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Check external links in HTML files
+      - name: Extract external links only
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          folders = [
+              "scam-check-now",
+              "scam-check-now-b",
+              "scam-check-now-c",
+              "token-risk",
+          ]
+
+          urls = set()
+
+          for folder in folders:
+              root = Path(folder)
+              if not root.exists():
+                  continue
+
+              for file in root.rglob("*.html"):
+                  text = file.read_text(errors="ignore")
+                  found = re.findall(r'''(?:href|src|action)=["'](https?://[^"'\s<>]+)''', text, re.I)
+                  urls.update(found)
+
+          with open("external-links.txt", "w") as f:
+              for url in sorted(urls):
+                  f.write(url + "\n")
+
+          print(f"Found {len(urls)} external links")
+          PY
+
+      - name: Check external links
         uses: lycheeverse/lychee-action@v2
         with:
           args: >
@@ -25,15 +57,8 @@ jobs:
             --max-concurrency 8
             --retry-wait-time 2
             --max-retries 2
-            --accept 200,204,206,301,302,303,307,308,429,403
-            --include '^(http|https)://'
-            --exclude '^(#|mailto:|tel:|javascript:|data:)'
-            --exclude '^/'
-            --exclude '^\.\.?/'
-            './scam-check-now/**/*.html'
-            './scam-check-now-b/**/*.html'
-            './scam-check-now-c/**/*.html'
-            './token-risk/**/*.html'
+            --accept 200,204,206,301,302,303,307,308,403,429
+            external-links.txt
           fail: true
           format: markdown
           output: lychee/out.md
