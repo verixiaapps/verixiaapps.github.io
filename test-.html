@@ -1,4014 +1,1787 @@
-import fetch from "node-fetch";
-/*
-  =========================================================
-  TOKEN RISK SEO ENGINE (EXPERT CRYPTO SEO ENGINE UPGRADE)
-  =========================================================
-  Goals:
-  - one file only
-  - no dependency on external rules.js
-  - premium crypto SEO analysis tone
-  - broader crypto subject support, not only token-risk pages
-  - one-pass-first generation with selective rewrites
-  - cheaper defaults while keeping quality controls
-  - smarter CoinGecko + DexScreener context selection
-  - fact-grounded context usage
-  - less brittle validation
-  - card-friendly output
-*/
-const OPENAI_MODEL = process.env.OPENAI_SEO_MODEL || "gpt-5-mini";
-const OPENAI_PREMIUM_MODEL =
-  process.env.OPENAI_SEO_PREMIUM_MODEL || "gpt-5.4";
-const OPENAI_API_URL =
-  process.env.OPENAI_SEO_API_URL || "https://api.openai.com/v1/chat/completions";
-const OPENAI_TIMEOUT_MS = Math.max(
-  12000,
-  Math.min(120000, Number(process.env.OPENAI_SEO_TIMEOUT_MS || 45000))
-);
-const OPENAI_MAX_RETRIES = Math.max(
-  1,
-  Math.min(5, Number(process.env.OPENAI_SEO_MAX_RETRIES || 3))
-);
-const OPENAI_MAX_TOKENS = Math.max(
-  650,
-  Math.min(1800, Number(process.env.OPENAI_SEO_MAX_TOKENS || 950))
-);
-const EARLY_ACCEPT_SCORE = Math.max(
-  88,
-  Math.min(100, Number(process.env.OPENAI_SEO_EARLY_ACCEPT_SCORE || 92))
-);
-const MIN_STRONG_SCORE = Math.max(
-  82,
-  Math.min(98, Number(process.env.OPENAI_SEO_MIN_STRONG_SCORE || 88))
-);
-const MAX_INITIAL_PASSES = Math.max(
-  1,
-  Math.min(6, Number(process.env.OPENAI_SEO_MAX_INITIAL_PASSES || 3))
-);
-const MAX_REWRITE_PASSES = Math.max(
-  0,
-  Math.min(5, Number(process.env.OPENAI_SEO_MAX_REWRITE_PASSES || 2))
-);
-const ENABLE_PREMIUM_FALLBACK =
-  String(process.env.OPENAI_SEO_ENABLE_PREMIUM_FALLBACK || "true").toLowerCase() !==
-  "false";
-const ENABLE_EXTERNAL_CRYPTO_CONTEXT =
-  String(process.env.OPENAI_SEO_ENABLE_EXTERNAL_CONTEXT || "true").toLowerCase() !==
-  "false";
-const ENABLE_CONTEXT_CACHE =
-  String(process.env.OPENAI_SEO_ENABLE_CONTEXT_CACHE || "true").toLowerCase() !==
-  "false";
-const ENABLE_OUTPUT_CACHE =
-  String(process.env.OPENAI_SEO_ENABLE_OUTPUT_CACHE || "false").toLowerCase() ===
-  "true";
-const COINGECKO_BASE_URL =
-  process.env.COINGECKO_BASE_URL || "https://api.coingecko.com/api/v3";
-const DEXSCREENER_BASE_URL =
-  process.env.DEXSCREENER_BASE_URL || "https://api.dexscreener.com";
-const CRYPTO_CONTEXT_TIMEOUT_MS = Math.max(
-  3000,
-  Math.min(20000, Number(process.env.OPENAI_SEO_CONTEXT_TIMEOUT_MS || 8000))
-);
-const CRYPTO_CONTEXT_MAX_ITEMS = Math.max(
-  1,
-  Math.min(10, Number(process.env.OPENAI_SEO_CONTEXT_MAX_ITEMS || 5))
-);
-const DEFAULT_SUBHEAD_BY_INTENT = {
-  token_risk: "Risk Breakdown",
-  token_profile: "Token Breakdown",
-  coin_profile: "Coin Breakdown",
-  chain_ecosystem: "Ecosystem Breakdown",
-  market_context: "Market Breakdown",
-  category_theme: "Category Breakdown",
-  education_explainer: "Crypto Breakdown",
-  comparison: "Comparison Breakdown",
-  wallet_security: "Security Breakdown",
-  defi_explainer: "DeFi Breakdown",
-  dex_exchange: "Exchange Breakdown",
-  general_crypto: "Crypto Breakdown",
-};
-const contextCache = new Map();
-const outputCache = new Map();
-/* =========================
-   UTIL
-========================= */
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+Block 1 of 2:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="{{CANONICAL_URL}}">
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{CANONICAL_URL}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{TITLE}}">
+<meta name="twitter:description" content="{{DESCRIPTION}}">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebPage",
+  "name":"{{TITLE}}",
+  "description":"{{DESCRIPTION}}",
+  "url":"{{CANONICAL_URL}}"
 }
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {
+      "@type":"Question",
+      "name":"How can I tell if a token looks risky?",
+      "acceptedAnswer":{
+        "@type":"Answer",
+        "text":"Start with the token address, not the name or chart. Risk often shows up through thin liquidity, weak exit depth, concentrated holders, unusual sell behavior, unclear ownership, aggressive wallet approvals, or buy pressure before the structure has been checked."
+      }
+    },
+    {
+      "@type":"Question",
+      "name":"What should I check before buying a token?",
+      "acceptedAnswer":{
+        "@type":"Answer",
+        "text":"Verify the exact contract address, review liquidity and pair activity, look for top-holder concentration, check whether selling appears normal, read project claims carefully, and avoid connecting a wallet or approving permissions until the setup still looks reasonable after review."
+      }
+    },
+    {
+      "@type":"Question",
+      "name":"Can a token look active and still be risky?",
+      "acceptedAnswer":{
+        "@type":"Answer",
+        "text":"Yes. A token can have a live chart, social hype, and recent trades while still carrying weak liquidity, poor exits, contract-control risk, approval risk, or a promotion pattern that pressures buyers before they understand the downside."
+      }
+    }
+  ]
 }
-function unique(values) {
-  return [...new Set((values || []).filter(Boolean))];
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"Token Risk",
+  "applicationCategory":"FinanceApplication",
+  "operatingSystem":"Web",
+  "description":"Token risk checker for reviewing token addresses, Dexscreener links, project copy, wallet prompts, liquidity signals, exit risk, and common warning signs before buying or connecting a wallet.",
+  "url":"{{CANONICAL_URL}}"
 }
-function compactObject(obj) {
-  if (!obj || typeof obj !== "object") return obj;
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, value]) => {
-      if (value == null) return false;
-      if (Array.isArray(value)) return value.length > 0;
-      if (typeof value === "string") return value.trim().length > 0;
-      if (typeof value === "object") return Object.keys(value).length > 0;
-      return true;
-    })
+</script>
+<style>
+:root{
+--bg:#06101b;
+--bg-2:#0a1324;
+--bg-3:#0f1b31;
+--bg-4:#132341;
+--surface:rgba(255,255,255,.05);
+--surface-2:rgba(255,255,255,.07);
+--surface-3:rgba(255,255,255,.10);
+--surface-4:#ffffff;
+--card:#101c33;
+--card-2:#15233d;
+--card-3:#182a48;
+--ink:#e9f1ff;
+--ink-strong:#ffffff;
+--ink-dark:#132033;
+--muted:#a7b7d3;
+--muted-2:#8296b7;
+--line:rgba(148,163,184,.18);
+--line-2:rgba(255,255,255,.09);
+--line-3:rgba(255,255,255,.14);
+--cyan:#66d9ef;
+--cyan-2:#28bfd9;
+--blue:#5b8cff;
+--blue-2:#3f72ee;
+--violet:#8b78f2;
+--violet-2:#7460e8;
+--emerald:#18b67f;
+--emerald-2:#109466;
+--amber:#e7a93d;
+--red:#d96574;
+--red-2:#b94b5f;
+--blue-soft:#dbeafe;
+--violet-soft:#ede9fe;
+--green-soft:#ecfdf5;
+--amber-soft:#fffbeb;
+--red-soft:#fef2f2;
+--shadow-xl:0 32px 90px rgba(2,6,23,.46);
+--shadow-lg:0 22px 56px rgba(2,6,23,.34);
+--shadow-md:0 14px 34px rgba(2,6,23,.24);
+--shadow-sm:0 8px 20px rgba(2,6,23,.16);
+--shadow-xs:0 4px 12px rgba(2,6,23,.10);
+--radius-xl:30px;
+--radius-lg:24px;
+--radius-md:20px;
+--radius-sm:16px;
+}
+*{
+box-sizing:border-box;
+}
+html{
+-webkit-text-size-adjust:100%;
+scroll-behavior:smooth;
+}
+body{
+font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
+margin:0;
+padding-top:90px;
+color:var(--ink);
+line-height:1.6;
+background:
+radial-gradient(circle at 14% 8%, rgba(102,217,239,.10), transparent 22%),
+radial-gradient(circle at 84% 0%, rgba(139,120,242,.14), transparent 26%),
+radial-gradient(circle at 50% 100%, rgba(24,182,127,.05), transparent 24%),
+linear-gradient(180deg,var(--bg) 0%, var(--bg-2) 34%, var(--bg-3) 70%, var(--bg-4) 100%);
+}
+a{
+color:#9cecff;
+text-decoration:none;
+}
+a:hover{
+text-decoration:underline;
+}
+button,
+textarea,
+input{
+font-family:inherit;
+}
+@supports (padding:max(0px)) {
+  body{
+    padding-left:max(0px, env(safe-area-inset-left));
+    padding-right:max(0px, env(safe-area-inset-right));
+  }
+}
+.top-bar{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 16px;
+z-index:1000;
+pointer-events:none;
+}
+.top-actions{
+pointer-events:auto;
+display:flex;
+align-items:center;
+gap:10px;
+margin-right:20px;
+}
+.logo{
+pointer-events:auto;
+display:inline-flex;
+align-items:center;
+gap:10px;
+font-size:14px;
+font-weight:900;
+color:#eef6ff;
+margin-left:8px;
+padding:11px 15px;
+border-radius:999px;
+letter-spacing:-.01em;
+background:rgba(10,18,35,.62);
+border:1px solid rgba(255,255,255,.10);
+backdrop-filter:blur(14px);
+box-shadow:var(--shadow-sm);
+text-decoration:none;
+}
+.logo:hover{
+text-decoration:none;
+border-color:rgba(255,255,255,.16);
+background:rgba(12,21,39,.72);
+}
+.logo-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+background:linear-gradient(180deg,var(--cyan) 0%,var(--violet) 100%);
+box-shadow:0 0 0 4px rgba(139,120,242,.12);
+flex:0 0 10px;
+}
+.app-top{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:11px 14px;
+font-size:14px;
+border-radius:16px;
+font-weight:900;
+color:#fff;
+border:1px solid rgba(255,255,255,.11);
+white-space:nowrap;
+background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.06) 100%);
+backdrop-filter:blur(10px);
+box-shadow:var(--shadow-xs);
+}
+.app-top:hover{
+text-decoration:none;
+background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.07) 100%);
+}
+.upgrade-top{
+pointer-events:auto;
+padding:11px 15px;
+font-size:14px;
+border-radius:16px;
+font-weight:900;
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
+color:#fff;
+border:none;
+cursor:pointer;
+white-space:nowrap;
+box-shadow:0 14px 28px rgba(40,191,217,.14);
+transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.upgrade-top:hover{
+transform:translateY(-1px);
+box-shadow:0 18px 34px rgba(40,191,217,.18);
+}
+.page-shell{
+max-width:940px;
+margin:0 auto;
+padding:0 14px 40px;
+}
+.hero{
+position:relative;
+padding:18px 8px 20px;
+max-width:980px;
+margin:0 auto 10px;
+text-align:center;
+}
+.hero-badge-row{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+margin-bottom:16px;
+}
+.hero-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+padding:9px 13px;
+border-radius:999px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.01em;
+color:#d9e8ff;
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.09);
+backdrop-filter:blur(10px);
+box-shadow:var(--shadow-xs);
+}
+.hero h1{
+margin:0;
+font-size:48px;
+line-height:1.02;
+letter-spacing:-.05em;
+font-weight:950;
+color:var(--ink-strong);
+text-wrap:balance;
+}
+.hero p{
+margin:14px auto 0;
+max-width:760px;
+font-size:19px;
+color:#c8d7ec;
+text-wrap:balance;
+}
+.hero-trust{
+margin-top:18px;
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+}
+.hero-trust-chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:10px 14px;
+border-radius:999px;
+font-size:13px;
+font-weight:900;
+color:#dde9fb;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+.hero-quick-grid{
+max-width:820px;
+margin:14px auto 18px;
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:12px;
+}
+.hero-quick-card{
+padding:16px 16px 15px;
+border-radius:20px;
+text-align:left;
+background:
+linear-gradient(135deg, rgba(91,140,255,.10) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
+box-shadow:var(--shadow-xs);
+}
+.hero-quick-label{
+display:block;
+margin-bottom:7px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+.hero-quick-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e7f0ff;
+}
+.container,
+.content-section{
+max-width:820px;
+margin:auto;
+padding:24px;
+border-radius:var(--radius-xl);
+position:relative;
+overflow:hidden;
+border:1px solid rgba(255,255,255,.10);
+background:
+linear-gradient(180deg, rgba(17,28,51,.95) 0%, rgba(11,19,36,.985) 100%);
+box-shadow:var(--shadow-xl);
+}
+.container::before,
+.content-section::before{
+content:"";
+position:absolute;
+top:-120px;
+right:-90px;
+width:260px;
+height:260px;
+border-radius:50%;
+background:radial-gradient(circle, rgba(102,217,239,.11), transparent 65%);
+pointer-events:none;
+}
+.container::after,
+.content-section::after{
+content:"";
+position:absolute;
+left:-80px;
+bottom:-120px;
+width:220px;
+height:220px;
+border-radius:50%;
+background:radial-gradient(circle, rgba(139,120,242,.08), transparent 68%);
+pointer-events:none;
+}
+.container > *,
+.content-section > *{
+position:relative;
+z-index:1;
+}
+.system-badge{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:8px;
+margin-bottom:14px;
+font-size:11px;
+font-weight:900;
+color:#99eaff;
+letter-spacing:.10em;
+text-transform:uppercase;
+text-align:center;
+}
+.preview-card,
+.tool-shell,
+.app-link-card,
+.upgrade,
+.inline-info-card,
+.quick-checklist{
+background:linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.10);
+border-radius:var(--radius-lg);
+box-shadow:var(--shadow-md);
+}
+.preview-card{
+position:relative;
+margin-bottom:20px;
+padding:20px;
+background:
+linear-gradient(135deg, rgba(217,101,116,.10) 0%, rgba(139,120,242,.08) 56%, rgba(102,217,239,.06) 100%),
+linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
+overflow:hidden;
+}
+.preview-card::before{
+content:"";
+position:absolute;
+inset:0;
+background:
+radial-gradient(circle at top right, rgba(217,101,116,.10), transparent 34%),
+radial-gradient(circle at bottom left, rgba(102,217,239,.08), transparent 38%);
+pointer-events:none;
+}
+.preview-card > *{
+position:relative;
+z-index:1;
+}
+.preview-top{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap;
+}
+.preview-badge{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:8px 14px;
+border-radius:999px;
+background:linear-gradient(135deg,var(--red) 0%,var(--red-2) 100%);
+color:#fff;
+font-size:11px;
+font-weight:900;
+letter-spacing:.03em;
+box-shadow:0 10px 20px rgba(185,75,95,.14);
+line-height:1;
+}
+.preview-score-wrap{
+display:flex;
+flex-direction:column;
+gap:7px;
+min-width:154px;
+flex:0 0 auto;
+}
+.preview-score{
+padding:8px 10px;
+border-radius:999px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.11);
+font-size:11px;
+font-weight:900;
+color:#ffe2e6;
+text-align:center;
+line-height:1.1;
+}
+.preview-score-bar{
+height:8px;
+border-radius:999px;
+background:rgba(255,255,255,.07);
+overflow:hidden;
+border:1px solid rgba(255,255,255,.09);
+}
+.preview-score-fill{
+height:100%;
+width:18%;
+background:linear-gradient(90deg,#d96574 0%, #c55467 60%, #a94458 100%);
+border-radius:999px;
+box-shadow:none;
+}
+.preview-domain{
+margin-top:14px;
+font-size:26px;
+font-weight:900;
+line-height:1.06;
+color:#fff;
+letter-spacing:-.03em;
+word-break:break-word;
+}
+.preview-sub{
+margin-top:6px;
+font-size:13px;
+color:#d8e5f8;
+font-weight:800;
+line-height:1.5;
+}
+.preview-signals{
+margin-top:14px;
+display:grid;
+gap:10px;
+}
+.preview-signal{
+display:flex;
+align-items:flex-start;
+gap:10px;
+padding:12px 13px;
+border-radius:16px;
+background:rgba(255,255,255,.055);
+border:1px solid rgba(255,255,255,.08);
+font-size:13px;
+font-weight:850;
+color:#fde8ec;
+line-height:1.45;
+}
+.preview-signal-icon{
+width:18px;
+height:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+flex:0 0 18px;
+line-height:1;
+}
+.quick-checklist{
+margin-bottom:20px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(24,182,127,.10) 0%, rgba(102,217,239,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.04) 100%);
+}
+.quick-checklist-title{
+margin:0 0 10px;
+font-size:18px;
+font-weight:900;
+letter-spacing:-.02em;
+color:#fff;
+}
+.quick-checklist-grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+.quick-checklist-item{
+padding:13px 14px;
+border-radius:16px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.09);
+font-size:14px;
+font-weight:850;
+color:#e8f2ff;
+line-height:1.45;
+}
+.tool-shell{
+padding:24px;
+margin-top:0;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.045) 100%);
+border-color:rgba(255,255,255,.11);
+}
+textarea,input{
+width:100%;
+padding:16px 16px;
+margin-top:12px;
+border-radius:18px;
+border:1.5px solid rgba(255,255,255,.11);
+font-size:16px;
+background:rgba(7,16,29,.76);
+color:#eef6ff;
+box-shadow:none;
+transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+textarea{
+height:156px;
+resize:none;
+}
+textarea::placeholder,
+input::placeholder{
+color:#89a0c4;
+}
+textarea:focus,
+input:focus{
+outline:none;
+border-color:rgba(102,217,239,.48);
+box-shadow:0 0 0 5px rgba(102,217,239,.08);
+background:rgba(8,18,33,.86);
+}
+button{
+border:none;
+border-radius:18px;
+cursor:pointer;
+font-size:16px;
+padding:16px;
+min-height:50px;
+}
+.check{
+width:100%;
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
+color:#fff;
+margin-top:18px;
+font-weight:900;
+font-size:18px;
+letter-spacing:.2px;
+box-shadow:0 16px 34px rgba(40,191,217,.16);
+transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.check:hover{
+transform:translateY(-1px);
+box-shadow:0 20px 40px rgba(40,191,217,.20);
+}
+.check:active{
+transform:scale(.985);
+}
+.note,
+.input-help{
+margin-top:12px;
+font-size:14px;
+color:#a4b6d2;
+text-align:center;
+text-wrap:balance;
+}
+.success{
+margin-top:12px;
+font-size:14px;
+color:#86efac;
+text-align:center;
+font-weight:900;
+display:none;
+}
+.app-link-card{
+margin-top:20px;
+padding:22px;
+text-align:center;
+background:
+linear-gradient(135deg, rgba(24,182,127,.10) 0%, rgba(102,217,239,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%);
+}
+.app-link-card h4{
+margin:0 0 6px;
+font-size:21px;
+color:#fff;
+font-weight:900;
+letter-spacing:-.02em;
+}
+.app-link-card p{
+margin:0 0 14px;
+font-size:14px;
+color:#cfddf1;
+line-height:1.7;
+}
+.app-link-button{
+display:block;
+width:100%;
+text-align:center;
+background:linear-gradient(135deg,var(--emerald) 0%,var(--cyan-2) 100%);
+color:#fff;
+font-weight:900;
+padding:15px;
+border-radius:16px;
+box-sizing:border-box;
+box-shadow:0 12px 24px rgba(16,148,102,.14);
+text-decoration:none;
+}
+.app-link-button:hover{
+text-decoration:none;
+}
+#result{
+margin-top:26px;
+display:none;
+}
+.result-card{
+background:rgba(255,255,255,.97);
+border-radius:26px;
+padding:22px;
+box-shadow:var(--shadow-lg);
+border:1px solid rgba(15,23,42,.08);
+overflow:hidden;
+color:var(--ink-dark);
+}
+.result-card.high{
+border:2px solid #f1c8cf;
+box-shadow:0 20px 46px rgba(185,75,95,.10);
+}
+.result-card.medium{
+border:2px solid #f4ddb0;
+box-shadow:0 20px 46px rgba(231,169,61,.09);
+}
+.result-card.low{
+border:2px solid #c2efd7;
+box-shadow:0 20px 46px rgba(24,182,127,.09);
+}
+.result-card.unknown{
+border:1px solid #dbe4f0;
+}
+.result-top{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap;
+}
+.risk{
+font-size:21px;
+font-weight:900;
+margin-bottom:0;
+padding:11px 16px;
+border-radius:999px;
+display:inline-flex;
+align-items:center;
+gap:10px;
+letter-spacing:.01em;
+box-shadow:var(--shadow-sm);
+}
+.risk.high{
+background:var(--red);
+color:#fff;
+}
+.risk.medium{
+background:var(--amber);
+color:#fff;
+}
+.risk.low{
+background:var(--emerald);
+color:#fff;
+}
+.risk.unknown{
+background:#e5e7eb;
+color:#374151;
+}
+.result-chip{
+padding:9px 13px;
+border-radius:999px;
+font-size:12px;
+font-weight:900;
+background:#fff;
+border:1px solid #d9e2ec;
+color:#334155;
+box-shadow:var(--shadow-xs);
+}
+.result-summary{
+margin:16px 0 0;
+font-size:16px;
+color:#334155;
+font-weight:800;
+line-height:1.58;
+}
+.result-continuation{
+margin-top:14px;
+padding:14px 15px;
+border-radius:16px;
+font-size:14px;
+font-weight:900;
+line-height:1.55;
+background:#f8fafc;
+border:1px solid #e2e8f0;
+color:#334155;
+}
+.result-card.high .result-continuation{
+background:#fff8f9;
+border-color:#eed1d7;
+color:#7f1d2c;
+}
+.result-card.medium .result-continuation{
+background:#fffdf7;
+border-color:#f4ddb0;
+color:#8a5710;
+}
+.result-card.unknown .result-continuation{
+background:#f8fafc;
+border-color:#e2e8f0;
+color:#334155;
+}
+.section{
+margin-top:18px;
+padding:18px;
+border-radius:20px;
+background:#f8fafc;
+border:1px solid #e7eef6;
+}
+.section-title{
+font-weight:900;
+margin-bottom:10px;
+color:#0f172a;
+font-size:16px;
+letter-spacing:-.01em;
+}
+.signal-list{
+list-style:none;
+padding:0;
+margin:0;
+display:grid;
+gap:10px;
+}
+.signal-item{
+display:flex;
+align-items:flex-start;
+gap:12px;
+padding:14px 15px;
+border-radius:16px;
+background:#fff;
+border:1px solid #e2e8f0;
+font-size:14px;
+font-weight:800;
+color:#334155;
+line-height:1.45;
+}
+.result-card.high .signal-item{
+background:#fffafb;
+border-color:#f1d2d8;
+color:#7f1d2c;
+}
+.result-card.medium .signal-item{
+background:#fffdf7;
+border-color:#f4ddb0;
+color:#8a5710;
+}
+.result-card.low .signal-item{
+background:#f7fff9;
+border-color:#c2efd7;
+color:#166534;
+}
+.signal-icon{
+width:22px;
+height:22px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:16px;
+line-height:1;
+flex:0 0 22px;
+}
+.action-box{
+padding:15px 16px;
+border-radius:16px;
+background:#eef6ff;
+border:1px solid #bfdbfe;
+font-size:14px;
+font-weight:900;
+color:#1e3a8a;
+line-height:1.55;
+}
+.result-payline{
+margin-top:18px;
+padding:16px;
+background:#f8fafc;
+border:1px solid #e2e8f0;
+border-radius:18px;
+font-size:14px;
+color:#334155;
+font-weight:900;
+line-height:1.55;
+}
+.result-card.high .result-payline{
+background:#fff8f9;
+border-color:#eed1d7;
+color:#7f1d2c;
+}
+.result-card.medium .result-payline{
+background:#fffdf7;
+border-color:#f4ddb0;
+color:#8a5710;
+}
+.result-card.low .result-payline{
+background:#f7fff9;
+border-color:#c2efd7;
+color:#166534;
+}
+.result-actions{
+margin-top:16px;
+display:grid;
+gap:12px;
+}
+.result-cta{
+margin-top:0;
+}
+.share-wrap{
+margin-top:4px;
+padding:18px;
+border-radius:20px;
+background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);
+border:1px solid #e2e8f0;
+text-align:center;
+box-shadow:var(--shadow-xs);
+}
+.share-alert{
+font-size:13px;
+font-weight:900;
+color:#0f172a;
+margin-bottom:6px;
+letter-spacing:.01em;
+}
+.share-copy{
+font-size:14px;
+font-weight:800;
+color:#475569;
+line-height:1.55;
+margin-bottom:14px;
+max-width:560px;
+margin-left:auto;
+margin-right:auto;
+}
+.share-grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+.share-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+min-height:46px;
+padding:12px 14px;
+border-radius:14px;
+font-size:14px;
+font-weight:900;
+transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.share-btn:hover{
+transform:translateY(-1px);
+}
+.share-btn.primary{
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
+color:#fff;
+box-shadow:0 10px 20px rgba(40,191,217,.14);
+}
+.share-btn.dark{
+background:linear-gradient(135deg,#111827 0%,#1f2937 100%);
+color:#fff;
+box-shadow:0 10px 20px rgba(15,23,42,.12);
+}
+.share-btn.light{
+background:#eef2ff;
+color:#1e293b;
+border:1px solid #dbe3f8;
+}
+.share-status{
+margin-top:12px;
+min-height:20px;
+font-size:13px;
+font-weight:900;
+color:#059669;
+}
+.upgrade{
+display:none;
+margin-top:28px;
+padding:26px 24px;
+text-align:center;
+background:
+linear-gradient(135deg, rgba(139,120,242,.16) 0%, rgba(102,217,239,.13) 100%),
+linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.045) 100%);
+}
+
+.upgrade h3{
+margin:0 0 8px;
+font-size:30px;
+line-height:1.15;
+color:#fff;
+text-wrap:balance;
+}
+
+.upgrade-copy{
+margin:0 auto;
+max-width:600px;
+color:#d7e4f8;
+font-size:15px;
+line-height:1.7;
+}
+
+.plan{
+width:100%;
+margin-top:14px;
+background:linear-gradient(135deg,var(--violet) 0%,var(--cyan-2) 100%);
+color:#fff;
+font-weight:900;
+padding:15px;
+box-shadow:0 12px 24px rgba(40,191,217,.14);
+}
+
+.plan.secondary{
+background:linear-gradient(135deg,#466ff0 0%,#29bfd9 100%);
+}
+
+.plan.tertiary{
+background:linear-gradient(135deg,#0e7b6f 0%,#18b67f 100%);
+}
+
+.subscriber-link{
+margin-top:14px;
+text-align:center;
+}
+
+.subscriber-link button{
+background:none;
+border:none;
+padding:0;
+min-height:auto;
+font-size:14px;
+color:#c6f7ff;
+font-weight:800;
+text-decoration:underline;
+cursor:pointer;
+}
+
+.content-section{
+margin-top:36px;
+padding-bottom:38px;
+}
+
+.content-bridge{
+margin:0 0 18px;
+padding:18px;
+border-radius:20px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+font-size:15px;
+color:#d7e4f8;
+font-weight:800;
+line-height:1.68;
+}
+
+.inline-info-card{
+margin:0 0 18px;
+padding:18px;
+background:
+linear-gradient(135deg, rgba(91,140,255,.10) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+}
+
+.hub-link-block{
+display:block;
+}
+
+.hub-link-label{
+display:block;
+margin-bottom:6px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.hub-link-anchor{
+display:inline;
+font-size:15px;
+font-weight:900;
+color:#fff;
+}
+
+.content-section h2,
+.content-section h3{
+margin:0 0 14px;
+color:#fff;
+line-height:1.08;
+letter-spacing:-.035em;
+font-weight:900;
+text-wrap:balance;
+}
+
+.content-section h2{
+font-size:40px;
+}
+
+.content-section h3{
+font-size:28px;
+margin-top:30px;
+}
+
+.content-recognition{
+margin:0 0 20px;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.recognition-chip{
+padding:14px 15px;
+border-radius:18px;
+background:
+linear-gradient(135deg, rgba(102,217,239,.08) 0%, rgba(139,120,242,.08) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border:1px solid rgba(255,255,255,.09);
+box-shadow:var(--shadow-xs);
+}
+
+.recognition-label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.recognition-copy{
+display:block;
+font-size:14px;
+font-weight:850;
+line-height:1.5;
+color:#e6f0ff;
+}
+
+.content-body{
+font-size:18px;
+color:#d7e4f8;
+}
+
+.content-body p{
+margin:0 0 20px;
+}
+
+.content-body ul{
+margin:0 0 20px;
+padding-left:22px;
+}
+
+.content-body li{
+margin-bottom:10px;
+}
+
+.story-stack{
+display:grid;
+gap:14px;
+}
+
+.story-card{
+padding:18px 18px 17px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.09);
+background:
+linear-gradient(180deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,.035) 100%);
+box-shadow:var(--shadow-sm);
+}
+
+.story-card.lead{
+background:
+linear-gradient(135deg, rgba(91,140,255,.12) 0%, rgba(139,120,242,.12) 100%),
+linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.04) 100%);
+border-color:rgba(102,217,239,.18);
+}
+
+.story-card-title{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:9px;
+font-size:12px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#9cecff;
+}
+
+.story-card-title-icon{
+font-size:13px;
+line-height:1;
+}
+
+.story-card p{
+margin:0;
+font-size:16px;
+line-height:1.72;
+color:#dce8fb;
+}
+
+.link-section{
+margin-top:28px;
+padding-top:24px;
+border-top:1px solid rgba(255,255,255,.08);
+}
+
+.related-links{
+margin:0;
+padding-left:22px;
+}
+
+.related-links li{
+margin-bottom:10px;
+}
+
+.related-links a{
+color:#9cecff;
+font-weight:800;
+}
+
+.content-close{
+margin-top:28px;
+padding:18px;
+border-radius:20px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+font-size:15px;
+font-weight:800;
+color:#d7e4f8;
+line-height:1.72;
+}
+
+.footer{
+text-align:center;
+margin-top:72px;
+padding:40px 20px;
+color:#9fb0cc;
+font-size:14px;
+line-height:1.75;
+text-wrap:balance;
+}
+
+.footer a{
+color:#9cecff;
+font-weight:700;
+}
+
+@media (max-width:640px){
+body{padding-top:84px;}
+.hero{padding:14px 6px 16px;}
+.hero h1{font-size:34px;}
+.hero p{margin-top:10px;font-size:17px;}
+.hero-quick-grid{grid-template-columns:1fr;gap:10px;margin:12px auto 16px;}
+.hero-quick-card{padding:14px 14px 13px;border-radius:18px;}
+.container,.content-section{margin-left:12px;margin-right:12px;padding:18px;border-radius:24px;}
+.top-bar{padding:10px 10px;}
+.top-actions{gap:8px;margin-right:0;}
+.logo{font-size:13px;margin-left:2px;padding:9px 12px;}
+.app-top{font-size:13px;padding:8px 10px;}
+.upgrade-top{font-size:13px;padding:8px 10px;margin-right:0;}
+.upgrade h3{font-size:24px;}
+.content-section h2{font-size:30px;line-height:1.12;}
+.content-section h3{font-size:24px;}
+.content-body{font-size:16px;}
+.system-badge{margin-bottom:8px;font-size:11px;}
+.preview-card{padding:14px;border-radius:20px;}
+.preview-top{align-items:flex-start;gap:8px;}
+.preview-badge{font-size:10px;padding:8px 12px;gap:6px;}
+.preview-score-wrap{min-width:128px;gap:5px;}
+.preview-score{font-size:10px;padding:7px 9px;}
+.preview-score-bar{height:7px;}
+.preview-domain{margin-top:8px;font-size:18px;line-height:1.08;}
+.preview-sub{margin-top:3px;font-size:11px;line-height:1.3;}
+.preview-signals{margin-top:8px;gap:6px;}
+.preview-signal{padding:9px 10px;font-size:11px;gap:7px;border-radius:12px;}
+.preview-signal-icon{width:14px;height:14px;font-size:11px;flex:0 0 14px;}
+.quick-checklist-grid{grid-template-columns:1fr;}
+.result-top{align-items:flex-start;}
+.result-chip{font-size:12px;}
+.risk{font-size:19px;padding:10px 14px;}
+.result-summary{font-size:15px;}
+.signal-item{font-size:14px;}
+.inline-info-card{padding:14px 15px;}
+.content-close{padding:15px;}
+.share-grid{grid-template-columns:1fr;}
+.share-btn{width:100%;}
+.content-recognition{grid-template-columns:1fr;gap:10px;}
+.recognition-chip{padding:12px 13px;border-radius:16px;}
+.recognition-copy{font-size:13px;}
+.story-stack{gap:12px;}
+.story-card{padding:16px;border-radius:18px;}
+.story-card p{font-size:15px;line-height:1.7;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+  <a class="logo" href="https://verixiaapps.com/check/">
+    <span class="logo-dot"></span>
+    <span>Token Risk</span>
+  </a>
+  <div class="top-actions">
+    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
+    <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
+  </div>
+</div>
+
+<div class="page-shell">
+
+  <div class="hero">
+    <div class="hero-badge-row">
+      <div class="hero-badge">Live token risk check</div>
+      <div class="hero-badge">Plain-English warning guide</div>
+      <div class="hero-badge">Built for repeat reviews</div>
+    </div>
+
+    <h1 id="heroKeyword"></h1>
+    <p id="heroSubheading"></p>
+
+    <div class="hero-trust">
+      <div class="hero-trust-chip">Check before you buy</div>
+      <div class="hero-trust-chip">Check before you connect</div>
+      <div class="hero-trust-chip">Check before you trust the hype</div>
+    </div>
+  </div>
+
+  <div class="hero-quick-grid" id="heroQuickGrid">
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">First check</span>
+      <span class="hero-quick-copy">Confirm the exact token address before trusting the name, chart, or post that sent you there.</span>
+    </div>
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">Then review</span>
+      <span class="hero-quick-copy">Look at liquidity, trading behavior, project claims, wallet prompts, and buy pressure together.</span>
+    </div>
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">Safest move</span>
+      <span class="hero-quick-copy">Pause before buying, connecting, approving, or reacting to urgency, hype, or social proof.</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="system-badge">Live checker plus token risk guide</div>
+
+    <div class="preview-card">
+      <div class="preview-top">
+        <div class="preview-badge" id="previewBadge">🔴 Common Warning Pattern</div>
+        <div class="preview-score-wrap">
+          <div class="preview-score" id="previewScore">Pattern Snapshot</div>
+          <div class="preview-score-bar"><div class="preview-score-fill" id="previewScoreFill"></div></div>
+        </div>
+      </div>
+
+      <div class="preview-domain" id="previewDomain">Example risky token setup</div>
+      <div class="preview-sub" id="previewSub">Common structural signals found in similar token risk cases</div>
+
+      <div class="preview-signals" id="previewSignals">
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Liquidity may not support a clean exit</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Hype may be stronger than the underlying structure</span></div>
+        <div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>Urgency may be pushing the decision too fast</span></div>
+      </div>
+    </div>
+
+    <div class="quick-checklist">
+      <div class="quick-checklist-title" id="quickChecklistTitle">Fast token risk checklist before you act</div>
+      <div class="quick-checklist-grid" id="quickChecklistGrid">
+        <div class="quick-checklist-item">Check the exact token address and source first.</div>
+        <div class="quick-checklist-item">Review liquidity and trading activity together.</div>
+        <div class="quick-checklist-item">Slow down if hype is doing most of the work.</div>
+        <div class="quick-checklist-item">Do not buy or connect until the setup still holds up after review.</div>
+      </div>
+    </div>
+
+    <div class="tool-shell">
+      <textarea id="text" placeholder="Paste a token address, contract address, Dexscreener link, token name, claim page, or project copy to review..."></textarea>
+
+      <div class="input-help">Examples: token address, contract address, Dexscreener link, project page, claim page, wallet prompt</div>
+
+      <button class="check" onclick="check()">🧪 Check Token Risk</button>
+
+      <div class="note">No signup required • 1 free check • Results in seconds</div>
+
+      <input id="email" placeholder="Already subscribed? Enter your payment email to unlock unlimited checks">
+
+      <div class="note">Use the same email you entered during checkout</div>
+
+      <div id="postPurchase" class="success">
+        ✅ Payment successful — unlimited access is active on this browser
+      </div>
+
+      <div class="note">Get a clear risk level, key warning signals, and what to do next before buying or connecting</div>
+
+      <div id="result"></div>
+    </div>
+
+    <div class="app-link-card">
+      <h4>Check the next token before you act</h4>
+      <p>Risky token setups rarely appear just once. Use the app to review the next address, chart, claim page, or project before you buy or connect.</p>
+      <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
+    </div>
+
+    <div class="upgrade" id="upgrade">
+      <h3>Don’t Guess on the Next Token</h3>
+
+      <div class="upgrade-copy">
+        If one token setup looks questionable, more may follow. Check each address, launch page, claim, or project before a fast decision turns into a real loss.
+      </div>
+
+      <div style="margin-top:10px;font-size:13px;color:#d4e2f5;">
+        Built for token checks, contract review, hype filtering, wallet-risk review, and faster pre-buy decisions
+      </div>
+
+      <div style="margin-top:8px;margin-bottom:10px;font-size:14px;color:#d4e2f5;">
+        Unlimited token checks • Cancel anytime
+      </div>
+
+      <button class="plan" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Weekly Access</button>
+      <button class="plan secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access</button>
+      <button class="plan tertiary" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Yearly Access</button>
+
+      <div style="margin-top:14px;font-size:13px;color:#d4e2f5;">
+        Secure payments powered by Stripe
+      </div>
+
+      <div class="subscriber-link">
+        <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="content-section">
+    <div id="contentBridge" class="content-bridge"></div>
+
+    <div class="inline-info-card" id="hubLinkWrap">
+      {{HUB_LINK}}
+    </div>
+
+    <h2 id="contentHeading"></h2>
+
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">What appears first</span>
+        <span class="recognition-copy">A token, chart, post, or project page that looks active enough to earn quick trust.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Where risk hides</span>
+        <span class="recognition-copy">Weak liquidity, poor exits, concentrated control, wallet prompts, or claims that do not hold up after review.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">Why people miss it</span>
+        <span class="recognition-copy">Momentum can make a weak setup feel safer than it is until money or wallet access is already exposed.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What to slow down</span>
+        <span class="recognition-copy">The buy, connection, approval, or follow-up action that depends more on urgency than verified structure.</span>
+      </div>
+    </div>
+
+    <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
+
+    <div class="link-section">
+      <h3 id="relatedHeading">Check Similar Token Setups</h3>
+      <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
+    </div>
+
+    <div class="link-section" id="moreLinksWrap">
+      <h3 id="moreLinksHeading">More Token Risk Checks</h3>
+      <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+    </div>
+
+    <div class="content-close">
+      Token risk often looks normal at first. It may appear active, timely, or promising right before liquidity, exit conditions, contract control, or wallet exposure start to matter. Slow the decision down before buying, connecting, or trusting the setup.
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>
+      By using this website you agree to our
+      <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.
+    </div>
+    <div style="margin-top:10px">
+      Token Risk © 2026 • Token risk analysis and warning signal tool
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const API = "https://awake-integrity-production-faa0.up.railway.app";
+const ANALYZE_PATH = "/analyze-token";
+const RAW_KEYWORD = "{{KEYWORD}}";
+const TOKEN_RISK_BROWSER_SUB_KEY = "token_risk_browser_subscribed";
+const LEGACY_BROWSER_SUB_KEY = "scam_check_browser_subscribed";
+
+window.addEventListener("load", function () {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("subscribed") === "true") {
+    localStorage.setItem(TOKEN_RISK_BROWSER_SUB_KEY, "true");
+    localStorage.setItem(LEGACY_BROWSER_SUB_KEY, "true");
+    document.getElementById("postPurchase").style.display = "block";
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (isBrowserSubscribed()) {
+    document.getElementById("postPurchase").style.display = "block";
+  }
+
+  setKeywordHeadings();
+  applyPreviewCard();
+  applyIntentToChecker();
+  cleanSeoContent();
+  cleanRelatedLinks();
+  cleanHubLink();
+  cleanMoreLinks();
+  renderRecognitionChips();
+  renderHeroQuickGrid();
+  renderQuickChecklist();
+});
+
+function isBrowserSubscribed() {
+  return (
+    localStorage.getItem(TOKEN_RISK_BROWSER_SUB_KEY) === "true" ||
+    localStorage.getItem(LEGACY_BROWSER_SUB_KEY) === "true"
   );
 }
-function normalizeSeoKeyword(value) {
-  return String(value || "")
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function normalizeKeyword(str) {
+  return String(str || "")
     .replace(/[–—]/g, "-")
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'")
     .replace(/\s+/g, " ")
     .trim();
 }
-function normalizeWhitespace(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+
+function smartTitleCase(text) {
+  const smallWords = new Set(["a", "an", "and", "as", "at", "but", "by", "for", "from", "in", "into", "of", "on", "or", "the", "to", "vs", "with"]);
+  const acronyms = new Set(["ai", "api", "btc", "eth", "sol", "bnb", "usdc", "usdt", "dex", "lp", "nft", "rwa"]);
+  const words = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
+
+  return words.map((word, index) => {
+    const clean = word.toLowerCase();
+    if (acronyms.has(clean)) return clean.toUpperCase();
+    if (index > 0 && smallWords.has(clean)) return clean;
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  }).join(" ");
 }
-function safeLower(value) {
-  return normalizeWhitespace(value).toLowerCase();
+
+function stripLeadingQuestionPrefixes(text) {
+  return String(text || "")
+    .replace(/^\s*is\s+this\s+/i, "")
+    .replace(/^\s*is\s+/i, "")
+    .replace(/^\s*can\s+i\s+trust\s+/i, "")
+    .replace(/^\s*should\s+i\s+buy\s+/i, "")
+    .replace(/^\s*did\s+i\s+get\s+scammed\s+by\s+/i, "")
+    .trim();
 }
-function stableHash(input) {
-  const clean = normalizeSeoKeyword(input);
-  let hash = 0;
-  for (let i = 0; i < clean.length; i++) {
-    hash = (hash * 31 + clean.charCodeAt(i)) >>> 0;
-  }
-  return hash >>> 0;
+
+function stripTrailingQuestionSuffixes(text) {
+  return String(text || "")
+    .replace(/\?+$/g, "")
+    .replace(/\s+a\s+scam$/i, "")
+    .replace(/\s+or\s+scam$/i, "")
+    .replace(/\s+or\s+legit$/i, "")
+    .replace(/\s+or\s+safe$/i, "")
+    .replace(/\s+safe$/i, "")
+    .replace(/\s+legit$/i, "")
+    .replace(/\s+buy$/i, "")
+    .trim();
 }
-function countMatches(text, terms) {
-  const lower = String(text || "").toLowerCase();
-  return (terms || []).reduce((count, term) => {
-    const clean = String(term || "").toLowerCase();
-    return count + (clean && lower.includes(clean) ? 1 : 0);
-  }, 0);
+
+function cleanKeywordBase(keyword) {
+  let text = normalizeKeyword(keyword);
+  text = stripLeadingQuestionPrefixes(text);
+  text = stripTrailingQuestionSuffixes(text);
+  return text.replace(/\s+/g, " ").trim();
 }
-function ensureOpenAiConfig() {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is missing for Token Risk SEO generation");
-  }
-}
-function ensurePrompt(prompt, label) {
-  const value = String(prompt || "").trim();
-  if (!value) {
-    throw new Error(`${label} is empty for Token Risk SEO generation`);
-  }
-  return value;
-}
-function truncateText(value, max = 220) {
-  const text = normalizeWhitespace(value);
-  if (text.length <= max) return text;
-  return `${text.slice(0, max - 1).trim()}…`;
-}
-function stripHtml(value) {
-  return String(value || "")
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
+
+function cleanKeywordForSentence(keyword) {
+  return cleanKeywordBase(keyword)
+    .replace(/\btoken\b/gi, "")
+    .replace(/\bcoin\b/gi, "")
+    .replace(/\bcoins\b/gi, "")
+    .replace(/\bcontract\b/gi, "")
+    .replace(/\baddress\b/gi, "")
+    .replace(/\bproject\b/gi, "")
+    .replace(/\bchart\b/gi, "")
+    .replace(/\blink\b/gi, "")
+    .replace(/\blinks\b/gi, "")
+    .replace(/\bwallet\b/gi, "")
+    .replace(/\bwallets\b/gi, "")
+    .replace(/\bairdrop\b/gi, "")
+    .replace(/\bpresale\b/gi, "")
+    .replace(/\blaunch\b/gi, "")
+    .replace(/\bcrypto\b/gi, "")
     .replace(/\s+/g, " ")
     .trim();
 }
-function normalizeChainName(value) {
-  const lower = safeLower(value);
-  if (!lower) return "";
-  if (["eth", "ethereum", "erc20"].includes(lower)) return "ethereum";
-  if (["bsc", "bnb", "bnb chain", "binance smart chain", "bep20"].includes(lower)) return "bsc";
-  if (["sol", "solana", "spl"].includes(lower)) return "solana";
-  if (["matic", "polygon", "polygon pos"].includes(lower)) return "polygon";
-  if (["avax", "avalanche"].includes(lower)) return "avalanche";
-  if (["arb", "arbitrum", "arbitrum one"].includes(lower)) return "arbitrum";
-  if (["op", "optimism", "optimistic ethereum"].includes(lower)) return "optimism";
-  if (lower === "base") return "base";
-  if (lower === "sui") return "sui";
-  if (lower === "blast") return "blast";
-  if (lower === "linea") return "linea";
-  if (lower === "zksync" || lower === "zk sync") return "zksync";
-  if (lower === "fantom" || lower === "ftm") return "fantom";
-  return lower;
-}
-function mapCoinGeckoPlatformId(chain) {
-  const mapped = normalizeChainName(chain);
-  const map = {
-    ethereum: "ethereum",
-    bsc: "binance-smart-chain",
-    solana: "solana",
-    polygon: "polygon-pos",
-    avalanche: "avalanche",
-    arbitrum: "arbitrum-one",
-    optimism: "optimistic-ethereum",
-    base: "base",
-    sui: "sui",
-    fantom: "fantom",
-    blast: "blast",
-    linea: "linea",
-    zksync: "zksync",
-  };
-  return map[mapped] || mapped;
-}
-function mapDexScreenerChainId(chain) {
-  const mapped = normalizeChainName(chain);
-  const map = {
-    ethereum: "ethereum",
-    bsc: "bsc",
-    solana: "solana",
-    polygon: "polygon",
-    avalanche: "avalanche",
-    arbitrum: "arbitrum",
-    optimism: "optimism",
-    base: "base",
-    sui: "sui",
-    fantom: "fantom",
-    blast: "blast",
-    linea: "linea",
-    zksync: "zksync",
-  };
-  return map[mapped] || mapped;
-}
-function formatCompactNumber(value) {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return "";
-  const abs = Math.abs(num);
-  if (abs >= 1_000_000_000_000) return `${(num / 1_000_000_000_000).toFixed(2)}T`;
-  if (abs >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(2)}B`;
-  if (abs >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
-  if (abs >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
-  if (abs >= 1) return num.toFixed(2);
-  if (abs > 0) return num.toPrecision(3);
-  return "0";
-}
-function extractContractAddresses(text) {
-  const input = String(text || "");
-  const evm = input.match(/\b0x[a-fA-F0-9]{40}\b/g) || [];
-  const solana =
-    input.match(/\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g)?.filter((candidate) => {
-      return !/^0x/i.test(candidate) && candidate.length >= 32 && candidate.length <= 44;
-    }) || [];
-  return unique([...evm, ...solana]);
-}
-function tokenizeKeyword(keyword) {
-  return unique(
-    normalizeSeoKeyword(keyword)
-      .split(/[^a-zA-Z0-9]+/)
-      .map((token) => token.trim())
-      .filter(Boolean)
-  );
-}
-function isProbablyTicker(token) {
-  return /^[A-Z0-9]{2,10}$/.test(String(token || ""));
-}
-function titleCaseWords(text) {
-  return String(text || "")
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => {
-      if (/^[A-Z0-9]{2,10}$/.test(word)) return word;
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    })
-    .join(" ");
-}
-/* =========================
-   TEXT SANITIZING / SHAPE
-========================= */
-function splitSeoParagraphs(text) {
-  return String(text || "")
-    .replace(/\r/g, "")
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-}
-function sanitizeSeoContent(text) {
-  const cleaned = String(text || "")
-    .replace(/\r/g, "")
-    .replace(/\*\*/g, "")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^[*-]\s+/gm, "")
-    .replace(/^"+|"+$/g, "")
-    .replace(/^'+|'+$/g, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-  const paragraphs = splitSeoParagraphs(cleaned).map((paragraph) =>
-    paragraph
-      .replace(/\s+/g, " ")
-      .replace(/\s+([,.!?;:])/g, "$1")
-      .replace(/\s{2,}/g, " ")
-      .replace(/\b(can not)\b/gi, "cannot")
-      .replace(/\bweb site\b/gi, "website")
-      .replace(/\blog in\b/gi, "log in")
-      .replace(/\bweb-page\b/gi, "web page")
-      .replace(/\butilise\b/gi, "use")
-      .trim()
-  );
-  return paragraphs.join("\n\n").trim();
-}
-function seoWordCount(text) {
-  return String(text || "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-}
-function paragraphWordCount(paragraph) {
-  return String(paragraph || "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-}
-function splitSentences(text) {
-  return String(text || "")
-    .replace(/\s+/g, " ")
-    .match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
-}
-function countSentences(text) {
-  return splitSentences(text).length;
-}
-function normalizeSentenceFingerprint(sentence) {
-  return String(sentence || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 160);
-}
-function removeDuplicateSentencesFromParagraph(paragraph) {
-  const sentences = splitSentences(paragraph);
-  const kept = [];
-  const seen = new Set();
-  for (const sentence of sentences) {
-    const fp = normalizeSentenceFingerprint(sentence);
-    if (!fp) continue;
-    if (seen.has(fp)) continue;
-    seen.add(fp);
-    kept.push(sentence.trim());
-  }
-  return kept.join(" ").trim();
-}
-function getParagraphStartFingerprint(paragraph) {
-  return String(paragraph || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .trim()
-    .slice(0, 72);
-}
-function getSentenceStartFingerprint(sentence) {
-  return String(sentence || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .trim()
-    .slice(0, 40);
-}
-function hasListFormatting(text) {
-  return /^[-*•#]/m.test(String(text || ""));
-}
-function hasHtmlFormatting(text) {
-  return /<[a-z][\s\S]*>/i.test(String(text || ""));
-}
-function hasOverlongSentence(text) {
-  return splitSentences(text).some((sentence) => paragraphWordCount(sentence) > 32);
-}
-/* =========================
-   INTENT + CLASSIFICATION
-========================= */
-function keywordHasVerdictIntent(lower) {
-  return /safe|unsafe|legit|scam|rug pull|rugpull|risk score|high risk|low risk|real or fake|should i buy|is this token safe|is token safe|honeypot|is this coin safe|is this crypto safe/.test(
-    String(lower || "")
-  );
-}
-function detectSeoIntent(keyword) {
-  const lower = normalizeSeoKeyword(keyword).toLowerCase();
-  const hasAddress = extractContractAddresses(keyword).length > 0;
-  if (
-    keywordHasVerdictIntent(lower) ||
-    /rug|honeypot|liquidity lock|locked liquidity|unlocked liquidity|holders|holder concentration|wallet concentration|renounced|mintable|blacklist|freeze|token risk|contract risk|lp|slippage|deployer|owner control/.test(
-      lower
-    )
-  ) {
-    return "token_risk";
-  }
-  if (/\bvs\b|versus|compare|comparison|better than|difference between/.test(lower)) {
-    return "comparison";
-  }
-  if (
-    /wallet|seed phrase|private key|approval|revoke|revoke cash|phishing|drainer|wallet drain|wallet safety|token approval|permit signature|malicious signature/.test(
-      lower
-    )
-  ) {
-    return "wallet_security";
-  }
-  if (
-    /dex|decentralized exchange|swap|liquidity pool|amm|staking|yield|farm|farming|bridg|slippage|uniswap|pancakeswap|raydium|jupiter|curve|balancer/.test(
-      lower
-    )
-  ) {
-    return "defi_explainer";
-  }
-  if (
-    /coingecko|dexscreener|dex screener|coinmarketcap|exchange listing|trading pair|pair address|token listing|listed on/.test(
-      lower
-    )
-  ) {
-    return "dex_exchange";
-  }
-  if (
-    /\bwhat is\b|\bhow\b|\bwhy\b|\bguide\b|\bexplained\b|\bmeaning\b|\bbeginners?\b/.test(
-      lower
-    )
-  ) {
-    return "education_explainer";
-  }
-  if (
-    /\becosystem\b|\bchain\b|\blayer 1\b|\blayer 2\b|\bl2\b|\bl1\b|\bnetwork\b|\bbase\b ecosystem|\bsolana ecosystem\b|\beth ecosystem\b|\bethereum ecosystem\b|\barbitrum ecosystem\b|\bsui ecosystem\b/.test(
-      lower
-    )
-  ) {
-    return "chain_ecosystem";
-  }
-  if (
-    /\bai tokens?\b|\bdefi\b|\bdepin\b|\bgaming tokens?\b|\breal world assets?\b|\brwa\b|\bmeme coins?\b|\bstablecoins?\b|\bsector\b|\bcategory\b|\bnarrative\b|\bprivacy coins?\b|\boracle tokens?\b|\bliquid staking\b/.test(
-      lower
-    )
-  ) {
-    return "category_theme";
-  }
-  if (
-    /\bprice\b|\bmarket cap\b|\bvolume\b|\btrending\b|\bgainers?\b|\blosers?\b|\bbullish\b|\bbearish\b|\bmarket\b|\boutlook\b|\bchart\b|\btoday\b|\bprediction\b/.test(
-      lower
-    )
-  ) {
-    return "market_context";
-  }
-  if (hasAddress || /\btoken\b|\bcoin\b/.test(lower)) {
-    if (/\bbitcoin\b|\bbtc\b|\bethereum\b|\beth\b|\bsolana\b|\bsol\b|\bxrp\b|\bcardano\b|\bada\b|\bdogecoin\b|\bdoge\b|\bavalanche\b|\bavax\b|\bchainlink\b|\blink\b|\bpepe\b|\bshiba\b|\bshib\b/.test(lower)) {
-      return "coin_profile";
-    }
-    return "token_profile";
-  }
-  return "general_crypto";
-}
-function buildSeoClassMap() {
-  return {
-    liquidity: {
-      type: "liquidity",
-      contextLabel: "token liquidity risk",
-      coreSignals: [
-        "liquidity",
-        "liquidity depth",
-        "locked liquidity",
-        "unlocked liquidity",
-        "pool",
-        "thin liquidity",
-        "slippage",
-        "exit",
-        "sell pressure",
-        "volatility",
-        "LP depth",
-        "volume-to-liquidity imbalance",
-      ],
-      supportingSignals: [
-        "holder concentration",
-        "contract control",
-        "supply distribution",
-        "token age",
-        "launch pattern",
-        "FDV/liquidity mismatch",
-      ],
-      requiredTerms: ["liquidity", "risk"],
-      flexibleConcepts: ["slippage", "exit", "pool", "thin liquidity", "sell pressure"],
-      triggerTerms: [
-        "liquidity",
-        "liquidity lock",
-        "locked liquidity",
-        "lp lock",
-        "lp burn",
-        "burned lp",
-        "pool",
-        "dex liquidity",
-        "exit liquidity",
-        "liquidity risk",
-        "liquidity unlock",
-        "thin liquidity",
-        "unlocked liquidity",
-        "slippage",
-      ],
-    },
-    holders: {
-      type: "holders",
-      contextLabel: "holder concentration risk",
-      coreSignals: [
-        "holders",
-        "holder concentration",
-        "wallet concentration",
-        "distribution",
-        "supply distribution",
-        "top holders",
-        "whales",
-        "ownership",
-        "control",
-        "volatility",
-        "concentrated supply",
-      ],
-      supportingSignals: [
-        "liquidity",
-        "contract permissions",
-        "token age",
-        "launch structure",
-        "market depth",
-        "exit risk",
-      ],
-      requiredTerms: ["holder", "risk"],
-      flexibleConcepts: [
-        "holders",
-        "wallet",
-        "distribution",
-        "ownership",
-        "whales",
-        "concentration",
-      ],
-      triggerTerms: [
-        "holder",
-        "holders",
-        "wallet concentration",
-        "holder concentration",
-        "wallet distribution",
-        "top holders",
-        "whale",
-        "whales",
-        "supply concentration",
-        "ownership concentration",
-        "distribution",
-        "supply distribution",
-      ],
-    },
-    contract: {
-      type: "contract",
-      contextLabel: "contract control risk",
-      coreSignals: [
-        "contract",
-        "contract risk",
-        "permissions",
-        "ownership",
-        "renounced",
-        "mint",
-        "mintable",
-        "freeze",
-        "blacklist",
-        "pause",
-        "control",
-        "trust",
-        "deployer control",
-        "upgradeable proxy",
-      ],
-      supportingSignals: [
-        "liquidity",
-        "holder concentration",
-        "distribution",
-        "token age",
-        "launch pattern",
-        "volatility",
-      ],
-      requiredTerms: ["contract", "risk"],
-      flexibleConcepts: ["permissions", "ownership", "control", "mint", "freeze", "renounced"],
-      triggerTerms: [
-        "contract",
-        "renounced",
-        "ownership renounced",
-        "owner",
-        "owner control",
-        "mint",
-        "mintable",
-        "freeze",
-        "blacklist",
-        "pause",
-        "permissions",
-        "contract risk",
-        "token control",
-        "ownership",
-        "admin",
-        "proxy",
-        "upgradeable",
-        "deployer",
-      ],
-    },
-    broad_risk: {
-      type: "broad_risk",
-      contextLabel: "broad token risk evaluation",
-      coreSignals: [
-        "risk",
-        "token",
-        "liquidity",
-        "holders",
-        "ownership",
-        "contract",
-        "control",
-        "volatility",
-        "distribution",
-        "launch",
-        "momentum",
-        "exit",
-      ],
-      supportingSignals: [
-        "holder concentration",
-        "liquidity depth",
-        "contract permissions",
-        "token age",
-        "market behavior",
-        "confidence",
-      ],
-      requiredTerms: ["risk", "token"],
-      flexibleConcepts: ["liquidity", "holders", "contract", "control", "volatility", "exit"],
-      triggerTerms: [
-        "rug pull",
-        "scam",
-        "safe",
-        "unsafe",
-        "legit",
-        "real or fake",
-        "risk score",
-        "token risk",
-        "is this token safe",
-        "is token safe",
-        "high risk",
-        "low risk",
-        "presale",
-        "meme coin",
-        "meme token",
-        "new token",
-        "launch",
-        "launched",
-        "buy",
-        "should i buy",
-      ],
-    },
-    token_profile: {
-      type: "token_profile",
-      contextLabel: "token profile and structure",
-      coreSignals: [
-        "token",
-        "coin",
-        "project",
-        "utility",
-        "ecosystem",
-        "supply",
-        "liquidity",
-        "holders",
-        "market cap",
-        "volume",
-      ],
-      supportingSignals: [
-        "narrative",
-        "exchange coverage",
-        "chain",
-        "trading activity",
-        "community",
-        "product fit",
-      ],
-      requiredTerms: ["token"],
-      flexibleConcepts: ["utility", "supply", "volume", "market cap", "ecosystem", "chain"],
-      triggerTerms: [],
-    },
-    coin_profile: {
-      type: "coin_profile",
-      contextLabel: "coin profile and market structure",
-      coreSignals: [
-        "coin",
-        "network",
-        "market cap",
-        "volume",
-        "liquidity",
-        "adoption",
-        "ecosystem",
-        "utility",
-        "supply",
-        "volatility",
-      ],
-      supportingSignals: [
-        "developer activity",
-        "exchange depth",
-        "sector role",
-        "capital rotation",
-        "market cycle",
-      ],
-      requiredTerms: ["coin"],
-      flexibleConcepts: ["market", "volume", "ecosystem", "adoption", "liquidity"],
-      triggerTerms: [],
-    },
-    market_context: {
-      type: "market_context",
-      contextLabel: "crypto market context",
-      coreSignals: [
-        "price",
-        "volume",
-        "market cap",
-        "momentum",
-        "trend",
-        "liquidity",
-        "volatility",
-        "rotation",
-      ],
-      supportingSignals: [
-        "sentiment",
-        "sector strength",
-        "risk appetite",
-        "trading flow",
-        "macro pressure",
-      ],
-      requiredTerms: ["market"],
-      flexibleConcepts: ["price", "volume", "trend", "momentum", "volatility", "rotation"],
-      triggerTerms: [],
-    },
-    chain_ecosystem: {
-      type: "chain_ecosystem",
-      contextLabel: "chain ecosystem analysis",
-      coreSignals: [
-        "ecosystem",
-        "chain",
-        "network",
-        "users",
-        "builders",
-        "liquidity",
-        "applications",
-        "throughput",
-        "fees",
-        "activity",
-      ],
-      supportingSignals: [
-        "developer momentum",
-        "asset depth",
-        "user retention",
-        "bridge flow",
-        "durable demand",
-      ],
-      requiredTerms: ["ecosystem"],
-      flexibleConcepts: ["chain", "liquidity", "activity", "builders", "users"],
-      triggerTerms: [],
-    },
-    category_theme: {
-      type: "category_theme",
-      contextLabel: "crypto category and narrative analysis",
-      coreSignals: [
-        "category",
-        "sector",
-        "narrative",
-        "rotation",
-        "liquidity",
-        "quality",
-        "market cap",
-        "volume",
-        "adoption",
-        "attention",
-      ],
-      supportingSignals: [
-        "capital flow",
-        "token selection",
-        "durability",
-        "hype cycle",
-        "sector dispersion",
-      ],
-      requiredTerms: ["category"],
-      flexibleConcepts: ["sector", "narrative", "rotation", "liquidity", "quality"],
-      triggerTerms: [],
-    },
-    education_explainer: {
-      type: "education_explainer",
-      contextLabel: "crypto explainer",
-      coreSignals: [
-        "crypto",
-        "token",
-        "market",
-        "liquidity",
-        "volatility",
-        "ownership",
-        "supply",
-        "trading",
-        "mechanics",
-      ],
-      supportingSignals: [
-        "context",
-        "use case",
-        "structure",
-        "risk",
-        "real-world behavior",
-      ],
-      requiredTerms: ["crypto"],
-      flexibleConcepts: ["structure", "market", "trading", "liquidity", "risk"],
-      triggerTerms: [],
-    },
-    wallet_security: {
-      type: "wallet_security",
-      contextLabel: "wallet and crypto security",
-      coreSignals: [
-        "wallet",
-        "approval",
-        "signature",
-        "seed phrase",
-        "private key",
-        "phishing",
-        "drainer",
-        "permissions",
-        "revoke",
-        "custody",
-      ],
-      supportingSignals: [
-        "smart contract permissions",
-        "token approvals",
-        "malicious links",
-        "transaction review",
-        "wallet isolation",
-      ],
-      requiredTerms: ["wallet"],
-      flexibleConcepts: ["approval", "signature", "phishing", "permissions", "revoke"],
-      triggerTerms: [],
-    },
-    defi_explainer: {
-      type: "defi_explainer",
-      contextLabel: "DeFi mechanics and market structure",
-      coreSignals: [
-        "DEX",
-        "swap",
-        "liquidity pool",
-        "AMM",
-        "slippage",
-        "yield",
-        "staking",
-        "LP",
-        "fees",
-        "routing",
-      ],
-      supportingSignals: [
-        "pool depth",
-        "price impact",
-        "impermanent loss",
-        "bridge risk",
-        "contract risk",
-      ],
-      requiredTerms: ["DeFi"],
-      flexibleConcepts: ["liquidity", "swap", "pool", "slippage", "fees"],
-      triggerTerms: [],
-    },
-    dex_exchange: {
-      type: "dex_exchange",
-      contextLabel: "exchange and listing context",
-      coreSignals: [
-        "exchange",
-        "DEX",
-        "pair",
-        "listing",
-        "liquidity",
-        "volume",
-        "market cap",
-        "token data",
-        "price",
-        "chain",
-      ],
-      supportingSignals: [
-        "pair quality",
-        "source reliability",
-        "data freshness",
-        "pool depth",
-        "trading activity",
-      ],
-      requiredTerms: ["exchange"],
-      flexibleConcepts: ["pair", "listing", "liquidity", "volume", "data"],
-      triggerTerms: [],
-    },
-    general_token_risk: {
-      type: "general_token_risk",
-      contextLabel: "general token risk explanation",
-      coreSignals: [
-        "risk",
-        "token",
-        "liquidity",
-        "holders",
-        "ownership",
-        "contract",
-        "control",
-        "volatility",
-        "distribution",
-        "exit",
-      ],
-      supportingSignals: [
-        "launch pattern",
-        "token age",
-        "market depth",
-        "confidence",
-        "sell pressure",
-        "structural weakness",
-      ],
-      requiredTerms: ["risk"],
-      flexibleConcepts: ["liquidity", "holders", "contract", "control", "volatility", "exit"],
-      triggerTerms: [],
-    },
-  };
-}
-function mergeSeoCategoryProfiles(profiles) {
-  return {
-    type: profiles[0]?.type || "general_token_risk",
-    contextLabel: profiles.map((p) => p.contextLabel).join(" + "),
-    coreSignals: unique(profiles.flatMap((p) => p.coreSignals || [])),
-    supportingSignals: unique(profiles.flatMap((p) => p.supportingSignals || [])),
-    requiredTerms: unique(profiles.flatMap((p) => p.requiredTerms || [])),
-    flexibleConcepts: unique(profiles.flatMap((p) => p.flexibleConcepts || [])),
-    triggerTerms: unique(profiles.flatMap((p) => p.triggerTerms || [])),
-  };
-}
-function classifySeoKeyword(keyword) {
-  const lower = normalizeSeoKeyword(keyword).toLowerCase();
-  const intent = detectSeoIntent(keyword);
-  const classes = buildSeoClassMap();
-  const directMap = {
-    token_profile: classes.token_profile,
-    coin_profile: classes.coin_profile,
-    market_context: classes.market_context,
-    chain_ecosystem: classes.chain_ecosystem,
-    category_theme: classes.category_theme,
-    education_explainer: classes.education_explainer,
-    wallet_security: classes.wallet_security,
-    defi_explainer: classes.defi_explainer,
-    dex_exchange: classes.dex_exchange,
-    comparison: classes.market_context,
-  };
-  if (directMap[intent] && intent !== "token_risk") {
-    const picked = directMap[intent];
-    return {
-      ...picked,
-      primaryType: picked.type,
-      secondaryTypes: [],
-      activeTypes: [picked.type],
-      mixStrength: 1,
-      intent,
-    };
-  }
-  if (keywordHasVerdictIntent(lower)) {
-    return {
-      ...classes.broad_risk,
-      primaryType: "broad_risk",
-      secondaryTypes: [],
-      activeTypes: ["broad_risk"],
-      mixStrength: 1,
-      intent,
-    };
-  }
-  const specificClasses = [classes.liquidity, classes.holders, classes.contract];
-  const scored = specificClasses
-    .map((seoClass) => ({
-      seoClass,
-      score: countMatches(lower, seoClass.triggerTerms || []),
-    }))
-    .filter((entry) => entry.score > 0)
-    .sort((a, b) => b.score - a.score);
-  if (!scored.length) {
-    return {
-      ...classes.general_token_risk,
-      primaryType: "general_token_risk",
-      secondaryTypes: [],
-      activeTypes: ["general_token_risk"],
-      mixStrength: 1,
-      intent,
-    };
-  }
-  const topScore = scored[0].score;
-  const selected = scored
-    .filter((entry, index) => entry.score >= Math.max(1, topScore - 1) && index < 2)
-    .map((entry) => entry.seoClass);
-  const merged = mergeSeoCategoryProfiles(selected);
-  return {
-    ...merged,
-    primaryType: selected[0].type,
-    secondaryTypes: selected.slice(1).map((item) => item.type),
-    activeTypes: selected.map((item) => item.type),
-    mixStrength: selected.length,
-    intent,
-  };
-}
-function getEntityStopwords() {
-  return new Set([
-    "what",
-    "how",
-    "why",
-    "when",
-    "where",
-    "is",
-    "are",
-    "was",
-    "were",
-    "the",
-    "and",
-    "for",
-    "with",
-    "from",
-    "risk",
-    "token",
-    "tokens",
-    "coin",
-    "coins",
-    "crypto",
-    "price",
-    "market",
-    "guide",
-    "explained",
-    "meaning",
-    "vs",
-    "compare",
-    "comparison",
-    "safe",
-    "scam",
-    "legit",
-    "buy",
-    "sell",
-    "should",
-    "this",
-    "that",
-    "today",
-    "best",
-    "top",
-    "new",
-    "old",
-    "real",
-    "fake",
-    "good",
-    "bad",
-    "high",
-    "low",
-    "project",
-    "projects",
-    "blockchain",
-    "network",
-    "ecosystem",
-  ]);
-}
-function extractKeywordSignals(keyword) {
-  const clean = normalizeSeoKeyword(keyword);
-  const lower = clean.toLowerCase();
-  const tokens = tokenizeKeyword(clean);
-  const quotedPhrases = [];
-  const addresses = extractContractAddresses(clean);
-  const phrasePatterns = [/"([^"]+)"/g, /'([^']+)'/g];
-  for (const pattern of phrasePatterns) {
-    let match;
-    while ((match = pattern.exec(clean))) {
-      if (match[1] && match[1].trim()) quotedPhrases.push(match[1].trim());
-    }
-  }
-  const intentHints = [];
-  const chainHints = [];
-  const tokenStructureHints = [];
-  const signalHints = [];
-  const audienceIntentHints = [];
-  const entityHints = [];
-  const tickers = [];
-  if (/solana|phantom|\bsol\b/.test(lower)) chainHints.push("solana");
-  if (/\bbase\b/.test(lower)) chainHints.push("base");
-  if (/ethereum|\beth\b|erc20/.test(lower)) chainHints.push("ethereum");
-  if (/bsc|bnb chain|binance smart chain|bep20/.test(lower)) chainHints.push("bsc");
-  if (/arbitrum/.test(lower)) chainHints.push("arbitrum");
-  if (/polygon|matic/.test(lower)) chainHints.push("polygon");
-  if (/avalanche|avax/.test(lower)) chainHints.push("avalanche");
-  if (/sui/.test(lower)) chainHints.push("sui");
-  if (/optimism|\bop\b/.test(lower)) chainHints.push("optimism");
-  if (/fantom|\bftm\b/.test(lower)) chainHints.push("fantom");
-  if (keywordHasVerdictIntent(lower)) {
-    intentHints.push("verdict");
-    audienceIntentHints.push("trust decision");
-  }
-  if (/liquidity|lp|lock|locked|unlock|unlocked|pool|slippage/.test(lower)) {
-    signalHints.push("liquidity");
-    tokenStructureHints.push("exit conditions");
-  }
-  if (/holder|holders|wallet|whale|distribution|supply/.test(lower)) {
-    signalHints.push("ownership concentration");
-    tokenStructureHints.push("distribution");
-  }
-  if (
-    /contract|renounced|mint|freeze|blacklist|permission|owner|ownership|admin|proxy|upgradeable|deployer/.test(
-      lower
-    )
-  ) {
-    signalHints.push("contract control");
-    tokenStructureHints.push("permissions");
-  }
-  if (/new token|launch|launched|presale|meme/.test(lower)) {
-    signalHints.push("early-stage risk");
-    tokenStructureHints.push("launch pattern");
-  }
-  if (/token|coin/.test(lower)) audienceIntentHints.push("buying decision");
-  if (/price|volume|market cap|trend|trending|chart|prediction/.test(lower)) intentHints.push("market context");
-  if (/ecosystem|chain|network|layer 1|layer 2|l1|l2/.test(lower)) intentHints.push("ecosystem");
-  if (/wallet|approval|signature|phishing|seed phrase|private key|drainer/.test(lower)) intentHints.push("security");
-  if (/dex|swap|staking|yield|liquidity pool|amm|bridge/.test(lower)) intentHints.push("defi");
-  const stopwords = getEntityStopwords();
-  for (const token of tokens) {
-    if (isProbablyTicker(token)) tickers.push(token.toUpperCase());
-  }
-  const candidateEntity = tokens
-    .filter((token) => token.length >= 2 && token.length <= 24)
-    .filter((token) => !stopwords.has(token.toLowerCase()))
-    .filter((token) => !/^\d+$/.test(token));
-  entityHints.push(...candidateEntity.slice(0, 6));
-  return {
-    clean,
-    tokens,
-    quotedPhrases: unique(quotedPhrases),
-    addresses,
-    tickers: unique(tickers).slice(0, 4),
-    intentHints: unique(intentHints),
-    chainHints: unique(chainHints),
-    tokenStructureHints: unique(tokenStructureHints),
-    signalHints: unique(signalHints),
-    audienceIntentHints: unique(audienceIntentHints),
-    entityHints: unique(entityHints),
-  };
-}
-/* =========================
-   CRYPTO CONTEXT FETCHING
-========================= */
-function detectBestChainForAddresses(keywordSignals) {
-  const chainHints = keywordSignals?.chainHints || [];
-  const addresses = keywordSignals?.addresses || [];
-  if (!addresses.length) return "";
-  if (chainHints.includes("solana")) return "solana";
-  if (chainHints.includes("base")) return "base";
-  if (chainHints.includes("arbitrum")) return "arbitrum";
-  if (chainHints.includes("polygon")) return "polygon";
-  if (chainHints.includes("avalanche")) return "avalanche";
-  if (chainHints.includes("bsc")) return "bsc";
-  if (chainHints.includes("ethereum")) return "ethereum";
-  const first = addresses[0];
-  if (/^0x[a-f0-9]{40}$/i.test(first)) return "ethereum";
-  return "solana";
-}
-function shouldFetchCryptoContext(keyword, keywordSignals, intent) {
-  if (!ENABLE_EXTERNAL_CRYPTO_CONTEXT) return false;
-  if ((keywordSignals?.addresses || []).length) return true;
-  if ((keywordSignals?.entityHints || []).length) return true;
-  if ((keywordSignals?.tickers || []).length) return true;
-  return [
-    "token_risk",
-    "token_profile",
-    "coin_profile",
-    "market_context",
-    "chain_ecosystem",
-    "category_theme",
-    "comparison",
-    "dex_exchange",
-  ].includes(intent);
-}
-function buildCoinGeckoHeaders() {
-  const headers = { Accept: "application/json" };
-  if (process.env.COINGECKO_API_KEY) {
-    headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
-  }
-  return headers;
-}
-async function fetchJsonWithTimeout(url, options = {}, timeoutMs = CRYPTO_CONTEXT_TIMEOUT_MS) {
-  const response = await fetchWithTimeout(
-    url,
-    {
-      ...options,
-      headers: {
-        Accept: "application/json",
-        ...(options.headers || {}),
-      },
-    },
-    timeoutMs
-  );
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    const error = new Error(
-      `HTTP ${response.status} for ${url}${text ? `: ${text.slice(0, 180)}` : ""}`
-    );
-    error.status = response.status;
-    throw error;
-  }
-  return response.json();
-}
-async function tryFetchJson(url, options = {}, timeoutMs = CRYPTO_CONTEXT_TIMEOUT_MS) {
-  try {
-    return await fetchJsonWithTimeout(url, options, timeoutMs);
-  } catch {
-    return null;
-  }
-}
-function summarizeCoinGeckoCoin(coin) {
-  if (!coin) return null;
-  return compactObject({
-    id: coin.id,
-    name: coin.name,
-    symbol: coin.symbol ? String(coin.symbol).toUpperCase() : "",
-    marketCapRank: coin.market_cap_rank,
-    categories: Array.isArray(coin.categories) ? coin.categories.slice(0, 6) : [],
-    description: truncateText(stripHtml(coin.description?.en || ""), 340),
-    homepage: Array.isArray(coin.links?.homepage)
-      ? coin.links.homepage.filter(Boolean).slice(0, 2)
-      : [],
-    platforms: coin.platforms ? Object.keys(coin.platforms).filter(Boolean).slice(0, 8) : [],
-    genesisDate: coin.genesis_date || "",
-    sentimentUp: coin.sentiment_votes_up_percentage,
-    sentimentDown: coin.sentiment_votes_down_percentage,
-  });
-}
-function summarizeCoinGeckoMarket(coin) {
-  if (!coin) return null;
-  return compactObject({
-    id: coin.id,
-    name: coin.name,
-    symbol: coin.symbol ? String(coin.symbol).toUpperCase() : "",
-    priceUsd: coin.current_price,
-    marketCapUsd: coin.market_cap,
-    volume24hUsd: coin.total_volume,
-    priceChange24h: coin.price_change_percentage_24h,
-    marketCapRank: coin.market_cap_rank,
-  });
-}
-function summarizeDexScreenerPair(pair) {
-  if (!pair) return null;
-  return compactObject({
-    chainId: pair.chainId || "",
-    dexId: pair.dexId || "",
-    pairAddress: pair.pairAddress || "",
-    baseToken: compactObject({
-      name: pair.baseToken?.name || "",
-      symbol: pair.baseToken?.symbol || "",
-      address: pair.baseToken?.address || "",
-    }),
-    quoteToken: compactObject({
-      name: pair.quoteToken?.name || "",
-      symbol: pair.quoteToken?.symbol || "",
-      address: pair.quoteToken?.address || "",
-    }),
-    priceUsd: pair.priceUsd,
-    volume24h: pair.volume?.h24,
-    volume6h: pair.volume?.h6,
-    volume1h: pair.volume?.h1,
-    liquidityUsd: pair.liquidity?.usd,
-    marketCapUsd: pair.marketCap,
-    fdvUsd: pair.fdv,
-    pairCreatedAt: pair.pairCreatedAt,
-    labels: Array.isArray(pair.labels) ? pair.labels.slice(0, 5) : [],
-    url: pair.url || "",
-  });
+
+function displayKeyword(str) {
+  const text = normalizeKeyword(str);
+  if (!text) return "";
+  return smartTitleCase(text);
 }
 
-function scoreDexScreenerPair(pair, keywordSignals = {}) {
-  if (!pair) return -999;
-  let score = 0;
-  const liquidityUsd = Number(pair.liquidityUsd);
-  const volume24h = Number(pair.volume24h);
-  const fdvUsd = Number(pair.fdvUsd);
-  const marketCapUsd = Number(pair.marketCapUsd);
-  const baseName = String(pair.baseToken?.name || "").toLowerCase();
-  const baseSymbol = String(pair.baseToken?.symbol || "").toLowerCase();
-  const baseAddress = String(pair.baseToken?.address || "").toLowerCase();
-  const chainId = String(pair.chainId || "").toLowerCase();
-  const entityHints = (keywordSignals.entityHints || []).map((item) => item.toLowerCase());
-  const tickers = (keywordSignals.tickers || []).map((item) => item.toLowerCase());
-  const addresses = (keywordSignals.addresses || []).map((item) => item.toLowerCase());
-  const chainHints = (keywordSignals.chainHints || []).map((item) => normalizeChainName(item));
-  if (addresses.some((address) => address && baseAddress === address)) score += 20;
-  if (tickers.some((ticker) => ticker && baseSymbol === ticker)) score += 10;
-  if (entityHints.some((hint) => hint && (baseName === hint || baseSymbol === hint))) score += 9;
-  if (entityHints.some((hint) => hint && (baseName.includes(hint) || baseSymbol.includes(hint)))) score += 5;
-  if (chainHints.some((chain) => chain && normalizeChainName(chainId) === chain)) score += 5;
-  if (chainHints.some((chain) => chain && mapDexScreenerChainId(chain) === chainId)) score += 5;
-  if (Number.isFinite(liquidityUsd)) {
-    if (liquidityUsd >= 1_000_000) score += 9;
-    else if (liquidityUsd >= 250_000) score += 7;
-    else if (liquidityUsd >= 50_000) score += 5;
-    else if (liquidityUsd >= 10_000) score += 2;
-    else if (liquidityUsd > 0) score -= 2;
-  }
-  if (Number.isFinite(volume24h)) {
-    if (volume24h >= 1_000_000) score += 7;
-    else if (volume24h >= 100_000) score += 5;
-    else if (volume24h >= 20_000) score += 3;
-    else if (volume24h > 0) score += 1;
-  }
-  if (Number.isFinite(fdvUsd) && Number.isFinite(liquidityUsd) && liquidityUsd > 0) {
-    const fdvLiquidityRatio = fdvUsd / liquidityUsd;
-    if (fdvLiquidityRatio > 200) score -= 5;
-    else if (fdvLiquidityRatio > 75) score -= 3;
-    else if (fdvLiquidityRatio > 25) score -= 1;
-    else score += 2;
-  }
-  if (Number.isFinite(marketCapUsd) && marketCapUsd > 0) score += 2;
-  if (pair.pairCreatedAt) {
-    const ageMs = Date.now() - Number(pair.pairCreatedAt);
-    const ageDays = ageMs / (1000 * 60 * 60 * 24);
-    if (Number.isFinite(ageDays)) {
-      if (ageDays >= 365) score += 5;
-      else if (ageDays >= 90) score += 3;
-      else if (ageDays >= 14) score += 1;
-      else if (ageDays >= 0) score -= 1;
-    }
-  }
-  return score;
-}
-function selectBestDexPair(pairs = [], keywordSignals = {}) {
-  if (!Array.isArray(pairs) || !pairs.length) return null;
-  const scored = pairs
-    .filter(Boolean)
-    .map((pair) => ({
-      pair,
-      score: scoreDexScreenerPair(pair, keywordSignals),
-    }))
-    .sort((a, b) => b.score - a.score);
-  return scored[0]?.pair || null;
-}
-async function fetchCoinGeckoSearch(keyword, keywordSignals) {
-  const query =
-    keywordSignals?.quotedPhrases?.[0] ||
-    keywordSignals?.entityHints?.[0] ||
-    keywordSignals?.tickers?.[0] ||
-    tokenizeKeyword(keyword).filter((token) => token.length >= 2).slice(0, 4).join(" ");
-  if (!query) return null;
-  const url = `${COINGECKO_BASE_URL}/search?query=${encodeURIComponent(query)}`;
-  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
-  if (!data || !Array.isArray(data.coins) || !data.coins.length) return null;
-  return data.coins.slice(0, CRYPTO_CONTEXT_MAX_ITEMS).map((coin) =>
-    compactObject({
-      id: coin.id,
-      name: coin.name,
-      symbol: coin.symbol ? String(coin.symbol).toUpperCase() : "",
-      marketCapRank: coin.market_cap_rank,
-      thumb: coin.thumb || "",
-    })
-  );
-}
-async function fetchCoinGeckoMarketByIds(ids = []) {
-  const cleanIds = unique(ids).slice(0, CRYPTO_CONTEXT_MAX_ITEMS);
-  if (!cleanIds.length) return [];
-  const url =
-    `${COINGECKO_BASE_URL}/coins/markets?vs_currency=usd&ids=` +
-    encodeURIComponent(cleanIds.join(",")) +
-    "&price_change_percentage=24h";
-  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
-  if (!Array.isArray(data)) return [];
-  return data.map(summarizeCoinGeckoMarket).filter(Boolean);
-}
-async function fetchCoinGeckoCoinById(id) {
-  if (!id) return null;
-  const url =
-    `${COINGECKO_BASE_URL}/coins/${encodeURIComponent(id)}` +
-    "?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false";
-  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
-  return summarizeCoinGeckoCoin(data);
-}
-async function fetchCoinGeckoTrending() {
-  const url = `${COINGECKO_BASE_URL}/search/trending`;
-  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
-  if (!data || !Array.isArray(data.coins)) return [];
-  return data.coins.slice(0, CRYPTO_CONTEXT_MAX_ITEMS).map((entry) =>
-    compactObject({
-      id: entry.item?.id,
-      name: entry.item?.name,
-      symbol: entry.item?.symbol ? String(entry.item.symbol).toUpperCase() : "",
-      marketCapRank: entry.item?.market_cap_rank,
-      priceBtc: entry.item?.price_btc,
-    })
-  );
-}
-async function fetchCoinGeckoTokenByContract(chain, address) {
-  if (!chain || !address) return null;
-  const mapped = mapCoinGeckoPlatformId(chain);
-  if (!mapped) return null;
-  const url =
-    `${COINGECKO_BASE_URL}/coins/${encodeURIComponent(mapped)}/contract/${encodeURIComponent(
-      address
-    )}` +
-    "?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false";
-  const data = await tryFetchJson(url, { headers: buildCoinGeckoHeaders() });
-  return summarizeCoinGeckoCoin(data);
-}
-async function fetchDexScreenerSearch(keyword, keywordSignals) {
-  const query =
-    keywordSignals?.quotedPhrases?.[0] ||
-    keywordSignals?.entityHints?.[0] ||
-    keywordSignals?.tickers?.[0] ||
-    tokenizeKeyword(keyword).slice(0, 4).join(" ");
-  if (!query) return [];
-  const url = `${DEXSCREENER_BASE_URL}/latest/dex/search?q=${encodeURIComponent(query)}`;
-  const data = await tryFetchJson(url);
-  if (!data || !Array.isArray(data.pairs)) return [];
-  return data.pairs
-    .slice(0, Math.max(CRYPTO_CONTEXT_MAX_ITEMS * 3, 12))
-    .map(summarizeDexScreenerPair)
-    .filter(Boolean);
-}
-async function fetchDexScreenerTokenPairs(chain, address) {
-  if (!chain || !address) return [];
-  const mappedChain = mapDexScreenerChainId(chain);
-  const url = `${DEXSCREENER_BASE_URL}/token-pairs/v1/${encodeURIComponent(
-    mappedChain
-  )}/${encodeURIComponent(address)}`;
-  const data = await tryFetchJson(url);
-  if (!Array.isArray(data)) return [];
-  return data
-    .slice(0, Math.max(CRYPTO_CONTEXT_MAX_ITEMS * 3, 12))
-    .map(summarizeDexScreenerPair)
-    .filter(Boolean);
-}
-function selectBestCoinGeckoMatch(searchResults, keywordSignals) {
-  if (!Array.isArray(searchResults) || !searchResults.length) return null;
-  const entityHints = (keywordSignals?.entityHints || []).map((item) => item.toLowerCase());
-  const tickers = (keywordSignals?.tickers || []).map((item) => item.toLowerCase());
-  const chainHints = new Set((keywordSignals?.chainHints || []).map((item) => item.toLowerCase()));
-  const scored = searchResults.map((coin, index) => {
-    let score = 0;
-    const name = String(coin.name || "").toLowerCase();
-    const symbol = String(coin.symbol || "").toLowerCase();
-    if (tickers.some((ticker) => symbol === ticker)) score += 10;
-    if (entityHints.some((hint) => name === hint || symbol === hint)) score += 8;
-    if (entityHints.some((hint) => name.includes(hint) || symbol.includes(hint))) score += 4;
-    if (Number.isFinite(Number(coin.marketCapRank)) && Number(coin.marketCapRank) > 0) {
-      score += clamp(12 - Number(coin.marketCapRank) / 50, 0, 8);
-    }
-    if (index === 0) score += 1;
-    if (chainHints.size) score += 0.5;
-    return { coin, score };
-  });
-  scored.sort((a, b) => b.score - a.score);
-  return scored[0]?.coin || null;
-}
-function summarizeCryptoContext(context) {
-  if (!context) return "";
-  const lines = [];
-  const bestCoin = context.bestCoinGeckoCoin;
-  const bestMarket = context.bestCoinGeckoMarket;
-  const bestPair = context.bestDexPair;
-  if (context.intent) lines.push(`Intent: ${context.intent}`);
-  if (context.entityLabel) lines.push(`Entity focus: ${context.entityLabel}`);
-  if (context.topicStyle) lines.push(`Topic style: ${context.topicStyle}`);
-  if (bestCoin) {
-    lines.push(
-      `CoinGecko entity: ${bestCoin.name || ""} ${bestCoin.symbol ? `(${bestCoin.symbol})` : ""}`.trim()
-    );
-    if (bestCoin.marketCapRank) {
-      lines.push(`CoinGecko market cap rank: ${bestCoin.marketCapRank}`);
-    }
-    if (bestCoin.categories?.length) {
-      lines.push(`CoinGecko categories: ${bestCoin.categories.join(", ")}`);
-    }
-    if (bestCoin.platforms?.length) {
-      lines.push(`Known platforms: ${bestCoin.platforms.join(", ")}`);
-    }
-    if (bestCoin.genesisDate) {
-      lines.push(`Genesis date: ${bestCoin.genesisDate}`);
-    }
-    if (bestCoin.description) {
-      lines.push(`Project summary: ${bestCoin.description}`);
-    }
-  }
-  if (bestMarket) {
-    lines.push(
-      `Market snapshot: price ${
-        bestMarket.priceUsd != null ? `$${formatCompactNumber(bestMarket.priceUsd)}` : "n/a"
-      }, market cap ${
-        bestMarket.marketCapUsd != null ? `$${formatCompactNumber(bestMarket.marketCapUsd)}` : "n/a"
-      }, 24h volume ${
-        bestMarket.volume24hUsd != null ? `$${formatCompactNumber(bestMarket.volume24hUsd)}` : "n/a"
-      }, 24h change ${
-        bestMarket.priceChange24h != null ? `${Number(bestMarket.priceChange24h).toFixed(2)}%` : "n/a"
-      }`
-    );
-  }
-  if (bestPair) {
-    const fdvLiquidityRatio =
-      Number(bestPair.fdvUsd) > 0 && Number(bestPair.liquidityUsd) > 0
-        ? Number(bestPair.fdvUsd) / Number(bestPair.liquidityUsd)
-        : null;
-    lines.push(
-      `DEX snapshot: ${bestPair.chainId || "unknown chain"} on ${
-        bestPair.dexId || "unknown dex"
-      }, liquidity ${
-        bestPair.liquidityUsd != null ? `$${formatCompactNumber(bestPair.liquidityUsd)}` : "n/a"
-      }, 24h volume ${
-        bestPair.volume24h != null ? `$${formatCompactNumber(bestPair.volume24h)}` : "n/a"
-      }, FDV ${bestPair.fdvUsd != null ? `$${formatCompactNumber(bestPair.fdvUsd)}` : "n/a"}`
-    );
-    if (fdvLiquidityRatio && Number.isFinite(fdvLiquidityRatio)) {
-      lines.push(`FDV/liquidity ratio: ${fdvLiquidityRatio.toFixed(1)}x`);
-    }
-  }
-  if (Array.isArray(context.trending) && context.trending.length) {
-    lines.push(
-      `Trending reference set: ${context.trending
-        .slice(0, 5)
-        .map((item) => `${item.name || ""}${item.symbol ? ` (${item.symbol})` : ""}`.trim())
-        .join(", ")}`
-    );
-  }
-  if (context.factSafetyNote) {
-    lines.push(`Fact safety: ${context.factSafetyNote}`);
-  }
-  return lines.join("\n");
-}
-async function fetchCryptoContext(keyword) {
-  const cleanKeyword = normalizeSeoKeyword(keyword);
-  const cacheKey = `${cleanKeyword.toLowerCase()}::${stableHash(cleanKeyword)}`;
-  if (ENABLE_CONTEXT_CACHE && contextCache.has(cacheKey)) {
-    return contextCache.get(cacheKey);
-  }
-  const intent = detectSeoIntent(cleanKeyword);
-  const keywordSignals = extractKeywordSignals(cleanKeyword);
-  const context = {
-    enabled: ENABLE_EXTERNAL_CRYPTO_CONTEXT,
-    intent,
-    keyword: cleanKeyword,
-    keywordSignals,
-    entityLabel: titleCaseWords(
-      [
-        ...(keywordSignals.quotedPhrases || []),
-        ...(keywordSignals.entityHints || []),
-        ...(keywordSignals.tickers || []),
-      ]
-        .slice(0, 3)
-        .join(" ")
-    ),
-    topicStyle: pickTopicStyle(cleanKeyword),
-    coinGeckoSearchResults: [],
-    coinGeckoMarkets: [],
-    bestCoinGeckoCoin: null,
-    bestCoinGeckoMarket: null,
-    dexPairs: [],
-    bestDexPair: null,
-    trending: [],
-    fetchNotes: [],
-    factSafetyNote:
-      "Use provided metrics only as context. Do not invent wallet counts, taxes, contract permissions, audits, or guarantees.",
-  };
-  if (!shouldFetchCryptoContext(cleanKeyword, keywordSignals, intent)) {
-    context.fetchNotes.push("External context skipped because this keyword is general or educational.");
-    context.contextSummary = summarizeCryptoContext(context);
-    if (ENABLE_CONTEXT_CACHE) contextCache.set(cacheKey, context);
-    return context;
-  }
-  const addresses = keywordSignals.addresses || [];
-  const chain = detectBestChainForAddresses(keywordSignals);
-  try {
-    const shouldFetchTrending =
-      intent === "market_context" ||
-      intent === "category_theme" ||
-      intent === "chain_ecosystem" ||
-      /trending|narrative|sector|category|best|top/i.test(cleanKeyword);
-    const [searchResults, trending] = await Promise.all([
-      fetchCoinGeckoSearch(cleanKeyword, keywordSignals),
-      shouldFetchTrending ? fetchCoinGeckoTrending() : Promise.resolve([]),
-    ]);
-    context.coinGeckoSearchResults = searchResults || [];
-    context.trending = trending || [];
-    const bestMatch = selectBestCoinGeckoMatch(context.coinGeckoSearchResults, keywordSignals);
-    if (bestMatch?.id) {
-      const [coinInfo, markets] = await Promise.all([
-        fetchCoinGeckoCoinById(bestMatch.id),
-        fetchCoinGeckoMarketByIds([bestMatch.id]),
-      ]);
-      context.bestCoinGeckoCoin = coinInfo;
-      context.coinGeckoMarkets = markets || [];
-      context.bestCoinGeckoMarket = context.coinGeckoMarkets[0] || null;
-    }
-    if (addresses.length) {
-      const bestAddress = addresses[0];
-      const [contractCoin, tokenPairs] = await Promise.all([
-        chain ? fetchCoinGeckoTokenByContract(chain, bestAddress) : Promise.resolve(null),
-        chain ? fetchDexScreenerTokenPairs(chain, bestAddress) : Promise.resolve([]),
-      ]);
-      if (contractCoin && !context.bestCoinGeckoCoin) {
-        context.bestCoinGeckoCoin = contractCoin;
-      }
-      context.dexPairs = tokenPairs || [];
-      context.bestDexPair = selectBestDexPair(context.dexPairs, keywordSignals);
-    }
-    if (!context.bestDexPair) {
-      const dexSearch = await fetchDexScreenerSearch(cleanKeyword, keywordSignals);
-      context.dexPairs = dexSearch || [];
-      context.bestDexPair = selectBestDexPair(context.dexPairs, keywordSignals);
-    }
-  } catch (error) {
-    context.fetchNotes.push(`Context fetch error: ${error.message}`);
-  }
-  if (!context.bestCoinGeckoCoin && !context.bestDexPair && !context.trending.length) {
-    context.fetchNotes.push("No strong external crypto entity match found.");
-  }
-  context.contextSummary = summarizeCryptoContext(context);
-  if (ENABLE_CONTEXT_CACHE) contextCache.set(cacheKey, context);
-  return context;
-}
-/* =========================
-   WRITING VARIATION / MODE
-========================= */
-function detectKeywordMode(keyword) {
-  const k = String(keyword || "").toLowerCase().trim();
-  const intent = detectSeoIntent(keyword);
-  if (!k) return "risk";
-  if (intent === "token_risk") return "risk";
-  if (intent === "comparison") return "comparison";
-  if (
-    [
-      "market_context",
-      "chain_ecosystem",
-      "category_theme",
-      "education_explainer",
-      "wallet_security",
-      "defi_explainer",
-      "dex_exchange",
-      "coin_profile",
-    ].includes(intent)
-  ) {
-    return "context";
-  }
-  if (
-    /^(how|what|why|when)\b/.test(k) ||
-    /\bguide\b/.test(k) ||
-    /\bexplained\b/.test(k) ||
-    /\bvs\b/.test(k) ||
-    /\bcompare\b/.test(k) ||
-    /\bmeaning\b/.test(k)
-  ) {
-    return "context";
-  }
-  if (
-    /\bpatterns?\b/.test(k) ||
-    /\bred flags?\b/.test(k) ||
-    /\bwarning signs?\b/.test(k) ||
-    /\bcommon\b/.test(k) ||
-    /\btypes\b/.test(k) ||
-    /\bexamples\b/.test(k)
-  ) {
-    return "pattern";
-  }
-  return "risk";
-}
-function pickTopicStyle(keyword) {
-  const styles = [
-    "risk-first",
-    "mechanics-first",
-    "structure-first",
-    "market-first",
-    "pressure-first",
-    "comparison-first",
-    "context-first",
-    "quality-filter",
-  ];
-  return styles[stableHash(keyword) % styles.length];
-}
-function pickContentAngle(keyword) {
-  const intent = detectSeoIntent(keyword);
-  const angleGroups = {
-    token_risk: [
-      {
-        id: "risk_stack",
-        label: "risk stack",
-        description:
-          "Layer liquidity, holder distribution, contract control, and exit difficulty into one compressed risk view.",
-      },
-      {
-        id: "mechanics_first",
-        label: "mechanics first",
-        description:
-          "Lead with structure and mechanics instead of verdict language or generic warnings.",
-      },
-      {
-        id: "surface_vs_structure",
-        label: "surface versus structure",
-        description:
-          "Contrast surface strength or momentum with the weaker structure underneath it.",
-      },
-      {
-        id: "pattern_recognition",
-        label: "pattern recognition",
-        description:
-          "Treat the keyword as part of a recurring token-risk pattern rather than a one-off case.",
-      },
-      {
-        id: "exit_reality",
-        label: "exit reality",
-        description:
-          "Keep the frame anchored in exit conditions, slippage, reversals, and what happens when confidence breaks.",
-      },
-      {
-        id: "trust_pressure",
-        label: "trust pressure",
-        description:
-          "Focus on why the setup creates a trust problem even before obvious failure appears.",
-      },
-    ],
-    token_profile: [
-      {
-        id: "project_structure",
-        label: "project structure",
-        description:
-          "Explain what the token is, where it fits, and how structure matters more than branding.",
-      },
-      {
-        id: "utility_vs_trade",
-        label: "utility versus trade",
-        description:
-          "Separate product or ecosystem relevance from pure trading attention.",
-      },
-      {
-        id: "market_position",
-        label: "market position",
-        description:
-          "Frame the token through liquidity, usage, market footprint, and competitive positioning.",
-      },
-    ],
-    coin_profile: [
-      {
-        id: "network_asset",
-        label: "network asset",
-        description:
-          "Frame the coin through network role, market depth, adoption, and cycle behavior.",
-      },
-      {
-        id: "market_footprint",
-        label: "market footprint",
-        description:
-          "Separate liquidity, rank, volume, and durability from short-term attention.",
-      },
-      {
-        id: "utility_and_cycle",
-        label: "utility and cycle",
-        description:
-          "Connect utility, adoption, and market-cycle pressure without hype.",
-      },
-    ],
-    market_context: [
-      {
-        id: "flow_and_rotation",
-        label: "flow and rotation",
-        description:
-          "Explain price action through liquidity, volume, momentum, and sector rotation.",
-      },
-      {
-        id: "risk_appetite",
-        label: "risk appetite",
-        description:
-          "Show how market behavior changes when risk appetite expands or contracts.",
-      },
-      {
-        id: "structure_over_hype",
-        label: "structure over hype",
-        description:
-          "Keep the focus on tradable structure rather than social excitement.",
-      },
-    ],
-    chain_ecosystem: [
-      {
-        id: "ecosystem_depth",
-        label: "ecosystem depth",
-        description:
-          "Frame the chain through activity, tooling, liquidity, builders, and durable use cases.",
-      },
-      {
-        id: "network_effect",
-        label: "network effect",
-        description:
-          "Show how adoption compounds through users, developers, assets, and applications.",
-      },
-      {
-        id: "throughput_vs_quality",
-        label: "throughput versus quality",
-        description:
-          "Contrast raw activity with the quality and durability of ecosystem demand.",
-      },
-    ],
-    category_theme: [
-      {
-        id: "narrative_filter",
-        label: "narrative filter",
-        description:
-          "Separate broad sector excitement from which structures look durable.",
-      },
-      {
-        id: "category_quality",
-        label: "category quality",
-        description:
-          "Explain what makes one token set stronger or weaker within the same theme.",
-      },
-      {
-        id: "capital_rotation",
-        label: "capital rotation",
-        description:
-          "Describe how money moves into and out of crypto categories over time.",
-      },
-    ],
-    education_explainer: [
-      {
-        id: "clear_mechanics",
-        label: "clear mechanics",
-        description:
-          "Explain the topic with practical crypto mechanics instead of textbook language.",
-      },
-      {
-        id: "structure_and_risk",
-        label: "structure and risk",
-        description:
-          "Blend explanation with what actually matters when the concept meets the market.",
-      },
-      {
-        id: "decision_relevance",
-        label: "decision relevance",
-        description:
-          "Keep the explanation useful for understanding price behavior and token quality.",
-      },
-    ],
-    wallet_security: [
-      {
-        id: "permission_reality",
-        label: "permission reality",
-        description:
-          "Explain wallet risk through approvals, signatures, permissions, and custody exposure.",
-      },
-      {
-        id: "attack_surface",
-        label: "attack surface",
-        description:
-          "Frame wallet safety around where control can leak before funds move.",
-      },
-      {
-        id: "trust_boundary",
-        label: "trust boundary",
-        description:
-          "Separate normal wallet activity from trust breaks and permission risk.",
-      },
-    ],
-    defi_explainer: [
-      {
-        id: "mechanics_and_pressure",
-        label: "mechanics and pressure",
-        description:
-          "Explain DeFi through swaps, pools, routing, slippage, fees, and market pressure.",
-      },
-      {
-        id: "liquidity_engine",
-        label: "liquidity engine",
-        description:
-          "Frame DeFi around pool depth, price impact, incentives, and contract exposure.",
-      },
-      {
-        id: "yield_vs_risk",
-        label: "yield versus risk",
-        description:
-          "Separate visible yield or convenience from liquidity, contract, and exit risks.",
-      },
-    ],
-    dex_exchange: [
-      {
-        id: "data_quality",
-        label: "data quality",
-        description:
-          "Frame exchange and listing topics through source quality, pair depth, volume, and liquidity.",
-      },
-      {
-        id: "pair_structure",
-        label: "pair structure",
-        description:
-          "Explain why a trading pair’s chain, DEX, liquidity, and age matter.",
-      },
-      {
-        id: "listing_reality",
-        label: "listing reality",
-        description:
-          "Separate being visible on a tracker from having durable market quality.",
-      },
-    ],
-    comparison: [
-      {
-        id: "contrast_the_tradeoffs",
-        label: "contrast the tradeoffs",
-        description:
-          "Separate the strongest differences in structure, liquidity, adoption, and downside.",
-      },
-      {
-        id: "positioning_gap",
-        label: "positioning gap",
-        description:
-          "Explain how two crypto candidates occupy different roles even when they look similar.",
-      },
-      {
-        id: "surface_vs_depth",
-        label: "surface versus depth",
-        description:
-          "Contrast branding or attention with deeper quality signals.",
-      },
-    ],
-    general_crypto: [
-      {
-        id: "structure_first",
-        label: "structure first",
-        description:
-          "Keep the answer grounded in real crypto structure and market logic.",
-      },
-      {
-        id: "signal_over_filler",
-        label: "signal over filler",
-        description:
-          "Favor useful specifics and compressed explanations.",
-      },
-      {
-        id: "practical_frame",
-        label: "practical frame",
-        description:
-          "Make the copy decision-relevant instead of generic.",
-      },
-    ],
-  };
-  const pool = angleGroups[intent] || angleGroups.general_crypto;
-  return pool[stableHash(keyword) % pool.length];
-}
-function buildSeoVariationHint(keyword) {
-  const hash = stableHash(keyword);
-  const openerStyles = [
-    "Open with direct structural language.",
-    "Open with the highest-signal point first.",
-    "Open with pressure, not definitions.",
-    "Open with a decision-grade sentence.",
-    "Open with market reality, not hype.",
-    "Open with what matters immediately.",
-  ];
-  const paragraph2Styles = [
-    "Make paragraph 2 about mechanics.",
-    "Make paragraph 2 carry the structure.",
-    "Keep paragraph 2 concrete and specific.",
-    "Use paragraph 2 to explain interaction between signals.",
-    "Keep paragraph 2 tighter than paragraph 1.",
-    "Make paragraph 2 do the factual heavy lifting.",
-  ];
-  const paragraph3Styles = [
-    "Make paragraph 3 introduce contrast: surface vs structure, momentum vs sustainability, or strength vs fragility.",
-    "Use paragraph 3 to separate surface strength from underlying quality.",
-    "Let paragraph 3 widen the frame without becoming generic.",
-    "Use paragraph 3 to show recurring crypto behavior.",
-    "Keep paragraph 3 comparative and revealing.",
-    "Make paragraph 3 feel like insight, not recap.",
-  ];
-  const paragraph4Styles = [
-    "Make paragraph 4 land on consequence or takeaway.",
-    "End on downside, fragility, or what breaks first.",
-    "End on practical reality rather than generic advice.",
-    "Do not drift into broad disclaimers.",
-    "Make the finish feel sharp and useful.",
-    "Close with what the structure implies.",
-  ];
-  const rhythmStyles = [
-    "Keep sentence rhythm uneven and natural.",
-    "Let one sentence hit shorter and harder.",
-    "Do not let every sentence sound equally polished.",
-    "Avoid smooth filler transitions.",
-    "Favor compression over explanation.",
-  ];
-  return {
-    openerStyle: openerStyles[hash % openerStyles.length],
-    paragraph2Style: paragraph2Styles[(hash >> 2) % paragraph2Styles.length],
-    paragraph3Style: paragraph3Styles[(hash >> 4) % paragraph3Styles.length],
-    paragraph4Style: paragraph4Styles[(hash >> 6) % paragraph4Styles.length],
-    rhythmStyle: rhythmStyles[(hash >> 8) % rhythmStyles.length],
-  };
-}
-/* =========================
-   QUALITY DETECTION
-========================= */
-function looksGenericSeo(text) {
-  const t = String(text || "").toLowerCase();
-  const badSignals = [
-    "in today's digital age",
-    "it is important to",
-    "users should",
-    "many investors",
-    "there are many factors",
-    "there are several factors",
-    "one important factor",
-    "another important factor",
-    "in many cases",
-    "for example",
-    "at the end of the day",
-    "the main thing",
-    "it is worth noting",
-    "one thing to remember",
-    "another thing to remember",
-    "it can be difficult to know",
-    "do your own research",
-    "always do your own research",
-    "invest responsibly",
-    "nothing in crypto is guaranteed",
-    "you should always",
-    "it is always a good idea",
-    "in conclusion",
-    "overall",
-    "to sum up",
-    "navigating the crypto market",
-    "volatile world of crypto",
-    "the world of cryptocurrency",
-    "before investing",
-    "before making any investment",
-    "helps investors make informed decisions",
-    "can help investors",
-    "investors should be careful",
-    "can be a red flag",
-    "is a red flag",
-    "red flags include",
-    "warning signs include",
-    "it is possible that",
-    "it may indicate",
-    "it may suggest",
-    "one common issue",
-    "another common issue",
-    "this means that",
-    "this is because",
-    "it is also important",
-    "on the other hand",
-    "in other words",
-    "there are risks involved",
-    "it helps to",
-    "it is helpful to",
-    "a key thing to understand",
-    "it can look",
-    "it may look",
-    "this can happen when",
-    "one reason is",
-    "another reason is",
-  ];
-  let score = 0;
-  badSignals.forEach((phrase) => {
-    if (t.includes(phrase)) score++;
-  });
-  return score >= 2;
-}
-function countExplainerSignals(text) {
-  const t = String(text || "").toLowerCase();
-  const phrases = [
-    "this means that",
-    "this is because",
-    "the reason is",
-    "the idea is",
-    "the goal is",
-    "in other words",
-    "one factor is",
-    "another factor is",
-    "it may indicate",
-    "it may suggest",
-    "it is important to note",
-    "it is worth noting",
-    "one thing to remember",
-    "another thing to remember",
-    "it helps to",
-    "it is helpful to",
-    "a key thing to understand",
-  ];
-  return phrases.filter((phrase) => t.includes(phrase)).length;
-}
-function countDistanceLanguage(text) {
-  const t = String(text || "").toLowerCase();
-  const phrases = [
-    "many investors",
-    "some investors",
-    "people should",
-    "investors should",
-    "before investing",
-    "before making any investment",
-    "the main thing",
-    "overall",
-    "in conclusion",
-    "to sum up",
-  ];
-  return phrases.filter((phrase) => t.includes(phrase)).length;
-}
-function hasNarrativeMarkers(text) {
-  const lower = String(text || "").toLowerCase();
-  const badPatterns = [
-    "imagine",
-    "picture this",
-    "you land on",
-    "you notice",
-    "you see",
-    "the page in front of you",
-    "the browser tab says",
-    "the address bar",
-    "a timer starts",
-    "the chat window",
-    "support:",
-    "telegram dm",
-    "noreply@",
-    "counting down",
-    "pulsing slightly",
-    "a small note says",
-    "the button turns red",
-    "within seconds",
-    "your wallet is empty",
-    "fake support chat",
-    "screenshot",
-    "email from",
-    "subject line",
-    "picture a",
-    "suppose you",
-    "you might get",
-    "you could see",
-    "the site says",
-    "the page flashes",
-    "a banner reads",
-  ];
-  return badPatterns.some((pattern) => lower.includes(pattern));
-}
-function paragraphHasOverlap(paragraphA, paragraphB) {
-  const a = new Set(
-    String(paragraphA || "")
-      .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .filter((w) => w.length >= 5)
-  );
-  const b = new Set(
-    String(paragraphB || "")
-      .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .filter((w) => w.length >= 5)
-  );
-  if (!a.size || !b.size) return false;
-  let overlap = 0;
-  for (const token of a) {
-    if (b.has(token)) overlap++;
-  }
-  return overlap >= 18;
-}
-function hasDuplicateParagraphStarts(paragraphs) {
-  const seen = new Set();
-  for (const paragraph of paragraphs) {
-    const start = getParagraphStartFingerprint(paragraph);
-    if (!start) continue;
-    if (seen.has(start)) return true;
-    seen.add(start);
-  }
-  return false;
-}
-function hasRepeatedSentenceStarts(paragraphs) {
-  const seen = new Set();
-  for (const paragraph of paragraphs) {
-    const sentences = splitSentences(paragraph).slice(0, 2);
-    for (const sentence of sentences) {
-      const fp = getSentenceStartFingerprint(sentence);
-      if (!fp) continue;
-      if (seen.has(fp)) return true;
-      seen.add(fp);
-    }
-  }
-  return false;
-}
-function hasStructuralOverlap(paragraphs) {
-  return (
-    (paragraphs[0] && paragraphs[1] && paragraphHasOverlap(paragraphs[0], paragraphs[1])) ||
-    (paragraphs[1] && paragraphs[2] && paragraphHasOverlap(paragraphs[1], paragraphs[2])) ||
-    (paragraphs[2] && paragraphs[3] && paragraphHasOverlap(paragraphs[2], paragraphs[3]))
-  );
-}
-function sentenceLengths(paragraph) {
-  return splitSentences(paragraph).map((sentence) => paragraphWordCount(sentence));
-}
-function hasFlatSentenceRhythm(paragraphs) {
-  const all = paragraphs.flatMap(sentenceLengths).filter(Boolean);
-  if (all.length < 8) return false;
-  const shortCount = all.filter((n) => n <= 7).length;
-  const longCount = all.filter((n) => n >= 24).length;
-  const average = all.reduce((sum, n) => sum + n, 0) / all.length;
-  return (shortCount === 0 && longCount === 0) || average < 7 || average > 21;
-}
-function countWeakTransitions(text) {
-  const lower = String(text || "").toLowerCase();
-  const phrases = [
-    "at the same time",
-    "in addition",
-    "in many cases",
-    "for example",
-    "however",
-    "that said",
-    "another thing",
-    "on the other hand",
-    "this is because",
-    "that is because",
-    "in other words",
-    "overall",
-    "to sum up",
-    "as a result",
-    "for that reason",
-  ];
-  return phrases.filter((phrase) => lower.includes(phrase)).length;
-}
-function countRiskSignalMatches(text, cues) {
-  const lower = String(text || "").toLowerCase();
-  return (cues || []).filter((cue) => lower.includes(String(cue).toLowerCase())).length;
-}
-function countStructuralTerms(text) {
-  const lower = String(text || "").toLowerCase();
-  const terms = [
-    "liquidity",
-    "liquidity depth",
-    "locked liquidity",
-    "unlocked liquidity",
-    "slippage",
-    "exit",
-    "sell pressure",
-    "holders",
-    "holder concentration",
-    "wallet concentration",
-    "distribution",
-    "ownership",
-    "top holders",
-    "whales",
-    "contract",
-    "permissions",
-    "renounced",
-    "mint",
-    "freeze",
-    "blacklist",
-    "control",
-    "volatility",
-    "launch",
-    "token age",
-    "momentum",
-    "market depth",
-    "confidence",
-    "trust",
-    "downside",
-    "fragile",
-    "weak structure",
-    "structural weakness",
-    "market cap",
-    "volume",
-    "utility",
-    "ecosystem",
-    "chain",
-    "rotation",
-    "trend",
-    "wallet",
-    "approval",
-    "signature",
-    "seed phrase",
-    "private key",
-    "phishing",
-    "drainer",
-    "dex",
-    "swap",
-    "pool",
-    "staking",
-    "yield",
-    "bridge",
-    "network",
-    "adoption",
-    "builders",
-    "users",
-    "listing",
-    "pair",
-    "fdv",
-  ];
-  return terms.filter((term) => lower.includes(term)).length;
-}
-function countExpertCryptoTerms(text) {
-  const lower = String(text || "").toLowerCase();
-  const terms = [
-    "lp depth",
-    "pool depth",
-    "price impact",
-    "volume-to-liquidity",
-    "fdv/liquidity",
-    "fdv to liquidity",
-    "deployer control",
-    "owner control",
-    "contract permissions",
-    "token approvals",
-    "approval risk",
-    "concentrated supply",
-    "sell-side pressure",
-    "exit liquidity",
-    "pair age",
-    "liquidity depth",
-    "routing",
-    "slippage",
-    "market depth",
-    "capital rotation",
-    "risk appetite",
-    "supply distribution",
-    "wallet concentration",
-    "unlock risk",
-  ];
-  return terms.filter((term) => lower.includes(term)).length;
-}
-function countInterpretationTerms(text) {
-  const lower = String(text || "").toLowerCase();
-  const terms = [
-    "which matters because",
-    "that matters because",
-    "combined with",
-    "taken together",
-    "even if",
-    "can still",
-    "underneath",
-    "surface strength",
-    "surface momentum",
-    "structural weakness",
-    "trust breaks",
-    "confidence breaks",
-    "exit becomes harder",
-    "price behavior",
-    "risk profile",
-    "fragile underneath",
-    "when multiple signals combine",
-    "interaction between signals",
-    "repeatable pattern",
-    "once momentum fades",
-    "looks stable until",
-    "holds up until",
-    "appears strong until",
-    "which leaves",
-    "which puts pressure on",
-    "which changes the setup",
-    "which shifts the balance",
-    "surface vs structure",
-    "momentum vs sustainability",
-    "strength vs fragility",
-  ];
-  return terms.filter((term) => lower.includes(term)).length;
-}
-function countConsequenceTerms(text) {
-  const lower = String(text || "").toLowerCase();
-  const terms = [
-    "losses",
-    "fast downside",
-    "rapid downside",
-    "difficulty exiting",
-    "exit difficulty",
-    "slippage",
-    "sell pressure",
-    "price drops",
-    "sharp sell-offs",
-    "reversals",
-    "buyers trapped",
-    "confidence breaks",
-    "volatility worsening",
-    "downside",
-    "loss conditions",
-    "losses accelerating",
-    "harder to exit",
-    "gets harder to exit",
-    "turns ugly fast",
-    "pricing weakens",
-    "rotation leaves",
-    "momentum fades",
-    "risk compounds",
-    "pressure builds",
-    "liquidity thins",
-    "demand cools",
-  ];
-  return terms.filter((term) => lower.includes(term)).length;
-}
-function countNounClusterRepetition(paragraphs) {
-  const clusters = [
-    "liquidity",
-    "holders",
-    "holder concentration",
-    "wallet concentration",
-    "distribution",
-    "ownership",
-    "contract",
-    "control",
-    "volatility",
-    "exit",
-    "risk",
-    "trust",
-    "momentum",
-    "market cap",
-    "volume",
-    "ecosystem",
-    "utility",
-    "wallet",
-    "approval",
-    "dex",
-    "pool",
-  ];
-  let repetition = 0;
-  for (const cluster of clusters) {
-    let paragraphHits = 0;
-    for (const paragraph of paragraphs) {
-      if (String(paragraph || "").toLowerCase().includes(cluster)) paragraphHits++;
-    }
-    if (paragraphHits >= 4) repetition += 2;
-    else if (paragraphHits === 3) repetition += 1;
-  }
-  return repetition;
-}
-function hasFlexibleConceptCoverage(text, seoClass) {
-  const lower = String(text || "").toLowerCase();
-  const concepts = unique([
-    ...(seoClass.requiredTerms || []),
-    ...(seoClass.flexibleConcepts || []),
-  ]);
-  const matches = concepts.filter((term) =>
-    lower.includes(String(term).toLowerCase())
-  ).length;
-  return matches >= Math.min(2, concepts.length);
-}
-function paragraphFeelsSoft(paragraph, index, intent = "token_risk") {
-  const lower = String(paragraph || "").toLowerCase();
-  if (!lower) return true;
-  if (intent === "token_risk") {
-    if (index === 0) {
-      if (!/risk|trust|fragile|unsafe|safe|downside|token|structure|exposure|liquidity|contract|holder/.test(lower)) {
-        return true;
-      }
-    }
-    if (index === 1) {
-      if (!/liquidity|holders|holder|wallet|distribution|contract|permissions|ownership|mint|freeze|slippage|exit|control|fdv|pool|volume/.test(lower)) {
-        return true;
-      }
-    }
-    if (index === 2) {
-      if (!/pattern|combined|taken together|even if|surface|momentum|repeatable|similar tokens|underneath|interaction|overlap|contrast|quality|fragility|sustainability/.test(lower)) {
-        return true;
-      }
-    }
-    if (index === 3) {
-      if (!/loss|downside|exit|slippage|sell-offs|reversals|buyers trapped|confidence breaks|volatility|difficulty|pressure|weakens|fragile/.test(lower)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  if (intent === "token_profile" || intent === "coin_profile") {
-    if (index === 0 && !/token|coin|project|ecosystem|market|utility|structure|liquidity|network/.test(lower)) {
-      return true;
-    }
-    if (index === 1 && !/supply|holders|volume|liquidity|market cap|chain|trading|utility|adoption|network/.test(lower)) {
-      return true;
-    }
-    if (index === 2 && !/position|pattern|adoption|attention|usage|momentum|competition|category|quality|cycle/.test(lower)) {
-      return true;
-    }
-    if (index === 3 && !/risk|downside|volatility|fragile|pressure|liquidity|demand|exit|weaken|rotation/.test(lower)) {
-      return true;
-    }
-    return false;
-  }
-  if (intent === "market_context" || intent === "category_theme" || intent === "chain_ecosystem") {
-    if (index === 0 && !/market|crypto|sector|ecosystem|chain|liquidity|volume|trend|momentum|rotation|activity/.test(lower)) {
-      return true;
-    }
-    if (index === 1 && !/flow|rotation|liquidity|volume|activity|usage|market cap|builders|trading|users|demand/.test(lower)) {
-      return true;
-    }
-    if (index === 2 && !/pattern|position|quality|surface|underneath|pressure|competition|selection|durable|sustainability/.test(lower)) {
-      return true;
-    }
-    if (index === 3 && !/risk|downside|fragile|pressure|weakens|reversal|volatility|cools|breaks|rotation/.test(lower)) {
-      return true;
-    }
-    return false;
-  }
-  if (intent === "wallet_security") {
-    if (index === 0 && !/wallet|approval|signature|permission|security|risk|custody/.test(lower)) return true;
-    if (index === 1 && !/approval|permission|contract|signature|private key|seed phrase|transaction|revoke/.test(lower)) return true;
-    if (index === 3 && !/loss|exposure|control|risk|drainer|phishing|access|permission/.test(lower)) return true;
-    return false;
-  }
-  if (intent === "defi_explainer" || intent === "dex_exchange") {
-    if (index === 0 && !/dex|defi|swap|liquidity|pool|exchange|pair|market|routing/.test(lower)) return true;
-    if (index === 1 && !/pool|liquidity|slippage|volume|fee|routing|price impact|pair|chain/.test(lower)) return true;
-    if (index === 3 && !/risk|downside|pressure|slippage|liquidity|fragile|exit|weakens/.test(lower)) return true;
-    return false;
-  }
-  if (intent === "education_explainer" || intent === "general_crypto" || intent === "comparison") {
-    if (index === 0 && !/crypto|token|market|structure|difference|comparison|risk|liquidity|chain|wallet|dex/.test(lower)) {
-      return true;
-    }
-    return false;
-  }
-  return false;
-}
-function paragraphStartsWeak(paragraph, index, intent = "token_risk") {
-  const start = safeLower(splitSentences(paragraph)[0] || paragraph);
-  if (!start) return true;
-  const weakStarts = [
-    "it is",
-    "in many cases",
-    "overall",
-    "in conclusion",
-    "to sum up",
-    "many investors",
-    "people should",
-    "another thing",
-    "for example",
-  ];
-  if (weakStarts.some((prefix) => start.startsWith(prefix))) {
-    return true;
-  }
-  if (index === 0) {
-    if (intent === "token_risk") {
-      if (
-        !/^(the risk|risk here|this token|tokens like this|elevated risk|structural risk)/.test(start)
-      ) {
-        if (!/risk|token|trust|structure|fragile|downside|liquidity|contract|holder/.test(start)) {
-          return true;
-        }
-      }
-    } else {
-      if (
-        !/token|coin|crypto|market|ecosystem|chain|sector|project|difference|comparison|structure|liquidity|volume|trend|wallet|dex|defi|exchange|approval|security/.test(
-          start
-        )
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-function paragraphDetailScore(paragraph) {
-  return (
-    countStructuralTerms(paragraph) * 2 +
-    countExpertCryptoTerms(paragraph) * 2 +
-    countInterpretationTerms(paragraph) * 2 +
-    countConsequenceTerms(paragraph)
-  );
-}
-function paragraphHasHardProof(paragraph, intent = "token_risk") {
-  const value = String(paragraph || "");
-  if (intent === "token_risk") {
-    return /risk|liquidity|holders|holder|wallet|distribution|contract|ownership|volatility|exit|slippage|trust|control|fdv|pool|volume/i.test(
-      value
-    );
-  }
-  if (intent === "wallet_security") {
-    return /wallet|approval|signature|permission|seed phrase|private key|phishing|drainer|contract|custody/i.test(
-      value
-    );
-  }
-  if (intent === "defi_explainer" || intent === "dex_exchange") {
-    return /dex|swap|liquidity|pool|slippage|pair|exchange|volume|fee|routing|market/i.test(
-      value
-    );
-  }
-  return /token|coin|project|market|volume|liquidity|utility|ecosystem|chain|trend|structure|risk|wallet|dex|network|adoption/i.test(
-    value
-  );
-}
-/* =========================
-   VALIDATION + SCORING
-========================= */
-function getValidationProfile(keyword) {
-  const intent = detectSeoIntent(keyword);
-  if (intent === "token_risk") {
-    return {
-      intent,
-      minWords: 155,
-      maxWords: 365,
-      minStructuralTerms: 6,
-      minInterpretationTerms: 2,
-      minConsequenceTerms: 2,
-      requireFlexibleCoverage: true,
-      strictRoleShape: true,
-    };
-  }
-  if (intent === "token_profile" || intent === "coin_profile") {
-    return {
-      intent,
-      minWords: 155,
-      maxWords: 385,
-      minStructuralTerms: 5,
-      minInterpretationTerms: 1,
-      minConsequenceTerms: 1,
-      requireFlexibleCoverage: false,
-      strictRoleShape: true,
-    };
-  }
-  if (
-    intent === "wallet_security" ||
-    intent === "defi_explainer" ||
-    intent === "dex_exchange"
-  ) {
-    return {
-      intent,
-      minWords: 150,
-      maxWords: 390,
-      minStructuralTerms: 5,
-      minInterpretationTerms: 1,
-      minConsequenceTerms: 1,
-      requireFlexibleCoverage: false,
-      strictRoleShape: false,
-    };
-  }
-  return {
-    intent,
-    minWords: 150,
-    maxWords: 395,
-    minStructuralTerms: 4,
-    minInterpretationTerms: 1,
-    minConsequenceTerms: 1,
-    requireFlexibleCoverage: false,
-    strictRoleShape: false,
-  };
-}
-function hasSeoFormattingProblems(text, keyword = "") {
-  const value = String(text || "");
-  const paragraphs = splitSeoParagraphs(value);
-  const profile = getValidationProfile(keyword);
-  if (!value.trim()) return true;
-  if (paragraphs.length !== 4) return true;
-  const totalWords = seoWordCount(value);
-  if (totalWords < profile.minWords || totalWords > profile.maxWords) return true;
-  if (paragraphs.some((p) => paragraphWordCount(p) < 22 || paragraphWordCount(p) > 100)) {
-    return true;
-  }
-  if (paragraphs.some((p) => countSentences(p) < 2 || countSentences(p) > 4)) {
-    return true;
-  }
-  if (hasListFormatting(value)) return true;
-  if (hasHtmlFormatting(value)) return true;
-  if (hasNarrativeMarkers(value)) return true;
-  if (paragraphs.some((p) => hasOverlongSentence(p))) return true;
-  return false;
-}
-function getSoftValidationPenalty(finalContent, cleanedParagraphs, keyword, seoClass, profile) {
-  let penalty = 0;
-  const structuralTerms = countStructuralTerms(finalContent);
-  const interpretationTerms = countInterpretationTerms(finalContent);
-  const consequenceTerms = countConsequenceTerms(finalContent);
-  if (structuralTerms < profile.minStructuralTerms) {
-    penalty += (profile.minStructuralTerms - structuralTerms) * 5;
-  }
-  if (interpretationTerms < profile.minInterpretationTerms) {
-    penalty += (profile.minInterpretationTerms - interpretationTerms) * 6;
-  }
-  if (consequenceTerms < profile.minConsequenceTerms) {
-    penalty += (profile.minConsequenceTerms - consequenceTerms) * 6;
-  }
-  if (profile.requireFlexibleCoverage && !hasFlexibleConceptCoverage(finalContent, seoClass)) {
-    penalty += 7;
-  }
-  if (countNounClusterRepetition(cleanedParagraphs) >= 10) {
-    penalty += 8;
-  }
-  cleanedParagraphs.forEach((paragraph, index) => {
-    if (paragraphFeelsSoft(paragraph, index, profile.intent)) penalty += 6;
-    if (paragraphStartsWeak(paragraph, index, profile.intent)) penalty += 6;
-    if (paragraphDetailScore(paragraph) < 5) penalty += 5;
-  });
-  return penalty;
-}
-function finalizeSeoCandidate(text, keyword = "") {
-  if (!text) return null;
-  const sanitized = sanitizeSeoContent(text);
-  const rawParagraphs = splitSeoParagraphs(sanitized);
-  const seoClass = classifySeoKeyword(keyword || "");
-  const lower = sanitized.toLowerCase();
-  const profile = getValidationProfile(keyword);
-  const intent = profile.intent;
-  if (rawParagraphs.length !== 4) return null;
-  const cleanedParagraphs = rawParagraphs
-    .map(removeDuplicateSentencesFromParagraph)
-    .map((p) => sanitizeSeoContent(p))
-    .map((p) => p.replace(/\n+/g, " ").trim())
-    .filter(Boolean);
-  if (cleanedParagraphs.length !== 4) return null;
-  if (hasDuplicateParagraphStarts(cleanedParagraphs)) return null;
-  if (hasRepeatedSentenceStarts(cleanedParagraphs)) return null;
-  if (hasStructuralOverlap(cleanedParagraphs)) return null;
-  if (hasFlatSentenceRhythm(cleanedParagraphs)) return null;
-  if (cleanedParagraphs.some((p) => hasOverlongSentence(p))) return null;
-  const finalContent = cleanedParagraphs.join("\n\n").trim();
-  if (hasSeoFormattingProblems(finalContent, keyword)) return null;
-  if (looksGenericSeo(finalContent)) return null;
-  if (hasNarrativeMarkers(finalContent)) return null;
-  if (countExplainerSignals(finalContent) >= 3) return null;
-  if (countDistanceLanguage(finalContent) >= 2) return null;
-  if (countWeakTransitions(finalContent) >= 3) return null;
-  if (!paragraphHasHardProof(cleanedParagraphs[0], intent)) return null;
-  const requiredTermMatches = (seoClass.requiredTerms || []).filter((term) =>
-    lower.includes(String(term).toLowerCase())
-  ).length;
-  if (
-    profile.requireFlexibleCoverage &&
-    requiredTermMatches < 1 &&
-    !hasFlexibleConceptCoverage(finalContent, seoClass)
-  ) {
-    const score = scoreSeoContent(finalContent, keyword);
-    if (score < MIN_STRONG_SCORE + 4) return null;
-  }
-  const softPenalty = getSoftValidationPenalty(
-    finalContent,
-    cleanedParagraphs,
-    keyword,
-    seoClass,
-    profile
-  );
-  const adjustedScore = scoreSeoContent(finalContent, keyword) - softPenalty;
-  if (adjustedScore < MIN_STRONG_SCORE - 2) return null;
-  return finalContent;
-}
-function scoreSeoContent(text, keyword) {
-  const content = sanitizeSeoContent(text);
-  const paragraphs = splitSeoParagraphs(content);
-  const seoClass = classifySeoKeyword(keyword);
-  const keywordSignals = extractKeywordSignals(keyword);
-  const lower = content.toLowerCase();
-  const profile = getValidationProfile(keyword);
-  let score = 100;
-  if (!content) score -= 100;
-  if (paragraphs.length !== 4) score -= 40;
-  const totalWords = seoWordCount(content);
-  if (totalWords < profile.minWords + 5) score -= 10;
-  if (totalWords > profile.maxWords - 8) score -= 12;
-  if (looksGenericSeo(content)) score -= 38;
-  if (hasNarrativeMarkers(content)) score -= 45;
-  if (countDistanceLanguage(content) >= 1) score -= 11;
-  if (countWeakTransitions(content) >= 3) score -= 10;
-  if (hasListFormatting(content)) score -= 18;
-  if (hasHtmlFormatting(content)) score -= 18;
-  const repeatedStarts = new Set();
-  paragraphs.forEach((paragraph, index) => {
-    const start = getParagraphStartFingerprint(paragraph);
-    if (repeatedStarts.has(start)) score -= 12;
-    repeatedStarts.add(start);
-    const words = paragraphWordCount(paragraph);
-    if (words < 22 || words > 100) score -= 10;
-    if (countSentences(paragraph) < 2 || countSentences(paragraph) > 4) score -= 10;
-    if (hasOverlongSentence(paragraph)) score -= 10;
-    if (paragraphStartsWeak(paragraph, index, profile.intent)) score -= 8;
-    if (paragraphDetailScore(paragraph) >= 8) score += 5;
-    if (paragraphDetailScore(paragraph) >= 13) score += 4;
-  });
-  if (hasRepeatedSentenceStarts(paragraphs)) score -= 12;
-  if (hasStructuralOverlap(paragraphs)) score -= 10;
-  if (hasFlatSentenceRhythm(paragraphs)) score -= 7;
-  const repetitionPenalty = countNounClusterRepetition(paragraphs);
-  if (repetitionPenalty >= 6) score -= repetitionPenalty * 1.5;
-  const explainerSignals = countExplainerSignals(content);
-  if (explainerSignals >= 2) score -= explainerSignals * 8;
-  if (paragraphs[0]) {
-    if (!paragraphHasHardProof(paragraphs[0], profile.intent)) score -= 14;
-    if (paragraphDetailScore(paragraphs[0]) >= 8) score += 5;
-  }
-  if (paragraphs[1] && paragraphFeelsSoft(paragraphs[1], 1, profile.intent)) score -= 8;
-  if (paragraphs[2] && paragraphFeelsSoft(paragraphs[2], 2, profile.intent)) score -= 8;
-  if (paragraphs[3] && paragraphFeelsSoft(paragraphs[3], 3, profile.intent)) score -= 9;
-  const coreSignalMatches = countRiskSignalMatches(lower, seoClass.coreSignals || []);
-  const supportingSignalMatches = countRiskSignalMatches(
-    lower,
-    seoClass.supportingSignals || []
-  );
-  const structuralTerms = countStructuralTerms(content);
-  const expertTerms = countExpertCryptoTerms(content);
-  const interpretationTerms = countInterpretationTerms(content);
-  const consequenceTerms = countConsequenceTerms(content);
-  if (coreSignalMatches < 2) score -= 8;
-  if (coreSignalMatches >= 4) score += 5;
-  if (coreSignalMatches >= 6) score += 4;
-  if (supportingSignalMatches >= 2) score += 4;
-  if (supportingSignalMatches >= 4) score += 3;
-  if (structuralTerms < profile.minStructuralTerms) score -= 12;
-  if (structuralTerms >= profile.minStructuralTerms + 2) score += 6;
-  if (structuralTerms >= profile.minStructuralTerms + 5) score += 4;
-  if (expertTerms >= 1) score += 4;
-  if (expertTerms >= 2) score += 4;
-  if (expertTerms >= 4) score += 3;
-  if (interpretationTerms < profile.minInterpretationTerms) score -= 9;
-  if (interpretationTerms >= profile.minInterpretationTerms) score += 5;
-  if (interpretationTerms >= profile.minInterpretationTerms + 2) score += 3;
-  if (consequenceTerms < profile.minConsequenceTerms) score -= 9;
-  if (consequenceTerms >= profile.minConsequenceTerms) score += 5;
-  if (consequenceTerms >= profile.minConsequenceTerms + 2) score += 3;
-  const keywordLower = normalizeSeoKeyword(keyword).toLowerCase();
-  if (keywordLower && lower.includes(keywordLower)) score += 2;
-  const keywordTokenMatches = keywordSignals.tokens.filter(
-    (token) => token.length >= 4 && lower.includes(token.toLowerCase())
-  ).length;
-  if (keywordTokenMatches >= 2) score += 2;
-  if (keywordTokenMatches >= 4) score += 2;
-  if (keywordSignals.chainHints.some((chain) => lower.includes(chain))) score += 3;
-  if (
-    keywordSignals.signalHints.some((signal) => lower.includes(signal.split(" ")[0]))
-  ) {
-    score += 3;
-  }
-  if (
-    keywordSignals.tokenStructureHints.some((hint) => lower.includes(hint.split(" ")[0]))
-  ) {
-    score += 2;
-  }
-  if (
-    keywordSignals.audienceIntentHints.some((hint) => lower.includes(hint.split(" ")[0]))
-  ) {
-    score += 2;
-  }
-  const categoryTermMatches = (seoClass.requiredTerms || []).filter((term) =>
-    lower.includes(String(term).toLowerCase())
-  ).length;
-  if (categoryTermMatches >= 1) score += 3;
-  if (profile.requireFlexibleCoverage && hasFlexibleConceptCoverage(content, seoClass)) {
-    score += 4;
-  }
-  if (/surface|underneath|contrast|stronger than|weaker than|but the|while the|even when|even if/i.test(content)) {
-    score += 4;
-  }
-  if (
-    /you should|do your own research|always do your own research|invest responsibly|before investing|before making any investment|not financial advice|nfa/i.test(
-      lower
-    )
-  ) {
-    score -= 14;
-  }
-  return clamp(score, 0, 100);
-}
-function isUsableSeoCandidate(text, keyword) {
-  const content = sanitizeSeoContent(text);
-  const paragraphs = splitSeoParagraphs(content);
-  const seoClass = classifySeoKeyword(keyword);
-  const profile = getValidationProfile(keyword);
-  if (!content) return false;
-  if (paragraphs.length !== 4) return false;
-  if (hasListFormatting(content)) return false;
-  if (hasHtmlFormatting(content)) return false;
-  if (looksGenericSeo(content)) return false;
-  if (hasNarrativeMarkers(content)) return false;
-  if (countExplainerSignals(content) >= 3) return false;
-  if (countDistanceLanguage(content) >= 2) return false;
-  if (countWeakTransitions(content) >= 3) return false;
-  if (hasDuplicateParagraphStarts(paragraphs)) return false;
-  if (hasRepeatedSentenceStarts(paragraphs)) return false;
-  if (hasStructuralOverlap(paragraphs)) return false;
-  if (hasFlatSentenceRhythm(paragraphs)) return false;
-  const totalWords = seoWordCount(content);
-  if (totalWords < profile.minWords || totalWords > profile.maxWords) return false;
-  if (paragraphs.some((p) => paragraphWordCount(p) < 22 || paragraphWordCount(p) > 100)) {
-    return false;
-  }
-  if (paragraphs.some((p) => countSentences(p) < 2 || countSentences(p) > 4)) {
-    return false;
-  }
-  if (paragraphs.some((p) => hasOverlongSentence(p))) return false;
-  if (!paragraphHasHardProof(paragraphs[0] || "", profile.intent)) return false;
-  const softPenalty = getSoftValidationPenalty(content, paragraphs, keyword, seoClass, profile);
-  const score = scoreSeoContent(content, keyword) - softPenalty;
-  return score >= MIN_STRONG_SCORE - 2;
-}
-/* =========================
-   PROMPTS
-========================= */
-function buildContextGuidanceLines(context) {
-  if (!context) {
-    return ["No external crypto context pack available. Stay accurate and do not invent specifics."];
-  }
-  const lines = [];
-  if (context.contextSummary) {
-    lines.push("External crypto context pack:");
-    lines.push(context.contextSummary);
-  } else {
-    lines.push("No strong external crypto entity match found. Keep the writing grounded and do not invent specifics.");
-  }
-  if (Array.isArray(context.fetchNotes) && context.fetchNotes.length) {
-    lines.push(`Context notes: ${context.fetchNotes.join(" | ")}`);
-  }
-  lines.push(
-    "Fact rule: Treat context metrics as factual only if shown above. Do not invent audits, holder counts, tax rates, owner permissions, wallet counts, or guarantees."
-  );
-  return lines;
-}
-function buildParagraphJobsByIntent(intent) {
-  if (intent === "token_profile" || intent === "coin_profile") {
-    return [
-      "Paragraph 1: immediate asset framing and why it matters",
-      "Paragraph 2: market structure, liquidity, supply, trading, chain, or ecosystem mechanics",
-      "Paragraph 3: positioning, adoption, category role, cycle behavior, or competitive angle",
-      "Paragraph 4: fragility, downside, demand weakness, or what would weaken the setup",
-    ];
-  }
-  if (intent === "market_context" || intent === "category_theme" || intent === "chain_ecosystem") {
-    return [
-      "Paragraph 1: immediate market, sector, chain, or ecosystem framing",
-      "Paragraph 2: mechanics, flows, activity, liquidity, volume, users, builders, or structural drivers",
-      "Paragraph 3: contrast between surface momentum and durable quality",
-      "Paragraph 4: downside, cooling conditions, rotation risk, or what breaks first",
-    ];
-  }
-  if (intent === "comparison") {
-    return [
-      "Paragraph 1: immediate contrast between the two sides",
-      "Paragraph 2: structural differences in quality, liquidity, adoption, usage, or risk",
-      "Paragraph 3: where surface strength diverges from deeper quality",
-      "Paragraph 4: downside, tradeoff, or what matters when conditions worsen",
-    ];
-  }
-  if (intent === "wallet_security") {
-    return [
-      "Paragraph 1: immediate wallet-security framing",
-      "Paragraph 2: permissions, approvals, signatures, custody, or transaction mechanics",
-      "Paragraph 3: contrast normal wallet activity with the trust boundary that can break",
-      "Paragraph 4: exposure, loss path, permission risk, or practical consequence",
-    ];
-  }
-  if (intent === "defi_explainer") {
-    return [
-      "Paragraph 1: immediate DeFi or DEX mechanics framing",
-      "Paragraph 2: pools, routing, liquidity, slippage, fees, yield, or contract mechanics",
-      "Paragraph 3: contrast visible opportunity with hidden structural pressure",
-      "Paragraph 4: downside, exit friction, pool weakness, or risk consequence",
-    ];
-  }
-  if (intent === "dex_exchange") {
-    return [
-      "Paragraph 1: immediate exchange, listing, pair, or data-quality framing",
-      "Paragraph 2: pair structure, liquidity, volume, chain, DEX, or market-depth mechanics",
-      "Paragraph 3: contrast tracker visibility with real market quality",
-      "Paragraph 4: downside, false confidence, thin liquidity, or data limitation",
-    ];
-  }
-  if (intent === "education_explainer" || intent === "general_crypto") {
-    return [
-      "Paragraph 1: immediate explanation with real market relevance",
-      "Paragraph 2: mechanics and structure",
-      "Paragraph 3: pattern, misread, or real-world crypto implication",
-      "Paragraph 4: consequence, limitation, or why the concept matters",
-    ];
-  }
-  return [
-    "Paragraph 1: immediate risk framing with no warmup",
-    "Paragraph 2: structural mechanics and signal interaction",
-    "Paragraph 3: contrast surface strength with deeper structure or repeatable pattern",
-    "Paragraph 4: downside, exit difficulty, confidence breaks, or losses",
-  ];
-}
-function buildModeLine(mode, intent) {
-  if (intent === "token_profile" || intent === "coin_profile") {
-    return "Keep this anchored in asset structure, market footprint, liquidity, adoption, and where the project fits.";
-  }
-  if (intent === "market_context") {
-    return "Allow broader market framing, but keep it compressed, tradable, and structurally useful.";
-  }
-  if (intent === "chain_ecosystem") {
-    return "Frame this through ecosystem depth, liquidity, builders, users, applications, and durable demand.";
-  }
-  if (intent === "category_theme") {
-    return "Treat this as a crypto theme or sector and separate stronger structures from weaker ones.";
-  }
-  if (intent === "wallet_security") {
-    return "Frame this through wallet permissions, signatures, custody boundaries, phishing exposure, approvals, and control leakage.";
-  }
-  if (intent === "defi_explainer") {
-    return "Frame this through DeFi mechanics: liquidity pools, routing, slippage, fees, yield, contract exposure, and exit conditions.";
-  }
-  if (intent === "dex_exchange") {
-    return "Frame this through pair quality, exchange visibility, liquidity depth, volume, chain context, and data reliability.";
-  }
-  if (intent === "comparison") {
-    return "Keep the answer comparative, sharp, and rooted in real tradeoffs instead of vague preference language.";
-  }
-  if (mode === "context") {
-    return "Allow explanatory framing, but keep it compressed, structural, and decision-relevant.";
-  }
-  if (mode === "pattern") {
-    return "Treat the keyword as a recurring pattern and keep the comparison language sharp.";
-  }
-  return "Keep this anchored in direct token-risk framing.";
-}
-function buildSeoSystemPrompt(keyword, context = null) {
-  const seoClass = classifySeoKeyword(keyword);
-  const keywordSignals = extractKeywordSignals(keyword);
-  const variation = buildSeoVariationHint(keyword);
-  const angle = pickContentAngle(keyword);
-  const mode = detectKeywordMode(keyword);
-  const intent = detectSeoIntent(keyword);
-  const paragraphJobs = buildParagraphJobsByIntent(intent);
-  const topicStyle = pickTopicStyle(keyword);
-  return `You write elite crypto SEO body copy for a premium card-based page.
-Write exactly 4 paragraphs.
-Hard bans:
-- No lists
-- No headings
-- No bullets
-- No HTML
-- No fake scenarios
-- No story scenes
-- No UI descriptions
-- No wallet-drain narratives
-- No “imagine”, “you notice”, “the page says”, “telegram dm”, “email from”, or similar
-- No broad filler
-- No advice cliches like “do your own research”
-- No conclusions like “overall” or “in conclusion”
-- No explainer phrasing like “this means”, “this is because”, or “in other words”
-- No screenplay energy
-- No soft setup or warmup
-Style:
-- Direct
-- Analytical
-- Dense
-- Confident
-- Sharp
-- Trust-first
-- Specific
-- Skimmable
-- Serious, not dramatic
-- Natural, not robotic
-- Every sentence must carry signal
-- Prefer compression over explanation
-- Prefer structural language over vague warnings
-Content rules:
-- Use verified context when provided
-- Never invent live metrics, wallet counts, percentages, audits, tax rates, ownership status, holder counts, contract facts, or guarantees
-- If the context pack is sparse, stay more general
-- Separate verified context from inferred market or risk interpretation
-- Blend specific and general naturally
-- Keep each paragraph distinct in function, texture, and noun emphasis
-- Stay within crypto, token, coin, market, chain, ecosystem, DeFi, wallet, exchange, security, or risk logic relevant to the keyword
-- Paragraph 3 must include a real contrast: surface vs structure, momentum vs sustainability, visibility vs quality, or strength vs fragility
-Target:
-- Exactly 4 paragraphs
-- 150 to 395 words total
-- 22 to 100 words per paragraph
-- 2 to 4 sentences per paragraph
-- Avoid sentences longer than 32 words
-Intent: ${intent}
-Keyword class: ${seoClass.contextLabel}
-Primary type: ${seoClass.primaryType || seoClass.type}
-Active layers: ${(seoClass.activeTypes || [seoClass.type]).join(", ")}
-Angle: ${angle.label} — ${angle.description}
-Mode: ${mode}
-Primary framing style: ${topicStyle}
-Important signal families:
-Core: ${(seoClass.coreSignals || []).join(", ")}
-Supporting: ${(seoClass.supportingSignals || []).join(", ")}
-Keyword-specific hints:
-- Chains: ${keywordSignals.chainHints.join(", ") || "none forced"}
-- Tickers: ${keywordSignals.tickers.join(", ") || "none forced"}
-- Intent: ${keywordSignals.intentHints.join(", ") || "none forced"}
-- Structure hints: ${keywordSignals.tokenStructureHints.join(", ") || "none forced"}
-- Signal hints: ${keywordSignals.signalHints.join(", ") || "none forced"}
-- Audience intent: ${keywordSignals.audienceIntentHints.join(", ") || "none forced"}
-- Entity hints: ${keywordSignals.entityHints.join(", ") || "none forced"}
-Variation guidance:
-- ${variation.openerStyle}
-- ${variation.paragraph2Style}
-- ${variation.paragraph3Style}
-- ${variation.paragraph4Style}
-- ${variation.rhythmStyle}
-Paragraph jobs:
-1. ${paragraphJobs[0]}
-2. ${paragraphJobs[1]}
-3. ${paragraphJobs[2]}
-4. ${paragraphJobs[3]}
-Additional guidance:
-- ${buildModeLine(mode, intent)}
-- If the keyword naturally blends multiple crypto layers, let them coexist instead of flattening to one bucket.
-- ${buildContextGuidanceLines(context).join("\n- ")}
-Before final output, silently check:
-- exactly 4 paragraphs
-- each paragraph has a distinct job
-- paragraph 2 has real mechanics
-- paragraph 3 has contrast
-- paragraph 4 has consequence
-- no unsupported facts
-- no generic SEO phrasing`;
-}
-function buildSeoUserPrompt(keyword, context = null) {
-  const cleanKeyword = normalizeSeoKeyword(keyword);
-  const seoClass = classifySeoKeyword(cleanKeyword);
-  const keywordSignals = extractKeywordSignals(cleanKeyword);
-  const variation = buildSeoVariationHint(cleanKeyword);
-  const angle = pickContentAngle(cleanKeyword);
-  const mode = detectKeywordMode(cleanKeyword);
-  const intent = detectSeoIntent(cleanKeyword);
-  const paragraphJobs = buildParagraphJobsByIntent(intent);
-  const topicStyle = pickTopicStyle(cleanKeyword);
-  return `Write premium crypto SEO body copy for the keyword "${cleanKeyword}".
-Requirements:
-- Exactly 4 paragraphs
-- 150 to 395 words total
-- Keep it tight enough for card-based rendering
-- Make the writing feel expensive, sharp, and expert
-- Stay grounded in real crypto structure
-- Use verified context when provided
-- Do not invent live metrics or unsupported token facts
-- Do not turn this into a story
-- Do not describe a fake webpage, email, chat, timer, support agent, or wallet-drain scene
-- Do not use headings or bullets
-- Do not use explainer filler
-- Do not force pure token-risk language if the keyword is about markets, chains, DeFi, wallets, exchanges, education, or comparisons
-- Make each paragraph do one distinct job
-- Make paragraph 1 feel immediate
-- Make paragraph 2 carry mechanics
-- Make paragraph 3 introduce contrast
-- Make paragraph 4 feel costly, useful, or decisive
-- Keep noun mix varied across paragraphs
-- ${variation.openerStyle}
-- ${variation.paragraph2Style}
-- ${variation.paragraph3Style}
-- ${variation.paragraph4Style}
-- ${variation.rhythmStyle}
-Intent:
-- ${intent}
-Mode:
-- ${mode}
-Primary framing style:
-- ${topicStyle}
-Primary angle:
-- ${angle.label} — ${angle.description}
-Helpful signals:
-- Core signals: ${(seoClass.coreSignals || []).slice(0, 14).join(", ")}
-- Supporting signals: ${(seoClass.supportingSignals || []).slice(0, 12).join(", ")}
-- Token structure hints: ${keywordSignals.tokenStructureHints.join(", ") || "none forced"}
-- Signal hints: ${keywordSignals.signalHints.join(", ") || "none forced"}
-- Audience intent: ${keywordSignals.audienceIntentHints.join(", ") || "none forced"}
-- Entity hints: ${keywordSignals.entityHints.join(", ") || "none forced"}
-- Tickers: ${keywordSignals.tickers.join(", ") || "none forced"}
-Context pack:
-${context?.contextSummary || "No strong external crypto context available. Stay accurate and general where needed."}
-Paragraph jobs:
-1. ${paragraphJobs[0]}
-2. ${paragraphJobs[1]}
-3. ${paragraphJobs[2]}
-4. ${paragraphJobs[3]}`;
-}
-function buildSeoRewritePrompt(keyword, existingDraft, context = null) {
-  const cleanKeyword = normalizeSeoKeyword(keyword);
-  const seoClass = classifySeoKeyword(cleanKeyword);
-  const variation = buildSeoVariationHint(cleanKeyword);
-  const angle = pickContentAngle(cleanKeyword);
-  const intent = detectSeoIntent(cleanKeyword);
-  const topicStyle = pickTopicStyle(cleanKeyword);
-  return `Rewrite this draft for "${cleanKeyword}" so it becomes sharper, shorter, denser, and more structurally useful.
-Intent:
-- ${intent}
-Primary framing style:
-- ${topicStyle}
-Fixes required:
-- Remove fake narrative and scene-writing
-- Remove long bloated sentences
-- Remove broad filler and generic SEO wording
-- Remove explainer tone unless the keyword clearly needs explanation
-- Keep exactly 4 paragraphs
-- Keep it card-friendly
-- Preserve only the strongest logic
-- Make each paragraph do a distinct job
-- Keep it grounded in crypto structure, market mechanics, ecosystem reality, liquidity, holders, contract control, wallet permissions, DeFi mechanics, volume, adoption, positioning, downside, or comparison when relevant
-- Make the opening feel immediate
-- Make paragraph 2 more mechanical
-- Make paragraph 3 introduce contrast
-- Make the ending feel costly, sharp, or decisive
-- Replace soft phrases with harder structural language
-- Cut anything that sounds like SEO content instead of analysis
-- Keep noun usage from flattening into the same repeated cluster every paragraph
-- Use context only where supported
-- ${variation.openerStyle}
-- ${variation.paragraph2Style}
-- ${variation.paragraph3Style}
-- ${variation.paragraph4Style}
-- ${variation.rhythmStyle}
-Angle:
-- ${angle.label} — ${angle.description}
-Risk or structure families to preserve when relevant:
-- ${(seoClass.coreSignals || []).slice(0, 16).join(", ")}
-Context pack:
-${context?.contextSummary || "No strong external crypto context available. Stay accurate and general where needed."}
-Draft to rewrite:
-"""
-${String(existingDraft || "").trim()}
-"""`;
-}
-/* =========================
-   SHAPE EVALUATION
-========================= */
-function getParagraphs(text) {
-  return splitSeoParagraphs(sanitizeSeoContent(text));
-}
-function getFirstParagraph(text) {
-  return getParagraphs(text)[0] || "";
-}
-function firstParagraphStartsStrong(text, mode = "risk", intent = "token_risk") {
-  const first = getFirstParagraph(text).toLowerCase().trim();
-  if (!first) return false;
-  if (intent === "token_risk") {
-    return Boolean(
-      /^(the risk|risk here|this token|tokens like this|elevated risk|structural risk)/.test(
-        first
-      ) || /(risk|token|liquidity|contract|holder|structure|trust|downside)/.test(first)
-    );
-  }
-  if (intent === "token_profile" || intent === "coin_profile") {
-    return Boolean(
-      first.length >= 35 &&
-        /(token|coin|project|ecosystem|chain|market|liquidity|utility|volume|supply|network)/.test(
-          first
-        )
-    );
-  }
-  if (intent === "market_context" || intent === "chain_ecosystem" || intent === "category_theme") {
-    return Boolean(
-      first.length >= 35 &&
-        /(market|crypto|sector|ecosystem|chain|liquidity|volume|momentum|rotation|activity|trend)/.test(
-          first
-        )
-    );
-  }
-  if (intent === "wallet_security") {
-    return Boolean(first.length >= 35 && /(wallet|approval|signature|security|permission|custody|risk)/.test(first));
-  }
-  if (intent === "defi_explainer" || intent === "dex_exchange") {
-    return Boolean(first.length >= 35 && /(dex|defi|swap|liquidity|pool|exchange|pair|slippage|routing)/.test(first));
-  }
-  if (mode === "context") {
-    return Boolean(
-      first.length >= 40 &&
-        !/^(crypto is|in crypto|in today's|today's crypto|many people|there are many|this article|this guide)/.test(
-          first
-        ) &&
-        /(risk|token|liquidity|structure|trust|volatility|buyers|trading|exposure|failure|collapse|downside|market|chain|ecosystem|wallet|dex|defi)/.test(
-          first
-        )
-    );
-  }
-  if (mode === "pattern") {
-    return Boolean(
-      /^(many tokens|most tokens|common crypto|common token|the pattern|patterns like this|tokens that|one recurring|a recurring)/.test(
-        first
-      ) ||
-        (first.length >= 40 &&
-          /(pattern|repeat|recurring|signals|warning|red flags|setup|structure)/.test(
-            first
-          ))
-    );
-  }
-  return false;
-}
-function hasParagraphRoleShape(text, mode = "risk", intent = "token_risk") {
-  const paragraphs = getParagraphs(text);
-  if (paragraphs.length !== 4) return false;
-  if (intent === "token_profile" || intent === "coin_profile") {
-    const checks = [
-      /token|coin|project|ecosystem|utility|liquidity|market|structure|network/i.test(paragraphs[0] || ""),
-      /supply|holders|volume|liquidity|market cap|chain|trading|usage|adoption/i.test(paragraphs[1] || ""),
-      /position|adoption|competition|pattern|attention|category|momentum|cycle|quality/i.test(paragraphs[2] || ""),
-      /risk|downside|volatility|fragile|pressure|liquidity|demand|exit|weakens|rotation/i.test(paragraphs[3] || ""),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (intent === "market_context" || intent === "category_theme" || intent === "chain_ecosystem") {
-    const checks = [
-      /market|crypto|ecosystem|sector|chain|activity|liquidity|trend|momentum|rotation/i.test(paragraphs[0] || ""),
-      /volume|liquidity|activity|builders|users|rotation|trading|flow|market cap|demand/i.test(paragraphs[1] || ""),
-      /pattern|position|quality|surface|underneath|selection|competition|durable|sustainability/i.test(paragraphs[2] || ""),
-      /risk|downside|fragile|pressure|cools|reversal|volatility|breaks|weakens/i.test(paragraphs[3] || ""),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (intent === "wallet_security") {
-    const checks = [
-      /wallet|approval|signature|security|permission|custody|risk/i.test(paragraphs[0] || ""),
-      /approval|permission|contract|signature|private key|seed phrase|transaction|revoke/i.test(paragraphs[1] || ""),
-      /surface|normal|trust|boundary|permission|control|exposure|contrast/i.test(paragraphs[2] || ""),
-      /loss|exposure|control|risk|drainer|phishing|access|permission/i.test(paragraphs[3] || ""),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (intent === "defi_explainer" || intent === "dex_exchange") {
-    const checks = [
-      /dex|defi|swap|liquidity|pool|exchange|pair|market|routing/i.test(paragraphs[0] || ""),
-      /pool|liquidity|slippage|volume|fee|routing|price impact|pair|chain/i.test(paragraphs[1] || ""),
-      /surface|visible|quality|underneath|pressure|contrast|opportunity|risk/i.test(paragraphs[2] || ""),
-      /risk|downside|pressure|slippage|liquidity|fragile|exit|weakens/i.test(paragraphs[3] || ""),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (intent === "comparison") {
-    const checks = [
-      /difference|compare|versus|both|either|token|chain|market/i.test(paragraphs[0] || ""),
-      /liquidity|volume|usage|adoption|structure|ecosystem|holders/i.test(paragraphs[1] || ""),
-      /surface|underneath|position|quality|tradeoff|pattern/i.test(paragraphs[2] || ""),
-      /risk|downside|fragile|weaker|pressure|conditions/i.test(paragraphs[3] || ""),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (mode === "risk") {
-    const checks = [
-      /risk|trust|fragile|token|structure|downside|exposure/i.test(paragraphs[0] || ""),
-      /liquidity|holders|holder|wallet|distribution|contract|permissions|ownership|mint|freeze|slippage|exit|control|fdv|volume/i.test(
-        paragraphs[1] || ""
-      ),
-      /pattern|combined|taken together|even if|surface|momentum|repeatable|similar tokens|underneath|interaction|overlap|quality|contrast/i.test(
-        paragraphs[2] || ""
-      ),
-      /loss|downside|exit|slippage|sell-offs|reversals|buyers trapped|confidence breaks|volatility|difficulty|pressure/i.test(
-        paragraphs[3] || ""
-      ),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (mode === "context") {
-    const checks = [
-      /token|risk|liquidity|structure|trust|volatility|exposure|trading|buyers|sellers|market|chain|ecosystem|wallet|dex/i.test(
-        paragraphs[0] || ""
-      ),
-      /mechanic|mechanics|liquidity|supply|demand|market|volume|holders|distribution|trading|structure|activity|permission|pool/i.test(
-        paragraphs[1] || ""
-      ),
-      /risk|problem|weakness|failure|break|fragile|pressure|surface|momentum|misread|signal|pattern|position|quality/i.test(
-        paragraphs[2] || ""
-      ),
-      /downside|loss|reversal|collapse|trap|volatility|exit|slippage|confidence|buyers|pressure|weakens/i.test(
-        paragraphs[3] || ""
-      ),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  if (mode === "pattern") {
-    const checks = [
-      /pattern|signals|warning|red flags|common|setup|tokens|projects/i.test(paragraphs[0] || ""),
-      /liquidity|holders|wallet|distribution|contract|momentum|volume|structure|control|pricing/i.test(
-        paragraphs[1] || ""
-      ),
-      /repeat|recurring|again|combined|surface|overlap|underneath|similar tokens|same setup|quality/i.test(
-        paragraphs[2] || ""
-      ),
-      /loss|trap|buyers|downside|reversal|collapse|exit|slippage|confidence/i.test(
-        paragraphs[3] || ""
-      ),
-    ];
-    return checks.filter(Boolean).length >= 3;
-  }
-  return false;
+function displayCleanKeyword(str) {
+  return displayKeyword(cleanKeywordBase(str));
 }
 
-function paragraphLengthsAreTight(text) {
-  const paragraphs = getParagraphs(text);
-  if (paragraphs.length !== 4) return false;
-  return paragraphs.every((paragraph) => {
-    const words = paragraphWordCount(paragraph);
-    return words >= 22 && words <= 102;
-  });
+function containsAny(text, phrases) {
+  const lower = String(text || "").toLowerCase();
+  return phrases.some(phrase => lower.includes(String(phrase).toLowerCase()));
 }
-function sentenceShapeIsTight(text) {
-  const paragraphs = getParagraphs(text);
-  if (paragraphs.length !== 4) return false;
-  return paragraphs.every((paragraph) => {
-    const sentenceCount = countSentences(paragraph);
-    if (sentenceCount < 1 || sentenceCount > 5) return false;
-    const sentences = splitSentences(paragraph);
-    return !sentences.some((sentence) => paragraphWordCount(sentence) > 32);
-  });
-}
-function evaluateContentShape(content, keyword) {
-  const sanitized = sanitizeSeoContent(content);
-  const mode = detectKeywordMode(keyword);
-  const intent = detectSeoIntent(keyword);
-  if (!sanitized) {
-    return {
-      valid: false,
-      usable: false,
-      premium: false,
-      sanitized: "",
-      paragraphCount: 0,
-      startsStrong: false,
-      hasRoleShape: false,
-      tightParagraphs: false,
-      tightSentences: false,
-      hasNarrative: true,
-      isGeneric: true,
-      formattingIssues: true,
-      usableByRules: false,
-      score: 0,
-      adjustedScore: 0,
-      mode,
-      intent,
-    };
-  }
-  const paragraphs = splitSeoParagraphs(sanitized);
-  const seoClass = classifySeoKeyword(keyword);
-  const profile = getValidationProfile(keyword);
-  const startsStrong = firstParagraphStartsStrong(sanitized, mode, intent);
-  const hasRoleShape = hasParagraphRoleShape(sanitized, mode, intent);
-  const tightParagraphs = paragraphLengthsAreTight(sanitized);
-  const tightSentences = sentenceShapeIsTight(sanitized);
-  const hasNarrative = hasNarrativeMarkers(sanitized);
-  const isGeneric = looksGenericSeo(sanitized);
-  const formattingIssues = hasSeoFormattingProblems(sanitized, keyword);
-  const usableByRules = isUsableSeoCandidate(sanitized, keyword);
-  const score = scoreSeoContent(sanitized, keyword);
-  const penalty = getValidationPenalty(sanitized, paragraphs, keyword, seoClass, profile);
-  const adjustedScore = clamp(score - penalty, 0, 100);
-  const usable = Boolean(
-    !hasNarrative &&
-      !formattingIssues &&
-      paragraphs.length === 4 &&
-      tightParagraphs &&
-      tightSentences &&
-      usableByRules &&
-      adjustedScore >= MIN_STRONG_SCORE
-  );
-  const premium = Boolean(
-    usable &&
-      startsStrong &&
-      (hasRoleShape || adjustedScore >= EARLY_ACCEPT_SCORE) &&
-      adjustedScore >= MIN_STRONG_SCORE + 2
-  );
-  return {
-    valid: usable,
-    usable,
-    premium,
-    sanitized,
-    paragraphCount: paragraphs.length,
-    startsStrong,
-    hasRoleShape,
-    tightParagraphs,
-    tightSentences,
-    hasNarrative,
-    isGeneric,
-    formattingIssues,
-    usableByRules,
-    score,
-    adjustedScore,
-    mode,
-    intent,
-  };
-}
-function scoreCandidateShape(candidate, keyword) {
-  if (!candidate?.content) return -1;
-  const shape = evaluateContentShape(candidate.content, keyword);
-  if (!shape.valid) return -1;
-  let score = shape.adjustedScore || shape.score;
-  if (candidate.strictPassed) score += 7;
-  if (shape.startsStrong) score += 5;
-  if (shape.hasRoleShape) score += 5;
-  if (shape.tightParagraphs) score += 3;
-  if (shape.tightSentences) score += 3;
-  if (shape.premium) score += 7;
-  if (candidate.contextApplied) score += 3;
-  if (candidate.contextStrength >= 2) score += 3;
-  if (candidate.modelUsed === OPENAI_PREMIUM_MODEL) score += 2;
-  return score;
-}
-function sortCandidates(candidates, keyword) {
-  return [...(candidates || [])]
-    .filter(Boolean)
-    .sort((a, b) => scoreCandidateShape(b, keyword) - scoreCandidateShape(a, keyword));
-}
-function selectBestCandidate(candidates, keyword) {
-  const sorted = sortCandidates(candidates, keyword);
-  return sorted[0] || null;
-}
-function selectTopCandidates(candidates, keyword, limit = 2) {
-  return sortCandidates(candidates, keyword).slice(0, limit);
-}
-function isEarlyAcceptCandidate(candidate, keyword) {
-  if (!candidate?.content) return false;
-  const shape = evaluateContentShape(candidate.content, keyword);
-  return Boolean(
-    candidate.strictPassed &&
-      candidate.score >= EARLY_ACCEPT_SCORE &&
-      shape.premium
-  );
-}
-function isStrongEnoughWithoutRewrite(candidate, keyword) {
-  if (!candidate?.content) return false;
-  const shape = evaluateContentShape(candidate.content, keyword);
-  return Boolean(
-    shape.usable &&
-      shape.adjustedScore >= MIN_STRONG_SCORE + 3 &&
-      shape.startsStrong &&
-      (shape.hasRoleShape || shape.adjustedScore >= EARLY_ACCEPT_SCORE)
-  );
-}
-/* =========================
-   OPENAI CALL
-========================= */
-function shouldRetryStatus(status) {
+
+function isGuidanceStyleKeyword(lower) {
   return (
-    status === 408 ||
-    status === 409 ||
-    status === 425 ||
-    status === 429 ||
-    status >= 500
+    lower.startsWith("how to ") ||
+    lower.startsWith("what to do before ") ||
+    lower.startsWith("how to check ") ||
+    lower.startsWith("how to avoid ") ||
+    lower.startsWith("what is ") ||
+    lower.startsWith("why ") ||
+    lower.startsWith("when ") ||
+    lower.startsWith("where ") ||
+    lower.startsWith("who ")
   );
 }
-async function fetchWithTimeout(url, options, timeoutMs) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-async function requestSeoContent({ systemPrompt, userPrompt, temperature, model }) {
-  ensureOpenAiConfig();
-  const safeSystemPrompt = ensurePrompt(systemPrompt, "System prompt");
-  const safeUserPrompt = ensurePrompt(userPrompt, "User prompt");
-  const selectedModel = model || OPENAI_MODEL;
-  let attempt = 0;
-  let lastError = null;
-  while (attempt < OPENAI_MAX_RETRIES) {
-    try {
-      const response = await fetchWithTimeout(
-        OPENAI_API_URL,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: selectedModel,
-            temperature,
-            max_tokens: OPENAI_MAX_TOKENS,
-            messages: [
-              { role: "system", content: safeSystemPrompt },
-              { role: "user", content: safeUserPrompt },
-            ],
-          }),
-        },
-        OPENAI_TIMEOUT_MS
-      );
-      const rawText = await response.text();
-      let data = {};
-      try {
-        data = rawText ? JSON.parse(rawText) : {};
-      } catch {
-        throw new Error(`OpenAI SEO response was not valid JSON: ${rawText.slice(0, 400)}`);
-      }
-      if (!response.ok) {
-        const message =
-          data?.error?.message ||
-          `OpenAI SEO request failed with status ${response.status}`;
-        const error = new Error(message);
-        error.retryable = shouldRetryStatus(response.status);
-        throw error;
-      }
-      return sanitizeSeoContent(data?.choices?.[0]?.message?.content || "");
-    } catch (error) {
-      lastError = error;
-      attempt += 1;
-      const aborted = error?.name === "AbortError";
-      const retryable = aborted || error?.retryable === true;
-      if (!retryable || attempt >= OPENAI_MAX_RETRIES) {
-        if (aborted) {
-          throw new Error(`OpenAI SEO request timed out after ${OPENAI_TIMEOUT_MS}ms`);
-        }
-        throw error;
-      }
-      await sleep(700 * attempt);
-    }
-  }
-  throw lastError || new Error("OpenAI SEO request failed");
-}
-/* =========================
-   CANDIDATE PIPELINE
-========================= */
-function appendPassDirection(basePrompt, extraDirections = []) {
-  const prompt = ensurePrompt(basePrompt, "Base prompt");
-  const additions = (extraDirections || [])
-    .map((line) => String(line || "").trim())
-    .filter(Boolean);
-  if (!additions.length) return prompt;
-  return `${prompt}
-Additional pass direction:
-${additions.map((line) => `- ${line}`).join("\n")}`;
-}
-function getContextStrength(context) {
-  let strength = 0;
-  if (context?.bestCoinGeckoCoin) strength += 2;
-  if (context?.bestCoinGeckoMarket) strength += 2;
-  if (context?.bestDexPair) strength += 2;
-  if (Array.isArray(context?.trending) && context.trending.length) strength += 1;
-  if (Array.isArray(context?.coinGeckoSearchResults) && context.coinGeckoSearchResults.length) strength += 1;
-  return strength;
-}
-function getInitialPassInputs(systemPrompt, cleanKeyword, baseUserPrompt, context, model = OPENAI_MODEL) {
-  const mode = detectKeywordMode(cleanKeyword);
-  const intent = detectSeoIntent(cleanKeyword);
-  const contextStrength = getContextStrength(context);
-  const modeDirections =
-    mode === "context"
-      ? [
-          "Allow broader crypto explanation where the keyword needs it.",
-          "Keep the explanation tight and structurally useful.",
-          "Do not force every paragraph into verdict language.",
-          "Still make each paragraph clearly separate in role.",
-        ]
-      : mode === "pattern"
-        ? [
-            "Frame this as a recurring crypto pattern, not a one-off isolated claim.",
-            "Keep the pattern language concrete and repeatable.",
-            "Do not drift into vague education or listicle tone.",
-            "Make the final paragraph feel costly and real.",
-          ]
-        : [];
-  const intentDirections =
-    intent === "token_profile" || intent === "coin_profile"
-      ? [
-          "Prioritize asset profile, market footprint, chain fit, utility, liquidity, and adoption where supported.",
-          "Do not flatten the copy into pure scam language if the keyword is broader than risk.",
-        ]
-      : intent === "market_context"
-        ? [
-            "Frame price, market cap, volume, trend, and rotation as structure, not hype.",
-            "Keep this useful for understanding market behavior.",
-          ]
-        : intent === "chain_ecosystem"
-          ? [
-              "Write this through ecosystem depth, builders, liquidity, users, applications, and durable demand.",
-            ]
-          : intent === "category_theme"
-            ? [
-                "Separate category excitement from stronger versus weaker structures inside the theme.",
-              ]
-            : intent === "wallet_security"
-              ? [
-                  "Write this through wallet permissions, signatures, custody boundaries, approvals, and control risk.",
-                ]
-              : intent === "defi_explainer"
-                ? [
-                    "Write this through DeFi mechanics, liquidity pools, slippage, routing, fees, yield, and contract exposure.",
-                  ]
-                : intent === "dex_exchange"
-                  ? [
-                      "Write this through pair quality, listing visibility, liquidity depth, volume, chain context, and data reliability.",
-                    ]
-                  : intent === "comparison"
-                    ? [
-                        "Keep the writing comparative and contrast real tradeoffs without ranking like a listicle.",
-                      ]
-                    : [];
-  const contextDirections =
-    contextStrength >= 2
-      ? [
-          "Use the external context pack when it improves specificity.",
-          "Do not repeat raw numbers too often.",
-          "Blend facts into natural analysis rather than dumping data.",
-          "Keep unsupported risk claims framed as interpretation, not certainty.",
-        ]
-      : [
-          "Context is thin, so stay accurate and avoid invented specifics.",
-          "Use structural crypto logic instead of pretending to know missing facts.",
-        ];
-  return [
-    {
-      systemPrompt,
-      userPrompt: appendPassDirection(baseUserPrompt, [
-        ...modeDirections,
-        ...intentDirections,
-        ...contextDirections,
-        "This is the main one-pass attempt. Make it clean enough to accept without a rewrite.",
-        "Before final output, silently remove any generic SEO sentence.",
-      ]),
-      temperature: model === OPENAI_PREMIUM_MODEL ? 0.28 : 0.34,
-      keyword: cleanKeyword,
-      context,
-      model,
-    },
-    {
-      systemPrompt,
-      userPrompt: appendPassDirection(baseUserPrompt, [
-        ...modeDirections,
-        ...intentDirections,
-        ...contextDirections,
-        "Make the opening sharper and more immediate.",
-        "Push cleaner logic than the base version.",
-        "Keep each paragraph clearly separate in job and texture.",
-        "Cut any sentence that feels like filler.",
-      ]),
-      temperature: model === OPENAI_PREMIUM_MODEL ? 0.38 : 0.46,
-      keyword: cleanKeyword,
-      context,
-      model,
-    },
-    {
-      systemPrompt,
-      userPrompt: appendPassDirection(baseUserPrompt, [
-        ...modeDirections,
-        ...intentDirections,
-        ...contextDirections,
-        "Make paragraph 2 especially strong on mechanics and interaction.",
-        "Make paragraph 3 clearly contrast surface strength with deeper structure.",
-        "Keep the writing grounded and restrained.",
-        "Prefer shorter sentences over smoother ones.",
-      ]),
-      temperature: model === OPENAI_PREMIUM_MODEL ? 0.48 : 0.56,
-      keyword: cleanKeyword,
-      context,
-      model,
-    },
-    {
-      systemPrompt,
-      userPrompt: appendPassDirection(baseUserPrompt, [
-        ...modeDirections,
-        ...intentDirections,
-        ...contextDirections,
-        "Write this like a premium crypto analyst, not an SEO writer.",
-        "Every paragraph must earn its space.",
-        "If a sentence sounds generic, replace it with structural language.",
-        "Make the finish feel hard to ignore.",
-      ]),
-      temperature: model === OPENAI_PREMIUM_MODEL ? 0.58 : 0.66,
-      keyword: cleanKeyword,
-      context,
-      model,
-    },
-  ].slice(0, MAX_INITIAL_PASSES);
-}
-function buildRewriteSeed(bestCandidate, cleanKeyword, allCandidates = []) {
-  if (bestCandidate?.content) {
-    const topCandidates = selectTopCandidates(allCandidates, cleanKeyword, 2);
-    if (topCandidates.length >= 2) {
-      return topCandidates
-        .map((candidate, index) => {
-          const label = index === 0 ? "Stronger draft" : "Alternate draft";
-          return `${label}:
-${sanitizeSeoContent(candidate.content)}`;
-        })
-        .join("\n\n");
-    }
-    return sanitizeSeoContent(bestCandidate.content);
-  }
-  return `Write a fresh version for "${cleanKeyword}" with stronger structure, sharper framing, clearer paragraph roles, less generic SEO tone, tighter paragraph lengths, better contrast in paragraph 3, and harder-edged ending logic.`;
-}
-function getRewritePassInputs(systemPrompt, cleanKeyword, rewriteSeed, context, model = OPENAI_MODEL) {
-  const mode = detectKeywordMode(cleanKeyword);
-  const intent = detectSeoIntent(cleanKeyword);
-  const baseRewritePrompt = buildSeoRewritePrompt(cleanKeyword, rewriteSeed, context);
-  const contextStrength = getContextStrength(context);
-  const modeDirections =
-    mode === "context"
-      ? [
-          "Allow broader explanatory framing if the keyword needs it.",
-          "Keep the structure compressed and useful.",
-          "Do not force verdict language if explanation is more natural.",
-        ]
-      : mode === "pattern"
-        ? [
-            "Keep this anchored in recurring crypto patterns.",
-            "Do not make it sound like one isolated case unless the keyword clearly implies that.",
-            "Keep the pattern language concrete and sharp.",
-          ]
-        : [];
-  const intentDirections =
-    intent === "token_profile" || intent === "coin_profile"
-      ? [
-          "Preserve profile clarity, market footprint, adoption, and structure instead of collapsing into pure risk copy.",
-        ]
-      : intent === "market_context" || intent === "category_theme" || intent === "chain_ecosystem"
-        ? [
-            "Preserve market or ecosystem logic and do not over-force token-risk vocabulary.",
-          ]
-        : intent === "wallet_security"
-          ? [
-              "Preserve wallet-security logic and do not drift into generic investing advice.",
-            ]
-          : intent === "defi_explainer" || intent === "dex_exchange"
-            ? [
-                "Preserve DeFi/exchange mechanics and do not flatten the copy into generic token safety language.",
-              ]
-            : intent === "comparison"
-              ? [
-                  "Keep the draft comparative and do not flatten both sides into the same generic paragraphing.",
-                ]
-              : [];
-  const contextDirections =
-    contextStrength >= 2
-      ? [
-          "Keep supported specifics that improve credibility.",
-          "Cut any fake specificity or anything not grounded in the context pack.",
-        ]
-      : ["Context is thin, so prefer stronger structure over fake detail."];
-  const prompts = [
-    appendPassDirection(baseRewritePrompt, [
-      ...modeDirections,
-      ...intentDirections,
-      ...contextDirections,
-      "Keep the rewrite brutally tight.",
-      "Do not allow any soft opening.",
-      "Paragraph 1 must sound immediate.",
-      "Paragraph 3 must contain contrast.",
-    ]),
-    appendPassDirection(baseRewritePrompt, [
-      ...modeDirections,
-      ...intentDirections,
-      ...contextDirections,
-      "If any paragraph overlaps with another, replace it with new information.",
-      "Keep all four paragraphs clearly separated by role.",
-      "Do not let paragraph 4 drift into advice.",
-      "Keep all sentences compact.",
-    ]),
-    appendPassDirection(baseRewritePrompt, [
-      ...modeDirections,
-      ...intentDirections,
-      ...contextDirections,
-      "Make the rewrite feel less templated and more naturally written.",
-      "Avoid mechanical transitions.",
-      "Prefer one sharper insight over another broad explanation.",
-      "Cut any sentence that feels padded.",
-    ]),
-  ].slice(0, MAX_REWRITE_PASSES);
-  return prompts.map((userPrompt, index) => ({
-    systemPrompt,
-    userPrompt,
-    temperature:
-      model === OPENAI_PREMIUM_MODEL
-        ? index === 0
-          ? 0.42
-          : index === 1
-            ? 0.50
-            : 0.58
-        : index === 0
-          ? 0.48
-          : index === 1
-            ? 0.56
-            : 0.64,
-    keyword: cleanKeyword,
-    rewriteIndex: index,
-    context,
-    model,
-  }));
-}
-async function buildCandidate({ systemPrompt, userPrompt, temperature, keyword, context, model }) {
-  const modelUsed = model || OPENAI_MODEL;
-  const raw = await requestSeoContent({
-    systemPrompt,
-    userPrompt,
-    temperature,
-    model: modelUsed,
-  });
-  if (!raw) return null;
-  const finalized = finalizeSeoCandidate(raw, keyword);
-  if (finalized) {
-    const content = sanitizeSeoContent(finalized);
-    return {
-      content,
-      score: scoreSeoContent(content, keyword),
-      strictPassed: true,
-      temperature,
-      contextApplied: Boolean(context?.contextSummary),
-      contextStrength: getContextStrength(context),
-      modelUsed,
-    };
-  }
-  const shape = evaluateContentShape(raw, keyword);
-  if (!shape.valid) return null;
-  return {
-    content: shape.sanitized,
-    score: Math.max(1, (shape.adjustedScore || shape.score) - 2),
-    strictPassed: false,
-    temperature,
-    contextApplied: Boolean(context?.contextSummary),
-    contextStrength: getContextStrength(context),
-    modelUsed,
-  };
-}
-async function collectCandidateSeries({ inputs, cleanKeyword, label }) {
-  const candidates = [];
-  for (const input of inputs) {
-    try {
-      const candidate = await buildCandidate(input);
-      if (!candidate) continue;
-      candidates.push(candidate);
-      if (isEarlyAcceptCandidate(candidate, cleanKeyword)) {
-        break;
-      }
-      if (isStrongEnoughWithoutRewrite(candidate, cleanKeyword)) {
-        break;
-      }
-    } catch (error) {
-      const descriptor =
-        label === "initial"
-          ? `temp ${input.temperature}`
-          : `rewrite ${input.rewriteIndex}`;
-      console.error(
-        `[SEO] ${label === "initial" ? "Initial" : "Rewrite"} candidate failed for "${cleanKeyword}" at ${descriptor}: ${error.message}`
-      );
-    }
-  }
-  return candidates;
-}
-/* =========================
-   GENERATION ENTRY
-========================= */
-async function runSeoGenerationPipeline(cleanKeyword, context, model = OPENAI_MODEL) {
-  const systemPrompt = ensurePrompt(
-    buildSeoSystemPrompt(cleanKeyword, context),
-    "System prompt"
+
+function isQuestionStyleKeyword(lower) {
+  return (
+    lower.startsWith("is ") ||
+    lower.startsWith("can ") ||
+    lower.startsWith("should ") ||
+    lower.startsWith("could ") ||
+    lower.startsWith("would ") ||
+    lower.startsWith("do ") ||
+    lower.startsWith("does ") ||
+    lower.startsWith("did ")
   );
-  const baseUserPrompt = ensurePrompt(
-    buildSeoUserPrompt(cleanKeyword, context),
-    "User prompt"
-  );
-  const initialCandidates = await collectCandidateSeries({
-    inputs: getInitialPassInputs(systemPrompt, cleanKeyword, baseUserPrompt, context, model),
-    cleanKeyword,
-    label: "initial",
-  });
-  let bestCandidate = selectBestCandidate(initialCandidates, cleanKeyword);
-  if (isEarlyAcceptCandidate(bestCandidate, cleanKeyword)) {
-    return bestCandidate;
-  }
-  if (isStrongEnoughWithoutRewrite(bestCandidate, cleanKeyword)) {
-    return bestCandidate;
-  }
-  if (MAX_REWRITE_PASSES <= 0) {
-    return bestCandidate;
-  }
-  const rewriteSeed = buildRewriteSeed(bestCandidate, cleanKeyword, initialCandidates);
-  const rewriteCandidates = await collectCandidateSeries({
-    inputs: getRewritePassInputs(systemPrompt, cleanKeyword, rewriteSeed, context, model),
-    cleanKeyword,
-    label: "rewrite",
-  });
-  const allCandidates = [...initialCandidates, ...rewriteCandidates];
-  return selectBestCandidate(allCandidates, cleanKeyword);
 }
-async function generateSeoBestPass(keyword) {
-  const cleanKeyword = normalizeSeoKeyword(keyword);
-  if (!cleanKeyword) {
-    throw new Error("Keyword is required for Token Risk SEO generation");
+
+function humanizeKeyword(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+
+  if (!raw) return "This Token";
+
+  if ((lower.includes("i bought") || lower.includes("bought")) && (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell"))) {
+    return "Bought a Token but Can’t Sell It";
   }
-  const cacheKey = String(stableHash(cleanKeyword));
-  if (ENABLE_OUTPUT_CACHE && outputCache.has(cacheKey)) {
-    return outputCache.get(cacheKey);
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return "Can’t Sell a Token You Bought";
   }
-  const context = await fetchCryptoContext(cleanKeyword);
-  let bestCandidate = await runSeoGenerationPipeline(cleanKeyword, context, OPENAI_MODEL);
-  let shape = bestCandidate?.content
-    ? evaluateContentShape(bestCandidate.content, cleanKeyword)
-    : null;
-  const needsPremiumFallback =
-    ENABLE_PREMIUM_FALLBACK &&
-    OPENAI_PREMIUM_MODEL &&
-    OPENAI_PREMIUM_MODEL !== OPENAI_MODEL &&
-    (!bestCandidate || !shape?.premium || (shape.adjustedScore || 0) < MIN_STRONG_SCORE + 2);
-  if (needsPremiumFallback) {
-    const premiumCandidate = await runSeoGenerationPipeline(
-      cleanKeyword,
-      context,
-      OPENAI_PREMIUM_MODEL
-    );
-    const premiumScore = premiumCandidate
-      ? scoreCandidateShape(premiumCandidate, cleanKeyword)
-      : -1;
-    const baseScore = bestCandidate ? scoreCandidateShape(bestCandidate, cleanKeyword) : -1;
-    if (premiumCandidate && premiumScore > baseScore) {
-      bestCandidate = premiumCandidate;
-      shape = evaluateContentShape(bestCandidate.content, cleanKeyword);
-    }
+
+  if (lower.startsWith("did i get scammed")) {
+    return "Did You Get Scammed by This Token";
   }
-  if (!bestCandidate) {
-    throw new Error(`No usable SEO candidate generated for "${cleanKeyword}"`);
+
+  if (lower.startsWith("should i buy")) {
+    return "Should You Buy This Token";
   }
-  shape = evaluateContentShape(bestCandidate.content, cleanKeyword);
-  if (!shape.usable) {
-    throw new Error(
-      `Top SEO candidate failed usable-shape validation for "${cleanKeyword}"`
-    );
+
+  if (lower.startsWith("is this token safe")) {
+    return "Is This Token Safe";
   }
-  const finalContent = shape.sanitized;
-  if (ENABLE_OUTPUT_CACHE) {
-    outputCache.set(cacheKey, finalContent);
+
+  if (lower.startsWith("is this token legit")) {
+    return "Is This Token Legit";
   }
-  return finalContent;
+
+  if (lower.startsWith("is this ")) {
+    const rest = raw.replace(/^is this\s+/i, "").replace(/\?+$/g, "").trim();
+    return rest ? `Is This ${smartTitleCase(rest)}` : "Is This Token Safe";
+  }
+
+  if (lower.startsWith("is ") && lower.includes(" safe")) {
+    const rest = raw.replace(/^is\s+/i, "").replace(/\s+safe.*$/i, "").trim();
+    return `${smartTitleCase(rest || "This Token")} Safe`;
+  }
+
+  if (lower.startsWith("is ") && lower.includes(" legit")) {
+    const rest = raw.replace(/^is\s+/i, "").replace(/\s+legit.*$/i, "").trim();
+    return `${smartTitleCase(rest || "This Token")} Legit`;
+  }
+
+  if (lower.includes("rug pull")) return "Possible Token Rug Pull";
+  if (lower.includes("honeypot")) return "Possible Honeypot Token";
+  if (lower.includes("airdrop") || lower.includes("claim")) return "Token Claim or Airdrop";
+  if (lower.includes("wallet") || lower.includes("approve") || lower.includes("connect")) return "Wallet Connection Risk";
+  if (lower.includes("meme") || lower.includes("memecoin")) return "Meme Token Risk";
+  if (lower.includes("new") && lower.includes("token")) return "New Token Risk";
+  if (lower.includes("trending") && lower.includes("token")) return "Trending Token Risk";
+
+  return displayCleanKeyword(raw) || smartTitleCase(raw) || "This Token";
 }
-/* =========================
-   TEMPLATE OUTPUT
-========================= */
-function buildSeoTemplateFieldsFromContent(content, keyword = "") {
-  const paragraphs = splitSeoParagraphs(content);
-  const intent = detectSeoIntent(keyword);
-  const subhead = DEFAULT_SUBHEAD_BY_INTENT[intent] || "Crypto Breakdown";
-  return {
-    AI_HOOK: paragraphs[0] || "",
-    AI_BODY_1: paragraphs[1] || "",
-    AI_BODY_2: "",
-    AI_SUBHEAD: subhead,
-    AI_BODY_3: paragraphs[2] || "",
-    AI_LIST: "",
-    AI_CLOSE: paragraphs[3] || "",
-  };
+
+function buildHeroTitle(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+  const phrase = humanizeKeyword(raw);
+
+  if (!raw) {
+    return "Check Token Risk Before You Buy, Connect, or Trust the Hype";
+  }
+
+  if (isGuidanceStyleKeyword(lower)) {
+    return `${displayKeyword(raw)}: Token Risk Signs to Check First`;
+  }
+
+  if (phrase.endsWith("?")) {
+    return `${phrase} Check the Risk Before You Act`;
+  }
+
+  return `${phrase}? Check the Risk Before You Act`;
 }
-async function generateSeoTemplateFields(keyword) {
-  const content = await generateSeoBestPass(keyword);
-  return buildSeoTemplateFieldsFromContent(content, keyword);
+
+function buildHeroSubheading(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return "A token that is hard to sell can point to liquidity problems, sell restrictions, contract controls, or weak exit conditions. Use the checker below before buying more, connecting a wallet, or trusting the setup.";
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return "Wallet prompts and claim pages can look normal while hiding risky permissions or weak verification. Paste the token address, claim page, or approval text below before connecting.";
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return "Meme tokens can move fast, but speed does not prove safety. Check the address, liquidity, holder setup, and exit conditions before buying into momentum.";
+  }
+
+  if (containsAny(lower, ["contract", "address", "solana", "ethereum", "base", "bnb"])) {
+    return "The exact address matters more than the name. Use the checker below to review the token, contract, Dexscreener link, or project copy before you buy or connect.";
+  }
+
+  return "Some token setups look active at first but become risky when liquidity, exits, contract control, wallet exposure, and buy pressure are checked together. Paste the address, Dexscreener link, or project copy below before you act.";
 }
-export {
-  normalizeSeoKeyword,
-  sanitizeSeoContent,
-  splitSeoParagraphs,
-  seoWordCount,
-  paragraphWordCount,
-  splitSentences,
-  countSentences,
-  stableHash,
-  detectSeoIntent,
-  classifySeoKeyword,
-  extractKeywordSignals,
-  fetchCryptoContext,
-  buildSeoVariationHint,
-  buildSeoSystemPrompt,
-  buildSeoUserPrompt,
-  buildSeoRewritePrompt,
-  looksGenericSeo,
-  hasNarrativeMarkers,
-  hasSeoFormattingProblems,
-  finalizeSeoCandidate,
-  scoreSeoContent,
-  isUsableSeoCandidate,
-  generateSeoBestPass,
-  generateSeoTemplateFields,
-  buildSeoTemplateFieldsFromContent,
-};
+
+function buildContentHeading(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+  const phrase = humanizeKeyword(raw);
+
+  if (!raw) return "What Token Risk Usually Looks Like";
+
+  if (isGuidanceStyleKeyword(lower)) {
+    return displayKeyword(raw);
+  }
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return "Why a Token Can Become Hard to Sell";
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return "How Wallet and Claim Risks Usually Show Up";
+  }
+
+  return `${phrase}: What to Check Before You Trust It`;
+}
+
+function buildContentBridge(keywordRaw) {
+  const raw = normalizeKeyword(keywordRaw);
+  const lower = raw.toLowerCase();
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return "When a token cannot be sold cleanly, the issue is usually structural, not cosmetic. Liquidity, sell rules, contract control, routing, and market depth all matter before you decide what to do next.";
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return "Before connecting a wallet or approving anything, slow the flow down. The safest review starts with the destination, requested permission, token address, and reason the action is being pushed now.";
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return "Fast attention can make a weak token feel validated. This page helps separate momentum from structure before you buy into a chart, post, or claim that may not hold up.";
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return "Use the checker above to review the token address, contract details, project copy, launch page, wallet prompt, and hype pattern before you buy, connect, or take action.";
+  }
+
+  return "Use the checker above before you buy, connect a wallet, approve anything, or act on hype. A token can look active on the surface while liquidity, exits, ownership, or wallet exposure tell a different story.";
+}
+
+function setKeywordHeadings() {
+  const keywordRaw = (RAW_KEYWORD || "this token").trim();
+
+  document.getElementById("heroKeyword").textContent = buildHeroTitle(keywordRaw);
+  document.getElementById("heroSubheading").textContent = buildHeroSubheading(keywordRaw);
+  document.getElementById("contentHeading").textContent = buildContentHeading(keywordRaw);
+  document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
+}
+
+
