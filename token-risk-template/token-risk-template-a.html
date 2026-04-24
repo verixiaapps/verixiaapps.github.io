@@ -2093,18 +2093,29 @@ function splitSeoParagraphsFromHtml(seoContent) {
     .map(p => p.textContent.trim())
     .filter(Boolean);
 
-  if (paragraphs.length) return paragraphs;
+  if (!paragraphs.length) {
+    paragraphs = parser.innerHTML
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/div>/gi, "\n\n")
+      .replace(/<\/section>/gi, "\n\n")
+      .replace(/<h[1-6][^>]*>.*?<\/h[1-6]>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .split(/\n\s*\n/)
+      .map(p => p.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+  }
 
-  paragraphs = parser.innerHTML
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/div>/gi, "\n\n")
-    .replace(/<\/section>/gi, "\n\n")
-    .replace(/<[^>]+>/g, "")
-    .split(/\n\s*\n/)
-    .map(p => p.replace(/\s+/g, " ").trim())
-    .filter(Boolean);
-
-  return paragraphs;
+  return paragraphs
+    .map(p => p
+      .replace(/\*\*/g, "")
+      .replace(/\bguaranteed\b/gi, "possible")
+      .replace(/\bdefinitely a scam\b/gi, "high risk")
+      .replace(/\b100% scam\b/gi, "high risk")
+      .replace(/\s+/g, " ")
+      .trim()
+    )
+    .filter(Boolean)
+    .slice(0, 4);
 }
 
 function buildSeoCardTitles(keywordRaw) {
@@ -2112,36 +2123,36 @@ function buildSeoCardTitles(keywordRaw) {
 
   if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
     return [
-      ["🔐", "Risk setup"],
-      ["🧩", "Permission weakness"],
-      ["🔁", "Repeatable pattern"],
-      ["💥", "Real downside"]
+      ["🔐", "Before you connect"],
+      ["⚠️", "Where the risk hides"],
+      ["🧠", "What to verify"],
+      ["🛑", "Safer next move"]
     ];
   }
 
   if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
     return [
-      ["🪙", "Risk setup"],
-      ["🧩", "Structural weakness"],
-      ["🔁", "Repeatable pattern"],
-      ["💥", "Real downside"]
+      ["🪙", "Why hype is risky"],
+      ["📉", "Where weak tokens break"],
+      ["🧠", "What to check first"],
+      ["🛑", "Safer next move"]
     ];
   }
 
   if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
     return [
-      ["📍", "Risk setup"],
-      ["🧩", "Structural weakness"],
-      ["🔁", "Repeatable pattern"],
-      ["💥", "Real downside"]
+      ["📍", "Address risk"],
+      ["💧", "Liquidity risk"],
+      ["🧠", "Project quality check"],
+      ["🛑", "Safer next move"]
     ];
   }
 
   return [
-    ["⚠️", "Risk setup"],
-    ["🧩", "Structural weakness"],
-    ["🔁", "Repeatable pattern"],
-    ["💥", "Real downside"]
+    ["⚠️", "Why this deserves caution"],
+    ["💧", "What can make it risky"],
+    ["🧠", "What to check first"],
+    ["🛑", "Safer next move"]
   ];
 }
 
@@ -2158,15 +2169,26 @@ function renderSeoContentCards(paragraphs) {
 
   seoContent.innerHTML = `
     <div class="story-stack">
-      ${paragraphs.map((paragraph, index) => `
+      ${paragraphs.map((paragraph, index) => {
+        const text = paragraph
+          .replace(/\bthis token\b/gi, "this setup")
+          .replace(/\bthis project\b/gi, "this setup")
+          .replace(/\bit is important to note that\b/gi, "")
+          .replace(/\bin conclusion\b/gi, "")
+          .replace(/\boverall\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        return `
         <article class="story-card${index === 0 ? " lead" : ""}">
           <div class="story-card-title">
             <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
-            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+            <span>${titles[index] ? titles[index][1] : "What to know"}</span>
           </div>
-          <p>${escapeHtml(paragraph)}</p>
+          <p>${escapeHtml(text)}</p>
         </article>
-      `).join("")}
+      `;
+      }).join("")}
     </div>
   `;
 }
@@ -2282,15 +2304,18 @@ function summaryForRisk(riskClass, summary) {
   if (summary) return summary;
 
   if (riskClass === "high") {
-    return "This token setup shows multiple warning signals. Treat it as high risk until you verify the address, project quality, liquidity, ownership structure, and trading behavior directly.";
+    return "This setup has enough warning signs that you should slow down before buying, connecting, or approving anything. Verify the exact address, liquidity, ownership pattern, project claims, and recent trading behavior before trusting it.";
   }
+
   if (riskClass === "medium") {
-    return "This token setup shows warning signs. Be cautious and verify the address, liquidity, ownership structure, and project claims before you buy or connect.";
+    return "This setup is not clean enough to trust quickly. Review the address, liquidity, holder structure, wallet prompts, and project claims before you buy, connect, or follow hype.";
   }
+
   if (riskClass === "low") {
-    return "This token setup shows fewer obvious warning signals, but you should still verify the address, liquidity, holder structure, and project context before acting.";
+    return "This setup shows fewer obvious warning signs, but that does not make it automatically safe. Confirm the address, liquidity, trading activity, and project context before acting.";
   }
-  return "We could not determine a clear risk level. Treat the token cautiously and verify it through trusted sources before you buy, connect, or approve anything.";
+
+  return "The risk level is unclear from the available information. Treat this as a reason to pause, verify the token through trusted sources, and avoid buying or connecting until the setup makes sense.";
 }
 
 function paylineForRisk(riskClass, payline) {
@@ -3723,4 +3748,4 @@ async function checkout(priceId) {
 </script>
 
 </body>
-</html>
+</html> 
