@@ -3330,3 +3330,691 @@ function hasParagraphRoleShape(text, mode = "risk", intent = "token_risk") {
   }
   return false;
 }
+
+Final block:
+
+function paragraphLengthsAreTight(text) {
+  const paragraphs = getParagraphs(text);
+  if (paragraphs.length !== 4) return false;
+  return paragraphs.every((paragraph) => {
+    const words = paragraphWordCount(paragraph);
+    return words >= 22 && words <= 102;
+  });
+}
+function sentenceShapeIsTight(text) {
+  const paragraphs = getParagraphs(text);
+  if (paragraphs.length !== 4) return false;
+  return paragraphs.every((paragraph) => {
+    const sentenceCount = countSentences(paragraph);
+    if (sentenceCount < 1 || sentenceCount > 5) return false;
+    const sentences = splitSentences(paragraph);
+    return !sentences.some((sentence) => paragraphWordCount(sentence) > 32);
+  });
+}
+function evaluateContentShape(content, keyword) {
+  const sanitized = sanitizeSeoContent(content);
+  const mode = detectKeywordMode(keyword);
+  const intent = detectSeoIntent(keyword);
+  if (!sanitized) {
+    return {
+      valid: false,
+      usable: false,
+      premium: false,
+      sanitized: "",
+      paragraphCount: 0,
+      startsStrong: false,
+      hasRoleShape: false,
+      tightParagraphs: false,
+      tightSentences: false,
+      hasNarrative: true,
+      isGeneric: true,
+      formattingIssues: true,
+      usableByRules: false,
+      score: 0,
+      adjustedScore: 0,
+      mode,
+      intent,
+    };
+  }
+  const paragraphs = splitSeoParagraphs(sanitized);
+  const seoClass = classifySeoKeyword(keyword);
+  const profile = getValidationProfile(keyword);
+  const startsStrong = firstParagraphStartsStrong(sanitized, mode, intent);
+  const hasRoleShape = hasParagraphRoleShape(sanitized, mode, intent);
+  const tightParagraphs = paragraphLengthsAreTight(sanitized);
+  const tightSentences = sentenceShapeIsTight(sanitized);
+  const hasNarrative = hasNarrativeMarkers(sanitized);
+  const isGeneric = looksGenericSeo(sanitized);
+  const formattingIssues = hasSeoFormattingProblems(sanitized, keyword);
+  const usableByRules = isUsableSeoCandidate(sanitized, keyword);
+  const score = scoreSeoContent(sanitized, keyword);
+  const penalty = getValidationPenalty(sanitized, paragraphs, keyword, seoClass, profile);
+  const adjustedScore = clamp(score - penalty, 0, 100);
+  const usable = Boolean(
+    !hasNarrative &&
+      !formattingIssues &&
+      paragraphs.length === 4 &&
+      tightParagraphs &&
+      tightSentences &&
+      usableByRules &&
+      adjustedScore >= MIN_STRONG_SCORE
+  );
+  const premium = Boolean(
+    usable &&
+      startsStrong &&
+      (hasRoleShape || adjustedScore >= EARLY_ACCEPT_SCORE) &&
+      adjustedScore >= MIN_STRONG_SCORE + 2
+  );
+  return {
+    valid: usable,
+    usable,
+    premium,
+    sanitized,
+    paragraphCount: paragraphs.length,
+    startsStrong,
+    hasRoleShape,
+    tightParagraphs,
+    tightSentences,
+    hasNarrative,
+    isGeneric,
+    formattingIssues,
+    usableByRules,
+    score,
+    adjustedScore,
+    mode,
+    intent,
+  };
+}
+function scoreCandidateShape(candidate, keyword) {
+  if (!candidate?.content) return -1;
+  const shape = evaluateContentShape(candidate.content, keyword);
+  if (!shape.valid) return -1;
+  let score = shape.adjustedScore || shape.score;
+  if (candidate.strictPassed) score += 7;
+  if (shape.startsStrong) score += 5;
+  if (shape.hasRoleShape) score += 5;
+  if (shape.tightParagraphs) score += 3;
+  if (shape.tightSentences) score += 3;
+  if (shape.premium) score += 7;
+  if (candidate.contextApplied) score += 3;
+  if (candidate.contextStrength >= 2) score += 3;
+  if (candidate.modelUsed === OPENAI_PREMIUM_MODEL) score += 2;
+  return score;
+}
+function sortCandidates(candidates, keyword) {
+  return [...(candidates || [])]
+    .filter(Boolean)
+    .sort((a, b) => scoreCandidateShape(b, keyword) - scoreCandidateShape(a, keyword));
+}
+function selectBestCandidate(candidates, keyword) {
+  const sorted = sortCandidates(candidates, keyword);
+  return sorted[0] || null;
+}
+function selectTopCandidates(candidates, keyword, limit = 2) {
+  return sortCandidates(candidates, keyword).slice(0, limit);
+}
+function isEarlyAcceptCandidate(candidate, keyword) {
+  if (!candidate?.content) return false;
+  const shape = evaluateContentShape(candidate.content, keyword);
+  return Boolean(
+    candidate.strictPassed &&
+      candidate.score >= EARLY_ACCEPT_SCORE &&
+      shape.premium
+  );
+}
+function isStrongEnoughWithoutRewrite(candidate, keyword) {
+  if (!candidate?.content) return false;
+  const shape = evaluateContentShape(candidate.content, keyword);
+  return Boolean(
+    shape.usable &&
+      shape.adjustedScore >= MIN_STRONG_SCORE + 3 &&
+      shape.startsStrong &&
+      (shape.hasRoleShape || shape.adjustedScore >= EARLY_ACCEPT_SCORE)
+  );
+}
+/* =========================
+   OPENAI CALL
+========================= */
+function shouldRetryStatus(status) {
+  return (
+    status === 408 ||
+    status === 409 ||
+    status === 425 ||
+    status === 429 ||
+    status >= 500
+  );
+}
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+async function requestSeoContent({ systemPrompt, userPrompt, temperature, model }) {
+  ensureOpenAiConfig();
+  const safeSystemPrompt = ensurePrompt(systemPrompt, "System prompt");
+  const safeUserPrompt = ensurePrompt(userPrompt, "User prompt");
+  const selectedModel = model || OPENAI_MODEL;
+  let attempt = 0;
+  let lastError = null;
+  while (attempt < OPENAI_MAX_RETRIES) {
+    try {
+      const response = await fetchWithTimeout(
+        OPENAI_API_URL,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            temperature,
+            max_tokens: OPENAI_MAX_TOKENS,
+            messages: [
+              { role: "system", content: safeSystemPrompt },
+              { role: "user", content: safeUserPrompt },
+            ],
+          }),
+        },
+        OPENAI_TIMEOUT_MS
+      );
+      const rawText = await response.text();
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        throw new Error(`OpenAI SEO response was not valid JSON: ${rawText.slice(0, 400)}`);
+      }
+      if (!response.ok) {
+        const message =
+          data?.error?.message ||
+          `OpenAI SEO request failed with status ${response.status}`;
+        const error = new Error(message);
+        error.retryable = shouldRetryStatus(response.status);
+        throw error;
+      }
+      return sanitizeSeoContent(data?.choices?.[0]?.message?.content || "");
+    } catch (error) {
+      lastError = error;
+      attempt += 1;
+      const aborted = error?.name === "AbortError";
+      const retryable = aborted || error?.retryable === true;
+      if (!retryable || attempt >= OPENAI_MAX_RETRIES) {
+        if (aborted) {
+          throw new Error(`OpenAI SEO request timed out after ${OPENAI_TIMEOUT_MS}ms`);
+        }
+        throw error;
+      }
+      await sleep(700 * attempt);
+    }
+  }
+  throw lastError || new Error("OpenAI SEO request failed");
+}
+/* =========================
+   CANDIDATE PIPELINE
+========================= */
+function appendPassDirection(basePrompt, extraDirections = []) {
+  const prompt = ensurePrompt(basePrompt, "Base prompt");
+  const additions = (extraDirections || [])
+    .map((line) => String(line || "").trim())
+    .filter(Boolean);
+  if (!additions.length) return prompt;
+  return `${prompt}
+Additional pass direction:
+${additions.map((line) => `- ${line}`).join("\n")}`;
+}
+function getContextStrength(context) {
+  let strength = 0;
+  if (context?.bestCoinGeckoCoin) strength += 2;
+  if (context?.bestCoinGeckoMarket) strength += 2;
+  if (context?.bestDexPair) strength += 2;
+  if (Array.isArray(context?.trending) && context.trending.length) strength += 1;
+  if (Array.isArray(context?.coinGeckoSearchResults) && context.coinGeckoSearchResults.length) strength += 1;
+  return strength;
+}
+function getInitialPassInputs(systemPrompt, cleanKeyword, baseUserPrompt, context, model = OPENAI_MODEL) {
+  const mode = detectKeywordMode(cleanKeyword);
+  const intent = detectSeoIntent(cleanKeyword);
+  const contextStrength = getContextStrength(context);
+  const modeDirections =
+    mode === "context"
+      ? [
+          "Allow broader crypto explanation where the keyword needs it.",
+          "Keep the explanation tight and structurally useful.",
+          "Do not force every paragraph into verdict language.",
+          "Still make each paragraph clearly separate in role.",
+        ]
+      : mode === "pattern"
+        ? [
+            "Frame this as a recurring crypto pattern, not a one-off isolated claim.",
+            "Keep the pattern language concrete and repeatable.",
+            "Do not drift into vague education or listicle tone.",
+            "Make the final paragraph feel costly and real.",
+          ]
+        : [];
+  const intentDirections =
+    intent === "token_profile" || intent === "coin_profile"
+      ? [
+          "Prioritize asset profile, market footprint, chain fit, utility, liquidity, and adoption where supported.",
+          "Do not flatten the copy into pure scam language if the keyword is broader than risk.",
+        ]
+      : intent === "market_context"
+        ? [
+            "Frame price, market cap, volume, trend, and rotation as structure, not hype.",
+            "Keep this useful for understanding market behavior.",
+          ]
+        : intent === "chain_ecosystem"
+          ? [
+              "Write this through ecosystem depth, builders, liquidity, users, applications, and durable demand.",
+            ]
+          : intent === "category_theme"
+            ? [
+                "Separate category excitement from stronger versus weaker structures inside the theme.",
+              ]
+            : intent === "wallet_security"
+              ? [
+                  "Write this through wallet permissions, signatures, custody boundaries, approvals, and control risk.",
+                ]
+              : intent === "defi_explainer"
+                ? [
+                    "Write this through DeFi mechanics, liquidity pools, slippage, routing, fees, yield, and contract exposure.",
+                  ]
+                : intent === "dex_exchange"
+                  ? [
+                      "Write this through pair quality, listing visibility, liquidity depth, volume, chain context, and data reliability.",
+                    ]
+                  : intent === "comparison"
+                    ? [
+                        "Keep the writing comparative and contrast real tradeoffs without ranking like a listicle.",
+                      ]
+                    : [];
+  const contextDirections =
+    contextStrength >= 2
+      ? [
+          "Use the external context pack when it improves specificity.",
+          "Do not repeat raw numbers too often.",
+          "Blend facts into natural analysis rather than dumping data.",
+          "Keep unsupported risk claims framed as interpretation, not certainty.",
+        ]
+      : [
+          "Context is thin, so stay accurate and avoid invented specifics.",
+          "Use structural crypto logic instead of pretending to know missing facts.",
+        ];
+  return [
+    {
+      systemPrompt,
+      userPrompt: appendPassDirection(baseUserPrompt, [
+        ...modeDirections,
+        ...intentDirections,
+        ...contextDirections,
+        "This is the main one-pass attempt. Make it clean enough to accept without a rewrite.",
+        "Before final output, silently remove any generic SEO sentence.",
+      ]),
+      temperature: model === OPENAI_PREMIUM_MODEL ? 0.28 : 0.34,
+      keyword: cleanKeyword,
+      context,
+      model,
+    },
+    {
+      systemPrompt,
+      userPrompt: appendPassDirection(baseUserPrompt, [
+        ...modeDirections,
+        ...intentDirections,
+        ...contextDirections,
+        "Make the opening sharper and more immediate.",
+        "Push cleaner logic than the base version.",
+        "Keep each paragraph clearly separate in job and texture.",
+        "Cut any sentence that feels like filler.",
+      ]),
+      temperature: model === OPENAI_PREMIUM_MODEL ? 0.38 : 0.46,
+      keyword: cleanKeyword,
+      context,
+      model,
+    },
+    {
+      systemPrompt,
+      userPrompt: appendPassDirection(baseUserPrompt, [
+        ...modeDirections,
+        ...intentDirections,
+        ...contextDirections,
+        "Make paragraph 2 especially strong on mechanics and interaction.",
+        "Make paragraph 3 clearly contrast surface strength with deeper structure.",
+        "Keep the writing grounded and restrained.",
+        "Prefer shorter sentences over smoother ones.",
+      ]),
+      temperature: model === OPENAI_PREMIUM_MODEL ? 0.48 : 0.56,
+      keyword: cleanKeyword,
+      context,
+      model,
+    },
+    {
+      systemPrompt,
+      userPrompt: appendPassDirection(baseUserPrompt, [
+        ...modeDirections,
+        ...intentDirections,
+        ...contextDirections,
+        "Write this like a premium crypto analyst, not an SEO writer.",
+        "Every paragraph must earn its space.",
+        "If a sentence sounds generic, replace it with structural language.",
+        "Make the finish feel hard to ignore.",
+      ]),
+      temperature: model === OPENAI_PREMIUM_MODEL ? 0.58 : 0.66,
+      keyword: cleanKeyword,
+      context,
+      model,
+    },
+  ].slice(0, MAX_INITIAL_PASSES);
+}
+function buildRewriteSeed(bestCandidate, cleanKeyword, allCandidates = []) {
+  if (bestCandidate?.content) {
+    const topCandidates = selectTopCandidates(allCandidates, cleanKeyword, 2);
+    if (topCandidates.length >= 2) {
+      return topCandidates
+        .map((candidate, index) => {
+          const label = index === 0 ? "Stronger draft" : "Alternate draft";
+          return `${label}:
+${sanitizeSeoContent(candidate.content)}`;
+        })
+        .join("\n\n");
+    }
+    return sanitizeSeoContent(bestCandidate.content);
+  }
+  return `Write a fresh version for "${cleanKeyword}" with stronger structure, sharper framing, clearer paragraph roles, less generic SEO tone, tighter paragraph lengths, better contrast in paragraph 3, and harder-edged ending logic.`;
+}
+function getRewritePassInputs(systemPrompt, cleanKeyword, rewriteSeed, context, model = OPENAI_MODEL) {
+  const mode = detectKeywordMode(cleanKeyword);
+  const intent = detectSeoIntent(cleanKeyword);
+  const baseRewritePrompt = buildSeoRewritePrompt(cleanKeyword, rewriteSeed, context);
+  const contextStrength = getContextStrength(context);
+  const modeDirections =
+    mode === "context"
+      ? [
+          "Allow broader explanatory framing if the keyword needs it.",
+          "Keep the structure compressed and useful.",
+          "Do not force verdict language if explanation is more natural.",
+        ]
+      : mode === "pattern"
+        ? [
+            "Keep this anchored in recurring crypto patterns.",
+            "Do not make it sound like one isolated case unless the keyword clearly implies that.",
+            "Keep the pattern language concrete and sharp.",
+          ]
+        : [];
+  const intentDirections =
+    intent === "token_profile" || intent === "coin_profile"
+      ? [
+          "Preserve profile clarity, market footprint, adoption, and structure instead of collapsing into pure risk copy.",
+        ]
+      : intent === "market_context" || intent === "category_theme" || intent === "chain_ecosystem"
+        ? [
+            "Preserve market or ecosystem logic and do not over-force token-risk vocabulary.",
+          ]
+        : intent === "wallet_security"
+          ? [
+              "Preserve wallet-security logic and do not drift into generic investing advice.",
+            ]
+          : intent === "defi_explainer" || intent === "dex_exchange"
+            ? [
+                "Preserve DeFi/exchange mechanics and do not flatten the copy into generic token safety language.",
+              ]
+            : intent === "comparison"
+              ? [
+                  "Keep the draft comparative and do not flatten both sides into the same generic paragraphing.",
+                ]
+              : [];
+  const contextDirections =
+    contextStrength >= 2
+      ? [
+          "Keep supported specifics that improve credibility.",
+          "Cut any fake specificity or anything not grounded in the context pack.",
+        ]
+      : ["Context is thin, so prefer stronger structure over fake detail."];
+  const prompts = [
+    appendPassDirection(baseRewritePrompt, [
+      ...modeDirections,
+      ...intentDirections,
+      ...contextDirections,
+      "Keep the rewrite brutally tight.",
+      "Do not allow any soft opening.",
+      "Paragraph 1 must sound immediate.",
+      "Paragraph 3 must contain contrast.",
+    ]),
+    appendPassDirection(baseRewritePrompt, [
+      ...modeDirections,
+      ...intentDirections,
+      ...contextDirections,
+      "If any paragraph overlaps with another, replace it with new information.",
+      "Keep all four paragraphs clearly separated by role.",
+      "Do not let paragraph 4 drift into advice.",
+      "Keep all sentences compact.",
+    ]),
+    appendPassDirection(baseRewritePrompt, [
+      ...modeDirections,
+      ...intentDirections,
+      ...contextDirections,
+      "Make the rewrite feel less templated and more naturally written.",
+      "Avoid mechanical transitions.",
+      "Prefer one sharper insight over another broad explanation.",
+      "Cut any sentence that feels padded.",
+    ]),
+  ].slice(0, MAX_REWRITE_PASSES);
+  return prompts.map((userPrompt, index) => ({
+    systemPrompt,
+    userPrompt,
+    temperature:
+      model === OPENAI_PREMIUM_MODEL
+        ? index === 0
+          ? 0.42
+          : index === 1
+            ? 0.50
+            : 0.58
+        : index === 0
+          ? 0.48
+          : index === 1
+            ? 0.56
+            : 0.64,
+    keyword: cleanKeyword,
+    rewriteIndex: index,
+    context,
+    model,
+  }));
+}
+async function buildCandidate({ systemPrompt, userPrompt, temperature, keyword, context, model }) {
+  const modelUsed = model || OPENAI_MODEL;
+  const raw = await requestSeoContent({
+    systemPrompt,
+    userPrompt,
+    temperature,
+    model: modelUsed,
+  });
+  if (!raw) return null;
+  const finalized = finalizeSeoCandidate(raw, keyword);
+  if (finalized) {
+    const content = sanitizeSeoContent(finalized);
+    return {
+      content,
+      score: scoreSeoContent(content, keyword),
+      strictPassed: true,
+      temperature,
+      contextApplied: Boolean(context?.contextSummary),
+      contextStrength: getContextStrength(context),
+      modelUsed,
+    };
+  }
+  const shape = evaluateContentShape(raw, keyword);
+  if (!shape.valid) return null;
+  return {
+    content: shape.sanitized,
+    score: Math.max(1, (shape.adjustedScore || shape.score) - 2),
+    strictPassed: false,
+    temperature,
+    contextApplied: Boolean(context?.contextSummary),
+    contextStrength: getContextStrength(context),
+    modelUsed,
+  };
+}
+async function collectCandidateSeries({ inputs, cleanKeyword, label }) {
+  const candidates = [];
+  for (const input of inputs) {
+    try {
+      const candidate = await buildCandidate(input);
+      if (!candidate) continue;
+      candidates.push(candidate);
+      if (isEarlyAcceptCandidate(candidate, cleanKeyword)) {
+        break;
+      }
+      if (isStrongEnoughWithoutRewrite(candidate, cleanKeyword)) {
+        break;
+      }
+    } catch (error) {
+      const descriptor =
+        label === "initial"
+          ? `temp ${input.temperature}`
+          : `rewrite ${input.rewriteIndex}`;
+      console.error(
+        `[SEO] ${label === "initial" ? "Initial" : "Rewrite"} candidate failed for "${cleanKeyword}" at ${descriptor}: ${error.message}`
+      );
+    }
+  }
+  return candidates;
+}
+/* =========================
+   GENERATION ENTRY
+========================= */
+async function runSeoGenerationPipeline(cleanKeyword, context, model = OPENAI_MODEL) {
+  const systemPrompt = ensurePrompt(
+    buildSeoSystemPrompt(cleanKeyword, context),
+    "System prompt"
+  );
+  const baseUserPrompt = ensurePrompt(
+    buildSeoUserPrompt(cleanKeyword, context),
+    "User prompt"
+  );
+  const initialCandidates = await collectCandidateSeries({
+    inputs: getInitialPassInputs(systemPrompt, cleanKeyword, baseUserPrompt, context, model),
+    cleanKeyword,
+    label: "initial",
+  });
+  let bestCandidate = selectBestCandidate(initialCandidates, cleanKeyword);
+  if (isEarlyAcceptCandidate(bestCandidate, cleanKeyword)) {
+    return bestCandidate;
+  }
+  if (isStrongEnoughWithoutRewrite(bestCandidate, cleanKeyword)) {
+    return bestCandidate;
+  }
+  if (MAX_REWRITE_PASSES <= 0) {
+    return bestCandidate;
+  }
+  const rewriteSeed = buildRewriteSeed(bestCandidate, cleanKeyword, initialCandidates);
+  const rewriteCandidates = await collectCandidateSeries({
+    inputs: getRewritePassInputs(systemPrompt, cleanKeyword, rewriteSeed, context, model),
+    cleanKeyword,
+    label: "rewrite",
+  });
+  const allCandidates = [...initialCandidates, ...rewriteCandidates];
+  return selectBestCandidate(allCandidates, cleanKeyword);
+}
+async function generateSeoBestPass(keyword) {
+  const cleanKeyword = normalizeSeoKeyword(keyword);
+  if (!cleanKeyword) {
+    throw new Error("Keyword is required for Token Risk SEO generation");
+  }
+  const cacheKey = String(stableHash(cleanKeyword));
+  if (ENABLE_OUTPUT_CACHE && outputCache.has(cacheKey)) {
+    return outputCache.get(cacheKey);
+  }
+  const context = await fetchCryptoContext(cleanKeyword);
+  let bestCandidate = await runSeoGenerationPipeline(cleanKeyword, context, OPENAI_MODEL);
+  let shape = bestCandidate?.content
+    ? evaluateContentShape(bestCandidate.content, cleanKeyword)
+    : null;
+  const needsPremiumFallback =
+    ENABLE_PREMIUM_FALLBACK &&
+    OPENAI_PREMIUM_MODEL &&
+    OPENAI_PREMIUM_MODEL !== OPENAI_MODEL &&
+    (!bestCandidate || !shape?.premium || (shape.adjustedScore || 0) < MIN_STRONG_SCORE + 2);
+  if (needsPremiumFallback) {
+    const premiumCandidate = await runSeoGenerationPipeline(
+      cleanKeyword,
+      context,
+      OPENAI_PREMIUM_MODEL
+    );
+    const premiumScore = premiumCandidate
+      ? scoreCandidateShape(premiumCandidate, cleanKeyword)
+      : -1;
+    const baseScore = bestCandidate ? scoreCandidateShape(bestCandidate, cleanKeyword) : -1;
+    if (premiumCandidate && premiumScore > baseScore) {
+      bestCandidate = premiumCandidate;
+      shape = evaluateContentShape(bestCandidate.content, cleanKeyword);
+    }
+  }
+  if (!bestCandidate) {
+    throw new Error(`No usable SEO candidate generated for "${cleanKeyword}"`);
+  }
+  shape = evaluateContentShape(bestCandidate.content, cleanKeyword);
+  if (!shape.usable) {
+    throw new Error(
+      `Top SEO candidate failed usable-shape validation for "${cleanKeyword}"`
+    );
+  }
+  const finalContent = shape.sanitized;
+  if (ENABLE_OUTPUT_CACHE) {
+    outputCache.set(cacheKey, finalContent);
+  }
+  return finalContent;
+}
+/* =========================
+   TEMPLATE OUTPUT
+========================= */
+function buildSeoTemplateFieldsFromContent(content, keyword = "") {
+  const paragraphs = splitSeoParagraphs(content);
+  const intent = detectSeoIntent(keyword);
+  const subhead = DEFAULT_SUBHEAD_BY_INTENT[intent] || "Crypto Breakdown";
+  return {
+    AI_HOOK: paragraphs[0] || "",
+    AI_BODY_1: paragraphs[1] || "",
+    AI_BODY_2: "",
+    AI_SUBHEAD: subhead,
+    AI_BODY_3: paragraphs[2] || "",
+    AI_LIST: "",
+    AI_CLOSE: paragraphs[3] || "",
+  };
+}
+async function generateSeoTemplateFields(keyword) {
+  const content = await generateSeoBestPass(keyword);
+  return buildSeoTemplateFieldsFromContent(content, keyword);
+}
+export {
+  normalizeSeoKeyword,
+  sanitizeSeoContent,
+  splitSeoParagraphs,
+  seoWordCount,
+  paragraphWordCount,
+  splitSentences,
+  countSentences,
+  stableHash,
+  detectSeoIntent,
+  classifySeoKeyword,
+  extractKeywordSignals,
+  fetchCryptoContext,
+  buildSeoVariationHint,
+  buildSeoSystemPrompt,
+  buildSeoUserPrompt,
+  buildSeoRewritePrompt,
+  looksGenericSeo,
+  hasNarrativeMarkers,
+  hasSeoFormattingProblems,
+  finalizeSeoCandidate,
+  scoreSeoContent,
+  isUsableSeoCandidate,
+  generateSeoBestPass,
+  generateSeoTemplateFields,
+  buildSeoTemplateFieldsFromContent,
+};
