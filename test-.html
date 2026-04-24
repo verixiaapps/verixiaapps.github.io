@@ -1784,4 +1784,412 @@ function setKeywordHeadings() {
   document.getElementById("contentBridge").textContent = buildContentBridge(keywordRaw);
 }
 
+function buildHeroQuickItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return [
+      ["First check", "Do not assume the chart tells the full story. Confirm whether the token can actually be sold cleanly."],
+      ["Main risk", "Sell failures can come from thin liquidity, routing issues, contract controls, or a setup designed to trap buyers."],
+      ["Safest move", "Avoid buying more or connecting deeper until the exit problem is understood."]
+    ];
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return [
+      ["First check", "Verify the claim page, token address, and approval request away from the original source."],
+      ["Main risk", "A small-looking wallet approval can create much larger exposure than the page suggests."],
+      ["Safest move", "Do not connect or approve until the destination and permission still make sense after review."]
+    ];
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return [
+      ["First check", "Verify the exact token address before hype, memes, or screenshots shape the decision."],
+      ["Main risk", "Momentum can make weak liquidity and poor exits feel safer than they are."],
+      ["Safest move", "Slow the buy down until liquidity, holder structure, and exits look real."]
+    ];
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    return [
+      ["First check", "Confirm the exact contract address and source before trusting the token name."],
+      ["Main risk", "Address trust is often extended faster than real project review."],
+      ["Safest move", "Review liquidity, pair behavior, and project claims before buying or connecting."]
+    ];
+  }
+
+  return [
+    ["First check", "Confirm the exact token address before trusting the name, chart, or post."],
+    ["Then review", "Look at liquidity, trading behavior, project claims, wallet prompts, and buy pressure together."],
+    ["Safest move", "Pause before buying, connecting, approving, or reacting to urgency, hype, or social proof."]
+  ];
+}
+
+function renderHeroQuickGrid() {
+  const wrap = document.getElementById("heroQuickGrid");
+  if (!wrap) return;
+
+  const items = buildHeroQuickItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="hero-quick-card">
+      <span class="hero-quick-label">${escapeHtml(item[0])}</span>
+      <span class="hero-quick-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
+function buildQuickChecklistItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return [
+      "Check whether the token has enough real liquidity to exit.",
+      "Look for sell restrictions, routing problems, or abnormal tax behavior.",
+      "Do not buy more just because the chart still looks active.",
+      "Treat a failed sell as a serious risk signal until verified."
+    ];
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return [
+      "Check the destination before any wallet connection.",
+      "Treat approval requests as higher risk than they look.",
+      "Ignore urgency tied to claims, rewards, or verification prompts.",
+      "Do not connect until the full flow still looks safe after review."
+    ];
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return [
+      "Verify the exact token address before hype takes over.",
+      "Review liquidity next, not just momentum or price action.",
+      "Assume exits may be weaker than the upside pitch suggests.",
+      "Do not buy fast just because attention looks strong."
+    ];
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    return [
+      "Confirm the exact token or contract address first.",
+      "Check pair activity and liquidity together.",
+      "Treat fast trust in the address as a warning sign.",
+      "Review project quality before money or wallet access is exposed."
+    ];
+  }
+
+  return [
+    "Check the exact token address and source first.",
+    "Review liquidity and trading activity together.",
+    "Slow down if hype or urgency is doing most of the work.",
+    "Do not buy or connect until the setup still holds up after review."
+  ];
+}
+
+function renderQuickChecklist() {
+  const title = document.getElementById("quickChecklistTitle");
+  const grid = document.getElementById("quickChecklistGrid");
+  if (!title || !grid) return;
+
+  const cleanTitle = humanizeKeyword(RAW_KEYWORD || "");
+  title.textContent = cleanTitle
+    ? `${cleanTitle}: quick checks before you act`
+    : "Fast token risk checklist before you act";
+
+  const items = buildQuickChecklistItems(RAW_KEYWORD || "");
+  grid.innerHTML = items.map(item =>
+    `<div class="quick-checklist-item">${escapeHtml(item)}</div>`
+  ).join("");
+}
+
+function buildRecognitionItems(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return [
+      ["What appears first", "A chart or balance that still looks real even though selling may not work cleanly."],
+      ["Where risk hides", "Thin liquidity, blocked exits, routing failures, sell taxes, or contract rules that make exiting harder than buying."],
+      ["Why people miss it", "The token may still show movement, price action, or activity while the exit path is weak."],
+      ["What to slow down", "Any decision to buy more, connect deeper, approve more, or trust the project before the sell issue is understood."]
+    ];
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    return [
+      ["What appears first", "A chain, contract, or token address that seems active enough to trust quickly."],
+      ["Where risk hides", "A copied name, weak pair, low-quality project page, or address that does not match the source you expected."],
+      ["Why people miss it", "The token may already be trading or getting shared in a way that makes it feel more established than it is."],
+      ["What to slow down", "The buy or wallet connection that happens before address quality, liquidity, and project claims are checked."]
+    ];
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return [
+      ["What appears first", "A claim page, wallet prompt, or approval request that looks routine enough to lower caution."],
+      ["Where risk hides", "The requested permission, destination, contract, or claim flow may expose more than the page suggests."],
+      ["Why people miss it", "The flow often borrows familiar wallet language and makes the action feel normal or time-sensitive."],
+      ["What to slow down", "The connection, approval, signature, or claim step before wallet exposure becomes real."]
+    ];
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return [
+      ["What appears first", "Momentum, chart movement, or fast attention that makes hesitation feel expensive."],
+      ["Where risk hides", "Weak liquidity, poor exits, concentrated holders, or project claims that depend more on attention than structure."],
+      ["Why people miss it", "Speed and social proof can make the setup feel validated even when the underlying support is thin."],
+      ["What to slow down", "The emotional buy that happens before liquidity, exits, and holder structure are reviewed."]
+    ];
+  }
+
+  if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    return [
+      ["What appears first", "A token, contract, or project page that looks interesting before the structure has actually been checked."],
+      ["Where risk hides", "Liquidity, ownership, wallet prompts, exit conditions, or claims that look weaker after review."],
+      ["Why people miss it", "Risky token pages often use normal crypto language, urgency, and surface activity to lower caution."],
+      ["What to slow down", "The buy, connection, approval, or follow-up action that depends more on speed than verification."]
+    ];
+  }
+
+  return [
+    ["What appears first", "A token, chart, post, or project page that looks active enough to earn quick trust."],
+    ["Where risk hides", "Weak liquidity, poor exits, concentrated control, wallet prompts, or claims that do not hold up after review."],
+    ["Why people miss it", "Momentum can make a weak setup feel safer than it is until money or wallet access is already exposed."],
+    ["What to slow down", "The buy, connection, approval, or follow-up action that depends more on urgency than verified structure."]
+  ];
+}
+
+function renderRecognitionChips() {
+  const wrap = document.getElementById("contentRecognition");
+  if (!wrap) return;
+
+  const items = buildRecognitionItems(RAW_KEYWORD || "");
+  wrap.innerHTML = items.map(item => `
+    <div class="recognition-chip">
+      <span class="recognition-label">${escapeHtml(item[0])}</span>
+      <span class="recognition-copy">${escapeHtml(item[1])}</span>
+    </div>
+  `).join("");
+}
+
+function applyPreviewCard() {
+  const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
+  const cleanTitle = humanizeKeyword(keywordRaw) || "Risky Token";
+  const lower = keywordRaw.toLowerCase();
+
+  const previewDomain = document.getElementById("previewDomain");
+  const previewSub = document.getElementById("previewSub");
+  const previewBadge = document.getElementById("previewBadge");
+  const previewScore = document.getElementById("previewScore");
+  const previewScoreFill = document.getElementById("previewScoreFill");
+  const previewSignals = document.getElementById("previewSignals");
+
+  if (!previewDomain || !previewSub || !previewBadge || !previewScore || !previewScoreFill || !previewSignals) {
+    return;
+  }
+
+  let riskLabel = "Common Warning Pattern";
+  let trustScore = "Pattern Snapshot";
+  let fillWidth = "22%";
+  let sub = "Common structural signals found in similar token risk cases";
+  let signals = [
+    "Liquidity may not support a clean exit",
+    "Hype may be stronger than the underlying structure",
+    "Urgency may be pushing the decision too fast"
+  ];
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    riskLabel = "Exit Risk Pattern";
+    trustScore = "Sell Review";
+    fillWidth = "14%";
+    sub = "Possible sell, liquidity, routing, or contract-control issue";
+    signals = [
+      "Selling may be harder than buying",
+      "Liquidity or routing may not support a clean exit",
+      "Contract behavior should be checked before more exposure"
+    ];
+  } else if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    riskLabel = "Wallet Risk Pattern";
+    trustScore = "Permission Review";
+    fillWidth = "18%";
+    sub = "Common wallet exposure signals found in claim or approval flows";
+    signals = [
+      "Wallet prompt or approval pressure",
+      "Claim urgency before trust is established",
+      "Permission requested before proper verification"
+    ];
+  } else if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    riskLabel = "Momentum Risk Pattern";
+    trustScore = "Hype Review";
+    fillWidth = "24%";
+    sub = "Common momentum-driven token risk signals";
+    signals = [
+      "Momentum may be doing most of the work",
+      "Buy pressure appears before clarity",
+      "Fast upside framing may hide weak exits"
+    ];
+  } else if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    riskLabel = "Address Review Pattern";
+    trustScore = "Contract Check";
+    fillWidth = "28%";
+    sub = "Common address, pair, and project-claim signals to review";
+    signals = [
+      "Contract or address trust is assumed too fast",
+      "Project quality is still unclear",
+      "Surface activity may outrun real review"
+    ];
+  } else if (isGuidanceStyleKeyword(lower) || isQuestionStyleKeyword(lower)) {
+    riskLabel = "Token Risk Check";
+    trustScore = "Review Pattern";
+    fillWidth = "34%";
+    signals = [
+      "Review contract, liquidity, and wallet flow",
+      "Verify away from the original source or pitch",
+      "Do not buy or connect until the setup holds up"
+    ];
+  }
+
+  previewBadge.textContent = `🔴 ${riskLabel}`;
+  previewScore.textContent = trustScore;
+  previewScoreFill.style.width = fillWidth;
+  previewDomain.textContent = cleanTitle;
+  previewSub.textContent = sub;
+  previewSignals.innerHTML = signals.map(signal =>
+    `<div class="preview-signal"><span class="preview-signal-icon">⚠️</span><span>${escapeHtml(signal)}</span></div>`
+  ).join("");
+}
+
+function applyIntentToChecker() {
+  const keywordRaw = normalizeKeyword(RAW_KEYWORD || "");
+  const lower = keywordRaw.toLowerCase();
+  const textarea = document.getElementById("text");
+  const inputHelp = document.querySelector(".input-help");
+
+  if (!textarea || !inputHelp) return;
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    textarea.placeholder = "Paste the token address, contract address, Dexscreener link, or details about the failed sell...";
+    inputHelp.textContent = "Examples: token address, Dexscreener link, failed sell details, contract address, token page";
+    return;
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    textarea.placeholder = "Paste the token address, claim page, wallet prompt, approval request, or project copy to review...";
+    inputHelp.textContent = "Examples: token address, claim page, approval request, wallet prompt, launch page";
+    return;
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    textarea.placeholder = "Paste the token address, ticker, contract address, Dexscreener link, or launch page to review...";
+    inputHelp.textContent = "Examples: token address, ticker, contract address, Dexscreener page, launch page";
+    return;
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    textarea.placeholder = "Paste the token address, contract address, Dexscreener link, or project page to review...";
+    inputHelp.textContent = "Examples: token address, contract address, Dexscreener link, project page copy, token page";
+    return;
+  }
+
+  textarea.placeholder = "Paste a token address, contract address, Dexscreener link, token name, claim page, or project copy to review...";
+  inputHelp.textContent = "Examples: token address, contract address, Dexscreener link, project page, claim page, wallet prompt";
+}
+
+function splitSeoParagraphsFromHtml(seoContent) {
+  const html = String(seoContent.innerHTML || "").trim();
+  if (!html) return [];
+
+  const parser = document.createElement("div");
+  parser.innerHTML = html;
+
+  let paragraphs = Array.from(parser.querySelectorAll("p"))
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length) return paragraphs;
+
+  paragraphs = parser.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  return paragraphs;
+}
+
+function buildSeoCardTitles(keywordRaw) {
+  const lower = normalizeKeyword(keywordRaw || "").toLowerCase();
+
+  if (lower.includes("can't sell") || lower.includes("cant sell") || lower.includes("cannot sell")) {
+    return [
+      ["🚪", "Exit problem"],
+      ["🧩", "Why selling fails"],
+      ["🔁", "Pattern to compare"],
+      ["🛑", "What not to rush"]
+    ];
+  }
+
+  if (containsAny(lower, ["airdrop", "claim", "wallet", "connect", "approve"])) {
+    return [
+      ["🔐", "Wallet setup"],
+      ["🧩", "Permission risk"],
+      ["🔁", "Pattern to compare"],
+      ["🛑", "What not to rush"]
+    ];
+  }
+
+  if (containsAny(lower, ["meme", "memecoin", "pump", "moon", "100x"])) {
+    return [
+      ["🪙", "Momentum setup"],
+      ["🧩", "Structural weakness"],
+      ["🔁", "Pattern to compare"],
+      ["🛑", "What not to rush"]
+    ];
+  }
+
+  if (containsAny(lower, ["sol", "solana", "eth", "ethereum", "base", "bnb", "chain", "contract", "address"])) {
+    return [
+      ["📍", "Address setup"],
+      ["🧩", "Structural weakness"],
+      ["🔁", "Pattern to compare"],
+      ["🛑", "What not to rush"]
+    ];
+  }
+
+  return [
+    ["⚠️", "Risk setup"],
+    ["🧩", "Structural weakness"],
+    ["🔁", "Pattern to compare"],
+    ["🛑", "What not to rush"]
+  ];
+}
+
+function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  if (!paragraphs.length) {
+    seoContent.innerHTML = "";
+    return;
+  }
+
+  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+
+  seoContent.innerHTML = `
+    <div class="story-stack">
+      ${paragraphs.map((paragraph, index) => `
+        <article class="story-card${index === 0 ? " lead" : ""}">
+          <div class="story-card-title">
+            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
+            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
+          </div>
+          <p>${escapeHtml(paragraph)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 
