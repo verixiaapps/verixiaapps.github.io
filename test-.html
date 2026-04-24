@@ -2192,4 +2192,170 @@ function renderSeoContentCards(paragraphs) {
   `;
 }
 
+function cleanSeoContent() {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  seoContent.innerHTML = seoContent.innerHTML
+    .replace(/\*\*/g, "")
+    .replace(/<p>\s*<\/p>/g, "")
+    .trim();
+
+  const paragraphs = splitSeoParagraphsFromHtml(seoContent)
+    .map(p => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  renderSeoContentCards(paragraphs);
+}
+
+function cleanRelatedLinks() {
+  const relatedLinks = document.getElementById("relatedLinks");
+  if (!relatedLinks) return;
+
+  const links = Array.from(relatedLinks.querySelectorAll("li"))
+    .map(li => {
+      const a = li.querySelector("a");
+      if (!a) return null;
+
+      let text = a.textContent
+        .replace(/\s+/g, " ")
+        .replace(/\?+$/g, "")
+        .trim();
+
+      if (!text) return null;
+
+      return {
+        href: a.getAttribute("href"),
+        text
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 6);
+
+  if (!links.length) {
+    relatedLinks.innerHTML = "";
+    return;
+  }
+
+  relatedLinks.innerHTML = links.map(link => `
+    <li>
+      <a href="${escapeHtml(link.href)}">
+        ${escapeHtml(link.text)}
+      </a>
+    </li>
+  `).join("");
+}
+
+function cleanMoreLinks() {
+  const moreLinks = document.getElementById("moreLinks");
+  const wrap = document.getElementById("moreLinksWrap");
+
+  if (!moreLinks || !wrap) return;
+
+  const links = Array.from(moreLinks.querySelectorAll("li"))
+    .map(li => {
+      const a = li.querySelector("a");
+      if (!a) return null;
+
+      let text = a.textContent
+        .replace(/\s+/g, " ")
+        .replace(/\?+$/g, "")
+        .trim();
+
+      if (!text) return null;
+
+      return {
+        href: a.getAttribute("href"),
+        text
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 6);
+
+  if (!links.length) {
+    wrap.style.display = "none";
+    return;
+  }
+
+  moreLinks.innerHTML = links.map(link => `
+    <li>
+      <a href="${escapeHtml(link.href)}">
+        ${escapeHtml(link.text)}
+      </a>
+    </li>
+  `).join("");
+}
+
+function cleanHubLink() {
+  const hubWrap = document.getElementById("hubLinkWrap");
+  if (!hubWrap) return;
+
+  const content = hubWrap.innerHTML.trim();
+  if (!content || content === "{{HUB_LINK}}") {
+    hubWrap.style.display = "none";
+    return;
+  }
+
+  hubWrap.innerHTML = content;
+}
+
+function showUpgrade() {
+  const upgrade = document.getElementById("upgrade");
+  if (!upgrade) return;
+
+  upgrade.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function scrollToEmail() {
+  const email = document.getElementById("email");
+  if (!email) return;
+
+  email.scrollIntoView({ behavior: "smooth", block: "center" });
+  email.focus();
+}
+
+async function check() {
+  const text = document.getElementById("text").value.trim();
+  const result = document.getElementById("result");
+
+  if (!text) {
+    result.innerHTML = `<div class="error">Paste something to analyze first.</div>`;
+    return;
+  }
+
+  if (!isBrowserSubscribed()) {
+    if (localStorage.getItem("token_risk_free_check_used") === "true") {
+      showUpgrade();
+      return;
+    }
+    localStorage.setItem("token_risk_free_check_used", "true");
+  }
+
+  result.innerHTML = `<div class="loading">Analyzing token risk...</div>`;
+
+  try {
+    const res = await fetch(API + ANALYZE_PATH, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+
+    if (!data || !data.result) {
+      throw new Error("Invalid response");
+    }
+
+    result.innerHTML = `<div class="analysis">${escapeHtml(data.result)}</div>`;
+  } catch (err) {
+    result.innerHTML = `<div class="error">Something went wrong. Try again.</div>`;
+  }
+}
+</script>
+</body>
+</html>
+
 
