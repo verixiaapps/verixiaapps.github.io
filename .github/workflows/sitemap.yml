@@ -20,7 +20,7 @@ jobs:
           python3 << 'EOF'
           import requests
           from lxml import etree
-          import os
+          import os, sys, hashlib, json
           from datetime import datetime
 
           SITEMAP_URL   = "https://verixiaapps.com/sitemap.xml"
@@ -28,30 +28,62 @@ jobs:
           URLS_PER_FILE = 1000
           BASE_URL      = "https://verixiaapps.com"
           NS            = "http://www.sitemaps.org/schemas/sitemap/0.9"
-          TODAY         = datetime.utcnow().strftime("%Y-%m-%d")
+          HASH_FILE     = ".sitemap_hash"
 
           os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-          resp = requests.get(SITEMAP_URL, timeout=30)
-          resp.raise_for_status()
-          root = etree.fromstring(resp.content)
-          urls = [el.text.strip() for el in root.iter(f"{{{NS}}}loc")]
+          # 1. Fetch sitemap
+          try:
+              resp = requests.get(SITEMAP_URL, timeout=30)
+              resp.raise_for_status()
+          except Exception as e:
+              print(f"ERROR fetching sitemap: {e}")
+              sys.exit(1)
 
-          chunks      = [urls[i:i+URLS_PER_FILE] for i in range(0, len(urls), URLS_PER_FILE)]
+          # 2. Guard: exit if content unchanged since last run
+          content_hash = hashlib.md5(resp.content).hexdigest()
+          if os.path.exists(HASH_FILE):
+              if open(HASH_FILE).read().strip() == content_hash:
+                  print("Sitemap unchanged — skipping.")
+                  sys.exit(0)
+
+          # 3. Parse
+          try:
+              root = etree.fromstring(resp.content)
+          except Exception as e:
+              print(f"ERROR parsing sitemap: {e}")
+              sys.exit(1)
+
+          # 4. Extract full <url> blocks preserving all child elements
+          url_els = root.findall(f"{{{NS}}}url")
+          if not url_els:
+              print("ERROR: no <url> elements found — aborting.")
+              sys.exit(1)
+          print(f"Found {len(url_els)} URLs")
+
+          # 5. Split into chunks
+          chunks      = [url_els[i:i+URLS_PER_FILE] for i in range(0, len(url_els), URLS_PER_FILE)]
           child_names = []
+          TODAY       = datetime.utcnow().strftime("%Y-%m-%d")
 
           for idx, chunk in enumerate(chunks, start=1):
-              fname = f"sitemap-{idx}.xml"
+              fname  = f"sitemap-{idx}.xml"
               child_names.append(fname)
               urlset = etree.Element("urlset", xmlns=NS)
-              for u in chunk:
-                  url_el = etree.SubElement(urlset, "url")
-                  etree.SubElement(url_el, "loc").text     = u
-                  etree.SubElement(url_el, "lastmod").text = TODAY
+              for url_el in chunk:
+                  new_url = etree.SubElement(urlset, "url")
+                  for child in url_el:
+                      # preserve priority/changefreq/lastmod as-is
+                      # only set lastmod if it was missing
+                      new_url.append(child)
+                  if url_el.find(f"{{{NS}}}lastmod") is None:
+                      etree.SubElement(new_url, "lastmod").text = TODAY
               etree.ElementTree(urlset).write(
                   os.path.join(OUTPUT_DIR, fname),
                   xml_declaration=True, encoding="UTF-8", pretty_print=True)
+              print(f"  {fname} — {len(chunk)} URLs")
 
+          # 6. Build index
           index = etree.Element("sitemapindex", xmlns=NS)
           for fname in child_names:
               sm = etree.SubElement(index, "sitemap")
@@ -60,11 +92,15 @@ jobs:
           etree.ElementTree(index).write(
               os.path.join(OUTPUT_DIR, "sitemap-index.xml"),
               xml_declaration=True, encoding="UTF-8", pretty_print=True)
+          print(f"Index written — {len(child_names)} child sitemaps")
+
+          # 7. Save hash so next run skips if nothing changed
+          open(HASH_FILE, "w").write(content_hash)
           EOF
 
       - run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/sitemap*.xml
+          git add public/sitemap*.xml .sitemap_hash
           git diff --cached --quiet || git commit -m "chore: split sitemaps $(date -u +%Y-%m-%d)"
           git push
