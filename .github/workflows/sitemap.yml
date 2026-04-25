@@ -8,9 +8,11 @@ jobs:
   split-sitemap:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history needed for git log dates
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -18,69 +20,86 @@ jobs:
 
       - run: |
           python3 << 'EOF'
-          import os, sys, hashlib
+          import os, sys, hashlib, subprocess
           from lxml import etree
-          from datetime import datetime
+          from datetime import datetime, timezone
 
-          PAGES_DIR     = "scam-check-now"   # folder at repo root
+          PAGES_DIR     = "scam-check-now"
           OUTPUT_DIR    = "public"
           URLS_PER_FILE = 1000
           BASE_URL      = "https://verixiaapps.com"
           NS            = "http://www.sitemaps.org/schemas/sitemap/0.9"
           HASH_FILE     = ".sitemap_hash"
-          TODAY         = datetime.utcnow().strftime("%Y-%m-%d")
+          TODAY         = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
           os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-          # 1. Walk scam-check-now/ and collect URLs
-          urls = []
+          # 1. Safety check
           if not os.path.isdir(PAGES_DIR):
-              print(f"ERROR: folder '{PAGES_DIR}' not found")
+              print(f"ERROR: folder '{PAGES_DIR}' not found — aborting.")
               sys.exit(1)
 
+          # 2. Get last git commit date for a path
+          def git_date(path):
+              try:
+                  result = subprocess.run(
+                      ["git", "log", "-1", "--format=%cs", "--", path],
+                      capture_output=True, text=True, timeout=10
+                  )
+                  date = result.stdout.strip()
+                  return date if date else TODAY
+              except Exception:
+                  return TODAY
+
+          # 3. Scan — only include dirs that contain index.html
+          entries = []
           for entry in sorted(os.scandir(PAGES_DIR), key=lambda e: e.name):
               if entry.is_dir():
-                  urls.append(f"{BASE_URL}/{PAGES_DIR}/{entry.name}/")
-              elif entry.is_file() and entry.name.endswith((".html", ".mdx", ".md")):
-                  slug = entry.name.rsplit(".", 1)[0]
-                  urls.append(f"{BASE_URL}/{PAGES_DIR}/{slug}/")
+                  index_path = os.path.join(entry.path, "index.html")
+                  if os.path.isfile(index_path):
+                      url      = f"{BASE_URL}/{PAGES_DIR}/{entry.name}/"
+                      lastmod  = git_date(index_path)
+                      entries.append((url, lastmod))
 
-          if not urls:
-              print("ERROR: no pages found — aborting.")
+          if not entries:
+              print("ERROR: no valid pages found — aborting.")
               sys.exit(1)
 
-          print(f"Found {len(urls)} URLs")
+          print(f"Found {len(entries)} valid pages")
 
-          # 2. Hash URL list — skip if unchanged
-          content_hash = hashlib.md5("\n".join(urls).encode()).hexdigest()
+          # 4. Hash — skip if unchanged
+          hash_input   = "\n".join(f"{u}|{d}" for u, d in entries)
+          content_hash = hashlib.md5(hash_input.encode()).hexdigest()
           if os.path.exists(HASH_FILE):
               if open(HASH_FILE).read().strip() == content_hash:
                   print("No changes — skipping.")
                   sys.exit(0)
 
-          # 3. Split into chunks and write clean sitemaps
-          chunks      = [urls[i:i+URLS_PER_FILE] for i in range(0, len(urls), URLS_PER_FILE)]
+          # 5. Split into chunks and write clean sitemaps
+          chunks      = [entries[i:i+URLS_PER_FILE] for i in range(0, len(entries), URLS_PER_FILE)]
           child_names = []
 
           for idx, chunk in enumerate(chunks, start=1):
+              if not chunk:
+                  continue  # never write empty sitemaps
               fname  = f"sitemap-{idx}.xml"
               child_names.append(fname)
               urlset = etree.Element("urlset", xmlns=NS)
-              for u in chunk:
-                  url_el  = etree.SubElement(urlset, "url")
-                  etree.SubElement(url_el, "loc").text         = u
-                  etree.SubElement(url_el, "lastmod").text     = TODAY
-                  etree.SubElement(url_el, "changefreq").text  = "daily"
-                  etree.SubElement(url_el, "priority").text    = "0.8"
+              for url, lastmod in chunk:
+                  url_el = etree.SubElement(urlset, "url")
+                  etree.SubElement(url_el, "loc").text      = url
+                  etree.SubElement(url_el, "lastmod").text  = lastmod
+                  etree.SubElement(url_el, "changefreq").text = "weekly"
+                  etree.SubElement(url_el, "priority").text = "0.8"
               etree.ElementTree(urlset).write(
                   os.path.join(OUTPUT_DIR, fname),
                   xml_declaration=True, encoding="UTF-8", pretty_print=True)
               print(f"  {fname} — {len(chunk)} URLs")
 
-          # 4. Build clean sitemap index
+          # 6. Build clean sitemap index
           index = etree.Element("sitemapindex", xmlns=NS)
           for fname in child_names:
-              sm  = etree.SubElement(index, "sitemap")
+              sm = etree.SubElement(index, "sitemap")
               etree.SubElement(sm, "loc").text     = f"{BASE_URL}/{fname}"
               etree.SubElement(sm, "lastmod").text = TODAY
           etree.ElementTree(index).write(
@@ -88,7 +107,7 @@ jobs:
               xml_declaration=True, encoding="UTF-8", pretty_print=True)
           print(f"Index written — {len(child_names)} child sitemaps")
 
-          # 5. Save hash
+          # 7. Save hash
           open(HASH_FILE, "w").write(content_hash)
           EOF
 
