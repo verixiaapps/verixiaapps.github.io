@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history needed for git log dates
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -57,8 +57,8 @@ jobs:
               if entry.is_dir():
                   index_path = os.path.join(entry.path, "index.html")
                   if os.path.isfile(index_path):
-                      url      = f"{BASE_URL}/{PAGES_DIR}/{entry.name}/"
-                      lastmod  = git_date(index_path)
+                      url     = f"{BASE_URL}/{PAGES_DIR}/{entry.name}/"
+                      lastmod = git_date(index_path)
                       entries.append((url, lastmod))
 
           if not entries:
@@ -75,28 +75,26 @@ jobs:
                   print("No changes — skipping.")
                   sys.exit(0)
 
-          # 5. Split into chunks and write clean sitemaps
+          # 5. Split into chunks and write clean sitemaps (loc + lastmod only)
           chunks      = [entries[i:i+URLS_PER_FILE] for i in range(0, len(entries), URLS_PER_FILE)]
           child_names = []
 
           for idx, chunk in enumerate(chunks, start=1):
               if not chunk:
-                  continue  # never write empty sitemaps
+                  continue
               fname  = f"sitemap-{idx}.xml"
               child_names.append(fname)
               urlset = etree.Element("urlset", xmlns=NS)
               for url, lastmod in chunk:
                   url_el = etree.SubElement(urlset, "url")
-                  etree.SubElement(url_el, "loc").text      = url
-                  etree.SubElement(url_el, "lastmod").text  = lastmod
-                  etree.SubElement(url_el, "changefreq").text = "weekly"
-                  etree.SubElement(url_el, "priority").text = "0.8"
+                  etree.SubElement(url_el, "loc").text     = url
+                  etree.SubElement(url_el, "lastmod").text = lastmod
               etree.ElementTree(urlset).write(
                   os.path.join(OUTPUT_DIR, fname),
                   xml_declaration=True, encoding="UTF-8", pretty_print=True)
               print(f"  {fname} — {len(chunk)} URLs")
 
-          # 6. Build clean sitemap index
+          # 6. Build sitemap index
           index = etree.Element("sitemapindex", xmlns=NS)
           for fname in child_names:
               sm = etree.SubElement(index, "sitemap")
@@ -105,7 +103,7 @@ jobs:
           etree.ElementTree(index).write(
               os.path.join(OUTPUT_DIR, "sitemap-index.xml"),
               xml_declaration=True, encoding="UTF-8", pretty_print=True)
-          print(f"Index written — {len(child_names)} child sitemaps")
+          print(f"Index written → {BASE_URL}/sitemap-index.xml ({len(child_names)} child sitemaps)")
 
           # 7. Save hash
           open(HASH_FILE, "w").write(content_hash)
