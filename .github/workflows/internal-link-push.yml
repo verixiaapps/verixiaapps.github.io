@@ -1,34 +1,21 @@
-name: Auto Scam Check Linking + Homepage + Recent Hub + Category Hubs + Sitemap + Card Rotation
+Yes — use this version with card rotation removed and manual run only:
 
+name: Auto Scam Check Linking + Homepage + Recent Hub + Category Hubs + Sitemap
 on:
-  schedule:
-    - cron: '0 6 * * *'
   workflow_dispatch:
-    inputs:
-      rotate_structure_pages:
-        description: 'How many scam-check pages should have card structure rotation applied? Use 0 to disable.'
-        required: false
-        default: '0'
-
 permissions:
   contents: write
-
 jobs:
   update-pages:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Run auto SEO script
-        env:
-          ROTATE_STRUCTURE_PAGES: ${{ github.event.inputs.rotate_structure_pages }}
         run: |
           node << 'EOF'
           const fs = require('fs');
           const path = require('path');
-
           const ROOT = './scam-check-now';
           const BACKUP = './backup';
           const HOMEPAGE = './check/index.html';
@@ -37,7 +24,6 @@ jobs:
           const HUBS_DIR = './check/hubs';
           const SITEMAP_PATH = './sitemap.xml';
           const ROBOTS_PATH = './robots.txt';
-
           const RELATED_COUNT = 5;
           const MORE_COUNT = 10;
           const HOMEPAGE_COUNT = 15;
@@ -45,68 +31,51 @@ jobs:
           const HUB_COUNT = 40;
           const MAX_HUBS = 12;
           const MIN_HUB_SIZE = 6;
-
-          const ROTATE_STRUCTURE_PAGES = Math.max(
-            0,
-            parseInt(process.env.ROTATE_STRUCTURE_PAGES || '0', 10) || 0
-          );
-
           if (!fs.existsSync(ROOT)) {
             console.error(`Missing root folder: ${ROOT}`);
             process.exit(1);
           }
-
           if (!fs.existsSync(BACKUP)) {
             fs.mkdirSync(BACKUP, { recursive: true });
           }
-
           function ensureDir(dir) {
             if (!fs.existsSync(dir)) {
               fs.mkdirSync(dir, { recursive: true });
             }
           }
-
           function readFile(filePath) {
             return fs.readFileSync(filePath, 'utf8');
           }
-
           function hasFileChanged(filePath, content) {
             const existing = fs.existsSync(filePath) ? readFile(filePath) : null;
             return existing !== content;
           }
-
           function backupFile(filePath) {
             if (!fs.existsSync(filePath)) return;
             const backupName = filePath.replace(/[\\/]/g, '_');
             const backupPath = path.join(BACKUP, backupName);
             fs.writeFileSync(backupPath, readFile(filePath));
           }
-
           function writeWithBackupIfChanged(filePath, content) {
             if (!hasFileChanged(filePath, content)) return false;
             if (fs.existsSync(filePath)) backupFile(filePath);
             fs.writeFileSync(filePath, content);
             return true;
           }
-
           function getAllPages(dir) {
             let results = [];
             const list = fs.readdirSync(dir);
-
             list.forEach(file => {
               const fullPath = path.join(dir, file);
               const stat = fs.statSync(fullPath);
-
               if (stat.isDirectory()) {
                 results = results.concat(getAllPages(fullPath));
               } else if (file === 'index.html') {
                 results.push(fullPath);
               }
             });
-
             return results;
           }
-
           function shuffle(arr) {
             const copy = [...arr];
             for (let i = copy.length - 1; i > 0; i--) {
@@ -115,7 +84,6 @@ jobs:
             }
             return copy;
           }
-
           function hashString(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -124,30 +92,25 @@ jobs:
             }
             return Math.abs(hash);
           }
-
           function rotateByDay(items, seed) {
             if (!items.length) return items;
             const day = Math.floor(Date.now() / 86400000);
             const offset = (hashString(seed) + day) % items.length;
             return items.slice(offset).concat(items.slice(0, offset));
           }
-
           function normalizedPath(filePath) {
             return filePath.replace(/\\/g, '/');
           }
-
           function hrefFromPath(filePath) {
             const normalized = normalizedPath(filePath).replace(/^\.\//, '');
             return '/' + normalized.replace(/\/index\.html$/i, '/');
           }
-
           function slugFromPath(filePath) {
             const normalized = normalizedPath(filePath);
             const withoutIndex = normalized.replace(/\/index\.html$/i, '');
             const parts = withoutIndex.split('/').filter(Boolean);
             return parts[parts.length - 1] || '';
           }
-
           function wordFromToken(token) {
             const specialWords = {
               usps: 'USPS',
@@ -174,106 +137,40 @@ jobs:
               microsoft: 'Microsoft',
               netflix: 'Netflix',
               walmart: 'Walmart',
-              target: 'Target',
-              paypalbusiness: 'PayPal Business',
-              login: 'Login',
-              text: 'Text',
-              email: 'Email',
-              message: 'Message',
-              alert: 'Alert',
-              code: 'Code',
-              refund: 'Refund',
-              wire: 'Wire',
-              transfer: 'Transfer',
-              link: 'Link',
-              account: 'Account',
-              verification: 'Verification',
-              unusual: 'Unusual',
-              activity: 'Activity',
-              customs: 'Customs',
-              fee: 'Fee',
-              support: 'Support',
-              debit: 'Debit',
-              fraud: 'Fraud',
-              issue: 'Issue',
-              package: 'Package',
-              missed: 'Missed',
-              delivery: 'Delivery',
-              safe: 'Safe',
-              real: 'Real',
-              fake: 'Fake',
-              legit: 'Legit',
-              scam: 'Scam',
-              unknown: 'Unknown',
-              needed: 'Needed',
-              free: 'Free',
-              trial: 'Trial',
-              from: 'From',
-              company: 'Company',
-              suspension: 'Suspension',
-              attempt: 'Attempt',
-              notice: 'Notice',
-              locked: 'Locked',
-              payment: 'Payment',
-              security: 'Security',
-              warning: 'Warning',
-              blocked: 'Blocked',
-              update: 'Update',
-              contact: 'Contact',
-              charge: 'Charge',
-              hold: 'Hold',
-              request: 'Request',
-              flagged: 'Flagged',
-              review: 'Review',
-              processing: 'Processing',
-              confirmation: 'Confirmation',
-              delay: 'Delay',
-              recovery: 'Recovery'
+              target: 'Target'
             };
-
             return specialWords[token] || token.charAt(0).toUpperCase() + token.slice(1);
           }
-
           function wordsToPhrase(words) {
             return words.filter(Boolean).map(wordFromToken).join(' ');
           }
-
           function stripPrefix(slug, prefix) {
             return slug.startsWith(prefix) ? slug.slice(prefix.length) : slug;
           }
-
           function titleFromSlug(slug) {
             if (!slug) return 'Check Similar Message';
-
             if (slug.startsWith('did-i-get-scammed-by-')) {
               const core = stripPrefix(slug, 'did-i-get-scammed-by-');
               return `Did I Get Scammed by ${wordsToPhrase(core.split('-'))}?`;
             }
-
             if (slug.startsWith('is-')) {
               const core = stripPrefix(slug, 'is-');
-
               if (core.endsWith('-legit-or-scam')) {
                 const subject = core.replace(/-legit-or-scam$/, '');
                 return `Is ${wordsToPhrase(subject.split('-'))} Legit or a Scam?`;
               }
-
               if (core.endsWith('-real-or-fake')) {
                 const subject = core.replace(/-real-or-fake$/, '');
                 return `Is ${wordsToPhrase(subject.split('-'))} Real or Fake?`;
               }
-
               if (core.endsWith('-safe-or-scam')) {
                 const subject = core.replace(/-safe-or-scam$/, '');
                 return `Is ${wordsToPhrase(subject.split('-'))} Safe or a Scam?`;
               }
-
               return `Is ${wordsToPhrase(core.split('-'))}?`;
             }
-
             return wordsToPhrase(slug.split('-'));
           }
-
           function buildLinkHTML(links) {
             return links.map(link => {
               const slug = slugFromPath(link);
@@ -282,53 +179,42 @@ jobs:
               return `<li><a href="${href}">${text}</a></li>`;
             }).join('\n');
           }
-
           function updateSection(html, id, linksHTML) {
             const regex = new RegExp(`<ul id="${id}"[^>]*>[\\s\\S]*?<\\/ul>`, 'i');
-
             if (!regex.test(html)) {
               return html;
             }
-
             return html.replace(
               regex,
               `<ul id="${id}" class="related-links">\n${linksHTML}\n</ul>`
             );
           }
-
           function getCategoryTokens(slug) {
             let core = slug;
-
             if (core.startsWith('did-i-get-scammed-by-')) {
               core = core.replace(/^did-i-get-scammed-by-/, '');
             } else if (core.startsWith('is-')) {
               core = core.replace(/^is-/, '');
             }
-
             core = core
               .replace(/-legit-or-scam$/, '')
               .replace(/-real-or-fake$/, '')
               .replace(/-safe-or-scam$/, '');
-
             const stopWords = new Set([
               'is','did','i','get','scammed','by','or','a','the','this','that','real','fake','safe','scam','legit',
               'message','email','text','alert','link','issue','notice','request','update','warning','confirmation',
               'processing','review','activity','attempt','account','login','support','contact'
             ]);
-
             return core
               .split('-')
               .filter(Boolean)
               .filter(token => !stopWords.has(token));
           }
-
           function buildCategoryMap(pages) {
             const map = new Map();
-
             pages.forEach(page => {
               const slug = slugFromPath(page);
               const tokens = getCategoryTokens(slug);
-
               tokens.forEach(token => {
                 if (!map.has(token)) {
                   map.set(token, []);
@@ -336,10 +222,8 @@ jobs:
                 map.get(token).push(page);
               });
             });
-
             return map;
           }
-
           function chooseHubCategories(categoryMap) {
             return [...categoryMap.entries()]
               .filter(([, tokenPages]) => tokenPages.length >= MIN_HUB_SIZE)
@@ -350,19 +234,20 @@ jobs:
               .slice(0, MAX_HUBS)
               .map(([token]) => token);
           }
-
           function hubTitleFromToken(token) {
             return `${wordFromToken(token)} Scam Checks`;
           }
-
           function hubUrlFromToken(token) {
             return `/check/hubs/${token}/`;
           }
-
+          function buildHubNavHTML(tokens) {
+            return tokens.map(token => {
+              return `<li><a href="${hubUrlFromToken(token)}">${hubTitleFromToken(token)}</a></li>`;
+            }).join('\n');
+          }
           function buildHubHTML(token, linksHTML) {
             const title = hubTitleFromToken(token);
             const tokenLabel = wordFromToken(token);
-
             return `<!DOCTYPE html>
           <html lang="en">
           <head>
@@ -372,137 +257,45 @@ jobs:
           <meta name="description" content="Browse ${tokenLabel} scam check pages including suspicious messages, alerts, refund setups, phishing pages, and account warning scams.">
           <meta name="robots" content="index,follow">
           <link rel="canonical" href="https://verixiaapps.com${hubUrlFromToken(token)}">
-          <style>
-          :root{
-            --bg:#07121f;
-            --bg2:#0d1b31;
-            --card:rgba(255,255,255,.05);
-            --line:rgba(255,255,255,.09);
-            --ink:#eef6ff;
-            --muted:#c9d8ec;
-            --cyan:#9cecff;
-            --violet:#8b78f2;
-          }
-          *{box-sizing:border-box}
-          body{
-            margin:0;
-            font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
-            color:var(--ink);
-            line-height:1.6;
-            background:
-              radial-gradient(circle at top right, rgba(139,120,242,.12), transparent 25%),
-              radial-gradient(circle at top left, rgba(102,217,239,.10), transparent 24%),
-              linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
-          }
-          .wrap{max-width:980px;margin:0 auto;padding:40px 16px 60px}
-          .card{
-            border-radius:28px;
-            padding:28px;
-            background:linear-gradient(180deg, rgba(14,25,44,.96) 0%, rgba(9,18,33,.98) 100%);
-            border:1px solid var(--line);
-            box-shadow:0 24px 64px rgba(2,6,23,.28);
-          }
-          h1{
-            margin:0 0 12px;
-            font-size:42px;
-            line-height:1.02;
-            letter-spacing:-.04em;
-            font-weight:950;
-            color:#fff;
-          }
-          p{
-            margin:0 0 20px;
-            font-size:17px;
-            color:var(--muted);
-            font-weight:700;
-          }
-          ul{
-            margin:0;
-            padding-left:22px;
-            display:grid;
-            gap:12px;
-          }
-          li{color:var(--muted)}
-          a{
-            color:var(--cyan);
-            text-decoration:none;
-            font-weight:900;
-          }
-          a:hover{text-decoration:underline}
-          .toplink{
-            display:inline-block;
-            margin-top:20px;
-            padding:12px 16px;
-            border-radius:14px;
-            background:linear-gradient(135deg,var(--violet) 0%, #2fc6e4 100%);
-            color:#fff;
-            text-decoration:none;
-            font-weight:900;
-          }
-          </style>
           </head>
           <body>
-            <div class="wrap">
-              <div class="card">
-                <h1>${title}</h1>
-                <p>Updated automatically to surface scam check pages related to ${tokenLabel} messages, fake alerts, phishing attempts, payment pressure, and suspicious account activity.</p>
-                <ul>
+            <main>
+              <h1>${title}</h1>
+              <p>Browse scam check pages related to ${tokenLabel} messages, fake alerts, phishing attempts, payment pressure, and suspicious account activity.</p>
+              <ul>
           ${linksHTML}
-                </ul>
-                <a class="toplink" href="/check/">Back to Scam Check Now</a>
-              </div>
-            </div>
+              </ul>
+              <p><a href="/check/">Back to Scam Check Now</a></p>
+            </main>
           </body>
           </html>`;
           }
-
-          function buildHubNavHTML(tokens) {
-            return tokens.map(token => {
-              return `<li><a href="${hubUrlFromToken(token)}">${hubTitleFromToken(token)}</a></li>`;
-            }).join('\n');
-          }
-
           function upsertHomepageLinks(homepageHtml, linksHTML, hubLinksHTML) {
             const sectionHtml = `
-          <section id="autoScamCheckHomepageLinks" style="max-width:1100px;margin:28px auto 0;padding:0 16px 32px;">
-            <div style="border-radius:24px;padding:24px;background:linear-gradient(180deg, rgba(7,18,35,.96) 0%, rgba(10,23,45,.98) 100%);border:1px solid rgba(255,255,255,.08);box-shadow:0 22px 56px rgba(2,6,23,.22);">
-              <h2 style="margin:0 0 14px;font-size:34px;line-height:1.05;font-weight:900;color:#ffffff;letter-spacing:-.03em;">Recent Scam Checks</h2>
-              <div style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#d7e4f8;font-weight:700;">
-                Explore recent scam warning pages across package alerts, account warnings, refund scams, payment requests, and phishing messages.
-              </div>
-              <ul id="homepageLinks" style="margin:0;padding-left:22px;display:grid;gap:10px;color:#d7e4f8;">
+          <section id="autoScamCheckHomepageLinks">
+            <h2>Recent Scam Checks</h2>
+            <p>Explore recent scam warning pages across package alerts, account warnings, refund scams, payment requests, and phishing messages.</p>
+            <ul id="homepageLinks">
           ${linksHTML}
-              </ul>
-              <div style="margin-top:18px;">
-                <a href="/check/recent/" style="display:inline-block;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,#7d6cf4 0%, #38c8e7 100%);color:#fff;text-decoration:none;font-weight:900;">View More Scam Check Pages</a>
-              </div>
-            </div>
-
-            <div style="border-radius:24px;padding:24px;margin-top:18px;background:linear-gradient(180deg, rgba(7,18,35,.96) 0%, rgba(10,23,45,.98) 100%);border:1px solid rgba(255,255,255,.08);box-shadow:0 22px 56px rgba(2,6,23,.22);">
-              <h2 style="margin:0 0 14px;font-size:30px;line-height:1.05;font-weight:900;color:#ffffff;letter-spacing:-.03em;">Scam Categories</h2>
-              <div style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#d7e4f8;font-weight:700;">
-                Browse grouped scam check pages by brand, platform, or scam pattern.
-              </div>
-              <ul id="homepageHubLinks" style="margin:0;padding-left:22px;display:grid;gap:10px;color:#d7e4f8;">
+            </ul>
+            <p><a href="/check/recent/">View More Scam Check Pages</a></p>
+            <h2>Scam Categories</h2>
+            <p>Browse grouped scam check pages by brand, platform, or scam pattern.</p>
+            <ul id="homepageHubLinks">
           ${hubLinksHTML}
-              </ul>
-            </div>
+            </ul>
           </section>`;
-
             if (/id="autoScamCheckHomepageLinks"/i.test(homepageHtml)) {
               return homepageHtml.replace(
                 /<section id="autoScamCheckHomepageLinks"[\s\S]*?<\/section>/i,
                 sectionHtml.trim()
               );
             }
-
             if (/<\/main>/i.test(homepageHtml)) {
               return homepageHtml.replace(/<\/main>/i, `${sectionHtml}\n</main>`);
             }
-
             return homepageHtml.replace(/<\/body>/i, `${sectionHtml}\n</body>`);
           }
-
           function buildRecentHubHTML(linksHTML, hubLinksHTML) {
             return `<!DOCTYPE html>
           <html lang="en">
@@ -513,98 +306,24 @@ jobs:
           <meta name="description" content="Browse recent Scam Check Now pages covering scam messages, phishing emails, package alerts, fake payment requests, and account warning scams.">
           <meta name="robots" content="index,follow">
           <link rel="canonical" href="https://verixiaapps.com/check/recent/">
-          <style>
-          :root{
-            --bg:#07121f;
-            --bg2:#0d1b31;
-            --card:rgba(255,255,255,.05);
-            --line:rgba(255,255,255,.09);
-            --ink:#eef6ff;
-            --muted:#c9d8ec;
-            --cyan:#9cecff;
-            --violet:#8b78f2;
-          }
-          *{box-sizing:border-box}
-          body{
-            margin:0;
-            font-family:Inter,system-ui,-apple-system,Arial,sans-serif;
-            color:var(--ink);
-            line-height:1.6;
-            background:
-              radial-gradient(circle at top right, rgba(139,120,242,.12), transparent 25%),
-              radial-gradient(circle at top left, rgba(102,217,239,.10), transparent 24%),
-              linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
-          }
-          .wrap{max-width:980px;margin:0 auto;padding:40px 16px 60px}
-          .card{
-            border-radius:28px;
-            padding:28px;
-            background:linear-gradient(180deg, rgba(14,25,44,.96) 0%, rgba(9,18,33,.98) 100%);
-            border:1px solid var(--line);
-            box-shadow:0 24px 64px rgba(2,6,23,.28);
-          }
-          h1,h2{
-            margin:0 0 12px;
-            line-height:1.02;
-            letter-spacing:-.04em;
-            font-weight:950;
-            color:#fff;
-          }
-          h1{font-size:42px}
-          h2{font-size:28px;margin-top:26px}
-          p{
-            margin:0 0 20px;
-            font-size:17px;
-            color:var(--muted);
-            font-weight:700;
-          }
-          ul{
-            margin:0;
-            padding-left:22px;
-            display:grid;
-            gap:12px;
-          }
-          li{color:var(--muted)}
-          a{
-            color:var(--cyan);
-            text-decoration:none;
-            font-weight:900;
-          }
-          a:hover{text-decoration:underline}
-          .toplink{
-            display:inline-block;
-            margin-top:20px;
-            padding:12px 16px;
-            border-radius:14px;
-            background:linear-gradient(135deg,var(--violet) 0%, #2fc6e4 100%);
-            color:#fff;
-            text-decoration:none;
-            font-weight:900;
-          }
-          </style>
           </head>
           <body>
-            <div class="wrap">
-              <div class="card">
-                <h1>Recent Scam Check Pages</h1>
-                <p>Updated automatically to surface recent scam warning pages across shipping scams, refund emails, fake alerts, account security messages, payment requests, and phishing pages.</p>
-                <ul>
+            <main>
+              <h1>Recent Scam Check Pages</h1>
+              <p>Browse recent scam warning pages across shipping scams, refund emails, fake alerts, account security messages, payment requests, and phishing pages.</p>
+              <ul>
           ${linksHTML}
-                </ul>
-
-                <h2>Scam Categories</h2>
-                <p>Jump into grouped scam pages by brand, service, or scam pattern.</p>
-                <ul>
+              </ul>
+              <h2>Scam Categories</h2>
+              <p>Jump into grouped scam pages by brand, service, or scam pattern.</p>
+              <ul>
           ${hubLinksHTML}
-                </ul>
-
-                <a class="toplink" href="/check/">Back to Scam Check Now</a>
-              </div>
-            </div>
+              </ul>
+              <p><a href="/check/">Back to Scam Check Now</a></p>
+            </main>
           </body>
           </html>`;
           }
-
           function xmlEscape(value) {
             return String(value)
               .replace(/&/g, '&amp;')
@@ -613,11 +332,9 @@ jobs:
               .replace(/"/g, '&quot;')
               .replace(/'/g, '&apos;');
           }
-
           function uniqueUrls(urls) {
             return [...new Set(urls)];
           }
-
           function buildSitemap(urls) {
             const today = new Date().toISOString().split('T')[0];
             const entries = uniqueUrls(urls).map(url => {
@@ -626,53 +343,42 @@ jobs:
               <lastmod>${today}</lastmod>
             </url>`;
             }).join('\n');
-
             return `<?xml version="1.0" encoding="UTF-8"?>
           <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           ${entries}
           </urlset>`;
           }
-
           function ensureRobotsReference() {
             const sitemapLine = 'Sitemap: https://verixiaapps.com/sitemap.xml';
-
             if (!fs.existsSync(ROBOTS_PATH)) {
               fs.writeFileSync(ROBOTS_PATH, `${sitemapLine}\n`);
               return;
             }
-
             const robots = readFile(ROBOTS_PATH);
             if (robots.includes(sitemapLine)) return;
-
             const updated = robots.trimEnd() + '\n' + sitemapLine + '\n';
             backupFile(ROBOTS_PATH);
             fs.writeFileSync(ROBOTS_PATH, updated);
           }
-
           function selectDailyLinks(pages, count, seed) {
             return rotateByDay(shuffle([...pages]), seed).slice(0, count);
           }
-
           function scoreRelatedPages(currentPage, allPages) {
             const currentTokens = new Set(getCategoryTokens(slugFromPath(currentPage)));
             const currentSlug = slugFromPath(currentPage);
-
             return allPages
               .filter(page => page !== currentPage)
               .map(page => {
                 const pageSlug = slugFromPath(page);
                 const pageTokens = getCategoryTokens(pageSlug);
                 let score = 0;
-
                 pageTokens.forEach(token => {
                   if (currentTokens.has(token)) score += 3;
                 });
-
                 if (pageSlug.includes('email') && currentSlug.includes('email')) score += 2;
                 if (pageSlug.includes('text') && currentSlug.includes('text')) score += 2;
                 if (pageSlug.includes('message') && currentSlug.includes('message')) score += 2;
                 if (pageSlug.includes('alert') && currentSlug.includes('alert')) score += 2;
-
                 return { page, score, slug: pageSlug };
               })
               .sort((a, b) => {
@@ -680,219 +386,40 @@ jobs:
                 return a.slug.localeCompare(b.slug);
               });
           }
-
           function pickSmarterLinks(allPages, currentPage, count, seed) {
             const scored = scoreRelatedPages(currentPage, allPages);
             const strong = scored.filter(item => item.score > 0).map(item => item.page);
             const weak = scored.filter(item => item.score <= 0).map(item => item.page);
-
             const strongCount = Math.min(Math.ceil(count * 0.7), strong.length);
             const weakCount = Math.max(0, count - strongCount);
-
             const selectedStrong = rotateByDay(strong, `${seed}-strong`).slice(0, strongCount);
             const selectedWeak = rotateByDay(weak, `${seed}-weak`).slice(0, weakCount);
-
             return [...selectedStrong, ...selectedWeak].slice(0, count);
           }
-
-          function findEndOfExactElement(html, startIndex, openingTagStart) {
-            const firstGt = html.indexOf('>', openingTagStart);
-            if (firstGt === -1) return -1;
-
-            const openingTagText = html.slice(openingTagStart, firstGt + 1);
-            const tagMatch = openingTagText.match(/^<([a-z0-9]+)/i);
-            if (!tagMatch) return -1;
-
-            const tagName = tagMatch[1].toLowerCase();
-            const openTagRegex = new RegExp(`<${tagName}(\\s|>)`, 'gi');
-            const closeTagRegex = new RegExp(`</${tagName}>`, 'gi');
-
-            openTagRegex.lastIndex = openingTagStart;
-            closeTagRegex.lastIndex = openingTagStart;
-
-            let depth = 0;
-            let cursor = openingTagStart;
-
-            while (cursor < html.length) {
-              openTagRegex.lastIndex = cursor;
-              closeTagRegex.lastIndex = cursor;
-
-              const openMatch = openTagRegex.exec(html);
-              const closeMatch = closeTagRegex.exec(html);
-
-              const nextOpen = openMatch ? openMatch.index : -1;
-              const nextClose = closeMatch ? closeMatch.index : -1;
-
-              if (nextOpen !== -1 && (nextOpen < nextClose || nextClose === -1)) {
-                depth += 1;
-                cursor = nextOpen + 1;
-                continue;
-              }
-
-              if (nextClose !== -1) {
-                depth -= 1;
-                cursor = nextClose + closeMatch[0].length;
-                if (depth === 0) {
-                  return cursor;
-                }
-                continue;
-              }
-
-              break;
-            }
-
-            return -1;
-          }
-
-          function extractElementByExactStart(html, exactStart) {
-            const start = html.indexOf(exactStart);
-            if (start === -1) return null;
-
-            const end = findEndOfExactElement(html, start, start);
-            if (end === -1) return null;
-
-            return {
-              start,
-              end,
-              block: html.slice(start, end)
-            };
-          }
-
-          function extractElementById(html, tagName, idValue) {
-            const regex = new RegExp(`<${tagName}[^>]*\\sid="${idValue}"[^>]*>`, 'i');
-            const match = regex.exec(html);
-            if (!match) return null;
-
-            const start = match.index;
-            const end = findEndOfExactElement(html, start, start);
-            if (end === -1) return null;
-
-            return {
-              start,
-              end,
-              block: html.slice(start, end)
-            };
-          }
-
-          function extractHeading(html) {
-            const match = html.match(/<h2 id="contentHeading"[\s\S]*?<\/h2>/i);
-            return match ? match[0] : '';
-          }
-
-          function extractSectionAfterHeading(html, headingHtml) {
-            if (!headingHtml) return null;
-            const headingIndex = html.indexOf(headingHtml);
-            if (headingIndex === -1) return null;
-
-            const searchStart = headingIndex + headingHtml.length;
-            const nextSectionIndex = html.indexOf('<div class="link-section">', searchStart);
-            if (nextSectionIndex === -1) return null;
-
-            return extractElementByExactStart(html, '<div class="link-section">');
-          }
-
-          function getRotationTargets(pages) {
-            if (ROTATE_STRUCTURE_PAGES <= 0) return [];
-            const limit = Math.min(ROTATE_STRUCTURE_PAGES, pages.length);
-            return rotateByDay([...pages], 'rotate-structure-pages').slice(0, limit);
-          }
-
-          function rotateCardsForPage(html, forcedVariant) {
-            const sectionBlock = extractElementByExactStart(html, '<section class="content-section">');
-            if (!sectionBlock) return html;
-
-            const sectionHtml = sectionBlock.block;
-
-            const bridgeCard = extractElementById(sectionHtml, 'div', 'contentBridge');
-            const hubCard = extractElementById(sectionHtml, 'div', 'hubLinkWrap');
-            const recognitionCard = extractElementById(sectionHtml, 'div', 'contentRecognition');
-            const seoContentCard = extractElementById(sectionHtml, 'div', 'seoContent');
-            const relatedCard = extractSectionAfterHeading(sectionHtml, extractHeading(sectionHtml));
-            const moreCard = extractElementById(sectionHtml, 'div', 'moreLinksWrap');
-            const closeCard = extractElementByExactStart(sectionHtml, '<div class="content-close">');
-            const headingHtml = extractHeading(sectionHtml);
-
-            if (!bridgeCard || !recognitionCard || !seoContentCard || !relatedCard || !moreCard || !closeCard || !headingHtml) {
-              return html;
-            }
-
-            const seoCard = `${headingHtml}\n\n    ${seoContentCard.block}`;
-
-            const cardMap = {
-              bridge: bridgeCard.block,
-              hub: hubCard ? hubCard.block : '',
-              recognition: recognitionCard.block,
-              seo: seoCard,
-              related: relatedCard.block,
-              more: moreCard.block,
-              close: closeCard.block
-            };
-
-            const orders = {
-              a: ['bridge', 'hub', 'recognition', 'seo', 'related', 'more', 'close'],
-              b: ['hub', 'bridge', 'seo', 'recognition', 'related', 'more', 'close'],
-              c: ['bridge', 'recognition', 'related', 'seo', 'hub', 'more', 'close']
-            };
-
-            const variant = forcedVariant && orders[forcedVariant] ? forcedVariant : 'b';
-            const order = orders[variant];
-
-            const orderedCards = order
-              .map(key => cardMap[key])
-              .filter(Boolean)
-              .join('\n\n    ');
-
-            const newSection = `<section class="content-section">\n    ${orderedCards}\n  </section>`;
-
-            return html.slice(0, sectionBlock.start) + newSection + html.slice(sectionBlock.end);
-          }
-
           const pages = getAllPages(ROOT).sort();
           const homepageLinks = buildLinkHTML(selectDailyLinks(pages, HOMEPAGE_COUNT, 'homepage-links'));
           const recentLinks = buildLinkHTML(selectDailyLinks(pages, RECENT_COUNT, 'recent-links'));
-
           const categoryMap = buildCategoryMap(pages);
           const hubTokens = chooseHubCategories(categoryMap);
           const hubLinksHTML = buildHubNavHTML(hubTokens);
-
-          const rotationTargets = getRotationTargets(pages);
-          const rotationVariantMap = new Map();
-          rotationTargets.forEach((page, index) => {
-            rotationVariantMap.set(page, index % 2 === 0 ? 'b' : 'c');
-          });
-
           pages.forEach(page => {
             const original = readFile(page);
-
             const relatedPages = pickSmarterLinks(pages, page, RELATED_COUNT, `related-${slugFromPath(page)}`);
             const morePages = pickSmarterLinks(pages, page, MORE_COUNT, `more-${slugFromPath(page)}`);
-
             let updated = original;
             updated = updateSection(updated, 'relatedLinks', buildLinkHTML(relatedPages));
             updated = updateSection(updated, 'moreLinks', buildLinkHTML(morePages));
-
-            const forcedVariant = rotationVariantMap.get(page) || null;
-            if (forcedVariant) {
-              updated = rotateCardsForPage(updated, forcedVariant);
-            }
-
             if (updated !== original) {
               backupFile(page);
               fs.writeFileSync(page, updated);
-              if (forcedVariant) {
-                console.log(`Updated page links + cards (${forcedVariant}): ${page}`);
-              } else {
-                console.log(`Updated page links: ${page}`);
-              }
+              console.log(`Updated page links: ${page}`);
             } else {
               console.log(`Skipped page: ${page}`);
             }
           });
-
           if (fs.existsSync(HOMEPAGE)) {
             const homepageOriginal = readFile(HOMEPAGE);
             const homepageUpdated = upsertHomepageLinks(homepageOriginal, homepageLinks, hubLinksHTML);
-
             if (homepageUpdated !== homepageOriginal) {
               backupFile(HOMEPAGE);
               fs.writeFileSync(HOMEPAGE, homepageUpdated);
@@ -903,7 +430,6 @@ jobs:
           } else {
             console.warn(`Homepage not found: ${HOMEPAGE}`);
           }
-
           ensureDir(RECENT_DIR);
           const recentHtml = buildRecentHubHTML(recentLinks, hubLinksHTML);
           if (writeWithBackupIfChanged(RECENT_PAGE, recentHtml)) {
@@ -911,28 +437,22 @@ jobs:
           } else {
             console.log(`Skipped recent hub: ${RECENT_PAGE}`);
           }
-
           ensureDir(HUBS_DIR);
           const hubUrls = [];
-
           hubTokens.forEach(token => {
             const hubDir = path.join(HUBS_DIR, token);
             const hubPage = path.join(hubDir, 'index.html');
             ensureDir(hubDir);
-
             const tokenPages = categoryMap.get(token) || [];
             const hubPages = rotateByDay(tokenPages, `hub-${token}`).slice(0, HUB_COUNT);
             const hubHtml = buildHubHTML(token, buildLinkHTML(hubPages));
-
             if (writeWithBackupIfChanged(hubPage, hubHtml)) {
               console.log(`Updated category hub: ${hubPage}`);
             } else {
               console.log(`Skipped category hub: ${hubPage}`);
             }
-
             hubUrls.push(`https://verixiaapps.com${hubUrlFromToken(token)}`);
           });
-
           const sitemapUrls = [
             'https://verixiaapps.com/check/',
             'https://verixiaapps.com/check/recent/',
@@ -940,23 +460,18 @@ jobs:
             ...pages.map(page => 'https://verixiaapps.com' + hrefFromPath(page))
           ];
           const sitemapXml = buildSitemap(sitemapUrls);
-
           if (writeWithBackupIfChanged(SITEMAP_PATH, sitemapXml)) {
             console.log(`Updated sitemap: ${SITEMAP_PATH}`);
           } else {
             console.log(`Skipped sitemap: ${SITEMAP_PATH}`);
           }
-
           ensureRobotsReference();
-
           console.log(`Processed ${pages.length} scam-check pages and ${hubTokens.length} category hubs`);
-          console.log(`Card structure rotation targeted ${rotationTargets.length} page(s)`);
           EOF
-
       - name: Commit changes
         run: |
           git config user.name "seo-bot"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Auto scam check linking + homepage + hubs + sitemap + card rotation update" || echo "No changes"
+          git commit -m "Auto scam check linking + homepage + hubs + sitemap update" || echo "No changes"
           git push
