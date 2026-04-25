@@ -1,0 +1,70 @@
+name: Split Sitemap
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  split-sitemap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: pip install requests lxml
+
+      - run: |
+          python3 << 'EOF'
+          import requests
+          from lxml import etree
+          import os
+          from datetime import datetime
+
+          SITEMAP_URL   = "https://verixiaapps.com/sitemap.xml"
+          OUTPUT_DIR    = "public"
+          URLS_PER_FILE = 1000
+          BASE_URL      = "https://verixiaapps.com"
+          NS            = "http://www.sitemaps.org/schemas/sitemap/0.9"
+          TODAY         = datetime.utcnow().strftime("%Y-%m-%d")
+
+          os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+          resp = requests.get(SITEMAP_URL, timeout=30)
+          resp.raise_for_status()
+          root = etree.fromstring(resp.content)
+          urls = [el.text.strip() for el in root.iter(f"{{{NS}}}loc")]
+
+          chunks      = [urls[i:i+URLS_PER_FILE] for i in range(0, len(urls), URLS_PER_FILE)]
+          child_names = []
+
+          for idx, chunk in enumerate(chunks, start=1):
+              fname = f"sitemap-{idx}.xml"
+              child_names.append(fname)
+              urlset = etree.Element("urlset", xmlns=NS)
+              for u in chunk:
+                  url_el = etree.SubElement(urlset, "url")
+                  etree.SubElement(url_el, "loc").text     = u
+                  etree.SubElement(url_el, "lastmod").text = TODAY
+              etree.ElementTree(urlset).write(
+                  os.path.join(OUTPUT_DIR, fname),
+                  xml_declaration=True, encoding="UTF-8", pretty_print=True)
+
+          index = etree.Element("sitemapindex", xmlns=NS)
+          for fname in child_names:
+              sm = etree.SubElement(index, "sitemap")
+              etree.SubElement(sm, "loc").text     = f"{BASE_URL}/{fname}"
+              etree.SubElement(sm, "lastmod").text = TODAY
+          etree.ElementTree(index).write(
+              os.path.join(OUTPUT_DIR, "sitemap-index.xml"),
+              xml_declaration=True, encoding="UTF-8", pretty_print=True)
+          EOF
+
+      - run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/sitemap*.xml
+          git diff --cached --quiet || git commit -m "chore: split sitemaps $(date -u +%Y-%m-%d)"
+          git push
