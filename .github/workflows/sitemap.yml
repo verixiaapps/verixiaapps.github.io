@@ -25,14 +25,12 @@ jobs:
           from datetime import datetime, timezone
 
           PAGES_DIR     = "scam-check-now"
-          OUTPUT_DIR    = "public"
+          OUTPUT_DIR    = "."           # repo root = verixiaapps.com/
           URLS_PER_FILE = 1000
           BASE_URL      = "https://verixiaapps.com"
           NS            = "http://www.sitemaps.org/schemas/sitemap/0.9"
           HASH_FILE     = ".sitemap_hash"
           TODAY         = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-          os.makedirs(OUTPUT_DIR, exist_ok=True)
 
           # 1. Safety check
           if not os.path.isdir(PAGES_DIR):
@@ -75,7 +73,7 @@ jobs:
                   print("No changes — skipping.")
                   sys.exit(0)
 
-          # 5. Split into chunks and write clean sitemaps (loc + lastmod only)
+          # 5. Split into chunks and write clean sitemaps
           chunks      = [entries[i:i+URLS_PER_FILE] for i in range(0, len(entries), URLS_PER_FILE)]
           child_names = []
 
@@ -112,6 +110,6 @@ jobs:
       - run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/sitemap*.xml .sitemap_hash
+          git add sitemap*.xml .sitemap_hash
           git diff --cached --quiet || git commit -m "chore: split sitemaps $(date -u +%Y-%m-%d)"
           git push
