@@ -14,79 +14,73 @@ jobs:
         with:
           python-version: '3.11'
 
-      - run: pip install requests lxml
+      - run: pip install lxml
 
       - run: |
           python3 << 'EOF'
-          import requests
+          import os, sys, hashlib
           from lxml import etree
-          import os, sys, hashlib, json
           from datetime import datetime
 
-          SITEMAP_URL   = "https://verixiaapps.com/sitemap.xml"
+          PAGES_DIR     = "scam-check-now"   # folder at repo root
           OUTPUT_DIR    = "public"
           URLS_PER_FILE = 1000
           BASE_URL      = "https://verixiaapps.com"
           NS            = "http://www.sitemaps.org/schemas/sitemap/0.9"
           HASH_FILE     = ".sitemap_hash"
+          TODAY         = datetime.utcnow().strftime("%Y-%m-%d")
 
           os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-          # 1. Fetch sitemap
-          try:
-              resp = requests.get(SITEMAP_URL, timeout=30)
-              resp.raise_for_status()
-          except Exception as e:
-              print(f"ERROR fetching sitemap: {e}")
+          # 1. Walk scam-check-now/ and collect URLs
+          urls = []
+          if not os.path.isdir(PAGES_DIR):
+              print(f"ERROR: folder '{PAGES_DIR}' not found")
               sys.exit(1)
 
-          # 2. Guard: exit if content unchanged since last run
-          content_hash = hashlib.md5(resp.content).hexdigest()
+          for entry in sorted(os.scandir(PAGES_DIR), key=lambda e: e.name):
+              if entry.is_dir():
+                  urls.append(f"{BASE_URL}/{PAGES_DIR}/{entry.name}/")
+              elif entry.is_file() and entry.name.endswith((".html", ".mdx", ".md")):
+                  slug = entry.name.rsplit(".", 1)[0]
+                  urls.append(f"{BASE_URL}/{PAGES_DIR}/{slug}/")
+
+          if not urls:
+              print("ERROR: no pages found — aborting.")
+              sys.exit(1)
+
+          print(f"Found {len(urls)} URLs")
+
+          # 2. Hash URL list — skip if unchanged
+          content_hash = hashlib.md5("\n".join(urls).encode()).hexdigest()
           if os.path.exists(HASH_FILE):
               if open(HASH_FILE).read().strip() == content_hash:
-                  print("Sitemap unchanged — skipping.")
+                  print("No changes — skipping.")
                   sys.exit(0)
 
-          # 3. Parse
-          try:
-              root = etree.fromstring(resp.content)
-          except Exception as e:
-              print(f"ERROR parsing sitemap: {e}")
-              sys.exit(1)
-
-          # 4. Extract full <url> blocks preserving all child elements
-          url_els = root.findall(f"{{{NS}}}url")
-          if not url_els:
-              print("ERROR: no <url> elements found — aborting.")
-              sys.exit(1)
-          print(f"Found {len(url_els)} URLs")
-
-          # 5. Split into chunks
-          chunks      = [url_els[i:i+URLS_PER_FILE] for i in range(0, len(url_els), URLS_PER_FILE)]
+          # 3. Split into chunks and write clean sitemaps
+          chunks      = [urls[i:i+URLS_PER_FILE] for i in range(0, len(urls), URLS_PER_FILE)]
           child_names = []
-          TODAY       = datetime.utcnow().strftime("%Y-%m-%d")
 
           for idx, chunk in enumerate(chunks, start=1):
               fname  = f"sitemap-{idx}.xml"
               child_names.append(fname)
               urlset = etree.Element("urlset", xmlns=NS)
-              for url_el in chunk:
-                  new_url = etree.SubElement(urlset, "url")
-                  for child in url_el:
-                      # preserve priority/changefreq/lastmod as-is
-                      # only set lastmod if it was missing
-                      new_url.append(child)
-                  if url_el.find(f"{{{NS}}}lastmod") is None:
-                      etree.SubElement(new_url, "lastmod").text = TODAY
+              for u in chunk:
+                  url_el  = etree.SubElement(urlset, "url")
+                  etree.SubElement(url_el, "loc").text         = u
+                  etree.SubElement(url_el, "lastmod").text     = TODAY
+                  etree.SubElement(url_el, "changefreq").text  = "daily"
+                  etree.SubElement(url_el, "priority").text    = "0.8"
               etree.ElementTree(urlset).write(
                   os.path.join(OUTPUT_DIR, fname),
                   xml_declaration=True, encoding="UTF-8", pretty_print=True)
               print(f"  {fname} — {len(chunk)} URLs")
 
-          # 6. Build index
+          # 4. Build clean sitemap index
           index = etree.Element("sitemapindex", xmlns=NS)
           for fname in child_names:
-              sm = etree.SubElement(index, "sitemap")
+              sm  = etree.SubElement(index, "sitemap")
               etree.SubElement(sm, "loc").text     = f"{BASE_URL}/{fname}"
               etree.SubElement(sm, "lastmod").text = TODAY
           etree.ElementTree(index).write(
@@ -94,7 +88,7 @@ jobs:
               xml_declaration=True, encoding="UTF-8", pretty_print=True)
           print(f"Index written — {len(child_names)} child sitemaps")
 
-          # 7. Save hash so next run skips if nothing changed
+          # 5. Save hash
           open(HASH_FILE, "w").write(content_hash)
           EOF
 
