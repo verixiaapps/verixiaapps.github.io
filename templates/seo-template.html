@@ -1981,17 +1981,19 @@ function renderSeoContentCards(paragraphs) {
     return;
   }
 
-  const titles = buildSeoCardTitles(RAW_KEYWORD || "");
+  function renderSeoContentCards(paragraphs) {
+  const seoContent = document.getElementById("seoContent");
+  if (!seoContent) return;
+
+  const chunks = paragraphs.flatMap(p =>
+    p.split(/(?<=[.!?])\s+/).slice(0, 2)
+  );
 
   seoContent.innerHTML = `
     <div class="story-stack">
-      ${paragraphs.map((paragraph, index) => `
-        <article class="story-card${index === 0 ? " lead" : ""}">
-          <div class="story-card-title">
-            <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
-            <span>${titles[index] ? titles[index][1] : "More to know"}</span>
-          </div>
-          <p>${escapeHtml(paragraph)}</p>
+      ${chunks.map((text, i) => `
+        <article class="story-card${i === 0 ? " lead" : ""}">
+          <p>${escapeHtml(text.trim())}</p>
         </article>
       `).join("")}
     </div>
