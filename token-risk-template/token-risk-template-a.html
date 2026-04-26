@@ -1,6 +1,6 @@
 <!DOCTYPE html>
- 
-<html lang="en"> 
+
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -131,14 +131,14 @@ button,textarea,input{font-family:'DM Sans',system-ui,Arial,sans-serif;}
 
 /* ─── CONTAINER ─── */
 .container,.content-section{max-width:820px;margin:auto;padding:24px;border-radius:var(–radius-xl);position:relative;overflow:hidden;border:1px solid rgba(0,236,208,.10);background:linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%);box-shadow:var(–shadow-xl),inset 0 1px 0 rgba(0,236,208,.06);}
-.container::before,.content-section::before{content:"";position:absolute;top:-100px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(0,236,208,.09),transparent 65%);pointer-events:none;}
-.container::after,.content-section::after{content:"";position:absolute;left:-70px;bottom:-100px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(168,127,255,.07),transparent 68%);pointer-events:none;}
+.container::before,.content-section::before{content:””;position:absolute;top:-100px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(0,236,208,.09),transparent 65%);pointer-events:none;}
+.container::after,.content-section::after{content:””;position:absolute;left:-70px;bottom:-100px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(168,127,255,.07),transparent 68%);pointer-events:none;}
 .container>*,.content-section>*{position:relative;z-index:1;}
 .system-badge{display:flex;justify-content:center;align-items:center;gap:7px;margin-bottom:14px;font-size:10px;font-weight:900;color:var(–cyan);letter-spacing:.12em;text-transform:uppercase;text-align:center;}
 
 /* ─── PREVIEW CARD ─── */
 .preview-card{position:relative;margin-bottom:18px;padding:18px;border-radius:var(–radius-lg);background:linear-gradient(135deg,rgba(224,80,104,.09) 0%,rgba(168,127,255,.07) 56%,rgba(0,236,208,.05) 100%);border:1px solid rgba(224,80,104,.18);overflow:hidden;box-shadow:var(–glow-red),var(–shadow-md);}
-.preview-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(224,80,104,.09),transparent 34%),radial-gradient(circle at bottom left,rgba(0,236,208,.07),transparent 38%);pointer-events:none;}
+.preview-card::before{content:””;position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(224,80,104,.09),transparent 34%),radial-gradient(circle at bottom left,rgba(0,236,208,.07),transparent 38%);pointer-events:none;}
 .preview-card>*{position:relative;z-index:1;}
 .preview-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .preview-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:linear-gradient(135deg,var(–red) 0%,var(–red-2) 100%);color:#fff;font-size:11px;font-weight:900;letter-spacing:.03em;box-shadow:var(–glow-red);line-height:1;}
@@ -475,6 +475,7 @@ body{padding-top:82px;}
 
   <div class="container">
 
+```
 <div class="system-badge">⬡ Live checker plus keyword guide</div>
 
 <div class="preview-card">
@@ -505,8 +506,8 @@ body{padding-top:82px;}
 </div>
 
 <div class="tool-shell">
-  <textarea id="text" placeholder="Paste a token address, contract address, Dexscreener link, token name, or project page copy to review..."></textarea>
-  <div class="input-help">Examples: token address, contract address, Dexscreener link, project site copy, token page, launch page</div>
+  <textarea id="text" placeholder="Enter token contract address for accurate results..."></textarea>
+  <div class="input-help">Enter the token contract address — required for accurate risk results</div>
   <button class="check" onclick="check()">🧪 Check Token Risk</button>
   <div class="note">No signup required • 1 free check • Results in seconds</div>
   <div class="price-anchor">Unlimited checks from $3.99 / week • Cancel anytime</div>
@@ -569,6 +570,7 @@ body{padding-top:82px;}
     <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
   </div>
 </div>
+```
 
   </div>
 
@@ -679,9 +681,9 @@ function isBrowserSubscribed(){return localStorage.getItem(TOKEN_RISK_BROWSER_SU
 function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function normalizeKeyword(str){return String(str||"").replace(/\s+/g," ").replace(/[–—]/g,"-").trim();}
 function stripLeadingQuestionPrefixes(t){return String(t||"").replace(/^\s*is\s+/i,"").replace(/^\s*can\s+i\s+trust\s+/i,"").replace(/^\s*should\s+i\s+buy\s+/i,"").replace(/^\s*is\s+this\s+/i,"").trim();}
-function stripTrailingQuestionSuffixes(t){return String(t||"").replace(/\s+a\s+scam$/i,"").replace(/\s+or\s+legit$/i,"").replace(/\s+or\s+safe$/i,"").replace(/\s+safe$/i,"").replace(/\s+legit$/i,"").replace(/\s+buy$/i,"").replace(/\s+token$/i," token").trim();}
+function stripTrailingQuestionSuffixes(t){return String(t||"").replace(/\s+a\s+scam\b.*/i,"").replace(/\s+scam\b.*/i,"").replace(/\s+or\s+legit$/i,"").replace(/\s+or\s+safe$/i,"").replace(/\s+safe$/i,"").replace(/\s+legit$/i,"").replace(/\s+buy$/i,"").replace(/\s+risky\b.*/i,"").replace(/\s+risk\b.*/i,"").replace(/\s+token$/i," token").trim();}
 function cleanKeywordBase(k){var t=normalizeKeyword(k);t=stripLeadingQuestionPrefixes(t);t=stripTrailingQuestionSuffixes(t);return t.replace(/\s+/g," ").trim();}
-function cleanKeywordForSentence(k){return cleanKeywordBase(k).replace(/\btoken\b/gi,"").replace(/\bcoin\b/gi,"").replace(/\bcoins\b/gi,"").replace(/\bcontract\b/gi,"").replace(/\baddress\b/gi,"").replace(/\bproject\b/gi,"").replace(/\bchart\b/gi,"").replace(/\blink\b/gi,"").replace(/\blinks\b/gi,"").replace(/\bwallet\b/gi,"").replace(/\bwallets\b/gi,"").replace(/\bairdrop\b/gi,"").replace(/\bpresale\b/gi,"").replace(/\blaunch\b/gi,"").replace(/\bcrypto\b/gi,"").replace(/\bblock\b/gi,"").replace(/\bselling\b/gi,"").replace(/\bdev\b/gi,"").replace(/\bcan\b/gi,"").replace(/\bshould\b/gi,"").replace(/\bdoes\b/gi,"").replace(/\bdo\b/gi,"").replace(/\bis\b/gi,"").replace(/\bwhy\b/gi,"").replace(/\bhow\b/gi,"").replace(/\bwhat\b/gi,"").replace(/\s+/g," ").trim();}
+function cleanKeywordForSentence(k){return cleanKeywordBase(k).replace(/\btoken\b/gi,"").replace(/\bcoin\b/gi,"").replace(/\bcoins\b/gi,"").replace(/\bcontract\b/gi,"").replace(/\baddress\b/gi,"").replace(/\bproject\b/gi,"").replace(/\bchart\b/gi,"").replace(/\blink\b/gi,"").replace(/\blinks\b/gi,"").replace(/\bwallet\b/gi,"").replace(/\bwallets\b/gi,"").replace(/\bairdrop\b/gi,"").replace(/\bpresale\b/gi,"").replace(/\blaunch\b/gi,"").replace(/\bcrypto\b/gi,"").replace(/\bblock\b/gi,"").replace(/\bselling\b/gi,"").replace(/\bdev\b/gi,"").replace(/\bcan\b/gi,"").replace(/\bshould\b/gi,"").replace(/\bdoes\b/gi,"").replace(/\bdo\b/gi,"").replace(/\bis\b/gi,"").replace(/\bwhy\b/gi,"").replace(/\bhow\b/gi,"").replace(/\bwhat\b/gi,"").replace(/\bthis\b/gi,"").replace(/\bscam\b/gi,"").replace(/\brisky\b/gi,"").replace(/\brisk\b/gi,"").replace(/\bcheck\b/gi,"").replace(/\bsafe\b/gi,"").replace(/\ba\b/gi,"").replace(/\ban\b/gi,"").replace(/\s+/g," ").trim();}
 function displayKeyword(s){var t=normalizeKeyword(s);if(!t)return"";return t.charAt(0).toUpperCase()+t.slice(1);}
 function displayCleanKeyword(s){return displayKeyword(cleanKeywordBase(s));}
 function containsAny(t,arr){return arr.some(function(p){return t.includes(p);});}
@@ -705,21 +707,30 @@ function buildHeroTitle(kw){
   if(!raw)return"Check Token Risk Before You Buy, Connect, or Chase Hype";
   if(isGuidanceStyleKeyword(lower))return displayKeyword(raw)+": "+suffix;
   if(isQuestionStyleKeyword(lower))return rewriteQuestionKeyword(raw)+" "+suffix;
-  return"Is "+displayCleanKeyword(kw)+" Risky? Check Token Risk Before You Buy";
+  var cleaned=cleanKeywordForSentence(kw);
+  if(!cleaned||cleaned.length<2)cleaned="This Token";
+  else cleaned=displayKeyword(cleaned);
+  return"Is "+cleaned+" Risky? Check Token Risk Before You Buy";
 }
 function buildHeroSubheading(kw){
   var raw=normalizeKeyword(kw),lower=raw.toLowerCase();
-  if(isGuidanceStyleKeyword(lower)||isQuestionStyleKeyword(lower))return"Use the checker below to review token addresses, contract details, project copy, launch pages, and momentum before you buy, connect, or take action.";
-  return"Tokens related to "+displayKeyword(cleanKeywordForSentence(raw)||cleanKeywordBase(raw)||raw)+" can carry structural risk even when the surface looks active. Paste the token address, Dexscreener link, or project copy below before you buy, connect, or move on momentum alone.";
+  if(isGuidanceStyleKeyword(lower)||isQuestionStyleKeyword(lower))return"Enter the token contract address in the checker below for an accurate risk result before you buy or connect.";
+  var ck=cleanKeywordForSentence(raw)||cleanKeywordBase(raw)||raw;
+  if(!ck||ck.length<2)return"Enter the token contract address in the checker below for an accurate risk result before you buy or connect.";
+  return"Tokens related to "+displayKeyword(ck)+" can carry structural risk even when the surface looks active. Enter the token contract address in the checker below before you buy or connect.";
 }
 function buildContentHeading(kw){
   var raw=normalizeKeyword(kw),lower=raw.toLowerCase();
   if(isGuidanceStyleKeyword(lower)||isQuestionStyleKeyword(lower))return displayKeyword(raw);
-  return"What "+displayCleanKeyword(kw)+" Token Risk Often Looks Like";
+  var ck=cleanKeywordForSentence(raw);
+  if(!ck||ck.length<2)return"Token Risk: What To Check Before You Buy";
+  return"What "+displayKeyword(ck)+" Token Risk Often Looks Like";
 }
 function buildContentBridge(kw){
-  var raw=normalizeKeyword(kw),lower=raw.toLowerCase(),ck=cleanKeywordForSentence(raw)||cleanKeywordBase(raw)||raw;
-  if(isGuidanceStyleKeyword(lower)||isQuestionStyleKeyword(lower))return"Use the checker above to review token addresses, contract details, project copy, launch pages, wallet prompts, and hype before you buy, connect, or take action.";
+  var raw=normalizeKeyword(kw),lower=raw.toLowerCase();
+  if(isGuidanceStyleKeyword(lower)||isQuestionStyleKeyword(lower))return"Enter the token contract address in the checker above for an accurate risk result before you buy or connect.";
+  var ck=cleanKeywordForSentence(raw);
+  if(!ck||ck.length<2)return"Use the checker above before you buy, connect a wallet, approve anything, or act on hype. Weak token structure often looks strongest right before real exposure starts.";
   var r=displayKeyword(ck),v=["If this "+r+" just showed up,","If you\u2019re looking at this "+r+" right now,","If this "+r+" is already getting attention,"];
   return v[ck.length%v.length]+" use the checker above before you buy, connect a wallet, approve anything, or act on hype. Weak token structure often looks strongest right before real exposure starts.";
 }
@@ -817,10 +828,10 @@ function applyIntentToChecker(){
   var lower=normalizeKeyword(RAW_KEYWORD||"").toLowerCase();
   var ta=document.getElementById("text"),ih=document.querySelector(".input-help");
   if(!ta||!ih)return;
-  if(containsAny(lower,["airdrop","claim","wallet","connect","approve"])){ta.placeholder="Paste the token address, claim page, wallet prompt, or approval request you want to review...";ih.textContent="Examples: token address, claim page, approval request, wallet prompt, launch page";return;}
-  if(containsAny(lower,["meme","memecoin","pump","moon","100x"])){ta.placeholder="Paste the token address, ticker, contract address, or launch page you want to review before buying...";ih.textContent="Examples: token address, ticker, contract address, Dexscreener page, launch page";return;}
-  if(containsAny(lower,["sol","solana","eth","ethereum","base","bnb","chain","contract","address"])){ta.placeholder="Paste the token address, contract address, Dexscreener link, or project page you want to review...";ih.textContent="Examples: token address, contract address, Dexscreener link, project page copy, token page";return;}
-  ta.placeholder="Paste a token address, contract address, Dexscreener link, token name, or project page copy to review...";ih.textContent="Examples: token address, contract address, Dexscreener link, project site copy, token page, launch page";
+  if(containsAny(lower,["airdrop","claim","wallet","connect","approve"])){ta.placeholder="Enter the token contract address to check approval and wallet drain risk...";ih.textContent="Enter the token contract address — required for accurate risk results";return;}
+  if(containsAny(lower,["meme","memecoin","pump","moon","100x"])){ta.placeholder="Enter the token contract address to check structure before buying...";ih.textContent="Enter the token contract address — required for accurate risk results";return;}
+  if(containsAny(lower,["sol","solana","eth","ethereum","base","bnb","chain","contract","address"])){ta.placeholder="Enter the token contract address to check risk on this chain...";ih.textContent="Enter the token contract address — required for accurate risk results";return;}
+  ta.placeholder="Enter token contract address for accurate results...";ih.textContent="Enter the token contract address — required for accurate risk results";
 }
 
 function splitIntoSentences(text){var sentences=[],parts=text.trim().split(/(?<=[.!?])\s+(?=[A-Z])/);parts.forEach(function(p){var s=p.trim();if(s)sentences.push(s);});return sentences;}
@@ -986,15 +997,14 @@ async function check(){
   var email=document.getElementById("email").value.trim().toLowerCase();
   var subscribed=isBrowserSubscribed();
   var result=document.getElementById("result");
-  if(!text){result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Paste A Token To Check</div><div class="result-chip">Awaiting Input</div></div><div class="result-summary">Paste a token address, contract address, Dexscreener link, or project page to check token risk before you act.</div></div>';result.style.display="block";return;}
+  if(!text){result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Enter A Contract Address To Check</div><div class="result-chip">Awaiting Input</div></div><div class="result-summary">Enter the token contract address above to get an accurate risk result.</div></div>';result.style.display="block";return;}
   result.style.display="block";
   result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Analyzing...</div><div class="result-chip">Token Scan In Progress</div></div><div class="result-summary">Checking token structure, liquidity risk, holder concentration, approval risk, hype pressure, and suspicious project behavior.</div></div>';
   try{
     var response=await fetch(API+ANALYZE_PATH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,email:email,subscribed:subscribed})});
     var data=await response.json();
-    if(data&&data.limit){result.innerHTML='<div class="result-card medium"><div class="result-top"><div class="risk medium">🟠 Free Check Used</div><div class="result-chip">Upgrade Available</div></div><div class="result-summary">Unlock unlimited access so you can check the next token, contract address, or project before it costs you.</div></div>';showUpgrade();return;}
+    if(data&&data.limit){result.innerHTML='<div class="result-card medium"><div class="result-top"><div class="risk medium">🟠 Free Check Used</div><div class="result-chip">Upgrade Available</div></div><div class="result-summary">Unlock unlimited access so you can check the next token, contract address, or project before it costs you.</div></div>';if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade('yearly');return;}
     result.innerHTML=formatTokenResult(data||{});
-    showUpgrade();
   }catch(e){result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Unable To Analyze</div><div class="result-chip">Try Again</div></div><div class="result-summary">We could not analyze this token right now. Please try again in a moment.</div></div>';}
 }
 
