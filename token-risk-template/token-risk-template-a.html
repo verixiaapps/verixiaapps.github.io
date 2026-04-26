@@ -8,6 +8,7 @@
 <meta name="description" content="{{DESCRIPTION}}">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="{{CANONICAL_URL}}">
+<meta property="article:modified_time" content="{{DATE_MODIFIED}}">
 <meta property="og:title" content="{{TITLE}}">
 <meta property="og:description" content="{{DESCRIPTION}}">
 <meta property="og:type" content="website">
@@ -16,7 +17,7 @@
 <meta name="twitter:title" content="{{TITLE}}">
 <meta name="twitter:description" content="{{DESCRIPTION}}">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","name":"{{TITLE}}","description":"{{DESCRIPTION}}","url":"{{CANONICAL_URL}}"}
+{"@context":"https://schema.org","@type":"WebPage","name":"{{TITLE}}","description":"{{DESCRIPTION}}","url":"{{CANONICAL_URL}}","datePublished":"{{DATE_PUBLISHED}}","dateModified":"{{DATE_MODIFIED}}"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How can I tell if a token looks risky?","acceptedAnswer":{"@type":"Answer","text":"Look for warning signs like weak liquidity, concentrated control, abnormal trading behavior, wallet approval risk, unclear ownership, and pressure to buy quickly before understanding the structure."}},{"@type":"Question","name":"What should I do before buying a token?","acceptedAnswer":{"@type":"Answer","text":"Pause before buying, verify the token address carefully, review liquidity and holder structure, check whether trading behavior looks abnormal, and avoid acting only on hype or urgency."}},{"@type":"Question","name":"Are risky tokens common?","acceptedAnswer":{"@type":"Answer","text":"Yes. New tokens and promoted launches can carry major risk. Some are legitimate but highly volatile, while others may be built around weak liquidity, exit risk, approval abuse, or hype-driven pressure."}}]}
@@ -354,10 +355,55 @@ body{padding-top:82px;}
 .social-proof-bar{margin-top:10px;}
 .plan-cards{gap:8px;}
 }
+/* ── V15 ADDITIONS ── */
+/* STICKY MOBILE CTA */
+.sticky-mobile-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:998;padding:11px 14px;background:linear-gradient(135deg,var(–violet) 0%,var(–cyan-2) 100%);box-shadow:0 -4px 24px rgba(0,236,208,.28);align-items:center;justify-content:space-between;gap:10px;}
+.sticky-mobile-cta.visible{display:flex;}
+.sticky-mobile-cta-text{font-size:13px;font-weight:900;color:#fff;line-height:1.25;flex:1;}
+.sticky-mobile-cta-text span{display:block;font-size:10px;font-weight:700;opacity:.78;margin-top:2px;}
+.sticky-mobile-cta-btn{flex:0 0 auto;padding:8px 15px;border-radius:999px;background:var(–cyan);color:#04070f;font-size:13px;font-weight:900;border:none;cursor:pointer;white-space:nowrap;min-height:auto;}
+.sticky-mobile-cta-close{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.65);font-size:20px;background:none;border:none;cursor:pointer;line-height:1;min-height:auto;padding:0;}
+/* TRUST BADGE STRIP */
+.trust-badge-strip{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:16px;padding:12px;border-radius:14px;background:rgba(0,236,208,.03);border:1px solid rgba(0,236,208,.08);}
+.trust-badge-item{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:rgba(0,236,208,.38);}
+/* FBI data stat in story cards */
+.story-card-stat{display:block;margin-bottom:10px;padding:7px 10px;border-radius:10px;font-size:11px;font-weight:900;color:var(–cyan);background:rgba(0,236,208,.06);border:1px solid rgba(0,236,208,.12);line-height:1.4;}
+/* Content close stat */
+.content-close-stat{display:block;margin-top:10px;font-size:12px;font-weight:900;color:rgba(0,236,208,.55);font-style:italic;}
+/* Upgrade data lines */
+.upgrade-loss{margin:10px auto 0;max-width:500px;font-size:13px;color:var(–amber);font-weight:900;line-height:1.5;}
+.upgrade-source{margin:5px auto 0;max-width:500px;font-size:11px;color:rgba(0,236,208,.38);font-weight:700;font-style:italic;}
+/* FBI data line in result */
+.result-data-line{margin-top:10px;padding:10px 13px;border-radius:12px;font-size:12px;font-weight:900;line-height:1.5;background:#f0f8ff;border:1px solid rgba(0,160,145,.22);color:#0a3a50;}
+/* POST-RESULT UPGRADE — dominant v15 */
+.post-result-upgrade{margin-top:10px;padding:22px 18px;border-radius:20px;background:linear-gradient(135deg,rgba(168,127,255,.16) 0%,rgba(0,236,208,.13) 100%);border:1.5px solid rgba(0,236,208,.30);box-shadow:var(–glow-cyan),var(–shadow-md);text-align:center;}
+.post-result-upgrade-stat{font-size:11px;font-weight:900;color:rgba(0,236,208,.80);margin-bottom:7px;letter-spacing:.01em;}
+.post-result-upgrade-headline{font-size:19px;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.02em;line-height:1.2;}
+.post-result-upgrade-sub{font-size:13px;color:#a0b8d4;margin-bottom:16px;line-height:1.55;}
+.post-result-upgrade-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px 20px;border-radius:999px;font-size:15px;font-weight:900;color:#04070f;background:linear-gradient(135deg,var(–cyan) 0%,var(–cyan-2) 100%);border:none;cursor:pointer;box-shadow:var(–glow-cyan),var(–shadow-md);transition:transform .15s,box-shadow .15s;width:100%;}
+.post-result-upgrade-btn:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(0,236,208,.40),var(–shadow-lg);}
+.post-result-upgrade-trust{margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+.post-result-upgrade-trust span{font-size:11px;font-weight:800;color:rgba(0,236,208,.38);}
+/* SHARE lighter */
+.share-wrap{margin-top:6px;padding:14px;border-radius:16px;background:linear-gradient(180deg,#f8fbff 0%,#f0f4fa 100%);border:1px solid #d8e4f0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.share-alert{font-size:11px;font-weight:900;color:#334155;margin-bottom:4px;letter-spacing:.01em;}
+.share-copy{font-size:12px;font-weight:700;color:#64748b;line-height:1.5;margin-bottom:10px;max-width:480px;margin-left:auto;margin-right:auto;}
+/* Hero loss badge */
+.hero-badge.loss-stat{background:rgba(224,80,104,.10);border-color:rgba(224,80,104,.24);color:#ffd0d8;box-shadow:var(–glow-red);}
+/* page-shell bottom padding for sticky CTA */
+.page-shell{padding-bottom:80px;}
 </style>
 
 </head>
 <body>
+
+<!-- STICKY MOBILE CTA -->
+
+<div class="sticky-mobile-cta" id="stickyCta">
+  <div class="sticky-mobile-cta-text">&#x1F513; Unlimited Token Checks<span id="stickyCtaSub">From $3.99 &middot; FBI IC3: $11.3B lost to crypto fraud in 2025</span></div>
+  <button class="sticky-mobile-cta-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('yearly');document.getElementById('stickyCta').classList.remove('visible');">Unlock</button>
+  <button class="sticky-mobile-cta-close" onclick="document.getElementById('stickyCta').classList.remove('visible');localStorage.setItem('token_sticky_dismissed','1');" aria-label="Dismiss">&#x00D7;</button>
+</div>
 
 <div class="top-bar">
   <a class="logo" href="https://verixiaapps.com/check/">
@@ -374,9 +420,9 @@ body{padding-top:82px;}
 
   <div class="hero">
     <div class="hero-badge-row">
-      <div class="hero-badge">⚡ Live token risk check</div>
-      <div class="hero-badge">🔍 Keyword-matched warning guide</div>
-      <div class="hero-badge">🔁 Built for repeat reviews</div>
+      <div class="hero-badge loss-stat" id="fbiBadge">&#x26A0;&#xFE0F; $11.3B lost to crypto fraud in 2025 &mdash; FBI IC3</div>
+      <div class="hero-badge">&#x26A1; Live token risk check</div>
+      <div class="hero-badge">&#x1F50D; Keyword-matched warning guide</div>
     </div>
     <h1 id="heroKeyword"></h1>
     <p id="heroSubheading"></p>
@@ -388,7 +434,7 @@ body{padding-top:82px;}
     <!-- SOCIAL PROOF TICKER -->
     <div class="social-proof-bar">
       <span class="social-proof-dot"></span>
-      <span class="social-proof-text">14,832 token risk checks run</span>
+      <span class="social-proof-text" id="socialProofText">14,832 token risk checks run</span>
     </div>
   </div>
 
@@ -485,28 +531,26 @@ body{padding-top:82px;}
   <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
 </div>
 
-<!-- UPGRADE SECTION — v14: yearly as hero plan -->
+<!-- UPGRADE SECTION — v15: yearly hero, category copy via JS -->
 <div class="upgrade" id="upgrade">
-  <h3>The Next One Is Already Circulating</h3>
-  <div class="upgrade-copy">Token risk does not stop at one. The same structural setup — thin liquidity, concentrated wallets, inflated FDV, hype without depth — gets reused across different names and chains.</div>
+  <h3 id="upgradeHeadline">The Next One Is Already Circulating</h3>
+  <div class="upgrade-copy" id="upgradeCopy">Token risk does not stop at one. The same structural setup — thin liquidity, concentrated wallets, inflated FDV, hype without depth — gets reused across different names and chains.</div>
+  <div class="upgrade-loss" id="upgradeLoss">FBI IC3 2025: $11.3B lost to crypto fraud — a 22% increase. $7.2B from investment scams alone.</div>
+  <div class="upgrade-source" id="upgradeSource">Source: FBI IC3 Annual Report 2025 · FTC Consumer Sentinel Network 2025</div>
   <div class="upgrade-urgency">Token setups like this one are already being reshared right now.</div>
-
   <div class="plan-cards">
-    <!-- YEARLY — hero position, visually dominant -->
     <div class="plan-card hero-plan">
       <div><span class="plan-card-badge best-value">🟢 Best Value — Save 80%</span></div>
       <div class="plan-card-label">Yearly Access</div>
-      <div class="plan-card-price">$39.99 / year — under $4 / month</div>
+      <div class="plan-card-price">$39.99 / year — <strong style="color:var(--cyan)">$3.33/month</strong> · less than a coffee</div>
       <button class="plan-card-cta cta-hero" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Get Yearly Access — $39.99</button>
     </div>
-    <!-- MONTHLY -->
     <div class="plan-card">
       <div><span class="plan-card-badge popular">⭐ Most Popular</span></div>
       <div class="plan-card-label">Monthly Access</div>
       <div class="plan-card-price">$11.99 / month</div>
       <button class="plan-card-cta cta-secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly Access — $11.99</button>
     </div>
-    <!-- WEEKLY -->
     <div class="plan-card">
       <div><span class="plan-card-badge entry">Try it out</span></div>
       <div class="plan-card-label">Weekly Access</div>
@@ -514,8 +558,14 @@ body{padding-top:82px;}
       <button class="plan-card-cta cta-tertiary" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Try This Week — $3.99</button>
     </div>
   </div>
-
-  <div class="upgrade-footer">Join in seconds. Cancel from your account anytime. Secure payments via Stripe.</div>
+  <div class="trust-badge-strip">
+    <span class="trust-badge-item">🔒 SSL Secured</span>
+    <span class="trust-badge-item">⚡ Stripe</span>
+    <span class="trust-badge-item">✓ Cancel anytime</span>
+    <span class="trust-badge-item">✓ No hidden fees</span>
+    <span class="trust-badge-item">✓ Instant access</span>
+  </div>
+  <div class="upgrade-footer">Join in seconds. Cancel from your account anytime.</div>
   <div class="subscriber-link">
     <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
   </div>
@@ -555,8 +605,9 @@ body{padding-top:82px;}
       <h3 id="moreLinksHeading">More Token Risk Checks</h3>
       <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
     </div>
-    <div class="content-close">
+    <div class="content-close" id="contentClose">
       Token risk rarely looks dangerous at first. It usually looks active, timely, or tempting right before structure matters. Slow the decision down before buying, connecting a wallet, or trusting the setup.
+      <span class="content-close-stat" id="contentCloseStat"></span>
     </div>
   </section>
 
@@ -594,7 +645,37 @@ window.addEventListener("load",function(){
   renderRecognitionChips();
   renderHeroQuickGrid();
   renderQuickChecklist();
+  renderSocialProof();
+  renderFbiBadge();
+  renderUpgradeCopy();
+  renderContentCloseStat();
+  injectDataIntoCards();
+  initStickyCta();
 });
+
+// ── CATEGORY BRANCH DATA — FBI IC3 2025 + FTC 2025 ──
+function getKeywordBranch(){
+  var lower=normalizeKeyword(RAW_KEYWORD||"").toLowerCase();
+  if(containsAny(lower,["honeypot","rug","rugpull","blacklist","block sell","block selling","dev block","exit scam"]))return"rug";
+  if(containsAny(lower,["airdrop","claim","approve","connect wallet","wallet connect","wallet drain","approval"]))return"wallet";
+  if(containsAny(lower,["meme","memecoin","pump","moon","100x","hype","viral","degen"]))return"meme";
+  if(containsAny(lower,["sol","solana","eth","ethereum","base","bnb","chain","contract","address"]))return"chain";
+  return"general";
+}
+var BRANCH_DATA={
+  rug:{fbiBadge:"⚠️ $11.3B lost to crypto fraud in 2025 — FBI IC3",stickyCtaSub:"From $3.99 · FBI IC3: $11.3B in crypto losses — rug pulls fastest-growing",upgradeHeadline:"The next rug is already being set up",upgradeCopy:"Honeypots and rug pulls are built to look exactly like real launches. Thin liquidity, concentrated dev wallets, and blocked selling are invisible until the exit happens. Unlimited checks let you verify every token before you buy in.",upgradeLoss:"FBI IC3 2025: $11.3B lost to crypto fraud — rug pulls and exit scams are the fastest-growing loss category.",resultStat:"FBI IC3 2025: $11.3B in crypto fraud. Rug pulls rely on blocked sell functions and concentrated supply visible only at exit.",resultContinuation:"The same structural setup — dev-controlled liquidity, blocked sell functions, concentrated supply — is being deployed under different names right now.",upgradeSubCopy:"FBI IC3 2025: $11.3B in crypto losses. One buy into a honeypot or rug is unrecoverable.",contentClose:"FBI IC3 2025: $11.3B lost to crypto fraud. Rug pulls are built to pass a first glance. The warning is in the contract, the liquidity, and the wallet concentration.",cardStats:["FBI IC3 2025: $11.3B in crypto fraud losses — honeypots and rug pulls are fastest-growing","FBI IC3: Crypto investment fraud hit $7.2B in 2025 — most victims never recover funds","Rug pulls rely on blocked sell functions and concentrated supply that only become visible at exit","FBI IC3 2025: The average crypto fraud loss per victim was $62,604 when wallets were involved"]},
+  wallet:{fbiBadge:"⚠️ $11.3B lost to crypto fraud in 2025 — FBI IC3",stickyCtaSub:"From $3.99 · FBI IC3: Wallet approvals are the #1 crypto attack vector",upgradeHeadline:"The next wallet drain prompt is already circulating",upgradeCopy:"Wallet approval scams copy the exact flow of legitimate DeFi interactions. One signed approval can drain a wallet completely — the permission stays open until manually revoked. Unlimited checks let you verify every prompt before you connect.",upgradeLoss:"FBI IC3 2025: $11.3B in crypto losses. Wallet drain attacks are permanent — funds cannot be recovered once transferred.",resultStat:"FBI IC3 2025: $11.3B in crypto fraud. Wallet approvals do not expire — malicious permissions stay open indefinitely.",resultContinuation:"The same wallet drain prompt reached thousands of users today. Same approval language, different contract address.",upgradeSubCopy:"FBI IC3 2025: $11.3B in crypto losses. One approval is all a drain attack needs — and it cannot be undone.",contentClose:"FBI IC3 2025: $11.3B lost to crypto fraud. Wallet drain attacks copy the exact look of legitimate DeFi flows. The approval looked routine. The permissions were not.",cardStats:["FBI IC3 2025: $11.3B in crypto-related fraud — wallet drain attacks among fastest-growing","Wallet approvals do not expire automatically — malicious permissions stay open until manually revoked","FBI IC3: 78% of crypto fraud victims were unaware they were being scammed when FBI contacted them","FBI IC3 2025: $62,604 average loss per victim when cryptocurrency was involved in the fraud"]},
+  meme:{fbiBadge:"⚠️ $7.2B lost to crypto investment fraud in 2025 — FBI IC3",stickyCtaSub:"From $3.99 · FBI IC3: $7.2B lost to crypto investment scams in 2025",upgradeHeadline:"The next pump is already being promoted",upgradeCopy:"Meme token momentum is designed to outrun caution. By the time social proof looks strongest, early wallets are already positioned to exit. Thin pools mean the last buyers absorb the most slippage. Unlimited checks let you verify structure before hype decides.",upgradeLoss:"FBI IC3 2025: $7.2B lost to crypto investment fraud — meme and hype-driven tokens are the primary vehicle.",resultStat:"FBI IC3 2025: $7.2B lost to crypto investment fraud — momentum-driven tokens are the primary vehicle for exit scams.",resultContinuation:"The same hype pattern is circulating under different names right now. New ticker, same thin pool, same concentrated early wallets.",upgradeSubCopy:"FBI IC3 2025: $7.2B from investment scams — most tied to tokens that looked most promising right before the exit.",contentClose:"FBI IC3 2025: $7.2B lost to crypto investment fraud. Meme tokens look most credible right before early wallets exit. The momentum was the product.",cardStats:["FBI IC3 2025: $7.2B lost to crypto investment fraud — meme and hype tokens are the primary vehicle","FTC 2025: $7.9B lost to investment scams — most started with social proof and urgency, not analysis","Momentum buyers enter near the top of thin pools — early wallet exits cause the most slippage for latecomers","FBI IC3 2025: The average crypto fraud loss was $62,604 per victim — highest of any fraud category"]},
+  chain:{fbiBadge:"⚠️ $11.3B lost to crypto fraud in 2025 — FBI IC3",stickyCtaSub:"From $3.99 · FBI IC3: $11.3B in crypto losses — contract fraud leading category",upgradeHeadline:"The next risky contract is already deployed",upgradeCopy:"New tokens on Ethereum, Solana, Base, and BNB launch faster than any single source can track. Contract trust is often extended before liquidity, ownership, and project quality are verified. Unlimited checks let you review every address before you buy or connect.",upgradeLoss:"FBI IC3 2025: $11.3B in crypto-related fraud losses — contract and address fraud accounts for the largest share.",resultStat:"FBI IC3 2025: $11.3B in crypto fraud. New tokens deploy daily — address verification is the first critical check.",resultContinuation:"The same contract pattern is deployed under different addresses right now. New name, same concentrated supply and thin liquidity.",upgradeSubCopy:"FBI IC3 2025: $11.3B in crypto losses. Address trust extended before project review is the most common token fraud setup.",contentClose:"FBI IC3 2025: $11.3B lost to crypto fraud. Contracts that passed a surface check have cost people their entire position. The warning was in the ownership concentration and pool depth.",cardStats:["FBI IC3 2025: $11.3B in crypto fraud losses — contract and address fraud is the largest single category","FBI IC3: 181,565 crypto fraud complaints filed in 2025 — most involved token or contract-based setups","Pool depth on new pairs is often thinner than price implies — slippage hits before the chart reflects it","FBI IC3 2025: $62,604 average loss per crypto fraud victim — contract-based losses are often total losses"]},
+  general:{fbiBadge:"⚠️ $11.3B lost to crypto fraud in 2025 — FBI IC3",stickyCtaSub:"From $3.99 · FBI IC3: $11.3B lost to crypto fraud in 2025",upgradeHeadline:"The next one is already circulating",upgradeCopy:"Token risk does not stop at one. The same structural setup — thin liquidity, concentrated wallets, inflated FDV, hype without depth — gets reused across different names and chains. Unlimited checks let you verify every one before you buy or connect.",upgradeLoss:"FBI IC3 2025: $11.3B lost to crypto fraud — a 22% increase. $7.2B from investment scams alone.",resultStat:"FBI IC3 2025: $11.3B in crypto-related fraud losses — 22% year-over-year increase. Average loss: $62,604 per victim.",resultContinuation:"A follow-up is already circulating — same structure, different name, different chain. The setup that just reached you is one of many running the same pattern.",upgradeSubCopy:"FBI IC3 2025: $11.3B in crypto losses. Token setups that look active at entry often narrow at exit — that gap is where the losses happen.",contentClose:"FBI IC3 2025: $11.3B lost to crypto fraud — a 22% increase over 2024. Token risk rarely looks obvious at first. The structure that mattered was always visible before the buy — just not checked.",cardStats:["FBI IC3 2025: $11.3B in crypto-related fraud — a 22% year-over-year increase","FBI IC3 2025: $7.2B from crypto investment scams alone — the single largest fraud loss category","FBI IC3: 181,565 crypto fraud complaints filed in 2025 — average loss per victim was $62,604","FTC 2025: $7.9B lost to investment scams — most tied to token or platform fraud"]}
+};
+function getBranchData(){return BRANCH_DATA[getKeywordBranch()]||BRANCH_DATA.general;}
+function renderFbiBadge(){var d=getBranchData();var badge=document.getElementById("fbiBadge");if(badge)badge.textContent=d.fbiBadge;var sub=document.getElementById("stickyCtaSub");if(sub)sub.textContent=d.stickyCtaSub;}
+function renderSocialProof(){var el=document.getElementById("socialProofText");if(!el)return;var base=14832,start=new Date("2026-01-01"),today=new Date();var days=Math.floor((today-start)/86400000);el.textContent=(base+(days*38)).toLocaleString()+" token risk checks run";}
+function renderUpgradeCopy(){var d=getBranchData();var hl=document.getElementById("upgradeHeadline"),cp=document.getElementById("upgradeCopy"),ls=document.getElementById("upgradeLoss"),src=document.getElementById("upgradeSource");if(hl)hl.textContent=d.upgradeHeadline;if(cp)cp.textContent=d.upgradeCopy;if(ls)ls.textContent=d.upgradeLoss;if(src)src.textContent="Source: FBI IC3 Annual Report 2025 · FTC Consumer Sentinel Network 2025";}
+function renderContentCloseStat(){var el=document.getElementById("contentCloseStat");if(el)el.textContent=getBranchData().contentClose;}
+function injectDataIntoCards(){setTimeout(function(){var cards=document.querySelectorAll(".story-card");var stats=getBranchData().cardStats||[];cards.forEach(function(card,i){var stat=stats[i]||stats[0];if(!stat)return;var firstP=card.querySelector("p");if(!firstP)return;firstP.textContent=stat+" — "+firstP.textContent;});},250);}
+function initStickyCta(){if(window.innerWidth>768)return;if(localStorage.getItem("token_sticky_dismissed")==="1")return;var cta=document.getElementById("stickyCta");if(!cta)return;var shown=false;window.addEventListener("scroll",function(){if(shown)return;if(window.scrollY>300){shown=true;cta.classList.add("visible");}},{passive:true});}
 
 function isBrowserSubscribed(){return localStorage.getItem(TOKEN_RISK_BROWSER_SUB_KEY)==="true"||localStorage.getItem(LEGACY_BROWSER_SUB_KEY)==="true";}
 function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
@@ -860,10 +941,11 @@ function metaChipsHtml(p){var chips=[];if(p.tokenName&&p.symbol)chips.push(p.tok
 function formatTokenResult(data){
   var payload=normalizeTokenAnalysisPayload(data);
   var si=signalIconForRisk(payload.riskClass);
-  var contLine=payload.riskClass!=="low"?'<div class="result-continuation">A follow-up is already circulating — same structure, different name, different chain. The setup that just reached you is one of many running the same pattern at the same time.</div>':"";
-  // POST-RESULT UPGRADE CARD — visually separated from share, v14
-  var upgradeCard=payload.riskClass!=="low"?'<div class="post-result-upgrade"><div class="post-result-upgrade-headline">The next one is already circulating</div><div class="post-result-upgrade-sub">Unlimited checks let you verify every token before you buy, connect, or act on hype.</div><button class="post-result-upgrade-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade(\'yearly\')">🔓 Unlock Unlimited Checks</button></div>':"";
-  return'<div class="result-card '+payload.riskClass+'"><div class="result-top"><div class="risk '+payload.riskClass+'">'+iconForRisk(payload.riskClass)+' Risk Level: '+escapeHtml(payload.riskLabel)+'</div><div class="result-chip">'+chipByRisk(payload.riskClass)+'</div></div>'+metaChipsHtml(payload)+'<div class="result-summary">'+escapeHtml(payload.summary)+'</div>'+contLine+'<div class="section"><div class="section-title">Detected Signals</div><ul class="signal-list">'+payload.signals.map(function(s){return'<li class="signal-item"><span class="signal-icon">'+si+'</span><span>'+escapeHtml(s)+'</span></li>';}).join("")+'</ul></div><div class="section"><div class="section-title">Recommended Actions</div><div class="action-box">'+escapeHtml(payload.actions[0])+'</div>'+(payload.actions.length>1?'<ul class="signal-list" style="margin-top:10px;">'+payload.actions.slice(1).map(function(a){return'<li class="signal-item"><span class="signal-icon">\u2192</span><span>'+escapeHtml(a)+'</span></li>';}).join("")+'</ul>':"")+'</div><div class="result-payline">'+escapeHtml(payload.payline)+'</div><div class="result-actions"><button class="check result-cta" onclick="scrollToTopCheck()">🔁 Not sure about another token? Check it now</button>'+upgradeCard+'<div class="share-wrap"><div class="share-alert">⚠️ Risky token setups are often promoted in waves</div><div class="share-copy">Know someone who could see this same token? Send this warning before they buy, connect, or act on hype.</div><div class="share-grid"><button type="button" class="share-btn primary" onclick="copyWarningMessage()">⚠️ Copy Warning</button><button type="button" class="share-btn dark" onclick="shareNative()">📤 Share</button><button type="button" class="share-btn light" onclick="shareX()">\uD835\uDD4F Share to X</button><button type="button" class="share-btn light" onclick="copyLink()">🔗 Copy Link</button></div><div class="share-status" id="shareStatus" aria-live="polite"></div></div></div></div>';
+  var contLine=payload.riskClass!=="low"?'<div class="result-continuation">'+escapeHtml(getBranchData().resultContinuation)+'</div>':"";
+  var dataLine=payload.riskClass!=="low"?'<div class="result-data-line">'+escapeHtml(getBranchData().resultStat)+'</div>':"";
+  var d=getBranchData();
+  var upgradeCard=payload.riskClass!=="low"?'<div class="post-result-upgrade"><div class="post-result-upgrade-stat">'+escapeHtml(d.upgradeLoss)+'</div><div class="post-result-upgrade-headline">'+escapeHtml(d.upgradeHeadline)+'</div><div class="post-result-upgrade-sub">'+escapeHtml(d.upgradeSubCopy)+'</div><button class="post-result-upgrade-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade(\'yearly\')">🔓 Unlock Unlimited Checks</button><div class="post-result-upgrade-trust"><span>🔒 Stripe secured</span><span>✓ Cancel anytime</span><span>✓ No hidden fees</span><span>From $3.99/week</span></div></div>':"";
+  return'<div class="result-card '+payload.riskClass+'"><div class="result-top"><div class="risk '+payload.riskClass+'">'+iconForRisk(payload.riskClass)+' Risk Level: '+escapeHtml(payload.riskLabel)+'</div><div class="result-chip">'+chipByRisk(payload.riskClass)+'</div></div>'+metaChipsHtml(payload)+'<div class="result-summary">'+escapeHtml(payload.summary)+'</div>'+dataLine+contLine+'<div class="section"><div class="section-title">Detected Signals</div><ul class="signal-list">'+payload.signals.map(function(s){return'<li class="signal-item"><span class="signal-icon">'+si+'</span><span>'+escapeHtml(s)+'</span></li>';}).join("")+'</ul></div><div class="section"><div class="section-title">Recommended Actions</div><div class="action-box">'+escapeHtml(payload.actions[0])+'</div>'+(payload.actions.length>1?'<ul class="signal-list" style="margin-top:10px;">'+payload.actions.slice(1).map(function(a){return'<li class="signal-item"><span class="signal-icon">\u2192</span><span>'+escapeHtml(a)+'</span></li>';}).join("")+'</ul>':"")+'</div><div class="result-payline">'+escapeHtml(payload.payline)+'</div><div class="result-actions"><button class="check result-cta" onclick="scrollToTopCheck()">🔁 Check another token</button>'+upgradeCard+'<div class="share-wrap"><div class="share-alert">⚠️ Risky token setups are often promoted in waves</div><div class="share-copy">Know someone who could see this same token? Send this warning before they buy, connect, or act on hype.</div><div class="share-grid"><button type="button" class="share-btn primary" onclick="copyWarningMessage()">⚠️ Copy Warning</button><button type="button" class="share-btn dark" onclick="shareNative()">📤 Share</button><button type="button" class="share-btn light" onclick="shareX()">\uD835\uDD4F Share to X</button><button type="button" class="share-btn light" onclick="copyLink()">🔗 Copy Link</button></div><div class="share-status" id="shareStatus" aria-live="polite"></div></div></div></div>';
 }
 
 function showUpgrade(){var el=document.getElementById("upgrade");if(!el)return;el.style.display="block";setTimeout(function(){el.scrollIntoView({behavior:"smooth",block:"start"});},100);}
@@ -931,7 +1013,7 @@ function patchTopUpgradeButton(){const b=document.querySelector(".upgrade-top");
 function patchHostedCheckoutFallback(){window.checkout=async function(priceId){if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return;}const pageUrl=window.location.origin+window.location.pathname;try{const r=await fetch(API_BASE+"/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId,email:null,successUrl:pageUrl+"?subscribed=true&conversion=1",cancelUrl:pageUrl})});const d=await r.json();if(d&&d.url){window.location=d.url;}else{alert("Checkout failed. Please try again.");}}catch(e){alert("Checkout failed. Please try again.");}};}
 function patchShowUpgrade(){window.showUpgrade=function(){hideLegacyUpgradeUI();return;};}
 function patchAnalyzeLimitAutoOpen(){if(!window.fetch||window.__TOKEN_RISK_FETCH_PATCHED__)return;window.__TOKEN_RISK_FETCH_PATCHED__=true;const orig=window.fetch.bind(window);window.fetch=async function(input,init){let url="",isA=false,pb=null;try{url=typeof input==="string"?input:(input&&input.url?input.url:"");isA=!!url&&url.indexOf(ANALYZE_PATH)!==-1;if(isA&&init&&typeof init.body==="string"){try{pb=JSON.parse(init.body);}catch(e){pb=null;}if(pb&&typeof pb==="object"){const ee=normalizeEmail(pb.email||getEnteredEmail());const se=getStoredVerifiedEmail();const ss=!!ee&&!!se&&ee===se&&isBrowserSubscribed();pb.email=ee;pb.subscribed=ss;init=Object.assign({},init,{body:JSON.stringify(pb)});}}}catch(e){}const response=await orig(input,init);try{if(isA){const re=normalizeEmail((pb&&pb.email)||getEnteredEmail());response.clone().json().then(function(data){const bs=!!(data&&(data.subscribed===true||data.activeSubscription===true||data.hasSubscription===true||data.unlimited===true));if(bs){markBrowserSubscribed(true);if(re)setStoredVerifiedEmail(re);else if(data&&data.email)setStoredVerifiedEmail(data.email);syncPostPurchaseMessage();hideLegacyUpgradeUI();return;}syncPostPurchaseMessage();if(data&&data.limit===true){setTimeout(function(){hideLegacyUpgradeUI();if(!shouldSuppressUpgrade()&&window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");},0);}}).catch(function(){});}}catch(e){}return response;};}
-function patchLegacyButtons(){Array.from(document.querySelectorAll('button[onclick],.upgrade-top,.primary-cta-btn,.post-result-upgrade-btn')).forEach(function(btn){const ot=(btn.getAttribute("onclick")||"").trim();const t=(btn.textContent||"").toLowerCase().trim();if(ot==="showUpgrade()"||t.includes("upgrade")||t.includes("unlock")){btn.removeAttribute("onclick");btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return false;}hideLegacyUpgradeUI();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}});}
+function patchLegacyButtons(){Array.from(document.querySelectorAll('button[onclick],.upgrade-top,.primary-cta-btn,.post-result-upgrade-btn,.sticky-mobile-cta-btn')).forEach(function(btn){const ot=(btn.getAttribute("onclick")||"").trim();const t=(btn.textContent||"").toLowerCase().trim();if(ot==="showUpgrade()"||t.includes("upgrade")||t.includes("unlock")){btn.removeAttribute("onclick");btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return false;}hideLegacyUpgradeUI();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}});}
 function patchSubscriberEmailField(){const i=getEmailInput();if(!i||i.__TOKEN_RISK_EMAIL_PATCHED__)return;i.__TOKEN_RISK_EMAIL_PATCHED__=true;i.addEventListener("input",function(){syncPostPurchaseMessage();hideLegacyUpgradeUI();});}
 function ensureStripeScript(){if(window.Stripe)return Promise.resolve();if(stripeScriptPromise)return stripeScriptPromise;stripeScriptPromise=new Promise(function(resolve,reject){const ex=document.querySelector('script[src="https://js.stripe.com/v3/"]');if(ex){if(window.Stripe){resolve();return;}ex.addEventListener("load",function(){resolve();},{once:true});ex.addEventListener("error",function(){reject(new Error("Stripe failed to load."));},{once:true});return;}const s=document.createElement("script");s.src="https://js.stripe.com/v3/";s.async=true;s.onload=function(){resolve();};s.onerror=function(){reject(new Error("Stripe failed to load."));};document.body.appendChild(s);});return stripeScriptPromise;}
 function getPlanButtonByKey(key){return{weekly:weeklyBtn,monthly:monthlyBtn,yearly:yearlyBtn}[key]||yearlyBtn;}
@@ -970,7 +1052,9 @@ function buildEmbeddedUI(){
   buttonRow=document.createElement("div");buttonRow.style.display=shouldSuppressUpgrade()?"none":"none"; // hidden — primary-cta-bar handles this
   checkoutCard=document.createElement("div");checkoutCard.style.display="none";checkoutCard.style.marginTop="10px";checkoutCard.style.background="linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%)";checkoutCard.style.border="1px solid rgba(0,236,208,.14)";checkoutCard.style.borderRadius="22px";checkoutCard.style.padding="16px";checkoutCard.style.boxShadow="0 0 32px rgba(0,236,208,.10),0 22px 56px rgba(0,0,0,.60)";checkoutCard.style.color="#d0e4f8";
   const title=document.createElement("div");title.textContent="Unlock unlimited token checks";title.style.fontSize="20px";title.style.fontWeight="900";title.style.marginBottom="4px";title.style.color="#fff";
-  const sub=document.createElement("div");sub.textContent="Join in seconds. Cancel from your account anytime.";sub.style.fontSize="13px";sub.style.color="#6a8aae";sub.style.marginBottom="12px";
+  const sub=document.createElement("div");sub.textContent="Join in seconds. Cancel from your account anytime.";sub.style.fontSize="13px";sub.style.color="#6a8aae";sub.style.marginBottom="10px";
+  const trustRow=document.createElement("div");trustRow.style.cssText="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;padding:9px 11px;border-radius:11px;background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.08);";
+  ["🔒 SSL Secured","⚡ Stripe","✓ Cancel anytime","✓ No hidden fees"].forEach(function(t){var s=document.createElement("span");s.textContent=t;s.style.cssText="font-size:11px;font-weight:800;color:rgba(0,236,208,.38);";trustRow.appendChild(s);});
   compactRow=document.createElement("div");compactRow.style.display="none";compactRow.style.alignItems="center";compactRow.style.justifyContent="space-between";compactRow.style.gap="10px";compactRow.style.marginBottom="10px";compactRow.style.padding="9px 11px";compactRow.style.borderRadius="13px";compactRow.style.background="rgba(0,236,208,.06)";compactRow.style.border="1px solid rgba(0,236,208,.14)";
   compactText=document.createElement("div");compactText.style.fontSize="12px";compactText.style.lineHeight="1.35";
   changePlanBtn=document.createElement("button");changePlanBtn.type="button";changePlanBtn.textContent="Change";changePlanBtn.style.padding="7px 11px";changePlanBtn.style.borderRadius="999px";changePlanBtn.style.border="1px solid rgba(0,236,208,.20)";changePlanBtn.style.background="rgba(0,236,208,.08)";changePlanBtn.style.color=var_cyan_fallback();changePlanBtn.style.fontWeight="800";changePlanBtn.style.cursor="pointer";changePlanBtn.style.fontSize="12px";changePlanBtn.style.flex="0 0 auto";
@@ -984,7 +1068,7 @@ function buildEmbeddedUI(){
   checkoutContainer=document.createElement("div");checkoutContainer.id="embedded-checkout-mount";checkoutContainer.style.minHeight="0";checkoutContainer.style.borderRadius="14px";checkoutContainer.style.overflow="hidden";checkoutContainer.style.display="none";
   status=document.createElement("div");status.style.marginTop="8px";status.style.fontSize="12px";status.style.color="#6a8aae";
   closeBtn=document.createElement("button");closeBtn.type="button";closeBtn.textContent="Close";closeBtn.style.marginTop="10px";closeBtn.style.padding="9px 13px";closeBtn.style.borderRadius="11px";closeBtn.style.border="1px solid rgba(255,255,255,.10)";closeBtn.style.background="rgba(255,255,255,.05)";closeBtn.style.color="#8aa0c0";closeBtn.style.fontWeight="800";closeBtn.style.cursor="pointer";closeBtn.style.fontSize="12px";
-  checkoutCard.appendChild(title);checkoutCard.appendChild(sub);checkoutCard.appendChild(compactRow);checkoutCard.appendChild(planRow);checkoutCard.appendChild(helper);checkoutCard.appendChild(checkoutContainer);checkoutCard.appendChild(status);checkoutCard.appendChild(closeBtn);
+  checkoutCard.appendChild(title);checkoutCard.appendChild(sub);checkoutCard.appendChild(trustRow);checkoutCard.appendChild(compactRow);checkoutCard.appendChild(planRow);checkoutCard.appendChild(helper);checkoutCard.appendChild(checkoutContainer);checkoutCard.appendChild(status);checkoutCard.appendChild(closeBtn);
   wrapper.appendChild(buttonRow);wrapper.appendChild(checkoutCard);
   const target=document.querySelector(".container");
   if(target){const ts=target.querySelector(".tool-shell")||document.querySelector(".tool-shell");if(ts)target.insertBefore(wrapper,ts);else target.insertBefore(wrapper,target.firstChild);}
