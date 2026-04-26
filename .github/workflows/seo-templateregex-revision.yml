@@ -1,0 +1,119 @@
+name: Repair SEO Template Regex Safe
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_changes:
+        description: "Commit patched file"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  repair-template:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Repair template safely
+        run: |
+          FILE="templates/seo-template.html"
+
+          if [ ! -f "$FILE" ]; then
+            echo "File not found: $FILE"
+            exit 1
+          fi
+
+          cp "$FILE" "$FILE.regex-backup"
+
+          node <<'EOF'
+          const fs = require("fs");
+
+          const file = "templates/seo-template.html";
+          let code = fs.readFileSync(file, "utf8");
+
+          const original = code;
+
+          // Remove accidental markdown fences only
+          code = code
+            .replace(/^\s*```(?:html|js|javascript)?\s*$/gim, "")
+            .replace(/^\s*```\s*$/gm, "");
+
+          // Normalize smart punctuation from pasted template text/code
+          code = code
+            .replace(/[“”]/g, '"')
+            .replace(/[‘’]/g, "'")
+            .replace(/\u00a0/g, " ");
+
+          // Repair known broken inline-regex patterns if they exist
+          code = code
+            .replace(/\|\s*short code\s*\|\s*\$\s*\)/g, "|short code|\\$)")
+            .replace(/match\(\/\$([\s\S]*?)\/g\)/g, "match(/\\$$1/g)")
+            .replace(/\.replace\(\/\*\*\/g,\s*""\)/g, '.replace(/\\*\\*/g, "")');
+
+          // Safety checks for template placeholders
+          const required = [
+            "{{TITLE}}",
+            "{{DESCRIPTION}}",
+            "{{CANONICAL_URL}}",
+            "{{KEYWORD}}",
+            "{{AI_CONTENT}}",
+            "{{RELATED_LINKS}}",
+            "{{MORE_LINKS}}",
+            "{{HUB_LINK}}"
+          ];
+
+          for (const marker of required) {
+            if (!code.includes(marker)) {
+              throw new Error(`Required template marker missing after repair: ${marker}`);
+            }
+          }
+
+          if (!code.includes("</html>")) {
+            throw new Error("Closing </html> missing after repair.");
+          }
+
+          if (code === original) {
+            console.log("No template changes needed.");
+          } else {
+            console.log("Template repair made changes.");
+          }
+
+          fs.writeFileSync(file, code);
+          EOF
+
+      - name: Show preview diff
+        if: ${{ github.event.inputs.commit_changes == 'false' }}
+        run: git diff -- templates/seo-template.html || true
+
+      - name: Revert preview changes
+        if: ${{ github.event.inputs.commit_changes == 'false' }}
+        run: |
+          git checkout -- templates/seo-template.html
+          rm -f templates/seo-template.html.regex-backup
+
+      - name: Commit patched template
+        if: ${{ github.event.inputs.commit_changes == 'true' }}
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            rm -f templates/seo-template.html.regex-backup
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add templates/seo-template.html
+          git commit -m "Repair SEO template safely"
+          git push
