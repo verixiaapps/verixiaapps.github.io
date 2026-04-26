@@ -1992,7 +1992,24 @@ function renderSeoContentCards(paragraphs) {
             <span class="story-card-title-icon">${titles[index] ? titles[index][0] : "•"}</span>
             <span>${titles[index] ? titles[index][1] : "More to know"}</span>
           </div>
-          <p>${escapeHtml(paragraph)}</p>
+          <p>${escapeHtml(
+  String(paragraph || "")
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => ({
+      text: s,
+      score:
+        (/\$|\d|%|\.com|\.net|\.io/i.test(s) ? 5 : 0) +
+        (/short code|domain|url|link|address bar|tab title|sender|reply-to|button|form|field|fee|card|cvv|login|verify|tracking|wallet|approval|seed phrase|support chat/i.test(s) ? 4 : 0) +
+        (/drained|charged|captured|submitted|entered|approved|redirects|expires|countdown|locked|frozen|restricted|lost|gone/i.test(s) ? 3 : 0) -
+        (/important|be careful|stay safe|scammers often|this type|in many cases|common warning|what to do next/i.test(s) ? 6 : 0)
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map(item => item.text)
+    .join(" ")
+)}</p>
         </article>
       `).join("")}
     </div>
