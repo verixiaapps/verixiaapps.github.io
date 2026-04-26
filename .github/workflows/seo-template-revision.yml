@@ -1,0 +1,121 @@
+name: Fix HTML Template (seo-template)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-html:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Prettier
+        run: npm install prettier
+
+      - name: Create HTML cleaner
+        run: |
+          mkdir -p scripts
+          cat > scripts/fix-html-template.mjs <<'EOF'
+          import fs from "fs";
+          import prettier from "prettier";
+
+          const file = "templates/seo-template.html";
+          const commit = process.env.COMMIT_CHANGES === "true";
+
+          if (!fs.existsSync(file)) {
+            throw new Error(`File not found: ${file}`);
+          }
+
+          const original = fs.readFileSync(file, "utf8");
+
+          let cleaned = original
+            // Remove markdown fences
+            .replace(/^\s*```.*$/gim, "")
+
+            // Normalize smart quotes
+            .replace(/[“”]/g, '"')
+            .replace(/[‘’]/g, "'")
+
+            // Normalize dashes
+            .replace(/[–—]/g, "-")
+
+            // Remove weird spacing
+            .replace(/\u00a0/g, " ")
+
+            // Clean excessive newlines
+            .replace(/\n{3,}/g, "\n\n")
+
+            .trim() + "\n";
+
+          // Protect template placeholders
+          cleaned = cleaned.replace(/{{/g, "___TPL_OPEN___");
+          cleaned = cleaned.replace(/}}/g, "___TPL_CLOSE___");
+
+          try {
+            cleaned = await prettier.format(cleaned, {
+              parser: "html",
+              htmlWhitespaceSensitivity: "ignore",
+            });
+          } catch (e) {
+            console.warn("Prettier failed, using cleaned version.");
+          }
+
+          // Restore placeholders
+          cleaned = cleaned.replace(/___TPL_OPEN___/g, "{{");
+          cleaned = cleaned.replace(/___TPL_CLOSE___/g, "}}");
+
+          fs.writeFileSync(file + ".preview", cleaned);
+
+          if (commit) {
+            fs.writeFileSync(file + ".backup", original);
+            fs.writeFileSync(file, cleaned);
+            console.log(`Cleaned and wrote ${file}`);
+          } else {
+            console.log(`Preview saved to ${file}.preview`);
+          }
+          EOF
+
+      - name: Run cleaner (preview only)
+        env:
+          COMMIT_CHANGES: false
+        run: node scripts/fix-html-template.mjs
+
+      - name: Show diff
+        run: git diff -- templates/seo-template.html || true
+
+      - name: Revert preview
+        run: |
+          git checkout -- templates/seo-template.html || true
+          rm -f templates/seo-template.html.preview
+
+      - name: Run cleaner (commit)
+        if: ${{ false }} # flip to true when ready
+        env:
+          COMMIT_CHANGES: true
+        run: node scripts/fix-html-template.mjs
+
+      - name: Commit cleaned file
+        if: ${{ false }} # flip to true when ready
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add templates/seo-template.html
+          git add templates/seo-template.html.backup
+          git commit -m "Clean SEO template formatting"
+          git push
