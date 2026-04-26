@@ -1,0 +1,108 @@
+name: Repair Token Risk Template Safe
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_changes:
+        description: "Commit patched file"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  repair-template:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Repair token risk template safely
+        run: |
+          FILE="token-risk-template/token-risk-template-a.html"
+
+          if [ ! -f "$FILE" ]; then
+            echo "File not found: $FILE"
+            exit 1
+          fi
+
+          cp "$FILE" "$FILE.backup"
+
+          node <<'EOF'
+          const fs = require("fs");
+
+          const file = "token-risk-template/token-risk-template-a.html";
+          let code = fs.readFileSync(file, "utf8");
+          const original = code;
+
+          code = code
+            // Remove accidental markdown fences only
+            .replace(/^\s*```(?:html|js|javascript)?\s*$/gim, "")
+            .replace(/^\s*```\s*$/gm, "")
+
+            // Normalize pasted smart punctuation
+            .replace(/[“”]/g, '"')
+            .replace(/[‘’]/g, "'")
+            .replace(/\u00a0/g, " ")
+
+            // Safe regex paste cleanup only
+            .replace(/\.replace\(\/\*\*\/g,\s*""\)/g, '.replace(/\\*\\*/g, "")')
+            .replace(/\|\s*short code\s*\|\s*\$\s*\)/g, "|short code|\\$)")
+
+            // Clean excessive blank lines
+            .replace(/\n{3,}/g, "\n\n")
+            .trim() + "\n";
+
+          const required = [
+            "<!DOCTYPE html",
+            "<html",
+            "</html>"
+          ];
+
+          for (const marker of required) {
+            if (!code.includes(marker)) {
+              throw new Error(`Required HTML marker missing after repair: ${marker}`);
+            }
+          }
+
+          if (!code.includes("token") && !code.includes("Token")) {
+            throw new Error("Template sanity check failed: token wording not found.");
+          }
+
+          if (code === original) {
+            console.log("No template changes needed.");
+          } else {
+            console.log("Token Risk template repair made changes.");
+          }
+
+          fs.writeFileSync(file, code);
+          EOF
+
+      - name: Show preview diff
+        if: ${{ github.event.inputs.commit_changes == 'false' }}
+        run: git diff -- token-risk-template/token-risk-template-a.html || true
+
+      - name: Revert preview changes
+        if: ${{ github.event.inputs.commit_changes == 'false' }}
+        run: |
+          git restore token-risk-template/token-risk-template-a.html || true
+          rm -f token-risk-template/token-risk-template-a.html.backup
+
+      - name: Commit patched template
+        if: ${{ github.event.inputs.commit_changes == 'true' }}
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            rm -f token-risk-template/token-risk-template-a.html.backup
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add token-risk-template/token-risk-template-a.html
+          git commit -m "Repair Token Risk template safely"
+          git push
