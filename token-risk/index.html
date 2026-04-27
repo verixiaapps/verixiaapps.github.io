@@ -1,1 +1,529 @@
- 
+ <!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Token Risk — Check Any Token Contract Before You Buy</title>
+<meta name="description" content="Paste any token contract address and get an instant risk verdict. Live liquidity analysis, structural warning signals, and red flags before you buy or connect. Free first check.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://verixiaapps.com/token-risk/">
+<meta property="og:title" content="Token Risk — Check Any Token Contract Before You Buy">
+<meta property="og:description" content="Paste any token contract address. Get a live risk verdict in seconds. Free first check.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://verixiaapps.com/token-risk/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Token Risk — Check Any Token Contract Before You Buy">
+<meta name="twitter:description" content="Paste any token contract address. Get a live risk verdict in seconds.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Token Risk","description":"Check any token contract address for liquidity risk, structural warning signals, and red flags before you buy.","url":"https://verixiaapps.com/token-risk/"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Token Risk","applicationCategory":"FinanceApplication","operatingSystem":"Web","description":"Analyzes token contract addresses for liquidity risk, structural warning signals, FDV ratio, pair age, and buy/sell pressure.","url":"https://verixiaapps.com/token-risk/","offers":{"@type":"Offer","price":"3.99","priceCurrency":"USD"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does Token Risk check?","acceptedAnswer":{"@type":"Answer","text":"Token Risk analyzes any token contract address for liquidity depth, volume-to-liquidity ratio, FDV risk, pair age, buy/sell pressure, and CoinGecko market context. It returns a risk level and key structural signals."}},{"@type":"Question","name":"How do I use Token Risk?","acceptedAnswer":{"@type":"Answer","text":"Paste the token contract address and click Check Token Risk. You get a live verdict in seconds with no signup required for the first check."}},{"@type":"Question","name":"Is it free?","acceptedAnswer":{"@type":"Answer","text":"The first check is free with no signup. Unlimited checks are available from $3.99 per week."}}]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03060a;--bg2:#060c12;--bg3:#08101a;--bg4:#0b1422;
+  --cyan:#00deb4;--cyan2:#00bfa0;--cyan3:#009a82;
+  --violet:#9b6fff;--violet2:#7c4fe0;
+  --emerald:#0fd98a;--amber:#f0a830;
+  --red:#e05068;--red2:#c03a50;
+  --ink:#c8dff0;--ink-strong:#edf6ff;
+  --muted:#5a7a98;--muted2:#3d5870;
+  --line:rgba(0,222,180,.10);
+  --glow-c:0 0 24px rgba(0,222,180,.22),0 0 48px rgba(0,222,180,.08);
+  --glow-v:0 0 20px rgba(155,111,255,.18);
+  --glow-r:0 0 18px rgba(224,80,104,.22);
+  --glow-e:0 0 18px rgba(15,217,138,.18);
+  --sh-xl:0 40px 100px rgba(0,0,0,.85);
+  --sh-lg:0 24px 60px rgba(0,0,0,.70);
+  --sh-md:0 14px 36px rgba(0,0,0,.50);
+  --sh-sm:0 6px 18px rgba(0,0,0,.34);
+  --r-xl:28px;--r-lg:22px;--r-md:16px;
+  --mono:'Space Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:var(--sans);color:var(--ink);line-height:1.6;
+  background:
+    radial-gradient(ellipse 80% 55% at 5% 0%,rgba(0,222,180,.10),transparent 55%),
+    radial-gradient(ellipse 65% 50% at 95% 0%,rgba(155,111,255,.14),transparent 52%),
+    linear-gradient(180deg,var(--bg) 0%,var(--bg2) 30%,var(--bg3) 65%,var(--bg4) 100%);
+  min-height:100vh;overflow-x:hidden;
+}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+button,textarea,input{font-family:var(--sans);}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;width:100%;z-index:100;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(3,6,10,.80);backdrop-filter:blur(16px);border-bottom:1px solid var(–line);}
+.nav-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800;color:var(–ink-strong);letter-spacing:-.01em;}
+.nav-logo-dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(–cyan),var(–violet));box-shadow:0 0 10px rgba(0,222,180,.7);animation:pulse 2.4s ease-in-out infinite;flex:0 0 9px;}
+@keyframes pulse{0%,100%{box-shadow:0 0 6px rgba(0,222,180,.5);}50%{box-shadow:0 0 18px rgba(0,222,180,.95),0 0 32px rgba(0,222,180,.35);}}
+.nav-actions{display:flex;align-items:center;gap:10px;}
+.nav-app{display:inline-flex;align-items:center;padding:9px 14px;border-radius:12px;font-size:13px;font-weight:700;color:var(–ink);border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);}
+.nav-app:hover{text-decoration:none;background:rgba(255,255,255,.09);}
+.nav-upgrade{padding:9px 16px;border-radius:12px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(–violet),var(–cyan2));color:#fff;border:none;cursor:pointer;box-shadow:var(–glow-c);transition:transform .15s,box-shadow .15s;}
+.nav-upgrade:hover{transform:translateY(-1px);box-shadow:0 0 32px rgba(0,222,180,.32),var(–sh-md);}
+
+/* HERO */
+.hero{padding:120px 20px 60px;text-align:center;max-width:860px;margin:0 auto;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(0,222,180,.07);border:1px solid rgba(0,222,180,.18);font-size:11px;font-weight:700;color:var(–cyan);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;}
+.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(–cyan);animation:pulse 2s ease-in-out infinite;}
+.hero h1{font-size:58px;line-height:1.03;letter-spacing:-.05em;font-weight:900;color:var(–ink-strong);text-wrap:balance;margin-bottom:18px;}
+.hero h1 em{font-style:normal;color:var(–cyan);}
+.hero-sub{font-size:19px;color:var(–muted);max-width:620px;margin:0 auto 28px;line-height:1.65;text-wrap:balance;}
+.hero-stat-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:32px;}
+.hero-stat{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(–muted);}
+.hero-stat.danger{background:rgba(224,80,104,.08);border-color:rgba(224,80,104,.20);color:#f0b0bc;}
+
+/* LIVE COUNTER */
+.live-counter{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:rgba(15,217,138,.07);border:1px solid rgba(15,217,138,.18);box-shadow:var(–glow-e);margin-bottom:36px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(–emerald);box-shadow:0 0 8px rgba(15,217,138,.8);animation:pulse 2s ease-in-out infinite;flex:0 0 8px;}
+.live-text{font-size:12px;font-weight:800;color:var(–emerald);}
+
+/* CHECKER CARD */
+.checker-wrap{max-width:680px;margin:0 auto 60px;padding:0 16px;}
+.checker-card{background:linear-gradient(180deg,rgba(8,15,24,.97) 0%,rgba(3,6,10,.99) 100%);border:1px solid rgba(0,222,180,.14);border-radius:var(–r-xl);padding:28px;box-shadow:var(–sh-xl),var(–glow-c),inset 0 1px 0 rgba(0,222,180,.06);}
+.checker-label{font-family:var(–mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(–cyan);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.checker-label::before{content:”>”;color:var(–cyan);opacity:.6;}
+.checker-input{width:100%;padding:16px;border-radius:var(–r-md);border:1.5px solid rgba(0,222,180,.14);background:rgba(3,6,10,.80);color:var(–ink-strong);font-family:var(–mono);font-size:14px;resize:none;height:100px;transition:border-color .15s,box-shadow .15s;line-height:1.5;}
+.checker-input::placeholder{color:var(–muted2);font-size:13px;}
+.checker-input:focus{outline:none;border-color:rgba(0,222,180,.45);box-shadow:0 0 0 4px rgba(0,222,180,.09);}
+.checker-help{margin-top:8px;font-family:var(–mono);font-size:11px;color:var(–muted2);letter-spacing:.02em;}
+.checker-btn{width:100%;margin-top:14px;padding:16px;border-radius:var(–r-md);font-size:16px;font-weight:800;letter-spacing:.02em;background:linear-gradient(135deg,var(–violet) 0%,var(–cyan2) 100%);color:#fff;border:none;cursor:pointer;box-shadow:var(–glow-c),var(–sh-md);transition:transform .15s,box-shadow .15s;}
+.checker-btn:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(0,222,180,.32),var(–sh-lg);}
+.checker-btn:active{transform:scale(.985);}
+.checker-note{margin-top:10px;font-size:12px;color:var(–muted);text-align:center;}
+.checker-price{margin-top:4px;font-size:11px;color:rgba(0,222,180,.50);text-align:center;font-weight:700;}
+.checker-email{width:100%;padding:14px 16px;margin-top:12px;border-radius:var(–r-md);border:1.5px solid rgba(255,255,255,.08);background:rgba(3,6,10,.70);color:var(–ink);font-family:var(–mono);font-size:13px;transition:border-color .15s;}
+.checker-email::placeholder{color:var(–muted2);}
+.checker-email:focus{outline:none;border-color:rgba(0,222,180,.35);}
+.checker-success{display:none;margin-top:8px;font-size:12px;color:var(–emerald);font-weight:800;text-align:center;}
+.result-box{margin-top:20px;display:none;}
+
+/* SIGNAL CARDS */
+.signals{max-width:860px;margin:0 auto 64px;padding:0 16px;}
+.signals-title{text-align:center;font-size:13px;font-weight:700;color:var(–muted);letter-spacing:.10em;text-transform:uppercase;font-family:var(–mono);margin-bottom:20px;}
+.signals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.signal-card{padding:18px;border-radius:var(–r-lg);background:rgba(8,15,24,.90);border:1px solid var(–line);position:relative;overflow:hidden;}
+.signal-card::before{content:””;position:absolute;top:0;left:0;right:0;height:2px;border-radius:999px;}
+.signal-card.red::before{background:linear-gradient(90deg,var(–red),transparent);}
+.signal-card.amber::before{background:linear-gradient(90deg,var(–amber),transparent);}
+.signal-card.cyan::before{background:linear-gradient(90deg,var(–cyan),transparent);}
+.signal-icon{font-size:20px;margin-bottom:10px;display:block;}
+.signal-label{font-family:var(–mono);font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(–muted);margin-bottom:5px;}
+.signal-title{font-size:14px;font-weight:800;color:var(–ink-strong);margin-bottom:6px;letter-spacing:-.01em;}
+.signal-copy{font-size:13px;color:var(–muted);line-height:1.55;}
+
+/* HOW IT WORKS */
+.how{max-width:860px;margin:0 auto 64px;padding:0 16px;}
+.section-eyebrow{font-family:var(–mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(–cyan);text-align:center;margin-bottom:12px;}
+.section-title{font-size:36px;font-weight:900;color:var(–ink-strong);text-align:center;letter-spacing:-.04em;margin-bottom:10px;text-wrap:balance;}
+.section-sub{font-size:16px;color:var(–muted);text-align:center;max-width:520px;margin:0 auto 32px;line-height:1.65;}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.step{padding:22px;border-radius:var(–r-lg);background:rgba(8,15,24,.90);border:1px solid var(–line);text-align:center;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(0,222,180,.15),rgba(155,111,255,.12));border:1px solid rgba(0,222,180,.22);font-family:var(–mono);font-size:13px;font-weight:700;color:var(–cyan);margin-bottom:12px;}
+.step-title{font-size:15px;font-weight:800;color:var(–ink-strong);margin-bottom:6px;letter-spacing:-.01em;}
+.step-copy{font-size:13px;color:var(–muted);line-height:1.55;}
+
+/* METRICS STRIP */
+.metrics{max-width:860px;margin:0 auto 64px;padding:0 16px;}
+.metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.metric-item{padding:16px 18px;border-radius:var(–r-md);background:rgba(8,15,24,.80);border:1px solid var(–line);display:flex;align-items:flex-start;gap:12px;}
+.metric-icon{font-size:18px;flex:0 0 auto;margin-top:2px;}
+.metric-label{font-family:var(–mono);font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(–cyan);margin-bottom:3px;}
+.metric-copy{font-size:13px;color:var(–muted);line-height:1.5;}
+
+/* UPGRADE */
+.upgrade{max-width:680px;margin:0 auto 64px;padding:0 16px;}
+.upgrade-card{background:linear-gradient(135deg,rgba(155,111,255,.12) 0%,rgba(0,222,180,.10) 100%);border:1.5px solid rgba(0,222,180,.22);border-radius:var(–r-xl);padding:32px 28px;text-align:center;box-shadow:var(–glow-c),var(–sh-xl);}
+.upgrade-eyebrow{font-family:var(–mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(–cyan);margin-bottom:12px;}
+.upgrade-title{font-size:28px;font-weight:900;color:var(–ink-strong);letter-spacing:-.035em;margin-bottom:8px;text-wrap:balance;}
+.upgrade-copy{font-size:14px;color:var(–muted);margin-bottom:8px;line-height:1.65;max-width:500px;margin-left:auto;margin-right:auto;}
+.upgrade-stat{font-size:13px;color:var(–amber);font-weight:800;margin-bottom:20px;}
+.plan-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
+.plan{padding:16px 18px;border-radius:var(–r-md);border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);text-align:left;cursor:pointer;transition:transform .15s,border-color .15s;}
+.plan:hover{transform:translateY(-2px);}
+.plan.hero{background:linear-gradient(135deg,rgba(0,222,180,.10),rgba(155,111,255,.08));border:1.5px solid rgba(0,222,180,.35);box-shadow:var(–glow-c);}
+.plan-badge{display:inline-block;margin-bottom:6px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.03em;}
+.plan-badge.best{background:linear-gradient(135deg,var(–cyan),var(–emerald));color:#030608;}
+.plan-badge.pop{background:rgba(155,111,255,.25);color:#d0b8ff;border:1px solid rgba(155,111,255,.35);}
+.plan-badge.entry{background:rgba(255,255,255,.09);color:var(–muted);border:1px solid rgba(255,255,255,.12);}
+.plan-name{font-size:15px;font-weight:800;color:var(–ink-strong);}
+.plan.hero .plan-name{color:var(–cyan);}
+.plan-price{font-size:12px;color:var(–muted);margin-top:2px;}
+.plan-cta{display:block;width:100%;margin-top:10px;padding:11px;border-radius:12px;font-size:14px;font-weight:800;border:none;cursor:pointer;transition:transform .15s;}
+.plan-cta.hero-cta{background:linear-gradient(135deg,var(–cyan),var(–cyan2));color:#030608;box-shadow:var(–glow-c);}
+.plan-cta.hero-cta:hover{transform:translateY(-1px);}
+.plan-cta.sec-cta{background:linear-gradient(135deg,var(–violet),var(–violet2));color:#fff;box-shadow:var(–glow-v);}
+.plan-cta.ter-cta{background:rgba(255,255,255,.07);color:var(–ink);border:1px solid rgba(255,255,255,.10);}
+.upgrade-trust{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px;}
+.upgrade-trust span{font-size:11px;font-weight:700;color:rgba(0,222,180,.38);}
+.upgrade-sub-link{margin-top:10px;font-size:12px;color:var(–cyan);text-align:center;cursor:pointer;opacity:.70;}
+.upgrade-sub-link:hover{opacity:1;}
+
+/* APP CARD */
+.app-card{max-width:680px;margin:0 auto 64px;padding:0 16px;}
+.app-card-inner{background:linear-gradient(135deg,rgba(15,217,138,.08),rgba(0,222,180,.06));border:1px solid rgba(15,217,138,.18);border-radius:var(–r-xl);padding:28px;text-align:center;box-shadow:var(–glow-e);}
+.app-card-title{font-size:20px;font-weight:900;color:var(–ink-strong);margin-bottom:6px;letter-spacing:-.02em;}
+.app-card-copy{font-size:13px;color:var(–muted);margin-bottom:16px;line-height:1.65;}
+.app-btn{display:inline-block;padding:13px 28px;border-radius:var(–r-md);background:linear-gradient(135deg,var(–emerald),var(–cyan2));color:#030608;font-weight:800;font-size:14px;box-shadow:var(–glow-e);}
+.app-btn:hover{text-decoration:none;}
+
+/* RESULT CARD */
+.result-card{border-radius:var(–r-lg);padding:20px;border:1px solid rgba(255,255,255,.08);background:rgba(248,252,255,.97);color:#0a1020;margin-top:4px;}
+.result-card.high{border:2px solid #f0c0cc;}
+.result-card.medium{border:2px solid #f0d890;}
+.result-card.low{border:2px solid #b8ecd4;}
+.res-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.res-risk{font-size:18px;font-weight:900;padding:9px 14px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;}
+.res-risk.high{background:#e05068;color:#fff;}
+.res-risk.medium{background:#f0a830;color:#fff;}
+.res-risk.low{background:#0fd98a;color:#fff;}
+.res-risk.unknown{background:#e0e8f0;color:#334155;}
+.res-chip{padding:7px 11px;border-radius:999px;font-size:11px;font-weight:800;background:#fff;border:1px solid #d0dcec;color:#2a3a54;}
+.res-summary{margin-top:12px;font-size:14px;color:#2a3a54;font-weight:700;line-height:1.55;}
+.res-section{margin-top:14px;padding:14px;border-radius:14px;background:#f4f8fc;border:1px solid #e0eaf4;}
+.res-section-title{font-weight:900;margin-bottom:8px;color:#0a1020;font-size:14px;}
+.res-list{list-style:none;display:grid;gap:8px;}
+.res-item{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid #dce8f0;font-size:12px;font-weight:700;color:#2a3a54;line-height:1.45;}
+.result-card.high .res-item{background:#fffafb;border-color:#f0ccd4;color:#7a1828;}
+.result-card.medium .res-item{background:#fffdf4;border-color:#f0d890;color:#7a4c08;}
+.result-card.low .res-item{background:#f4fff8;border-color:#b8ecd4;color:#145030;}
+.res-payline{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:12px;font-weight:800;line-height:1.55;background:#f4f8fc;border:1px solid #dce8f0;color:#2a3a54;}
+.result-card.high .res-payline{background:#fff6f8;border-color:#f0ccd4;color:#7a1828;}
+.result-card.medium .res-payline{background:#fffcf0;border-color:#f0d890;color:#7a4c08;}
+.result-card.low .res-payline{background:#f4fff8;border-color:#b8ecd4;color:#145030;}
+.res-again{display:block;width:100%;margin-top:12px;padding:13px;border-radius:12px;font-size:14px;font-weight:800;background:linear-gradient(135deg,#7c4fe0,#00bfa0);color:#fff;border:none;cursor:pointer;}
+.post-upgrade{margin-top:12px;padding:18px;border-radius:16px;background:linear-gradient(135deg,rgba(155,111,255,.14),rgba(0,222,180,.12));border:1.5px solid rgba(0,222,180,.28);text-align:center;}
+.post-upgrade-hl{font-size:15px;font-weight:900;color:#fff;margin-bottom:4px;}
+.post-upgrade-sub{font-size:12px;color:#7a9abf;margin-bottom:12px;}
+.post-upgrade-btn{display:block;width:100%;padding:13px;border-radius:999px;font-size:14px;font-weight:900;color:#030608;background:linear-gradient(135deg,#00deb4,#00bfa0);border:none;cursor:pointer;}
+
+/* STICKY CTA */
+.sticky{display:none;position:fixed;bottom:0;left:0;right:0;z-index:99;padding:10px 14px;background:linear-gradient(135deg,var(–violet),var(–cyan2));align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -4px 24px rgba(0,222,180,.22);}
+.sticky.show{display:flex;}
+.sticky-text{font-size:13px;font-weight:800;color:#fff;flex:1;}
+.sticky-text span{display:block;font-size:10px;opacity:.75;margin-top:1px;}
+.sticky-btn{padding:8px 14px;border-radius:999px;background:var(–cyan);color:#030608;font-size:13px;font-weight:900;border:none;cursor:pointer;flex:0 0 auto;}
+.sticky-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;flex:0 0 auto;}
+
+/* FAQ */
+.faq{max-width:680px;margin:0 auto 64px;padding:0 16px;}
+.faq-item{padding:18px 0;border-bottom:1px solid var(–line);}
+.faq-item:first-of-type{border-top:1px solid var(–line);}
+.faq-q{font-size:15px;font-weight:800;color:var(–ink-strong);margin-bottom:8px;letter-spacing:-.01em;}
+.faq-a{font-size:14px;color:var(–muted);line-height:1.65;}
+
+/* FOOTER */
+.footer{text-align:center;padding:40px 20px;color:var(–muted2);font-size:12px;line-height:1.75;border-top:1px solid var(–line);}
+.footer a{color:var(–cyan);opacity:.65;font-weight:700;}
+
+/* MOBILE */
+@media(max-width:640px){
+.hero{padding:90px 16px 40px;}
+.hero h1{font-size:34px;}
+.hero-sub{font-size:16px;}
+.signals-grid,.steps{grid-template-columns:1fr;}
+.metrics-grid{grid-template-columns:1fr;}
+.nav{padding:10px 12px;}
+.upgrade-title{font-size:22px;}
+.section-title{font-size:26px;}
+.hero-stat-row{gap:7px;}
+.hero-stat{font-size:11px;padding:7px 11px;}
+}
+</style>
+
+</head>
+<body>
+
+<div class="sticky" id="stickyCta">
+  <div class="sticky-text">🔓 Unlimited Token Checks<span>From $3.99 · FBI IC3: $11.3B lost to crypto fraud in 2025</span></div>
+  <button class="sticky-btn" onclick="openUpgrade('yearly');document.getElementById('stickyCta').classList.remove('show');">Unlock</button>
+  <button class="sticky-close" onclick="document.getElementById('stickyCta').classList.remove('show');localStorage.setItem('tr_sticky_dismissed','1');" aria-label="Close">×</button>
+</div>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    <span>Token Risk</span>
+  </div>
+  <div class="nav-actions">
+    <a class="nav-app" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 App</a>
+    <button class="nav-upgrade" onclick="openUpgrade('yearly')">Upgrade</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Live Token Risk Scanner</div>
+  <h1>Check Any Token Contract<br><em>Before You Buy</em></h1>
+  <p class="hero-sub">Paste a contract address. Get a live risk verdict — liquidity depth, structural signals, and red flags — in seconds.</p>
+  <div class="hero-stat-row">
+    <div class="hero-stat danger">⚠️ $11.3B lost to crypto fraud in 2025 — FBI IC3</div>
+    <div class="hero-stat">⚡ Live DexScreener data</div>
+    <div class="hero-stat">🔍 No signup required</div>
+  </div>
+  <div class="live-counter">
+    <span class="live-dot"></span>
+    <span class="live-text" id="liveCount">Loading...</span>
+  </div>
+</section>
+
+<div class="checker-wrap">
+  <div class="checker-card">
+    <div class="checker-label">Token Contract Address</div>
+    <textarea class="checker-input" id="checkerInput" placeholder="Paste token contract address (EVM, Solana, or Tron)..."></textarea>
+    <div class="checker-help">// EVM · Solana · Tron — contract address only</div>
+    <button class="checker-btn" onclick="runCheck()">🧪 Check Token Risk</button>
+    <div class="checker-note">No signup required · 1 free check · Results in seconds</div>
+    <div class="checker-price">Unlimited checks from $3.99/week · Cancel anytime</div>
+    <input class="checker-email" id="checkerEmail" placeholder="Already subscribed? Enter your payment email">
+    <div class="checker-success" id="checkerSuccess">✅ Unlimited token checks active</div>
+    <div class="result-box" id="resultBox"></div>
+  </div>
+</div>
+
+<div class="signals">
+  <div class="signals-title">// what gets checked</div>
+  <div class="signals-grid">
+    <div class="signal-card red">
+      <span class="signal-icon">💧</span>
+      <div class="signal-label">Liquidity Risk</div>
+      <div class="signal-title">Pool Depth & Confidence</div>
+      <div class="signal-copy">Volume-to-liquidity ratio, pool size, and whether exit conditions are structurally sound or fragile.</div>
+    </div>
+    <div class="signal-card amber">
+      <span class="signal-icon">📊</span>
+      <div class="signal-label">Structural Signals</div>
+      <div class="signal-title">FDV, Pair Age & Pressure</div>
+      <div class="signal-copy">FDV-to-liquidity ratio, pair age, buy/sell pressure, and price movement as structural indicators.</div>
+    </div>
+    <div class="signal-card cyan">
+      <span class="signal-icon">🔍</span>
+      <div class="signal-label">Market Context</div>
+      <div class="signal-title">Rank, Category & History</div>
+      <div class="signal-copy">CoinGecko rank, category, genesis date, and market cap enrichment where available.</div>
+    </div>
+  </div>
+</div>
+
+<div class="how">
+  <div class="section-eyebrow">// how it works</div>
+  <div class="section-title">Three Steps to a Risk Verdict</div>
+  <div class="section-sub">No account. No complexity. Paste an address and know the risk before you buy.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Paste the Contract Address</div>
+      <div class="step-copy">EVM, Solana, or Tron contract address. That's the only input needed for an accurate result.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Live Data Fetch</div>
+      <div class="step-copy">DexScreener pulls live pair data. CoinGecko adds rank and category context where available.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Risk Verdict in Seconds</div>
+      <div class="step-copy">Low, Medium, or High risk with key signals, concerning indicators, and what to watch next.</div>
+    </div>
+  </div>
+</div>
+
+<div class="metrics">
+  <div class="section-eyebrow">// data points analyzed</div>
+  <div class="section-title">What the Analysis Covers</div>
+  <div class="section-sub">Every check pulls live data and derives structural signals before the AI verdict runs.</div>
+  <div class="metrics-grid">
+    <div class="metric-item"><span class="metric-icon">💧</span><div><div class="metric-label">Liquidity USD</div><div class="metric-copy">Total pool liquidity in USD. Basis for all confidence calculations.</div></div></div>
+    <div class="metric-item"><span class="metric-icon">📈</span><div><div class="metric-label">Volume / Liquidity Ratio</div><div class="metric-copy">If volume exceeds liquidity by 3x or more, pool cycling is flagged as structural fragility.</div></div></div>
+    <div class="metric-item"><span class="metric-icon">🏷️</span><div><div class="metric-label">FDV / Liquidity Ratio</div><div class="metric-copy">Fully diluted valuation versus pool depth. Ratios above 50 flag material exit friction risk.</div></div></div>
+    <div class="metric-item"><span class="metric-icon">🕐</span><div><div class="metric-label">Pair Age</div><div class="metric-copy">Pairs under 7 days carry elevated volatility. Age is always stated, never used alone to pass or fail.</div></div></div>
+    <div class="metric-item"><span class="metric-icon">⚖️</span><div><div class="metric-label">Buy / Sell Pressure</div><div class="metric-copy">24h buy and sell transaction counts. Active sell dominance is flagged as a structural signal.</div></div></div>
+    <div class="metric-item"><span class="metric-icon">🌐</span><div><div class="metric-label">CoinGecko Rank & Category</div><div class="metric-copy">Market cap rank and sector category add context — a top-100 token reads differently than an unranked one.</div></div></div>
+  </div>
+</div>
+
+<div class="upgrade" id="upgradeSection">
+  <div class="upgrade-card">
+    <div class="upgrade-eyebrow">// unlimited access</div>
+    <div class="upgrade-title">The Next Token Is Already Circulating</div>
+    <div class="upgrade-copy">The same structural setup — thin liquidity, inflated FDV, concentrated wallets — gets reused across different names and chains. Unlimited checks let you verify every one before you buy.</div>
+    <div class="upgrade-stat">FBI IC3 2025: $11.3B lost to crypto fraud — 22% increase. $7.2B from investment scams alone.</div>
+    <div class="plan-grid">
+      <div class="plan hero">
+        <div><span class="plan-badge best">🟢 Best Value — Save 80%</span></div>
+        <div class="plan-name">Yearly Access</div>
+        <div class="plan-price">$39.99 / year — $3.33/month</div>
+        <button class="plan-cta hero-cta" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Get Yearly Access — $39.99</button>
+      </div>
+      <div class="plan">
+        <div><span class="plan-badge pop">⭐ Most Popular</span></div>
+        <div class="plan-name">Monthly Access</div>
+        <div class="plan-price">$11.99 / month</div>
+        <button class="plan-cta sec-cta" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly — $11.99</button>
+      </div>
+      <div class="plan">
+        <div><span class="plan-badge entry">Try it out</span></div>
+        <div class="plan-name">Weekly Access</div>
+        <div class="plan-price">$3.99 / week — cancel anytime</div>
+        <button class="plan-cta ter-cta" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Try This Week — $3.99</button>
+      </div>
+    </div>
+    <div class="upgrade-trust">
+      <span>🔒 SSL Secured</span><span>⚡ Stripe</span><span>✓ Cancel anytime</span><span>✓ No hidden fees</span><span>✓ Instant access</span>
+    </div>
+    <div class="upgrade-sub-link" onclick="scrollToEmail()">Already subscribed? Enter your email above</div>
+  </div>
+</div>
+
+<div class="app-card">
+  <div class="app-card-inner">
+    <div class="app-card-title">Check tokens anywhere, anytime</div>
+    <div class="app-card-copy">Token risk doesn't wait for a desktop. Use the app to check the next address before you buy or connect — on any device, in seconds.</div>
+    <a class="app-btn" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Download the App</a>
+  </div>
+</div>
+
+<div class="faq">
+  <div class="section-eyebrow">// common questions</div>
+  <div class="section-title">FAQ</div>
+  <div class="faq-item">
+    <div class="faq-q">What input does Token Risk accept?</div>
+    <div class="faq-a">Token contract addresses only — EVM (0x...), Solana (Base58), or Tron (T...). Contract addresses give unambiguous results. Name or ticker search is not supported because DexScreener returns trading pairs, not tokens, making the result unreliable.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What does the risk level mean?</div>
+    <div class="faq-a">Low means liquidity is structurally stable relative to trading activity with no major ratio flags. Medium means mixed signals that warrant closer review. High means one or more serious structural problems — thin liquidity under heavy volume, extreme FDV ratio, or unknown liquidity with other concerning indicators present.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Does Token Risk give financial advice?</div>
+    <div class="faq-a">No. Token Risk is a structural analysis tool. It evaluates on-chain market data and returns a structural risk level. It does not say buy, sell, or avoid. All decisions remain with you.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How many checks do I get free?</div>
+    <div class="faq-a">One free check with no signup required. Unlimited checks are available from $3.99 per week — cancel anytime from your account.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What chains are supported?</div>
+    <div class="faq-a">Any chain tracked by DexScreener — Ethereum, Solana, Base, BNB Chain, Arbitrum, Polygon, Optimism, Avalanche, Tron, and more. If DexScreener has a pair for the address, Token Risk can analyze it.</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div>By using this site you agree to our <a href="https://verixiaapps.com/website-policies/scam-check/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.</div>
+  <div style="margin-top:6px;">Token Risk © 2026 · <a href="https://verixiaapps.com/scam-check/">Scam Check Now</a> · verixiaapps.com</div>
+</footer>
+
+<script>
+const API = "https://awake-integrity-production-faa0.up.railway.app";
+const TR_SUB_KEY = "token_risk_browser_subscribed";
+const SC_SUB_KEY = "scam_check_browser_subscribed";
+const TR_EMAIL_KEY = "token_risk_verified_subscriber_email";
+
+function isSub(){return localStorage.getItem(TR_SUB_KEY)==="true"||localStorage.getItem(SC_SUB_KEY)==="true";}
+function markSub(){localStorage.setItem(TR_SUB_KEY,"true");localStorage.setItem(SC_SUB_KEY,"true");}
+function escHtml(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+// Live counter
+(function(){
+  var base=14832,start=new Date("2026-01-01"),days=Math.floor((new Date()-start)/86400000);
+  var el=document.getElementById("liveCount");
+  if(el)el.textContent=(base+days*38).toLocaleString()+" token risk checks run";
+})();
+
+// Return state
+(function(){
+  var p=new URLSearchParams(window.location.search);
+  if(p.get("subscribed")==="true"){markSub();document.getElementById("checkerSuccess").style.display="block";window.history.replaceState({},document.title,window.location.pathname);}
+  if(isSub())document.getElementById("checkerSuccess").style.display="block";
+})();
+
+// Sticky CTA
+(function(){
+  if(window.innerWidth>768)return;
+  if(localStorage.getItem("tr_sticky_dismissed")==="1")return;
+  var shown=false;
+  window.addEventListener("scroll",function(){
+    if(shown)return;
+    if(window.scrollY>300){shown=true;document.getElementById("stickyCta").classList.add("show");}
+  },{passive:true});
+})();
+
+function scrollToEmail(){var e=document.getElementById("checkerEmail");if(!e)return;e.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(function(){e.focus();},150);}
+function openUpgrade(plan){document.getElementById("upgradeSection").scrollIntoView({behavior:"smooth",block:"start"});}
+
+function riskClass(r){var v=String(r||"").toLowerCase().trim();if(v==="high"||v==="critical")return"high";if(v==="medium"||v==="moderate")return"medium";if(v==="low")return"low";return"unknown";}
+function riskIcon(r){return r==="high"?"🔴":r==="medium"?"🟠":r==="low"?"🟢":"⚪";}
+function sigIcon(r){return r==="low"?"✔️":"⚠️";}
+
+function renderResult(data){
+  var payload=data||{};
+  var rc=riskClass(payload.riskLevel||"");
+  var si=sigIcon(rc);
+  var signals=Array.isArray(payload.keySignals)?payload.keySignals:[];
+  var concerns=Array.isArray(payload.concerningIndicators)?payload.concerningIndicators:[];
+  var actions=Array.isArray(payload.recommendedActions)?payload.recommendedActions:[];
+  var allSignals=[...signals,...concerns].slice(0,5);
+  if(!allSignals.length)allSignals=["Review the token structure, liquidity, and pair conditions carefully before buying."];
+  if(!actions.length)actions=["Do not buy or connect until the setup has been independently verified."];
+
+  var meta="";
+  if(payload.tokenName||payload.symbol){meta+='<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">';}
+  if(payload.tokenName&&payload.symbol)meta+='<span class="res-chip">'+escHtml(payload.tokenName)+" ("+escHtml(payload.symbol)+")</span>";
+  else if(payload.tokenName)meta+='<span class="res-chip">'+escHtml(payload.tokenName)+"</span>";
+  if(payload.chain)meta+='<span class="res-chip">'+escHtml(payload.chain)+"</span>";
+  if(meta)meta+="</div>";
+
+  var postUpgrade=rc!=="low"?'<div class="post-upgrade"><div class="post-upgrade-hl">The next one is already circulating</div><div class="post-upgrade-sub">FBI IC3 2025: $11.3B in crypto fraud. Unlimited checks from $3.99.</div><button class="post-upgrade-btn" onclick="openUpgrade(\'yearly\')">🔓 Unlock Unlimited Checks</button></div>':"";
+
+  return'<div class="result-card '+rc+'"><div class="res-top"><div class="res-risk '+rc+'">'+riskIcon(rc)+' '+escHtml((rc==="unknown"?"REVIEW":rc).toUpperCase())+'</div><span class="res-chip">'+(rc==="high"?"Strong Signal":rc==="medium"?"Moderate Signal":rc==="low"?"Lower Risk":"Review Needed")+'</span></div>'+meta+'<div class="res-summary">'+escHtml(payload.summary||"Structural assessment complete. Review the signals below.")+'</div><div class="res-section"><div class="res-section-title">Key Signals</div><ul class="res-list">'+allSignals.map(function(s){return'<li class="res-item"><span>'+si+'</span><span>'+escHtml(s)+'</span></li>';}).join("")+'</ul></div><div class="res-section"><div class="res-section-title">Recommended Actions</div><div style="padding:10px 12px;border-radius:10px;background:#eef4ff;border:1px solid #b8d0f8;font-size:12px;font-weight:800;color:#1a3070;line-height:1.55;">'+escHtml(actions[0])+'</div></div><div class="res-payline">'+escHtml(payload.finalTake||"Verify structure independently before committing funds.")+'</div><button class="res-again" onclick="document.getElementById(\'checkerInput\').value=\'\';document.getElementById(\'resultBox\').style.display=\'none\';">🔁 Check another token</button>'+postUpgrade+'</div>';
+}
+
+async function runCheck(){
+  var text=(document.getElementById("checkerInput").value||"").trim();
+  var email=(document.getElementById("checkerEmail").value||"").trim();
+  var rb=document.getElementById("resultBox");
+  if(!text){
+    rb.style.display="block";
+    rb.innerHTML='<div class="result-card unknown"><div class="res-top"><div class="res-risk unknown">⚪ No Address Entered</div></div><div class="res-summary">Paste a token contract address to get a risk result.</div></div>';
+    return;
+  }
+  rb.style.display="block";
+  rb.innerHTML='<div class="result-card unknown"><div class="res-top"><div class="res-risk unknown">⚪ Analyzing...</div></div><div class="res-summary">Fetching live data and running structural analysis...</div></div>';
+  try{
+    var subscribed=isSub()&&!!email&&email===(localStorage.getItem(TR_EMAIL_KEY)||"");
+    var res=await fetch(API+"/analyze-token",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,email:email,subscribed:subscribed})});
+    var data=await res.json();
+    if(data&&data.limit){
+      rb.innerHTML='<div class="result-card medium"><div class="res-top"><div class="res-risk medium">🟠 Free Check Used</div></div><div class="res-summary">Unlock unlimited access to check the next token before you buy.</div></div>';
+      openUpgrade("yearly");
+      return;
+    }
+    rb.innerHTML=renderResult(data);
+  }catch(e){
+    rb.innerHTML='<div class="result-card unknown"><div class="res-top"><div class="res-risk unknown">⚪ Unable to Analyze</div></div><div class="res-summary">Could not reach the analysis server. Please try again in a moment.</div></div>';
+  }
+}
+
+async function checkout(priceId){
+  var pageUrl=window.location.origin+window.location.pathname;
+  try{
+    var res=await fetch(API+"/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId:priceId,email:null,successUrl:pageUrl+"?subscribed=true",cancelUrl:pageUrl})});
+    var data=await res.json();
+    if(data&&data.url){window.location=data.url;}else{alert("Checkout failed. Please try again.");}
+  }catch(e){alert("Checkout failed. Please try again.");}
+}
+</script>
+
+<!-- Google Ads -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17956428385"></script>
+
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','AW-17956428385');</script>
+
+</body>
+</html>
