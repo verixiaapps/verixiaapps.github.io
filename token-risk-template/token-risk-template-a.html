@@ -475,7 +475,6 @@ body{padding-top:82px;}
 
   <div class="container">
 
-```
 <div class="system-badge">⬡ Live checker plus keyword guide</div>
 
 <div class="preview-card">
@@ -519,6 +518,7 @@ body{padding-top:82px;}
 </div>
 
 <!-- PRIMARY CTA BAR — single action, opens embedded checkout -->
+
 <div class="primary-cta-bar">
   <button class="primary-cta-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('yearly')">
     🔓 Unlock Unlimited Checks <span class="cta-sub">· from $3.99</span>
@@ -532,6 +532,7 @@ body{padding-top:82px;}
 </div>
 
 <!-- UPGRADE SECTION — v15: yearly hero, category copy via JS -->
+
 <div class="upgrade" id="upgrade">
   <h3 id="upgradeHeadline">The Next One Is Already Circulating</h3>
   <div class="upgrade-copy" id="upgradeCopy">Token risk does not stop at one. The same structural setup — thin liquidity, concentrated wallets, inflated FDV, hype without depth — gets reused across different names and chains.</div>
@@ -570,7 +571,6 @@ body{padding-top:82px;}
     <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email</button>
   </div>
 </div>
-```
 
   </div>
 
@@ -681,8 +681,10 @@ function isBrowserSubscribed(){return localStorage.getItem(TOKEN_RISK_BROWSER_SU
 function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function normalizeKeyword(str){return String(str||"").replace(/\s+/g," ").replace(/[–—]/g,"-").trim();}
 function stripLeadingQuestionPrefixes(t){return String(t||"").replace(/^\s*is\s+/i,"").replace(/^\s*can\s+i\s+trust\s+/i,"").replace(/^\s*should\s+i\s+buy\s+/i,"").replace(/^\s*is\s+this\s+/i,"").trim();}
-function stripTrailingQuestionSuffixes(t){return String(t||"").replace(/\s+a\s+scam\b.*/i,"").replace(/\s+scam\b.*/i,"").replace(/\s+or\s+legit$/i,"").replace(/\s+or\s+safe$/i,"").replace(/\s+safe$/i,"").replace(/\s+legit$/i,"").replace(/\s+buy$/i,"").replace(/\s+risky\b.*/i,"").replace(/\s+risk\b.*/i,"").replace(/\s+token$/i," token").trim();}
-function cleanKeywordBase(k){var t=normalizeKeyword(k);t=stripLeadingQuestionPrefixes(t);t=stripTrailingQuestionSuffixes(t);return t.replace(/\s+/g," ").trim();}
+// FIX 1: strip trailing standalone "a" (fixes "solana token a risky" -> "solana token")
+function stripTrailingQuestionSuffixes(t){return String(t||"").replace(/\s+a\s+scam\b.*/i,"").replace(/\s+scam\b.*/i,"").replace(/\s+or\s+legit$/i,"").replace(/\s+or\s+safe$/i,"").replace(/\s+safe$/i,"").replace(/\s+legit$/i,"").replace(/\s+buy$/i,"").replace(/\s+risky\b.*/i,"").replace(/\s+risk\b.*/i,"").replace(/\s+token$/i," token").replace(/\s+a$/i,"").trim();}
+// FIX 2: strip standalone "a" in base so displayCleanKeyword also cleans it (fixes "Solana a" in headings)
+function cleanKeywordBase(k){var t=normalizeKeyword(k);t=stripLeadingQuestionPrefixes(t);t=stripTrailingQuestionSuffixes(t);t=t.replace(/\ba\b/gi,"");return t.replace(/\s+/g," ").trim();}
 function cleanKeywordForSentence(k){return cleanKeywordBase(k).replace(/\btoken\b/gi,"").replace(/\bcoin\b/gi,"").replace(/\bcoins\b/gi,"").replace(/\bcontract\b/gi,"").replace(/\baddress\b/gi,"").replace(/\bproject\b/gi,"").replace(/\bchart\b/gi,"").replace(/\blink\b/gi,"").replace(/\blinks\b/gi,"").replace(/\bwallet\b/gi,"").replace(/\bwallets\b/gi,"").replace(/\bairdrop\b/gi,"").replace(/\bpresale\b/gi,"").replace(/\blaunch\b/gi,"").replace(/\bcrypto\b/gi,"").replace(/\bblock\b/gi,"").replace(/\bselling\b/gi,"").replace(/\bdev\b/gi,"").replace(/\bcan\b/gi,"").replace(/\bshould\b/gi,"").replace(/\bdoes\b/gi,"").replace(/\bdo\b/gi,"").replace(/\bis\b/gi,"").replace(/\bwhy\b/gi,"").replace(/\bhow\b/gi,"").replace(/\bwhat\b/gi,"").replace(/\bthis\b/gi,"").replace(/\bscam\b/gi,"").replace(/\brisky\b/gi,"").replace(/\brisk\b/gi,"").replace(/\bcheck\b/gi,"").replace(/\bsafe\b/gi,"").replace(/\ba\b/gi,"").replace(/\ban\b/gi,"").replace(/\s+/g," ").trim();}
 function displayKeyword(s){var t=normalizeKeyword(s);if(!t)return"";return t.charAt(0).toUpperCase()+t.slice(1);}
 function displayCleanKeyword(s){return displayKeyword(cleanKeywordBase(s));}
@@ -1089,7 +1091,7 @@ function makePlanButton(label,sublabel,key){
 function buildEmbeddedUI(){
   if(document.getElementById("embedded-toggle-wrapper"))return;
   wrapper=document.createElement("div");wrapper.id="embedded-toggle-wrapper";wrapper.style.maxWidth="820px";wrapper.style.margin="12px auto 14px";wrapper.style.padding="0 12px";wrapper.style.boxSizing="border-box";
-  buttonRow=document.createElement("div");buttonRow.style.display=shouldSuppressUpgrade()?"none":"none"; // hidden — primary-cta-bar handles this
+  buttonRow=document.createElement("div");buttonRow.style.display="none";
   checkoutCard=document.createElement("div");checkoutCard.style.display="none";checkoutCard.style.marginTop="10px";checkoutCard.style.background="linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%)";checkoutCard.style.border="1px solid rgba(0,236,208,.14)";checkoutCard.style.borderRadius="22px";checkoutCard.style.padding="16px";checkoutCard.style.boxShadow="0 0 32px rgba(0,236,208,.10),0 22px 56px rgba(0,0,0,.60)";checkoutCard.style.color="#d0e4f8";
   const title=document.createElement("div");title.textContent="Unlock unlimited token checks";title.style.fontSize="20px";title.style.fontWeight="900";title.style.marginBottom="4px";title.style.color="#fff";
   const sub=document.createElement("div");sub.textContent="Join in seconds. Cancel from your account anytime.";sub.style.fontSize="13px";sub.style.color="#6a8aae";sub.style.marginBottom="10px";
