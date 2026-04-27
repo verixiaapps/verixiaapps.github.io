@@ -1,0 +1,745 @@
+import { useState, useEffect } from “react”;
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from “recharts”;
+
+// ─── Font + Global CSS ───────────────────────────────────────────────────────
+if (!document.getElementById(“ndex-style”)) {
+const l = document.createElement(“link”);
+l.id = “ndex-style”;
+l.rel = “stylesheet”;
+l.href = “https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap”;
+document.head.appendChild(l);
+const s = document.createElement(“style”);
+s.textContent = `*{box-sizing:border-box;margin:0;padding:0} ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#03060f}::-webkit-scrollbar-thumb{background:#1e2d4a;border-radius:2px} @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}} .nh:hover{filter:brightness(1.15)!important;transform:translateY(-1px)!important;transition:all .18s!important} .nh:active{transform:translateY(0)!important} .nr:hover{background:rgba(0,229,255,0.04)!important} .nc:hover{background:rgba(0,229,255,0.07)!important;cursor:pointer} .ntab:hover{color:#00e5ff!important} input::placeholder{color:#2e3f5e} input:focus{outline:none}`;
+document.head.appendChild(s);
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+const COINS = [
+{id:“bitcoin”,      sym:“BTC”, name:“Bitcoin”,   color:”#f7931a”},
+{id:“ethereum”,     sym:“ETH”, name:“Ethereum”,  color:”#627eea”},
+{id:“solana”,       sym:“SOL”, name:“Solana”,    color:”#9945ff”},
+{id:“binancecoin”,  sym:“BNB”, name:“BNB”,       color:”#f3ba2f”},
+{id:“ripple”,       sym:“XRP”, name:“XRP”,       color:”#00aae4”},
+{id:“cardano”,      sym:“ADA”, name:“Cardano”,   color:”#0ea5e9”},
+{id:“dogecoin”,     sym:“DOGE”,name:“Dogecoin”,  color:”#c2a633”},
+{id:“avalanche-2”,  sym:“AVAX”,name:“Avalanche”, color:”#e84142”},
+{id:“chainlink”,    sym:“LINK”,name:“Chainlink”, color:”#2a5ada”},
+{id:“uniswap”,      sym:“UNI”, name:“Uniswap”,   color:”#ff007a”},
+{id:“matic-network”,sym:“MATIC”,name:“Polygon”,  color:”#8247e5”},
+{id:“toncoin”,      sym:“TON”, name:“Toncoin”,   color:”#0098ea”},
+];
+
+const FEE = 0.003;
+const bg  = “#03060f”;
+const C   = {
+card:”#080d1a”, card2:”#0c1220”, card3:”#111d30”,
+border:“rgba(0,229,255,0.10)”, borderHi:“rgba(0,229,255,0.25)”,
+accent:”#00e5ff”, accentBg:“rgba(0,229,255,0.08)”,
+green:”#00ffa3”,  greenBg:“rgba(0,255,163,0.08)”,
+red:”#ff3b6b”,    redBg:“rgba(255,59,107,0.08)”,
+text:”#cdd6f4”,   muted:”#586994”, muted2:”#2e3f5e”,
+};
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const fmt = (n, d = 2) => {
+if (n == null) return “—”;
+if (n >= 1e9)  return “$” + (n/1e9).toFixed(2)  + “B”;
+if (n >= 1e6)  return “$” + (n/1e6).toFixed(2)  + “M”;
+if (n >= 1000) return “$” + n.toLocaleString(“en-US”, {maximumFractionDigits: d});
+if (n >= 1)    return “$” + n.toFixed(d);
+return “$” + n.toFixed(6);
+};
+const pct = n => !n && n!==0 ? “—” : (n>0?”+”:””) + n.toFixed(2) + “%”;
+const coinInfo = id => COINS.find(c => c.id === id) || {color:”#00e5ff”,sym:”?”};
+
+// ─── Subcomponents ───────────────────────────────────────────────────────────
+function Dot({color, size=24}) {
+return (
+<div style={{width:size,height:size,borderRadius:“50%”,background:color+“22”,
+display:“flex”,alignItems:“center”,justifyContent:“center”,
+fontSize:size*0.4,fontWeight:700,color,border:`1.5px solid ${color}44`,flexShrink:0}}>
+{color.charAt(0)}
+</div>
+);
+}
+
+function CoinIcon({coin, size=32, data}) {
+const [err,setErr] = useState(false);
+const src = data?.image;
+if (src && !err)
+return <img src={src} onError={()=>setErr(true)} style={{width:size,height:size,borderRadius:“50%”,flexShrink:0}} alt={coin.sym}/>;
+return (
+<div style={{width:size,height:size,borderRadius:“50%”,background:coin.color+“22”,border:`1.5px solid ${coin.color}44`,
+display:“flex”,alignItems:“center”,justifyContent:“center”,fontSize:size*0.38,fontWeight:700,color:coin.color,flexShrink:0}}>
+{coin.sym?.charAt(0)}
+</div>
+);
+}
+
+function Pill({label, color=C.accent}) {
+return <span style={{fontSize:10,color,background:color+“18”,border:`1px solid ${color}33`,borderRadius:4,padding:“2px 6px”,letterSpacing:.8,fontWeight:600}}>{label}</span>;
+}
+
+function Spinner() {
+return <div style={{width:36,height:36,borderRadius:“50%”,border:“2px solid rgba(0,229,255,.15)”,borderTop:“2px solid #00e5ff”,animation:“spin .8s linear infinite”,margin:“0 auto”}}/>;
+}
+
+// ─── Token Select Modal ───────────────────────────────────────────────────────
+function TokenModal({coins, onSelect, onClose}) {
+const [q, setQ] = useState(””);
+const list = coins.filter(c =>
+c.name?.toLowerCase().includes(q.toLowerCase()) ||
+c.symbol?.toLowerCase().includes(q.toLowerCase())
+);
+return (
+<div onClick={onClose} style={{position:“fixed”,inset:0,background:“rgba(3,6,15,.88)”,backdropFilter:“blur(10px)”,zIndex:300,display:“flex”,alignItems:“center”,justifyContent:“center”,padding:16}}>
+<div onClick={e=>e.stopPropagation()} style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:20,width:“100%”,maxWidth:400,maxHeight:“72vh”,display:“flex”,flexDirection:“column”,animation:“fadeUp .2s ease”}}>
+<div style={{padding:“20px 20px 12px”}}>
+<div style={{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:14}}>
+<span style={{fontFamily:“Syne”,fontWeight:700,fontSize:16,color:”#fff”}}>Select Token</span>
+<button onClick={onClose} style={{background:“none”,border:“none”,color:C.muted,cursor:“pointer”,fontSize:20,lineHeight:1}}>×</button>
+</div>
+<input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder=“Search name or symbol…”
+style={{width:“100%”,background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,padding:“10px 14px”,color:C.text,fontFamily:“Syne”,fontSize:13}}/>
+</div>
+<div style={{overflowY:“auto”,padding:“0 12px 16px”}}>
+{list.map(c => {
+const ci = coinInfo(c.id);
+return (
+<div key={c.id} className=“nc” onClick={()=>onSelect(c)} style={{display:“flex”,alignItems:“center”,gap:12,padding:“10px 8px”,borderRadius:12,transition:“background .15s”}}>
+<CoinIcon coin={ci} size={36} data={c}/>
+<div style={{flex:1}}>
+<div style={{fontFamily:“Syne”,fontWeight:700,fontSize:14,color:”#fff”}}>{c.name}</div>
+<div style={{fontSize:11,color:C.muted,fontFamily:“JetBrains Mono”}}>{c.symbol?.toUpperCase()}</div>
+</div>
+<div style={{textAlign:“right”}}>
+<div style={{fontFamily:“JetBrains Mono”,fontSize:13,color:C.text}}>{fmt(c.current_price)}</div>
+<div style={{fontSize:11,fontFamily:“JetBrains Mono”,color:(c.price_change_percentage_24h||0)>=0?C.green:C.red}}>{pct(c.price_change_percentage_24h)}</div>
+</div>
+</div>
+);
+})}
+</div>
+</div>
+</div>
+);
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
+export default function NexusDEX() {
+const [tab,       setTab]       = useState(“swap”);
+const [coins,     setCoins]     = useState([]);
+const [loading,   setLoading]   = useState(true);
+const [wallet,    setWallet]    = useState(null);
+const [fromC,     setFromC]     = useState(COINS[0]);
+const [toC,       setToC]       = useState(COINS[1]);
+const [fromAmt,   setFromAmt]   = useState(””);
+const [slip,      setSlip]      = useState(0.5);
+const [modal,     setModal]     = useState(null); // “from”|“to”
+const [chartId,   setChartId]   = useState(“bitcoin”);
+const [chart7d,   setChart7d]   = useState([]);
+const [swapped,   setSwapped]   = useState(false);
+const [lastUpd,   setLastUpd]   = useState(null);
+
+// ── Fetch market data ────────────────────────────────────────────────────────
+const fetchCoins = async () => {
+try {
+const ids = COINS.map(c=>c.id).join(”,”);
+const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=1h,24h,7d`);
+const d = await r.json();
+if (Array.isArray(d)) { setCoins(d); setLastUpd(new Date()); }
+} catch {}
+setLoading(false);
+};
+
+const fetchChart = async id => {
+try {
+const r = await fetch(`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=7`);
+const d = await r.json();
+const pts = (d.prices||[]).filter((_,i)=>i%6===0).map(([ts,p])=>({
+t: new Date(ts).toLocaleDateString(“en”,{month:“short”,day:“numeric”}),
+p: +p.toFixed(4)
+}));
+setChart7d(pts);
+} catch {}
+};
+
+useEffect(() => { fetchCoins(); const iv=setInterval(fetchCoins,30000); return ()=>clearInterval(iv); }, []);
+useEffect(() => { if (coins.length) fetchChart(chartId); }, [chartId, coins.length]);
+
+// ── Swap math ─────────────────────────────────────────────────────────────────
+const getCoin  = id => coins.find(c=>c.id===id);
+const fromData = getCoin(fromC.id);
+const toData   = getCoin(toC.id);
+const fromP    = fromData?.current_price || 0;
+const toP      = toData?.current_price   || 0;
+const toAmt    = fromAmt && fromP && toP
+? ((parseFloat(fromAmt)*fromP*(1-FEE))/toP).toFixed(6) : “”;
+const feeUsd   = fromAmt ? (parseFloat(fromAmt)*fromP*FEE).toFixed(2) : “0.00”;
+const impact   = fromAmt && fromP ? Math.min(parseFloat(fromAmt)*fromP/5000000*0.12,2.5).toFixed(3) : “0.000”;
+const minRec   = toAmt ? (parseFloat(toAmt)*(1-slip/100)).toFixed(6) : “0”;
+
+const doSwap = () => {
+if (!fromAmt || !wallet || !fromP) return;
+setSwapped(true);
+setTimeout(()=>{ setSwapped(false); setFromAmt(””); }, 3000);
+};
+
+const flipCoins = () => {
+setFromC(toC); setToC(fromC);
+setFromAmt(toAmt||””);
+};
+
+const connectWallet = () => setWallet(“7xKXmn…9mPq”);
+
+// ── Chart coin data ───────────────────────────────────────────────────────────
+const chartData    = getCoin(chartId);
+const chartColor   = (chartData?.price_change_percentage_7d_in_currency||0) >= 0 ? C.green : C.red;
+const chartCI      = coinInfo(chartId);
+
+// ─────────────────────────────────────────────────────────────────────────────
+return (
+<div style={{minHeight:“100vh”,background:bg,color:C.text,fontFamily:“Syne, sans-serif”,overflowX:“hidden”}}>
+
+```
+  {/* Background grid */}
+  <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
+    backgroundImage:"linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px)",
+    backgroundSize:"48px 48px"}}/>
+  {/* Ambient glow */}
+  <div style={{position:"fixed",top:-200,left:"50%",transform:"translateX(-50%)",width:800,height:400,
+    background:"radial-gradient(ellipse,rgba(0,229,255,.06) 0%,transparent 70%)",pointerEvents:"none",zIndex:0}}/>
+
+  {/* ── Header ─────────────────────────────────────────────────────────── */}
+  <header style={{position:"sticky",top:0,zIndex:100,
+    borderBottom:`1px solid ${C.border}`,background:"rgba(3,6,15,.94)",backdropFilter:"blur(24px)"}}>
+    <div style={{maxWidth:1400,margin:"0 auto",padding:"0 24px",display:"flex",alignItems:"center",gap:24,height:64}}>
+
+      {/* Logo */}
+      <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0,cursor:"pointer"}} onClick={()=>setTab("swap")}>
+        <div style={{width:34,height:34,borderRadius:9,background:"linear-gradient(135deg,#00e5ff,#0066ff)",
+          display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"JetBrains Mono",fontWeight:700,
+          fontSize:15,color:bg,boxShadow:"0 0 24px rgba(0,229,255,.4)"}}>N</div>
+        <span style={{fontWeight:800,fontSize:17,letterSpacing:3,color:"#fff"}}>NEXUS</span>
+        <Pill label="DEX"/>
+      </div>
+
+      {/* Nav */}
+      <nav style={{display:"flex",gap:2,flex:1}}>
+        {[["swap","Swap"],["markets","Markets"],["buy","Buy Crypto"],["portfolio","Portfolio"]].map(([id,label])=>(
+          <button key={id} className="ntab" onClick={()=>setTab(id)} style={{
+            background:tab===id?"rgba(0,229,255,.09)":"transparent",
+            border:tab===id?`1px solid rgba(0,229,255,.2)`:"1px solid transparent",
+            borderRadius:8,padding:"6px 16px",
+            color:tab===id?C.accent:C.muted,
+            fontFamily:"Syne",fontWeight:600,fontSize:13,cursor:"pointer",
+            letterSpacing:.4,transition:"color .15s",
+          }}>{label}</button>
+        ))}
+      </nav>
+
+      {/* Live ticker strip */}
+      {coins.slice(0,4).map(c => (
+        <span key={c.id} style={{display:"flex",gap:5,fontSize:11,fontFamily:"JetBrains Mono",whiteSpace:"nowrap",flexShrink:0,color:C.muted}}>
+          <span style={{color:C.text,fontWeight:700}}>{c.symbol?.toUpperCase()}</span>
+          <span style={{color:(c.price_change_percentage_24h||0)>=0?C.green:C.red}}>{fmt(c.current_price)}</span>
+        </span>
+      ))}
+
+      {/* Wallet */}
+      <button className="nh" onClick={connectWallet} style={{
+        background:wallet?"rgba(0,255,163,.10)":"linear-gradient(135deg,#00e5ff,#0055ff)",
+        border:wallet?`1px solid rgba(0,255,163,.3)`:"none",borderRadius:10,
+        padding:"8px 20px",color:wallet?C.green:bg,
+        fontFamily:"Syne",fontWeight:700,fontSize:13,cursor:"pointer",
+        whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",
+        boxShadow:wallet?"none":"0 0 24px rgba(0,229,255,.25)",
+      }}>
+        {wallet ? `● ${wallet}` : "Connect Wallet"}
+      </button>
+    </div>
+  </header>
+
+  <main style={{position:"relative",zIndex:1,maxWidth:1400,margin:"0 auto",padding:"36px 24px 80px"}}>
+
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {/* SWAP TAB                                                           */}
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {tab === "swap" && (
+      <div style={{display:"grid",gridTemplateColumns:"460px 1fr",gap:28,alignItems:"start",animation:"fadeUp .35s ease"}}>
+
+        {/* Left — Swap card */}
+        <div>
+          <div style={{marginBottom:22}}>
+            <h1 style={{fontSize:26,fontWeight:800,letterSpacing:.5,color:"#fff"}}>Swap Tokens</h1>
+            <p style={{color:C.muted,fontSize:13,marginTop:4}}>Best-price routing via Jupiter · <span style={{color:C.accent}}>0.3% platform fee</span></p>
+          </div>
+
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:22,padding:24,boxShadow:`0 0 60px rgba(0,229,255,.04)`}}>
+
+            {/* Slippage */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+              <span style={{fontSize:12,color:C.muted}}>Slippage</span>
+              <div style={{display:"flex",gap:4}}>
+                {[0.1,0.5,1.0].map(v=>(
+                  <button key={v} onClick={()=>setSlip(v)} style={{
+                    padding:"4px 10px",borderRadius:6,fontSize:11,fontFamily:"JetBrains Mono",cursor:"pointer",
+                    background:slip===v?"rgba(0,229,255,.15)":"transparent",
+                    border:`1px solid ${slip===v?"rgba(0,229,255,.4)":C.border}`,
+                    color:slip===v?C.accent:C.muted,
+                  }}>{v}%</button>
+                ))}
+              </div>
+            </div>
+
+            {/* FROM block */}
+            <div style={{background:C.card2,borderRadius:14,padding:16,border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontSize:12,color:C.muted}}>You Pay</span>
+                {wallet && <span style={{fontSize:11,color:C.muted,fontFamily:"JetBrains Mono"}}>Bal: 0.000 {fromC.sym}</span>}
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <button onClick={()=>setModal("from")} style={{
+                  display:"flex",alignItems:"center",gap:8,background:C.card3,
+                  border:`1px solid ${C.border}`,borderRadius:10,padding:"8px 12px",
+                  cursor:"pointer",flexShrink:0,transition:"border-color .15s",
+                }}>
+                  <CoinIcon coin={fromC} size={22} data={fromData}/>
+                  <span style={{color:"#fff",fontWeight:700,fontSize:14}}>{fromC.sym}</span>
+                  <span style={{color:C.muted,fontSize:10,marginLeft:2}}>▾</span>
+                </button>
+                <input value={fromAmt} onChange={e=>setFromAmt(e.target.value.replace(/[^0-9.]/g,""))}
+                  placeholder="0.00"
+                  style={{flex:1,background:"transparent",border:"none",fontSize:26,
+                    fontFamily:"JetBrains Mono",fontWeight:500,color:"#fff",textAlign:"right",width:"100%"}}/>
+              </div>
+              {fromAmt && fromP>0 && (
+                <div style={{textAlign:"right",marginTop:6,fontSize:11,color:C.muted,fontFamily:"JetBrains Mono"}}>
+                  ≈ {fmt(parseFloat(fromAmt)*fromP)}
+                </div>
+              )}
+            </div>
+
+            {/* Flip button */}
+            <div style={{display:"flex",justifyContent:"center",margin:"10px 0"}}>
+              <button onClick={flipCoins} style={{
+                width:38,height:38,borderRadius:11,background:C.card3,
+                border:`1px solid ${C.border}`,cursor:"pointer",
+                color:C.accent,fontSize:17,display:"flex",alignItems:"center",justifyContent:"center",
+                transition:"all .2s",
+              }} className="nh">⇅</button>
+            </div>
+
+            {/* TO block */}
+            <div style={{background:C.card2,borderRadius:14,padding:16,border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontSize:12,color:C.muted}}>You Receive</span>
+                {wallet && <span style={{fontSize:11,color:C.muted,fontFamily:"JetBrains Mono"}}>Bal: 0.000 {toC.sym}</span>}
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <button onClick={()=>setModal("to")} style={{
+                  display:"flex",alignItems:"center",gap:8,background:C.card3,
+                  border:`1px solid ${C.border}`,borderRadius:10,padding:"8px 12px",
+                  cursor:"pointer",flexShrink:0,
+                }}>
+                  <CoinIcon coin={toC} size={22} data={toData}/>
+                  <span style={{color:"#fff",fontWeight:700,fontSize:14}}>{toC.sym}</span>
+                  <span style={{color:C.muted,fontSize:10,marginLeft:2}}>▾</span>
+                </button>
+                <div style={{flex:1,textAlign:"right",fontFamily:"JetBrains Mono",fontSize:26,fontWeight:500,
+                  color:toAmt?C.green:C.muted2}}>{toAmt||"0.00"}</div>
+              </div>
+              {toAmt && toP>0 && (
+                <div style={{textAlign:"right",marginTop:6,fontSize:11,color:C.muted,fontFamily:"JetBrains Mono"}}>
+                  ≈ {fmt(parseFloat(toAmt)*toP)}
+                </div>
+              )}
+            </div>
+
+            {/* Route info */}
+            {fromAmt && fromP>0 && (
+              <div style={{marginTop:14,background:"#050912",borderRadius:12,padding:14,border:`1px solid rgba(0,229,255,.05)`}}>
+                {[
+                  ["Rate",       `1 ${fromC.sym} = ${(fromP/toP).toFixed(6)} ${toC.sym}`],
+                  ["Platform Fee (0.3%)", `$${feeUsd}`],
+                  ["Price Impact",`~${impact}%`],
+                  ["Min. Received",`${minRec} ${toC.sym}`],
+                  ["Route",      `${fromC.sym} → Jupiter → ${toC.sym}`],
+                ].map(([k,v])=>(
+                  <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:12}}>
+                    <span style={{color:C.muted}}>{k}</span>
+                    <span style={{color:C.text,fontFamily:"JetBrains Mono"}}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Swap CTA */}
+            {wallet ? (
+              <button className="nh" onClick={doSwap}
+                disabled={!fromAmt||parseFloat(fromAmt)<=0}
+                style={{
+                  width:"100%",marginTop:16,padding:18,borderRadius:14,border:"none",
+                  background: swapped ? "linear-gradient(135deg,#00ffa3,#00b36b)"
+                    : !fromAmt ? C.card2
+                    : "linear-gradient(135deg,#00e5ff,#0055ff)",
+                  color: !fromAmt ? C.muted2 : bg,
+                  fontFamily:"Syne",fontWeight:800,fontSize:16,letterSpacing:.5,
+                  cursor: !fromAmt?"not-allowed":"pointer",
+                  boxShadow: fromAmt&&!swapped ? "0 0 32px rgba(0,229,255,.3)" : "none",
+                  transition:"all .3s",
+                }}>
+                {swapped ? "✓ Swap Confirmed!" : !fromAmt ? "Enter an Amount" : `Swap ${fromC.sym} → ${toC.sym}`}
+              </button>
+            ) : (
+              <button className="nh" onClick={connectWallet} style={{
+                width:"100%",marginTop:16,padding:18,borderRadius:14,border:"none",
+                background:"linear-gradient(135deg,#00e5ff,#0055ff)",
+                color:bg,fontFamily:"Syne",fontWeight:800,fontSize:16,cursor:"pointer",
+                boxShadow:"0 0 32px rgba(0,229,255,.3)",letterSpacing:.5,
+              }}>Connect Wallet to Swap</button>
+            )}
+
+            <p style={{textAlign:"center",fontSize:11,color:C.muted2,marginTop:12}}>
+              Non-custodial · Wallet-to-wallet · No KYC required
+            </p>
+          </div>
+        </div>
+
+        {/* Right — Chart panel */}
+        <div>
+          {/* Coin tabs */}
+          <div style={{display:"flex",gap:6,marginBottom:18,flexWrap:"wrap"}}>
+            {coins.slice(0,8).map(c => {
+              const ci = coinInfo(c.id);
+              const active = chartId===c.id;
+              return (
+                <button key={c.id} onClick={()=>setChartId(c.id)} style={{
+                  display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:8,fontSize:12,
+                  fontFamily:"JetBrains Mono",cursor:"pointer",fontWeight:500,
+                  background:active?ci.color+"22":"transparent",
+                  border:`1px solid ${active?ci.color+"55":C.border}`,
+                  color:active?ci.color:C.muted,
+                }}>
+                  <CoinIcon coin={ci} size={16} data={c}/>
+                  {c.symbol?.toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
+
+          {chartData && (
+            <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:22,padding:28}}>
+              {/* Header row */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24}}>
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <CoinIcon coin={chartCI} size={44} data={chartData}/>
+                  <div>
+                    <div style={{fontFamily:"Syne",fontWeight:700,fontSize:16,color:"#fff"}}>{chartData.name}</div>
+                    <div style={{fontSize:12,color:C.muted,marginTop:2}}>{chartData.symbol?.toUpperCase()} · 7-Day Chart</div>
+                    <div style={{fontFamily:"JetBrains Mono",fontSize:30,fontWeight:500,color:"#fff",marginTop:6}}>{fmt(chartData.current_price)}</div>
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:11,color:C.muted,marginBottom:4,letterSpacing:.5}}>24H CHANGE</div>
+                  <div style={{fontFamily:"JetBrains Mono",fontSize:22,fontWeight:700,
+                    color:(chartData.price_change_percentage_24h||0)>=0?C.green:C.red}}>
+                    {pct(chartData.price_change_percentage_24h)}
+                  </div>
+                  <div style={{fontSize:11,color:C.muted,marginTop:8}}>Vol 24H: {fmt(chartData.total_volume)}</div>
+                  <div style={{fontSize:11,color:C.muted}}>Mkt Cap: {fmt(chartData.market_cap)}</div>
+                </div>
+              </div>
+
+              {/* Area chart */}
+              {chart7d.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={chart7d} margin={{top:5,right:0,left:0,bottom:0}}>
+                    <defs>
+                      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={chartColor} stopOpacity={.25}/>
+                        <stop offset="100%" stopColor={chartColor} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="t" hide/>
+                    <YAxis hide domain={["auto","auto"]}/>
+                    <Tooltip
+                      contentStyle={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,fontFamily:"JetBrains Mono",fontSize:12,color:C.text}}
+                      formatter={v=>[fmt(v),"Price"]}
+                      labelStyle={{color:C.muted}}
+                    />
+                    <Area type="monotone" dataKey="p" stroke={chartColor} strokeWidth={2} fill="url(#grad)"/>
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{height:200,display:"flex",alignItems:"center",justifyContent:"center"}}><Spinner/></div>
+              )}
+
+              {/* Stats grid */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginTop:20}}>
+                {[
+                  ["24H High",  fmt(chartData.high_24h)],
+                  ["24H Low",   fmt(chartData.low_24h)],
+                  ["All-Time High", fmt(chartData.ath)],
+                  ["Rank", "#" + (chartData.market_cap_rank||"—")],
+                ].map(([k,v])=>(
+                  <div key={k} style={{background:"#050912",borderRadius:10,padding:12,border:`1px solid rgba(0,229,255,.05)`}}>
+                    <div style={{fontSize:10,color:C.muted,marginBottom:4,letterSpacing:.5}}>{k}</div>
+                    <div style={{fontFamily:"JetBrains Mono",fontSize:13,color:C.text,fontWeight:500}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {/* MARKETS TAB                                                        */}
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {tab === "markets" && (
+      <div style={{animation:"fadeUp .35s ease"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:24}}>
+          <div>
+            <h1 style={{fontSize:26,fontWeight:800,color:"#fff",letterSpacing:.5}}>Live Markets</h1>
+            <p style={{color:C.muted,fontSize:13,marginTop:4}}>
+              Real-time data · Updates every 30s
+              {lastUpd && <span style={{marginLeft:8,color:C.muted2}}>· Last: {lastUpd.toLocaleTimeString()}</span>}
+            </p>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <Pill label="SOLANA" color="#9945ff"/>
+            <Pill label="ETHEREUM" color="#627eea"/>
+            <Pill label="MULTI-CHAIN" color={C.accent}/>
+          </div>
+        </div>
+
+        {loading ? (
+          <div style={{textAlign:"center",padding:80}}><Spinner/><p style={{color:C.muted,marginTop:16,fontSize:13}}>Fetching live prices…</p></div>
+        ) : (
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,overflow:"hidden"}}>
+            {/* TH */}
+            <div style={{display:"grid",gridTemplateColumns:"44px 2fr 1.4fr .9fr .9fr .9fr 1.3fr 1.4fr 110px",gap:12,
+              padding:"13px 24px",borderBottom:`1px solid rgba(0,229,255,.06)`,
+              fontSize:10,color:C.muted,fontWeight:700,letterSpacing:1}}>
+              {["#","NAME","PRICE","1H %","24H %","7D %","VOLUME","MARKET CAP","7D"].map(h=><div key={h}>{h}</div>)}
+            </div>
+
+            {coins.map((c,i) => {
+              const ci  = coinInfo(c.id);
+              const sp  = c.sparkline_in_7d?.price||[];
+              const pos = sp.length>1 && sp[sp.length-1]>sp[0];
+              const spPts = sp.filter((_,j)=>j%24===0).map((p,j)=>({p,j}));
+              return (
+                <div key={c.id} className="nr" onClick={()=>{setChartId(c.id);setTab("swap");}}
+                  style={{display:"grid",gridTemplateColumns:"44px 2fr 1.4fr .9fr .9fr .9fr 1.3fr 1.4fr 110px",gap:12,
+                    padding:"15px 24px",borderBottom:`1px solid rgba(255,255,255,.025)`,
+                    cursor:"pointer",alignItems:"center",transition:"background .15s"}}>
+                  <div style={{color:C.muted,fontSize:12,fontFamily:"JetBrains Mono"}}>{i+1}</div>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <CoinIcon coin={ci} size={34} data={c}/>
+                    <div>
+                      <div style={{fontFamily:"Syne",fontWeight:700,fontSize:14,color:"#fff"}}>{c.name}</div>
+                      <div style={{fontSize:11,color:C.muted,fontFamily:"JetBrains Mono"}}>{c.symbol?.toUpperCase()}</div>
+                    </div>
+                  </div>
+                  <div style={{fontFamily:"JetBrains Mono",fontWeight:500,color:"#fff",fontSize:14}}>{fmt(c.current_price)}</div>
+                  {[c.price_change_percentage_1h_in_currency,c.price_change_percentage_24h,c.price_change_percentage_7d_in_currency].map((v,idx)=>(
+                    <div key={idx} style={{fontFamily:"JetBrains Mono",fontSize:12,color:(v||0)>=0?C.green:C.red}}>{pct(v)}</div>
+                  ))}
+                  <div style={{fontFamily:"JetBrains Mono",fontSize:12,color:C.muted}}>{fmt(c.total_volume)}</div>
+                  <div style={{fontFamily:"JetBrains Mono",fontSize:12,color:C.muted}}>{fmt(c.market_cap)}</div>
+                  <div style={{height:44}}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={spPts}><Line type="monotone" dataKey="p" stroke={pos?C.green:C.red} strokeWidth={1.5} dot={false}/></LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {/* BUY CRYPTO TAB                                                     */}
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {tab === "buy" && (
+      <div style={{animation:"fadeUp .35s ease",maxWidth:640,margin:"0 auto"}}>
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <h1 style={{fontSize:26,fontWeight:800,color:"#fff",letterSpacing:.5}}>Buy Crypto with USD</h1>
+          <p style={{color:C.muted,fontSize:14,marginTop:6}}>Powered by MoonPay · Visa · Mastercard · Apple Pay · Bank Transfer</p>
+        </div>
+
+        {/* MoonPay card */}
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:22,padding:36,marginBottom:20,textAlign:"center"}}>
+          <div style={{width:80,height:80,borderRadius:22,background:"linear-gradient(135deg,#7c3aed,#4f46e5,#2563eb)",
+            margin:"0 auto 20px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,
+            boxShadow:"0 0 40px rgba(124,58,237,.4)"}}>🌙</div>
+          <h2 style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:10}}>MoonPay On-Ramp</h2>
+          <p style={{color:C.muted,fontSize:14,lineHeight:1.7,maxWidth:420,margin:"0 auto 28px"}}>
+            Buy Bitcoin, Ethereum, Solana and 100+ coins instantly. Funds are sent directly to your connected wallet — we never hold your assets.
+          </p>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:28}}>
+            {[["💳","Credit & Debit Card"],["🏦","Bank Transfer (ACH)"],["📱","Apple Pay"],["🔷","Google Pay"]].map(([ic,m])=>(
+              <div key={m} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,padding:14,
+                display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+                <span style={{fontSize:20}}>{ic}</span>
+                <span style={{fontSize:13,color:C.text,fontWeight:600}}>{m}</span>
+              </div>
+            ))}
+          </div>
+
+          <button className="nh" onClick={()=>window.open("https://buy.moonpay.com/?defaultCurrencyCode=ETH","_blank")} style={{
+            width:"100%",padding:18,borderRadius:14,border:"none",
+            background:"linear-gradient(135deg,#7c3aed,#4f46e5)",
+            color:"#fff",fontFamily:"Syne",fontWeight:800,fontSize:16,cursor:"pointer",
+            letterSpacing:.5,boxShadow:"0 0 36px rgba(124,58,237,.4)",transition:"all .2s",
+          }}>Open MoonPay → Buy Crypto Now</button>
+
+          <p style={{color:C.muted2,fontSize:11,marginTop:14,lineHeight:1.6}}>
+            Redirects to MoonPay's secure checkout. KYC may be required by MoonPay per their compliance requirements.
+          </p>
+        </div>
+
+        {/* Popular to buy */}
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:18,padding:22}}>
+          <div style={{fontSize:11,color:C.muted,marginBottom:14,fontWeight:700,letterSpacing:1}}>POPULAR RIGHT NOW</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            {coins.slice(0,6).map(c => {
+              const ci = coinInfo(c.id);
+              return (
+                <div key={c.id} onClick={()=>window.open(`https://buy.moonpay.com/?defaultCurrencyCode=${c.symbol?.toUpperCase()}`,"_blank")}
+                  className="nc" style={{display:"flex",alignItems:"center",gap:10,background:C.card2,
+                    border:`1px solid ${C.border}`,borderRadius:12,padding:"12px 14px",cursor:"pointer",transition:"background .15s"}}>
+                  <CoinIcon coin={ci} size={32} data={c}/>
+                  <div style={{flex:1}}>
+                    <div style={{fontFamily:"Syne",fontWeight:700,fontSize:13,color:"#fff"}}>{c.symbol?.toUpperCase()}</div>
+                    <div style={{fontSize:11,color:C.muted}}>{c.name}</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontFamily:"JetBrains Mono",fontSize:12,color:C.text}}>{fmt(c.current_price)}</div>
+                    <div style={{fontSize:10,fontFamily:"JetBrains Mono",color:(c.price_change_percentage_24h||0)>=0?C.green:C.red}}>
+                      {pct(c.price_change_percentage_24h)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {/* PORTFOLIO TAB                                                      */}
+    {/* ════════════════════════════════════════════════════════════════════ */}
+    {tab === "portfolio" && (
+      <div style={{animation:"fadeUp .35s ease"}}>
+        <div style={{marginBottom:24}}>
+          <h1 style={{fontSize:26,fontWeight:800,color:"#fff",letterSpacing:.5}}>Portfolio</h1>
+          <p style={{color:C.muted,fontSize:13,marginTop:4}}>Track your holdings, P&L, and trade history</p>
+        </div>
+
+        {!wallet ? (
+          <div style={{textAlign:"center",padding:"80px 40px",background:C.card,border:`1px solid ${C.border}`,borderRadius:22}}>
+            <div style={{fontSize:54,marginBottom:20}}>🔐</div>
+            <h2 style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:10}}>Connect Your Wallet</h2>
+            <p style={{color:C.muted,fontSize:14,maxWidth:360,margin:"0 auto 28px",lineHeight:1.6}}>
+              Link Phantom, MetaMask, Backpack, or any Web3 wallet to view your real-time portfolio.
+            </p>
+            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
+              {[["🟣","Phantom"],["🦊","MetaMask"],["🎒","Backpack"],["🔵","WalletConnect"]].map(([ic,n])=>(
+                <div key={n} style={{display:"flex",alignItems:"center",gap:8,background:C.card2,
+                  border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 16px"}}>
+                  <span style={{fontSize:18}}>{ic}</span>
+                  <span style={{fontSize:13,color:C.text,fontFamily:"Syne",fontWeight:600}}>{n}</span>
+                </div>
+              ))}
+            </div>
+            <button className="nh" onClick={connectWallet} style={{
+              padding:"14px 40px",borderRadius:12,background:"linear-gradient(135deg,#00e5ff,#0055ff)",
+              border:"none",color:bg,fontFamily:"Syne",fontWeight:800,fontSize:15,cursor:"pointer",
+              boxShadow:"0 0 32px rgba(0,229,255,.3)",letterSpacing:.5,
+            }}>Connect Wallet</button>
+          </div>
+        ) : (
+          <div>
+            {/* Wallet summary */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:14,marginBottom:20}}>
+              {[
+                ["Total Value","$0.00",C.accent],
+                ["24H P&L","$0.00 (0.00%)",C.green],
+                ["All-Time P&L","$0.00",C.muted],
+                ["Assets","0",C.text],
+              ].map(([k,v,color])=>(
+                <div key={k} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:20}}>
+                  <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:700,letterSpacing:.8}}>{k}</div>
+                  <div style={{fontFamily:"JetBrains Mono",fontSize:20,color,fontWeight:500}}>{v}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Connected wallet bar */}
+            <div style={{background:C.card,border:`1px solid rgba(0,255,163,.15)`,borderRadius:14,padding:18,
+              marginBottom:20,display:"flex",alignItems:"center",gap:14}}>
+              <div style={{width:44,height:44,borderRadius:12,background:C.greenBg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>👛</div>
+              <div>
+                <div style={{fontSize:12,color:C.muted,marginBottom:3}}>Connected</div>
+                <div style={{fontFamily:"JetBrains Mono",fontSize:15,color:C.green,fontWeight:500}}>{wallet}</div>
+              </div>
+              <div style={{marginLeft:"auto"}}><Pill label="SOLANA MAINNET" color="#9945ff"/></div>
+            </div>
+
+            {/* Empty state */}
+            <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:18,padding:"56px 40px",textAlign:"center"}}>
+              <div style={{fontSize:42,marginBottom:14}}>📊</div>
+              <h3 style={{fontSize:17,fontWeight:700,color:"#fff",marginBottom:8}}>No Holdings Detected</h3>
+              <p style={{color:C.muted,fontSize:14,marginBottom:24,lineHeight:1.6}}>Your wallet appears to have no tracked assets.<br/>Start by buying or swapping crypto.</p>
+              <div style={{display:"flex",gap:12,justifyContent:"center"}}>
+                <button className="nh" onClick={()=>setTab("buy")} style={{padding:"10px 24px",borderRadius:10,background:"linear-gradient(135deg,#7c3aed,#4f46e5)",border:"none",color:"#fff",fontFamily:"Syne",fontWeight:700,fontSize:13,cursor:"pointer"}}>Buy Crypto</button>
+                <button className="nh" onClick={()=>setTab("swap")} style={{padding:"10px 24px",borderRadius:10,background:C.accentBg,border:`1px solid ${C.borderHi}`,color:C.accent,fontFamily:"Syne",fontWeight:700,fontSize:13,cursor:"pointer"}}>Swap Tokens</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+  </main>
+
+  {/* ── Token Select Modal ─────────────────────────────────────────────── */}
+  {modal && (
+    <TokenModal coins={coins}
+      onSelect={c => {
+        const ci = coinInfo(c.id)||{id:c.id,sym:c.symbol?.toUpperCase(),name:c.name,color:C.accent};
+        if (modal==="from") setFromC(ci); else setToC(ci);
+        setModal(null);
+      }}
+      onClose={()=>setModal(null)}
+    />
+  )}
+
+  {/* ── Footer ────────────────────────────────────────────────────────── */}
+  <footer style={{borderTop:`1px solid ${C.border}`,padding:"22px 24px"}}>
+    <div style={{maxWidth:1400,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#00e5ff,#0055ff)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"JetBrains Mono",fontWeight:700,fontSize:12,color:bg}}>N</div>
+        <span style={{fontFamily:"Syne",fontWeight:800,fontSize:14,letterSpacing:2,color:"#fff"}}>NEXUS DEX</span>
+      </div>
+      <div style={{display:"flex",gap:6}}>
+        <Pill label="JUPITER ROUTING" color="#9945ff"/>
+        <Pill label="MOONPAY ON-RAMP" color="#7c3aed"/>
+        <Pill label="0.3% FEE" color={C.accent}/>
+        <Pill label="NON-CUSTODIAL" color={C.green}/>
+      </div>
+      <div style={{fontSize:11,color:C.muted2,fontFamily:"JetBrains Mono"}}>© 2025 Nexus DEX · Prices via CoinGecko</div>
+    </div>
+  </footer>
+</div>
+```
+
+);
+}
