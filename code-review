@@ -1,0 +1,581 @@
+# NEXUS DEX — COMPLETE CODE REVIEW CHECKLIST
+
+## Every Possible Issue: General Programming + Crypto-Specific
+
+-----
+
+## SECTION 1: IMPORTS & EXPORTS
+
+- [ ] Every import at top of file — no require() inside components or functions
+- [ ] No duplicate imports of same module
+- [ ] Every imported name is actually used
+- [ ] Every used name is actually imported (no assumed globals)
+- [ ] Named vs default exports match at call sites
+- [ ] File extensions correct (.js vs .jsx vs .mjs vs .ts)
+- [ ] No circular imports between files
+- [ ] ESM (import/export) and CJS (require) not mixed in same file
+- [ ] .mjs extension used for ESM scripts run directly by Node
+- [ ] package.json “type”:“module” not set if react-scripts used (breaks build)
+- [ ] Third-party packages installed in package.json dependencies
+- [ ] Package versions compatible with each other
+- [ ] No importing from private/internal package paths that may change
+
+-----
+
+## SECTION 2: REACT HOOKS RULES
+
+- [ ] No hooks called inside if/else/ternary/switch/loops
+- [ ] No hooks called conditionally — always called in same order every render
+- [ ] No hooks inside nested functions inside components
+- [ ] useEffect cleanup returned for every effect with timers, listeners, subscriptions
+- [ ] useEffect dependency array includes EVERY variable/function referenced inside
+- [ ] useCallback dependency array includes EVERY variable referenced inside
+- [ ] useMemo dependency array includes EVERY variable referenced inside
+- [ ] No stale closures — state from old render not used in async callbacks
+- [ ] No setState called after component unmounts (use isMounted / aborted flag)
+- [ ] useState initial values are correct type
+- [ ] useRef used for values that should NOT cause re-renders
+- [ ] No direct mutation of state variables — always use setter
+- [ ] React.memo used on expensive child components with stable props
+- [ ] Context values memoized to prevent unnecessary re-renders
+- [ ] useLayoutEffect only when DOM measurement needed — not as substitute for useEffect
+
+-----
+
+## SECTION 3: ASYNC / PROMISES
+
+- [ ] Every async function has try/catch or .catch() handler
+- [ ] No unhandled promise rejections
+- [ ] await used on every Promise where result or timing matters
+- [ ] Intentional fire-and-forget clearly commented
+- [ ] AbortController used for fetch calls that should be cancellable
+- [ ] Race conditions guarded with aborted/isMounted flags in async useEffects
+- [ ] Promise.all() used for independent parallel operations (not sequential awaits)
+- [ ] Error objects have .message extracted before display to user
+- [ ] No top-level await in non-module files
+- [ ] Promise chains not mixed with async/await in same function
+
+-----
+
+## SECTION 4: NULL / UNDEFINED SAFETY
+
+- [ ] No .property access on value that could be null or undefined
+- [ ] No array methods called on non-array values
+- [ ] Optional chaining (?.) used where object may not exist
+- [ ] Nullish coalescing (??) vs OR (||) correct — 0 and ‘’ are falsy, not nullish
+- [ ] Function arguments validated before destructuring or property access
+- [ ] Array.find() result checked before accessing properties on it
+- [ ] JSON.parse() wrapped in try/catch
+- [ ] localStorage.getItem() null-checked before JSON.parse()
+- [ ] publicKey null-checked before .toString() — Solana wallets return null before connect
+- [ ] evmAddress null-checked before string operations
+- [ ] walletClient null-checked before calling methods
+- [ ] API response bodies null-checked before accessing .routes/.data/.result
+- [ ] Nested optional fields use ?. (e.g. step?.action?.fromChainId)
+
+-----
+
+## SECTION 5: TYPE SAFETY
+
+- [ ] BigInt() NEVER called on float strings — Math.floor().toString() first
+- [ ] BigInt() NEVER called on undefined, null, NaN, or decimal numbers
+- [ ] parseInt() ALWAYS has radix (parseInt(x, 16) not parseInt(x))
+- [ ] parseFloat() result checked isNaN() before arithmetic
+- [ ] typeof check before type-sensitive operations
+- [ ] === strict equality used, never == (no implicit type coercion)
+- [ ] String vs number for chain IDs consistent — LiFi returns numbers, wagmi uses numbers
+- [ ] Array.isArray() checked before .map/.filter/.reduce
+- [ ] Token decimals always have fallback — dec(token) helper, never raw .decimals
+- [ ] Math.pow(10, decimals) always has integer decimals (NaN if undefined)
+- [ ] Number.isFinite() check for values used in financial calculations
+- [ ] No implicit string-to-number coercion in arithmetic (+str, str*1)
+
+-----
+
+## SECTION 6: VARIABLES & SCOPE
+
+- [ ] No var inside for loops where closures are involved (use let/const)
+- [ ] const for values that don’t change, let for values that do
+- [ ] No variable shadowing (inner variable same name as outer)
+- [ ] No variable used before declared
+- [ ] Loop variables don’t accidentally share across iterations in closures
+- [ ] No global variable pollution
+- [ ] Temporary variables in async loops use unique names per iteration
+- [ ] No accidental redeclaration of variables in same scope
+- [ ] Dead code removed (variables assigned but never read)
+
+-----
+
+## SECTION 7: FUNCTIONS & LOGIC
+
+- [ ] Every function does one thing
+- [ ] Early returns used for guard clauses (avoid deep nesting)
+- [ ] Switch statements have default case
+- [ ] Ternary expressions not nested more than 2 levels
+- [ ] Boolean logic correct (De Morgan’s laws applied correctly)
+- [ ] Off-by-one errors in array indexing and loop bounds
+- [ ] >= vs > and <= vs < used correctly
+- [ ] No magic numbers — named constants used everywhere
+- [ ] Division by zero guarded
+- [ ] Comparison operands in correct order
+
+-----
+
+## SECTION 8: MEMORY LEAKS
+
+- [ ] setInterval has clearInterval in useEffect cleanup
+- [ ] setTimeout has clearTimeout in useEffect cleanup
+- [ ] WebSocket has .close() in useEffect cleanup
+- [ ] Event listeners have removeEventListener in useEffect cleanup
+- [ ] Fetch calls aborted via AbortController in cleanup
+- [ ] Async setState guarded so it won’t fire after unmount
+- [ ] No closures retaining large object trees unnecessarily
+- [ ] Subscription-based data sources (WebSocket, polling) stopped on unmount
+
+-----
+
+## SECTION 9: PERFORMANCE
+
+- [ ] Expensive computations wrapped in useMemo
+- [ ] Callbacks passed as props wrapped in useCallback
+- [ ] List item keys are stable and unique — NOT array index
+- [ ] Large lists virtualized if needed
+- [ ] No new object/array literals created inline in JSX props
+- [ ] No anonymous functions as event handlers in frequently-rendered lists
+- [ ] API responses cached where appropriate (5-min cache for market data)
+- [ ] Debounce on search inputs (350ms before firing)
+- [ ] Bundle size: large libraries imported selectively not wholesale
+
+-----
+
+## SECTION 10: ERROR HANDLING
+
+- [ ] Every user-facing error sets visible error state (not just console.error)
+- [ ] Error state cleared on retry attempt
+- [ ] Error messages auto-clear after timeout (no stuck error messages)
+- [ ] Errors are human-readable (not raw JSON blobs)
+- [ ] Swap/send errors restore UI to usable state (no stuck loading spinner)
+- [ ] try/catch in every async execution path
+- [ ] console.error for bugs, console.warn for expected/recoverable issues
+- [ ] Error boundaries (React ErrorBoundary) wrap major UI sections
+- [ ] 429 rate limit errors detected and user notified
+- [ ] Network offline state handled
+
+-----
+
+## SECTION 11: SECURITY — GENERAL
+
+- [ ] No private keys, seed phrases, or secrets in client code
+- [ ] process.env.REACT_APP_* keys are public-safe — secret keys through server
+- [ ] No hardcoded credentials
+- [ ] No eval() or new Function() with user input
+- [ ] dangerouslySetInnerHTML never used with untrusted content
+- [ ] External URLs validated before window.open() (open redirect prevention)
+- [ ] User input sanitized before display (XSS prevention)
+- [ ] HTTPS enforced — no mixed content
+- [ ] Sensitive data not stored in localStorage
+- [ ] npm packages audited for known vulnerabilities
+
+-----
+
+## SECTION 12: SYNTAX BALANCE
+
+- [ ] Every { has matching }
+- [ ] Every ( has matching )
+- [ ] Every [ has matching ]
+- [ ] Template literals (backticks) all closed
+- [ ] JSX tags opened and closed correctly
+- [ ] No orphaned code blocks from failed edits
+- [ ] No duplicate closing braces from merged code sections
+- [ ] switch/case/break structure correct
+
+-----
+
+## SECTION 13: SOLANA — TRANSACTIONS
+
+- [ ] skipPreflight: true on ALL sendTransaction calls (prevents mobile timeout)
+- [ ] getLatestBlockhash(‘confirmed’) — ‘confirmed’ commitment always specified
+- [ ] VersionedTransaction decompiled via TransactionMessage.decompile() before adding instructions
+- [ ] Address Lookup Tables fetched and passed to decompile() when present
+- [ ] New VersionedTransaction created after modifying decompiled message
+- [ ] recentBlockhash set on decompiled message before recompiling
+- [ ] Transaction size stays under 1232 bytes after adding instructions
+- [ ] Compute units set for compute-heavy transactions
+- [ ] confirmTransaction uses { signature, blockhash, lastValidBlockHeight } form
+- [ ] maxRetries: 3 on sendTransaction for mobile reliability
+- [ ] SPL token ATA existence checked — create if missing
+- [ ] Priority fee added for time-sensitive transactions
+- [ ] Correct Token Program used (Token vs Token-2022)
+
+-----
+
+## SECTION 14: SOLANA — ACCOUNTS & KEYS
+
+- [ ] publicKey null-checked before every use
+- [ ] PublicKey() constructor wrapped in try/catch for user input
+- [ ] Base58 addresses validated (32-44 chars, valid charset)
+- [ ] Keypair never generated client-side for user funds
+- [ ] Seed phrases never entered into web UI
+- [ ] Connected wallet signer matches transaction fee payer
+- [ ] Rent-exempt minimum balance calculated before creating accounts
+- [ ] PDAs derived correctly with correct seeds and bump
+- [ ] Account ordering in instruction matches program IDL
+- [ ] Required signers present in instruction accounts
+
+-----
+
+## SECTION 15: SOLANA — PROGRAM IDs (MUST MATCH EXACTLY)
+
+- [ ] System Program: 11111111111111111111111111111111
+- [ ] Token Program: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+- [ ] Associated Token Account Program: ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bmd
+- [ ] Metaplex Token Metadata: metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s
+- [ ] Jupiter Aggregator v6: JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4
+- [ ] Pump.fun: 6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
+- [ ] Raydium LaunchLab: LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj (verify current)
+
+-----
+
+## SECTION 16: EVM — TRANSACTIONS
+
+- [ ] Chain switch uses polling (not fixed setTimeout) to confirm completion
+- [ ] Token approval checked before swap/send
+- [ ] Approval transaction awaited with polling before swap proceeds
+- [ ] BigInt used for ALL wei/token unit amounts
+- [ ] Native token (0xeeee…eeee) handled separately from ERC20
+- [ ] gas/gasLimit set to avoid out-of-gas failure
+- [ ] value: BigInt(0) explicitly set on ERC20 transactions
+- [ ] walletClient existence checked before calling methods
+- [ ] chainId compared as number (not string)
+- [ ] switchChain receives numeric chainId (not string)
+- [ ] Transaction hash stored before awaiting confirmation
+- [ ] EIP-1559 vs legacy gas handled correctly
+
+-----
+
+## SECTION 17: EVM — ABI ENCODING
+
+- [ ] Function selectors correct:
+  - [ ] transfer: 0xa9059cbb
+  - [ ] approve: 0x095ea7b3
+  - [ ] allowance: 0xdd62ed3e
+  - [ ] balanceOf: 0x70a08231
+  - [ ] transferFrom: 0x23b872dd
+- [ ] ABI encoding correct — padStart(64,‘0’) for addresses and uint256
+- [ ] Address encoding: address.slice(2).padStart(64,‘0’)
+- [ ] Amount encoding: amount.toString(16).padStart(64,‘0’)
+- [ ] Infinite approval amount: ‘f’.repeat(64) (max uint256)
+- [ ] Return values decoded correctly from eth_call hex response
+- [ ] Contract address checksummed (EIP-55) where required
+
+-----
+
+## SECTION 18: EVM — SECURITY
+
+- [ ] Slippage set correctly (sandwich attack protection)
+- [ ] Deadline set on DEX swaps (front-running protection)
+- [ ] Price impact shown to user before execution
+- [ ] Minimum received amount shown before execution
+- [ ] Token contract address validated before approval
+- [ ] MEV protection considered for large trades
+- [ ] Infinite approval revoked after swap if security is priority
+
+-----
+
+## SECTION 19: LIFI CROSS-CHAIN
+
+- [ ] /v1/advanced/routes used — NOT /v1/quote
+- [ ] POST body uses fromChainId/toChainId/fromTokenAddress/toTokenAddress
+- [ ] routes array checked for existence and length before routes[0]
+- [ ] steps array checked before for loop
+- [ ] Each step’s transactionRequest re-fetched via stepTransaction endpoint if null
+- [ ] stepFromChainId === ‘SOL’ correctly identifies Solana steps
+- [ ] EVM stepChainId parsed as integer before switchChain
+- [ ] allowSwitchChain: true in options
+- [ ] integrator: ‘nexus-dex’ set in every LiFi call
+- [ ] fee: 0.08 set in every LiFi call
+- [ ] order: ‘RECOMMENDED’ for best multi-hop route
+- [ ] maxPriceImpact: 0.5 set
+- [ ] Preview quote uses valid placeholder addresses (42-char EVM, 32-char Solana)
+- [ ] Execution always re-fetches fresh route (routes expire ~60 seconds)
+- [ ] Fee charged on Solana steps via fee instruction inside transaction
+- [ ] Fee charged on last EVM step via native transfer
+- [ ] LiFi integrator fee registered and verified on LiFi dashboard
+
+-----
+
+## SECTION 20: 0x PROTOCOL
+
+- [ ] /allowance-holder/quote for execution, /allowance-holder/price for preview
+- [ ] swapFeeBps: ‘500’ set
+- [ ] swapFeeRecipient: EVM_FEE_WALLET set
+- [ ] tradeSurplusRecipient: EVM_FEE_WALLET set
+- [ ] swapFeeToken set correctly (buy token for buys, sell token for sells)
+- [ ] taker address set in quote request
+- [ ] issues.allowance checked — approval sent if needed
+- [ ] issues.balance checked — error if insufficient
+- [ ] chainId in query matches wallet chain
+- [ ] slippageBps calculated correctly (slip * 100)
+- [ ] oxQ.transaction.to/.data/.value all used
+
+-----
+
+## SECTION 21: JUPITER
+
+- [ ] /swap/v1/quote for preview, /swap/v1/swap for execution
+- [ ] slippageBps calculated correctly
+- [ ] inputMint/outputMint are valid Solana mint addresses
+- [ ] amount in raw units (not human-readable)
+- [ ] quoteResponse object passed exactly to swap endpoint
+- [ ] swapTransaction base64 decoded via Buffer.from(x, ‘base64’)
+- [ ] ALTs fetched before decompiling
+- [ ] Fee instruction appended after decompile
+- [ ] recentBlockhash updated after decompile
+- [ ] compileToV0Message(altAccts) called with lookup tables
+- [ ] wrapAndUnwrapSol: true for SOL swaps
+- [ ] dynamicComputeUnitLimit: true set
+- [ ] Jupiter API key in headers
+
+-----
+
+## SECTION 22: PUMPPORTAL
+
+- [ ] Endpoint: https://pumpportal.fun/api/trade-local
+- [ ] denominatedInSol: ‘true’ for buy (string not boolean)
+- [ ] pool: ‘auto’ to handle graduation to Raydium
+- [ ] Response is arrayBuffer → Uint8Array → VersionedTransaction.deserialize
+- [ ] Fee instruction added via decompile before send
+- [ ] skipPreflight: true on send
+
+-----
+
+## SECTION 23: FEE COLLECTION — COMPLETE AUDIT
+
+- [ ] SOL fee wallet: 47sLuYEAy1zVLvnXyVd4m2YxK2Vmffnzab3xX3j9wkc5
+- [ ] EVM fee wallet: 0xC41c1de4250104dC1EE2854ffD5b40a04B9AC9fF
+- [ ] Same-chain fee: TOTAL_FEE = 0.05 (5%)
+- [ ] Cross-chain fee: TOTAL_FEE_CC = 0.08 (8%)
+- [ ] LIFI_FEE = 0.08 matches TOTAL_FEE_CC
+- [ ] Fee wallets IDENTICAL in SwapWidget.js, Send.js, NewLaunches.js, TokenLaunch.js
+- [ ] Jupiter: fee inside same VersionedTransaction as swap
+- [ ] 0x: fee in quote params (swapFeeBps + swapFeeRecipient)
+- [ ] LiFi: integrator fee in options + transfer on last step
+- [ ] PumpPortal: fee instruction inside same VersionedTransaction
+- [ ] TokenLaunch: 0.5 SOL fee transaction after launch confirmation
+- [ ] EVM sends: fee transfer in same execution block
+- [ ] EVM ERC20 sends: fee charged in same token as sent
+- [ ] MIN fee floor: 50000 lamports on Solana
+- [ ] Fee shown to user in UI breakdown before confirmation
+- [ ] Fee calculations: Math.round/Math.floor to avoid float drift
+
+-----
+
+## SECTION 24: WALLET STATE — SITE-WIDE AUDIT
+
+- [ ] walletConnected = isConnected || solConnected || evmConnected in every component
+- [ ] Never gate actions on prop alone without hook fallback
+- [ ] WalletContext wraps entire app inside WalletProvider + WagmiProvider
+- [ ] SwapWidget: walletConnected = solConnected || evmConnected
+- [ ] Send: walletConnected = isConnected || solConnected || evmConnected
+- [ ] NewLaunches (LaunchTradeDrawer): isConnected || solConnected || evmConnected
+- [ ] NewLaunches (TokenPage): isConnected || solConnected || evmConnected
+- [ ] NewLaunches (main export): isConnected || solConnected || evmConnected
+- [ ] PumpDrawer: walletConnected = solConnected (Solana-only — CORRECT)
+- [ ] Portfolio: isConnected || solConnected || evmConnected
+- [ ] TokenDetail: isConnected || solConnected || evmConnected
+- [ ] TokenLaunch: isConnected || solConnected || !!publicKey
+
+-----
+
+## SECTION 25: CHAIN IDS — COMPLETE MAP
+
+- [ ] Ethereum: 1
+- [ ] Base: 8453
+- [ ] Arbitrum: 42161
+- [ ] Optimism: 10
+- [ ] Polygon: 137
+- [ ] BNB Chain: 56
+- [ ] Avalanche: 43114
+- [ ] zkSync Era: 324
+- [ ] Linea: 59144
+- [ ] Scroll: 534352
+- [ ] Mantle: 5000
+- [ ] Blast: 81457
+- [ ] Mode: 34443
+- [ ] Sonic: 146
+- [ ] Unichain: 130
+- [ ] Berachain: 80094
+- [ ] Ink: 57073
+- [ ] Monad Testnet: 10143 (NOT 143)
+- [ ] World Chain: 480
+- [ ] Gnosis: 100
+- [ ] Fantom: 250
+- [ ] Cronos: 25
+- [ ] Moonbeam: 1284
+- [ ] Celo: 42220
+- [ ] SEI: 1329
+- [ ] Chain IDs consistent across CHAIN_NAMES, OX_CHAIN_IDS, ANKR_TO_CHAIN_ID, POPULAR_TOKENS, index.js
+
+-----
+
+## SECTION 26: CRITICAL TOKEN ADDRESSES
+
+- [ ] Native SOL / WSOL: So11111111111111111111111111111111111111112
+- [ ] USDC Solana: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+- [ ] USDT Solana: Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
+- [ ] Native EVM: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+- [ ] USDC Ethereum: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+- [ ] USDC Base: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+- [ ] USDC Arbitrum: 0xaf88d065e77c8cC2239327C5EDb3A432268e5831
+- [ ] USDT Ethereum: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+- [ ] WBTC Ethereum: 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
+- [ ] All EVM addresses EIP-55 checksummed
+- [ ] All Solana addresses valid base58
+
+-----
+
+## SECTION 27: API ENDPOINTS — COMPLETE MAP
+
+- [ ] Jupiter quote: https://api.jup.ag/swap/v1/quote
+- [ ] Jupiter swap: https://api.jup.ag/swap/v1/swap
+- [ ] Jupiter price: https://api.jup.ag/price/v2
+- [ ] Jupiter tokens: https://lite-api.jup.ag/tokens/v1/tagged/strict
+- [ ] LiFi routes: https://li.quest/v1/advanced/routes (POST)
+- [ ] LiFi step tx: https://li.quest/v1/advanced/stepTransaction (POST)
+- [ ] LiFi tokens: https://li.quest/v1/tokens
+- [ ] LiFi token price: https://li.quest/v1/token
+- [ ] 0x price: /api/0x/swap/allowance-holder/price (server proxy)
+- [ ] 0x quote: /api/0x/swap/allowance-holder/quote (server proxy)
+- [ ] PumpPortal: https://pumpportal.fun/api/trade-local (POST)
+- [ ] DexScreener: https://api.dexscreener.com/latest/dex/tokens/{addr}
+- [ ] GeckoTerminal: https://api.geckoterminal.com/api/v2/networks/{network}/tokens/{addr}/ohlcv/{tf}
+- [ ] CoinGecko: https://api.coingecko.com/api/v3/coins/markets
+- [ ] Ankr: https://rpc.ankr.com/multichain (POST)
+- [ ] NO /v1/quote for LiFi — deprecated single-hop only
+
+-----
+
+## SECTION 28: TRANSACTION LIFECYCLE
+
+- [ ] Quote fetched fresh at execution time (not reusing old quote)
+- [ ] Slippage applied correctly (bps vs percentage)
+- [ ] User shown expected output and minimum received before signing
+- [ ] Transaction submitted and hash stored before awaiting confirmation
+- [ ] Transaction hash shown to user with block explorer link immediately after submit
+- [ ] Optimistic UI update after submission (don’t wait for confirmation)
+- [ ] Background confirmation so UI isn’t blocked (Jupiter swaps)
+- [ ] Failed transaction detected and error shown
+- [ ] Double-submit prevented (button disabled after first click)
+- [ ] Status state cleaned up after success/error timeout
+- [ ] Retry logic for transient network failures
+
+-----
+
+## SECTION 29: ENVIRONMENT VARIABLES
+
+- [ ] REACT_APP_WC_PROJECT_ID — WalletConnect project ID
+- [ ] REACT_APP_SOLANA_RPC — Helius or Solana RPC
+- [ ] REACT_APP_JUPITER_API_KEY1 — Jupiter API key
+- [ ] REACT_APP_PLATFORM_ID — Raydium LaunchLab platform ID
+- [ ] REACT_APP_PINATA_JWT — Pinata for IPFS uploads
+- [ ] ADMIN_WALLET_PRIVATE_KEY — setupLaunchpad.mjs ONLY, never in client bundle
+- [ ] All REACT_APP_* are safe to expose in browser
+- [ ] Secret keys only in server environment
+- [ ] .env file in .gitignore (never committed to repo)
+- [ ] .env.example lists all required variables with placeholder values
+- [ ] Railway/Render env vars set for production deployment
+- [ ] Fallbacks for missing env vars (empty string, public RPC)
+
+-----
+
+## SECTION 30: SERVER / PROXY
+
+- [ ] 0x API key stored server-side only
+- [ ] 0x requests proxied through /api/0x/* (no CORS, no key exposure)
+- [ ] Rate limiting on proxy endpoints
+- [ ] CORS configured correctly on server
+- [ ] server.js uses PORT env var (Railway sets this)
+- [ ] railway.json / nixpacks.toml correct start command
+- [ ] Static files served from build/ directory
+- [ ] All API routes defined before static file catch-all
+
+-----
+
+## SECTION 31: MOBILE CONSIDERATIONS
+
+- [ ] skipPreflight: true on all Solana sends (mobile timeout bug)
+- [ ] maxRetries: 3 on all Solana sends (flaky mobile connections)
+- [ ] No fixed setTimeout delays in execution paths — use polling
+- [ ] safe-area-inset-bottom used for iOS home bar spacing
+- [ ] Touch targets minimum 44x44px
+- [ ] No hover-only interactions (hover doesn’t exist on mobile)
+- [ ] overscrollBehavior: none on scroll containers
+- [ ] Pull-to-refresh disabled where it causes accidental reloads
+- [ ] Phantom/Solflare wallet app switching handled on iOS
+- [ ] Deep links work correctly with BrowserRouter
+
+-----
+
+## SECTION 32: UI / UX
+
+- [ ] Loading states shown during async operations
+- [ ] Buttons disabled during pending transactions
+- [ ] Success state auto-clears after timeout
+- [ ] Error state auto-clears after timeout
+- [ ] Connect wallet prompt shown to disconnected users
+- [ ] Destination address field only shown when wallet not connected for that chain
+- [ ] Correct chain name in placeholder (not wrong chain for token)
+- [ ] MAX button accounts for fees and gas reserve
+- [ ] Drawers have fixed header + scrollable content + iOS safe area padding
+- [ ] No content hidden behind mobile nav bar
+- [ ] Fee breakdown visible to user before confirming swap/send
+
+-----
+
+## SECTION 33: DATA CONSISTENCY
+
+- [ ] Token decimals consistent with on-chain values
+- [ ] Price calculations use same decimal precision throughout
+- [ ] Fee percentages: displayed in UI matches what is charged
+- [ ] Chain IDs consistent across all map objects in all files
+- [ ] EVM token addresses always lowercase for comparisons
+- [ ] Solana addresses case-sensitive — never toLowerCase()
+- [ ] LiFi chain IDs: ‘SOL’ string for Solana, number for EVM (consistent)
+- [ ] Amount display uses correct decimals per token
+- [ ] No floating-point rounding errors in fee display vs fee charged
+
+-----
+
+## SECTION 34: CODE QUALITY
+
+- [ ] No commented-out code in production
+- [ ] No TODO/FIXME left unresolved
+- [ ] No console.log in production
+- [ ] No dead functions never called
+- [ ] No duplicate logic — shared utilities extracted
+- [ ] Constants defined once at top, not repeated inline
+- [ ] Magic numbers replaced with named constants
+- [ ] Clear, descriptive variable and function names
+- [ ] Files focused — each file has a single clear purpose
+- [ ] No files over ~1000 lines without strong reason
+
+-----
+
+## SECTION 35: FINAL SIGN-OFF — QUICK SCAN
+
+- [ ] npm run build succeeds with no errors
+- [ ] All brace pairs balanced { } ( ) [ ]
+- [ ] No /v1/quote in any LiFi call
+- [ ] All getLatestBlockhash use ‘confirmed’
+- [ ] All sendTransaction have skipPreflight: true
+- [ ] All walletConnected from hooks not prop alone
+- [ ] Fee wallet addresses identical in all files
+- [ ] Monad chain ID is 10143 not 143
+- [ ] setupLaunchpad is .mjs not .js
+- [ ] No duplicate WalletContext files
+- [ ] All BigInt() calls have integer-safe inputs
+- [ ] All Math.pow(10, decimals) have fallback via dec()
+- [ ] No stale LiFi route used at execution (fresh fetch at execution)
+- [ ] All Solana VersionedTransactions decompiled before modifying
+- [ ] PumpPortal transactions have fee instruction and skipPreflight
+- [ ] Every component with wallet actions has walletConnected from hooks
