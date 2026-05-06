@@ -1,0 +1,971 @@
+Cleaned. ~700 lines — 3 chunks.
+Chunk 1 of 3 (lines 1–235):
+
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="{{CANONICAL_URL}}">
+<meta property="article:modified_time" content="{{MODIFIED_DATE}}">
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{CANONICAL_URL}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{TITLE}}">
+<meta name="twitter:description" content="{{DESCRIPTION}}">
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"{{TITLE}}","description":"{{DESCRIPTION}}","url":"{{CANONICAL_URL}}"}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is a DEX aggregator and why does it get better prices?","acceptedAnswer":{"@type":"Answer","text":"A DEX aggregator routes your swap across multiple decentralized exchanges simultaneously rather than executing on a single pool. On Solana, liquidity is fragmented across Raydium, Orca, Meteora, and dozens of other venues. A direct swap applies full price impact to one pool. An aggregator finds the deepest pool or splits your order to reduce impact -- the result is more tokens received for the same input."}},{"@type":"Question","name":"Is the swap non-custodial? Do I need to sign up?","acceptedAnswer":{"@type":"Answer","text":"Yes -- non-custodial means your private keys and funds stay in your wallet until the swap executes on-chain. There is no account, no sign-up, and no KYC. Connect your wallet, review the quoted price, and confirm the transaction."}},{"@type":"Question","name":"What is slippage tolerance and how should I set it?","acceptedAnswer":{"@type":"Answer","text":"Slippage tolerance is the maximum price deviation you will accept between the quoted rate and the actual fill price. Setting 1% means you accept any fill up to 1% worse than quoted. On liquid pairs 0.5% is usually sufficient. On thinner pools or new tokens you may need 1-2%."}},{"@type":"Question","name":"What chains are supported?","acceptedAnswer":{"@type":"Answer","text":"Solana is the primary chain with full SPL token support across Raydium, Orca, Meteora, Phoenix, and other major Solana AMMs. EVM chains including Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche are supported. Cross-chain swaps between Solana and EVM networks are handled in one step."}},{"@type":"Question","name":"How does cross-chain swapping work?","acceptedAnswer":{"@type":"Answer","text":"Cross-chain swaps route your tokens from one blockchain to another at the best available price, combining bridge routing with destination DEX selection into a single quoted execution. You receive one price for the complete route without managing a separate bridge transaction or paying double fees."}},{"@type":"Question","name":"What is the difference between swapping on Raydium directly versus using a DEX aggregator?","acceptedAnswer":{"@type":"Answer","text":"A direct Raydium swap executes at the current pool price with full price impact on your order size. An aggregator runs the same trade simultaneously across Raydium, Orca, Meteora, and other pools, then routes your order through the deepest active liquidity or splits it to reduce impact. On larger trades the difference in tokens received is measurable and consistent."}}]}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FinancialService","name":"{{TITLE}}","description":"{{DESCRIPTION}}","url":"{{CANONICAL_URL}}","serviceType":"Decentralized Exchange Aggregator","areaServed":"Worldwide","provider":{"@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/"}}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"{{TITLE}}","applicationCategory":"FinanceApplication","operatingSystem":"Web","description":"{{DESCRIPTION}}","url":"{{CANONICAL_URL}}","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/","sameAs":["https://apps.apple.com/app/id6759490910"]}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Verixia","item":"https://verixiaapps.com/"},{"@type":"ListItem","position":2,"name":"{{BREADCRUMB_NAME}}","item":"{{CANONICAL_URL}}"}]}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--bg:#04070f;--bg-2:#060a14;--bg-3:#080d1a;--bg-4:#0a1020;
+--ink:#d8e8ff;--ink-strong:#f2f8ff;
+--muted:#7a96be;--muted-2:#5c7aa0;
+--cyan:#00ecd0;--cyan-2:#00c8b0;--cyan-3:#00a892;
+--violet:#a87fff;--violet-2:#8c64f8;
+--emerald:#0fd98a;
+--sol:#9945ff;
+--glow-cyan:0 0 20px rgba(0,236,208,.22),0 0 40px rgba(0,236,208,.08);
+--glow-sol:0 0 20px rgba(153,69,255,.20),0 0 40px rgba(153,69,255,.08);
+--glow-emerald:0 0 18px rgba(15,217,138,.18);
+--shadow-xl:0 32px 90px rgba(0,0,0,.80);--shadow-lg:0 22px 56px rgba(0,0,0,.64);
+--shadow-md:0 14px 34px rgba(0,0,0,.48);--shadow-sm:0 8px 20px rgba(0,0,0,.32);--shadow-xs:0 4px 12px rgba(0,0,0,.20);
+--radius-xl:28px;--radius-lg:22px;--radius-sm:14px;
+--font-display:'Syne',system-ui,sans-serif;
+--font-body:'DM Sans',system-ui,sans-serif;
+--font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+body{
+  font-family:var(--font-body);
+  margin:0;padding-top:84px;color:var(--ink);line-height:1.6;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 0%,rgba(153,69,255,.12),transparent 52%),
+    radial-gradient(ellipse 60% 45% at 90% 0%,rgba(0,236,208,.14),transparent 50%),
+    radial-gradient(ellipse 50% 35% at 50% 100%,rgba(0,180,150,.04),transparent 48%),
+    linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 28%,var(--bg-3) 62%,var(--bg-4) 100%);
+}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;color:var(--cyan-2);}
+button{font-family:var(--font-body);}
+@supports(padding:max(0px)){
+  body{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right));}
+}
+
+/* === TOP BAR === */
+.top-bar{
+  position:fixed;top:0;left:0;width:100%;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 18px;z-index:1000;pointer-events:none;
+  background:linear-gradient(180deg,rgba(4,7,15,.94) 0%,transparent 100%);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.top-actions{pointer-events:auto;display:flex;align-items:center;gap:10px;}
+.logo{
+  pointer-events:auto;display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--font-display);font-size:14px;font-weight:800;color:#eef6ff;
+  margin-left:4px;padding:9px 14px;border-radius:999px;letter-spacing:-.01em;
+  background:rgba(4,7,15,.70);border:1px solid rgba(153,69,255,.24);
+  backdrop-filter:blur(16px);box-shadow:var(--glow-sol),var(--shadow-sm);
+  text-decoration:none;transition:border-color .15s,box-shadow .15s;
+}
+.logo:hover{text-decoration:none;border-color:rgba(0,236,208,.36);box-shadow:var(--glow-cyan),var(--shadow-sm);}
+.logo-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:linear-gradient(135deg,var(--sol) 0%,var(--cyan) 100%);
+  box-shadow:0 0 8px rgba(153,69,255,.7);
+  flex:0 0 9px;animation:logopulse 2.4s ease-in-out infinite;
+}
+@keyframes logopulse{0%,100%{box-shadow:0 0 6px rgba(153,69,255,.5);}50%{box-shadow:0 0 16px rgba(153,69,255,.95),0 0 28px rgba(0,236,208,.35);}}
+.app-top{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:9px 13px;font-size:13px;border-radius:13px;font-weight:800;
+  color:#d8e8ff;border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);backdrop-filter:blur(10px);
+  box-shadow:var(--shadow-xs);transition:border-color .15s,background .15s;
+}
+.app-top:hover{text-decoration:none;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.18);}
+.swap-top-btn{
+  pointer-events:auto;padding:9px 16px;font-size:13px;border-radius:13px;font-weight:900;
+  background:linear-gradient(135deg,var(--sol) 0%,var(--cyan-2) 100%);
+  color:#fff;border:none;cursor:pointer;white-space:nowrap;
+  box-shadow:var(--glow-cyan),var(--shadow-sm);transition:transform .15s,box-shadow .15s;
+}
+.swap-top-btn:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,236,208,.30),var(--shadow-md);}
+
+/* === PAGE SHELL === */
+.page-shell{max-width:940px;margin:0 auto;padding:0 14px 80px;}
+
+/* === HERO === */
+.hero{position:relative;padding:20px 8px 16px;max-width:900px;margin:0 auto 10px;text-align:center;}
+.hero-badge-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:14px;}
+.hero-badge{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:7px 12px;border-radius:999px;font-size:11px;font-weight:800;
+  letter-spacing:.02em;color:#b0c8e8;
+  background:rgba(153,69,255,.07);border:1px solid rgba(153,69,255,.16);
+  backdrop-filter:blur(10px);box-shadow:var(--shadow-xs);
+}
+.hero-badge.sol-badge{
+  background:rgba(153,69,255,.10);border-color:rgba(153,69,255,.24);
+  color:#d0b8ff;box-shadow:var(--glow-sol);
+}
+.hero-badge.cyan-badge{
+  background:rgba(0,236,208,.07);border-color:rgba(0,236,208,.16);color:#a0e8dc;
+}
+.hero h1{
+  margin:0;font-family:var(--font-display);
+  font-size:48px;line-height:1.04;letter-spacing:-.04em;
+  font-weight:900;color:var(--ink-strong);text-wrap:balance;
+}
+.hero p{margin:13px auto 0;max-width:680px;font-size:17px;color:#9ab8d8;text-wrap:balance;line-height:1.65;}
+.hero-trust{margin-top:14px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
+.hero-trust-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800;
+  color:#c0d8f0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  box-shadow:var(--shadow-xs);
+}
+.social-proof-bar{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  margin:13px auto 0;max-width:300px;padding:8px 15px;border-radius:999px;
+  background:rgba(15,217,138,.07);border:1px solid rgba(15,217,138,.18);
+  box-shadow:var(--glow-emerald);
+}
+.social-proof-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--emerald);
+  box-shadow:0 0 8px rgba(15,217,138,.8);
+  animation:sproofpulse 2s ease-in-out infinite;flex:0 0 7px;
+}
+@keyframes sproofpulse{0%,100%{transform:scale(1);box-shadow:0 0 6px rgba(15,217,138,.6);}50%{transform:scale(1.25);box-shadow:0 0 14px rgba(15,217,138,.95),0 0 24px rgba(15,217,138,.35);}}
+.social-proof-text{font-size:12px;font-weight:900;color:var(--emerald);letter-spacing:.01em;}
+
+/* === SWAP SECTION === */
+.swap-section{max-width:820px;margin:0 auto 16px;padding:0 14px;}
+.swap-section-label{
+  text-align:center;margin-bottom:6px;
+  font-family:var(--font-display);font-size:11px;font-weight:800;
+  letter-spacing:.10em;text-transform:uppercase;color:rgba(0,236,208,.50);
+}
+.swap-widget-wrap{
+  position:relative;border-radius:var(--radius-xl);overflow:hidden;
+  background:linear-gradient(180deg,rgba(10,16,28,.98) 0%,rgba(4,7,15,1) 100%);
+  border:1px solid rgba(0,236,208,.20);
+  box-shadow:0 0 80px rgba(0,236,208,.08),0 0 40px rgba(153,69,255,.06),var(--shadow-xl);
+}
+.swap-widget-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 18px;border-bottom:1px solid rgba(0,236,208,.07);
+  background:rgba(0,236,208,.025);gap:10px;flex-wrap:wrap;
+}
+.swap-live-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 10px;
+  border-radius:999px;background:rgba(15,217,138,.08);
+  border:1px solid rgba(15,217,138,.18);
+  font-size:11px;font-weight:900;color:var(--emerald);letter-spacing:.02em;
+}
+.swap-live-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--emerald);
+  box-shadow:0 0 8px rgba(15,217,138,.8);
+  animation:sproofpulse 2s ease-in-out infinite;flex:0 0 7px;
+}
+.swap-trust-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.swap-trust-chip{
+  display:inline-flex;align-items:center;gap:4px;padding:5px 9px;
+  border-radius:999px;font-size:11px;font-weight:800;
+  color:rgba(180,210,240,.60);background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+}
+.swap-frame-container{position:relative;width:100%;background:var(--bg);min-height:480px;}
+.swap-frame-loading{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:14px;background:rgba(4,7,15,.96);z-index:2;
+  transition:opacity .4s ease;
+}
+.swap-frame-loading.hidden{opacity:0;pointer-events:none;}
+.swap-loading-spinner{
+  width:38px;height:38px;
+  border:3px solid rgba(0,236,208,.12);border-top-color:var(--cyan);
+  border-radius:50%;animation:spin .75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.swap-loading-text{
+  font-family:var(--font-mono);font-size:10px;font-weight:700;
+  color:rgba(0,236,208,.60);letter-spacing:.10em;text-transform:uppercase;
+}
+.swap-frame-container iframe{
+  width:100%;height:560px;border:none;display:block;background:transparent;
+}
+.swap-frame-error{
+  display:none;flex-direction:column;align-items:center;
+  justify-content:center;min-height:340px;padding:36px;
+  text-align:center;gap:14px;
+}
+.swap-frame-error-icon{font-size:32px;}
+.swap-frame-error-title{font-family:var(--font-display);font-size:18px;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.swap-frame-error-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:320px;}
+.swap-frame-error-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:13px 24px;border-radius:999px;font-size:14px;font-weight:900;
+  color:#04070f;background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
+  border:none;cursor:pointer;box-shadow:var(--glow-cyan);
+  text-decoration:none;transition:transform .15s;
+}
+.swap-frame-error-btn:hover{transform:translateY(-1px);text-decoration:none;}
+.swap-widget-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;border-top:1px solid rgba(0,236,208,.07);
+  background:rgba(0,236,208,.02);flex-wrap:wrap;gap:8px;
+}
+.swap-chain-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.swap-chain-badge{
+  display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;
+  font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.03em;
+}
+.swap-chain-badge.sol-chain{color:rgba(153,69,255,.80);background:rgba(153,69,255,.08);border:1px solid rgba(153,69,255,.18);}
+.swap-chain-badge.evm-chain{color:rgba(0,236,208,.55);background:rgba(0,236,208,.05);border:1px solid rgba(0,236,208,.10);}
+.swap-powered-by{font-size:10px;font-weight:700;color:rgba(120,150,180,.35);font-family:var(--font-mono);}
+
+/* === STATS BAR === */
+.stats-bar{
+  max-width:820px;margin:0 auto 16px;padding:0 14px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+}
+.stat-card{
+  padding:14px 12px;border-radius:var(--radius-sm);text-align:center;
+  background:linear-gradient(135deg,rgba(153,69,255,.06) 0%,rgba(0,236,208,.05) 100%);
+  border:1px solid rgba(0,236,208,.09);box-shadow:var(--shadow-xs);
+}
+.stat-card-value{
+  display:block;font-family:var(--font-mono);font-size:20px;font-weight:700;
+  color:var(--cyan);letter-spacing:-.01em;line-height:1.1;
+}
+.stat-card-label{
+  display:block;margin-top:3px;font-size:10px;font-weight:800;
+  color:var(--muted);letter-spacing:.05em;text-transform:uppercase;line-height:1.3;
+}
+
+/* === FEATURE GRID === */
+.feature-grid{
+  max-width:820px;margin:0 auto 16px;padding:0 14px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+.feature-card{
+  padding:20px 17px;border-radius:var(--radius-lg);
+  background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.02) 100%);
+  border:1px solid rgba(0,236,208,.09);box-shadow:var(--shadow-xs);
+  transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+.feature-card:hover{border-color:rgba(0,236,208,.18);box-shadow:var(--glow-cyan),var(--shadow-sm);transform:translateY(-2px);}
+.feature-card--primary{
+  background:linear-gradient(135deg,rgba(153,69,255,.09) 0%,rgba(0,236,208,.07) 100%);
+  border-color:rgba(0,236,208,.14);box-shadow:var(--glow-cyan),var(--shadow-sm);
+}
+.feature-card--sol{
+  background:linear-gradient(135deg,rgba(153,69,255,.09) 0%,rgba(0,236,208,.05) 100%);
+  border-color:rgba(153,69,255,.16);box-shadow:var(--glow-sol),var(--shadow-xs);
+}
+.feature-icon{font-size:24px;margin-bottom:11px;display:block;line-height:1;}
+.feature-title{
+  font-family:var(--font-display);font-size:16px;font-weight:900;
+  color:#fff;letter-spacing:-.02em;margin-bottom:8px;line-height:1.2;
+}
+.feature-body{font-size:13px;font-weight:700;line-height:1.65;color:#8aaccc;}
+
+/* === CONTENT SECTION === */
+.content-section{
+  max-width:820px;margin:28px auto 0;padding:26px;border-radius:var(--radius-xl);
+  position:relative;overflow:hidden;
+  border:1px solid rgba(0,236,208,.09);
+  background:linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%);
+  box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(0,236,208,.05);
+}
+.content-section::before{
+  content:"";position:absolute;top:-90px;right:-70px;width:220px;height:220px;
+  border-radius:50%;background:radial-gradient(circle,rgba(153,69,255,.07),transparent 65%);
+  pointer-events:none;
+}
+.content-section>*{position:relative;z-index:1;}
+.content-bridge{
+  margin:0 0 14px;padding:14px;border-radius:16px;
+  background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.09);
+  font-size:14px;color:#8aaccc;font-weight:700;line-height:1.65;
+}
+.inline-info-card{
+  margin:0 0 14px;padding:14px;
+  background:linear-gradient(135deg,rgba(153,69,255,.07) 0%,rgba(0,236,208,.06) 100%);
+  border:1px solid rgba(153,69,255,.13);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);
+}
+.hub-link-label{display:block;margin-bottom:5px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);}
+.hub-link-anchor{display:inline;font-size:14px;font-weight:900;color:#fff;}
+.content-section h2{
+  margin:0 0 13px;color:#fff;line-height:1.08;letter-spacing:-.035em;
+  font-family:var(--font-display);font-weight:900;text-wrap:balance;font-size:34px;
+}
+.content-section h3{
+  margin:24px 0 11px;font-size:22px;color:#fff;line-height:1.1;
+  letter-spacing:-.03em;font-family:var(--font-display);font-weight:900;
+}
+.content-recognition{margin:0 0 16px;display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+.recognition-chip{
+  padding:13px;border-radius:15px;
+  background:linear-gradient(135deg,rgba(153,69,255,.06) 0%,rgba(0,236,208,.05) 100%);
+  border:1px solid rgba(0,236,208,.09);box-shadow:var(--shadow-xs);
+}
+.recognition-label{display:block;margin-bottom:4px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);}
+.recognition-copy{display:block;font-size:13px;font-weight:800;line-height:1.5;color:#a0b8d4;}
+.content-body{font-size:16px;color:#8aaccc;}
+.content-body p{margin:0 0 16px;}
+.story-stack{display:grid;gap:11px;}
+.story-card{
+  padding:17px;border-radius:18px;
+  border:1px solid rgba(0,236,208,.08);
+  background:linear-gradient(180deg,rgba(255,255,255,.035) 0%,rgba(255,255,255,.02) 100%);
+  box-shadow:var(--shadow-sm);
+}
+.story-card.lead{
+  background:linear-gradient(135deg,rgba(153,69,255,.09) 0%,rgba(0,236,208,.07) 100%);
+  border-color:rgba(0,236,208,.14);box-shadow:var(--glow-cyan),var(--shadow-sm);
+}
+.story-card-title{
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;
+  font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);
+}
+.story-card p{margin:0 0 9px;font-size:14px;line-height:1.72;color:#b0c8e4;}
+.story-card p:last-child{margin-bottom:0;}
+.link-section{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,236,208,.07);}
+.related-links{margin:0;padding-left:18px;}
+.related-links li{margin-bottom:8px;}
+.related-links a{color:var(--cyan);font-weight:800;}
+.content-close{
+  margin-top:22px;padding:14px;border-radius:16px;
+  background:rgba(0,236,208,.03);border:1px solid rgba(0,236,208,.08);
+  font-size:14px;font-weight:800;color:#6a8aae;line-height:1.68;
+}
+.footer{
+  text-align:center;margin-top:56px;padding:32px 20px;
+  color:#4a6080;font-size:13px;line-height:1.7;
+}
+.footer a{color:var(--cyan);font-weight:700;opacity:.65;}
+
+/* === STICKY MOBILE CTA === */
+.sticky-mobile-cta{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:998;
+  padding:10px 14px;
+  background:linear-gradient(135deg,var(--sol) 0%,var(--cyan-2) 100%);
+  box-shadow:0 -4px 24px rgba(153,69,255,.28);
+  align-items:center;justify-content:space-between;gap:10px;
+}
+.sticky-mobile-cta.visible{display:flex;}
+.sticky-mobile-cta-text{font-size:13px;font-weight:900;color:#fff;line-height:1.25;flex:1;}
+.sticky-mobile-cta-text span{display:block;font-size:10px;font-weight:700;opacity:.75;margin-top:2px;}
+.sticky-mobile-cta-btn{
+  flex:0 0 auto;padding:9px 16px;border-radius:999px;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(10px);
+  color:#fff;font-size:13px;font-weight:900;
+  border:1px solid rgba(255,255,255,.30);cursor:pointer;white-space:nowrap;
+}
+.sticky-mobile-cta-close{
+  flex:0 0 auto;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.60);font-size:20px;
+  background:none;border:none;cursor:pointer;line-height:1;padding:0;
+}
+
+/* === SUPPLEMENTARY CONTENT === */
+.supplementary-content{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,236,208,.07);}
+.supplementary-content h3{margin:0 0 12px;font-size:22px;color:#fff;font-family:var(--font-display);font-weight:900;letter-spacing:-.03em;line-height:1.1;}
+.supplementary-content p{font-size:14px;color:#8aaccc;line-height:1.72;margin:0 0 13px;}
+.supplementary-content p:last-child{margin-bottom:0;}
+
+/* === FAQ SECTION === */
+.faq-section{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,236,208,.07);}
+.faq-section>h3{margin:0 0 12px;font-size:22px;color:#fff;font-family:var(--font-display);font-weight:900;letter-spacing:-.03em;line-height:1.1;}
+.faq-item{margin-bottom:7px;border:1px solid rgba(0,236,208,.09);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.025);}
+.faq-item summary{padding:14px 16px;cursor:pointer;font-size:14px;font-weight:800;color:#c0d8f0;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s,color .15s;line-height:1.45;}
+.faq-item summary:hover{background:rgba(0,236,208,.04);color:#fff;}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{content:'+';font-size:18px;color:rgba(0,236,208,.50);flex:0 0 20px;text-align:right;font-weight:400;}
+.faq-item[open] summary::after{content:'-';}
+.faq-item[open] summary{color:#fff;background:rgba(0,236,208,.03);}
+.faq-answer{padding:0 16px 14px;font-size:14px;color:#8aaccc;line-height:1.70;}
+
+/* === TRUST SECTION === */
+.trust-section{
+  max-width:820px;margin:28px auto 0;padding:0 14px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+.trust-item{
+  padding:16px;border-radius:var(--radius-sm);
+  background:rgba(255,255,255,.025);border:1px solid rgba(0,236,208,.07);
+  display:flex;align-items:flex-start;gap:12px;
+}
+.trust-item-icon{font-size:22px;flex:0 0 26px;line-height:1.2;}
+.trust-item-body{}
+.trust-item-title{display:block;font-size:14px;font-weight:900;color:#fff;margin-bottom:4px;}
+.trust-item-copy{display:block;font-size:13px;color:#7a9abf;line-height:1.55;}
+@media(max-width:640px){
+  .trust-section{grid-template-columns:1fr;gap:8px;padding:0 10px;}
+  .supplementary-content h3,.faq-section>h3{font-size:19px;}
+}
+@media(max-width:640px){
+  body{padding-top:78px;}
+  .hero{padding:10px 6px 12px;}
+  .hero h1{font-size:30px;letter-spacing:-.035em;}
+  .hero p{font-size:15px;margin-top:8px;}
+  .stats-bar{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .feature-grid{grid-template-columns:1fr;gap:8px;}
+  .feature-card{padding:16px 14px;}
+  .swap-frame-container iframe{height:480px;}
+  .swap-widget-header,.swap-widget-footer{padding:9px 14px;}
+  .content-section{margin-left:10px;margin-right:10px;padding:18px;border-radius:20px;}
+  .content-section h2{font-size:26px;}
+  .content-section h3{font-size:20px;}
+  .content-body{font-size:14px;}
+  .content-recognition{grid-template-columns:1fr;gap:7px;}
+  .top-bar{padding:8px 12px;}
+  .top-actions{gap:7px;}
+  .logo{font-size:13px;margin-left:2px;padding:8px 11px;}
+  .app-top{font-size:12px;padding:7px 9px;}
+  .swap-top-btn{font-size:12px;padding:7px 11px;}
+}
+</style>
+
+</head>
+<body>
+
+<!-- STICKY MOBILE CTA -->
+
+<div class="sticky-mobile-cta" id="stickyCta">
+  <div class="sticky-mobile-cta-text">
+    &#x25CE; Swap on Solana
+    <span>Best price &middot; Non-custodial &middot; No KYC</span>
+  </div>
+  <button class="sticky-mobile-cta-btn" onclick="scrollToSwap()">Swap Now</button>
+  <button class="sticky-mobile-cta-close" onclick="dismissCta()" aria-label="Dismiss">&times;</button>
+</div>
+
+<!-- TOP BAR -->
+
+<div class="top-bar">
+  <a class="logo" href="https://verixiaapps.com/">
+    <span class="logo-dot"></span>
+    <span>Verixia</span>
+  </a>
+  <div class="top-actions">
+    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">&#x1F4F1; App</a>
+    <button class="swap-top-btn" onclick="scrollToSwap()">Swap Now</button>
+  </div>
+</div>
+
+<div class="page-shell">
+
+  <!-- HERO -->
+
+  <div class="hero">
+    <div class="hero-badge-row">
+      <div class="hero-badge sol-badge">&#x25CE; Solana Native</div>
+      <div class="hero-badge cyan-badge">&#x26A1; 50+ DEXes</div>
+      <div class="hero-badge">&#x1F517; Cross-Chain</div>
+      <div class="hero-badge">&#x1F512; Non-Custodial</div>
+      <div class="hero-badge">&#x2713; No KYC</div>
+    </div>
+    <h1 id="heroKeyword">{{STATIC_H1}}</h1>
+    <p id="heroSubheading">{{STATIC_INTRO}}</p>
+    <div class="hero-trust">
+      <div class="hero-trust-chip">Non-custodial</div>
+      <div class="hero-trust-chip">Best price routing</div>
+      <div class="hero-trust-chip">Solana + EVM</div>
+      <div class="hero-trust-chip">Instant settlement</div>
+    </div>
+    <div class="social-proof-bar">
+      <span class="social-proof-dot"></span>
+      <span class="social-proof-text" id="socialProofText">12,480 swaps routed today</span>
+    </div>
+  </div>
+
+  <!-- SWAP WIDGET -->
+
+  <section class="swap-section" id="swapSection">
+    <div class="swap-section-label">Live Swap</div>
+    <div class="swap-widget-wrap">
+      <div class="swap-widget-header">
+        <div class="swap-live-badge">
+          <span class="swap-live-dot"></span>
+          <span>Live</span>
+        </div>
+        <div class="swap-trust-chips">
+          <span class="swap-trust-chip">&#x1F512; Non-custodial</span>
+          <span class="swap-trust-chip">&#x26A1; Best price</span>
+          <span class="swap-trust-chip">&#x2713; No KYC</span>
+          <span class="swap-trust-chip">&#x26A1; Instant</span>
+        </div>
+      </div>
+      <div class="swap-frame-container">
+        <div class="swap-frame-loading" id="swapLoading">
+          <div class="swap-loading-spinner"></div>
+          <div class="swap-loading-text">Loading swap</div>
+        </div>
+        <iframe
+          id="swapFrame"
+          src="https://swap.verixiaapps.com"
+          frameborder="0"
+          scrolling="no"
+          allow="clipboard-write; web3"
+          title="Swap tokens at best price -- Verixia DEX Aggregator"
+          loading="eager"
+        ></iframe>
+        <div class="swap-frame-error" id="swapError">
+          <div class="swap-frame-error-icon">&#x26A1;</div>
+          <div class="swap-frame-error-title">Open Swap</div>
+          <div class="swap-frame-error-sub">Best price swaps across Raydium, Orca, Meteora and 50+ DEXes. Non-custodial. No KYC.</div>
+          <a class="swap-frame-error-btn" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Open Swap &rarr;</a>
+        </div>
+      </div>
+      <div class="swap-widget-footer">
+        <div class="swap-chain-badges">
+          <span class="swap-chain-badge sol-chain">SOL</span>
+          <span class="swap-chain-badge evm-chain">ETH</span>
+          <span class="swap-chain-badge evm-chain">BASE</span>
+          <span class="swap-chain-badge evm-chain">ARB</span>
+          <span class="swap-chain-badge evm-chain">BNB</span>
+          <span class="swap-chain-badge evm-chain">POLY</span>
+          <span class="swap-chain-badge evm-chain">AVAX</span>
+          <span class="swap-chain-badge evm-chain">OP</span>
+        </div>
+        <span class="swap-powered-by">Powered by Verixia</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <span class="stat-card-value">50+</span>
+      <span class="stat-card-label">DEXes</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card-value">10+</span>
+      <span class="stat-card-label">Chains</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card-value">Best</span>
+      <span class="stat-card-label">Price Routing</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card-value">0%</span>
+      <span class="stat-card-label">Custody</span>
+    </div>
+  </div>
+
+  <!-- FEATURE GRID -->
+
+  <div class="feature-grid">
+    <div class="feature-card feature-card--primary">
+      <span class="feature-icon">&#x26A1;</span>
+      <div class="feature-title">Best Price Routing</div>
+      <div class="feature-body">Routes simultaneously across Raydium, Orca, Meteora and 50+ DEXes. Split-route execution reduces price impact -- you receive more tokens for the same input.</div>
+    </div>
+    <div class="feature-card feature-card--sol">
+      <span class="feature-icon">&#x25CE;</span>
+      <div class="feature-title">Solana Native</div>
+      <div class="feature-body">Full SPL token support across all major Solana AMMs. Native CLMM and DLMM pool access for the deepest available liquidity and fastest settlement.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#x1F517;</span>
+      <div class="feature-title">Cross-Chain</div>
+      <div class="feature-body">Swap SOL to ETH, BASE, ARB, BNB and back in one step. Cross-chain execution at best available price across Solana and EVM -- no separate bridge required.</div>
+    </div>
+  </div>
+
+  <!-- SEO CONTENT SECTION -->
+
+  <section class="content-section">
+    <div id="contentBridge" class="content-bridge"></div>
+    <div class="inline-info-card" id="hubLinkWrap">{{HUB_LINK}}</div>
+    <h2 id="contentHeading">Why a DEX Aggregator Gets You a Better Swap Price</h2>
+    <div class="content-recognition" id="contentRecognition">
+      <div class="recognition-chip">
+        <span class="recognition-label">The routing problem</span>
+        <span class="recognition-copy">Solana liquidity is split across Raydium, Orca, Meteora, and dozens of other venues. A direct swap hits only one pool -- full price impact, no routing.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What it costs you</span>
+        <span class="recognition-copy">On a thin pool, full price impact means you receive fewer tokens than a split-route execution would return for the same input amount.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">What aggregators do</span>
+        <span class="recognition-copy">Route simultaneously across all active pools, split the order where needed, and return the best combined fill price automatically.</span>
+      </div>
+      <div class="recognition-chip">
+        <span class="recognition-label">When it matters most</span>
+        <span class="recognition-copy">Larger trades, thinner pools, newer tokens with fragmented liquidity -- the conditions where the routing difference is measurable and real.</span>
+      </div>
+    </div>
+    <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
+
+    <!-- Static supplementary content -- always crawlable by Google -->
+    <div class="supplementary-content">
+      <h3>How DEX aggregation works on Solana</h3>
+      <p>Liquidity on Solana is distributed across Raydium, Orca, Meteora, Phoenix, and dozens of other venues. When you swap directly on any single DEX, your order applies full price impact to that pool alone -- the pool state changes with every trade, and larger orders move the price progressively further from the quote. An aggregator solves this by running your swap across multiple pools simultaneously, routing the full order through the deepest venue or splitting it to reduce impact on each pool individually.</p>
+      <p>Solana uses concentrated liquidity pool architectures (CLMM on Raydium and Orca, DLMM on Meteora) where depth clusters tightly around the current price and thins rapidly outside a narrow tick range. A trade large enough to exhaust the active range starts filling at progressively worse prices. Splitting the route across Raydium and Orca simultaneously -- or adding Meteora to the mix -- keeps more of the order inside the deep, liquid part of each pool. At $10,000 trade size the difference in tokens received is already measurable. At $50,000 it is significant.</p>
+      <p>Cross-chain swaps work the same way. Moving SOL to ETH, USDC on Base, or tokens on Arbitrum through the aggregator combines bridge routing with destination DEX selection into a single quoted execution -- one confirmation, one fee structure, better execution than a manual two-step bridge-then-swap approach.</p>
+    </div>
+
+    <!-- Visible FAQ -- indexed by Google, addresses conversion objections -->
+    <section class="faq-section" aria-label="Frequently asked questions">
+      <h3>Frequently asked questions</h3>
+      <details class="faq-item">
+        <summary>What is a DEX aggregator and why does it get better prices?</summary>
+        <div class="faq-answer">A DEX aggregator routes your swap across multiple decentralized exchanges simultaneously rather than executing on a single pool. On Solana, liquidity is fragmented across Raydium, Orca, Meteora, and dozens of other venues. A direct swap on any one DEX applies full price impact to that pool. An aggregator finds the deepest available pool or splits your order across pools to reduce impact -- the result is more tokens received for the same input amount.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Is the swap non-custodial? Do I need to sign up?</summary>
+        <div class="faq-answer">Yes -- non-custodial means your private keys and funds stay in your wallet until the swap executes on-chain. There is no account, no sign-up, and no KYC at any point. Connect your wallet, review the quoted price, and confirm the transaction. Your tokens move directly through the smart contract.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is slippage tolerance and how should I set it?</summary>
+        <div class="faq-answer">Slippage tolerance is the maximum price deviation you will accept between the quoted rate and the actual fill price. Setting 1% means you accept any fill up to 1% worse than quoted. On liquid pairs, 0.5% is usually sufficient. On thinner pools or new tokens, you may need 1-2%. Setting it too low causes transactions to fail on volatile pairs; too high exposes you to worse fills when pools move during execution.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What chains are supported?</summary>
+        <div class="faq-answer">Solana is the primary chain with full SPL token support across Raydium, Orca, Meteora, Phoenix, and other major Solana AMMs. EVM chains including Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche are supported. Cross-chain swaps between Solana and EVM networks are handled in a single step -- no separate bridge transaction required.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the difference between swapping on Raydium directly versus using a DEX aggregator?</summary>
+        <div class="faq-answer">A direct Raydium swap executes at the current CLMM pool price with full price impact applied to your order size. An aggregator runs the same trade simultaneously across Raydium, Orca, Meteora, and other active pools, then either routes the full order through the deepest pool or splits it to reduce impact. On Solana's concentrated liquidity architecture, where depth clusters tightly around the current price, the difference in execution cost is measurable on trades above $5,000 and significant on trades above $25,000.</div>
+      </details>
+    </section>
+
+    <div class="link-section">
+      <h3 id="relatedHeading">Related Swap Guides</h3>
+      <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
+    </div>
+    <div class="link-section" id="moreLinksWrap">
+      <h3 id="moreLinksHeading">More DEX Aggregator Guides</h3>
+      <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+    </div>
+    <div class="content-close">
+      Liquidity is fragmented across Solana. A direct swap on any single DEX applies full price impact to your order. An aggregator solves that routing problem automatically -- every time you swap.
+    </div>
+
+  </section>
+
+  <!-- TRUST SECTION -->
+
+  <div class="trust-section" aria-label="Why trust Verixia">
+    <div class="trust-item">
+      <span class="trust-item-icon">&#x1F512;</span>
+      <div class="trust-item-body">
+        <span class="trust-item-title">Non-custodial</span>
+        <span class="trust-item-copy">Your wallet keys never leave your device. Funds move directly between wallets through the smart contract -- Verixia holds nothing.</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item-icon">&#x2713;</span>
+      <div class="trust-item-body">
+        <span class="trust-item-title">No account required</span>
+        <span class="trust-item-copy">No sign-up, no KYC, no email. Connect your wallet and swap. Disconnect at any time -- no ongoing permissions required.</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item-icon">&#x26A1;</span>
+      <div class="trust-item-body">
+        <span class="trust-item-title">Best price routing</span>
+        <span class="trust-item-copy">Routes split across Raydium, Orca, Meteora and 50+ DEXes to minimize price impact. Every swap finds the best available execution price.</span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div>Verixia is a non-custodial DeFi platform. Swap fees apply to transactions. Not financial advice.</div>
+    <div style="margin-top:6px">By using this website you agree to our <a href="https://verixiaapps.com/website-policies/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.</div>
+    <div style="margin-top:6px">Verixia DEX Aggregator &copy; 2026 &middot; Best price swaps on Solana and EVM</div>
+  </footer>
+
+</div><!-- end page-shell -->
+
+<script>
+const RAW_KEYWORD = "{{KEYWORD}}";
+
+/* === UTILS === */
+function normalizeKeyword(str){return String(str||"").replace(/\s+/g," ").replace(/[\u2013\u2014]/g,"-").trim();}
+function safeLower(str){return normalizeKeyword(str).toLowerCase();}
+function displayKeyword(s){var t=normalizeKeyword(s);if(!t)return"";return t.charAt(0).toUpperCase()+t.slice(1);}
+function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function containsAny(text,arr){return arr.some(function(p){return text.includes(p);});}
+
+function cleanKeywordForSentence(kw){
+  return normalizeKeyword(kw)
+    .replace(/\bswap\b/gi,"").replace(/\bdex\b/gi,"").replace(/\baggregator\b/gi,"")
+    .replace(/\bbest\b/gi,"").replace(/\bcheap(est)?\b/gi,"").replace(/\bprice\b/gi,"")
+    .replace(/\brate\b/gi,"").replace(/\btoken\b/gi,"").replace(/\bcoin\b/gi,"")
+    .replace(/\bcrypto\b/gi,"").replace(/\bno\s+kyc\b/gi,"")
+    .replace(/\bcross[\s-]chain\b/gi,"").replace(/\binstant\b/gi,"").replace(/\bfast\b/gi,"")
+    .replace(/\s+/g," ").trim();
+}
+
+/* === HEADING BUILDERS === */
+function buildHeroTitle(kw){
+  var raw=normalizeKeyword(kw),lower=safeLower(kw);
+  if(!raw)return"Best Price Token Swap -- Solana DEX Aggregator";
+  if(containsAny(lower,["sol to eth","sol to usdc","sol to base","sol to arb","sol to bnb"]))return"Swap "+displayKeyword(raw)+" -- Best Price Cross-Chain";
+  if(containsAny(lower,["cross chain","crosschain","cross-chain","bridge sol"]))return"Cross-Chain Swap -- "+displayKeyword(raw)+" at Best Price";
+  if(containsAny(lower,["raydium vs","orca vs","jupiter vs","vs jupiter","vs raydium","vs orca","vs meteora"]))return displayKeyword(raw)+" -- Find the Best DEX Rate on Solana";
+  if(containsAny(lower,["best dex","dex aggregator","swap aggregator","best aggregator"]))return"Best Solana DEX Aggregator -- "+displayKeyword(raw);
+  if(containsAny(lower,["no kyc","without kyc","anonymous"])){var ck=cleanKeywordForSentence(kw);return"Swap "+(ck?displayKeyword(ck):"Crypto")+" -- No KYC DEX Aggregator";}
+  var ck2=cleanKeywordForSentence(kw);
+  if(ck2&&ck2.length>2)return"Swap "+displayKeyword(ck2)+" at Best Price -- Solana DEX Aggregator";
+  return displayKeyword(raw)+" -- Swap at Best Price on Solana";
+}
+
+function buildHeroSubheading(kw){
+  var lower=safeLower(kw);
+  if(containsAny(lower,["cross chain","crosschain","cross-chain","sol to eth","sol to usdc","sol to arb","sol to base"]))
+    return"Route from Solana to Ethereum, Base, Arbitrum and back at the best available price. Non-custodial. No KYC. One step.";
+  if(containsAny(lower,["raydium","orca","jupiter","meteora"]))
+    return"Compare "+displayKeyword(cleanKeywordForSentence(kw)||kw)+" across all active pools simultaneously. The aggregator finds the best execution price automatically.";
+  if(containsAny(lower,["no kyc","without kyc"]))
+    return"Swap any token at best price -- no sign-up, no KYC, non-custodial. Route across Raydium, Orca, Meteora and 50+ DEXes.";
+  return"Route across Raydium, Orca, Meteora and 50+ DEXes for the best execution price on Solana and EVM chains. Non-custodial. No KYC.";
+}
+
+function buildContentHeading(kw){
+  var lower=safeLower(kw);
+  var ck=cleanKeywordForSentence(kw);
+  if(containsAny(lower,["cross chain","crosschain","sol to eth","sol to usdc"]))return"How Cross-Chain Swaps Work -- Solana to EVM at Best Price";
+  if(containsAny(lower,["raydium vs","orca vs","vs jupiter","vs raydium"]))return"How DEX Aggregators Compare Prices Across Solana Venues";
+  if(containsAny(lower,["no kyc","without kyc"]))return"Non-Custodial DEX Swaps -- No KYC, Best Price Routing";
+  if(containsAny(lower,["best dex","dex aggregator"]))return"Why DEX Aggregators Get Better Prices Than Direct Swaps";
+  if(ck&&ck.length>2)return"How to Swap "+displayKeyword(ck)+" at Best Price on Solana";
+  return"Why a DEX Aggregator Gets You a Better Swap Price";
+}
+
+function buildContentBridge(kw){
+  var lower=safeLower(kw);
+  var ck=cleanKeywordForSentence(kw)||"this token";
+  if(containsAny(lower,["cross chain","crosschain","sol to eth"]))
+    return"Use the swap above to move "+displayKeyword(ck)+" across chains at the best available price. The aggregator handles routing and execution in one step -- no separate bridge needed.";
+  if(containsAny(lower,["no kyc","without kyc"]))
+    return"The swap above requires no sign-up and no KYC. Connect your wallet and swap "+displayKeyword(ck)+" at best price across 50+ DEXes.";
+  return"Use the swap above to trade "+displayKeyword(ck)+" at the best price across Raydium, Orca, Meteora and 50+ Solana DEXes.";
+}
+
+function setKeywordHeadings(){
+  var kw=(RAW_KEYWORD||"").trim();
+  if(!kw)return;
+  var h1=document.getElementById("heroKeyword");
+  var sub=document.getElementById("heroSubheading");
+  var ch=document.getElementById("contentHeading");
+  var cb=document.getElementById("contentBridge");
+  if(h1)h1.textContent=buildHeroTitle(kw);
+  if(sub)sub.textContent=buildHeroSubheading(kw);
+  if(ch)ch.textContent=buildContentHeading(kw);
+  if(cb)cb.textContent=buildContentBridge(kw);
+}
+
+/* === SOCIAL PROOF === */
+function renderSocialProof(){
+  var el=document.getElementById("socialProofText");
+  if(!el)return;
+  var base=12480,start=new Date("2026-01-01"),today=new Date();
+  var days=Math.floor((today-start)/86400000);
+  el.textContent=(base+(days*54)).toLocaleString()+" swaps routed today";
+}
+
+/* === SWAP IFRAME === */
+function initSwapFrame(){
+  var frame=document.getElementById("swapFrame");
+  var loading=document.getElementById("swapLoading");
+  var error=document.getElementById("swapError");
+  if(!frame)return;
+  var loaded=false;
+  var timeout=setTimeout(function(){
+    if(!loaded){
+      if(loading)loading.style.display="none";
+      if(error)error.style.display="flex";
+      frame.style.display="none";
+    }
+  },12000);
+  frame.addEventListener("load",function(){
+    loaded=true;clearTimeout(timeout);
+    if(loading)loading.classList.add("hidden");
+    setTimeout(function(){if(loading)loading.style.display="none";},400);
+  });
+  frame.addEventListener("error",function(){
+    loaded=true;clearTimeout(timeout);
+    if(loading)loading.style.display="none";
+    if(error)error.style.display="flex";
+    frame.style.display="none";
+  });
+  window.addEventListener("message",function(e){
+    if(e.origin!=="https://swap.verixiaapps.com")return;
+    if(e.data&&e.data.height&&typeof e.data.height==="number"){
+      var h=Math.max(400,Math.min(900,e.data.height));
+      frame.style.height=h+"px";
+      document.querySelector(".swap-frame-container").style.minHeight=h+"px";
+    }
+  });
+}
+
+function scrollToSwap(){
+  var s=document.getElementById("swapSection");
+  if(s)s.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* === STICKY CTA === */
+function dismissCta(){
+  var cta=document.getElementById("stickyCta");
+  if(cta)cta.classList.remove("visible");
+  try{localStorage.setItem("dex_sticky_dismissed","1");}catch(e){}
+}
+function initStickyCta(){
+  if(window.innerWidth>768)return;
+  try{if(localStorage.getItem("dex_sticky_dismissed")==="1")return;}catch(e){}
+  var cta=document.getElementById("stickyCta");
+  if(!cta)return;
+  var shown=false;
+  window.addEventListener("scroll",function(){
+    if(shown)return;
+    if(window.scrollY>400){shown=true;cta.classList.add("visible");}
+  },{passive:true});
+}
+
+/* === SEO CONTENT === */
+function splitSeoParagraphs(text){
+  return String(text||"").replace(/\r/g,"").split(/\n\s*\n/).map(function(p){return p.trim();}).filter(Boolean);
+}
+function sanitizeParagraph(text){
+  return text.replace(/\*\*/g,"").replace(/\s+/g," ").replace(/\s+([,.!?;:])/g,"$1").trim();
+}
+
+function buildSeoContentCards(paragraphs){
+  var sc=document.getElementById("seoContent");if(!sc)return;
+  if(!paragraphs.length){sc.innerHTML="";return;}
+  var lower=safeLower(RAW_KEYWORD||"");
+  var titles;
+  if(containsAny(lower,["cross chain","crosschain","sol to eth","sol to usdc"])){
+    titles=[["&#x1F517;","How cross-chain routing works"],["&#x26A1;","Where the price difference comes from"],["&#x25CE;","Solana-side execution"],["&#x2713;","When direct beats aggregated"]];
+  }else if(containsAny(lower,["raydium","orca","jupiter","meteora","vs"])){
+    titles=[["&#x1F4CA;","Pool comparison mechanics"],["&#x1F4A7;","Where liquidity is deepest"],["&#x26A1;","Split-route execution"],["&#x2713;","Best conditions for each venue"]];
+  }else{
+    titles=[["&#x26A1;","Why routing matters"],["&#x1F4A7;","Where price impact hits hardest"],["&#x25CE;","Solana pool mechanics"],["&#x2713;","Getting the best fill price"]];
+  }
+  sc.innerHTML='<div class="story-stack">'+paragraphs.map(function(p,i){
+    var text=sanitizeParagraph(p);
+    var t=titles[i]||titles[0];
+    return'<article class="story-card'+(i===0?" lead":"")+'"><div class="story-card-title"><span>'+t[0]+'</span><span>'+escapeHtml(t[1])+'</span></div><p>'+escapeHtml(text)+'</p></article>';
+  }).join("")+'</div>';
+}
+
+function cleanSeoContent(){
+  var sc=document.getElementById("seoContent");if(!sc)return;
+  sc.innerHTML=sc.innerHTML.replace(/\*\*/g,"").replace(/<p>\s*<\/p>/g,"").trim();
+  var paragraphs=splitSeoParagraphs(sc.innerText||sc.textContent||"");
+  if(paragraphs.length)buildSeoContentCards(paragraphs.slice(0,4));
+}
+
+function cleanRelatedLinks(){
+  var rl=document.getElementById("relatedLinks"),rh=document.getElementById("relatedHeading");
+  if(!rl||!rh)return;
+  rl.innerHTML=rl.innerHTML.replace(/\*\*/g,"").trim();
+  if(!rl.querySelectorAll("li a").length){rl.style.display="none";rh.style.display="none";}
+}
+function cleanMoreLinks(){
+  var mw=document.getElementById("moreLinksWrap"),ml=document.getElementById("moreLinks"),mh=document.getElementById("moreLinksHeading");
+  if(!mw||!ml||!mh)return;
+  ml.innerHTML=ml.innerHTML.replace(/\*\*/g,"").trim();
+  if(!ml.querySelectorAll("li a").length)mw.style.display="none";
+}
+function cleanHubLink(){
+  var w=document.getElementById("hubLinkWrap");if(!w)return;
+  w.innerHTML=w.innerHTML.replace(/\*\*/g,"").trim();
+  var a=w.querySelector("a");
+  if(!a){w.style.display="none";return;}
+  var href=a.getAttribute("href")||"#",text=(a.textContent||"").trim();
+  if(!text){w.style.display="none";return;}
+  w.innerHTML='<span class="hub-link-label">Related guide</span><a class="hub-link-anchor" href="'+escapeHtml(href)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(text)+'</a>';
+}
+
+/* === RECOGNITION CHIPS === */
+function renderRecognitionChips(){
+  var wrap=document.getElementById("contentRecognition");if(!wrap)return;
+  var lower=safeLower(RAW_KEYWORD||"");
+  var items;
+  if(containsAny(lower,["cross chain","crosschain","sol to eth","sol to usdc","sol to arb","sol to base"])){
+    items=[
+      ["How it works","Your Solana tokens route to the destination chain via the best bridge and DEX combination available -- aggregated into one quoted price."],
+      ["Why it matters","Separate bridging and swapping steps cost more in fees and price impact than a single aggregated cross-chain route."],
+      ["What it handles","Chain-specific liquidity, bridge costs, and destination DEX execution are all factored into a single execution price before you confirm."],
+      ["When to use it","Any time you need tokens on a different chain. Cross-chain aggregation beats doing it manually in two separate steps."]
+    ];
+  }else if(containsAny(lower,["no kyc","without kyc","anonymous"])){
+    items=[
+      ["No sign-up","Connect your wallet and swap immediately. No account, no email, no KYC at any stage of the process."],
+      ["Non-custodial","Your tokens never leave your wallet until the swap executes on-chain. No intermediate custody at any point."],
+      ["On-chain execution","Every swap settles directly on Solana or EVM via smart contract. Transparent, verifiable, permissionless."],
+      ["Full control","Disconnect at any time. No ongoing approvals or permissions required beyond the swap transaction itself."]
+    ];
+  }else{
+    items=[
+      ["The routing problem","Solana liquidity is split across Raydium, Orca, Meteora, and dozens of other venues. A direct swap hits only one pool -- full price impact, no routing."],
+      ["What it costs you","On a thin pool, full price impact means you receive fewer tokens than a split-route execution would return for the same input amount."],
+      ["What aggregators do","Route simultaneously across all active pools, split the order where needed, and return the best combined fill price automatically."],
+      ["When it matters most","Larger trades, thinner pools, newer tokens with fragmented liquidity -- the conditions where the routing difference is measurable and real."]
+    ];
+  }
+  wrap.innerHTML=items.map(function(item){
+    return'<div class="recognition-chip"><span class="recognition-label">'+escapeHtml(item[0])+'</span><span class="recognition-copy">'+escapeHtml(item[1])+'</span></div>';
+  }).join("");
+}
+
+/* === INIT === */
+window.addEventListener("load",function(){
+  setKeywordHeadings();
+  renderSocialProof();
+  renderRecognitionChips();
+  cleanSeoContent();
+  cleanRelatedLinks();
+  cleanMoreLinks();
+  cleanHubLink();
+  initSwapFrame();
+  initStickyCta();
+});
+</script>
+
+</body>
+</html>
