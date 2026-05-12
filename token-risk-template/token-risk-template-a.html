@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8">
@@ -21,7 +22,7 @@
 </script>
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does the token risk checker work?","acceptedAnswer":{"@type":"Answer","text":"Paste the token contract address into the checker. The tool reads the smart contract directly to identify structural risk signals -- minting permissions, freeze authority, blacklisting functions, sell restrictions -- then reviews the liquidity pool depth, LP lock status, and top holder wallet percentages. Results return in seconds with a risk level and specific signals detected."}},{"@type":"Question","name":"What is a honeypot token?","acceptedAnswer":{"@type":"Answer","text":"A honeypot token is a smart contract that allows purchases but blocks selling. The restriction is encoded into the transfer function -- a require() statement that causes sell transactions to revert for non-whitelisted wallets. Honeypots can look identical to legitimate tokens on price charts because buy transactions execute normally while only sell attempts fail."}},{"@type":"Question","name":"What is a rug pull in crypto?","acceptedAnswer":{"@type":"Answer","text":"A rug pull happens when token developers or large holders remove all liquidity from the trading pool, typically after attracting enough buyers. Liquidity removal collapses the token price instantly -- often 99% or more -- in a single transaction. The risk is visible before it happens: unlocked LP tokens, thin pools relative to market cap, and anonymous developer wallets are the main on-chain signals."}},{"@type":"Question","name":"Is the check free?","acceptedAnswer":{"@type":"Answer","text":"The first check is free with no account required. Unlimited checks are available from $3.99 per week. Subscribe with any email address and cancel anytime from your account."}},{"@type":"Question","name":"What is holder concentration and why does it matter?","acceptedAnswer":{"@type":"Answer","text":"Holder concentration measures what percentage of a token's supply is held by the largest wallets. When five wallets hold 60% or more of supply, a coordinated exit can move the market faster than other buyers can absorb. The checker surfaces top wallet percentages alongside pool depth to give a complete picture of exit risk."}},{"@type":"Question","name":"What chains are supported?","acceptedAnswer":{"@type":"Answer","text":"The checker supports Solana SPL tokens and EVM tokens across Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche. Paste the full contract address for the most accurate analysis -- for Solana tokens this is the token mint address, for EVM tokens it is the 0x contract address."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does the token risk checker work?","acceptedAnswer":{"@type":"Answer","text":"Paste the token contract address into the checker. The tool reads the smart contract directly to identify structural risk signals — minting permissions, freeze authority, blacklisting functions, sell restrictions — then reviews the liquidity pool depth, LP lock status, and top holder wallet percentages. Results return in seconds with a risk level and specific signals detected."}},{"@type":"Question","name":"What is a honeypot token?","acceptedAnswer":{"@type":"Answer","text":"A honeypot token is a smart contract that allows purchases but blocks selling. The restriction is encoded into the transfer function — a require() statement that causes sell transactions to revert for non-whitelisted wallets. Honeypots can look identical to legitimate tokens on price charts because buy transactions execute normally while only sell attempts fail."}},{"@type":"Question","name":"What is a rug pull in crypto?","acceptedAnswer":{"@type":"Answer","text":"A rug pull happens when token developers or large holders remove all liquidity from the trading pool, typically after attracting enough buyers. Liquidity removal collapses the token price instantly — often 99% or more — in a single transaction. The risk is visible before it happens: unlocked LP tokens, thin pools relative to market cap, and anonymous developer wallets are the main on-chain signals."}},{"@type":"Question","name":"Is the check free?","acceptedAnswer":{"@type":"Answer","text":"The first check is free with no account required. Unlimited checks are available from $3.99 per week. Subscribe with any email address and cancel anytime from your account."}},{"@type":"Question","name":"What is holder concentration and why does it matter?","acceptedAnswer":{"@type":"Answer","text":"Holder concentration measures what percentage of a token's supply is held by the largest wallets. When five wallets hold 60% or more of supply, a coordinated exit can move the market faster than other buyers can absorb. The checker surfaces top wallet percentages alongside pool depth to give a complete picture of exit risk."}},{"@type":"Question","name":"What chains are supported?","acceptedAnswer":{"@type":"Answer","text":"The checker supports Solana SPL tokens and EVM tokens across Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche. Paste the full contract address for the most accurate analysis — for Solana tokens this is the token mint address, for EVM tokens it is the 0x contract address."}}]}
 </script>
 
 <script type="application/ld+json">
@@ -29,7 +30,7 @@
 </script>
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/","sameAs":["https://apps.apple.com/app/id6759490910"]}
+{"@context":"https://schema.org","@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/","sameAs":[]}
 </script>
 
 <script type="application/ld+json">
@@ -39,660 +40,451 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
-
 <style>
 :root{
 --bg:#04070f;--bg-2:#060a14;--bg-3:#080d1a;--bg-4:#0a1020;
---card:rgba(8,13,26,.94);
---ink:#d8e8ff;--ink-strong:#f2f8ff;
---muted:#7a96be;--muted-2:#5c7aa0;
---line:rgba(0,236,208,.10);--line-2:rgba(255,255,255,.06);
+--ink:#d8e8ff;--ink-strong:#f2f8ff;--muted:#7a96be;--muted-2:#5c7aa0;
 --cyan:#00ecd0;--cyan-2:#00c8b0;--cyan-3:#00a892;
---violet:#a87fff;--violet-2:#8c64f8;--violet-3:#7048e0;
---emerald:#0fd98a;--emerald-2:#0ab872;
---amber:#f0a830;--amber-2:#d08820;
---red:#e05068;--red-2:#c03a50;
---sol:#9945ff;--sol-2:#7c35e0;
+--violet:#a87fff;--violet-2:#8c64f8;
+--emerald:#0fd98a;--amber:#f0a830;--sol:#9945ff;--sol-2:#7c35e0;
 --glow-cyan:0 0 20px rgba(0,236,208,.22),0 0 40px rgba(0,236,208,.08);
---glow-violet:0 0 20px rgba(168,127,255,.18),0 0 40px rgba(168,127,255,.07);
+--glow-sol:0 0 20px rgba(153,69,255,.20),0 0 40px rgba(153,69,255,.08);
 --glow-emerald:0 0 18px rgba(15,217,138,.18);
---glow-red:0 0 20px rgba(224,80,104,.20),0 0 40px rgba(224,80,104,.08);
---glow-amber:0 0 20px rgba(240,168,48,.18),0 0 40px rgba(240,168,48,.07);
+--glow-amber:0 0 18px rgba(240,168,48,.18);
 --shadow-xl:0 32px 90px rgba(0,0,0,.80);--shadow-lg:0 22px 56px rgba(0,0,0,.64);
 --shadow-md:0 14px 34px rgba(0,0,0,.48);--shadow-sm:0 8px 20px rgba(0,0,0,.32);--shadow-xs:0 4px 12px rgba(0,0,0,.20);
---radius-xl:28px;--radius-lg:22px;--radius-md:18px;--radius-sm:14px;
+--radius-xl:28px;--radius-lg:22px;--radius-sm:14px;
 --font-display:'Syne',system-ui,sans-serif;
 --font-body:'DM Sans',system-ui,sans-serif;
 --font-mono:'IBM Plex Mono',monospace;
 }
 *{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
-body{
-  font-family:var(--font-body);
-  margin:0;padding-top:84px;color:var(--ink);line-height:1.6;
-  background:
-    radial-gradient(ellipse 70% 50% at 10% 0%,rgba(224,80,104,.08),transparent 52%),
-    radial-gradient(ellipse 60% 45% at 90% 0%,rgba(0,236,208,.10),transparent 50%),
-    radial-gradient(ellipse 50% 35% at 50% 100%,rgba(168,127,255,.04),transparent 48%),
-    linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 28%,var(--bg-3) 62%,var(--bg-4) 100%);
-}
+body{font-family:var(--font-body);margin:0;padding-top:84px;color:var(--ink);line-height:1.6;background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(224,80,104,.07),transparent 52%),radial-gradient(ellipse 60% 45% at 90% 0%,rgba(0,236,208,.14),transparent 50%),radial-gradient(ellipse 50% 35% at 50% 100%,rgba(0,180,150,.04),transparent 48%),linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 28%,var(--bg-3) 62%,var(--bg-4) 100%);}
 a{color:var(--cyan);text-decoration:none;}
 a:hover{text-decoration:underline;color:var(--cyan-2);}
-button,textarea,input{font-family:var(--font-body);}
-@supports(padding:max(0px)){
-  body{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right));}
-}
+button{font-family:var(--font-body);}
+@supports(padding:max(0px)){body{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right));}}
 
-/* === TOP BAR === */
-.top-bar{
-  position:fixed;top:0;left:0;width:100%;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 18px;z-index:1000;pointer-events:none;
-  background:linear-gradient(180deg,rgba(4,7,15,.94) 0%,transparent 100%);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-}
+/* TOP BAR */
+.top-bar{position:fixed;top:0;left:0;width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 18px;z-index:1000;pointer-events:none;background:linear-gradient(180deg,rgba(4,7,15,.94) 0%,transparent 100%);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
 .top-actions{pointer-events:auto;display:flex;align-items:center;gap:10px;}
-.logo{
-  pointer-events:auto;display:inline-flex;align-items:center;gap:9px;
-  font-family:var(--font-display);font-size:14px;font-weight:800;color:#eef6ff;
-  margin-left:4px;padding:9px 14px;border-radius:999px;letter-spacing:-.01em;
-  background:rgba(4,7,15,.70);border:1px solid rgba(0,236,208,.18);
-  backdrop-filter:blur(16px);
-  box-shadow:var(--glow-cyan),var(--shadow-sm);
-  text-decoration:none;transition:border-color .15s,box-shadow .15s;
-}
-.logo:hover{text-decoration:none;border-color:rgba(0,236,208,.36);box-shadow:var(--glow-cyan),var(--shadow-md);}
-.logo-dot{
-  width:9px;height:9px;border-radius:50%;
-  background:linear-gradient(135deg,var(--cyan) 0%,var(--emerald) 100%);
-  box-shadow:0 0 8px rgba(0,236,208,.7);
-  flex:0 0 9px;animation:logopulse 2.4s ease-in-out infinite;
-}
-@keyframes logopulse{0%,100%{box-shadow:0 0 6px rgba(0,236,208,.5);}50%{box-shadow:0 0 16px rgba(0,236,208,.95),0 0 28px rgba(0,236,208,.35);}}
-.app-top{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:9px 13px;font-size:13px;border-radius:13px;font-weight:800;
-  color:#d8e8ff;border:1px solid rgba(255,255,255,.10);white-space:nowrap;
-  background:rgba(255,255,255,.05);backdrop-filter:blur(10px);
-  box-shadow:var(--shadow-xs);transition:border-color .15s,background .15s;
-}
-.app-top:hover{text-decoration:none;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.18);}
-.swap-top-btn{
-  pointer-events:auto;padding:9px 16px;font-size:13px;border-radius:13px;font-weight:900;
-  background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
-  color:#04070f;border:none;cursor:pointer;white-space:nowrap;
-  box-shadow:var(--glow-cyan),var(--shadow-sm);transition:transform .15s,box-shadow .15s;
-}
-.swap-top-btn:hover{transform:translateY(-1px);}
+.logo{pointer-events:auto;display:inline-flex;align-items:center;gap:9px;font-family:var(–font-display);font-size:14px;font-weight:800;color:#eef6ff;margin-left:4px;padding:9px 14px;border-radius:999px;letter-spacing:-.01em;background:rgba(4,7,15,.70);border:1px solid rgba(153,69,255,.24);backdrop-filter:blur(16px);box-shadow:var(–glow-sol),var(–shadow-sm);text-decoration:none;transition:border-color .15s,box-shadow .15s;}
+.logo:hover{text-decoration:none;border-color:rgba(0,236,208,.36);box-shadow:var(–glow-cyan),var(–shadow-sm);}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(–sol) 0%,var(–cyan) 100%);box-shadow:0 0 8px rgba(153,69,255,.7);flex:0 0 9px;animation:logopulse 2.4s ease-in-out infinite;}
+@keyframes logopulse{0%,100%{box-shadow:0 0 6px rgba(153,69,255,.5);}50%{box-shadow:0 0 16px rgba(153,69,255,.95),0 0 28px rgba(0,236,208,.35);}}
+.swap-top-btn{pointer-events:auto;padding:9px 16px;font-size:13px;border-radius:13px;font-weight:900;background:linear-gradient(135deg,var(–sol) 0%,var(–cyan-2) 100%);color:#fff;border:none;cursor:pointer;white-space:nowrap;box-shadow:var(–glow-cyan),var(–shadow-sm);transition:transform .15s,box-shadow .15s;text-decoration:none;display:inline-flex;align-items:center;}
+.swap-top-btn:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,236,208,.30),var(–shadow-md);text-decoration:none;}
 
-/* === PAGE SHELL === */
-.page-shell{max-width:940px;margin:0 auto;padding:0 14px 80px;}
+/* PAGE */
+.page-shell{max-width:940px;margin:0 auto;padding:0 14px 100px;}
 
-/* === HERO === */
+/* HERO */
 .hero{position:relative;padding:20px 8px 16px;max-width:900px;margin:0 auto 10px;text-align:center;}
-.hero-badge-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:14px;}
-.hero-badge{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:7px 12px;border-radius:999px;font-size:11px;font-weight:800;
-  letter-spacing:.02em;color:#b0c8e8;
-  background:rgba(0,236,208,.06);border:1px solid rgba(0,236,208,.14);
-  backdrop-filter:blur(10px);box-shadow:var(--shadow-xs);
-}
-.hero-badge.risk-badge{
-  background:rgba(224,80,104,.08);border-color:rgba(224,80,104,.22);
-  color:#f0b0bc;box-shadow:var(--glow-red);
-}
-.hero-badge.check-badge{
-  background:rgba(15,217,138,.07);border-color:rgba(15,217,138,.18);color:#a0e8c8;
-}
+.hero-badge-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px;}
+.hero-badge{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.02em;color:#b0c8e8;background:rgba(153,69,255,.07);border:1px solid rgba(153,69,255,.16);backdrop-filter:blur(10px);box-shadow:var(–shadow-xs);}
+.hero-badge.sol-badge{background:rgba(153,69,255,.10);border-color:rgba(153,69,255,.24);color:#d0b8ff;box-shadow:var(–glow-sol);}
+.hero-badge.cyan-badge{background:rgba(0,236,208,.07);border-color:rgba(0,236,208,.16);color:#a0e8dc;}
+.hero-badge.perp-badge{background:rgba(240,168,48,.07);border-color:rgba(240,168,48,.20);color:#f8e0a0;box-shadow:var(–glow-amber);}
+/* HERO KEYWORD LABEL — keyword sits above the big “Swap” word */
 .hero h1{
-  margin:0;font-family:var(--font-display);
-  font-size:46px;line-height:1.05;letter-spacing:-.04em;
-  font-weight:900;color:var(--ink-strong);text-wrap:balance;
+margin:0 0 2px;
+font-family:var(–font-mono);
+font-size:11px;font-weight:700;
+color:rgba(0,236,208,.80);
+letter-spacing:.16em;text-transform:uppercase;
+line-height:1.4;
 }
-.hero p{margin:12px auto 0;max-width:680px;font-size:17px;color:#9ab8d8;text-wrap:balance;line-height:1.65;}
+.hero-swap-word{
+font-family:var(–font-display);
+font-size:88px;line-height:.96;letter-spacing:-.055em;
+font-weight:900;color:var(–ink-strong);
+margin:0 0 6px;
+}
+.hero-tagline{
+margin:0 auto 10px;
+font-family:var(–font-display);font-size:19px;
+color:var(–cyan);font-weight:800;letter-spacing:-.01em;
+line-height:1.3;
+}
+.hero p.hero-sub{margin:0 auto;max-width:640px;font-size:16px;color:#9ab8d8;text-wrap:balance;line-height:1.65;}
 .hero-trust{margin-top:14px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
-.hero-trust-chip{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800;
-  color:#c0d8f0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  box-shadow:var(--shadow-xs);
-}
-.social-proof-bar{
-  display:flex;align-items:center;justify-content:center;gap:9px;
-  margin:12px auto 0;max-width:320px;padding:8px 15px;border-radius:999px;
-  background:rgba(15,217,138,.07);border:1px solid rgba(15,217,138,.18);
-  box-shadow:var(--glow-emerald);
-}
-.social-proof-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--emerald);
-  box-shadow:0 0 8px rgba(15,217,138,.8);
-  animation:sproofpulse 2s ease-in-out infinite;flex:0 0 7px;
-}
+.hero-trust-chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800;color:#c0d8f0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);box-shadow:var(–shadow-xs);}
+.social-proof-bar{display:flex;align-items:center;justify-content:center;gap:9px;margin:13px auto 0;max-width:300px;padding:8px 15px;border-radius:999px;background:rgba(15,217,138,.07);border:1px solid rgba(15,217,138,.18);box-shadow:var(–glow-emerald);}
+.social-proof-dot{width:7px;height:7px;border-radius:50%;background:var(–emerald);box-shadow:0 0 8px rgba(15,217,138,.8);animation:sproofpulse 2s ease-in-out infinite;flex:0 0 7px;}
 @keyframes sproofpulse{0%,100%{transform:scale(1);box-shadow:0 0 6px rgba(15,217,138,.6);}50%{transform:scale(1.25);box-shadow:0 0 14px rgba(15,217,138,.95),0 0 24px rgba(15,217,138,.35);}}
-.social-proof-text{font-size:12px;font-weight:900;color:var(--emerald);letter-spacing:.01em;}
+.social-proof-text{font-size:12px;font-weight:900;color:var(–emerald);letter-spacing:.01em;}
 
-/* === THREAT BANNER === */
-.threat-banner{
-  max-width:820px;margin:0 auto 12px;padding:0 14px;
-  display:none;
-}
-.threat-banner.visible{display:block;}
-.threat-banner-inner{
-  padding:13px 16px;border-radius:var(--radius-md);
-  display:flex;align-items:flex-start;gap:12px;
-}
-.threat-banner-inner.tier-high{
-  background:rgba(224,80,104,.09);border:1px solid rgba(224,80,104,.28);
-  box-shadow:var(--glow-red);
-}
-.threat-banner-inner.tier-medium{
-  background:rgba(240,168,48,.08);border:1px solid rgba(240,168,48,.24);
-  box-shadow:var(--glow-amber);
-}
-.threat-banner-inner.tier-info{
-  background:rgba(0,236,208,.05);border:1px solid rgba(0,236,208,.16);
-  box-shadow:var(--glow-cyan);
-}
-.threat-banner-icon{font-size:20px;line-height:1;flex:0 0 24px;margin-top:1px;}
-.threat-banner-content{}
-.threat-banner-title{font-size:14px;font-weight:900;line-height:1.25;margin-bottom:3px;}
-.threat-banner-inner.tier-high .threat-banner-title{color:#f0b0bc;}
-.threat-banner-inner.tier-medium .threat-banner-title{color:#f8d078;}
-.threat-banner-inner.tier-info .threat-banner-title{color:#80e8d8;}
-.threat-banner-copy{font-size:13px;font-weight:700;line-height:1.55;}
-.threat-banner-inner.tier-high .threat-banner-copy{color:rgba(240,176,188,.60);}
-.threat-banner-inner.tier-medium .threat-banner-copy{color:rgba(248,208,120,.50);}
-.threat-banner-inner.tier-info .threat-banner-copy{color:rgba(128,232,216,.50);}
-/* === MAIN CARD === */
-.risk-container{
-  max-width:820px;margin:0 auto;padding:22px;border-radius:var(--radius-xl);
-  position:relative;overflow:hidden;
-  border:1px solid rgba(0,236,208,.12);
-  background:linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%);
-  box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(0,236,208,.05);
-}
-.risk-container::before{
-  content:"";position:absolute;top:-80px;right:-60px;width:200px;height:200px;
-  border-radius:50%;background:radial-gradient(circle,rgba(0,236,208,.07),transparent 65%);
-  pointer-events:none;
-}
-.risk-container>*{position:relative;z-index:1;}
+/* HERO VISUAL */
+.hero-visual{max-width:820px;margin:18px auto 16px;padding:0 14px;}
+.hero-visual-frame{position:relative;border-radius:var(–radius-xl);overflow:hidden;border:1px solid rgba(153,69,255,.22);background:radial-gradient(ellipse 90% 70% at 50% 35%,rgba(153,69,255,.18) 0%,rgba(8,12,24,.99) 55%,rgba(4,7,15,1) 100%);box-shadow:0 0 90px rgba(153,69,255,.14),0 0 50px rgba(0,236,208,.06),var(–shadow-xl),inset 0 1px 0 rgba(168,127,255,.14);}
+.hero-visual-frame::before{content:””;position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 22%,rgba(153,69,255,.18),transparent 38%),radial-gradient(circle at 82% 78%,rgba(0,236,208,.10),transparent 42%);mix-blend-mode:screen;}
+.hero-visual-frame svg{display:block;width:100%;height:auto;position:relative;z-index:1;}
 
-/* === TOOL SHELL === */
-.tool-shell{
-  padding:20px;margin-top:0;
-  background:linear-gradient(135deg,rgba(0,236,208,.05) 0%,rgba(168,127,255,.04) 100%);
-  border:1px solid rgba(0,236,208,.10);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-md);
-}
-textarea,input{
-  width:100%;padding:14px 15px;margin-top:10px;border-radius:15px;
-  border:1.5px solid rgba(0,236,208,.12);font-size:15px;
-  background:rgba(4,7,15,.80);color:#e8f2ff;
-  box-shadow:none;transition:border-color .15s,box-shadow .15s,background .15s;
-}
-textarea{height:130px;resize:none;}
-textarea::placeholder,input::placeholder{color:#5a7898;}
-textarea:focus,input:focus{
-  outline:none;border-color:rgba(0,236,208,.45);
-  box-shadow:0 0 0 4px rgba(0,236,208,.09);background:rgba(4,7,15,.92);
-}
-button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px;min-height:46px;}
-.check{
-  width:100%;
-  background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
-  color:#04070f;margin-top:14px;font-weight:900;font-size:16px;letter-spacing:.02em;
-  box-shadow:var(--glow-cyan),var(--shadow-md);transition:transform .15s,box-shadow .15s;
-}
-.check:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,236,208,.30),var(--shadow-lg);}
-.check:active{transform:scale(.985);}
-.note,.input-help{margin-top:9px;font-size:13px;color:var(--muted);text-align:center;text-wrap:balance;}
-.price-anchor{margin-top:4px;font-size:12px;color:rgba(0,236,208,.50);text-align:center;font-weight:700;}
-.success{margin-top:9px;font-size:13px;color:var(--emerald);text-align:center;font-weight:900;display:none;}
-
-/* === APP LINK CARD === */
-.app-link-card{
-  margin-top:16px;padding:18px;text-align:center;
-  background:linear-gradient(135deg,rgba(0,236,208,.07) 0%,rgba(168,127,255,.06) 100%);
-  border:1px solid rgba(0,236,208,.13);border-radius:var(--radius-lg);
-  box-shadow:var(--glow-cyan),var(--shadow-md);
-}
-.app-link-card h4{margin:0 0 5px;font-size:17px;color:#fff;font-weight:900;letter-spacing:-.02em;}
-.app-link-card p{margin:0 0 11px;font-size:13px;color:#8aaccc;line-height:1.6;}
-.app-link-button{
-  display:block;width:100%;text-align:center;
-  background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
-  color:#04070f;font-weight:900;padding:12px;border-radius:13px;
-  box-sizing:border-box;box-shadow:var(--glow-cyan),var(--shadow-sm);
-  text-decoration:none;font-size:14px;
-}
-.app-link-button:hover{text-decoration:none;}
-
-/* === RESULT === */
-#result{margin-top:20px;display:none;}
-.result-card{
-  background:rgba(248,252,255,.97);border-radius:22px;padding:18px;
-  box-shadow:var(--shadow-lg);border:1px solid rgba(15,23,42,.08);
-  overflow:hidden;color:#0a1020;
-}
-.result-card.high{border:2px solid #f0c0cc;box-shadow:0 18px 44px rgba(200,60,80,.12);}
-.result-card.medium{border:2px solid #f0d890;box-shadow:0 18px 44px rgba(220,160,40,.10);}
-.result-card.low{border:2px solid #b8ecd4;box-shadow:0 18px 44px rgba(15,210,130,.10);}
-.result-card.unknown{border:1px solid #d8e4f0;}
-.result-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-.risk{
-  font-size:19px;font-weight:900;padding:9px 14px;border-radius:999px;
-  display:inline-flex;align-items:center;gap:8px;letter-spacing:.01em;
-  box-shadow:0 5px 14px rgba(0,0,0,.12);
-}
-.risk.high{background:var(--red);color:#fff;}
-.risk.medium{background:var(--amber);color:#fff;}
-.risk.low{background:var(--emerald);color:#fff;}
-.risk.unknown{background:#e0e8f0;color:#334155;}
-.result-chip{
-  padding:7px 11px;border-radius:999px;font-size:12px;font-weight:900;
-  background:#fff;border:1px solid #d0dcec;color:#2a3a54;
-  box-shadow:0 2px 7px rgba(0,0,0,.06);
-}
-.result-summary{margin:12px 0 0;font-size:14px;color:#2a3a54;font-weight:800;line-height:1.55;}
-.section{margin-top:14px;padding:14px;border-radius:16px;background:#f4f8fc;border:1px solid #e0eaf4;}
-.section-title{font-weight:900;margin-bottom:8px;color:#0a1020;font-size:14px;}
-.signal-list{list-style:none;padding:0;margin:0;display:grid;gap:8px;}
-.signal-item{
-  display:flex;align-items:flex-start;gap:10px;padding:11px 13px;
-  border-radius:13px;background:#fff;border:1px solid #dce8f0;
-  font-size:13px;font-weight:800;color:#2a3a54;line-height:1.45;
-}
-.result-card.high .signal-item{background:#fffafb;border-color:#f0ccd4;color:#7a1828;}
-.result-card.medium .signal-item{background:#fffdf4;border-color:#f0d890;color:#7a4c08;}
-.result-card.low .signal-item{background:#f4fff8;border-color:#b8ecd4;color:#145030;}
-.signal-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;flex:0 0 20px;}
-.action-box{
-  padding:12px 14px;border-radius:13px;background:#eef4ff;
-  border:1px solid #b8d0f8;font-size:13px;font-weight:900;color:#1a3070;line-height:1.55;
-}
-.result-payline{
-  margin-top:14px;padding:13px;background:#f4f8fc;border:1px solid #dce8f0;
-  border-radius:15px;font-size:13px;color:#2a3a54;font-weight:900;line-height:1.55;
-}
-.result-card.high .result-payline{background:#fff6f8;border-color:#f0ccd4;color:#7a1828;}
-.result-card.medium .result-payline{background:#fffcf0;border-color:#f0d890;color:#7a4c08;}
-.result-card.low .result-payline{background:#f4fff8;border-color:#b8ecd4;color:#145030;}
-.result-actions{margin-top:12px;display:grid;gap:10px;}
-
-/* === SWAP-AFTER-CHECK SECTION === */
-.swap-after-check{
-  max-width:820px;margin:20px auto 0;padding:0 14px;
-}
-.swap-after-check-intro{
-  display:flex;align-items:center;gap:10px;margin-bottom:10px;
-  padding:12px 16px;border-radius:15px;
-  background:rgba(0,236,208,.05);border:1px solid rgba(0,236,208,.12);
-}
-.swap-after-check-intro-icon{font-size:22px;flex:0 0 28px;}
-.swap-after-check-intro-text{}
-.swap-after-check-intro-title{font-size:14px;font-weight:900;color:#fff;margin-bottom:2px;}
-.swap-after-check-intro-sub{font-size:12px;font-weight:700;color:#6a8aae;line-height:1.45;}
-.swap-widget-wrap{
-  position:relative;border-radius:var(--radius-xl);overflow:hidden;
-  background:linear-gradient(180deg,rgba(10,16,28,.98) 0%,rgba(4,7,15,1) 100%);
-  border:1px solid rgba(0,236,208,.15);
-  box-shadow:0 0 60px rgba(0,236,208,.06),var(--shadow-xl);
-}
-.swap-widget-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:11px 18px;border-bottom:1px solid rgba(0,236,208,.07);
-  background:rgba(0,236,208,.025);gap:10px;flex-wrap:wrap;
-}
-.swap-live-badge{
-  display:inline-flex;align-items:center;gap:6px;padding:5px 10px;
-  border-radius:999px;background:rgba(15,217,138,.08);
-  border:1px solid rgba(15,217,138,.18);
-  font-size:11px;font-weight:900;color:var(--emerald);letter-spacing:.02em;
-}
-.swap-live-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--emerald);
-  box-shadow:0 0 8px rgba(15,217,138,.8);
-  animation:sproofpulse 2s ease-in-out infinite;flex:0 0 7px;
-}
+/* SWAP SECTION */
+.swap-section{max-width:820px;margin:0 auto 16px;padding:0 14px;}
+.swap-section-label{text-align:center;margin-bottom:6px;font-family:var(–font-display);font-size:11px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;color:rgba(0,236,208,.50);}
+.swap-widget-wrap{position:relative;border-radius:var(–radius-xl);overflow:hidden;background:linear-gradient(180deg,rgba(10,16,28,.98) 0%,rgba(4,7,15,1) 100%);border:1px solid rgba(0,236,208,.20);box-shadow:0 0 80px rgba(0,236,208,.08),0 0 40px rgba(153,69,255,.06),var(–shadow-xl);}
+.swap-widget-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid rgba(0,236,208,.07);background:rgba(0,236,208,.025);gap:10px;flex-wrap:wrap;}
+.swap-live-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(15,217,138,.08);border:1px solid rgba(15,217,138,.18);font-size:11px;font-weight:900;color:var(–emerald);letter-spacing:.02em;}
+.swap-live-dot{width:7px;height:7px;border-radius:50%;background:var(–emerald);box-shadow:0 0 8px rgba(15,217,138,.8);animation:sproofpulse 2s ease-in-out infinite;flex:0 0 7px;}
 .swap-trust-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.swap-trust-chip{
-  display:inline-flex;align-items:center;gap:4px;padding:5px 9px;
-  border-radius:999px;font-size:11px;font-weight:800;
-  color:rgba(180,210,240,.60);background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.07);
-}
-.swap-frame-container{position:relative;width:100%;background:var(--bg);min-height:480px;}
-.swap-frame-loading{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:14px;background:rgba(4,7,15,.96);z-index:2;
-  transition:opacity .4s ease;
-}
-.swap-frame-loading.hidden{opacity:0;pointer-events:none;}
-.swap-loading-spinner{
-  width:38px;height:38px;
-  border:3px solid rgba(0,236,208,.12);border-top-color:var(--cyan);
-  border-radius:50%;animation:spin .75s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-.swap-loading-text{
-  font-family:var(--font-mono);font-size:10px;font-weight:700;
-  color:rgba(0,236,208,.60);letter-spacing:.10em;text-transform:uppercase;
-}
-.swap-frame-container iframe{
-  width:100%;height:520px;border:none;display:block;background:transparent;
-}
-.swap-frame-error{
-  display:none;flex-direction:column;align-items:center;
-  justify-content:center;min-height:280px;padding:36px;
-  text-align:center;gap:14px;
-}
-.swap-frame-error-icon{font-size:32px;}
-.swap-frame-error-title{font-family:var(--font-display);font-size:18px;font-weight:900;color:#fff;letter-spacing:-.02em;}
-.swap-frame-error-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:320px;}
-.swap-frame-error-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:12px 22px;border-radius:999px;font-size:14px;font-weight:900;
-  color:#04070f;background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
-  border:none;cursor:pointer;box-shadow:var(--glow-cyan);
-  text-decoration:none;transition:transform .15s;
-}
-.swap-frame-error-btn:hover{transform:translateY(-1px);text-decoration:none;}
-.swap-widget-footer{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 18px;border-top:1px solid rgba(0,236,208,.07);
-  background:rgba(0,236,208,.02);flex-wrap:wrap;gap:8px;
-}
+.swap-trust-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;color:rgba(180,210,240,.60);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);}
+
+/* SWAP PREVIEW CARD */
+.swap-cta-link{display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .25s ease;}
+.swap-cta-link:hover{text-decoration:none;}
+.swap-cta-link:hover .swap-preview-cta{background:linear-gradient(135deg,#c060ff 0%,#00ecd0 100%);box-shadow:0 0 40px rgba(0,236,208,.45),0 0 24px rgba(153,69,255,.35);transform:translateY(-1px);}
+.swap-cta-link:hover .swap-preview-card{border-color:rgba(0,236,208,.18);}
+.swap-cta-link:hover .swap-preview-cta-arrow{transform:translateX(3px);}
+.swap-preview{padding:22px 20px 18px;display:flex;flex-direction:column;gap:7px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(153,69,255,.06),transparent 60%),var(–bg);}
+.swap-preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.swap-preview-head-title{font-family:var(–font-display);font-size:22px;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.swap-preview-head-meta{font-family:var(–font-mono);font-size:10px;font-weight:700;color:rgba(0,236,208,.65);letter-spacing:.05em;text-transform:uppercase;}
+.swap-preview-card{background:rgba(255,255,255,.03);border:1px solid rgba(0,236,208,.10);border-radius:18px;padding:13px 16px;transition:border-color .2s ease;}
+.swap-preview-card-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;}
+.swap-preview-card-label{color:rgba(180,210,240,.55);letter-spacing:.02em;}
+.swap-preview-card-balance{color:rgba(180,210,240,.40);font-family:var(–font-mono);font-size:10px;}
+.swap-preview-card-balance.best{color:var(–emerald);background:rgba(15,217,138,.08);padding:3px 8px;border-radius:999px;border:1px solid rgba(15,217,138,.20);font-weight:800;font-size:10px;}
+.swap-preview-card-main{display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px;gap:10px;}
+.swap-preview-amount{font-family:var(–font-display);font-size:30px;font-weight:900;color:#fff;letter-spacing:-.025em;line-height:1.05;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.swap-preview-token{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:7px 11px;border-radius:999px;font-weight:800;font-size:13px;white-space:nowrap;}
+.swap-preview-token.sol-token{background:rgba(153,69,255,.12);border:1px solid rgba(153,69,255,.30);color:#d8c0ff;}
+.swap-preview-token.usdc-token{background:rgba(0,236,208,.10);border:1px solid rgba(0,236,208,.28);color:#a0ecdc;}
+.swap-preview-token-arrow{font-size:8px;opacity:.55;margin-left:2px;}
+.swap-preview-card-foot{font-family:var(–font-mono);font-size:11px;font-weight:700;color:rgba(180,210,240,.40);}
+.swap-preview-flip{display:flex;justify-content:center;margin:-9px 0;position:relative;z-index:2;}
+.swap-preview-flip-circle{width:34px;height:34px;border-radius:50%;background:var(–bg);border:1px solid rgba(0,236,208,.22);display:flex;align-items:center;justify-content:center;color:rgba(0,236,208,.75);font-size:16px;}
+.swap-preview-route{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.10);border-radius:13px;margin-top:4px;gap:10px;}
+.swap-preview-route-label{font-size:10px;font-weight:800;color:rgba(0,236,208,.75);letter-spacing:.06em;text-transform:uppercase;font-family:var(–font-mono);flex:0 0 auto;}
+.swap-preview-route-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.route-pill{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);padding:4px 9px;border-radius:999px;font-family:var(–font-mono);font-size:10px;font-weight:700;color:rgba(180,210,240,.85);white-space:nowrap;}
+.route-arrow{color:rgba(0,236,208,.5);font-size:12px;font-weight:700;}
+.swap-preview-cta{margin-top:8px;padding:16px 22px;background:linear-gradient(135deg,var(–sol) 0%,var(–cyan-2) 100%);border-radius:14px;color:#fff;font-size:15px;font-weight:900;text-align:center;box-shadow:0 0 28px rgba(0,236,208,.30),0 0 18px rgba(153,69,255,.20);transition:background .25s ease,box-shadow .25s ease,transform .15s ease;display:flex;align-items:center;justify-content:center;gap:10px;}
+.swap-preview-cta-arrow{transition:transform .2s ease;display:inline-block;}
+.swap-preview-disclaimer{text-align:center;margin-top:6px;font-family:var(–font-mono);font-size:10px;font-weight:700;color:rgba(120,150,180,.42);letter-spacing:.04em;}
+.swap-widget-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid rgba(0,236,208,.07);background:rgba(0,236,208,.02);flex-wrap:wrap;gap:8px;}
 .swap-chain-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.swap-chain-badge{
-  display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;
-  font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.03em;
-}
+.swap-chain-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-family:var(–font-mono);font-size:9px;font-weight:700;letter-spacing:.03em;}
 .swap-chain-badge.sol-chain{color:rgba(153,69,255,.80);background:rgba(153,69,255,.08);border:1px solid rgba(153,69,255,.18);}
 .swap-chain-badge.evm-chain{color:rgba(0,236,208,.55);background:rgba(0,236,208,.05);border:1px solid rgba(0,236,208,.10);}
-.swap-powered-by{font-size:10px;font-weight:700;color:rgba(120,150,180,.35);font-family:var(--font-mono);}
+.swap-powered-by{font-size:10px;font-weight:700;color:rgba(120,150,180,.35);font-family:var(–font-mono);}
 
-/* === FEATURE GRID === */
-.feature-grid{
-  max-width:820px;margin:20px auto 0;padding:0 14px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-}
-.feature-card{
-  padding:18px 16px;border-radius:var(--radius-lg);
-  background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.02) 100%);
-  border:1px solid rgba(0,236,208,.09);box-shadow:var(--shadow-xs);
-  transition:border-color .18s,box-shadow .18s;
-}
-.feature-card:hover{border-color:rgba(0,236,208,.18);box-shadow:var(--glow-cyan),var(--shadow-sm);}
-.feature-icon{font-size:22px;margin-bottom:10px;display:block;line-height:1;}
-.feature-title{font-family:var(--font-display);font-size:15px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:7px;line-height:1.2;}
-.feature-body{font-size:13px;font-weight:700;line-height:1.6;color:#8aaccc;}
+/* STATS BAR */
+.stats-bar{max-width:820px;margin:0 auto 16px;padding:0 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.stat-card{padding:14px 12px;border-radius:var(–radius-sm);text-align:center;background:linear-gradient(135deg,rgba(153,69,255,.06) 0%,rgba(0,236,208,.05) 100%);border:1px solid rgba(0,236,208,.09);box-shadow:var(–shadow-xs);}
+.stat-card-value{display:block;font-family:var(–font-mono);font-size:20px;font-weight:700;color:var(–cyan);letter-spacing:-.01em;line-height:1.1;}
+.stat-card-label{display:block;margin-top:3px;font-size:10px;font-weight:800;color:var(–muted);letter-spacing:.05em;text-transform:uppercase;line-height:1.3;}
 
-/* === UPGRADE SECTION === */
-.upgrade{
-  display:none;margin-top:22px;padding:22px 18px;text-align:center;
-  background:linear-gradient(135deg,rgba(168,127,255,.12) 0%,rgba(0,236,208,.09) 100%);
-  border:1px solid rgba(0,236,208,.13);border-radius:var(--radius-xl);
-  box-shadow:var(--glow-cyan),var(--shadow-xl);
-}
-.upgrade h3{margin:0 0 7px;font-size:24px;line-height:1.15;color:#fff;text-wrap:balance;letter-spacing:-.02em;}
-.upgrade-copy{margin:0 auto;max-width:560px;color:#8aaccc;font-size:14px;line-height:1.7;}
-.upgrade-stat-row{
-  margin:12px auto;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:560px;
-  padding:10px;border-radius:14px;background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.06);
-}
-.upgrade-stat{
-  display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  font-size:12px;font-weight:900;color:#a0bcdc;
-}
-.upgrade-stat-value{color:var(--cyan);font-family:var(--font-mono);}
-.plan-cards{margin-top:16px;display:grid;grid-template-columns:1fr;gap:9px;}
-.plan-card{
-  padding:15px 17px;border-radius:17px;text-align:left;cursor:pointer;
-  border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);
-  transition:transform .15s,border-color .15s,box-shadow .15s;position:relative;
-}
-.plan-card:hover{transform:translateY(-2px);}
-.plan-card.hero-plan{
-  background:linear-gradient(135deg,rgba(0,236,208,.09) 0%,rgba(168,127,255,.08) 100%);
-  border:1.5px solid rgba(0,236,208,.32);box-shadow:var(--glow-cyan),var(--shadow-md);
-}
-.plan-card-badge{display:inline-block;margin-bottom:7px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.04em;}
-.plan-card-badge.best-value{background:linear-gradient(135deg,var(--cyan) 0%,var(--emerald) 100%);color:#04070f;}
-.plan-card-badge.popular{background:rgba(168,127,255,.28);color:#d0b8ff;border:1px solid rgba(168,127,255,.36);}
-.plan-card-badge.entry{background:rgba(255,255,255,.09);color:#8aaccc;border:1px solid rgba(255,255,255,.13);}
-.plan-card-label{font-size:15px;font-weight:900;color:#fff;line-height:1.2;}
-.plan-card-price{font-size:13px;color:var(--muted);margin-top:3px;font-weight:700;}
-.plan-card.hero-plan .plan-card-label{color:var(--cyan);}
-.plan-card.hero-plan .plan-card-price{color:rgba(0,236,208,.70);}
-.plan-card-cta{
-  display:block;width:100%;margin-top:10px;padding:11px;border-radius:12px;
-  font-size:13px;font-weight:900;border:none;cursor:pointer;
-  transition:transform .15s,box-shadow .15s;letter-spacing:.01em;
-}
-.plan-card-cta.cta-hero{background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);color:#04070f;box-shadow:var(--glow-cyan);}
-.plan-card-cta.cta-hero:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,236,208,.36);}
-.plan-card-cta.cta-secondary{background:linear-gradient(135deg,var(--violet) 0%,var(--violet-2) 100%);color:#fff;box-shadow:var(--glow-violet);}
-.plan-card-cta.cta-tertiary{background:rgba(255,255,255,.07);color:#b0c8e8;border:1px solid rgba(255,255,255,.11);}
-.trust-badge-strip{
-  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:13px;
-  padding:10px;border-radius:12px;background:rgba(0,236,208,.03);border:1px solid rgba(0,236,208,.07);
-}
-.trust-badge-item{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:rgba(0,236,208,.36);}
-.upgrade-footer{margin-top:12px;font-size:12px;color:rgba(130,160,190,.50);}
-.subscriber-link{margin-top:9px;text-align:center;}
-.subscriber-link button{
-  background:none;border:none;padding:0;min-height:auto;
-  font-size:13px;color:var(--cyan);font-weight:800;text-decoration:underline;
-  cursor:pointer;opacity:.70;
-}
-.subscriber-link button:hover{opacity:1;}
+/* FEATURE GRID */
+.feature-grid{max-width:820px;margin:0 auto 16px;padding:0 14px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.feature-card{padding:20px 17px;border-radius:var(–radius-lg);background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.02) 100%);border:1px solid rgba(0,236,208,.09);box-shadow:var(–shadow-xs);transition:border-color .18s,box-shadow .18s,transform .18s;}
+.feature-card:hover{border-color:rgba(0,236,208,.18);box-shadow:var(–glow-cyan),var(–shadow-sm);transform:translateY(-2px);}
+.feature-card–primary{background:linear-gradient(135deg,rgba(153,69,255,.09) 0%,rgba(0,236,208,.07) 100%);border-color:rgba(0,236,208,.14);box-shadow:var(–glow-cyan),var(–shadow-sm);}
+.feature-card–sol{background:linear-gradient(135deg,rgba(153,69,255,.09) 0%,rgba(0,236,208,.05) 100%);border-color:rgba(153,69,255,.16);box-shadow:var(–glow-sol),var(–shadow-xs);}
+.feature-icon{font-size:24px;margin-bottom:11px;display:block;line-height:1;}
+.feature-title{font-family:var(–font-display);font-size:16px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:8px;line-height:1.2;}
+.feature-body{font-size:13px;font-weight:700;line-height:1.65;color:#8aaccc;}
 
-/* === SHARE === */
-.share-wrap{
-  margin-top:5px;padding:13px;border-radius:15px;
-  background:linear-gradient(180deg,#f8fbff 0%,#f0f4fa 100%);
-  border:1px solid #d8e4f0;text-align:center;box-shadow:0 2px 7px rgba(0,0,0,.04);
-}
-.share-alert{font-size:11px;font-weight:900;color:#334155;margin-bottom:4px;letter-spacing:.01em;}
-.share-copy{font-size:12px;font-weight:700;color:#64748b;line-height:1.5;margin-bottom:9px;}
-.share-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
-.share-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  min-height:42px;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:900;
-  transition:transform .15s;
-}
-.share-btn:hover{transform:translateY(-1px);}
-.share-btn.primary{background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);color:#04070f;box-shadow:0 7px 16px rgba(0,236,208,.18);}
-.share-btn.dark{background:linear-gradient(135deg,#0a0e18 0%,#141c2e 100%);color:#fff;box-shadow:0 7px 16px rgba(0,0,0,.16);}
-.share-btn.light{background:#eef2ff;color:#1e2a44;border:1px solid #d4daf0;}
-.share-status{margin-top:9px;min-height:17px;font-size:12px;font-weight:900;color:#059669;}
+/* PERPS SECTION — single card (Hyperliquid only) */
+.perps-section{max-width:820px;margin:0 auto 16px;padding:0 14px;}
+.perps-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap;}
+.perps-section-title{font-family:var(–font-display);font-size:18px;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.perps-section-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:900;background:rgba(240,168,48,.08);border:1px solid rgba(240,168,48,.22);color:#f8e0a0;letter-spacing:.02em;box-shadow:var(–glow-amber);}
+.perps-card{padding:20px 20px 18px;border-radius:var(–radius-lg);background:linear-gradient(135deg,rgba(240,168,48,.09) 0%,rgba(153,69,255,.07) 100%);border:1px solid rgba(240,168,48,.20);box-shadow:var(–glow-amber),var(–shadow-sm);transition:border-color .18s,box-shadow .18s,transform .18s;}
+.perps-card:hover{border-color:rgba(240,168,48,.30);box-shadow:0 0 28px rgba(240,168,48,.22),var(–shadow-md);transform:translateY(-2px);}
+.perps-card-icon{font-size:22px;margin-bottom:9px;display:block;line-height:1;}
+.perps-card-title{font-family:var(–font-display);font-size:16px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:7px;line-height:1.2;}
+.perps-card-body{font-size:13px;font-weight:700;line-height:1.62;color:#8aaccc;}
+.perps-markets{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.perps-market-pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-family:var(–font-mono);font-size:10px;font-weight:700;letter-spacing:.02em;background:rgba(240,168,48,.07);border:1px solid rgba(240,168,48,.16);color:rgba(248,224,160,.80);}
+.perps-cta-link{display:block;margin-top:12px;padding:13px 18px;border-radius:13px;background:linear-gradient(135deg,rgba(240,168,48,.15) 0%,rgba(153,69,255,.12) 100%);border:1px solid rgba(240,168,48,.24);font-size:14px;font-weight:900;color:#f8e0a0;text-align:center;transition:background .2s,transform .15s;text-decoration:none;}
+.perps-cta-link:hover{background:linear-gradient(135deg,rgba(240,168,48,.24) 0%,rgba(153,69,255,.20) 100%);transform:translateY(-1px);text-decoration:none;color:#f8e0a0;}
 
-/* === POST-RESULT UPGRADE === */
-.post-result-upgrade{
-  margin-top:10px;padding:20px 16px;border-radius:18px;
-  background:linear-gradient(135deg,rgba(168,127,255,.12) 0%,rgba(0,236,208,.10) 100%);
-  border:1.5px solid rgba(0,236,208,.24);box-shadow:var(--glow-cyan),var(--shadow-md);
-  text-align:center;
-}
-.post-result-upgrade-headline{font-size:16px;font-weight:900;color:#fff;margin-bottom:5px;letter-spacing:-.015em;}
-.post-result-upgrade-sub{font-size:13px;color:#8aaccc;margin-bottom:13px;line-height:1.5;}
-.post-result-upgrade-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  padding:13px 18px;border-radius:999px;font-size:14px;font-weight:900;
-  color:#04070f;background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
-  border:none;cursor:pointer;box-shadow:var(--glow-cyan),var(--shadow-md);
-  transition:transform .15s,box-shadow .15s;width:100%;
-}
-.post-result-upgrade-btn:hover{transform:translateY(-1px);}
-.post-result-upgrade-trust{margin-top:9px;display:flex;flex-wrap:wrap;justify-content:center;gap:9px;}
-.post-result-upgrade-trust span{font-size:11px;font-weight:800;color:rgba(0,236,208,.36);}
-
-/* === CONTENT SECTION === */
-.content-section{
-  max-width:820px;margin:28px auto 0;padding:24px;border-radius:var(--radius-xl);
-  position:relative;overflow:hidden;
-  border:1px solid rgba(0,236,208,.09);
-  background:linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%);
-  box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(0,236,208,.05);
-}
-.content-section::before{
-  content:"";position:absolute;top:-90px;right:-70px;width:220px;height:220px;
-  border-radius:50%;background:radial-gradient(circle,rgba(168,127,255,.07),transparent 65%);
-  pointer-events:none;
-}
+/* CONTENT SECTION */
+.content-section{max-width:820px;margin:28px auto 0;padding:26px;border-radius:var(–radius-xl);position:relative;overflow:hidden;border:1px solid rgba(0,236,208,.09);background:linear-gradient(180deg,rgba(8,13,26,.96) 0%,rgba(4,7,15,.99) 100%);box-shadow:var(–shadow-xl),inset 0 1px 0 rgba(0,236,208,.05);}
+.content-section::before{content:””;position:absolute;top:-90px;right:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(153,69,255,.07),transparent 65%);pointer-events:none;}
 .content-section>*{position:relative;z-index:1;}
-.content-bridge{
-  margin:0 0 14px;padding:14px;border-radius:16px;
-  background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.09);
-  font-size:14px;color:#8aaccc;font-weight:700;line-height:1.65;
-}
-.inline-info-card{
-  margin:0 0 14px;padding:14px;
-  background:linear-gradient(135deg,rgba(168,127,255,.07) 0%,rgba(0,236,208,.06) 100%);
-  border:1px solid rgba(168,127,255,.13);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-sm);
-}
-.hub-link-label{display:block;margin-bottom:5px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);}
+.content-bridge{margin:0 0 14px;padding:14px;border-radius:16px;background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.09);font-size:14px;color:#8aaccc;font-weight:700;line-height:1.65;}
+.inline-info-card{margin:0 0 14px;padding:14px;background:linear-gradient(135deg,rgba(153,69,255,.07) 0%,rgba(0,236,208,.06) 100%);border:1px solid rgba(153,69,255,.13);border-radius:var(–radius-lg);box-shadow:var(–shadow-sm);}
+.hub-link-label{display:block;margin-bottom:5px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(–cyan);}
 .hub-link-anchor{display:inline;font-size:14px;font-weight:900;color:#fff;}
-.content-section h2{
-  margin:0 0 13px;color:#fff;line-height:1.08;letter-spacing:-.035em;
-  font-family:var(--font-display);font-weight:900;text-wrap:balance;font-size:34px;
-}
-.content-section h3{
-  margin:24px 0 11px;font-size:22px;color:#fff;line-height:1.1;
-  letter-spacing:-.03em;font-family:var(--font-display);font-weight:900;
-}
+.content-section h2{margin:0 0 13px;color:#fff;line-height:1.08;letter-spacing:-.035em;font-family:var(–font-display);font-weight:900;text-wrap:balance;font-size:34px;}
+.content-section h3{margin:24px 0 11px;font-size:22px;color:#fff;line-height:1.1;letter-spacing:-.03em;font-family:var(–font-display);font-weight:900;}
 .content-recognition{margin:0 0 16px;display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
-.recognition-chip{
-  padding:12px 13px;border-radius:15px;
-  background:linear-gradient(135deg,rgba(168,127,255,.06) 0%,rgba(0,236,208,.05) 100%);
-  border:1px solid rgba(0,236,208,.09);box-shadow:var(--shadow-xs);
-}
-.recognition-label{display:block;margin-bottom:4px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);}
+.recognition-chip{padding:13px;border-radius:15px;background:linear-gradient(135deg,rgba(153,69,255,.06) 0%,rgba(0,236,208,.05) 100%);border:1px solid rgba(0,236,208,.09);box-shadow:var(–shadow-xs);}
+.recognition-label{display:block;margin-bottom:4px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(–cyan);}
 .recognition-copy{display:block;font-size:13px;font-weight:800;line-height:1.5;color:#a0b8d4;}
 .content-body{font-size:16px;color:#8aaccc;}
 .content-body p{margin:0 0 16px;}
 .story-stack{display:grid;gap:11px;}
-.story-card{
-  padding:16px;border-radius:18px;
-  border:1px solid rgba(0,236,208,.08);
-  background:linear-gradient(180deg,rgba(255,255,255,.035) 0%,rgba(255,255,255,.02) 100%);
-  box-shadow:var(--shadow-sm);
-}
-.story-card.lead{
-  background:linear-gradient(135deg,rgba(168,127,255,.09) 0%,rgba(0,236,208,.07) 100%);
-  border-color:rgba(0,236,208,.14);box-shadow:var(--glow-cyan),var(--shadow-sm);
-}
-.story-card-title{
-  display:flex;align-items:center;gap:6px;margin-bottom:7px;
-  font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);
-}
-.story-card p{margin:0 0 9px;font-size:14px;line-height:1.70;color:#b0c8e4;}
+.story-card{padding:17px;border-radius:18px;border:1px solid rgba(0,236,208,.08);background:linear-gradient(180deg,rgba(255,255,255,.035) 0%,rgba(255,255,255,.02) 100%);box-shadow:var(–shadow-sm);}
+.story-card.lead{background:linear-gradient(135deg,rgba(153,69,255,.09) 0%,rgba(0,236,208,.07) 100%);border-color:rgba(0,236,208,.14);box-shadow:var(–glow-cyan),var(–shadow-sm);}
+.story-card-title{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(–cyan);}
+.story-card p{margin:0 0 9px;font-size:14px;line-height:1.72;color:#b0c8e4;}
 .story-card p:last-child{margin-bottom:0;}
 .link-section{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,236,208,.07);}
 .related-links{margin:0;padding-left:18px;}
 .related-links li{margin-bottom:8px;}
-.related-links a{color:var(--cyan);font-weight:800;}
-.content-close{
-  margin-top:22px;padding:14px;border-radius:16px;
-  background:rgba(0,236,208,.03);border:1px solid rgba(0,236,208,.08);
-  font-size:14px;font-weight:800;color:#6a8aae;line-height:1.68;
-}
+.related-links a{color:var(–cyan);font-weight:800;}
+.content-close{margin-top:22px;padding:14px;border-radius:16px;background:rgba(0,236,208,.03);border:1px solid rgba(0,236,208,.08);font-size:14px;font-weight:800;color:#6a8aae;line-height:1.68;}
 .footer{text-align:center;margin-top:56px;padding:32px 20px;color:#4a6080;font-size:13px;line-height:1.7;}
-.footer a{color:var(--cyan);font-weight:700;opacity:.65;}
+.footer a{color:var(–cyan);font-weight:700;opacity:.65;}
 
-/* === STICKY MOBILE CTA === */
-.sticky-mobile-cta{
-  display:none;position:fixed;bottom:0;left:0;right:0;z-index:998;
-  padding:10px 14px;
-  background:linear-gradient(135deg,rgba(4,7,15,.97) 0%,rgba(8,13,26,.99) 100%);
-  border-top:1px solid rgba(0,236,208,.16);
-  box-shadow:0 -4px 24px rgba(0,0,0,.50);
-  align-items:center;justify-content:space-between;gap:10px;
-}
+/* STICKY MOBILE CTA */
+.sticky-mobile-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:998;padding:10px 14px;background:linear-gradient(135deg,var(–sol) 0%,var(–cyan-2) 100%);box-shadow:0 -4px 24px rgba(153,69,255,.28);align-items:center;justify-content:space-between;gap:10px;}
 .sticky-mobile-cta.visible{display:flex;}
 .sticky-mobile-cta-text{font-size:13px;font-weight:900;color:#fff;line-height:1.25;flex:1;}
-.sticky-mobile-cta-text span{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;}
-.sticky-mobile-cta-btn{
-  flex:0 0 auto;padding:8px 15px;border-radius:999px;
-  background:linear-gradient(135deg,var(--cyan) 0%,var(--cyan-2) 100%);
-  color:#04070f;font-size:13px;font-weight:900;border:none;
-  cursor:pointer;white-space:nowrap;min-height:auto;
-  box-shadow:var(--glow-cyan);
-}
-.sticky-mobile-cta-close{
-  flex:0 0 auto;width:28px;height:28px;
-  display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,.40);font-size:20px;
-  background:none;border:none;cursor:pointer;line-height:1;min-height:auto;padding:0;
-}
+.sticky-mobile-cta-text span{display:block;font-size:10px;font-weight:700;opacity:.75;margin-top:2px;}
+.sticky-mobile-cta-btn{flex:0 0 auto;padding:9px 16px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(10px);color:#fff;font-size:13px;font-weight:900;border:1px solid rgba(255,255,255,.30);white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;}
+.sticky-mobile-cta-btn:hover{text-decoration:none;color:#fff;}
+.sticky-mobile-cta-close{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.60);font-size:20px;background:none;border:none;cursor:pointer;line-height:1;padding:0;}
 
-/* === SUPPLEMENTARY CONTENT === */
+/* SUPPLEMENTARY + FAQ + TRUST */
 .supplementary-content{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,236,208,.07);}
-.supplementary-content h3{margin:0 0 12px;font-size:22px;color:#fff;font-family:var(--font-display);font-weight:900;letter-spacing:-.03em;line-height:1.1;}
+.supplementary-content h3{margin:0 0 12px;font-size:22px;color:#fff;font-family:var(–font-display);font-weight:900;letter-spacing:-.03em;line-height:1.1;}
 .supplementary-content p{font-size:14px;color:#8aaccc;line-height:1.72;margin:0 0 13px;}
 .supplementary-content p:last-child{margin-bottom:0;}
-
-/* === FAQ SECTION === */
 .faq-section{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,236,208,.07);}
-.faq-section>h3{margin:0 0 12px;font-size:22px;color:#fff;font-family:var(--font-display);font-weight:900;letter-spacing:-.03em;line-height:1.1;}
+.faq-section>h3{margin:0 0 12px;font-size:22px;color:#fff;font-family:var(–font-display);font-weight:900;letter-spacing:-.03em;line-height:1.1;}
 .faq-item{margin-bottom:7px;border:1px solid rgba(0,236,208,.09);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.025);}
-.faq-item summary{padding:14px 16px;cursor:pointer;font-size:14px;font-weight:800;color:#c0d8f0;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s,color .15s;line-height:1.45;}
+.faq-item summary{padding:14px 16px;cursor:pointer;font-size:14px;font-weight:800;color:#c0d8f0;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s,color .15s;line-height:1.45;gap:12px;}
 .faq-item summary:hover{background:rgba(0,236,208,.04);color:#fff;}
 .faq-item summary::-webkit-details-marker{display:none;}
-.faq-item summary::after{content:'+';font-size:18px;color:rgba(0,236,208,.50);flex:0 0 20px;text-align:right;font-weight:400;}
-.faq-item[open] summary::after{content:'-';}
+.faq-item summary::after{content:’+’;font-size:18px;color:rgba(0,236,208,.50);flex:0 0 18px;text-align:right;font-weight:400;}
+.faq-item[open] summary::after{content:’\2212’;}
 .faq-item[open] summary{color:#fff;background:rgba(0,236,208,.03);}
 .faq-answer{padding:0 16px 14px;font-size:14px;color:#8aaccc;line-height:1.70;}
-
-/* === TRUST SECTION === */
-.trust-section{
-  max-width:820px;margin:28px auto 0;padding:0 14px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-}
-.trust-item{
-  padding:16px;border-radius:var(--radius-sm);
-  background:rgba(255,255,255,.025);border:1px solid rgba(0,236,208,.07);
-  display:flex;align-items:flex-start;gap:12px;
-}
+.trust-section{max-width:820px;margin:28px auto 0;padding:0 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.trust-item{padding:16px;border-radius:var(–radius-sm);background:rgba(255,255,255,.025);border:1px solid rgba(0,236,208,.07);display:flex;align-items:flex-start;gap:12px;}
 .trust-item-icon{font-size:22px;flex:0 0 26px;line-height:1.2;}
 .trust-item-body{}
 .trust-item-title{display:block;font-size:14px;font-weight:900;color:#fff;margin-bottom:4px;}
 .trust-item-copy{display:block;font-size:13px;color:#7a9abf;line-height:1.55;}
+
+/* MOBILE */
 @media(max-width:640px){
-  .trust-section{grid-template-columns:1fr;gap:8px;padding:0 10px;}
-  .supplementary-content h3,.faq-section>h3{font-size:19px;}
+body{padding-top:78px;padding-bottom:90px;}
+.hero{padding:10px 6px 12px;}
+.hero-swap-word{font-size:64px;}
+.hero-tagline{font-size:16px;}
+.hero p.hero-sub{font-size:14px;}
+.hero-visual{padding:0 10px;margin:12px auto 14px;}
+.stats-bar{grid-template-columns:repeat(2,1fr);gap:8px;}
+.feature-grid{grid-template-columns:1fr;gap:8px;}
+.feature-card{padding:16px 14px;}
+.swap-preview{padding:16px 14px 14px;gap:6px;}
+.swap-preview-amount{font-size:24px;}
+.swap-preview-cta{padding:14px 18px;font-size:14px;}
+.swap-preview-head-title{font-size:19px;}
+.swap-preview-card{padding:12px 13px;}
+.swap-preview-route{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 12px;}
+.swap-preview-route-flow{justify-content:flex-start;}
+.swap-widget-header,.swap-widget-footer{padding:9px 14px;}
+.content-section{margin-left:10px;margin-right:10px;padding:18px;border-radius:20px;}
+.content-section h2{font-size:26px;}
+.content-section h3{font-size:20px;}
+.content-body{font-size:14px;}
+.content-recognition{grid-template-columns:1fr;gap:7px;}
+.trust-section{grid-template-columns:1fr;gap:8px;padding:0 10px;}
+.supplementary-content h3,.faq-section>h3{font-size:19px;}
+.top-bar{padding:8px 12px;}
+.top-actions{gap:7px;}
+.logo{font-size:13px;margin-left:2px;padding:8px 11px;}
+.swap-top-btn{font-size:12px;padding:7px 11px;}
 }
 
-/* === MOBILE === */
-@media(max-width:640px){
-  body{padding-top:78px;}
-  .hero{padding:10px 6px 12px;}
-  .hero h1{font-size:28px;letter-spacing:-.035em;}
-  .hero p{font-size:15px;margin-top:8px;}
-  .feature-grid{grid-template-columns:1fr;gap:8px;}
-  .feature-card{padding:15px 14px;}
-  .swap-after-check{padding:0 10px;}
-  .swap-frame-container iframe{height:440px;}
-  .swap-widget-header,.swap-widget-footer{padding:9px 14px;}
-  .content-section{margin-left:10px;margin-right:10px;padding:16px;border-radius:20px;}
-  .content-section h2{font-size:26px;}
-  .content-section h3{font-size:20px;}
-  .content-body{font-size:14px;}
-  .risk-container{padding:14px;border-radius:20px;}
-  .content-recognition{grid-template-columns:1fr;gap:7px;}
-  .share-grid{grid-template-columns:1fr;}
-  .top-bar{padding:8px 12px;}
-  .top-actions{gap:7px;}
-  .logo{font-size:13px;margin-left:2px;padding:8px 11px;}
-  .app-top{font-size:12px;padding:7px 9px;}
-  .swap-top-btn{font-size:12px;padding:7px 11px;}
+/* HL LIVE DATA BLOCK — rendered on perps pages when Hyperliquid data was fetched */
+.hl-data-block{
+margin:0 0 18px;padding:16px 18px;border-radius:var(–radius-lg);
+background:linear-gradient(135deg,rgba(240,168,48,.07) 0%,rgba(153,69,255,.05) 100%);
+border:1px solid rgba(240,168,48,.18);box-shadow:var(–glow-amber),var(–shadow-sm);
 }
+.hl-data-header{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:12px;flex-wrap:wrap;gap:6px;
+}
+.hl-data-source{
+font-family:var(–font-mono);font-size:11px;font-weight:700;
+color:#f8e0a0;letter-spacing:.08em;text-transform:uppercase;
+}
+.hl-data-note{
+font-family:var(–font-mono);font-size:10px;font-weight:700;
+color:rgba(240,168,48,.40);letter-spacing:.03em;
+}
+.hl-row{
+display:grid;grid-template-columns:80px repeat(7,1fr);align-items:center;
+gap:8px;padding:9px 0;border-top:1px solid rgba(240,168,48,.08);
+}
+.hl-row:first-of-type{border-top:none;}
+.hl-asset{
+font-family:var(–font-mono);font-size:11px;font-weight:700;
+color:#f8e0a0;letter-spacing:.04em;
+}
+.hl-stat{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.hl-stat-label{
+font-family:var(–font-mono);font-size:9px;font-weight:700;
+color:rgba(240,168,48,.45);letter-spacing:.06em;text-transform:uppercase;
+white-space:nowrap;
+}
+.hl-stat-value{
+font-family:var(–font-mono);font-size:12px;font-weight:700;
+color:rgba(220,200,255,.85);white-space:nowrap;
+}
+.hl-pos{color:var(–emerald)!important;}
+.hl-neg{color:#e05068!important;}
+@media(max-width:640px){
+.hl-row{grid-template-columns:70px repeat(3,1fr);gap:6px;row-gap:8px;}
+.hl-stat-value{font-size:11px;}
+}
+
+/* ─── SUPPLEMENTARY INFO CARDS ─── */
+.supp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+.supp-card{
+display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:var(–radius-sm);
+background:linear-gradient(135deg,rgba(255,255,255,.035) 0%,rgba(255,255,255,.015) 100%);
+border:1px solid rgba(0,236,208,.08);box-shadow:var(–shadow-xs);
+}
+.supp-card-icon{font-size:20px;line-height:1;flex:0 0 auto;}
+.supp-card-body{font-size:13px;font-weight:700;line-height:1.65;color:#8aaccc;}
+.supp-card-body strong{display:block;color:#c0d8f0;font-weight:900;margin-bottom:5px;font-size:13px;}
+@media(max-width:640px){.supp-cards{grid-template-columns:1fr;gap:8px;}}
+
+/* ─── RISK CHECKER TOOL ─── */
+.tool-shell{padding:20px;display:flex;flex-direction:column;gap:10px;}
+.tool-shell textarea{width:100%;min-height:80px;padding:13px 15px;font-family:var(–font-mono);font-size:13px;font-weight:500;color:var(–ink-strong);background:rgba(255,255,255,.03);border:1px solid rgba(0,236,208,.15);border-radius:var(–radius-sm);outline:none;resize:vertical;line-height:1.6;transition:border-color .15s,box-shadow .15s;}
+.tool-shell textarea::placeholder{color:var(–muted);}
+.tool-shell textarea:focus{border-color:rgba(0,236,208,.40);box-shadow:0 0 0 3px rgba(0,236,208,.07);}
+.tool-shell input[type=“email”]{width:100%;padding:11px 14px;font-family:var(–font-mono);font-size:13px;color:var(–ink);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:var(–radius-sm);outline:none;transition:border-color .15s;}
+.tool-shell input[type=“email”]::placeholder{color:var(–muted);}
+.tool-shell input[type=“email”]:focus{border-color:rgba(0,236,208,.25);}
+.tool-shell .check{width:100%;padding:14px;background:linear-gradient(135deg,var(–cyan) 0%,var(–cyan-2) 100%);color:#020408;border:none;border-radius:var(–radius-sm);font-family:var(–font-mono);font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:opacity .15s;}
+.tool-shell .check:hover{opacity:.88;}
+.tool-shell .note{font-size:11px;color:var(–muted);text-align:center;font-family:var(–font-mono);}
+.tool-shell .price-anchor{font-size:12px;color:var(–muted);text-align:center;font-family:var(–font-mono);}
+.tool-shell .success{display:none;padding:10px 13px;background:rgba(15,217,138,.08);border:1px solid rgba(15,217,138,.20);border-radius:var(–radius-sm);font-size:12px;font-weight:700;color:#0fd98a;text-align:center;font-family:var(–font-mono);}
+.tool-shell .input-help{font-size:11px;color:var(–muted);font-family:var(–font-mono);}
+
+/* ─── RESULT CARD ─── */
+#result{display:none;}
+.result-card{background:rgba(248,252,255,.97);border-radius:var(–radius-lg);padding:16px;box-shadow:0 14px 44px rgba(0,0,0,.55);border:1px solid rgba(15,23,42,.06);color:#0a1020;}
+.result-card.high{border:2px solid #f0c0cc;}
+.result-card.medium{border:2px solid #f0d890;}
+.result-card.low{border:2px solid #b8ecd4;}
+.result-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.risk{font-size:13px;font-weight:900;padding:7px 13px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-family:var(–font-mono);}
+.risk.high{background:#e05068;color:#fff;}
+.risk.medium{background:#f0a830;color:#fff;}
+.risk.low{background:#0fd98a;color:#fff;}
+.risk.unknown{background:#e0e8f0;color:#334155;}
+.result-chip{padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;background:#fff;border:1px solid #d0dcec;color:#2a3a54;font-family:var(–font-mono);}
+.result-summary{margin:10px 0 0;font-size:13px;color:#2a3a54;font-weight:700;line-height:1.5;}
+.section{margin-top:10px;padding:11px;border-radius:var(–radius-sm);background:#f4f8fc;border:1px solid #e0eaf4;}
+.section-title{font-weight:700;margin-bottom:7px;color:#0a1020;font-size:10px;font-family:var(–font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.signal-list{list-style:none;padding:0;margin:0;display:grid;gap:5px;}
+.signal-item{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;border-radius:10px;background:#fff;border:1px solid #dce8f0;font-size:12px;font-weight:700;color:#2a3a54;line-height:1.4;}
+.result-card.high .signal-item{background:#fffafb;border-color:#f0ccd4;color:#7a1828;}
+.result-card.medium .signal-item{background:#fffdf4;border-color:#f0d890;color:#7a4c08;}
+.result-card.low .signal-item{background:#f4fff8;border-color:#b8ecd4;color:#145030;}
+.signal-icon{width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;flex:0 0 16px;}
+.action-box{padding:9px 12px;border-radius:10px;background:#eef4ff;border:1px solid #b8d0f8;font-size:12px;font-weight:700;color:#1a3070;line-height:1.5;}
+.result-payline{margin-top:10px;padding:9px 12px;background:#f4f8fc;border:1px solid #dce8f0;border-radius:var(–radius-sm);font-size:12px;color:#2a3a54;font-weight:700;line-height:1.5;}
+.result-card.high .result-payline{background:#fff6f8;border-color:#f0ccd4;color:#7a1828;}
+.result-card.medium .result-payline{background:#fffcf0;border-color:#f0d890;color:#7a4c08;}
+.result-card.low .result-payline{background:#f4fff8;border-color:#b8ecd4;color:#145030;}
+.result-actions{margin-top:9px;display:grid;gap:7px;}
+.result-actions .check{font-size:12px;padding:11px;}
+.post-result-upgrade{margin-top:9px;padding:14px;border-radius:var(–radius-md);background:linear-gradient(135deg,rgba(153,69,255,.09),rgba(0,236,208,.07));border:1px solid rgba(0,236,208,.16);text-align:center;}
+.post-result-upgrade-headline{font-size:13px;font-weight:900;color:#fff;margin-bottom:4px;}
+.post-result-upgrade-sub{font-size:12px;color:var(–muted);margin-bottom:9px;line-height:1.5;}
+.post-result-upgrade-btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:10px;border-radius:9px;font-family:var(–font-mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#020408;background:linear-gradient(135deg,var(–cyan),var(–cyan-2));border:none;cursor:pointer;transition:opacity .15s;}
+.post-result-upgrade-btn:hover{opacity:.88;}
+.post-result-upgrade-trust{margin-top:7px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+.post-result-upgrade-trust span{font-family:var(–font-mono);font-size:9px;font-weight:700;color:var(–muted);letter-spacing:.04em;}
+.share-wrap{margin-top:8px;padding:11px;border-radius:var(–radius-sm);background:linear-gradient(180deg,#f8fbff,#f0f4fa);border:1px solid #d8e4f0;text-align:center;}
+.share-alert{font-family:var(–font-mono);font-size:9px;font-weight:700;color:#334155;margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase;}
+.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px;}
+.share-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:36px;padding:7px;border-radius:8px;font-size:11px;font-weight:700;transition:opacity .15s;cursor:pointer;border:none;}
+.share-btn:hover{opacity:.82;}
+.share-btn.primary{background:linear-gradient(135deg,var(–cyan),var(–cyan-2));color:#020408;}
+.share-btn.dark{background:linear-gradient(135deg,#080e1c,#141c2e);color:#fff;}
+.share-btn.light{background:#eef2ff;color:#1e2a44;border:1px solid #d4daf0;}
+.share-status{margin-top:5px;min-height:14px;font-size:10px;font-weight:700;color:#059669;font-family:var(–font-mono);}
+
+/* ─── THREAT BANNER ─── */
+.threat-banner{display:none;margin-bottom:12px;}
+.threat-banner.visible{display:block;}
+.threat-banner-inner{padding:11px 15px;border-radius:var(–radius-sm);display:flex;align-items:flex-start;gap:11px;}
+.threat-banner-inner.tier-high{background:rgba(224,80,104,.07);border:1px solid rgba(224,80,104,.18);}
+.threat-banner-inner.tier-medium{background:rgba(240,168,48,.06);border:1px solid rgba(240,168,48,.16);}
+.threat-banner-inner.tier-info{background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.10);}
+.threat-banner-icon{font-size:15px;flex:0 0 18px;line-height:1.4;}
+.threat-banner-content{}
+.threat-banner-title{font-family:var(–font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
+.threat-banner-inner.tier-high .threat-banner-title{color:#f0b0bc;}
+.threat-banner-inner.tier-medium .threat-banner-title{color:#f8d078;}
+.threat-banner-inner.tier-info .threat-banner-title{color:#80e8d8;}
+.threat-banner-copy{font-size:12px;color:var(–muted);line-height:1.5;}
+
+/* ─── APP LINK ─── */
+
+/* ─── UPGRADE PANEL ─── */
+.upgrade{display:none;margin:0 20px 20px;padding:18px;background:linear-gradient(135deg,rgba(153,69,255,.08) 0%,rgba(0,236,208,.06) 100%);border:1px solid rgba(153,69,255,.18);border-radius:var(–radius-lg);}
+.upgrade h3{margin:0 0 6px;font-size:18px;font-weight:900;color:var(–ink-strong);letter-spacing:-.02em;font-family:var(–font-display);}
+.upgrade-copy{font-size:13px;color:var(–muted);line-height:1.6;margin:0 0 12px;}
+.upgrade-stat-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:10px;background:rgba(0,0,0,.20);border-radius:var(–radius-sm);}
+.upgrade-stat{font-size:11px;color:var(–muted);font-family:var(–font-mono);display:flex;gap:5px;align-items:center;}
+.upgrade-stat-value{color:var(–cyan);font-weight:700;}
+.plan-cards{display:grid;gap:8px;}
+.plan-card{padding:12px 14px;border-radius:var(–radius-md);border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);}
+.plan-card.hero-plan{background:linear-gradient(135deg,rgba(0,236,208,.08),rgba(153,69,255,.06));border:1.5px solid rgba(0,236,208,.22);}
+.plan-card-badge{display:inline-block;margin-bottom:4px;padding:2px 8px;border-radius:999px;font-size:9px;font-weight:700;font-family:var(–font-mono);letter-spacing:.06em;}
+.plan-card-badge.best-value{background:linear-gradient(135deg,var(–cyan),var(–emerald));color:#020408;}
+.plan-card-badge.popular{background:rgba(153,69,255,.22);color:#c4a8ff;border:1px solid rgba(153,69,255,.30);}
+.plan-card-badge.entry{background:rgba(255,255,255,.06);color:var(–muted);border:1px solid rgba(255,255,255,.10);}
+.plan-card-label{font-size:14px;font-weight:900;color:var(–ink-strong);}
+.plan-card-price{font-size:11px;color:var(–muted);margin-top:2px;font-family:var(–font-mono);}
+.plan-card.hero-plan .plan-card-label{color:var(–cyan);}
+.plan-card-cta{display:block;width:100%;margin-top:8px;padding:10px;border-radius:var(–radius-sm);font-family:var(–font-mono);font-size:11px;font-weight:700;letter-spacing:.04em;border:none;cursor:pointer;transition:opacity .15s;}
+.cta-hero{background:linear-gradient(135deg,var(–cyan),var(–cyan-2));color:#020408;}
+.cta-secondary{background:linear-gradient(135deg,#a87fff,#8c64f8);color:#fff;}
+.cta-tertiary{background:rgba(255,255,255,.06);color:var(–muted);border:1px solid rgba(255,255,255,.10);}
+.plan-card-cta:hover{opacity:.85;}
+.trust-badge-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:8px;background:rgba(0,0,0,.20);border-radius:var(–radius-sm);}
+.trust-badge-item{font-size:10px;font-weight:700;color:var(–muted);font-family:var(–font-mono);}
+.upgrade-footer{margin-top:8px;font-size:10px;color:var(–muted);font-family:var(–font-mono);opacity:.6;}
+.subscriber-link{margin-top:8px;text-align:center;}
+.subscriber-link button{background:none;border:none;padding:0;font-family:var(–font-mono);font-size:11px;color:var(–cyan);font-weight:700;cursor:pointer;opacity:.6;}
+.subscriber-link button:hover{opacity:1;}
+
+/* ─── SWAP AFTER CHECK ─── */
+.swap-after-check{margin-bottom:18px;}
+.swap-after-check-intro{display:flex;align-items:center;gap:12px;padding:14px 18px;background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.10);border-radius:var(–radius-md);margin-bottom:10px;}
+.swap-after-check-intro-icon{font-size:22px;line-height:1;}
+.swap-after-check-intro-title{font-size:15px;font-weight:900;color:var(–ink-strong);margin-bottom:2px;}
+.swap-after-check-intro-sub{font-size:12px;color:var(–muted);line-height:1.5;}
+
+/* ─── FAQ collapsible (risk pages) ─── */
+.faq-section details{margin-bottom:6px;border:1px solid rgba(255,255,255,.06);border-radius:var(–radius-sm);overflow:hidden;}
+.faq-section summary{padding:12px 15px;cursor:pointer;font-size:13px;font-weight:700;color:var(–ink);list-style:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s;gap:10px;}
+.faq-section summary:hover{background:rgba(255,255,255,.03);}
+.faq-section summary::-webkit-details-marker{display:none;}
+.faq-section summary::after{content:’+’;font-size:16px;color:var(–muted);flex:0 0 14px;text-align:right;}
+.faq-section details[open] summary::after{content:’-’;}
+.faq-answer{padding:0 15px 12px;font-size:13px;color:var(–muted);line-height:1.65;}
+
+/* ─── Supplementary cards (risk pages) ─── */
+.supp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+.supp-card{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:var(–radius-sm);background:rgba(255,255,255,.025);border:1px solid rgba(0,236,208,.07);}
+.supp-card-icon{font-size:20px;line-height:1;}
+.supp-card-body{font-size:13px;font-weight:600;line-height:1.65;color:var(–muted);}
+.supp-card-body strong{display:block;color:var(–ink);font-weight:900;margin-bottom:5px;font-size:13px;}
+@media(max-width:640px){.supp-cards{grid-template-columns:1fr;}.share-grid{grid-template-columns:1fr;}}
+
+/* ─── Placeholder guard ─── */
+.cleanable:empty{display:none;}
+
 </style>
-
 </head>
 <body>
 
@@ -700,11 +492,11 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
 
 <div class="sticky-mobile-cta" id="stickyCta">
   <div class="sticky-mobile-cta-text">
-    &#x1F50D; Check any token before you buy
-    <span>Paste the contract address above</span>
+    &#x25CE; Swap on Solana
+    <span>Best price &middot; Non-custodial &middot; No KYC</span>
   </div>
-  <button class="sticky-mobile-cta-btn" onclick="scrollToChecker()">Check Token</button>
-  <button class="sticky-mobile-cta-close" onclick="document.getElementById('stickyCta').classList.remove('visible');localStorage.setItem('risk_sticky_dismissed','1');" aria-label="Dismiss">&times;</button>
+  <a class="sticky-mobile-cta-btn" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Swap Now</a>
+  <button class="sticky-mobile-cta-close" onclick="dismissCta()" aria-label="Dismiss">&times;</button>
 </div>
 
 <!-- TOP BAR -->
@@ -715,8 +507,7 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
     <span>Verixia</span>
   </a>
   <div class="top-actions">
-    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">&#x1F4F1; App</a>
-    <button class="swap-top-btn" onclick="scrollToSwap()">Swap Now</button>
+    <a class="swap-top-btn" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Swap Now</a>
   </div>
 </div>
 
@@ -726,13 +517,16 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
 
   <div class="hero">
     <div class="hero-badge-row">
-      <div class="hero-badge risk-badge">&#x26A0;&#xFE0F; Token Risk Check</div>
-      <div class="hero-badge check-badge">&#x2713; On-Chain Analysis</div>
+      <div class="hero-badge">&#x26A0;&#xFE0F; Token Risk Check</div>
+      <div class="hero-badge cyan-badge">&#x2713; On-Chain Analysis</div>
       <div class="hero-badge">&#x1F512; No Signup</div>
       <div class="hero-badge">&#x26A1; Results in Seconds</div>
     </div>
+    <!-- Keyword label sits above the big "Swap" word -->
     <h1 id="heroKeyword">{{STATIC_H1}}</h1>
-    <p id="heroSubheading">{{STATIC_INTRO}}</p>
+    <div class="hero-swap-word">Swap</div>
+    <p class="hero-tagline">Swap Solana at best price</p>
+    <p class="hero-sub" id="heroSubheading">{{STATIC_INTRO}}</p>
     <div class="hero-trust">
       <div class="hero-trust-chip">Honeypot detection</div>
       <div class="hero-trust-chip">LP lock status</div>
@@ -745,9 +539,73 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
     </div>
   </div>
 
-  <!-- THREAT BANNER (dynamic based on keyword) -->
+  <!-- HERO VISUAL -->
 
-  <div class="threat-banner" id="threatBanner">
+  <div class="hero-visual" aria-hidden="true">
+    <div class="hero-visual-frame">
+      <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="hv-soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="22"/></filter>
+          <filter id="hv-med" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9"/></filter>
+          <filter id="hv-tight" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5"/></filter>
+          <filter id="hv-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <radialGradient id="hv-rg-sol" cx="50%" cy="50%"><stop offset="0%" stop-color="#9945ff" stop-opacity="0.55"/><stop offset="40%" stop-color="#7020cc" stop-opacity="0.22"/><stop offset="100%" stop-color="#7020cc" stop-opacity="0"/></radialGradient>
+          <radialGradient id="hv-rg-cyan" cx="50%" cy="50%"><stop offset="0%" stop-color="#00ecd0" stop-opacity="0.32"/><stop offset="55%" stop-color="#00a892" stop-opacity="0.10"/><stop offset="100%" stop-color="#00a892" stop-opacity="0"/></radialGradient>
+          <linearGradient id="hv-wordmark" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c8a0ff"/><stop offset="50%" stop-color="#ffffff"/><stop offset="100%" stop-color="#7defd9"/></linearGradient>
+          <linearGradient id="hv-accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9945ff" stop-opacity="0"/><stop offset="35%" stop-color="#9945ff" stop-opacity="0.7"/><stop offset="65%" stop-color="#00ecd0" stop-opacity="0.7"/><stop offset="100%" stop-color="#00ecd0" stop-opacity="0"/></linearGradient>
+          <pattern id="hv-dots" x="0" y="0" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="17" cy="17" r="0.85" fill="rgba(120,160,210,0.10)"/></pattern>
+          <symbol id="hv-bracket" viewBox="0 0 14 14"><path d="M0,4 L0,0 L4,0" stroke="rgba(0,236,208,0.50)" stroke-width="1" fill="none"/></symbol>
+        </defs>
+        <rect width="800" height="300" fill="url(#hv-dots)"/>
+        <ellipse cx="220" cy="150" rx="300" ry="180" fill="url(#hv-rg-sol)" filter="url(#hv-soft)"/>
+        <ellipse cx="600" cy="160" rx="260" ry="170" fill="url(#hv-rg-cyan)" filter="url(#hv-soft)"/>
+        <ellipse cx="400" cy="120" rx="220" ry="110" fill="url(#hv-rg-sol)" opacity="0.55"/>
+        <line x1="0" y1="48" x2="800" y2="48" stroke="rgba(0,236,208,0.045)" stroke-width="1" stroke-dasharray="120,90"><animate attributeName="stroke-dashoffset" from="0" to="-210" dur="9s" repeatCount="indefinite"/></line>
+        <line x1="0" y1="252" x2="800" y2="252" stroke="rgba(153,69,255,0.045)" stroke-width="1" stroke-dasharray="80,160"><animate attributeName="stroke-dashoffset" from="0" to="-240" dur="13s" repeatCount="indefinite"/></line>
+        <use href="#hv-bracket" x="22" y="22" width="14" height="14"/>
+        <use href="#hv-bracket" x="764" y="22" width="14" height="14" transform="rotate(90 771 29)"/>
+        <use href="#hv-bracket" x="22" y="264" width="14" height="14" transform="rotate(-90 29 271)"/>
+        <use href="#hv-bracket" x="764" y="264" width="14" height="14" transform="rotate(180 771 271)"/>
+        <g opacity="0.65"><circle cx="92" cy="74" r="15" fill="rgba(153,69,255,0.10)" stroke="rgba(168,127,255,0.32)" stroke-width="1"/><text x="92" y="78" text-anchor="middle" fill="rgba(200,160,255,0.70)" font-size="9" font-weight="800" font-family="'IBM Plex Mono',monospace">SOL</text><animate attributeName="opacity" values="0.45;0.85;0.45" dur="4.4s" repeatCount="indefinite"/></g>
+        <g opacity="0.55"><circle cx="710" cy="68" r="14" fill="rgba(0,236,208,0.08)" stroke="rgba(0,236,208,0.26)" stroke-width="1"/><text x="710" y="71.5" text-anchor="middle" fill="rgba(120,236,210,0.65)" font-size="8" font-weight="800" font-family="'IBM Plex Mono',monospace">USDC</text><animate attributeName="opacity" values="0.4;0.75;0.4" dur="5.2s" repeatCount="indefinite"/></g>
+        <g opacity="0.50"><circle cx="62" cy="234" r="13" fill="rgba(0,236,208,0.07)" stroke="rgba(0,236,208,0.20)" stroke-width="1"/><text x="62" y="237" text-anchor="middle" fill="rgba(120,236,210,0.55)" font-size="8" font-weight="800" font-family="'IBM Plex Mono',monospace">RAY</text><animate attributeName="opacity" values="0.35;0.65;0.35" dur="6.1s" repeatCount="indefinite"/></g>
+        <g opacity="0.55"><circle cx="745" cy="240" r="13" fill="rgba(240,168,48,0.08)" stroke="rgba(240,168,48,0.28)" stroke-width="1"/><text x="745" y="243" text-anchor="middle" fill="rgba(248,208,120,0.70)" font-size="7.5" font-weight="800" font-family="'IBM Plex Mono',monospace">HYPE</text><animate attributeName="opacity" values="0.40;0.80;0.40" dur="4.8s" repeatCount="indefinite"/></g>
+        <g opacity="0.45"><circle cx="148" cy="158" r="11" fill="rgba(153,69,255,0.07)" stroke="rgba(153,69,255,0.18)" stroke-width="1"/><text x="148" y="161" text-anchor="middle" fill="rgba(180,140,235,0.50)" font-size="7" font-weight="800" font-family="'IBM Plex Mono',monospace">ORCA</text></g>
+        <g opacity="0.45"><circle cx="660" cy="152" r="11" fill="rgba(0,236,208,0.05)" stroke="rgba(0,236,208,0.15)" stroke-width="1"/><text x="660" y="155" text-anchor="middle" fill="rgba(110,200,180,0.50)" font-size="6.5" font-weight="800" font-family="'IBM Plex Mono',monospace">JUP</text></g>
+        <g><circle r="2.4" fill="rgba(0,236,208,0.85)" filter="url(#hv-glow)"><animateMotion dur="9s" repeatCount="indefinite" path="M 400,118 m -72,0 a 72,72 0 1,1 144,0 a 72,72 0 1,1 -144,0"/></circle><circle r="1.8" fill="rgba(168,127,255,0.75)" filter="url(#hv-glow)"><animateMotion dur="13s" repeatCount="indefinite" path="M 400,118 m -88,0 a 88,88 0 1,1 176,0 a 88,88 0 1,1 -176,0"/></circle><circle r="2.2" fill="rgba(0,236,208,0.55)" filter="url(#hv-glow)"><animateMotion dur="17s" repeatCount="indefinite" path="M 400,118 m 100,0 a 100,100 0 1,0 -200,0 a 100,100 0 1,0 200,0"/></circle><circle r="1.4" fill="rgba(240,168,48,0.75)" filter="url(#hv-glow)"><animateMotion dur="21s" repeatCount="indefinite" path="M 400,118 m -115,0 a 115,115 0 1,1 230,0 a 115,115 0 1,1 -230,0"/></circle></g>
+        <circle cx="400" cy="118" r="78" fill="rgba(153,69,255,0.20)" filter="url(#hv-soft)"><animate attributeName="r" values="74;84;74" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="400" cy="118" r="56" fill="rgba(153,69,255,0.32)" filter="url(#hv-med)"><animate attributeName="opacity" values="0.85;1;0.85" dur="3.2s" repeatCount="indefinite"/></circle>
+        <circle cx="400" cy="118" r="40" fill="rgba(153,69,255,0.40)" filter="url(#hv-tight)"/>
+        <circle cx="400" cy="118" r="58" fill="none" stroke="rgba(168,127,255,0.32)" stroke-width="1" stroke-dasharray="2,4" opacity="0.7"><animateTransform attributeName="transform" type="rotate" from="0 400 118" to="360 400 118" dur="24s" repeatCount="indefinite"/></circle>
+        <circle cx="400" cy="118" r="72" fill="none" stroke="rgba(0,236,208,0.18)" stroke-width="1" stroke-dasharray="1,7" opacity="0.55"><animateTransform attributeName="transform" type="rotate" from="360 400 118" to="0 400 118" dur="32s" repeatCount="indefinite"/></circle>
+        <text x="400" y="148" text-anchor="middle" fill="white" font-size="84" font-weight="900" font-family="system-ui,sans-serif" filter="url(#hv-tight)" opacity="0.97">&#x25CE;</text>
+        <text x="400" y="208" text-anchor="middle" font-family="'Syne',sans-serif" font-size="44" font-weight="900" letter-spacing="16" fill="url(#hv-wordmark)">SOLANA</text>
+        <line x1="248" y1="225" x2="552" y2="225" stroke="url(#hv-accent)" stroke-width="1.5" opacity="0.85"/>
+        <circle cx="400" cy="225" r="2.5" fill="#00ecd0" filter="url(#hv-glow)" opacity="0.9"><animate attributeName="opacity" values="0.5;1;0.5" dur="2.4s" repeatCount="indefinite"/></circle>
+        <text x="400" y="247" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="9" font-weight="700" letter-spacing="5.5" fill="rgba(0,236,208,0.70)">F A S T E S T &#xA0; C H A I N &#xA0; F O R &#xA0; D E F I</text>
+        <rect x="258" y="266" width="284" height="22" rx="11" fill="rgba(153,69,255,0.10)" stroke="rgba(168,127,255,0.30)" stroke-width="1"/>
+        <text x="400" y="281" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="8.5" font-weight="700" letter-spacing="2" fill="rgba(220,200,255,0.92)">&#x2605; &#xA0; S W A P S &#xA0; + &#xA0; P E R P S &#xA0; &middot; &#xA0; 5 0 + &#xA0; D E X E S</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- RISK CHECKER -->
+
+  <section class="swap-section" id="riskSection">
+    <div class="swap-section-label">Contract Scanner</div>
+    <div class="swap-widget-wrap">
+      <div class="swap-widget-header">
+        <div class="swap-live-badge"><span class="swap-live-dot"></span><span>Live</span></div>
+        <div class="swap-trust-chips">
+          <span class="swap-trust-chip">&#x1F50D; On-chain read</span>
+          <span class="swap-trust-chip">&#x26A1; Seconds</span>
+          <span class="swap-trust-chip">&#x2713; No signup</span>
+        </div>
+      </div>
+
+```
+  <!-- THREAT BANNER -->
+  <div class="threat-banner" id="threatBanner" style="margin:0 20px;">
     <div class="threat-banner-inner" id="threatBannerInner">
       <div class="threat-banner-icon" id="threatBannerIcon"></div>
       <div class="threat-banner-content">
@@ -757,113 +615,153 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
     </div>
   </div>
 
-  <!-- MAIN RISK CONTAINER -->
+  <div class="tool-shell">
+    <textarea id="text" placeholder="Paste contract address (0x... or Solana token mint address)..."></textarea>
+    <div class="input-help">Enter the full token contract address for the most accurate on-chain analysis</div>
+    <button class="check" onclick="check()">&#x1F50D; Check Token Risk</button>
+    <div class="note">No signup required &middot; 1 free check &middot; Results in seconds</div>
+    <div class="price-anchor">Unlimited checks from $3.99&nbsp;/&nbsp;week &middot; Cancel anytime</div>
+    <input id="email" type="email" placeholder="Already subscribed? Enter your payment email">
+    <div class="note">Use the same email entered during checkout to restore access</div>
+    <div id="postPurchase" class="success">&#x2705; Unlimited token checks active</div>
+    <div id="result"></div>
+  </div>
+```
 
-  <div class="risk-container" id="riskContainer">
+<!-- UPGRADE -->
 
-    <div class="tool-shell">
-      <textarea id="text" placeholder="Paste contract address (e.g. 0x... or Solana token address)..."></textarea>
-      <div class="input-help">Enter the full token contract address for the most accurate on-chain check</div>
-      <button class="check" onclick="check()">&#x1F50D; Check Token Risk</button>
-      <div class="note">No signup required &middot; 1 free check &middot; Results in seconds</div>
-      <div class="price-anchor">Unlimited checks from $3.99 / week &middot; Cancel anytime</div>
-      <input id="email" placeholder="Already subscribed? Enter your payment email">
-      <div class="note">Use the same email you entered during checkout</div>
-      <div id="postPurchase" class="success">&#x2705; Unlimited token checks are active</div>
-      <div id="result"></div>
+```
+  <div class="upgrade" id="upgrade">
+    <h3>Unlimited Token Risk Checks</h3>
+    <div class="upgrade-copy">Verify every contract before buying. Honeypot detection, LP lock analysis, and holder concentration reviews across Solana and EVM.</div>
+    <div class="upgrade-stat-row">
+      <div class="upgrade-stat"><span class="upgrade-stat-value">$5.6B</span><span>FBI crypto losses 2023</span></div>
+      <div class="upgrade-stat"><span class="upgrade-stat-value">$1B+</span><span>FTC losses 2023</span></div>
+      <div class="upgrade-stat"><span class="upgrade-stat-value">&lt;5s</span><span>per contract scan</span></div>
     </div>
-
-    <div class="app-link-card">
-      <h4>Check tokens on the go</h4>
-      <p>Instant on-chain risk checks for any token -- available on iOS. Verify before you buy.</p>
-      <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download on the App Store</a>
-    </div>
-
-    <div class="upgrade" id="upgrade">
-      <h3>Unlimited Token Risk Checks</h3>
-      <div class="upgrade-copy">Verify every token before you buy in. Unlimited contract checks, honeypot detection, LP lock analysis, and holder concentration reviews -- across Solana and EVM chains.</div>
-      <div class="upgrade-stat-row">
-        <div class="upgrade-stat"><span class="upgrade-stat-value">$5.6B</span><span>in crypto investment losses reported to the FBI in 2023</span></div>
-        <div class="upgrade-stat"><span class="upgrade-stat-value">$1B+</span><span>in crypto losses reported to the FTC in 2023</span></div>
-        <div class="upgrade-stat"><span class="upgrade-stat-value">Seconds</span><span>to check any contract before you commit</span></div>
+    <div class="plan-cards">
+      <div class="plan-card hero-plan">
+        <div><span class="plan-card-badge best-value">&#x1F7E2; Best Value — Save 80%</span></div>
+        <div class="plan-card-label">Yearly Access</div>
+        <div class="plan-card-price">$39.99 / yr &nbsp;&middot;&nbsp; $3.33/mo</div>
+        <button class="plan-card-cta cta-hero" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Get Yearly — $39.99</button>
       </div>
-      <div class="plan-cards">
-        <div class="plan-card hero-plan">
-          <div><span class="plan-card-badge best-value">&#x1F7E2; Best Value -- Save 80%</span></div>
-          <div class="plan-card-label">Yearly Access</div>
-          <div class="plan-card-price">$39.99 / year -- <strong style="color:var(--cyan)">$3.33/month</strong></div>
-          <button class="plan-card-cta cta-hero" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Get Yearly Access -- $39.99</button>
-        </div>
-        <div class="plan-card">
-          <div><span class="plan-card-badge popular">&#x2B50; Popular</span></div>
-          <div class="plan-card-label">Monthly Access</div>
-          <div class="plan-card-price">$11.99 / month</div>
-          <button class="plan-card-cta cta-secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly -- $11.99</button>
-        </div>
-        <div class="plan-card">
-          <div><span class="plan-card-badge entry">Try it</span></div>
-          <div class="plan-card-label">Weekly Access</div>
-          <div class="plan-card-price">$3.99 / week -- cancel anytime</div>
-          <button class="plan-card-cta cta-tertiary" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Try This Week -- $3.99</button>
-        </div>
+      <div class="plan-card">
+        <div><span class="plan-card-badge popular">&#x2B50; Popular</span></div>
+        <div class="plan-card-label">Monthly Access</div>
+        <div class="plan-card-price">$11.99 / month</div>
+        <button class="plan-card-cta cta-secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly — $11.99</button>
       </div>
-      <div class="trust-badge-strip">
-        <span class="trust-badge-item">&#x1F512; SSL Secured</span>
-        <span class="trust-badge-item">&#x26A1; Stripe</span>
-        <span class="trust-badge-item">&#x2713; Cancel anytime</span>
-        <span class="trust-badge-item">&#x2713; No hidden fees</span>
-      </div>
-      <div class="upgrade-footer">Cancel from your account anytime. No contracts.</div>
-      <div class="subscriber-link">
-        <button type="button" onclick="scrollToEmail()">Already subscribed? Enter your email above</button>
+      <div class="plan-card">
+        <div><span class="plan-card-badge entry">Try it</span></div>
+        <div class="plan-card-label">Weekly Access</div>
+        <div class="plan-card-price">$3.99 / week &middot; cancel anytime</div>
+        <button class="plan-card-cta cta-tertiary" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">This Week — $3.99</button>
       </div>
     </div>
+    <div class="trust-badge-strip">
+      <span class="trust-badge-item">&#x1F512; SSL Secured</span>
+      <span class="trust-badge-item">&#x26A1; Stripe</span>
+      <span class="trust-badge-item">&#x2713; Cancel anytime</span>
+      <span class="trust-badge-item">&#x2713; No hidden fees</span>
+    </div>
+    <div class="upgrade-footer">No contracts. Cancel anytime from your account.</div>
+    <div class="subscriber-link">
+      <button type="button" onclick="scrollToEmail()">Already subscribed? Enter email above</button>
+    </div>
+  </div>
 
-  </div><!-- end risk-container -->
+  <div class="swap-widget-footer">
+    <div class="swap-chain-badges">
+      <span class="swap-chain-badge sol-chain">SOL</span>
+      <span class="swap-chain-badge evm-chain">ETH</span>
+      <span class="swap-chain-badge evm-chain">BASE</span>
+      <span class="swap-chain-badge evm-chain">ARB</span>
+      <span class="swap-chain-badge evm-chain">BNB</span>
+      <span class="swap-chain-badge evm-chain">POLY</span>
+      <span class="swap-chain-badge evm-chain">AVAX</span>
+    </div>
+    <span class="swap-powered-by">Powered by Verixia</span>
+  </div>
+</div>
+```
 
-  <!-- SWAP AFTER CHECK SECTION -->
+  </section>
+
+  <!-- STATS BAR -->
+
+  <div class="stats-bar">
+    <div class="stat-card"><span class="stat-card-value">49K+</span><span class="stat-card-label">Scans Run</span></div>
+    <div class="stat-card"><span class="stat-card-value">6</span><span class="stat-card-label">Chains</span></div>
+    <div class="stat-card"><span class="stat-card-value">3</span><span class="stat-card-label">Risk Signals</span></div>
+    <div class="stat-card"><span class="stat-card-value">Free</span><span class="stat-card-label">First Check</span></div>
+  </div>
+
+  <!-- FEATURE GRID — 2 cards -->
+
+  <div class="feature-grid">
+    <div class="feature-card feature-card--primary">
+      <span class="feature-icon">&#x1F50D;</span>
+      <div class="feature-title">Honeypot Detection</div>
+      <div class="feature-body">Simulates sell transactions to detect transfer locks, fee traps, and whitelist-only exit conditions before you buy in. Reads the contract directly — not market data.</div>
+    </div>
+    <div class="feature-card feature-card--sol">
+      <span class="feature-icon">&#x1F4A7;</span>
+      <div class="feature-title">Liquidity &amp; Holder Analysis</div>
+      <div class="feature-body">Reviews pool depth, LP lock status, and top wallet percentages. Surfaces unlocked pools and concentrated wallets that enable rug pulls before the price collapses.</div>
+    </div>
+  </div>
+
+  <!-- SWAP AFTER CHECK -->
 
   <div class="swap-after-check" id="swapSection">
     <div class="swap-after-check-intro">
       <div class="swap-after-check-intro-icon">&#x26A1;</div>
       <div class="swap-after-check-intro-text">
         <div class="swap-after-check-intro-title">Token verified? Swap at best price.</div>
-        <div class="swap-after-check-intro-sub">Route across Raydium, Orca, Meteora and 50+ DEXes for the best execution price on Solana and EVM. Non-custodial. No KYC.</div>
+        <div class="swap-after-check-intro-sub">Route across Raydium, Orca, Meteora and 50+ DEXes — non-custodial, no KYC.</div>
       </div>
     </div>
     <div class="swap-widget-wrap">
       <div class="swap-widget-header">
-        <div class="swap-live-badge">
-          <span class="swap-live-dot"></span>
-          <span>Live</span>
-        </div>
+        <div class="swap-live-badge"><span class="swap-live-dot"></span><span>Live</span></div>
         <div class="swap-trust-chips">
           <span class="swap-trust-chip">&#x1F512; Non-custodial</span>
           <span class="swap-trust-chip">&#x26A1; Best price</span>
           <span class="swap-trust-chip">&#x2713; No KYC</span>
         </div>
       </div>
-      <div class="swap-frame-container">
-        <div class="swap-frame-loading" id="swapLoading">
-          <div class="swap-loading-spinner"></div>
-          <div class="swap-loading-text">Loading swap</div>
+      <a class="swap-cta-link" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">
+        <div class="swap-preview">
+          <div class="swap-preview-head">
+            <span class="swap-preview-head-title">Swap</span>
+            <span class="swap-preview-head-meta">Best price &middot; 50+ DEXes</span>
+          </div>
+          <div class="swap-preview-card">
+            <div class="swap-preview-card-top"><span class="swap-preview-card-label">You pay</span><span class="swap-preview-card-balance">Connect wallet</span></div>
+            <div class="swap-preview-card-main">
+              <div class="swap-preview-amount">100.0</div>
+              <div class="swap-preview-token sol-token"><span>&#x25CE;</span><span>SOL</span><span class="swap-preview-token-arrow">&#x25BE;</span></div>
+            </div>
+            <div class="swap-preview-card-foot">&asymp; $15,300.00</div>
+          </div>
+          <div class="swap-preview-flip"><div class="swap-preview-flip-circle">&darr;</div></div>
+          <div class="swap-preview-card">
+            <div class="swap-preview-card-top"><span class="swap-preview-card-label">You receive</span><span class="swap-preview-card-balance best">+ $122 vs direct</span></div>
+            <div class="swap-preview-card-main">
+              <div class="swap-preview-amount">15,422.4</div>
+              <div class="swap-preview-token usdc-token"><span>$</span><span>USDC</span><span class="swap-preview-token-arrow">&#x25BE;</span></div>
+            </div>
+            <div class="swap-preview-card-foot">1 SOL = 154.224 USDC</div>
+          </div>
+          <div class="swap-preview-route">
+            <span class="swap-preview-route-label">&#x2605; Best route</span>
+            <span class="swap-preview-route-flow"><span class="route-pill">Raydium 60%</span><span class="route-arrow">+</span><span class="route-pill">Orca 40%</span></span>
+          </div>
+          <div class="swap-preview-cta"><span>Open Swap on Verixia</span><span class="swap-preview-cta-arrow">&rarr;</span></div>
+          <div class="swap-preview-disclaimer">Click to open live swap &middot; Non-custodial &middot; No KYC</div>
         </div>
-        <iframe
-          id="swapFrame"
-          src="https://swap.verixiaapps.com"
-          frameborder="0"
-          scrolling="no"
-          allow="clipboard-write; web3"
-          title="Swap tokens at best price -- Verixia DEX Aggregator"
-          loading="lazy"
-        ></iframe>
-        <div class="swap-frame-error" id="swapError">
-          <div class="swap-frame-error-icon">&#x26A1;</div>
-          <div class="swap-frame-error-title">Open Swap</div>
-          <div class="swap-frame-error-sub">Best price swaps across Raydium, Orca, Meteora and 50+ DEXes.</div>
-          <a class="swap-frame-error-btn" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Open Swap &rarr;</a>
-        </div>
-      </div>
+      </a>
       <div class="swap-widget-footer">
         <div class="swap-chain-badges">
           <span class="swap-chain-badge sol-chain">SOL</span>
@@ -871,32 +769,10 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
           <span class="swap-chain-badge evm-chain">BASE</span>
           <span class="swap-chain-badge evm-chain">ARB</span>
           <span class="swap-chain-badge evm-chain">BNB</span>
-          <span class="swap-chain-badge evm-chain">POLY</span>
           <span class="swap-chain-badge evm-chain">AVAX</span>
-          <span class="swap-chain-badge evm-chain">OP</span>
         </div>
         <span class="swap-powered-by">Powered by Verixia</span>
       </div>
-    </div>
-  </div>
-
-  <!-- FEATURE GRID -->
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <span class="feature-icon">&#x1F50D;</span>
-      <div class="feature-title">Honeypot Detection</div>
-      <div class="feature-body">Identifies tokens with sell restrictions encoded in the smart contract -- including transfer blocks, fee traps, and whitelist-only exit conditions.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">&#x1F4A7;</span>
-      <div class="feature-title">Liquidity Analysis</div>
-      <div class="feature-body">Reviews pool depth, LP lock status, and liquidity concentration. Surfaces thin liquidity and unlocked pools that enable easy rug pulls.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">&#x1F465;</span>
-      <div class="feature-title">Holder Concentration</div>
-      <div class="feature-body">Analyzes top wallet holdings as a percentage of total supply. High concentration in a few wallets means coordinated exits can collapse price fast.</div>
     </div>
   </div>
 
@@ -905,71 +781,25 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
   <section class="content-section">
     <div id="contentBridge" class="content-bridge"></div>
     <div class="inline-info-card" id="hubLinkWrap">{{HUB_LINK}}</div>
-    <h2 id="contentHeading">How to Check If a Crypto Token Is Safe</h2>
-    <div class="content-recognition" id="contentRecognition">
-      <div class="recognition-chip">
-        <span class="recognition-label">Contract structure</span>
-        <span class="recognition-copy">Unrestricted minting, owner withdrawal functions, and blacklisting capabilities can allow developers to drain value or block selling.</span>
-      </div>
-      <div class="recognition-chip">
-        <span class="recognition-label">Liquidity depth</span>
-        <span class="recognition-copy">Thin or unlocked liquidity pools make it easy for creators to remove all liquidity, collapsing the price instantly and permanently.</span>
-      </div>
-      <div class="recognition-chip">
-        <span class="recognition-label">Holder distribution</span>
-        <span class="recognition-copy">When a handful of wallets hold most of the supply, they can exit simultaneously and push price down faster than the market can absorb.</span>
-      </div>
-      <div class="recognition-chip">
-        <span class="recognition-label">Honeypot patterns</span>
-        <span class="recognition-copy">Honeypot tokens allow purchases but block selling at the contract level. They can look like any other token until you try to exit.</span>
-      </div>
-    </div>
+    <h2 id="contentHeading">Token Risk Analysis — Contract, Liquidity &amp; Holders</h2>
+    <div class="content-recognition" id="contentRecognition"></div>
     <div id="seoContent" class="content-body">{{AI_CONTENT}}</div>
 
-    <!-- Static supplementary content -- always crawlable by Google -->
-    <div class="supplementary-content">
-      <h3>What the token risk checker analyzes</h3>
-      <p>The checker reads the token smart contract directly to identify structural risk signals before they appear in the price. It looks for unrestricted minting -- the ability to create new supply at any time -- which can dilute existing holders without warning. It checks freeze authority, which allows developers to pause all token transfers, and blacklisting functions that can prevent specific wallets from selling. These functions are written into the contract at deployment and are visible on-chain long before any price impact occurs.</p>
-      <p>Liquidity pool structure matters as much as the contract itself. A thin pool means large exits move the price disproportionately. An unlocked pool means developers can remove all liquidity in a single transaction, collapsing the price to near zero in the same block. According to FBI and FTC reports, crypto-related investment losses exceeded $5.6B in 2023 -- the majority involving tokens where pool structure gave clear advance warning. The checker surfaces pool depth alongside lock status so you can see both risk factors together.</p>
-      <p>Holder concentration shows how coordinated selling risk is distributed. When the top five wallets hold the majority of supply, a coordinated exit -- or even one large holder deciding to leave -- can move the market faster than other buyers can absorb. The checker shows top wallet percentages, pool depth, and contract permissions together so you have a complete structural picture before committing to a position.</p>
-    </div>
-
-    <!-- Visible FAQ -- indexed by Google, handles objections before they become bounces -->
-    <section class="faq-section" aria-label="Frequently asked questions">
-      <h3>Frequently asked questions</h3>
-      <details class="faq-item">
-        <summary>How does the token risk checker work?</summary>
-        <div class="faq-answer">Paste the token contract address into the checker above. The tool reads the smart contract directly to identify structural risk signals -- minting permissions, freeze authority, blacklisting functions, sell restrictions -- then reviews the liquidity pool depth, LP lock status, and top holder wallet percentages. Results return in seconds with a risk level and the specific signals detected.</div>
-      </details>
-      <details class="faq-item">
-        <summary>What is a honeypot token?</summary>
-        <div class="faq-answer">A honeypot token is a smart contract that allows purchases but blocks selling. The restriction is encoded into the transfer function -- a require() statement that causes sell transactions to revert for non-whitelisted wallets. Honeypots look identical to legitimate tokens on price charts because buy transactions execute normally. Only sell attempts fail, and they fail silently at gas cost with no receipt.</div>
-      </details>
-      <details class="faq-item">
-        <summary>What is a rug pull and how does the checker detect it?</summary>
-        <div class="faq-answer">A rug pull happens when developers remove all liquidity from the trading pool, collapsing the price to near zero in a single transaction. The checker detects it by checking whether LP tokens are locked -- if they are not, the pool can be drained instantly. It also surfaces pool depth relative to market cap: a $180,000 pool supporting a $2.4M market cap means a single $15,000 exit moves price 8% before slippage activates.</div>
-      </details>
-      <details class="faq-item">
-        <summary>Is the check free? How does the subscription work?</summary>
-        <div class="faq-answer">The first check is free with no account required. Unlimited checks are available from $3.99 per week -- useful if you are researching multiple tokens before swapping. Subscribe with any email address. Cancel anytime from your account with no fees or notice period required.</div>
-      </details>
-      <details class="faq-item">
-        <summary>What chains are supported?</summary>
-        <div class="faq-answer">The checker supports Solana SPL tokens and EVM tokens across Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche. Paste the full contract address for the most accurate analysis -- for Solana tokens this is the token mint address, for EVM tokens it is the 0x contract address.</div>
-      </details>
-    </section>
-
-    <div class="link-section">
-      <h3 id="relatedHeading">Related Token Risk Guides</h3>
-      <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
-    </div>
-    <div class="link-section" id="moreLinksWrap">
-      <h3 id="moreLinksHeading">More Risk Check Guides</h3>
-      <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
-    </div>
-    <div class="content-close" id="contentClose">
-      Contract structure, liquidity depth, and holder concentration are the three places token risk hides before it shows up in the price. Check the address before you swap into it.
-    </div>
+```
+<!-- FAQ — rendered dynamically per keyword -->
+<section class="faq-section" id="faqSection" aria-label="Frequently asked questions">
+  <h3>Frequently asked questions</h3>
+</section>
+<div class="link-section">
+  <h3 id="relatedHeading">Related Risk Guides</h3>
+  <ul id="relatedLinks" class="related-links">{{RELATED_LINKS}}</ul>
+</div>
+<div class="link-section" id="moreLinksWrap">
+  <h3 id="moreLinksHeading">More Risk Check Guides</h3>
+  <ul id="moreLinks" class="related-links">{{MORE_LINKS}}</ul>
+</div>
+<div class="content-close" id="contentClose">Verify the contract address before you buy in.</div>
+```
 
   </section>
 
@@ -977,35 +807,26 @@ button{border:none;border-radius:15px;cursor:pointer;font-size:15px;padding:14px
 
   <div class="trust-section" aria-label="Why trust Verixia">
     <div class="trust-item">
-      <span class="trust-item-icon">&#x1F50D;</span>
-      <div class="trust-item-body">
-        <span class="trust-item-title">On-chain analysis</span>
-        <span class="trust-item-copy">Reads the smart contract directly -- not market data or social signals. Contract structure determines your exit options, and it's visible before you buy.</span>
-      </div>
+      <span class="trust-item-icon">&#x1F512;</span>
+      <div class="trust-item-body"><span class="trust-item-title">Non-custodial</span><span class="trust-item-copy">Your wallet keys never leave your device. Funds move directly between wallets through the smart contract — Verixia holds nothing.</span></div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item-icon">&#x2713;</span>
+      <div class="trust-item-body"><span class="trust-item-title">No account required</span><span class="trust-item-copy">No sign-up, no KYC, no email. Connect your wallet and swap. Disconnect at any time — no ongoing permissions required.</span></div>
     </div>
     <div class="trust-item">
       <span class="trust-item-icon">&#x26A1;</span>
-      <div class="trust-item-body">
-        <span class="trust-item-title">Results in seconds</span>
-        <span class="trust-item-copy">No account, no sign-up. Paste the contract address and receive a complete risk assessment in seconds. One free check, no commitment.</span>
-      </div>
-    </div>
-    <div class="trust-item">
-      <span class="trust-item-icon">&#x25CE;</span>
-      <div class="trust-item-body">
-        <span class="trust-item-title">Solana and EVM</span>
-        <span class="trust-item-copy">Checks Solana SPL tokens and EVM contracts across Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche.</span>
-      </div>
+      <div class="trust-item-body"><span class="trust-item-title">Solana + EVM</span><span class="trust-item-copy">Checks SPL tokens and EVM contracts across Ethereum, Base, Arbitrum, BNB Chain, Polygon, and Avalanche.</span></div>
     </div>
   </div>
 
   <footer class="footer">
-    <div>Verixia's token risk checker analyzes on-chain contract data for informational purposes only. Not financial advice.</div>
-    <div style="margin-top:6px">By using this website you agree to our <a href="https://verixiaapps.com/website-policies/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.</div>
-    <div style="margin-top:6px">Verixia Token Risk Checker &copy; 2026 &middot; On-chain risk analysis for Solana and EVM tokens</div>
+    <div>Verixia is a non-custodial DeFi platform. Swap fees apply to transactions. Not financial advice.</div>
+    <div style="margin-top:6px">On-chain analysis for informational purposes only. Not financial advice. By using this website you agree to our <a href="https://verixiaapps.com/website-policies/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.</div>
+    <div style="margin-top:6px">Verixia Apps &copy; 2026 &middot; Best price swaps and perpetuals on Solana</div>
   </footer>
 
-</div><!-- end page-shell -->
+</div>
 
 <script>
 const API          = "https://awake-integrity-production-faa0.up.railway.app";
@@ -1014,8 +835,8 @@ const RAW_KEYWORD  = "{{KEYWORD}}";
 const TOKEN_RISK_BROWSER_SUB_KEY  = "token_risk_browser_subscribed";
 const LEGACY_BROWSER_SUB_KEY      = "scam_check_browser_subscribed";
 
-/* === UTILS === */
-function normalizeKeyword(str){return String(str||"").replace(/\s+/g," ").replace(/[\u2013\u2014]/g,"-").trim();}
+/* ─── UTILS ─── */
+function normalizeKeyword(str){return String(str||"").replace(/\s+/g," ").replace(/[–—]/g,"-").trim();}
 function safeLower(str){return normalizeKeyword(str).toLowerCase();}
 function displayKeyword(s){var t=normalizeKeyword(s);if(!t)return"";return t.charAt(0).toUpperCase()+t.slice(1);}
 function escapeHtml(str){return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
@@ -1032,17 +853,17 @@ function cleanKeywordForSentence(kw){
     .replace(/\s+/g," ").trim();
 }
 
-/* === HEADING BUILDERS === */
+/* ─── HEADING BUILDERS ─── */
 function buildHeroTitle(kw){
   var raw=normalizeKeyword(kw),lower=safeLower(kw);
   if(!raw)return"Is This Token Safe? Solana Token Risk Checker";
   var ck=cleanKeywordForSentence(kw);
-  if(containsAny(lower,["honeypot"]))return"Honeypot Token Check -- "+displayKeyword(raw);
-  if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"Rug Pull Token Check -- "+displayKeyword(raw);
-  if(containsAny(lower,["scam","fake"]))return"Scam Token Check -- Is "+displayKeyword(ck||raw)+" Legitimate?";
-  if(containsAny(lower,["safe","legit","real","risk"]))return"Token Risk Check -- Is "+displayKeyword(ck||raw)+" Safe?";
+  if(containsAny(lower,["honeypot"]))return"Honeypot Token Check — "+displayKeyword(raw);
+  if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"Rug Pull Token Check — "+displayKeyword(raw);
+  if(containsAny(lower,["scam","fake"]))return"Scam Token Check — Is "+displayKeyword(ck||raw)+" Legitimate?";
+  if(containsAny(lower,["safe","legit","real","risk"]))return"Token Risk Check — Is "+displayKeyword(ck||raw)+" Safe?";
   if(ck&&ck.length>2)return"Is "+displayKeyword(ck)+" Safe? Token Risk Check";
-  return displayKeyword(raw)+" -- Token Risk Check";
+  return displayKeyword(raw)+" — Token Risk Check";
 }
 
 function buildHeroSubheading(kw){
@@ -1050,18 +871,18 @@ function buildHeroSubheading(kw){
   if(containsAny(lower,["honeypot"]))return"Check whether this token blocks selling at the contract level. Honeypot tokens look identical to legitimate tokens until you try to exit.";
   if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"Review the liquidity lock status, holder concentration, and contract permissions before committing to a position.";
   if(containsAny(lower,["scam","fake"]))return"Verify the contract structure, on-chain trading history, and developer wallet activity before buying in.";
-  return"Paste any contract address for an instant on-chain risk assessment -- honeypot detection, liquidity analysis, holder concentration, and contract permissions.";
+  return"Paste any contract address for an instant on-chain risk assessment — honeypot detection, liquidity analysis, holder concentration, and contract permissions.";
 }
 
 function buildContentHeading(kw){
   var lower=safeLower(kw);
   var ck=cleanKeywordForSentence(kw);
-  if(containsAny(lower,["honeypot"]))return"What Makes a Token a Honeypot -- and How to Detect It";
-  if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"How Rug Pulls Work -- and What to Check Before Buying";
+  if(containsAny(lower,["honeypot"]))return"What Makes a Token a Honeypot — and How to Detect It";
+  if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"How Rug Pulls Work — and What to Check Before Buying";
   if(containsAny(lower,["holder","concentration","whale","distribution"]))return"Why Holder Concentration Is a Structural Risk Signal";
   if(containsAny(lower,["liquidity","lp","lock","locked"]))return"How Liquidity Pool Structure Determines Token Exit Risk";
   if(containsAny(lower,["contract","renounced","mint","owner"]))return"What Token Contract Permissions Reveal About Risk";
-  if(ck&&ck.length>2)return"How to Check If "+displayKeyword(ck)+" Is Safe -- On-Chain Analysis";
+  if(ck&&ck.length>2)return"How to Check If "+displayKeyword(ck)+" Is Safe — On-Chain Analysis";
   return"How to Check If a Crypto Token Is Safe";
 }
 
@@ -1071,6 +892,67 @@ function buildContentBridge(kw){
   if(containsAny(lower,["honeypot"]))return"Paste the contract address above to check whether "+displayKeyword(ck)+" has sell restrictions, fee traps, or whitelist-only exit conditions.";
   if(containsAny(lower,["rug pull","rug-pull"]))return"Use the checker above to review the liquidity lock, holder concentration, and contract permissions for "+displayKeyword(ck)+" before buying in.";
   return"Use the tool above to check "+displayKeyword(ck)+"'s contract structure, liquidity depth, and holder distribution before you swap into it.";
+}
+
+function renderFaq(){
+  var wrap=document.getElementById("faqSection");if(!wrap)return;
+  var lower=safeLower(RAW_KEYWORD||"");
+  var items;
+  if(containsAny(lower,["honeypot"])){
+    items=[
+      ["How do I know if a token is a honeypot?","Paste the contract address. The scanner simulates a sell transaction — if the transfer function blocks the exit, the scanner surfaces it before you buy in."],
+      ["Can honeypots be detected before buying?","Yes. Sell restrictions are written into the contract at deployment and readable on-chain. The scanner checks the transfer function directly, not trading history."]
+    ];
+  }else if(containsAny(lower,["rug pull","rug-pull","rugpull"])){
+    items=[
+      ["What is a rug pull and how is it detected?","A rug pull removes all liquidity in a single transaction, collapsing price instantly. The scanner checks LP lock status and pool depth — both are visible before it happens."],
+      ["Is the first check free?","Yes. One free check, no account required. Unlimited checks from $3.99 per week — cancel anytime."]
+    ];
+  }else if(containsAny(lower,["scam","fake","fraud"])){
+    items=[
+      ["How do I know if a token is a scam?","Paste the contract address. Scam tokens consistently fail on multiple signals simultaneously — minting permissions, unlocked LP, concentrated wallets, and sell restrictions all visible before any price impact."],
+      ["Is the first check free?","Yes. One free check, no account required. Unlimited checks from $3.99 per week — cancel anytime."]
+    ];
+  }else{
+    items=[
+      ["How does the token risk checker work?","Paste the contract address. The scanner reads the smart contract directly — minting permissions, freeze authority, sell restrictions, LP lock, and top holder percentages. Results in seconds."],
+      ["Is the first check free?","Yes. One free check, no account required. Unlimited checks from $3.99 per week — cancel anytime."]
+    ];
+  }
+  var html=items.map(function(item){
+    return'<details class="faq-item"><summary>'+escapeHtml(item[0])+'</summary><div class="faq-answer">'+escapeHtml(item[1])+'</div></details>';
+  }).join("");
+  wrap.innerHTML='<h3>Frequently asked questions</h3>'+html;
+}
+
+function renderRecognitionChips(){
+  var wrap=document.getElementById("contentRecognition");if(!wrap)return;
+  var lower=safeLower(RAW_KEYWORD||"");
+  var items;
+  if(containsAny(lower,["honeypot"])){
+    items=[
+      ["Transfer simulation","Simulates a sell transaction to detect restrictions before you commit funds."],
+      ["Whitelist and fee traps","Identifies whether only specific wallets can sell, and detects sell taxes that activate after launch."]
+    ];
+  } else if(containsAny(lower,["rug pull","rug-pull","rugpull"])){
+    items=[
+      ["LP lock status","Unlocked LP tokens mean developers can withdraw all pool liquidity at any time, collapsing price instantly."],
+      ["Holder concentration","A few wallets holding most supply can coordinate to dump simultaneously, overwhelming buy-side liquidity."]
+    ];
+  } else if(containsAny(lower,["scam","fake","fraud"])){
+    items=[
+      ["Contract structure","Minting permissions, freeze authority, and sell restrictions are visible in the contract before you buy in."],
+      ["Liquidity signals","Thin or newly created pools with no LP lock are a consistent scam token signal."]
+    ];
+  } else {
+    items=[
+      ["Contract structure","Minting permissions, freeze authority, blacklisting, and sell restrictions are encoded at deployment and readable on-chain before they cause damage."],
+      ["Liquidity and holders","Unlocked LP and concentrated wallets are the two most reliable pre-rug signals — both visible before you buy in."]
+    ];
+  }
+  wrap.innerHTML=items.map(function(item){
+    return'<div class="recognition-chip"><span class="recognition-label">'+escapeHtml(item[0])+'</span><span class="recognition-copy">'+escapeHtml(item[1])+'</span></div>';
+  }).join("");
 }
 
 function setKeywordHeadings(){
@@ -1085,23 +967,23 @@ function setKeywordHeadings(){
   if(cb&&kw)cb.textContent=buildContentBridge(kw);
 }
 
-/* === THREAT BANNER === */
+/* ─── THREAT BANNER ─── */
 function getThreatBannerConfig(kw){
   var lower=safeLower(kw);
   if(containsAny(lower,["honeypot"])){
-    return{tier:"high",icon:"\uD83D\uDD34",title:"Honeypot Warning Pattern Detected in Search",copy:"Honeypot tokens block selling at the contract level. They look identical to legitimate tokens on charts until you attempt to exit. The check above analyzes the contract for transfer restrictions and fee traps before you buy in."};
+    return{tier:"high",icon:"🔴",title:"Honeypot Warning Pattern Detected in Search",copy:"Honeypot tokens block selling at the contract level. They look identical to legitimate tokens on charts until you attempt to exit. The check above analyzes the contract for transfer restrictions and fee traps before you buy in."};
   }
   if(containsAny(lower,["rug pull","rug-pull","rugpull"])){
-    return{tier:"high",icon:"\uD83D\uDD34",title:"Rug Pull Risk Pattern -- Check Before Buying",copy:"Rug pulls remove all pool liquidity, collapsing price instantly. The main signals -- unlocked LP, thin liquidity, and concentrated holder wallets -- are all visible on-chain before a rug happens. Check the address above."};
+    return{tier:"high",icon:"🔴",title:"Rug Pull Risk Pattern — Check Before Buying",copy:"Rug pulls remove all pool liquidity, collapsing price instantly. The main signals — unlocked LP, thin liquidity, and concentrated holder wallets — are all visible on-chain before a rug happens. Check the address above."};
   }
   if(containsAny(lower,["scam","fake","fraud"])){
-    return{tier:"high",icon:"\uD83D\uDD34",title:"Potential Scam Token Pattern",copy:"Scam tokens frequently impersonate legitimate projects using similar names and ticker symbols. Verify the exact contract address from the official project source before pasting it above."};
+    return{tier:"high",icon:"🔴",title:"Potential Scam Token Pattern",copy:"Scam tokens frequently impersonate legitimate projects using similar names and ticker symbols. Verify the exact contract address from the official project source before pasting it above."};
   }
   if(containsAny(lower,["meme","new token","launched","presale","launch"])){
-    return{tier:"medium",icon:"\uD83D\uDFE0",title:"New or Meme Token -- Higher Structural Risk",copy:"New tokens and meme coins carry elevated structural risk: thin liquidity, unlocked LP, and concentrated holder wallets are common. The risk check above surfaces these signals before you buy in."};
+    return{tier:"medium",icon:"🟠",title:"New or Meme Token — Higher Structural Risk",copy:"New tokens and meme coins carry elevated structural risk: thin liquidity, unlocked LP, and concentrated holder wallets are common. The risk check above surfaces these signals before you buy in."};
   }
   if(containsAny(lower,["risk","safe","legit","is this","should i","is it"])){
-    return{tier:"info",icon:"\uD83D\uDD35",title:"On-Chain Check Available for This Token",copy:"Paste the contract address above for an instant analysis of the token's structure, liquidity depth, and holder distribution. No signup required."};
+    return{tier:"info",icon:"🔵",title:"On-Chain Check Available for This Token",copy:"Paste the contract address above for an instant analysis of the token's structure, liquidity depth, and holder distribution. No signup required."};
   }
   return null;
 }
@@ -1124,7 +1006,7 @@ function renderThreatBanner(){
   banner.classList.add("visible");
 }
 
-/* === SOCIAL PROOF === */
+/* ─── SOCIAL PROOF ─── */
 function renderSocialProof(){
   var el=document.getElementById("socialProofText");
   if(!el)return;
@@ -1133,7 +1015,7 @@ function renderSocialProof(){
   el.textContent=(base+(days*132)).toLocaleString()+" risk checks run";
 }
 
-/* === RECOGNITION CHIPS === */
+/* ─── RECOGNITION CHIPS ─── */
 function renderRecognitionChips(){
   var wrap=document.getElementById("contentRecognition");if(!wrap)return;
   var lower=safeLower(RAW_KEYWORD||"");
@@ -1141,14 +1023,14 @@ function renderRecognitionChips(){
   if(containsAny(lower,["honeypot"])){
     items=[["What it is","A honeypot token allows purchases but blocks selling at the contract level via transfer restrictions, whitelist-only exits, or high fee encoding."],["How it hides","Honeypots show normal price charts, trading volume, and even holder counts. The restriction only activates when a non-whitelisted wallet tries to sell."],["What to check","Transfer function restrictions, whitelist requirements, fee multipliers on sells, and any function that changes tax rates after launch."],["How to verify","Paste the contract address above. The checker simulates a sell transaction to detect restrictions before you commit any funds."]];
   }else if(containsAny(lower,["rug pull","rug-pull","rugpull"])){
-    items=[["Liquidity removal","Unlocked LP tokens mean developers can withdraw pool liquidity at any time, instantly collapsing the token price to near zero."],["Holder concentration","A few wallets holding a large share of supply can coordinate to dump simultaneously, overwhelming buy-side liquidity in seconds."],["Warning signals","Unlocked or thin liquidity, anonymous teams, no audits, and concentrated holder wallets are the core pre-rug signals visible on-chain."],["Before you buy","Check the LP lock status, pool depth, and top holder percentages -- all available on-chain before any price action occurs."]];
+    items=[["Liquidity removal","Unlocked LP tokens mean developers can withdraw pool liquidity at any time, instantly collapsing the token price to near zero."],["Holder concentration","A few wallets holding a large share of supply can coordinate to dump simultaneously, overwhelming buy-side liquidity in seconds."],["Warning signals","Unlocked or thin liquidity, anonymous teams, no audits, and concentrated holder wallets are the core pre-rug signals visible on-chain."],["Before you buy","Check the LP lock status, pool depth, and top holder percentages — all available on-chain before any price action occurs."]];
   }else{
     items=[["Contract structure","Unrestricted minting, owner withdrawal functions, and blacklisting capabilities can allow developers to drain value or block selling."],["Liquidity depth","Thin or unlocked liquidity pools make it easy for creators to remove all liquidity, collapsing the price instantly and permanently."],["Holder distribution","When a handful of wallets hold most of the supply, they can exit simultaneously and push price down faster than the market can absorb."],["Honeypot patterns","Honeypot tokens allow purchases but block selling at the contract level. They can look like any other token until you try to exit."]];
   }
   wrap.innerHTML=items.map(function(item){return'<div class="recognition-chip"><span class="recognition-label">'+escapeHtml(item[0])+'</span><span class="recognition-copy">'+escapeHtml(item[1])+'</span></div>';}).join("");
 }
 
-/* === SWAP IFRAME === */
+/* ─── SWAP IFRAME ─── */
 function initSwapFrame(){
   var frame=document.getElementById("swapFrame");
   var loading=document.getElementById("swapLoading");
@@ -1192,7 +1074,7 @@ function scrollToSwap(){
   if(s)s.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
-/* === STICKY CTA === */
+/* ─── STICKY CTA ─── */
 function initStickyCta(){
   if(window.innerWidth>768)return;
   if(localStorage.getItem("risk_sticky_dismissed")==="1")return;
@@ -1205,7 +1087,7 @@ function initStickyCta(){
   },{passive:true});
 }
 
-/* === SEO CONTENT PROCESSING === */
+/* ─── SEO CONTENT PROCESSING ─── */
 function splitSeoParagraphs(text){return String(text||"").replace(/\r/g,"").split(/\n\s*\n/).map(function(p){return p.trim();}).filter(Boolean);}
 function sanitizeParagraph(text){return text.replace(/\*\*/g,"").replace(/\s+/g," ").replace(/\s+([,.!?;:])/g,"$1").trim();}
 
@@ -1215,16 +1097,16 @@ function buildSeoContentCards(paragraphs){
   var lower=safeLower(RAW_KEYWORD||"");
   var titles;
   if(containsAny(lower,["honeypot"])){
-    titles=[["&#x1F534;","Why honeypots are hard to spot"],["&#x1F4CA;","What the contract structure reveals"],["&#x1F4A7;","Liquidity signals that confirm the pattern"],["&#x2713;","What to do before buying in"]];
+    titles=[["🔴","Why honeypots are hard to spot"],["📊","What the contract structure reveals"],["💧","Liquidity signals that confirm the pattern"],["✓","What to do before buying in"]];
   }else if(containsAny(lower,["rug pull","rug-pull","rugpull"])){
-    titles=[["&#x1F534;","How rug pulls work on-chain"],["&#x1F4CA;","The pre-rug signals that show up first"],["&#x1F4A7;","Why liquidity structure is the core signal"],["&#x2713;","What to check before committing"]];
+    titles=[["🔴","How rug pulls work on-chain"],["📊","The pre-rug signals that show up first"],["💧","Why liquidity structure is the core signal"],["✓","What to check before committing"]];
   }else{
-    titles=[["&#x1F4CA;","What the structure actually shows"],["&#x1F4A7;","Where the real risk sits"],["&#x1F50D;","What most buyers miss"],["&#x2713;","How to read the on-chain signals"]];
+    titles=[["📊","What the structure actually shows"],["💧","Where the real risk sits"],["🔍","What most buyers miss"],["✓","How to read the on-chain signals"]];
   }
   sc.innerHTML='<div class="story-stack">'+paragraphs.map(function(p,i){
     var text=sanitizeParagraph(p);
     var t=titles[i]||titles[0];
-    return'<article class="story-card'+(i===0?" lead":"")+'"><div class="story-card-title"><span>'+t[0]+'</span><span>'+escapeHtml(t[1])+'</span></div><p>'+escapeHtml(text)+'</p></article>';
+    return'<article class="story-card'+(i===0?" lead":"")+'"><div class="story-card-title"><span>'+escapeHtml(t[0])+'</span><span>'+escapeHtml(t[1])+'</span></div><p>'+escapeHtml(text)+'</p></article>';
   }).join("")+'</div>';
 }
 
@@ -1257,9 +1139,9 @@ function cleanHubLink(){
   w.innerHTML='<span class="hub-link-label">Related guide</span><a class="hub-link-anchor" href="'+escapeHtml(href)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(text)+'</a>';
 }
 
-/* === TOKEN RISK CHECKER === */
+/* ─── TOKEN RISK CHECKER ─── */
 function cardClassForRisk(r){var v=String(r||"").trim().toLowerCase();if(v==="high")return"high";if(v==="medium"||v==="moderate")return"medium";if(v==="low")return"low";return"unknown";}
-function iconForRisk(r){return r==="high"?"&#x1F534;":r==="medium"?"&#x1F7E0;":r==="low"?"&#x1F7E2;":"&#x26AA;";}
+function iconForRisk(r){return r==="high"?"🔴":r==="medium"?"🟠":r==="low"?"🟢":"⚪";}
 function chipByRisk(r){if(r==="high")return"Structure: High Risk";if(r==="medium")return"Structure: Review Needed";if(r==="low")return"Structure: Lower Risk";return"Structure: Check Needed";}
 
 function summaryForRisk(rc,s){
@@ -1310,18 +1192,18 @@ function scrollToTopCheck(){var ta=document.getElementById("text");if(!ta)return
 
 function formatTokenResult(data){
   var p=normalizeTokenPayload(data);
-  var si=p.riskClass==="low"?"&#x2714;&#xFE0F;":"&#x26A0;&#xFE0F;";
+  var si=p.riskClass==="low"?"✔️":"⚠️";
   var upgradeCard=p.riskClass!=="low"
     ?(function(){
       var headline=p.riskClass==="high"
         ?"That token is high risk. Check every token before you swap into it."
         :"This token needs a closer look. Verify everything before you commit.";
-      var sub="Unlimited on-chain checks across Solana and EVM -- from $3.99/week. Cancel anytime.";
-      return'<div class="post-result-upgrade"><div class="post-result-upgrade-headline">'+headline+'</div><div class="post-result-upgrade-sub">'+sub+'</div><button class="post-result-upgrade-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade(\'yearly\')">&#x1F513; Unlock Unlimited Checks</button><div class="post-result-upgrade-trust"><span>&#x1F512; Stripe secured</span><span>&#x2713; Cancel anytime</span><span>From $3.99/week</span></div></div>';
+      var sub="Unlimited on-chain checks across Solana and EVM — from $3.99/week. Cancel anytime.";
+      return'<div class="post-result-upgrade"><div class="post-result-upgrade-headline">'+headline+'</div><div class="post-result-upgrade-sub">'+sub+'</div><button class="post-result-upgrade-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade(\'yearly\')">🔓 Unlock Unlimited Checks</button><div class="post-result-upgrade-trust"><span>🔒 Stripe secured</span><span>✓ Cancel anytime</span><span>From $3.99/week</span></div></div>';
     }())
     :"";
-  var swapCta='<div style="margin-top:10px;padding:14px;border-radius:15px;background:rgba(0,200,180,.08);border:1px solid rgba(0,200,180,.20);text-align:center;"><div style="font-size:13px;font-weight:900;color:#0a2a24;margin-bottom:6px;">Check done? Swap at best price.</div><button style="padding:10px 18px;border-radius:999px;background:linear-gradient(135deg,#00a892,#008878);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;" onclick="scrollToSwap()">&#x26A1; Open Swap &rarr;</button></div>';
-  return'<div class="result-card '+p.riskClass+'"><div class="result-top"><div class="risk '+p.riskClass+'">'+iconForRisk(p.riskClass)+' Risk: '+escapeHtml(p.riskLabel)+'</div><div class="result-chip">'+chipByRisk(p.riskClass)+'</div></div><div class="result-summary">'+escapeHtml(p.summary)+'</div><div class="section"><div class="section-title">Detected Signals</div><ul class="signal-list">'+p.signals.map(function(s){return'<li class="signal-item"><span class="signal-icon">'+si+'</span><span>'+escapeHtml(s)+'</span></li>';}).join("")+'</ul></div><div class="section"><div class="section-title">Recommended Actions</div><div class="action-box">'+escapeHtml(p.actions[0])+'</div>'+(p.actions.length>1?'<ul class="signal-list" style="margin-top:9px">'+p.actions.slice(1).map(function(a){return'<li class="signal-item"><span class="signal-icon">&rarr;</span><span>'+escapeHtml(a)+'</span></li>';}).join("")+'</ul>':"")+'</div><div class="result-payline">'+escapeHtml(p.payline)+'</div><div class="result-actions"><button class="check" onclick="scrollToTopCheck()">&#x1F501; Check another token</button>'+upgradeCard+swapCta+'<div class="share-wrap"><div class="share-alert">Share this risk check</div><div class="share-copy">Know someone considering this token? Share the check before they buy in.</div><div class="share-grid"><button type="button" class="share-btn primary" onclick="shareNative()">&#x1F4E4; Share</button><button type="button" class="share-btn dark" onclick="shareX()">&#x1D54F; Post to X</button><button type="button" class="share-btn light" onclick="copyLink()">&#x1F517; Copy Link</button></div><div class="share-status" id="shareStatus" aria-live="polite"></div></div></div></div>';
+  var swapCta='<div style="margin-top:10px;padding:14px;border-radius:15px;background:rgba(0,200,180,.08);border:1px solid rgba(0,200,180,.20);text-align:center;"><div style="font-size:13px;font-weight:900;color:#0a2a24;margin-bottom:6px;">Check done? Swap at best price.</div><button style="padding:10px 18px;border-radius:999px;background:linear-gradient(135deg,#00a892,#008878);color:#fff;font-weight:900;font-size:13px;border:none;cursor:pointer;" onclick="scrollToSwap()">⚡ Open Swap →</button></div>';
+  return'<div class="result-card '+p.riskClass+'"><div class="result-top"><div class="risk '+p.riskClass+'">'+iconForRisk(p.riskClass)+' Risk: '+escapeHtml(p.riskLabel)+'</div><div class="result-chip">'+chipByRisk(p.riskClass)+'</div></div><div class="result-summary">'+escapeHtml(p.summary)+'</div><div class="section"><div class="section-title">Detected Signals</div><ul class="signal-list">'+p.signals.map(function(s){return'<li class="signal-item"><span class="signal-icon">'+si+'</span><span>'+escapeHtml(s)+'</span></li>';}).join("")+'</ul></div><div class="section"><div class="section-title">Recommended Actions</div><div class="action-box">'+escapeHtml(p.actions[0])+'</div>'+(p.actions.length>1?'<ul class="signal-list" style="margin-top:9px">'+p.actions.slice(1).map(function(a){return'<li class="signal-item"><span class="signal-icon">→</span><span>'+escapeHtml(a)+'</span></li>';}).join("")+'</ul>':"")+'</div><div class="result-payline">'+escapeHtml(p.payline)+'</div><div class="result-actions"><button class="check" onclick="scrollToTopCheck()">🔁 Check another token</button>'+upgradeCard+swapCta+'<div class="share-wrap"><div class="share-alert">Share this risk check</div><div class="share-copy">Know someone considering this token? Share the check before they buy in.</div><div class="share-grid"><button type="button" class="share-btn primary" onclick="shareNative()">📤 Share</button><button type="button" class="share-btn dark" onclick="shareX()">𝕏 Post to X</button><button type="button" class="share-btn light" onclick="copyLink()">🔗 Copy Link</button></div><div class="share-status" id="shareStatus" aria-live="polite"></div></div></div></div>';
 }
 
 async function check(){
@@ -1330,22 +1212,22 @@ async function check(){
   var subscribed=isBrowserSubscribed();
   var result=document.getElementById("result");
   if(!text){
-    result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">&#x26AA; Enter a Contract Address</div><div class="result-chip">Awaiting Input</div></div><div class="result-summary">Enter the token contract address above to get an on-chain risk assessment.</div></div>';
+    result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Enter a Contract Address</div><div class="result-chip">Awaiting Input</div></div><div class="result-summary">Enter the token contract address above to get an on-chain risk assessment.</div></div>';
     result.style.display="block";return;
   }
   result.style.display="block";
-  result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">&#x26AA; Analyzing...</div><div class="result-chip">On-chain check in progress</div></div><div class="result-summary">Checking contract structure, liquidity depth, holder distribution, and on-chain signals.</div></div>';
+  result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Analyzing...</div><div class="result-chip">On-chain check in progress</div></div><div class="result-summary">Checking contract structure, liquidity depth, holder distribution, and on-chain signals.</div></div>';
   try{
     var response=await fetch(API+ANALYZE_PATH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,email:email,subscribed:subscribed})});
     var data=await response.json();
     if(data&&data.limit){
-      result.innerHTML='<div class="result-card medium"><div class="result-top"><div class="risk medium">&#x1F7E0; Free Check Used</div><div class="result-chip">Upgrade for Unlimited</div></div><div class="result-summary">Unlock unlimited token checks to verify every contract before you buy in.</div></div>';
+      result.innerHTML='<div class="result-card medium"><div class="result-top"><div class="risk medium">🟠 Free Check Used</div><div class="result-chip">Upgrade for Unlimited</div></div><div class="result-summary">Unlock unlimited token checks to verify every contract before you buy in.</div></div>';
       if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");
       return;
     }
     result.innerHTML=formatTokenResult(data||{});
   }catch(e){
-    result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">&#x26AA; Try Again</div><div class="result-chip">Connection Error</div></div><div class="result-summary">Could not complete the check right now. Please try again in a moment.</div></div>';
+    result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">⚪ Try Again</div><div class="result-chip">Connection Error</div></div><div class="result-summary">Could not complete the check right now. Please try again in a moment.</div></div>';
   }
 }
 
@@ -1361,7 +1243,23 @@ async function checkout(priceId){
   }catch(e){alert("Checkout failed. Please try again.");}
 }
 
-/* === INIT === */
+/* ─── INIT ─── */
+function cleanUnresolvedPlaceholders() {
+  document.querySelectorAll('[id],[class]').forEach(function(el) {
+    if (el.children.length === 0 && /\{\{[A-Z0-9_]+\}\}/.test(el.textContent)) {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+  });
+  ['hubLinkWrap','seoContent','contentBridge'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && /\{\{[A-Z0-9_]+\}\}/.test(el.innerHTML)) {
+      el.innerHTML = '';
+      el.style.display = 'none';
+    }
+  });
+}
+
 window.addEventListener("load",function(){
   var params=new URLSearchParams(window.location.search);
   if(params.get("subscribed")==="true"){
@@ -1374,6 +1272,7 @@ window.addEventListener("load",function(){
   setKeywordHeadings();
   renderSocialProof();
   renderThreatBanner();
+  renderFaq();
   renderRecognitionChips();
   cleanSeoContent();
   cleanRelatedLinks();
@@ -1381,6 +1280,7 @@ window.addEventListener("load",function(){
   cleanHubLink();
   initSwapFrame();
   initStickyCta();
+  cleanUnresolvedPlaceholders();
 });
 </script>
 
@@ -1417,16 +1317,16 @@ function makePlanButton(label,sublabel,key){
   btn.style.cssText="padding:12px 10px;border-radius:13px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:#d0e4f8;cursor:pointer;text-align:left;min-height:68px;transition:transform .15s,border-color .15s;";
   var top=document.createElement("div");top.style.cssText="font-size:13px;font-weight:900;line-height:1.2;color:#fff;";
   var bot=document.createElement("div");bot.style.cssText="font-size:11px;color:#7a9abf;margin-top:4px;line-height:1.3;";
-  if(key==="yearly"){top.innerHTML='Best Value -- Yearly <span style="font-size:9px;background:linear-gradient(135deg,#00ecd0,#0fd98a);color:#04070f;border-radius:999px;padding:2px 6px;font-weight:900;vertical-align:middle;">Save 80%</span>';bot.textContent="$39.99/yr -- under $4/mo";}
+  if(key==="yearly"){top.innerHTML='Best Value — Yearly <span style="font-size:9px;background:linear-gradient(135deg,#00ecd0,#0fd98a);color:#04070f;border-radius:999px;padding:2px 6px;font-weight:900;vertical-align:middle;">Save 80%</span>';bot.textContent="$39.99/yr — under $4/mo";}
   else if(key==="monthly"){top.innerHTML='Monthly <span style="font-size:9px;background:rgba(168,127,255,.28);color:#d4b8ff;border-radius:999px;padding:2px 6px;font-weight:900;border:1px solid rgba(168,127,255,.36);vertical-align:middle;">Popular</span>';bot.textContent="$11.99/month";}
-  else{top.textContent="Try This Week";bot.textContent="$3.99 -- cancel anytime";}
+  else{top.textContent="Try This Week";bot.textContent="$3.99 — cancel anytime";}
   btn.appendChild(top);btn.appendChild(bot);
   btn.addEventListener("mouseenter",function(){if(btn.dataset.active!=="true")btn.style.transform="translateY(-1px)";});
   btn.addEventListener("mouseleave",function(){btn.style.transform="translateY(0)";});
   return btn;
 }
 function setActivePlan(key){[weeklyBtn,monthlyBtn,yearlyBtn].forEach(function(btn){if(!btn)return;var a=btn.dataset.planKey===key;btn.dataset.active=a?"true":"false";btn.style.background=a?"linear-gradient(135deg,rgba(0,236,208,.14) 0%,rgba(168,127,255,.10) 100%)":"rgba(255,255,255,.04)";btn.style.borderColor=a?"rgba(0,236,208,.46)":"rgba(255,255,255,.10)";btn.style.transform="translateY(0)";});}
-function updateCompactSummary(key){var b={weekly:weeklyBtn,monthly:monthlyBtn,yearly:yearlyBtn}[key]||yearlyBtn;if(!b||!compactText)return;compactText.innerHTML='<div style="font-size:11px;color:#7a9abf;font-weight:700;">Selected plan</div><div style="margin-top:2px;color:#e0f0ff;font-weight:800;">'+b.dataset.planLabel+' &middot; '+b.dataset.planSubLabel+'</div>';}
+function updateCompactSummary(key){var b={weekly:weeklyBtn,monthly:monthlyBtn,yearly:yearlyBtn}[key]||yearlyBtn;if(!b||!compactText)return;compactText.innerHTML='<div style="font-size:11px;color:#7a9abf;font-weight:700;">Selected plan</div><div style="margin-top:2px;color:#e0f0ff;font-weight:800;">'+b.dataset.planLabel+' · '+b.dataset.planSubLabel+'</div>';}
 function showPlanSelector(){if(!compactRow||!planRow||!helper)return;compactRow.style.display="none";planRow.style.display="grid";helper.style.display="block";}
 function showCompactSelector(){if(!compactRow||!planRow||!helper)return;compactRow.style.display="flex";planRow.style.display="none";helper.style.display="none";}
 async function destroyCheckout(){if(checkoutInstance&&typeof checkoutInstance.destroy==="function"){try{await checkoutInstance.destroy();}catch(e){}}checkoutInstance=null;if(checkoutContainer){checkoutContainer.innerHTML="";checkoutContainer.style.display="none";checkoutContainer.style.minHeight="0";}}
@@ -1473,7 +1373,7 @@ function handleReturnState(){
   syncPostPurchase();
   if(p.get("subscribed")==="true"){try{window.history.replaceState({},document.title,window.location.pathname);}catch(e){}}
 }
-function patchLegacyButtons(){Array.from(document.querySelectorAll('.upgrade-top,.post-result-upgrade-btn')).forEach(function(btn){var t=(btn.textContent||"").toLowerCase();if(t.includes("unlock")||t.includes("upgrade")){btn.removeAttribute("onclick");btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppress()){return false;}hideLegacyUpgrade();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}});}
+function patchLegacyButtons(){Array.from(document.querySelectorAll('.upgrade-top,.post-result-upgrade-btn')).forEach(function(btn){var t=(btn.textContent||\"\").toLowerCase();if(t.includes("unlock")||t.includes("upgrade")){btn.removeAttribute("onclick");btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppress()){return false;}hideLegacyUpgrade();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}});}
 function patchSubscriberField(){var i=getEmailInput();if(!i||i.__VX_PATCHED__)return;i.__VX_PATCHED__=true;i.addEventListener("input",function(){syncPostPurchase();hideLegacyUpgrade();});}
 function buildEmbeddedUI(){
   if(document.getElementById("verixia-upgrade-wrapper"))return;
@@ -1484,13 +1384,13 @@ function buildEmbeddedUI(){
   var title=document.createElement("div");title.textContent="Unlimited token risk checks";title.style.cssText="font-size:19px;font-weight:900;margin-bottom:4px;color:#fff;";
   var sub=document.createElement("div");sub.textContent="Verify every token before you buy in. Cancel anytime.";sub.style.cssText="font-size:13px;color:#6a8aae;margin-bottom:10px;";
   var trustRow=document.createElement("div");trustRow.style.cssText="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:11px;padding:8px 10px;border-radius:10px;background:rgba(0,236,208,.04);border:1px solid rgba(0,236,208,.07);";
-  ["\uD83D\uDD12 SSL Secured","\u26A1 Stripe","\u2713 Cancel anytime","\u2713 No hidden fees"].forEach(function(t){var s=document.createElement("span");s.textContent=t;s.style.cssText="font-size:11px;font-weight:800;color:rgba(0,236,208,.36);";trustRow.appendChild(s);});
+  ["🔒 SSL Secured","⚡ Stripe","✓ Cancel anytime","✓ No hidden fees"].forEach(function(t){var s=document.createElement("span");s.textContent=t;s.style.cssText="font-size:11px;font-weight:800;color:rgba(0,236,208,.36);";trustRow.appendChild(s);});
   compactRow=document.createElement("div");compactRow.style.cssText="display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:8px 10px;border-radius:12px;background:rgba(0,236,208,.06);border:1px solid rgba(0,236,208,.13);";
   compactText=document.createElement("div");compactText.style.cssText="font-size:12px;line-height:1.35;";
   changePlanBtn=document.createElement("button");changePlanBtn.type="button";changePlanBtn.textContent="Change";changePlanBtn.style.cssText="padding:6px 10px;border-radius:999px;border:1px solid rgba(0,236,208,.20);background:rgba(0,236,208,.08);color:#00ecd0;font-weight:800;cursor:pointer;font-size:12px;flex:0 0 auto;";
   compactRow.appendChild(compactText);compactRow.appendChild(changePlanBtn);
   planRow=document.createElement("div");planRow.style.cssText="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;";
-  yearlyBtn=makePlanButton("Best Value -- Yearly","$39.99/yr","yearly");
+  yearlyBtn=makePlanButton("Best Value — Yearly","$39.99/yr","yearly");
   monthlyBtn=makePlanButton("Monthly","$11.99/mo","monthly");
   weeklyBtn=makePlanButton("Try This Week","$3.99/wk","weekly");
   planRow.appendChild(yearlyBtn);planRow.appendChild(monthlyBtn);planRow.appendChild(weeklyBtn);
