@@ -2,6 +2,7 @@ import os
 import re
 import sys
 from html import escape
+from datetime import datetime, timezone
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
@@ -38,6 +39,10 @@ REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{MORE_LINKS}}",
     "{{HUB_LINK}}",
     "{{CANONICAL_URL}}",
+    "{{MODIFIED_DATE}}",
+    "{{BREADCRUMB_NAME}}",
+    "{{STATIC_H1}}",
+    "{{STATIC_INTRO}}",
 }
 
 TOKEN_CLUSTER_TERMS = {
@@ -270,6 +275,50 @@ def is_question_style_keyword(keyword):
     return kw.startswith(("is ", "can ", "should ", "what ", "why ", "when ", "where "))
 
 
+def build_static_h1(keyword):
+    """Mirror of JS buildHeroTitle() — pre-rendered for Google crawl."""
+    raw = normalize_keyword(keyword)
+    if not raw:
+        return "Is This Token Safe? Solana Token Risk Checker"
+    clean = display_keyword(keyword)
+    readable = title_case(clean) if clean else title_case(raw)
+    lower = raw.lower()
+    if "honeypot" in lower:
+        return f"Honeypot Token Check \u2014 {readable}"
+    if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
+        return f"Rug Pull Token Check \u2014 {readable}"
+    if "scam" in lower or "fake" in lower:
+        return f"Scam Token Check \u2014 Is {readable} Legitimate?"
+    if "safe" in lower or "legit" in lower or "real" in lower or "risk" in lower:
+        return f"Token Risk Check \u2014 Is {readable} Safe?"
+    if readable and len(readable) > 2:
+        return f"Is {readable} Safe? Token Risk Check"
+    return f"{readable} \u2014 Token Risk Check"
+
+
+def build_static_intro(keyword):
+    """Mirror of JS buildHeroSubheading() — pre-rendered for Google crawl."""
+    lower = normalize_keyword(keyword).lower()
+    if "honeypot" in lower:
+        return (
+            "Check whether this token blocks selling at the contract level. "
+            "Honeypot tokens look identical to legitimate tokens on price charts until you try to exit."
+        )
+    if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
+        return (
+            "Review the liquidity lock status, holder concentration, and contract permissions "
+            "before committing to a position."
+        )
+    if "scam" in lower or "fake" in lower:
+        return (
+            "Verify the contract structure, on-chain trading history, and developer wallet activity "
+            "before buying in."
+        )
+    return (
+        "Paste any contract address for an instant on-chain risk assessment \u2014 "
+        "honeypot detection, liquidity analysis, holder concentration, and contract permissions."
+    )
+
 def ensure_file(filepath):
     folder = os.path.dirname(filepath)
     if folder:
@@ -427,7 +476,6 @@ def render_page_html(template_html, replacements):
         raise ValueError("Unresolved template placeholders remain: " + ", ".join(unresolved))
 
     return html
-
 
 # -----------------------------
 # AI GENERATION
@@ -631,7 +679,6 @@ def build_aligned_generated_records(existing_pages_list, extra_pages=None):
 
     return [records_by_slug[slug] for slug in sorted(records_by_slug.keys())]
 
-
 # -----------------------------
 # SETUP & GENERATION LOOP
 # -----------------------------
@@ -739,14 +786,18 @@ for page in queue_pages:
     html = render_page_html(
         template,
         {
-            "{{TITLE}}": escape_html(title),
-            "{{DESCRIPTION}}": escape_html(description),
-            "{{KEYWORD}}": escape_html(keyword_display),
-            "{{AI_CONTENT}}": ai_text,
-            "{{RELATED_LINKS}}": build_links_html(related_pages),
-            "{{MORE_LINKS}}": build_links_html(more_pages),
-            "{{HUB_LINK}}": hub_link_html,
-            "{{CANONICAL_URL}}": escape_html(canonical),
+            "{{TITLE}}":          escape_html(title),
+            "{{DESCRIPTION}}":    escape_html(description),
+            "{{KEYWORD}}":        escape_html(keyword_display),
+            "{{AI_CONTENT}}":     ai_text,
+            "{{RELATED_LINKS}}":  build_links_html(related_pages),
+            "{{MORE_LINKS}}":     build_links_html(more_pages),
+            "{{HUB_LINK}}":       hub_link_html,
+            "{{CANONICAL_URL}}":  escape_html(canonical),
+            "{{MODIFIED_DATE}}":  datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "{{BREADCRUMB_NAME}}": escape_html(title_case(keyword_display) or readable_keyword(keyword)),
+            "{{STATIC_H1}}":      escape_html(build_static_h1(keyword)),
+            "{{STATIC_INTRO}}":   escape_html(build_static_intro(keyword)),
         },
     )
 
@@ -783,3 +834,4 @@ print(
     f"Failed {failed_count} keywords."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
+
