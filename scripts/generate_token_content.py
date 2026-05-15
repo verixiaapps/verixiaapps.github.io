@@ -419,3 +419,4 @@ def generate_token_content(keyword: str) -> str:
 if __name__ == "__main__":
     keyword = sys.argv[1] if len(sys.argv) > 1 else "should i buy this solana token"
     print(generate_token_content(keyword))
+ 
