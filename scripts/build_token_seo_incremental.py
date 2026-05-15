@@ -17,19 +17,18 @@ from generate_token_content import generate_token_content
 # CONFIG
 # -------------------------
 
-KEYWORD_FILE             = os.path.join(BASE_DIR, "data", "token_keywords.txt")
-GENERATED_SLUGS_FILE     = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
-GENERATED_KEYWORDS_FILE  = os.path.join(BASE_DIR, "data", "token_generated_keywords.txt")
-TEMPLATE_FILE            = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
-OUTPUT_DIR               = os.path.join(BASE_DIR, "token-risk")
-SITE                     = "https://verixiaapps.com"
+KEYWORD_FILE = os.path.join(BASE_DIR, "data", "token_keywords.txt")
+GENERATED_SLUGS_FILE = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
+GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "token_generated_keywords.txt")
+TEMPLATE_FILE = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
+OUTPUT_DIR = os.path.join(BASE_DIR, "token-risk")
+SITE = "https://verixiaapps.com"
 
 RELATED_LINKS_COUNT = 6
-MORE_LINKS_COUNT    = 10
-DAILY_LIMIT         = int(os.getenv("DAILY_LIMIT", "100"))
+MORE_LINKS_COUNT = 10
+DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
 
-# Protect both the section root concept slug and the dedicated hub slug.
-PROTECTED_SLUGS  = {"token-risk", "token-risk-hub"}
+PROTECTED_SLUGS = {"token-risk", "token-risk-hub"}
 FALLBACK_HUB_SLUG = "token-risk-hub"
 
 REQUIRED_TEMPLATE_PLACEHOLDERS = {
@@ -110,58 +109,58 @@ SMALL_WORDS = {
 }
 
 HUB_TITLE_OVERRIDES = {
-    "meme-token-risk":     "Meme Token Risk Hub",
-    "solana-token-risk":   "Solana Token Risk Hub",
-    "ethereum-token-risk": "Ethereum Token Risk Hub",
-    "base-token-risk":     "Base Token Risk Hub",
-    "bsc-token-risk":      "BSC Token Risk Hub",
-    "arbitrum-token-risk": "Arbitrum Token Risk Hub",
-    "token-metrics-risk":  "Token Metrics Risk Hub",
-    "buy-intent-risk":     "Buy Intent Risk Hub",
-    "token-safety-check":  "Token Safety Check Hub",
-    "token-risk-hub":      "Token Risk Hub",
+    "meme-token-risk":    "Meme Token Risk Hub",
+    "solana-token-risk":  "Solana Token Risk Hub",
+    "ethereum-token-risk":"Ethereum Token Risk Hub",
+    "base-token-risk":    "Base Token Risk Hub",
+    "bsc-token-risk":     "BSC Token Risk Hub",
+    "arbitrum-token-risk":"Arbitrum Token Risk Hub",
+    "token-metrics-risk": "Token Metrics Risk Hub",
+    "buy-intent-risk":    "Buy Intent Risk Hub",
+    "token-safety-check": "Token Safety Check Hub",
+    "token-risk-hub":     "Token Risk Hub",
 }
 
 # Ordered from most specific to most general.
 HUB_MATCH_RULES = [
-    ("meme coin",       "meme-token-risk"),
-    ("memecoin",        "meme-token-risk"),
-    ("meme token",      "meme-token-risk"),
-    ("shitcoin",        "meme-token-risk"),
-    ("microcap",        "meme-token-risk"),
-    ("moonshot",        "meme-token-risk"),
-    ("degen",           "meme-token-risk"),
-    ("pump",            "meme-token-risk"),
-    ("moon",            "meme-token-risk"),
-    ("should i buy",    "buy-intent-risk"),
-    ("worth buying",    "buy-intent-risk"),
-    ("good investment", "buy-intent-risk"),
-    ("safe to buy",     "buy-intent-risk"),
-    ("buy now",         "buy-intent-risk"),
-    ("entry",           "buy-intent-risk"),
-    ("buy",             "buy-intent-risk"),
-    ("liquidity",       "token-metrics-risk"),
-    ("volume",          "token-metrics-risk"),
-    ("pair age",        "token-metrics-risk"),
-    ("pool depth",      "token-metrics-risk"),
-    ("slippage",        "token-metrics-risk"),
-    ("fdv",             "token-metrics-risk"),
-    ("market cap",      "token-metrics-risk"),
-    ("buyers",          "token-metrics-risk"),
-    ("sellers",         "token-metrics-risk"),
-    ("solana",          "solana-token-risk"),
-    ("ethereum",        "ethereum-token-risk"),
-    ("eth",             "ethereum-token-risk"),
-    ("base",            "base-token-risk"),
-    ("bsc",             "bsc-token-risk"),
-    ("arbitrum",        "arbitrum-token-risk"),
-    ("safe",            "token-safety-check"),
-    ("legit",           "token-safety-check"),
-    ("risky",           "token-safety-check"),
-    ("rug pull",        "token-safety-check"),
-    ("rug",             "token-safety-check"),
-    ("honeypot",        "token-safety-check"),
-    ("token risk",      "token-risk-hub"),
+    ("meme coin",      "meme-token-risk"),
+    ("memecoin",       "meme-token-risk"),
+    ("meme token",     "meme-token-risk"),
+    ("shitcoin",       "meme-token-risk"),
+    ("microcap",       "meme-token-risk"),
+    ("moonshot",       "meme-token-risk"),
+    ("degen",          "meme-token-risk"),
+    ("pump",           "meme-token-risk"),
+    ("moon",           "meme-token-risk"),
+    ("should i buy",   "buy-intent-risk"),
+    ("worth buying",   "buy-intent-risk"),
+    ("good investment","buy-intent-risk"),
+    ("safe to buy",    "buy-intent-risk"),
+    ("buy now",        "buy-intent-risk"),
+    ("entry",          "buy-intent-risk"),
+    ("buy",            "buy-intent-risk"),
+    ("liquidity",      "token-metrics-risk"),
+    ("volume",         "token-metrics-risk"),
+    ("pair age",       "token-metrics-risk"),
+    ("pool depth",     "token-metrics-risk"),
+    ("slippage",       "token-metrics-risk"),
+    ("fdv",            "token-metrics-risk"),
+    ("market cap",     "token-metrics-risk"),
+    ("buyers",         "token-metrics-risk"),
+    ("sellers",        "token-metrics-risk"),
+    ("solana",         "solana-token-risk"),
+    ("ethereum",       "ethereum-token-risk"),
+    ("eth",            "ethereum-token-risk"),
+    ("base",           "base-token-risk"),
+    ("bsc",            "bsc-token-risk"),
+    ("arbitrum",       "arbitrum-token-risk"),
+    ("safe",           "token-safety-check"),
+    ("legit",          "token-safety-check"),
+    ("risky",          "token-safety-check"),
+    ("rug pull",       "token-safety-check"),
+    ("rug",            "token-safety-check"),
+    ("honeypot",       "token-safety-check"),
+    ("token risk",     "token-risk-hub"),
 ]
 
 # -------------------------
@@ -180,30 +179,28 @@ def slugify(text):
 
 def contains_term_phrase(haystack, needle):
     haystack_norm = normalize_keyword(haystack)
-    needle_norm   = normalize_keyword(needle)
-
+    needle_norm = normalize_keyword(needle)
     if not haystack_norm or not needle_norm:
         return False
-
     pattern = r"(^|[^a-z0-9])" + re.escape(needle_norm) + r"([^a-z0-9]|$)"
     return re.search(pattern, haystack_norm, flags=re.IGNORECASE) is not None
 
 
 def clean_base_keyword(text):
     kw = normalize_keyword(text)
-
-    kw = re.sub(r"^\s*is\s+this\s+",    "", kw)
-    kw = re.sub(r"^\s*is\s+",           "", kw)
+    kw = re.sub(r"^\s*is\s+this\s+", "", kw)
+    kw = re.sub(r"^\s*is\s+", "", kw)
     kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
     kw = re.sub(r"^\s*should\s+i\s+buy\s+", "", kw)
-    kw = re.sub(r"^\s*check\s+",        "", kw)
-
-    kw = re.sub(r"\s+safe$",  "", kw)
+    kw = re.sub(r"^\s*check\s+", "", kw)
+    kw = re.sub(r"\s+safe\s+to\s+buy\b", "", kw)
+    kw = re.sub(r"\s+to\s+buy\b", "", kw)
+    kw = re.sub(r"\s+to\s+trade\b", "", kw)
+    kw = re.sub(r"\s+safe$", "", kw)
     kw = re.sub(r"\s+legit$", "", kw)
     kw = re.sub(r"\s+risky$", "", kw)
-    kw = re.sub(r"\s+real$",  "", kw)
-    kw = re.sub(r"\s+scam$",  "", kw)
-
+    kw = re.sub(r"\s+real$", "", kw)
+    kw = re.sub(r"\s+scam$", "", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
     return kw
 
@@ -223,16 +220,13 @@ def apply_brand_case(text):
 def title_case(text):
     if not text:
         return ""
-
-    words  = normalize_keyword(text).split()
+    words = normalize_keyword(text).split()
     titled = []
-
     for i, word in enumerate(words):
         if i > 0 and word in SMALL_WORDS:
             titled.append(word)
         else:
             titled.append(word.capitalize())
-
     return apply_brand_case(" ".join(titled))
 
 
@@ -286,20 +280,20 @@ def build_static_h1(keyword):
     raw = normalize_keyword(keyword)
     if not raw:
         return "Is This Token Safe? Solana Token Risk Checker"
-    clean    = display_keyword(keyword)
+    clean = display_keyword(keyword)
     readable = title_case(clean) if clean else title_case(raw)
-    lower    = raw.lower()
+    lower = raw.lower()
     if "honeypot" in lower:
-        return f"Honeypot Token Check \u2014 {readable}"
+        return f"Honeypot Token Check -- {readable}"
     if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
-        return f"Rug Pull Token Check \u2014 {readable}"
+        return f"Rug Pull Token Check -- {readable}"
     if "scam" in lower or "fake" in lower:
-        return f"Scam Token Check \u2014 Is {readable} Legitimate?"
+        return f"Scam Token Check -- Is {readable} Legitimate?"
     if "safe" in lower or "legit" in lower or "real" in lower or "risk" in lower:
-        return f"Token Risk Check \u2014 Is {readable} Safe?"
+        return f"Token Risk Check -- Is {readable} Safe?"
     if readable and len(readable) > 2:
         return f"Is {readable} Safe? Token Risk Check"
-    return f"{readable} \u2014 Token Risk Check"
+    return f"{readable} -- Token Risk Check"
 
 
 def build_static_intro(keyword):
@@ -321,7 +315,7 @@ def build_static_intro(keyword):
             "before buying in."
         )
     return (
-        "Paste any contract address for an instant on-chain risk assessment \u2014 "
+        "Paste any contract address for an instant on-chain risk assessment -- "
         "honeypot detection, liquidity analysis, holder concentration, and contract permissions."
     )
 
@@ -365,7 +359,7 @@ def load_generated_records():
         return []
 
     records = []
-    seen    = set()
+    seen = set()
 
     for slug, keyword in zip(slugs, keywords):
         if not slug or not keyword or slug in PROTECTED_SLUGS:
@@ -380,12 +374,10 @@ def load_generated_records():
 
 def write_lines(filepath, values, preserve_input=True):
     ensure_file(filepath)
-
     if preserve_input:
-        lines = [str(v).strip()  for v in values if str(v).strip()]
+        lines = [str(v).strip() for v in values if str(v).strip()]
     else:
         lines = [str(v).rstrip() for v in values if str(v).strip()]
-
     with open(filepath, "w", encoding="utf-8") as f:
         if lines:
             f.write("\n".join(lines) + "\n")
@@ -413,11 +405,9 @@ def validate_template_placeholders(template_html):
 
 def find_best_hub_slug(keyword):
     keyword_norm = normalize_keyword(keyword)
-
     for term, slug in HUB_MATCH_RULES:
         if contains_term_phrase(keyword_norm, term):
             return slug
-
     return FALLBACK_HUB_SLUG
 
 
@@ -425,7 +415,6 @@ def build_hub_link_html(keyword):
     hub_slug = find_best_hub_slug(keyword)
     if not hub_slug:
         return ""
-
     hub_title = HUB_TITLE_OVERRIDES.get(hub_slug, f"{humanize_slug(hub_slug)} Hub")
     return f'<a href="/token-risk/{hub_slug}/">{escape_html(hub_title)}</a>'
 
@@ -434,45 +423,35 @@ def sanitize_ai_html(text):
     raw = str(text or "").strip()
     if not raw:
         return ""
-
-    raw = re.sub(r"^```(?:html)?\s*", "",  raw, flags=re.IGNORECASE)
-    raw = re.sub(r"\s*```$",          "",  raw)
+    raw = re.sub(r"^```(?:html)?\s*", "", raw, flags=re.IGNORECASE)
+    raw = re.sub(r"\s*```$", "", raw)
     raw = re.sub(r"<script\b[^>]*>.*?</script>", "", raw, flags=re.IGNORECASE | re.DOTALL)
-    raw = re.sub(r"<style\b[^>]*>.*?</style>",   "", raw, flags=re.IGNORECASE | re.DOTALL)
+    raw = re.sub(r"<style\b[^>]*>.*?</style>", "", raw, flags=re.IGNORECASE | re.DOTALL)
     raw = raw.strip()
-
     if "<" in raw and ">" in raw:
         return raw
-
     paragraphs = [p.strip() for p in re.split(r"\n\s*\n+", raw) if p.strip()]
     if not paragraphs:
         paragraphs = [raw]
-
     return "\n".join(f"<p>{escape_html(paragraph)}</p>" for paragraph in paragraphs)
 
 
 def discover_existing_output_pages(existing_keyword_map=None):
     existing_keyword_map = existing_keyword_map or {}
     discovered = []
-
     if not os.path.isdir(OUTPUT_DIR):
         return discovered
-
     for slug in sorted(os.listdir(OUTPUT_DIR)):
         slug = slugify(slug)
         if not slug or slug in PROTECTED_SLUGS:
             continue
-
         index_path = page_path(slug)
         if not os.path.isfile(index_path):
             continue
-
         keyword = normalize_keyword(existing_keyword_map.get(slug, slug.replace("-", " ")))
         if not keyword:
             continue
-
         discovered.append({"slug": slug, "keyword": keyword})
-
     return discovered
 
 
@@ -480,11 +459,9 @@ def render_page_html(template_html, replacements):
     html = template_html
     for placeholder, value in replacements.items():
         html = html.replace(placeholder, value)
-
     unresolved = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html)))
     if unresolved:
         raise ValueError("Unresolved template placeholders remain: " + ", ".join(unresolved))
-
     return html
 
 # -------------------------
@@ -569,11 +546,11 @@ def build_schema_faq(keyword):
 
     schema = {
         "@context": "https://schema.org",
-        "@type":    "FAQPage",
+        "@type": "FAQPage",
         "mainEntity": [
             {
                 "@type": "Question",
-                "name":  q,
+                "name": q,
                 "acceptedAnswer": {"@type": "Answer", "text": a},
             }
             for q, a in all_items
@@ -583,9 +560,8 @@ def build_schema_faq(keyword):
 
 
 def build_title(keyword):
-    raw      = normalize_keyword(keyword)
+    raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
-
     if not raw:
         return "Token Risk Checker | Liquidity, Volume, Pair Age & Risk Signals"
     if is_guidance_style_keyword(raw):
@@ -604,32 +580,28 @@ def build_title(keyword):
 
 
 def build_description(keyword):
-    raw      = normalize_keyword(keyword)
+    raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     clean_kw = display_keyword(keyword)
-
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
             f"Review token risk signals for {readable}, including liquidity, volume, pair age, "
             f"price action, and broader market-structure warning signs before you buy or swap."
         )
-
     return (
-        f"Check {readable} token risk with liquidity, volume, pair age, price action, and market-structure signals. "
-        f"Review {clean_kw} risk before you buy, swap, or connect."
+        f"Check {readable} token risk with liquidity, volume, pair age, price action, and "
+        f"market-structure signals. Review {clean_kw} risk before you buy, swap, or connect."
     )
 
 
 def build_related_anchor(keyword):
-    raw      = normalize_keyword(keyword)
+    raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
-
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         anchor = title_case(raw)
         if is_question_style_keyword(raw) and not anchor.endswith("?"):
             anchor += "?"
         return anchor
-
     return f"{readable} Token Risk"
 
 
@@ -642,28 +614,26 @@ def build_canonical(slug):
 
 def dedupe_pages_by_slug(pages_list):
     deduped = []
-    seen    = set()
-
+    seen = set()
     for page in pages_list:
-        slug    = slugify(page.get("slug", ""))
+        slug = slugify(page.get("slug", ""))
         keyword = normalize_keyword(page.get("keyword", ""))
         if not slug or not keyword or slug in seen or slug in PROTECTED_SLUGS:
             continue
         seen.add(slug)
         deduped.append({"slug": slug, "keyword": keyword})
-
     return deduped
 
 
 def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
-    exclude_slugs   = {slugify(slug) for slug in (exclude_slugs or set()) if slugify(slug)}
-    current_slug    = current_page["slug"]
+    exclude_slugs = {slugify(slug) for slug in (exclude_slugs or set()) if slugify(slug)}
+    current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
-    current_tokens  = keyword_tokens(current_keyword)
+    current_tokens = keyword_tokens(current_keyword)
     current_cluster = keyword_cluster_tokens(current_keyword)
-    current_root    = keyword_root(current_keyword)
-    current_base    = clean_base_keyword(current_keyword)
-    current_hub     = find_best_hub_slug(current_keyword)
+    current_root = keyword_root(current_keyword)
+    current_base = clean_base_keyword(current_keyword)
+    current_hub = find_best_hub_slug(current_keyword)
 
     candidates = [
         p for p in all_pages
@@ -675,17 +645,16 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     ]
 
     def score(page):
-        other_keyword  = page["keyword"]
-        other_tokens   = keyword_tokens(other_keyword)
-        other_cluster  = keyword_cluster_tokens(other_keyword)
-        other_root     = keyword_root(other_keyword)
-        other_hub      = find_best_hub_slug(other_keyword)
-        length_diff    = abs(len(other_tokens) - len(current_tokens))
-        same_root      = 1 if current_root and other_root == current_root else 0
-        same_hub       = 1 if current_hub and other_hub == current_hub else 0
+        other_keyword = page["keyword"]
+        other_tokens = keyword_tokens(other_keyword)
+        other_cluster = keyword_cluster_tokens(other_keyword)
+        other_root = keyword_root(other_keyword)
+        other_hub = find_best_hub_slug(other_keyword)
+        length_diff = abs(len(other_tokens) - len(current_tokens))
+        same_root = 1 if current_root and other_root == current_root else 0
+        same_hub = 1 if current_hub and other_hub == current_hub else 0
         shared_cluster = len(current_cluster & other_cluster)
-        shared_tokens  = len(current_tokens & other_tokens)
-
+        shared_tokens = len(current_tokens & other_tokens)
         return (
             -same_hub,
             -same_root,
@@ -695,8 +664,8 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
             other_keyword,
         )
 
-    ranked     = sorted(candidates, key=score)
-    related    = []
+    ranked = sorted(candidates, key=score)
+    related = []
     used_slugs = set()
     used_bases = set()
 
@@ -724,23 +693,20 @@ def build_links_html(pages_list):
 
 def build_aligned_generated_records(existing_pages_list, extra_pages=None):
     records_by_slug = {}
-
     for page in existing_pages_list:
-        slug    = slugify(page.get("slug", ""))
+        slug = slugify(page.get("slug", ""))
         keyword = normalize_keyword(page.get("keyword", ""))
         if not slug or not keyword or slug in PROTECTED_SLUGS:
             continue
         if page_exists(slug):
             records_by_slug[slug] = {"slug": slug, "keyword": keyword}
-
     for page in extra_pages or []:
-        slug    = slugify(page.get("slug", ""))
+        slug = slugify(page.get("slug", ""))
         keyword = normalize_keyword(page.get("keyword", ""))
         if not slug or not keyword or slug in PROTECTED_SLUGS:
             continue
         if page_exists(slug):
             records_by_slug[slug] = {"slug": slug, "keyword": keyword}
-
     return [records_by_slug[slug] for slug in sorted(records_by_slug.keys())]
 
 # -------------------------
@@ -748,20 +714,24 @@ def build_aligned_generated_records(existing_pages_list, extra_pages=None):
 # -------------------------
 
 def generate_ai_text(keyword, keyword_display):
-    raw_keyword   = normalize_keyword(keyword)
+    raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
-    readable      = readable_keyword(keyword_display)
+    readable = readable_keyword(keyword_display)
 
     attempts = [
         raw_keyword,
         clean_keyword,
         readable,
         f"{clean_keyword} token risk" if clean_keyword else "",
-        f"is {clean_keyword} safe"    if clean_keyword and not raw_keyword.startswith("is ") else "",
-        f"should i buy {clean_keyword}" if clean_keyword and not contains_term_phrase(raw_keyword, "buy") else "",
+        f"is {clean_keyword} safe" if clean_keyword and not raw_keyword.startswith("is ") else "",
+        (
+            f"should i buy {clean_keyword}"
+            if clean_keyword and not contains_term_phrase(raw_keyword, "buy")
+            else ""
+        ),
     ]
 
-    seen       = set()
+    seen = set()
     last_error = None
 
     for prompt in attempts:
@@ -769,7 +739,6 @@ def generate_ai_text(keyword, keyword_display):
         if not prompt_norm or prompt_norm in seen:
             continue
         seen.add(prompt_norm)
-
         try:
             ai_text = sanitize_ai_html(generate_token_content(prompt))
             if ai_text:
@@ -802,34 +771,32 @@ if not keywords:
     print("No keywords in queue. Nothing to generate.")
     sys.exit(0)
 
-generated_records   = load_generated_records()
+generated_records = load_generated_records()
 existing_keyword_map = {record["slug"]: record["keyword"] for record in generated_records}
 
-filesystem_pages  = discover_existing_output_pages(existing_keyword_map=existing_keyword_map)
+filesystem_pages = discover_existing_output_pages(existing_keyword_map=existing_keyword_map)
 generated_records = build_aligned_generated_records(filesystem_pages)
 
-generated_slugs    = {record["slug"]    for record in generated_records}
+generated_slugs = {record["slug"] for record in generated_records}
 generated_keywords = {record["keyword"] for record in generated_records}
 
-queue_pages             = []
-seen_queue_slugs        = set()
-duplicate_queue_count   = 0
+queue_pages = []
+seen_queue_slugs = set()
+duplicate_queue_count = 0
 
 for keyword in keywords:
     keyword_norm = normalize_keyword(keyword)
-    slug         = slugify(keyword_norm)
-
+    slug = slugify(keyword_norm)
     if slug in PROTECTED_SLUGS or not slug:
         continue
     if slug in seen_queue_slugs:
         duplicate_queue_count += 1
         continue
-
     seen_queue_slugs.add(slug)
     queue_pages.append({"keyword": keyword_norm, "slug": slug})
 
 existing_pages = dedupe_pages_by_slug(filesystem_pages)
-queue_pages    = dedupe_pages_by_slug(queue_pages)
+queue_pages = dedupe_pages_by_slug(queue_pages)
 
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
@@ -840,9 +807,9 @@ print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
-generated_count    = 0
+generated_count = 0
 skipped_existing_count = 0
-failed_count       = 0
+failed_count = 0
 processed_keywords = set()
 new_pages_this_run = []
 
@@ -850,10 +817,10 @@ for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
         break
 
-    slug            = page["slug"]
-    keyword         = page["keyword"]
+    slug = page["slug"]
+    keyword = page["keyword"]
     keyword_display = display_keyword(keyword)
-    path            = page_path(slug)
+    path = page_path(slug)
 
     if slug in PROTECTED_SLUGS:
         processed_keywords.add(keyword)
@@ -866,9 +833,9 @@ for page in queue_pages:
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    title       = build_title(keyword)
+    title = build_title(keyword)
     description = build_description(keyword)
-    canonical   = build_canonical(slug)
+    canonical = build_canonical(slug)
 
     try:
         ai_text = generate_ai_text(keyword, keyword_display)
@@ -879,7 +846,7 @@ for page in queue_pages:
 
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
-    more_pages    = get_related_pages(
+    more_pages = get_related_pages(
         page,
         existing_pages,
         MORE_LINKS_COUNT,
@@ -931,7 +898,7 @@ for keyword in keywords:
         remaining_keywords.append(keyword_norm)
 
 aligned_records = build_aligned_generated_records(existing_pages, extra_pages=new_pages_this_run)
-write_lines(GENERATED_SLUGS_FILE,    [record["slug"]    for record in aligned_records])
+write_lines(GENERATED_SLUGS_FILE, [record["slug"] for record in aligned_records])
 write_lines(GENERATED_KEYWORDS_FILE, [record["keyword"] for record in aligned_records])
 write_lines(KEYWORD_FILE, remaining_keywords)
 
