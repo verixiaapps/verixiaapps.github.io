@@ -1,974 +1,1034 @@
+import json
 import os
 import re
 import sys
-import logging
-from typing import List, Dict, Tuple, Optional
+from html import escape
+from datetime import datetime, timezone
 
-import requests
+BASE_DIR    = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
 
-# -----------------------------
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
+
+from generate_token_content import generate_token_content
+
+# -------------------------
 # CONFIG
-# -----------------------------
-TOKEN_RISK_API = os.getenv(
-    "TOKEN_RISK_API",
-    "https://awake-integrity-production-faa0.up.railway.app",
-).rstrip("/")
+# -------------------------
 
-TOKEN_RISK_ENDPOINT = os.getenv("TOKEN_RISK_ENDPOINT", "/seo-content")
-TIMEOUT = int(os.getenv("TOKEN_RISK_TIMEOUT", "180"))
+KEYWORD_FILE            = os.path.join(BASE_DIR, "data", "token_keywords.txt")
+GENERATED_SLUGS_FILE    = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
+GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "token_generated_keywords.txt")
+TEMPLATE_FILE           = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
+OUTPUT_DIR              = os.path.join(BASE_DIR, "token-risk")
+SITE                    = "https://verixiaapps.com"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
+RELATED_LINKS_COUNT = 6
+MORE_LINKS_COUNT    = 10
+DAILY_LIMIT         = int(os.getenv("DAILY_LIMIT", "100"))
 
-NON_RETRYABLE_ERROR_MARKERS = (
-    "exceeded your current quota",
-    "insufficient_quota",
-    "billing",
-    "quota",
-    "429",
-    "rate limit",
-    "rate_limit",
-    "invalid_api_key",
-    "incorrect api key",
-    "authentication",
-    "unauthorized",
-    "forbidden",
-)
+PROTECTED_SLUGS   = {"token-risk", "token-risk-hub"}
+FALLBACK_HUB_SLUG = "token-risk-hub"
 
-CONTENT_MODES = [
-    "risk-overview",
-    "buy-decision",
-    "metrics-breakdown",
-    "safety-check",
-    "scenario",
-]
-
-SECTION_TITLES = {
-    "risk-overview": "What This Token Risk Pattern Usually Looks Like",
-    "buy-decision": "How To Think About The Buy Decision",
-    "metrics-breakdown": "Which Token Metrics Usually Matter Most",
-    "safety-check": "How To Judge Whether The Setup Looks Safer Or Riskier",
-    "scenario": "How This Token Situation Usually Plays Out",
+REQUIRED_TEMPLATE_PLACEHOLDERS = {
+    "{{TITLE}}",
+    "{{DESCRIPTION}}",
+    "{{KEYWORD}}",
+    "{{AI_CONTENT}}",
+    "{{RELATED_LINKS}}",
+    "{{MORE_LINKS}}",
+    "{{HUB_LINK}}",
+    "{{CANONICAL_URL}}",
+    "{{MODIFIED_DATE}}",
+    "{{BREADCRUMB_NAME}}",
+    "{{STATIC_H1}}",
+    "{{STATIC_INTRO}}",
+    "{{OG_IMAGE}}",
+    "{{HL_DATA_BLOCK}}",
+    "{{SCHEMA_FAQ}}",
 }
 
-WARNING_SECTION_TITLES = [
-    "Common Token Risk Warning Signs",
-    "Red Flags To Watch Before Buying",
-    "Signs The Setup May Be Weak Or Risky",
-]
+TOKEN_CLUSTER_TERMS = {
+    "token", "coin", "crypto", "meme", "memecoin", "pump", "moon", "degen",
+    "microcap", "shitcoin", "moonshot", "fair", "launch", "stealth", "cto",
+    "solana", "ethereum", "eth", "base", "bsc", "arbitrum", "polygon",
+    "avalanche", "blast", "sui", "ton", "tron", "bitcoin", "liquidity",
+    "volume", "pair", "fdv", "market", "cap", "buyers", "sellers", "pool",
+    "slippage", "chart", "candles", "price", "change", "swap", "buy",
+    "entry", "exit", "rug", "honeypot", "safe", "legit", "risk",
+}
 
-ACTION_SECTION_TITLES = [
-    "What To Do Before You Buy Or Swap",
-    "How To Check The Token More Safely",
-    "Safer Next Steps",
-]
-
-ACTION_SECTION_INTROS = [
-    "The safest move is to verify the setup outside hype, chat pressure, or screenshots.",
-    "Before you buy, swap, or connect a wallet, slow down and check the token independently.",
-    "A careful token check can prevent a rushed entry into a weak or manipulated setup.",
-]
+BRAND_CASE = {
+    "binance smart chain": "Binance Smart Chain",
+    "market cap":          "Market Cap",
+    "pair age":            "Pair Age",
+    "price action":        "Price Action",
+    "price change":        "Price Change",
+    "trust wallet":        "Trust Wallet",
+    "pool depth":          "Pool Depth",
+    "token risk hub":      "Token Risk Hub",
+    "token risk":          "Token Risk",
+    "metamask":            "MetaMask",
+    "dexscreener":         "Dexscreener",
+    "pancakeswap":         "PancakeSwap",
+    "uniswap":             "Uniswap",
+    "raydium":             "Raydium",
+    "coinbase":            "Coinbase",
+    "ethereum":            "Ethereum",
+    "avalanche":           "Avalanche",
+    "arbitrum":            "Arbitrum",
+    "polygon":             "Polygon",
+    "phantom":             "Phantom",
+    "bitcoin":             "Bitcoin",
+    "solana":              "Solana",
+    "binance":             "Binance",
+    "jupiter":             "Jupiter",
+    "liquidity":           "Liquidity",
+    "volume":              "Volume",
+    "buyers":              "Buyers",
+    "sellers":             "Sellers",
+    "slippage":            "Slippage",
+    "crypto":              "Crypto",
+    "token":               "Token",
+    "market":              "Market",
+    "fdv":                 "FDV",
+    "bsc":                 "BSC",
+    "eth":                 "ETH",
+    "ton":                 "TON",
+    "trx":                 "TRX",
+    "tron":                "Tron",
+    "base":                "Base",
+    "blast":               "Blast",
+    "sui":                 "Sui",
+}
 
 SMALL_WORDS = {
     "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on",
     "or", "the", "to", "vs", "with",
 }
 
-BRAND_CASE = {
-    "binance smart chain": "Binance Smart Chain",
-    "market cap": "Market Cap",
-    "pair age": "Pair Age",
-    "price action": "Price Action",
-    "price change": "Price Change",
-    "trust wallet": "Trust Wallet",
-    "pool depth": "Pool Depth",
-    "token risk hub": "Token Risk Hub",
-    "token risk": "Token Risk",
-    "metamask": "MetaMask",
-    "dexscreener": "Dexscreener",
-    "pancakeswap": "PancakeSwap",
-    "uniswap": "Uniswap",
-    "raydium": "Raydium",
-    "coinbase": "Coinbase",
-    "ethereum": "Ethereum",
-    "avalanche": "Avalanche",
-    "arbitrum": "Arbitrum",
-    "polygon": "Polygon",
-    "phantom": "Phantom",
-    "bitcoin": "Bitcoin",
-    "solana": "Solana",
-    "binance": "Binance",
-    "jupiter": "Jupiter",
-    "liquidity": "Liquidity",
-    "volume": "Volume",
-    "buyers": "Buyers",
-    "sellers": "Sellers",
-    "slippage": "Slippage",
-    "crypto": "Crypto",
-    "token": "Token",
-    "market": "Market",
-    "fdv": "FDV",
-    "bsc": "BSC",
-    "eth": "ETH",
-    "ton": "TON",
-    "trx": "TRX",
-    "tron": "Tron",
-    "base": "Base",
-    "blast": "Blast",
-    "sui": "Sui",
-    "cto": "CTO",
+HUB_TITLE_OVERRIDES = {
+    "meme-token-risk":     "Meme Token Risk Hub",
+    "solana-token-risk":   "Solana Token Risk Hub",
+    "ethereum-token-risk": "Ethereum Token Risk Hub",
+    "base-token-risk":     "Base Token Risk Hub",
+    "bsc-token-risk":      "BSC Token Risk Hub",
+    "arbitrum-token-risk": "Arbitrum Token Risk Hub",
+    "token-metrics-risk":  "Token Metrics Risk Hub",
+    "buy-intent-risk":     "Buy Intent Risk Hub",
+    "token-safety-check":  "Token Safety Check Hub",
+    "token-risk-hub":      "Token Risk Hub",
 }
 
-CHAIN_HINTS = (
-    "solana",
-    "ethereum",
-    "eth",
-    "base",
-    "bsc",
-    "arbitrum",
-    "polygon",
-    "avalanche",
-    "blast",
-    "sui",
-    "ton",
-    "tron",
-    "bitcoin",
-)
+# Ordered from most specific to most general.
+HUB_MATCH_RULES = [
+    ("meme coin",       "meme-token-risk"),
+    ("memecoin",        "meme-token-risk"),
+    ("meme token",      "meme-token-risk"),
+    ("shitcoin",        "meme-token-risk"),
+    ("microcap",        "meme-token-risk"),
+    ("moonshot",        "meme-token-risk"),
+    ("degen",           "meme-token-risk"),
+    ("pump",            "meme-token-risk"),
+    ("moon",            "meme-token-risk"),
+    ("should i buy",    "buy-intent-risk"),
+    ("worth buying",    "buy-intent-risk"),
+    ("good investment", "buy-intent-risk"),
+    ("safe to buy",     "buy-intent-risk"),
+    ("buy now",         "buy-intent-risk"),
+    ("entry",           "buy-intent-risk"),
+    ("buy",             "buy-intent-risk"),
+    ("liquidity",       "token-metrics-risk"),
+    ("volume",          "token-metrics-risk"),
+    ("pair age",        "token-metrics-risk"),
+    ("pool depth",      "token-metrics-risk"),
+    ("slippage",        "token-metrics-risk"),
+    ("fdv",             "token-metrics-risk"),
+    ("market cap",      "token-metrics-risk"),
+    ("buyers",          "token-metrics-risk"),
+    ("sellers",         "token-metrics-risk"),
+    ("solana",          "solana-token-risk"),
+    ("ethereum",        "ethereum-token-risk"),
+    ("eth",             "ethereum-token-risk"),
+    ("base",            "base-token-risk"),
+    ("bsc",             "bsc-token-risk"),
+    ("arbitrum",        "arbitrum-token-risk"),
+    ("safe",            "token-safety-check"),
+    ("legit",           "token-safety-check"),
+    ("risky",           "token-safety-check"),
+    ("rug pull",        "token-safety-check"),
+    ("rug",             "token-safety-check"),
+    ("honeypot",        "token-safety-check"),
+    ("token risk",      "token-risk-hub"),
+]
 
-METRIC_HINTS = (
-    "liquidity",
-    "volume",
-    "pair age",
-    "pool depth",
-    "slippage",
-    "fdv",
-    "market cap",
-    "buyers",
-    "sellers",
-    "price action",
-    "price change",
-)
+# -------------------------
+# UTILITIES
+# -------------------------
 
-BUY_INTENT_HINTS = (
-    "should i buy",
-    "worth buying",
-    "good investment",
-    "safe to buy",
-    "buy now",
-    "entry",
-    "buy",
-)
-
-SAFETY_HINTS = (
-    "safe",
-    "legit",
-    "risky",
-    "rug pull",
-    "rug",
-    "honeypot",
-    "scam",
-    "sell lock",
-    "sell locked",
-)
-
-ALLOWED_INLINE_TAGS = ("strong", "em", "b", "i", "code")
-ALLOWED_BLOCK_TAGS = ("p", "ul", "ol", "li", "blockquote")
-
-RISK_WARNING_BULLETS = {
-    "metrics": [
-        [
-            "Liquidity looks thin relative to the attention or price move being advertised",
-            "Volume spikes look unstable, sudden, or disconnected from organic trading interest",
-            "Pair Age is extremely new, which leaves less history to judge behavior",
-            "Buyers, sellers, or price movement look one-sided in a way that may signal weak market structure",
-        ],
-        [
-            "The token story sounds strong, but core market metrics stay weak or shallow",
-            "Slippage, pool depth, or tradability look worse than the hype suggests",
-            "Market Cap or FDV is being used aggressively while execution risk is still high",
-            "The chart attracts attention before there is enough stable trading history",
-        ],
-        [
-            "Key token metrics are being presented selectively instead of as a full risk picture",
-            "Short-term momentum is being confused with durability or safety",
-            "A few screenshots or calls are replacing direct market checks",
-            "There is not enough clean on-chain or market context to justify confidence",
-        ],
-    ],
-    "buy-intent": [
-        [
-            "Pressure to buy quickly before the setup is independently checked",
-            "Hype around upside is much stronger than evidence around Liquidity, volume, or Pair Age",
-            "People focus on potential gains while downplaying execution and exit risk",
-            "The buy thesis depends more on excitement than on stable token structure",
-        ],
-        [
-            "Fear of missing out is being used to rush an entry",
-            "The token is framed as safe or early without enough real data behind that claim",
-            "The market structure still looks fragile even though the story sounds strong",
-            "Entry talk is happening before there is enough proof that the setup is durable",
-        ],
-        [
-            "A fast chart move is being treated as validation of safety",
-            "The setup may be easy to enter but much harder to exit cleanly",
-            "The conversation is about upside first and risk second",
-            "Independent verification is being replaced by social proof or urgency",
-        ],
-    ],
-    "safety": [
-        [
-            "Claims that the token is safe, legit, or not a rug are not backed by strong market structure",
-            "The trust narrative is stronger than the actual Liquidity, history, or trading behavior",
-            "People are using reassurance language instead of objective token checks",
-            "The setup still leaves major uncertainty around execution, exit, or sustainability",
-        ],
-        [
-            "Safety language appears before there is enough history to support it",
-            "The token may avoid obvious red flags while still carrying high structural risk",
-            "The market looks thin, young, or unstable despite confident messaging",
-            "The analysis depends on vibes, endorsements, or calls rather than direct checks",
-        ],
-        [
-            "A token can avoid being an obvious scam and still be a poor or risky buy",
-            "Low transparency, weak depth, or unstable behavior can matter even without a textbook rug pattern",
-            "The setup may look fine at first glance but still break down under pressure",
-            "The confidence level around the token may be higher than the evidence justifies",
-        ],
-    ],
-    "chain": [
-        [
-            "The chain context is being used as a trust shortcut instead of checking the token itself",
-            "A familiar ecosystem does not automatically make a specific token safer",
-            "The token is borrowing credibility from the chain, wallet, or DEX brand",
-            "Network familiarity may hide token-level execution risk",
-        ],
-        [
-            "Being on a popular chain is being confused with having strong token structure",
-            "Users may feel more comfortable because the tooling is familiar, not because the setup is safer",
-            "The platform brand is clear, but the token risk still looks unresolved",
-            "Chain identity alone is not enough to remove exit, liquidity, or durability concerns",
-        ],
-        [
-            "The ecosystem is recognizable, but token-specific risk remains the real issue",
-            "Users may overtrust the setup because the chain or DEX is familiar",
-            "A token can still be weak even if the surrounding infrastructure is strong",
-            "Chain reputation should support analysis, not replace it",
-        ],
-    ],
-    "general": [
-        [
-            "Strong hype but weak proof around Liquidity, history, or trade quality",
-            "Pressure to buy, swap, or ape in before the setup is independently checked",
-            "Safety claims that are not matched by clean token metrics",
-            "A token story that sounds stronger than the actual market structure",
-        ],
-        [
-            "A fast-moving narrative built on excitement rather than strong token fundamentals",
-            "Thin or unstable trading conditions underneath aggressive promotion",
-            "Too much confidence around a token that still has limited proof",
-            "Social pressure replacing direct checks of the chart, pool, and market behavior",
-        ],
-        [
-            "A believable setup on the surface that becomes weaker when you slow down",
-            "Not enough stable history to judge whether the move is durable",
-            "Claims of safety or quality without enough supporting evidence",
-            "A token that may be easy to enter emotionally but harder to justify analytically",
-        ],
-    ],
-}
-
-ACTION_PARAGRAPHS_BY_CONTEXT = {
-    "metrics": [
-        "If this involves {keyword}, check Liquidity, Volume, Pair Age, and the basic trade setup directly before treating the token as stronger than it is.",
-        "Before buying or swapping {keyword}, verify whether the metrics support the narrative instead of relying on screenshots, calls, or hype threads.",
-        "If {keyword} is being discussed through token metrics, focus on whether the market structure looks durable enough to support both entry and exit.",
-    ],
-    "buy-intent": [
-        "If this involves {keyword}, do not let urgency make the decision for you. Check whether the token still looks attractive after the excitement is stripped away.",
-        "Before buying {keyword}, make sure the setup still makes sense when you review Liquidity, history, and exit conditions independently.",
-        "If {keyword} is being framed as a buy opportunity, treat that as the beginning of the analysis, not the conclusion.",
-    ],
-    "safety": [
-        "If this involves {keyword}, do not treat reassurance language as proof. Check whether the token actually looks safer under direct review.",
-        "Before trusting claims around {keyword}, verify the market structure, chart behavior, and token context yourself.",
-        "If {keyword} is being described as safe or legit, test whether the evidence is strong enough to support that confidence.",
-    ],
-    "chain": [
-        "If this involves {keyword}, separate chain familiarity from token quality. A known ecosystem still requires token-level verification.",
-        "Before buying or swapping {keyword}, verify the token itself instead of assuming the chain or DEX environment makes it safe.",
-        "If {keyword} is being discussed inside a familiar ecosystem, make sure the token still passes basic risk checks on its own merits.",
-    ],
-    "general": [
-        "If this involves {keyword}, slow down before buying or swapping and check whether the token still looks strong once the noise is removed.",
-        "Before acting on anything related to {keyword}, verify the token structure directly instead of trusting chat momentum or social proof.",
-        "If {keyword} is attracting attention, treat that as a signal to investigate harder, not a reason to skip the risk check.",
-    ],
-}
-
-CONTEXT_EXAMPLES = {
-    "metrics": [
-        "a token with thin liquidity",
-        "a sudden volume spike",
-        "a very new pair",
-        "a chart that moves harder than the structure supports",
-    ],
-    "buy-intent": [
-        "a should I buy this token post",
-        "a fast entry setup",
-        "a token being pushed as early",
-        "a chart that looks tempting but still feels uncertain",
-    ],
-    "safety": [
-        "a token being called safe",
-        "a not a rug claim",
-        "a legit token thread",
-        "a reassurance-heavy token discussion",
-    ],
-    "chain": [
-        "a Solana meme token",
-        "a Base token setup",
-        "an ETH token launch",
-        "a BSC microcap being pushed as easy money",
-    ],
-    "general": [
-        "a token with fast hype",
-        "a risky-looking chart",
-        "a new launch with limited history",
-        "a token getting attention before it has much proof",
-    ],
-}
-
-MODE_INTROS = {
-    "risk-overview": [
-        "The main question is whether the token setup looks stronger than the hype around it.",
-        "The safest way to judge the token is to separate the story from the actual market structure.",
-        "Most token risk checks come down to whether the setup still looks solid after the excitement is removed.",
-    ],
-    "buy-decision": [
-        "A buy decision is usually weakest when it is rushed and strongest when it survives a slower second look.",
-        "The real question is not whether the token can move, but whether the setup justifies taking the risk.",
-        "Many weak entries happen when people confuse momentum with quality.",
-    ],
-    "metrics-breakdown": [
-        "The cleanest token checks usually begin with structure, not emotion.",
-        "Most token setups become clearer once you look at the actual metrics instead of the narrative alone.",
-        "A few core market signals often tell you more than a long thread of opinions.",
-    ],
-    "safety-check": [
-        "A token does not need to be an obvious scam to still be a weak or dangerous buy.",
-        "The safety question is usually about structure, not reassurance.",
-        "What matters most is whether the setup holds up under direct review, not whether people sound confident about it.",
-    ],
-    "scenario": [
-        "A common token risk pattern starts with excitement and only later reveals the structural weakness underneath.",
-        "Many risky token setups feel convincing early because attention arrives before proof does.",
-        "This usually becomes dangerous when the chart, chat, and urgency all start reinforcing each other at once.",
-    ],
-}
-
-WEAK_MARKERS = (
-    "lorem ipsum",
-    "as an ai",
-    "here are some paragraphs",
-    "let me know if you want",
-    "i can't help with that",
-    "i cannot help with that",
-    "i’m sorry",
-    "i am sorry",
-    "cannot assist",
-    "can't assist",
-    "content policy",
-    "policy",
-)
-
-GENERIC_PATTERNS = (
-    "this is important",
-    "it is important",
-    "it is worth noting",
-    "in many cases",
-    "in some cases",
-    "generally speaking",
-    "at the end of the day",
-    "when it comes to this",
-)
-
-# -----------------------------
-# HELPERS
-# -----------------------------
-def normalize_keyword(text: str) -> str:
+def normalize_keyword(text):
     return re.sub(r"\s+", " ", str(text).strip().lower())
 
 
-def contains_term_phrase(haystack: str, needle: str) -> bool:
-    haystack_norm = normalize_keyword(haystack)
-    needle_norm = normalize_keyword(needle)
+def slugify(text):
+    text = normalize_keyword(text)
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")
 
+
+def contains_term_phrase(haystack, needle):
+    haystack_norm = normalize_keyword(haystack)
+    needle_norm   = normalize_keyword(needle)
     if not haystack_norm or not needle_norm:
         return False
-
     pattern = r"(^|[^a-z0-9])" + re.escape(needle_norm) + r"([^a-z0-9]|$)"
     return re.search(pattern, haystack_norm, flags=re.IGNORECASE) is not None
 
 
-def clean_base_keyword(text: str) -> str:
+def clean_base_keyword(text):
     kw = normalize_keyword(text)
+    kw = re.sub(r"^\s*is\s+this\s+",      "", kw)
+    kw = re.sub(r"^\s*is\s+",             "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+","", kw)
+    kw = re.sub(r"^\s*should\s+i\s+buy\s+","", kw)
+    kw = re.sub(r"^\s*check\s+",          "", kw)
+    kw = re.sub(r"\s+safe\s+to\s+buy\b",  "", kw)
+    kw = re.sub(r"\s+to\s+buy\b",         "", kw)
+    kw = re.sub(r"\s+to\s+trade\b",       "", kw)
+    kw = re.sub(r"\s+safe$",              "", kw)
+    kw = re.sub(r"\s+legit$",             "", kw)
+    kw = re.sub(r"\s+risky$",             "", kw)
+    kw = re.sub(r"\s+real$",              "", kw)
+    kw = re.sub(r"\s+scam$",              "", kw)
+    kw = re.sub(r"\s+warning$",           "", kw)
+    kw = re.sub(r"\s+alert$",             "", kw)
+    kw = re.sub(r"\s+danger$",            "", kw)
+    return re.sub(r"\s+", " ", kw).strip()
 
-    kw = re.sub(r"^\s*is\s+this\s+", "", kw)
-    kw = re.sub(r"^\s*is\s+", "", kw)
-    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
-    kw = re.sub(r"^\s*should\s+i\s+buy\s+", "", kw)
-    kw = re.sub(r"^\s*check\s+", "", kw)
 
-    kw = re.sub(r"\s+safe$", "", kw)
-    kw = re.sub(r"\s+legit$", "", kw)
-    kw = re.sub(r"\s+risky$", "", kw)
-    kw = re.sub(r"\s+real$", "", kw)
-    kw = re.sub(r"\s+scam$", "", kw)
-
-    kw = re.sub(r"\s+", " ", kw).strip()
-    return kw
-
-
-def display_keyword(text: str) -> str:
+def display_keyword(text):
     return clean_base_keyword(text)
 
 
-def apply_brand_case(text: str) -> str:
+def apply_brand_case(text):
     result = f" {text} "
     for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
         pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
-        result = re.sub(pattern, proper, result, flags=re.IGNORECASE)
+        result  = re.sub(pattern, proper, result, flags=re.IGNORECASE)
     return re.sub(r"\s+", " ", result).strip()
 
 
-def title_case(text: str) -> str:
-    text = normalize_keyword(text)
+def title_case(text):
     if not text:
         return ""
-
-    words = text.split()
-    titled: List[str] = []
-
+    words  = normalize_keyword(text).split()
+    titled = []
     for i, word in enumerate(words):
-        titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
-
+        if i > 0 and word in SMALL_WORDS:
+            titled.append(word)
+        else:
+            titled.append(word.capitalize())
     return apply_brand_case(" ".join(titled))
 
 
-def variant_index(keyword: str, count: int) -> int:
-    return sum(ord(c) for c in normalize_keyword(keyword)) % count if count else 0
+def readable_keyword(text):
+    base = display_keyword(text)
+    return title_case(base) if base else ""
 
 
-def choose_mode(keyword: str) -> str:
-    idx = variant_index(keyword, len(CONTENT_MODES))
-    return CONTENT_MODES[idx]
+def keyword_tokens(text):
+    base = clean_base_keyword(text)
+    if not base:
+        base = normalize_keyword(text)
+    return {token for token in base.split() if token}
 
 
-def safe_json(response: requests.Response) -> Dict:
-    try:
-        return response.json()
-    except ValueError as e:
-        snippet = response.text[:200].replace("\n", " ").strip()
-        raise ValueError(f"Invalid JSON response: {snippet}") from e
+def keyword_cluster_tokens(text):
+    return {token for token in keyword_tokens(text) if token in TOKEN_CLUSTER_TERMS}
 
 
-def error_is_non_retryable(exc: Exception) -> bool:
-    message = str(exc).lower()
-    return any(marker in message for marker in NON_RETRYABLE_ERROR_MARKERS)
+def keyword_root(text):
+    cleaned = clean_base_keyword(text)
+    return cleaned.split()[0] if cleaned else ""
 
 
-def dedupe_preserve_order(items: List[str]) -> List[str]:
-    seen = set()
-    result: List[str] = []
-
-    for item in items:
-        key = normalize_keyword(item)
-        if key and key not in seen:
-            seen.add(key)
-            result.append(item)
-
-    return result
+def escape_html(text):
+    return escape(str(text), quote=True)
 
 
-def clean_text(text: str) -> str:
-    text = str(text or "")
-    text = re.sub(r"```(?:html)?\s*", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*```", "", text)
-    text = re.sub(r"<script\b[^>]*>.*?</script>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<style\b[^>]*>.*?</style>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
-    return text.strip()
-
-
-def strip_all_tags(text: str) -> str:
-    return re.sub(r"<[^>]+>", " ", text)
-
-
-def is_usable_ai_text(text: str) -> bool:
-    if not text:
-        return False
-
-    raw = str(text).strip()
-    lowered = raw.lower()
-
-    if len(raw) < 280:
-        return False
-
-    if any(marker in lowered for marker in WEAK_MARKERS):
-        return False
-
-    paragraph_like = (
-        "<p>" in lowered
-        or "</p>" in lowered
-        or "<ul>" in lowered
-        or raw.count("\n") >= 3
+def is_guidance_style_keyword(keyword):
+    kw = normalize_keyword(keyword)
+    return (
+        kw.startswith("how to ")
+        or kw.startswith("what is ")
+        or kw.startswith("what does ")
+        or kw.startswith("why ")
+        or kw.startswith("when ")
+        or kw.startswith("where ")
+        or kw.startswith("best ")
+        or kw.startswith("top ")
+        or kw.startswith("check ")
     )
 
-    return paragraph_like
+
+def is_question_style_keyword(keyword):
+    kw = normalize_keyword(keyword)
+    return kw.startswith(("is ", "can ", "should ", "what ", "why ", "when ", "where "))
 
 
-def normalize_ai_html(text: str) -> str:
-    raw = clean_text(text)
+def clean_keyword_for_title(text):
+    """Strip intent/noise words for H1 titles -- mirrors JS cleanKeywordForSentence."""
+    kw = normalize_keyword(text)
+    kw = re.sub(r"^\s*is\s+this\s+",        "", kw)
+    kw = re.sub(r"^\s*is\s+",               "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+",  "", kw)
+    kw = re.sub(r"^\s*should\s+i\s+buy\s+", "", kw)
+    kw = re.sub(r"^\s*what\s+is\s+a?\s*",   "", kw)
+    kw = re.sub(r"^\s*how\s+to\s+",         "", kw)
+    kw = re.sub(r"^\s*check\s+",            "", kw)
+    noise = [
+        r"\btoken\b", r"\bcoin\b", r"\bcrypto\b",
+        r"\brisk\b", r"\bsafe\b", r"\blegit\b",
+        r"\bscam\b", r"\bhoneypot\b", r"\brug\s*pull\b",
+        r"\bcheck\b", r"\bchecker\b", r"\breview\b",
+        r"\bwarning\b", r"\balert\b", r"\bdanger\b",
+        r"\bbefore\s+buy(ing)?\b", r"\bbefore\s+invest(ing)?\b", r"\bbefore\s+you\s+buy\b",
+        r"\bto\s+buy\b", r"\bto\s+trade\b", r"\bfor\s+sale\b",
+        r"\bis\b", r"\bthis\b", r"\bwhat\b", r"\bhow\b",
+        r"\bthe\b", r"\ba\b",
+    ]
+    for pattern in noise:
+        kw = re.sub(pattern, "", kw, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", kw).strip()
+
+
+def extract_subject(keyword):
+    """Extract clean subject noun from keyword -- mirrors JS extractSubject()."""
+    kw = clean_keyword_for_title(keyword)
+    extra_noise = [
+        r"\bgood\b", r"\bbad\b", r"\bworth\b",
+        r"\bprice(s)?\b", r"\btoday\b", r"\bnow\b", r"\btomorrow\b",
+        r"\bfees?\b", r"\bsignal(s)?\b", r"\bexplain(ed)?\b",
+        r"\bwork(s|ing)?\b", r"\bdoes\b", r"\bdo\b",
+        r"\bi\b", r"\bmy\b", r"\byou(r)?\b",
+        r"\bcan\b", r"\bshould\b", r"\bwill\b", r"\bwould\b",
+        r"\binvest(ing|ment|or)?\b", r"\btrad(e|ing|er)?\b",
+        r"\bmarket(s)?\b", r"\bguide\b", r"\btip(s)?\b",
+        r"\bare\b", r"\bof\b", r"\bin\b", r"\bon\b",
+        r"\bvs\b", r"\bversus\b",
+        r"\bbuy(ing)?\b", r"\bsell(ing)?\b",
+        r"\bsafety\b", r"\bsign(s)?\b", r"\brisks?\b",
+        r"\bsurviv(e|al|ing)?\b", r"\breward(s)?\b",
+        r"\b\d{4}\b",
+    ]
+    for pattern in extra_noise:
+        kw = re.sub(pattern, "", kw, flags=re.IGNORECASE)
+    words = [w for w in re.sub(r"\s+", " ", kw).strip().split(" ") if len(w) > 2]
+    return " ".join(words[:3])
+
+
+def soft_extract(keyword):
+    """Light stripping fallback -- keeps more context when extract_subject returns nothing."""
+    stop = {
+        "is","a","an","the","and","or","but","for","with","from","this","that","these","those",
+        "was","are","be","been","to","of","in","on","at","by","as","if","it","its","do","did",
+        "has","have","had","not","no","so","up","out","than","then","when","where","who",
+        "why","how","what","will","would","could","should","can","may","might",
+    }
+    words = [w for w in normalize_keyword(keyword).split() if len(w) > 1 and w not in stop]
+    return " ".join(words[:3])
+
+
+def build_static_h1(keyword):
+    """Mirror of JS buildHeroTitle() -- pre-rendered for Google crawl."""
+    try:
+        raw   = normalize_keyword(keyword)
+        if not raw:
+            return "Token Risk Check -- On-Chain Analysis"
+        subject = extract_subject(keyword)
+        s     = title_case(subject) if subject and len(subject) > 2 else ""
+        lower = raw.lower()
+        if "honeypot" in lower:
+            return f"Honeypot Token Check -- {s or 'Solana + EVM'}"
+        if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
+            return f"Rug Pull Token Check -- {s or 'Solana + EVM'}"
+        if any(t in lower for t in ["scam", "fake", "fraud", "phish"]):
+            return f"Scam Token Check -- {'Is ' + s + ' Legitimate?' if s else 'Verify Before Buying'}"
+        if any(t in lower for t in ["safe", "legit", "real", "trust"]):
+            s_safe = s if s and s not in ["Trust","Safe","Real","Legit"] else "This Token"
+            return f"Token Risk Check -- Is {s_safe} Safe?"
+        if any(t in lower for t in ["risk", "risky", "danger", "warning"]):
+            return f"{s or 'Token'} Risk -- On-Chain Safety Check"
+        if any(t in lower for t in ["how", "what", "why", "explain", "does", "work", "guide", "tutorial"]):
+            return f"On-Chain Guide -- {s + ' Risk Analysis' if s else 'Token Risk Analysis'}"
+        if any(t in lower for t in ["vs", "versus", "compare", "difference", "between"]):
+            return f"{s + ' -- Token Risk Comparison' if s else 'Token Risk Comparison -- Solana + EVM'}"
+        if any(t in lower for t in ["better", "best", "top", "choose", "pick"]):
+            s_best = s if s and s not in ["Best","Top"] else ""
+            return f"Best {s_best}? On-Chain Risk Comparison" if s_best else "Token Risk Comparison -- Solana + EVM"
+        if any(t in lower for t in ["price", "worth", "pump", "moon", "prediction", "forecast"]):
+            return f"{'Is ' + s + ' Worth Buying? On-Chain Risk Check' if s else 'Token Risk Check -- Price + On-Chain Signals'}"
+        if any(t in lower for t in ["buy", "invest", "should", "portfolio", "entry"]):
+            return f"{'Should I Buy ' + s + '? Token Risk Check' if s else 'Token Risk Check -- Before You Buy'}"
+        if s:
+            return f"Is {s} Safe? Token Risk Check"
+        soft = soft_extract(keyword)
+        if soft and len(soft) > 2:
+            return f"{title_case(soft)} -- Token Risk Check"
+        return "Token Risk Check -- On-Chain Analysis"
+    except Exception:
+        return "Token Risk Check -- On-Chain Analysis"
+
+
+def build_static_intro(keyword):
+    """Mirror of JS buildHeroSubheading() -- pre-rendered for Google crawl."""
+    lower = normalize_keyword(keyword).lower()
+    if "honeypot" in lower:
+        return (
+            "Check whether this token blocks selling at the contract level. "
+            "Honeypot tokens look identical to legitimate tokens on price charts until you try to exit."
+        )
+    if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
+        return (
+            "Review the liquidity lock status, holder concentration, and contract permissions "
+            "before committing to a position."
+        )
+    if "scam" in lower or "fake" in lower:
+        return (
+            "Verify the contract structure, on-chain trading history, and developer wallet activity "
+            "before buying in."
+        )
+    return (
+        "Paste any contract address for an instant on-chain risk assessment -- "
+        "honeypot detection, liquidity analysis, holder concentration, and contract permissions."
+    )
+
+
+def ensure_file(filepath):
+    folder = os.path.dirname(filepath)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+    if not os.path.exists(filepath):
+        with open(filepath, "a", encoding="utf-8"):
+            pass
+
+
+def validate_daily_limit(value):
+    if value <= 0:
+        raise ValueError("DAILY_LIMIT must be greater than 0")
+
+
+def load_keywords():
+    if not os.path.exists(KEYWORD_FILE):
+        return []
+    with open(KEYWORD_FILE, encoding="utf-8") as f:
+        return list(dict.fromkeys(normalize_keyword(line) for line in f if line.strip()))
+
+
+def load_generated_records():
+    if not os.path.exists(GENERATED_SLUGS_FILE) or not os.path.exists(GENERATED_KEYWORDS_FILE):
+        return []
+
+    with open(GENERATED_SLUGS_FILE, encoding="utf-8") as f:
+        slugs = [slugify(line) for line in f if slugify(line)]
+
+    with open(GENERATED_KEYWORDS_FILE, encoding="utf-8") as f:
+        keywords = [normalize_keyword(line) for line in f if normalize_keyword(line)]
+
+    if len(slugs) != len(keywords):
+        print(
+            "[warning] token_generated_slugs.txt and token_generated_keywords.txt are not "
+            "line-aligned. Rebuilding tracking from existing pages on disk."
+        )
+        return []
+
+    records = []
+    seen    = set()
+    for slug, keyword in zip(slugs, keywords):
+        if not slug or not keyword or slug in PROTECTED_SLUGS:
+            continue
+        if slug in seen:
+            continue
+        seen.add(slug)
+        records.append({"slug": slug, "keyword": keyword})
+    return records
+
+
+def write_lines(filepath, values, preserve_input=True):
+    ensure_file(filepath)
+    if preserve_input:
+        lines = [str(v).strip()  for v in values if str(v).strip()]
+    else:
+        lines = [str(v).rstrip() for v in values if str(v).strip()]
+    with open(filepath, "w", encoding="utf-8") as f:
+        if lines:
+            f.write("\n".join(lines) + "\n")
+        else:
+            f.write("")
+
+
+def page_path(slug):
+    return os.path.join(OUTPUT_DIR, slug, "index.html")
+
+
+def page_exists(slug):
+    return os.path.exists(page_path(slug))
+
+
+def humanize_slug(slug):
+    return title_case(slug.replace("-", " "))
+
+
+def validate_template_placeholders(template_html):
+    missing = [p for p in REQUIRED_TEMPLATE_PLACEHOLDERS if p not in template_html]
+    if missing:
+        raise ValueError("Template is missing required placeholders: " + ", ".join(sorted(missing)))
+
+
+def find_best_hub_slug(keyword):
+    keyword_norm = normalize_keyword(keyword)
+    for term, slug in HUB_MATCH_RULES:
+        if contains_term_phrase(keyword_norm, term):
+            return slug
+    return FALLBACK_HUB_SLUG
+
+
+def build_hub_link_html(keyword):
+    hub_slug = find_best_hub_slug(keyword)
+    if not hub_slug:
+        return ""
+    hub_title = HUB_TITLE_OVERRIDES.get(hub_slug, f"{humanize_slug(hub_slug)} Hub")
+    return f'<a href="/token-risk/{hub_slug}/">{escape_html(hub_title)}</a>'
+
+
+def sanitize_ai_html(text):
+    raw = str(text or "").strip()
     if not raw:
         return ""
-
-    raw = re.sub(
-        r"</?(html|body|main|section|article|header|footer|aside)[^>]*>",
-        "",
-        raw,
-        flags=re.IGNORECASE,
-    )
-    raw = re.sub(r"<div[^>]*>", "", raw, flags=re.IGNORECASE)
-    raw = re.sub(r"</div>", "", raw, flags=re.IGNORECASE)
-    raw = re.sub(r"<a\b[^>]*>(.*?)</a>", r"\1", raw, flags=re.IGNORECASE | re.DOTALL)
-    raw = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", raw, flags=re.IGNORECASE | re.DOTALL)
-
-    allowed_tag_names = set(ALLOWED_INLINE_TAGS + ALLOWED_BLOCK_TAGS)
-    tag_pattern = r"<(/?)([a-z0-9]+)(?:\s[^>]*)?>"
-
-    def rebuild_allowed_tag(match: re.Match) -> str:
-        slash = match.group(1)
-        tag = match.group(2).lower()
-        if tag in allowed_tag_names:
-            return f"<{slash}{tag}>"
-        return ""
-
-    raw = re.sub(tag_pattern, rebuild_allowed_tag, raw, flags=re.IGNORECASE)
-    raw = re.sub(r"\n{3,}", "\n\n", raw).strip()
-
-    if re.search(r"</?(p|ul|ol|li|blockquote)\b", raw, flags=re.IGNORECASE):
+    raw = re.sub(r"^```(?:html)?\s*", "",  raw, flags=re.IGNORECASE)
+    raw = re.sub(r"\s*```$",           "",  raw)
+    raw = re.sub(r"<script\b[^>]*>.*?</script>", "", raw, flags=re.IGNORECASE | re.DOTALL)
+    raw = re.sub(r"<style\b[^>]*>.*?</style>",   "", raw, flags=re.IGNORECASE | re.DOTALL)
+    raw = raw.strip()
+    if "<" in raw and ">" in raw:
         return raw
-
-    plain = strip_all_tags(raw)
-    plain = re.sub(r"\s+", " ", plain).strip()
-
-    if not plain:
-        return ""
-
-    parts = [part.strip() for part in re.split(r"\n\s*\n+", plain) if part.strip()]
-    if not parts:
-        parts = [plain]
-
-    return "\n".join(f"<p>{part}</p>" for part in parts)
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n+", raw) if p.strip()]
+    if not paragraphs:
+        paragraphs = [raw]
+    return "\n".join(f"<p>{escape_html(paragraph)}</p>" for paragraph in paragraphs)
 
 
-def split_sentences(text: str) -> List[str]:
-    text = re.sub(r"\s+", " ", text).strip()
-    if not text:
-        return []
-    parts = re.split(r"(?<=[.!?])\s+", text)
-    return [p.strip() for p in parts if p.strip()]
-
-
-def trim_redundant_ai_html(html: str, raw_keyword: str) -> str:
-    if not html:
-        return ""
-
-    blocks = re.findall(r"<p>.*?</p>|<ul>.*?</ul>|<ol>.*?</ol>|<blockquote>.*?</blockquote>", html, flags=re.I | re.S)
-    if not blocks:
-        blocks = [html]
-
-    keyword_norm = normalize_keyword(raw_keyword)
-    keyword_clean = re.sub(r"[^a-z0-9]+", " ", keyword_norm).strip()
-
-    kept: List[str] = []
-    seen_text = set()
-
-    for block in blocks:
-        plain = strip_all_tags(block)
-        plain = re.sub(r"\s+", " ", plain).strip()
-        plain_lower = plain.lower()
-
-        if not plain or len(plain) < 35:
+def discover_existing_output_pages(existing_keyword_map=None):
+    existing_keyword_map = existing_keyword_map or {}
+    discovered = []
+    if not os.path.isdir(OUTPUT_DIR):
+        return discovered
+    for slug in sorted(os.listdir(OUTPUT_DIR)):
+        slug = slugify(slug)
+        if not slug or slug in PROTECTED_SLUGS:
             continue
-        if any(marker in plain_lower for marker in WEAK_MARKERS):
+        index_path = page_path(slug)
+        if not os.path.isfile(index_path):
             continue
-        if any(marker in plain_lower for marker in GENERIC_PATTERNS):
+        keyword = normalize_keyword(existing_keyword_map.get(slug, slug.replace("-", " ")))
+        if not keyword:
             continue
-
-        normalized_plain = re.sub(r"[^a-z0-9]+", " ", plain_lower).strip()
-        if normalized_plain in seen_text:
-            continue
-
-        if keyword_clean:
-            keyword_mentions = normalized_plain.count(keyword_clean)
-            if keyword_mentions > 2:
-                continue
-
-        seen_text.add(normalized_plain)
-        kept.append(block.strip())
-
-    if not kept:
-        return html
-
-    if len(kept) > 4:
-        kept = kept[:4]
-
-    return "\n".join(kept)
+        discovered.append({"slug": slug, "keyword": keyword})
+    return discovered
 
 
-def build_payload_variants(raw_keyword: str, display_kw: str) -> List[str]:
-    readable = title_case(display_kw)
-    variants = dedupe_preserve_order([
-        raw_keyword,
-        display_kw,
-        readable,
-        f"{display_kw} token risk" if display_kw else "",
-        f"is {display_kw} safe" if display_kw and not raw_keyword.startswith("is ") else "",
-        f"should i buy {display_kw}" if display_kw and not contains_term_phrase(raw_keyword, "buy") else "",
-        f"{display_kw} liquidity risk" if display_kw and not contains_term_phrase(raw_keyword, "liquidity") else "",
-    ])
-    return variants[:6]
+def render_page_html(template_html, replacements):
+    html = template_html
+    for placeholder, value in replacements.items():
+        html = html.replace(placeholder, value)
+    unresolved = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html)))
+    if unresolved:
+        raise ValueError("Unresolved template placeholders remain: " + ", ".join(unresolved))
+    return html
 
 
-# -----------------------------
-# INTENT / CONTEXT
-# -----------------------------
-def detect_context(keyword: str) -> str:
-    kw = normalize_keyword(keyword)
-    scores = {
-        "buy-intent": 0,
-        "safety": 0,
-        "metrics": 0,
-        "chain": 0,
+# -------------------------
+# SEO TEXT HELPERS
+# -------------------------
+
+def build_og_image(slug):
+    return "https://verixiaapps.com/og/token-risk.png"
+
+
+def build_schema_faq(keyword):
+    """Build FAQPage JSON-LD schema -- intent-specific questions per keyword."""
+    lower = normalize_keyword(keyword).lower()
+
+    base_items = [
+        (
+            "How does the token risk checker work?",
+            "Paste the token contract address into the checker. The tool reads the smart contract "
+            "directly to identify structural risk signals -- minting permissions, freeze authority, "
+            "blacklisting functions, sell restrictions -- then reviews the liquidity pool depth, LP "
+            "lock status, and top holder wallet percentages. Results return in seconds with a risk "
+            "level and specific signals detected.",
+        ),
+        (
+            "Is the check free?",
+            "The first check is free with no account required. Unlimited checks are available from "
+            "$3.99 per week. Subscribe with any email address and cancel anytime from your account.",
+        ),
+        (
+            "What chains are supported?",
+            "The checker supports Solana SPL tokens and EVM tokens across Ethereum, Base, Arbitrum, "
+            "BNB Chain, Polygon, and Avalanche. Paste the full contract address -- for Solana tokens "
+            "this is the token mint address, for EVM tokens it is the 0x contract address.",
+        ),
+    ]
+
+    if "honeypot" in lower:
+        intent_item = (
+            "What is a honeypot token?",
+            "A honeypot token is a smart contract that allows purchases but blocks selling. The "
+            "restriction is encoded into the transfer function -- a require() statement that causes "
+            "sell transactions to revert for non-whitelisted wallets. Honeypots can look identical "
+            "to legitimate tokens on price charts because buy transactions execute normally while "
+            "only sell attempts fail.",
+        )
+    elif "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower or "rug" in lower:
+        intent_item = (
+            "What is a rug pull in crypto?",
+            "A rug pull happens when token developers or large holders remove all liquidity from the "
+            "trading pool after attracting enough buyers. Liquidity removal collapses the token price "
+            "instantly -- often 99% or more. The risk is visible before it happens: unlocked LP tokens, "
+            "thin pools relative to market cap, and anonymous developer wallets are the main on-chain "
+            "signals.",
+        )
+    elif any(t in lower for t in ["liquidity", " pool ", " lp "]):
+        intent_item = (
+            "What does liquidity lock status mean?",
+            "Liquidity lock status indicates whether LP tokens are locked in a time-lock contract. "
+            "Unlocked LP tokens mean the developer can remove all liquidity at any time, instantly "
+            "collapsing the token price. Check the lock duration and the percentage of LP tokens "
+            "that are locked.",
+        )
+    else:
+        intent_item = (
+            "What is holder concentration and why does it matter?",
+            "Holder concentration measures what percentage of a token's supply is held by the largest "
+            "wallets. When five wallets hold 60% or more of supply, a coordinated exit can move the "
+            "market faster than other buyers can absorb. The checker surfaces top wallet percentages "
+            "alongside pool depth to give a complete picture of exit risk.",
+        )
+
+    all_items = [intent_item] + base_items
+    schema = {
+        "@context": "https://schema.org",
+        "@type":    "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name":  q,
+                "acceptedAnswer": {"@type": "Answer", "text": a},
+            }
+            for q, a in all_items
+        ],
     }
-
-    for term in BUY_INTENT_HINTS:
-        if contains_term_phrase(kw, term):
-            scores["buy-intent"] += 3 if " " in term else 1
-
-    for term in SAFETY_HINTS:
-        if contains_term_phrase(kw, term):
-            scores["safety"] += 3 if " " in term else 1
-
-    for term in METRIC_HINTS:
-        if contains_term_phrase(kw, term):
-            scores["metrics"] += 3 if " " in term else 2
-
-    for term in CHAIN_HINTS:
-        if contains_term_phrase(kw, term):
-            scores["chain"] += 2
-
-    if scores["metrics"] > 0 and scores["chain"] > 0:
-        scores["metrics"] += 1
-
-    if scores["buy-intent"] > 0 and scores["safety"] > 0:
-        scores["buy-intent"] += 1
-
-    priority = ("buy-intent", "safety", "metrics", "chain")
-    best_context = "general"
-    best_score = 0
-
-    for context in priority:
-        if scores[context] > best_score:
-            best_context = context
-            best_score = scores[context]
-
-    return best_context if best_score > 0 else "general"
+    return json.dumps(schema, ensure_ascii=False)
 
 
-def context_example(context: str, keyword: str) -> str:
-    examples = CONTEXT_EXAMPLES.get(context, CONTEXT_EXAMPLES["general"])
-    idx = variant_index(keyword, len(examples))
-    return examples[idx]
+def build_title(keyword):
+    raw      = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
+    if not raw:
+        return "Token Risk Checker | Liquidity, Volume, Pair Age & Risk Signals"
+    if is_guidance_style_keyword(raw):
+        return f"{title_case(raw)} | Token Risk, Liquidity & Warning Signs"
+    if raw.startswith("is this "):
+        return f"{title_case(raw)}? Token Risk, Liquidity & What To Know"
+    if raw.startswith("is ") and contains_term_phrase(raw, "safe"):
+        cleaned = re.sub(r"\s+safe\b", "", raw).strip()
+        return f"Is {title_case(cleaned)} Safe? Token Risk, Liquidity & Warning Signs"
+    if raw.startswith("should i buy "):
+        cleaned = re.sub(r"^should i buy\s+", "", raw).strip()
+        return f"Should I Buy {title_case(cleaned)}? Token Risk & Warning Signs"
+    if is_question_style_keyword(raw):
+        return f"{title_case(raw)}? Token Risk, Liquidity & What To Know"
+    return f"{readable} Token Risk | Liquidity, Volume, Pair Age & Warning Signs"
 
 
-def mode_intro_sentence(mode: str, keyword: str) -> str:
-    options = MODE_INTROS.get(mode, MODE_INTROS["risk-overview"])
-    idx = variant_index(keyword + mode, len(options))
-    return options[idx]
-
-
-# -----------------------------
-# CONTENT BUILDERS
-# -----------------------------
-def intro_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
-    keyword_title = title_case(display_kw)
-    context = detect_context(raw_keyword)
-    example = context_example(context, raw_keyword)
-    mode_sentence = mode_intro_sentence(mode, raw_keyword)
-
-    if context == "buy-intent":
+def build_description(keyword):
+    raw      = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
+    clean_kw = display_keyword(keyword)
+    if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
-            f"<p>{keyword_title} is usually a buy-decision question, not just a hype question. "
-            f"{mode_sentence} A setup like {example} can look attractive early, but the safer move is to ask whether the token still looks strong after you check Liquidity, history, exit conditions, and overall structure directly.</p>"
+            f"Review token risk signals for {readable}, including liquidity, volume, pair age, "
+            f"price action, and broader market-structure warning signs before you buy or swap."
         )
-
-    if context == "metrics":
-        return (
-            f"<p>{keyword_title} is usually a token-structure question. "
-            f"{mode_sentence} Something like {example} can matter much more than social excitement because weak metrics often show up before the broader market realizes the setup is fragile.</p>"
-        )
-
-    if context == "safety":
-        return (
-            f"<p>{keyword_title} is usually a safety-and-structure question. "
-            f"{mode_sentence} A token can avoid obvious scam language and still carry meaningful risk if the market setup, Liquidity, or history does not support the confidence around it.</p>"
-        )
-
-    if context == "chain":
-        return (
-            f"<p>{keyword_title} often gets judged too quickly because the surrounding chain or DEX feels familiar. "
-            f"{mode_sentence} Something like {example} may borrow trust from the ecosystem, but the real question is whether the token itself looks solid under direct review.</p>"
-        )
-
     return (
-        f"<p>{keyword_title} is usually best judged by structure, not excitement. "
-        f"{mode_sentence} A setup like {example} may look interesting at first glance, but the safest move is to separate the token narrative from the actual risk signals before buying or swapping.</p>"
+        f"Check {readable} token risk with liquidity, volume, pair age, price action, and "
+        f"market-structure signals. Review {clean_kw} risk before you buy, swap, or connect."
     )
 
 
-def scenario_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
-    keyword_title = title_case(display_kw)
-    example = context_example(detect_context(raw_keyword), raw_keyword)
+def build_related_anchor(keyword):
+    raw      = normalize_keyword(keyword)
+    readable = readable_keyword(keyword)
+    if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
+        anchor = title_case(raw)
+        if is_question_style_keyword(raw) and not anchor.endswith("?"):
+            anchor += "?"
+        return anchor
+    return f"{readable} Token Risk"
 
-    if mode == "buy-decision":
-        return (
-            f"<p>With {keyword_title}, the risky pattern is often the same: a chart or narrative creates enough excitement that people start asking whether they should buy before they have really checked the token. A setup like {example} can feel compelling, but good entries usually survive slower analysis while bad ones depend on urgency.</p>"
-        )
 
-    if mode == "metrics-breakdown":
-        return (
-            f"<p>With {keyword_title}, the cleanest read usually comes from looking at the market structure directly. A setup like {example} may be paired with hype, calls, or screenshots, but the more important question is whether the core metrics look deep, stable, and believable enough to support the move.</p>"
-        )
+def build_canonical(slug):
+    return f"{SITE}/token-risk/{slug}/"
 
-    if mode == "safety-check":
-        return (
-            f"<p>With {keyword_title}, people often try to reduce the decision to a simple safe or risky label. A setup like {example} is usually more nuanced than that. The better question is whether the token looks strong enough to justify confidence, especially if conditions change after you enter.</p>"
-        )
 
-    if mode == "scenario":
-        return (
-            f"<p>A common {keyword_title} pattern starts when a token gets attention faster than it earns trust. Something like {example} draws people in, chat momentum builds, and then the decision becomes rushed. That is usually when weak structure matters most, because the market can look strong right up until it no longer does.</p>"
-        )
+# -------------------------
+# LINKING HELPERS
+# -------------------------
 
-    return (
-        f"<p>In many {keyword_title} situations, the token story is easy to understand long before the risk is easy to understand. Something like {example} may sound manageable, but the quality of the setup usually depends on whether the underlying market structure still looks healthy once you stop relying on the narrative alone.</p>"
+def dedupe_pages_by_slug(pages_list):
+    deduped = []
+    seen    = set()
+    for page in pages_list:
+        slug    = slugify(page.get("slug", ""))
+        keyword = normalize_keyword(page.get("keyword", ""))
+        if not slug or not keyword or slug in seen or slug in PROTECTED_SLUGS:
+            continue
+        seen.add(slug)
+        deduped.append({"slug": slug, "keyword": keyword})
+    return deduped
+
+
+def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
+    exclude_slugs   = {slugify(slug) for slug in (exclude_slugs or set()) if slugify(slug)}
+    current_slug    = current_page["slug"]
+    current_keyword = current_page["keyword"]
+    current_tokens  = keyword_tokens(current_keyword)
+    current_cluster = keyword_cluster_tokens(current_keyword)
+    current_root    = keyword_root(current_keyword)
+    current_base    = clean_base_keyword(current_keyword)
+    current_hub     = find_best_hub_slug(current_keyword)
+
+    candidates = [
+        p for p in all_pages
+        if p["slug"] != current_slug
+        and p["slug"] not in PROTECTED_SLUGS
+        and p["slug"] not in exclude_slugs
+        and page_exists(p["slug"])
+        and clean_base_keyword(p["keyword"]) != current_base
+    ]
+
+    def score(page):
+        other_keyword  = page["keyword"]
+        other_tokens   = keyword_tokens(other_keyword)
+        other_cluster  = keyword_cluster_tokens(other_keyword)
+        other_root     = keyword_root(other_keyword)
+        other_hub      = find_best_hub_slug(other_keyword)
+        length_diff    = abs(len(other_tokens) - len(current_tokens))
+        same_root      = 1 if current_root and other_root == current_root else 0
+        same_hub       = 1 if current_hub  and other_hub  == current_hub  else 0
+        shared_cluster = len(current_cluster & other_cluster)
+        shared_tokens  = len(current_tokens  & other_tokens)
+        return (-same_hub, -same_root, -shared_cluster, -shared_tokens, length_diff, other_keyword)
+
+    ranked     = sorted(candidates, key=score)
+    related    = []
+    used_slugs = set()
+    used_bases = set()
+
+    for page in ranked:
+        base = clean_base_keyword(page["keyword"])
+        if page["slug"] in used_slugs or base in used_bases:
+            continue
+        related.append(page)
+        used_slugs.add(page["slug"])
+        used_bases.add(base)
+        if len(related) == limit:
+            break
+    return related
+
+
+def build_links_html(pages_list):
+    return "".join(
+        f'<li><a href="/token-risk/{p["slug"]}/">'
+        f'{escape_html(build_related_anchor(p["keyword"]))}</a></li>\n'
+        for p in pages_list
+        if page_exists(p["slug"])
     )
 
 
-def context_detail_paragraph(raw_keyword: str, display_kw: str, mode: str) -> str:
-    keyword_title = title_case(display_kw)
-    context = detect_context(raw_keyword)
-    example = context_example(context, raw_keyword)
-
-    if context == "buy-intent":
-        return (
-            f"<p>That matters because a token related to {keyword_title} may still move even if the setup is weak. The real issue is whether the trade is being justified by evidence or by urgency. When something like {example} is involved, it is safer to check whether the setup still looks attractive after the fear of missing out is removed.</p>"
-        )
-
-    if context == "metrics":
-        return (
-            f"<p>This is why token metrics matter so much for {keyword_title}. A setup like {example} may look fine in a screenshot or chat message, but direct checks of Liquidity, volume behavior, age, and trade quality often tell you whether the structure is actually stable enough to trust.</p>"
-        )
-
-    if context == "safety":
-        return (
-            f"<p>The key point for {keyword_title} is that safety language can easily outrun the evidence. A token being called safe, legit, or not a rug does not mean the setup is strong. When something like {example} is involved, the better habit is to ask whether the structure supports the confidence, not whether people sound confident.</p>"
-        )
-
-    if context == "chain":
-        return (
-            f"<p>This matters because chain familiarity can distort judgment around {keyword_title}. A setup like {example} may feel more trustworthy simply because the tooling is recognizable, but token-level risk still decides whether the trade looks durable, fragile, or difficult to exit cleanly.</p>"
-        )
-
-    if mode == "metrics-breakdown":
-        return (
-            f"<p>For {keyword_title}, that is why structure usually matters more than storytelling. The token may still attract attention, but the safer read comes from asking whether the metrics actually support the confidence level around the setup.</p>"
-        )
-
-    return (
-        f"<p>With {keyword_title}, the safer approach is usually the same: slow down, verify the structure, and make sure the setup still makes sense without hype or pressure. That becomes even more important when something like {example} is being used to make the token sound more convincing than it may really be.</p>"
-    )
+def build_aligned_generated_records(existing_pages_list, extra_pages=None):
+    records_by_slug = {}
+    for page in existing_pages_list:
+        slug    = slugify(page.get("slug", ""))
+        keyword = normalize_keyword(page.get("keyword", ""))
+        if not slug or not keyword or slug in PROTECTED_SLUGS:
+            continue
+        if page_exists(slug):
+            records_by_slug[slug] = {"slug": slug, "keyword": keyword}
+    for page in extra_pages or []:
+        slug    = slugify(page.get("slug", ""))
+        keyword = normalize_keyword(page.get("keyword", ""))
+        if not slug or not keyword or slug in PROTECTED_SLUGS:
+            continue
+        if page_exists(slug):
+            records_by_slug[slug] = {"slug": slug, "keyword": keyword}
+    return [records_by_slug[slug] for slug in sorted(records_by_slug.keys())]
 
 
-def get_warning_bullets(context: str, idx: int) -> List[str]:
-    if context in RISK_WARNING_BULLETS:
-        return RISK_WARNING_BULLETS[context][idx]
-    return RISK_WARNING_BULLETS["general"][idx]
+# -------------------------
+# AI GENERATION
+# -------------------------
+
+PHISHING_REJECT_PATTERNS = [
+    r"support\s+chat",
+    r"wallet\s+address.*pasted",
+    r"countdown\s+timer",
+    r"re-?verification",
+    r"funds\s+would\s+return",
+    r"recovery\s+phrase",
+    r"connect\s+wallet.*button",
+    r"verify.*wallet",
+    r"sender\s+address.*sol",
+    r"claim\s+page",
+    r"preloaded",
+    r"typing\s+indicator",
+    r"coinb4se",
+]
 
 
-def get_action_paragraph(context: str, idx: int, keyword_title: str) -> str:
-    paragraphs = ACTION_PARAGRAPHS_BY_CONTEXT.get(context, ACTION_PARAGRAPHS_BY_CONTEXT["general"])
-    return paragraphs[idx].format(keyword=keyword_title)
+def is_phishing_content(text):
+    """Return True if text contains phishing or scam narrative patterns."""
+    plain = re.sub(r"<[^>]+>", " ", str(text)).lower()
+    return any(re.search(p, plain) for p in PHISHING_REJECT_PATTERNS)
 
 
-def build_metric_support_block(raw_keyword: str, display_kw: str) -> str:
-    keyword_title = title_case(display_kw)
-    context = detect_context(raw_keyword)
-
-    if context == "metrics":
-        return (
-            f"<h2>How To Read The Metrics More Clearly</h2>"
-            f"<p>For {keyword_title}, focus on whether Liquidity, Volume, Pair Age, FDV or Market Cap framing, and general trade quality all point in the same direction. The setup is usually stronger when the structure looks coherent instead of selectively impressive.</p>"
-        )
-
-    if context == "buy-intent":
-        return (
-            f"<h2>Why Buy Pressure Can Distort Token Risk</h2>"
-            f"<p>For {keyword_title}, the danger is often not just the token itself but the pace of the decision. When buy pressure increases, people may ignore thin Liquidity, fragile charts, or weak depth because they are more focused on upside than on whether they can exit safely later.</p>"
-        )
-
-    if context == "safety":
-        return (
-            f"<h2>Why Safe And Risky Are Usually Not Binary</h2>"
-            f"<p>For {keyword_title}, it helps to avoid overly simple labels. A token can avoid obvious scam patterns and still be too thin, too new, or too unstable to deserve high confidence. The better question is whether the setup looks strong enough for the claim being made.</p>"
-        )
-
-    if context == "chain":
-        return (
-            f"<h2>Why Chain Familiarity Is Not Enough</h2>"
-            f"<p>For {keyword_title}, familiar infrastructure can make the token feel safer than it is. The real test is whether the token itself shows strong enough structure, history, and trading conditions to justify confidence independent of the chain brand.</p>"
-        )
-
-    return (
-        f"<h2>Why Structure Matters More Than Narrative</h2>"
-        f"<p>For {keyword_title}, a strong narrative can attract attention quickly, but structure usually decides whether the setup deserves trust. The safer move is to check whether the token still looks solid when you focus on the underlying market instead of the story around it.</p>"
-    )
+def extract_clean_paragraphs(html, max_paragraphs=4):
+    """
+    Extract clean <p> paragraphs from enforce_structure HTML output.
+    Strips <h2> headings, <ul> lists, bracket section markers ([~] [I] etc),
+    and short heading-like fragments (<20 words). Returns <p> tags joined
+    by double newlines, ready for direct injection into {{AI_CONTENT}}.
+    """
+    p_tags = re.findall(r"<p>(.*?)</p>", str(html), re.IGNORECASE | re.DOTALL)
+    result = []
+    for p in p_tags:
+        text = re.sub(r"<[^>]+>", " ", p).strip()
+        text = re.sub(r"^\s*[[~\-+?!Ii*#>^=]]\s*", "", text).strip()
+        text = re.sub(r"^\s*#{1,6}\s+", "", text).strip()
+        text = re.sub(r"\s+", " ", text).strip()
+        if len(text.split()) < 20:
+            continue
+        if is_phishing_content(text):
+            continue
+        result.append(f"<p>{escape_html(text)}</p>")
+        if len(result) >= max_paragraphs:
+            break
+    return "\n\n".join(result)
 
 
-# -----------------------------
-# STRUCTURE ENFORCER
-# -----------------------------
-def enforce_structure(raw_keyword: str, display_kw: str, content: str) -> str:
-    keyword_title = title_case(display_kw)
-    context = detect_context(raw_keyword)
-    mode = choose_mode(raw_keyword)
+def generate_ai_text(keyword, keyword_display):
+    raw_keyword   = normalize_keyword(keyword)
+    clean_keyword = normalize_keyword(keyword_display)
+    readable      = readable_keyword(keyword_display)
 
-    idx = variant_index(display_kw + mode, len(WARNING_SECTION_TITLES))
-    middle_heading = SECTION_TITLES.get(mode, SECTION_TITLES["risk-overview"])
-    warning_title = WARNING_SECTION_TITLES[idx]
-    action_title = ACTION_SECTION_TITLES[idx]
-    action_intro = ACTION_SECTION_INTROS[idx]
-    bullets = get_warning_bullets(context, idx)
-    action = get_action_paragraph(context, idx, keyword_title)
+    attempts = [
+        raw_keyword,
+        clean_keyword,
+        readable,
+        f"{clean_keyword} token risk" if clean_keyword else "",
+        f"is {clean_keyword} safe" if clean_keyword and not raw_keyword.startswith("is ") else "",
+        f"should i buy {clean_keyword}" if clean_keyword and not contains_term_phrase(raw_keyword, "buy") else "",
+    ]
 
-    bullet_html = "\n".join(f"<li>{b}</li>" for b in bullets)
-    metric_block = build_metric_support_block(raw_keyword, display_kw)
+    seen       = set()
+    last_error = None
 
-    return f"""
-<div class="content-block" data-context="{context}" data-mode="{mode}">
-{intro_paragraph(raw_keyword, display_kw, mode)}
-<h2>{middle_heading}</h2>
-{scenario_paragraph(raw_keyword, display_kw, mode)}
-{content}
-{context_detail_paragraph(raw_keyword, display_kw, mode)}
-{metric_block}
-</div>
-<h2>{warning_title}</h2>
-<ul>
-{bullet_html}
-</ul>
-<h2>{action_title}</h2>
-<p>{action_intro}</p>
-<p>{action}</p>
-""".strip()
-
-
-# -----------------------------
-# API CALL
-# -----------------------------
-def fetch_ai(prompt_keyword: str) -> str:
-    response = requests.post(
-        f"{TOKEN_RISK_API}{TOKEN_RISK_ENDPOINT}",
-        json={"keyword": prompt_keyword, "type": "token-risk"},
-        timeout=TIMEOUT,
-    )
-    response.raise_for_status()
-    data = safe_json(response)
-    return str(data.get("content", "")).strip()
-
-
-# -----------------------------
-# MAIN GENERATOR
-# -----------------------------
-def generate_token_content(keyword: str) -> str:
-    raw_keyword = normalize_keyword(keyword)
-    display_kw = display_keyword(raw_keyword)
-
-    if not display_kw:
-        raise ValueError("Empty keyword after normalization")
-
-    logging.info("Generating token content for: %s", raw_keyword)
-
-    payload_variants = build_payload_variants(raw_keyword, display_kw)
-    last_error: Optional[Exception] = None
-
-    for prompt_keyword in payload_variants:
+    for prompt in attempts:
+        prompt_norm = normalize_keyword(prompt)
+        if not prompt_norm or prompt_norm in seen:
+            continue
+        seen.add(prompt_norm)
         try:
-            raw = fetch_ai(prompt_keyword)
+            raw_content = generate_token_content(prompt)
 
-            if not raw:
-                last_error = ValueError(f"Empty content for prompt: {prompt_keyword}")
-                logging.warning(
-                    "Token AI generation returned empty content for %s using prompt '%s'",
-                    raw_keyword,
-                    prompt_keyword,
-                )
-                continue
+            # Extract clean <p> paragraphs -- strips h2 headings, bullets, markers
+            ai_text = extract_clean_paragraphs(raw_content)
 
-            if not is_usable_ai_text(raw):
-                last_error = ValueError(f"Thin or malformed output for prompt: {prompt_keyword}")
-                logging.warning(
-                    "Token AI generation returned thin content for %s using prompt '%s'",
-                    raw_keyword,
-                    prompt_keyword,
-                )
-                continue
+            if not ai_text:
+                # Fallback: standard sanitize if paragraph extraction yields nothing
+                ai_text = sanitize_ai_html(raw_content)
 
-            final_content = normalize_ai_html(raw)
-            final_content = trim_redundant_ai_html(final_content, raw_keyword)
+            if ai_text and not is_phishing_content(ai_text):
+                return ai_text
 
-            if not final_content:
-                last_error = ValueError(f"Sanitized content became empty for prompt: {prompt_keyword}")
-                logging.warning(
-                    "Token AI content became empty after sanitation for %s using prompt '%s'",
-                    raw_keyword,
-                    prompt_keyword,
-                )
-                continue
-
-            return enforce_structure(raw_keyword, display_kw, final_content)
+            last_error = ValueError(f"Content rejected for prompt: {prompt_norm}")
+            print(f"[rejected] AI content failed quality check for '{prompt_norm}'")
 
         except Exception as e:
             last_error = e
-            logging.warning(
-                "Token AI generation failed for %s using prompt '%s': %s",
-                raw_keyword,
-                prompt_keyword,
-                e,
-            )
+            print(f"[error] AI generation failed for '{prompt}': {e}")
 
-            if error_is_non_retryable(e):
-                raise ValueError(
-                    f"Token AI generation failed for '{raw_keyword}': {e}"
-                ) from e
-
-    raise ValueError(f"Token AI generation failed for '{raw_keyword}': {last_error}")
+    if last_error:
+        raise ValueError(f"AI generation failed for all prompts: {last_error}")
+    raise ValueError("AI generation failed for all prompts")
 
 
-if __name__ == "__main__":
-    keyword = sys.argv[1] if len(sys.argv) > 1 else "should i buy this solana token"
-    print(generate_token_content(keyword))
+# -------------------------
+# SETUP & GENERATION LOOP
+# -------------------------
+
+validate_daily_limit(DAILY_LIMIT)
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+ensure_file(GENERATED_SLUGS_FILE)
+ensure_file(GENERATED_KEYWORDS_FILE)
+
+with open(TEMPLATE_FILE, encoding="utf-8") as f:
+    template = f.read()
+
+validate_template_placeholders(template)
+
+keywords = load_keywords()
+if not keywords:
+    print("No keywords in queue. Nothing to generate.")
+    sys.exit(0)
+
+generated_records    = load_generated_records()
+existing_keyword_map = {record["slug"]: record["keyword"] for record in generated_records}
+
+filesystem_pages  = discover_existing_output_pages(existing_keyword_map=existing_keyword_map)
+generated_records = build_aligned_generated_records(filesystem_pages)
+
+generated_slugs    = {record["slug"]    for record in generated_records}
+generated_keywords = {record["keyword"] for record in generated_records}
+
+queue_pages           = []
+seen_queue_slugs      = set()
+duplicate_queue_count = 0
+
+for keyword in keywords:
+    keyword_norm = normalize_keyword(keyword)
+    slug         = slugify(keyword_norm)
+    if slug in PROTECTED_SLUGS or not slug:
+        continue
+    if slug in seen_queue_slugs:
+        duplicate_queue_count += 1
+        continue
+    seen_queue_slugs.add(slug)
+    queue_pages.append({"keyword": keyword_norm, "slug": slug})
+
+existing_pages = dedupe_pages_by_slug(filesystem_pages)
+queue_pages    = dedupe_pages_by_slug(queue_pages)
+
+print(f"Loaded {len(keywords)} keywords from queue.")
+print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
+print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
+print(f"Known generated slugs: {len(generated_slugs)}")
+print(f"Known generated keywords: {len(generated_keywords)}")
+print(f"Existing pages available for internal links: {len(existing_pages)}")
+print(f"Daily limit: {DAILY_LIMIT}")
+print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
+
+generated_count        = 0
+skipped_existing_count = 0
+failed_count           = 0
+processed_keywords     = set()
+new_pages_this_run     = []
+
+for page in queue_pages:
+    if generated_count >= DAILY_LIMIT:
+        break
+
+    slug            = page["slug"]
+    keyword         = page["keyword"]
+    keyword_display = display_keyword(keyword)
+    path            = page_path(slug)
+
+    if slug in PROTECTED_SLUGS:
+        processed_keywords.add(keyword)
+        print("Skipping protected page:", slug)
+        continue
+
+    if page_exists(slug):
+        skipped_existing_count += 1
+        processed_keywords.add(keyword)
+        continue
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    title       = build_title(keyword)
+    description = build_description(keyword)
+    canonical   = build_canonical(slug)
+
+    try:
+        ai_text = generate_ai_text(keyword, keyword_display)
+    except Exception as e:
+        failed_count += 1
+        print(f"[failed] {keyword} -> {e}")
+        continue
+
+    related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
+    related_slugs = {p["slug"] for p in related_pages}
+    more_pages    = get_related_pages(
+        page,
+        existing_pages,
+        MORE_LINKS_COUNT,
+        exclude_slugs=related_slugs,
+    )
+
+    hub_link_html = build_hub_link_html(keyword)
+    html = render_page_html(
+        template,
+        {
+            "{{TITLE}}":           escape_html(title),
+            "{{DESCRIPTION}}":     escape_html(description),
+            "{{KEYWORD}}":         escape_html(keyword_display),
+            "{{AI_CONTENT}}":      ai_text,
+            "{{RELATED_LINKS}}":   build_links_html(related_pages),
+            "{{MORE_LINKS}}":      build_links_html(more_pages),
+            "{{HUB_LINK}}":        hub_link_html,
+            "{{CANONICAL_URL}}":   escape_html(canonical),
+            "{{MODIFIED_DATE}}":   datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "{{BREADCRUMB_NAME}}": escape_html(title_case(keyword_display) or readable_keyword(keyword)),
+            "{{STATIC_H1}}":       escape_html(build_static_h1(keyword)),
+            "{{STATIC_INTRO}}":    escape_html(build_static_intro(keyword)),
+            "{{OG_IMAGE}}":        escape_html(build_og_image(slug)),
+            "{{HL_DATA_BLOCK}}":   "",
+            "{{SCHEMA_FAQ}}":      build_schema_faq(keyword),
+        },
+    )
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    processed_keywords.add(keyword)
+
+    new_page_record = {"keyword": keyword, "slug": slug}
+    new_pages_this_run.append(new_page_record)
+    existing_pages.append(new_page_record)
+    existing_pages = dedupe_pages_by_slug(existing_pages)
+    generated_count += 1
+
+    print(
+        f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
+        f"-> hub: {find_best_hub_slug(keyword)}"
+    )
+
+remaining_keywords = []
+for keyword in keywords:
+    keyword_norm = normalize_keyword(keyword)
+    if keyword_norm not in processed_keywords:
+        remaining_keywords.append(keyword_norm)
+
+aligned_records = build_aligned_generated_records(existing_pages, extra_pages=new_pages_this_run)
+write_lines(GENERATED_SLUGS_FILE,    [record["slug"]    for record in aligned_records])
+write_lines(GENERATED_KEYWORDS_FILE, [record["keyword"] for record in aligned_records])
+write_lines(KEYWORD_FILE, remaining_keywords)
+
+print(
+    f"Done. Generated {generated_count} new pages. "
+    f"Skipped {skipped_existing_count} existing pages. "
+    f"Failed {failed_count} keywords."
+)
+print(f"Remaining keywords in queue: {len(remaining_keywords)}")
