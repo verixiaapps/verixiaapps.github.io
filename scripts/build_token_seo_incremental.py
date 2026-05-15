@@ -5,7 +5,7 @@ import sys
 from html import escape
 from datetime import datetime, timezone
 
-BASE_DIR    = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
 
 if SCRIPTS_DIR not in sys.path:
@@ -17,12 +17,12 @@ from generate_token_content import generate_token_content
 # CONFIG
 # -------------------------
 
-KEYWORD_FILE            = os.path.join(BASE_DIR, "data", "token_keywords.txt")
-GENERATED_SLUGS_FILE    = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
-GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "token_generated_keywords.txt")
-TEMPLATE_FILE           = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
-OUTPUT_DIR              = os.path.join(BASE_DIR, "token-risk")
-SITE                    = "https://verixiaapps.com"
+KEYWORD_FILE           = os.path.join(BASE_DIR, "data", "token_keywords.txt")
+GENERATED_SLUGS_FILE   = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
+GENERATED_KEYWORDS_FILE= os.path.join(BASE_DIR, "data", "token_generated_keywords.txt")
+TEMPLATE_FILE          = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
+OUTPUT_DIR             = os.path.join(BASE_DIR, "token-risk")
+SITE                   = "https://verixiaapps.com"
 
 RELATED_LINKS_COUNT = 6
 MORE_LINKS_COUNT    = 10
@@ -109,16 +109,16 @@ SMALL_WORDS = {
 }
 
 HUB_TITLE_OVERRIDES = {
-    "meme-token-risk":    "Meme Token Risk Hub",
-    "solana-token-risk":  "Solana Token Risk Hub",
-    "ethereum-token-risk":"Ethereum Token Risk Hub",
-    "base-token-risk":    "Base Token Risk Hub",
-    "bsc-token-risk":     "BSC Token Risk Hub",
-    "arbitrum-token-risk":"Arbitrum Token Risk Hub",
-    "token-metrics-risk": "Token Metrics Risk Hub",
-    "buy-intent-risk":    "Buy Intent Risk Hub",
-    "token-safety-check": "Token Safety Check Hub",
-    "token-risk-hub":     "Token Risk Hub",
+    "meme-token-risk":     "Meme Token Risk Hub",
+    "solana-token-risk":   "Solana Token Risk Hub",
+    "ethereum-token-risk": "Ethereum Token Risk Hub",
+    "base-token-risk":     "Base Token Risk Hub",
+    "bsc-token-risk":      "BSC Token Risk Hub",
+    "arbitrum-token-risk": "Arbitrum Token Risk Hub",
+    "token-metrics-risk":  "Token Metrics Risk Hub",
+    "buy-intent-risk":     "Buy Intent Risk Hub",
+    "token-safety-check":  "Token Safety Check Hub",
+    "token-risk-hub":      "Token Risk Hub",
 }
 
 # Ordered from most specific to most general.
@@ -188,24 +188,23 @@ def contains_term_phrase(haystack, needle):
 
 def clean_base_keyword(text):
     kw = normalize_keyword(text)
-    kw = re.sub(r"^\s*is\s+this\s+", "", kw)
-    kw = re.sub(r"^\s*is\s+", "", kw)
-    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
-    kw = re.sub(r"^\s*should\s+i\s+buy\s+", "", kw)
-    kw = re.sub(r"^\s*check\s+", "", kw)
+    kw = re.sub(r"^\s*is\s+this\s+",     "", kw)
+    kw = re.sub(r"^\s*is\s+",            "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+","", kw)
+    kw = re.sub(r"^\s*should\s+i\s+buy\s+","", kw)
+    kw = re.sub(r"^\s*check\s+",         "", kw)
     kw = re.sub(r"\s+safe\s+to\s+buy\b", "", kw)
-    kw = re.sub(r"\s+to\s+buy\b", "", kw)
-    kw = re.sub(r"\s+to\s+trade\b", "", kw)
-    kw = re.sub(r"\s+safe$", "", kw)
-    kw = re.sub(r"\s+legit$", "", kw)
-    kw = re.sub(r"\s+risky$", "", kw)
-    kw = re.sub(r"\s+real$", "", kw)
-    kw = re.sub(r"\s+scam$", "", kw)
-    kw = re.sub(r"\s+warning$", "", kw)
-    kw = re.sub(r"\s+alert$", "", kw)
-    kw = re.sub(r"\s+danger$", "", kw)
-    kw = re.sub(r"\s+", " ", kw).strip()
-    return kw
+    kw = re.sub(r"\s+to\s+buy\b",        "", kw)
+    kw = re.sub(r"\s+to\s+trade\b",      "", kw)
+    kw = re.sub(r"\s+safe$",             "", kw)
+    kw = re.sub(r"\s+legit$",            "", kw)
+    kw = re.sub(r"\s+risky$",            "", kw)
+    kw = re.sub(r"\s+real$",             "", kw)
+    kw = re.sub(r"\s+scam$",             "", kw)
+    kw = re.sub(r"\s+warning$",          "", kw)
+    kw = re.sub(r"\s+alert$",            "", kw)
+    kw = re.sub(r"\s+danger$",           "", kw)
+    return re.sub(r"\s+", " ", kw).strip()
 
 
 def display_keyword(text):
@@ -223,7 +222,7 @@ def apply_brand_case(text):
 def title_case(text):
     if not text:
         return ""
-    words = normalize_keyword(text).split()
+    words  = normalize_keyword(text).split()
     titled = []
     for i, word in enumerate(words):
         if i > 0 and word in SMALL_WORDS:
@@ -279,21 +278,21 @@ def is_question_style_keyword(keyword):
 
 
 def clean_keyword_for_title(text):
-    """Strip intent/noise words for H1 titles -- mirrors JS cleanKeywordForSentence."""
     kw = normalize_keyword(text)
-    kw = re.sub(r"^\s*is\s+this\s+", "", kw)
-    kw = re.sub(r"^\s*is\s+", "", kw)
+    kw = re.sub(r"^\s*is\s+this\s+",       "", kw)
+    kw = re.sub(r"^\s*is\s+",              "", kw)
     kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
-    kw = re.sub(r"^\s*should\s+i\s+buy\s+", "", kw)
-    kw = re.sub(r"^\s*what\s+is\s+a?\s*", "", kw)
-    kw = re.sub(r"^\s*how\s+to\s+", "", kw)
-    kw = re.sub(r"^\s*check\s+", "", kw)
+    kw = re.sub(r"^\s*should\s+i\s+buy\s+","", kw)
+    kw = re.sub(r"^\s*what\s+is\s+a?\s*",  "", kw)
+    kw = re.sub(r"^\s*how\s+to\s+",        "", kw)
+    kw = re.sub(r"^\s*check\s+",           "", kw)
     noise = [
-        r"\btoken\b", r"\bcoin\b",    r"\bcrypto\b",
-        r"\brisk\b",  r"\bsafe\b",    r"\blegit\b",
-        r"\bscam\b",  r"\bhoneypot\b",r"\brug\s*pull\b",
+        r"\btoken\b", r"\bcoin\b", r"\bcrypto\b",
+        r"\brisk\b", r"\bsafe\b", r"\blegit\b",
+        r"\bscam\b", r"\bhoneypot\b", r"\brug\s*pull\b",
         r"\bcheck\b", r"\bchecker\b", r"\breview\b",
-        r"\bwarning\b",r"\balert\b",  r"\bdanger\b",
+        r"\bwarning\b", r"\balert\b", r"\bdanger\b",
+        r"\bbefore\s+buy(ing)?\b", r"\bbefore\s+invest(ing)?\b", r"\bbefore\s+you\s+buy\b",
         r"\bto\s+buy\b", r"\bto\s+trade\b", r"\bfor\s+sale\b",
         r"\bis\b", r"\bthis\b", r"\bwhat\b", r"\bhow\b",
         r"\bthe\b", r"\ba\b",
@@ -303,29 +302,82 @@ def clean_keyword_for_title(text):
     return re.sub(r"\s+", " ", kw).strip()
 
 
+def extract_subject(keyword):
+    kw = clean_keyword_for_title(keyword)
+    extra_noise = [
+        r"\bgood\b", r"\bbad\b", r"\bworth\b",
+        r"\bprice(s)?\b", r"\btoday\b", r"\bnow\b", r"\btomorrow\b",
+        r"\bfees?\b", r"\bsignal(s)?\b", r"\bexplain(ed)?\b",
+        r"\bwork(s|ing)?\b", r"\bdoes\b", r"\bdo\b",
+        r"\bi\b", r"\bmy\b", r"\byou(r)?\b",
+        r"\bcan\b", r"\bshould\b", r"\bwill\b", r"\bwould\b",
+        r"\binvest(ing|ment|or)?\b", r"\btrad(e|ing|er)?\b",
+        r"\bmarket(s)?\b", r"\bguide\b", r"\btip(s)?\b",
+        r"\bare\b", r"\bof\b", r"\bin\b", r"\bon\b",
+        r"\bvs\b", r"\bversus\b",
+        r"\bbuy(ing)?\b", r"\bsell(ing)?\b",
+        r"\bsafety\b", r"\bsign(s)?\b", r"\brisks?\b",
+        r"\bsurviv(e|al|ing)?\b", r"\breward(s)?\b",
+        r"\b\d{4}\b",
+    ]
+    for pattern in extra_noise:
+        kw = re.sub(pattern, "", kw, flags=re.IGNORECASE)
+    words = [w for w in re.sub(r"\s+", " ", kw).strip().split(" ") if len(w) > 2]
+    return " ".join(words[:3])
+
+
+def soft_extract(keyword):
+    stop = {
+        "is","a","an","the","and","or","but","for","with","from","this","that","these","those",
+        "was","are","be","been","to","of","in","on","at","by","as","if","it","its","do","did",
+        "has","have","had","not","no","so","up","out","than","then","when","where","who",
+        "why","how","what","will","would","could","should","can","may","might",
+    }
+    words = [w for w in normalize_keyword(keyword).split() if len(w) > 1 and w not in stop]
+    return " ".join(words[:3])
+
+
 def build_static_h1(keyword):
-    """Mirror of JS buildHeroTitle() -- pre-rendered for Google crawl."""
-    raw = normalize_keyword(keyword)
-    if not raw:
-        return "Is This Token Safe? Solana Token Risk Checker"
-    clean    = clean_keyword_for_title(keyword)
-    readable = title_case(clean) if clean and len(clean) > 2 else title_case(raw.split()[0])
-    lower    = raw.lower()
-    if "honeypot" in lower:
-        return f"Honeypot Token Check -- {readable}"
-    if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
-        return f"Rug Pull Token Check -- {readable}"
-    if "scam" in lower or "fake" in lower:
-        return f"Scam Token Check -- Is {readable} Legitimate?"
-    if "safe" in lower or "legit" in lower or "real" in lower or "risk" in lower:
-        return f"Token Risk Check -- Is {readable} Safe?"
-    if readable and len(readable) > 2:
-        return f"Is {readable} Safe? Token Risk Check"
-    return f"{title_case(raw.split()[0])} -- Token Risk Check"
+    try:
+        raw   = normalize_keyword(keyword)
+        if not raw:
+            return "Token Risk Check -- On-Chain Analysis"
+        subject = extract_subject(keyword)
+        s     = title_case(subject) if subject and len(subject) > 2 else ""
+        lower = raw.lower()
+        if "honeypot" in lower:
+            return f"Honeypot Token Check -- {s or 'Solana + EVM'}"
+        if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
+            return f"Rug Pull Token Check -- {s or 'Solana + EVM'}"
+        if any(t in lower for t in ["scam", "fake", "fraud", "phish"]):
+            return f"Scam Token Check -- {'Is ' + s + ' Legitimate?' if s else 'Verify Before Buying'}"
+        if any(t in lower for t in ["safe", "legit", "real", "trust"]):
+            s_safe = s if s and s not in ["Trust","Safe","Real","Legit"] else "This Token"
+            return f"Token Risk Check -- Is {s_safe} Safe?"
+        if any(t in lower for t in ["risk", "risky", "danger", "warning"]):
+            return f"{s or 'Token'} Risk -- On-Chain Safety Check"
+        if any(t in lower for t in ["how", "what", "why", "explain", "does", "work", "guide", "tutorial"]):
+            return f"On-Chain Guide -- {s + ' Risk Analysis' if s else 'Token Risk Analysis'}"
+        if any(t in lower for t in ["vs", "versus", "compare", "difference", "between"]):
+            return f"{s + ' -- Token Risk Comparison' if s else 'Token Risk Comparison -- Solana + EVM'}"
+        if any(t in lower for t in ["better", "best", "top", "choose", "pick"]):
+            s_best = s if s and s not in ["Best","Top"] else ""
+            return f"Best {s_best}? On-Chain Risk Comparison" if s_best else "Token Risk Comparison -- Solana + EVM"
+        if any(t in lower for t in ["price", "worth", "pump", "moon", "prediction", "forecast"]):
+            return f"{'Is ' + s + ' Worth Buying? On-Chain Risk Check' if s else 'Token Risk Check -- Price + On-Chain Signals'}"
+        if any(t in lower for t in ["buy", "invest", "should", "portfolio", "entry"]):
+            return f"{'Should I Buy ' + s + '? Token Risk Check' if s else 'Token Risk Check -- Before You Buy'}"
+        if s:
+            return f"Is {s} Safe? Token Risk Check"
+        soft = soft_extract(keyword)
+        if soft and len(soft) > 2:
+            return f"{title_case(soft)} -- Token Risk Check"
+        return "Token Risk Check -- On-Chain Analysis"
+    except Exception:
+        return "Token Risk Check -- On-Chain Analysis"
 
 
 def build_static_intro(keyword):
-    """Mirror of JS buildHeroSubheading() -- pre-rendered for Google crawl."""
     lower = normalize_keyword(keyword).lower()
     if "honeypot" in lower:
         return (
@@ -388,7 +440,6 @@ def load_generated_records():
 
     records = []
     seen    = set()
-
     for slug, keyword in zip(slugs, keywords):
         if not slug or not keyword or slug in PROTECTED_SLUGS:
             continue
@@ -403,7 +454,7 @@ def load_generated_records():
 def write_lines(filepath, values, preserve_input=True):
     ensure_file(filepath)
     if preserve_input:
-        lines = [str(v).strip() for v in values if str(v).strip()]
+        lines = [str(v).strip()  for v in values if str(v).strip()]
     else:
         lines = [str(v).rstrip() for v in values if str(v).strip()]
     with open(filepath, "w", encoding="utf-8") as f:
@@ -451,10 +502,10 @@ def sanitize_ai_html(text):
     raw = str(text or "").strip()
     if not raw:
         return ""
-    raw = re.sub(r"^```(?:html)?\s*", "", raw, flags=re.IGNORECASE)
-    raw = re.sub(r"\s*```$", "", raw)
+    raw = re.sub(r"^```(?:html)?\s*", "",  raw, flags=re.IGNORECASE)
+    raw = re.sub(r"\s*```$",           "",  raw)
     raw = re.sub(r"<script\b[^>]*>.*?</script>", "", raw, flags=re.IGNORECASE | re.DOTALL)
-    raw = re.sub(r"<style\b[^>]*>.*?</style>",  "", raw, flags=re.IGNORECASE | re.DOTALL)
+    raw = re.sub(r"<style\b[^>]*>.*?</style>",   "", raw, flags=re.IGNORECASE | re.DOTALL)
     raw = raw.strip()
     if "<" in raw and ">" in raw:
         return raw
@@ -492,17 +543,16 @@ def render_page_html(template_html, replacements):
         raise ValueError("Unresolved template placeholders remain: " + ", ".join(unresolved))
     return html
 
+
 # -------------------------
 # SEO TEXT HELPERS
 # -------------------------
 
 def build_og_image(slug):
-    """Return absolute OG image URL. Swap for per-slug generator if needed."""
     return "https://verixiaapps.com/og/token-risk.png"
 
 
 def build_schema_faq(keyword):
-    """Build FAQPage JSON-LD schema -- intent-specific questions per keyword."""
     lower = normalize_keyword(keyword).lower()
 
     base_items = [
@@ -553,14 +603,6 @@ def build_schema_faq(keyword):
             "collapsing the token price. Check the lock duration and the percentage of LP tokens "
             "that are locked.",
         )
-    elif any(t in lower for t in ["holder", "concentration", "whale"]):
-        intent_item = (
-            "What is holder concentration and why does it matter?",
-            "Holder concentration measures what percentage of a token's supply is held by the largest "
-            "wallets. When five wallets hold 60% or more of supply, a coordinated exit can move the "
-            "market faster than other buyers can absorb. The checker surfaces top wallet percentages "
-            "alongside pool depth to give a complete picture of exit risk.",
-        )
     else:
         intent_item = (
             "What is holder concentration and why does it matter?",
@@ -571,7 +613,6 @@ def build_schema_faq(keyword):
         )
 
     all_items = [intent_item] + base_items
-
     schema = {
         "@context": "https://schema.org",
         "@type":    "FAQPage",
@@ -636,6 +677,7 @@ def build_related_anchor(keyword):
 def build_canonical(slug):
     return f"{SITE}/token-risk/{slug}/"
 
+
 # -------------------------
 # LINKING HELPERS
 # -------------------------
@@ -685,8 +727,8 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
         shared_tokens  = len(current_tokens  & other_tokens)
         return (-same_hub, -same_root, -shared_cluster, -shared_tokens, length_diff, other_keyword)
 
-    ranked    = sorted(candidates, key=score)
-    related   = []
+    ranked     = sorted(candidates, key=score)
+    related    = []
     used_slugs = set()
     used_bases = set()
 
@@ -730,6 +772,7 @@ def build_aligned_generated_records(existing_pages_list, extra_pages=None):
             records_by_slug[slug] = {"slug": slug, "keyword": keyword}
     return [records_by_slug[slug] for slug in sorted(records_by_slug.keys())]
 
+
 # -------------------------
 # AI GENERATION
 # -------------------------
@@ -745,11 +788,7 @@ def generate_ai_text(keyword, keyword_display):
         readable,
         f"{clean_keyword} token risk" if clean_keyword else "",
         f"is {clean_keyword} safe" if clean_keyword and not raw_keyword.startswith("is ") else "",
-        (
-            f"should i buy {clean_keyword}"
-            if clean_keyword and not contains_term_phrase(raw_keyword, "buy")
-            else ""
-        ),
+        f"should i buy {clean_keyword}" if clean_keyword and not contains_term_phrase(raw_keyword, "buy") else "",
     ]
 
     seen       = set()
@@ -771,6 +810,7 @@ def generate_ai_text(keyword, keyword_display):
     if last_error:
         raise ValueError(f"AI generation failed for all prompts: {last_error}")
     raise ValueError("AI generation failed for all prompts")
+
 
 # -------------------------
 # SETUP & GENERATION LOOP
@@ -828,11 +868,11 @@ print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
-generated_count       = 0
+generated_count      = 0
 skipped_existing_count = 0
-failed_count          = 0
-processed_keywords    = set()
-new_pages_this_run    = []
+failed_count         = 0
+processed_keywords   = set()
+new_pages_this_run   = []
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
