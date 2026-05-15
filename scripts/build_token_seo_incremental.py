@@ -5,7 +5,7 @@ import sys
 from html import escape
 from datetime import datetime, timezone
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR    = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
 
 if SCRIPTS_DIR not in sys.path:
@@ -17,18 +17,18 @@ from generate_token_content import generate_token_content
 # CONFIG
 # -------------------------
 
-KEYWORD_FILE = os.path.join(BASE_DIR, "data", "token_keywords.txt")
-GENERATED_SLUGS_FILE = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
+KEYWORD_FILE            = os.path.join(BASE_DIR, "data", "token_keywords.txt")
+GENERATED_SLUGS_FILE    = os.path.join(BASE_DIR, "data", "token_generated_slugs.txt")
 GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "token_generated_keywords.txt")
-TEMPLATE_FILE = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
-OUTPUT_DIR = os.path.join(BASE_DIR, "token-risk")
-SITE = "https://verixiaapps.com"
+TEMPLATE_FILE           = os.path.join(BASE_DIR, "token-risk-template", "token-risk-template-a.html")
+OUTPUT_DIR              = os.path.join(BASE_DIR, "token-risk")
+SITE                    = "https://verixiaapps.com"
 
 RELATED_LINKS_COUNT = 6
-MORE_LINKS_COUNT = 10
-DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
+MORE_LINKS_COUNT    = 10
+DAILY_LIMIT         = int(os.getenv("DAILY_LIMIT", "100"))
 
-PROTECTED_SLUGS = {"token-risk", "token-risk-hub"}
+PROTECTED_SLUGS  = {"token-risk", "token-risk-hub"}
 FALLBACK_HUB_SLUG = "token-risk-hub"
 
 REQUIRED_TEMPLATE_PLACEHOLDERS = {
@@ -179,7 +179,7 @@ def slugify(text):
 
 def contains_term_phrase(haystack, needle):
     haystack_norm = normalize_keyword(haystack)
-    needle_norm = normalize_keyword(needle)
+    needle_norm   = normalize_keyword(needle)
     if not haystack_norm or not needle_norm:
         return False
     pattern = r"(^|[^a-z0-9])" + re.escape(needle_norm) + r"([^a-z0-9]|$)"
@@ -201,6 +201,9 @@ def clean_base_keyword(text):
     kw = re.sub(r"\s+risky$", "", kw)
     kw = re.sub(r"\s+real$", "", kw)
     kw = re.sub(r"\s+scam$", "", kw)
+    kw = re.sub(r"\s+warning$", "", kw)
+    kw = re.sub(r"\s+alert$", "", kw)
+    kw = re.sub(r"\s+danger$", "", kw)
     kw = re.sub(r"\s+", " ", kw).strip()
     return kw
 
@@ -275,14 +278,39 @@ def is_question_style_keyword(keyword):
     return kw.startswith(("is ", "can ", "should ", "what ", "why ", "when ", "where "))
 
 
+def clean_keyword_for_title(text):
+    """Strip intent/noise words for H1 titles -- mirrors JS cleanKeywordForSentence."""
+    kw = normalize_keyword(text)
+    kw = re.sub(r"^\s*is\s+this\s+", "", kw)
+    kw = re.sub(r"^\s*is\s+", "", kw)
+    kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
+    kw = re.sub(r"^\s*should\s+i\s+buy\s+", "", kw)
+    kw = re.sub(r"^\s*what\s+is\s+a?\s*", "", kw)
+    kw = re.sub(r"^\s*how\s+to\s+", "", kw)
+    kw = re.sub(r"^\s*check\s+", "", kw)
+    noise = [
+        r"\btoken\b", r"\bcoin\b",    r"\bcrypto\b",
+        r"\brisk\b",  r"\bsafe\b",    r"\blegit\b",
+        r"\bscam\b",  r"\bhoneypot\b",r"\brug\s*pull\b",
+        r"\bcheck\b", r"\bchecker\b", r"\breview\b",
+        r"\bwarning\b",r"\balert\b",  r"\bdanger\b",
+        r"\bto\s+buy\b", r"\bto\s+trade\b", r"\bfor\s+sale\b",
+        r"\bis\b", r"\bthis\b", r"\bwhat\b", r"\bhow\b",
+        r"\bthe\b", r"\ba\b",
+    ]
+    for pattern in noise:
+        kw = re.sub(pattern, "", kw, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", kw).strip()
+
+
 def build_static_h1(keyword):
     """Mirror of JS buildHeroTitle() -- pre-rendered for Google crawl."""
     raw = normalize_keyword(keyword)
     if not raw:
         return "Is This Token Safe? Solana Token Risk Checker"
-    clean = display_keyword(keyword)
-    readable = title_case(clean) if clean else title_case(raw)
-    lower = raw.lower()
+    clean    = clean_keyword_for_title(keyword)
+    readable = title_case(clean) if clean and len(clean) > 2 else title_case(raw.split()[0])
+    lower    = raw.lower()
     if "honeypot" in lower:
         return f"Honeypot Token Check -- {readable}"
     if "rug pull" in lower or "rug-pull" in lower or "rugpull" in lower:
@@ -293,7 +321,7 @@ def build_static_h1(keyword):
         return f"Token Risk Check -- Is {readable} Safe?"
     if readable and len(readable) > 2:
         return f"Is {readable} Safe? Token Risk Check"
-    return f"{readable} -- Token Risk Check"
+    return f"{title_case(raw.split()[0])} -- Token Risk Check"
 
 
 def build_static_intro(keyword):
@@ -359,7 +387,7 @@ def load_generated_records():
         return []
 
     records = []
-    seen = set()
+    seen    = set()
 
     for slug, keyword in zip(slugs, keywords):
         if not slug or not keyword or slug in PROTECTED_SLUGS:
@@ -426,7 +454,7 @@ def sanitize_ai_html(text):
     raw = re.sub(r"^```(?:html)?\s*", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"\s*```$", "", raw)
     raw = re.sub(r"<script\b[^>]*>.*?</script>", "", raw, flags=re.IGNORECASE | re.DOTALL)
-    raw = re.sub(r"<style\b[^>]*>.*?</style>", "", raw, flags=re.IGNORECASE | re.DOTALL)
+    raw = re.sub(r"<style\b[^>]*>.*?</style>",  "", raw, flags=re.IGNORECASE | re.DOTALL)
     raw = raw.strip()
     if "<" in raw and ">" in raw:
         return raw
@@ -546,11 +574,11 @@ def build_schema_faq(keyword):
 
     schema = {
         "@context": "https://schema.org",
-        "@type": "FAQPage",
+        "@type":    "FAQPage",
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": q,
+                "name":  q,
                 "acceptedAnswer": {"@type": "Answer", "text": a},
             }
             for q, a in all_items
@@ -560,7 +588,7 @@ def build_schema_faq(keyword):
 
 
 def build_title(keyword):
-    raw = normalize_keyword(keyword)
+    raw      = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     if not raw:
         return "Token Risk Checker | Liquidity, Volume, Pair Age & Risk Signals"
@@ -580,7 +608,7 @@ def build_title(keyword):
 
 
 def build_description(keyword):
-    raw = normalize_keyword(keyword)
+    raw      = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     clean_kw = display_keyword(keyword)
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
@@ -595,7 +623,7 @@ def build_description(keyword):
 
 
 def build_related_anchor(keyword):
-    raw = normalize_keyword(keyword)
+    raw      = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         anchor = title_case(raw)
@@ -614,9 +642,9 @@ def build_canonical(slug):
 
 def dedupe_pages_by_slug(pages_list):
     deduped = []
-    seen = set()
+    seen    = set()
     for page in pages_list:
-        slug = slugify(page.get("slug", ""))
+        slug    = slugify(page.get("slug", ""))
         keyword = normalize_keyword(page.get("keyword", ""))
         if not slug or not keyword or slug in seen or slug in PROTECTED_SLUGS:
             continue
@@ -626,14 +654,14 @@ def dedupe_pages_by_slug(pages_list):
 
 
 def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
-    exclude_slugs = {slugify(slug) for slug in (exclude_slugs or set()) if slugify(slug)}
-    current_slug = current_page["slug"]
+    exclude_slugs   = {slugify(slug) for slug in (exclude_slugs or set()) if slugify(slug)}
+    current_slug    = current_page["slug"]
     current_keyword = current_page["keyword"]
-    current_tokens = keyword_tokens(current_keyword)
+    current_tokens  = keyword_tokens(current_keyword)
     current_cluster = keyword_cluster_tokens(current_keyword)
-    current_root = keyword_root(current_keyword)
-    current_base = clean_base_keyword(current_keyword)
-    current_hub = find_best_hub_slug(current_keyword)
+    current_root    = keyword_root(current_keyword)
+    current_base    = clean_base_keyword(current_keyword)
+    current_hub     = find_best_hub_slug(current_keyword)
 
     candidates = [
         p for p in all_pages
@@ -645,27 +673,20 @@ def get_related_pages(current_page, all_pages, limit, exclude_slugs=None):
     ]
 
     def score(page):
-        other_keyword = page["keyword"]
-        other_tokens = keyword_tokens(other_keyword)
-        other_cluster = keyword_cluster_tokens(other_keyword)
-        other_root = keyword_root(other_keyword)
-        other_hub = find_best_hub_slug(other_keyword)
-        length_diff = abs(len(other_tokens) - len(current_tokens))
-        same_root = 1 if current_root and other_root == current_root else 0
-        same_hub = 1 if current_hub and other_hub == current_hub else 0
+        other_keyword  = page["keyword"]
+        other_tokens   = keyword_tokens(other_keyword)
+        other_cluster  = keyword_cluster_tokens(other_keyword)
+        other_root     = keyword_root(other_keyword)
+        other_hub      = find_best_hub_slug(other_keyword)
+        length_diff    = abs(len(other_tokens) - len(current_tokens))
+        same_root      = 1 if current_root and other_root == current_root else 0
+        same_hub       = 1 if current_hub  and other_hub  == current_hub  else 0
         shared_cluster = len(current_cluster & other_cluster)
-        shared_tokens = len(current_tokens & other_tokens)
-        return (
-            -same_hub,
-            -same_root,
-            -shared_cluster,
-            -shared_tokens,
-            length_diff,
-            other_keyword,
-        )
+        shared_tokens  = len(current_tokens  & other_tokens)
+        return (-same_hub, -same_root, -shared_cluster, -shared_tokens, length_diff, other_keyword)
 
-    ranked = sorted(candidates, key=score)
-    related = []
+    ranked    = sorted(candidates, key=score)
+    related   = []
     used_slugs = set()
     used_bases = set()
 
@@ -694,14 +715,14 @@ def build_links_html(pages_list):
 def build_aligned_generated_records(existing_pages_list, extra_pages=None):
     records_by_slug = {}
     for page in existing_pages_list:
-        slug = slugify(page.get("slug", ""))
+        slug    = slugify(page.get("slug", ""))
         keyword = normalize_keyword(page.get("keyword", ""))
         if not slug or not keyword or slug in PROTECTED_SLUGS:
             continue
         if page_exists(slug):
             records_by_slug[slug] = {"slug": slug, "keyword": keyword}
     for page in extra_pages or []:
-        slug = slugify(page.get("slug", ""))
+        slug    = slugify(page.get("slug", ""))
         keyword = normalize_keyword(page.get("keyword", ""))
         if not slug or not keyword or slug in PROTECTED_SLUGS:
             continue
@@ -714,9 +735,9 @@ def build_aligned_generated_records(existing_pages_list, extra_pages=None):
 # -------------------------
 
 def generate_ai_text(keyword, keyword_display):
-    raw_keyword = normalize_keyword(keyword)
+    raw_keyword   = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
-    readable = readable_keyword(keyword_display)
+    readable      = readable_keyword(keyword_display)
 
     attempts = [
         raw_keyword,
@@ -731,7 +752,7 @@ def generate_ai_text(keyword, keyword_display):
         ),
     ]
 
-    seen = set()
+    seen       = set()
     last_error = None
 
     for prompt in attempts:
@@ -771,22 +792,22 @@ if not keywords:
     print("No keywords in queue. Nothing to generate.")
     sys.exit(0)
 
-generated_records = load_generated_records()
+generated_records    = load_generated_records()
 existing_keyword_map = {record["slug"]: record["keyword"] for record in generated_records}
 
-filesystem_pages = discover_existing_output_pages(existing_keyword_map=existing_keyword_map)
+filesystem_pages  = discover_existing_output_pages(existing_keyword_map=existing_keyword_map)
 generated_records = build_aligned_generated_records(filesystem_pages)
 
-generated_slugs = {record["slug"] for record in generated_records}
+generated_slugs    = {record["slug"]    for record in generated_records}
 generated_keywords = {record["keyword"] for record in generated_records}
 
-queue_pages = []
-seen_queue_slugs = set()
+queue_pages          = []
+seen_queue_slugs     = set()
 duplicate_queue_count = 0
 
 for keyword in keywords:
     keyword_norm = normalize_keyword(keyword)
-    slug = slugify(keyword_norm)
+    slug         = slugify(keyword_norm)
     if slug in PROTECTED_SLUGS or not slug:
         continue
     if slug in seen_queue_slugs:
@@ -796,7 +817,7 @@ for keyword in keywords:
     queue_pages.append({"keyword": keyword_norm, "slug": slug})
 
 existing_pages = dedupe_pages_by_slug(filesystem_pages)
-queue_pages = dedupe_pages_by_slug(queue_pages)
+queue_pages    = dedupe_pages_by_slug(queue_pages)
 
 print(f"Loaded {len(keywords)} keywords from queue.")
 print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
@@ -807,20 +828,20 @@ print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
-generated_count = 0
+generated_count       = 0
 skipped_existing_count = 0
-failed_count = 0
-processed_keywords = set()
-new_pages_this_run = []
+failed_count          = 0
+processed_keywords    = set()
+new_pages_this_run    = []
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
         break
 
-    slug = page["slug"]
-    keyword = page["keyword"]
+    slug            = page["slug"]
+    keyword         = page["keyword"]
     keyword_display = display_keyword(keyword)
-    path = page_path(slug)
+    path            = page_path(slug)
 
     if slug in PROTECTED_SLUGS:
         processed_keywords.add(keyword)
@@ -833,9 +854,9 @@ for page in queue_pages:
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    title = build_title(keyword)
+    title       = build_title(keyword)
     description = build_description(keyword)
-    canonical = build_canonical(slug)
+    canonical   = build_canonical(slug)
 
     try:
         ai_text = generate_ai_text(keyword, keyword_display)
@@ -846,7 +867,7 @@ for page in queue_pages:
 
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
-    more_pages = get_related_pages(
+    more_pages    = get_related_pages(
         page,
         existing_pages,
         MORE_LINKS_COUNT,
@@ -898,7 +919,7 @@ for keyword in keywords:
         remaining_keywords.append(keyword_norm)
 
 aligned_records = build_aligned_generated_records(existing_pages, extra_pages=new_pages_this_run)
-write_lines(GENERATED_SLUGS_FILE, [record["slug"] for record in aligned_records])
+write_lines(GENERATED_SLUGS_FILE,    [record["slug"]    for record in aligned_records])
 write_lines(GENERATED_KEYWORDS_FILE, [record["keyword"] for record in aligned_records])
 write_lines(KEYWORD_FILE, remaining_keywords)
 
