@@ -1,422 +1,529 @@
-import os
+#!/usr/bin/env python3
+"""
+build_pages.py -- v13.0
+
+Builds Verixia token-risk and DEX-aggregator SEO pages from the keyword queue.
+
+What changed from v12.x:
+  - Title, description, H1, hero intro, content H2, content bridge, FAQ, schema,
+    threat banner, recognition chips, and story card titles all come from the
+    Node SEO engine's `buildPageMeta(keyword)` -- single source of truth.
+  - Python no longer reimplements intent detection, subject extraction, or
+    keyword cleaning. Those live in the engine.
+  - One new endpoint required on the Node server: POST /seo-page returns the
+    full page payload (content + meta + hlData). See ROUTE_SNIPPET at the
+    bottom of this file -- 8 lines to add to your existing server.js.
+
+What stayed:
+  - Keyword queue loading and slug management.
+  - Hub link selection (HUB_MATCH_RULES, HUB_TITLE_OVERRIDES) -- depends on
+    your hub taxonomy, kept in Python.
+  - Related-page linking via get_related_pages() + build_links_html().
+  - Daily limit handling.
+  - Output paths and file I/O.
+"""
+
+from __future__ import annotations
+
+import json
 import re
 import sys
-import logging
-from typing import List, Dict, Tuple, Optional
+import time
+from datetime import datetime, timezone
+from pathlib import Path
 
 import requests
 
-# -------------------------
+# =========================================================================
 # CONFIG
-# -------------------------
+# =========================================================================
 
-TOKEN_RISK_API = os.getenv(
-    "TOKEN_RISK_API",
-    "https://awake-integrity-production-faa0.up.railway.app",
-).rstrip("/")
+# Repo layout: this script lives at BASE_DIR/scripts/build_pages.py
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-TOKEN_RISK_ENDPOINT = os.getenv("TOKEN_RISK_ENDPOINT", "/seo-content")
-TIMEOUT             = int(os.getenv("TOKEN_RISK_TIMEOUT", "180"))
+# Paths preserved verbatim from v12 -- do not change without coordinating
+# with cron / Railway / deploy pipeline.
+KEYWORDS_FILE        = BASE_DIR / "data" / "token_keywords.txt"
+GENERATED_SLUGS_FILE = BASE_DIR / "data" / "token_generated_slugs.txt"
+GENERATED_KW_FILE    = BASE_DIR / "data" / "token_generated_keywords.txt"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
+TEMPLATE_RISK_PATH   = BASE_DIR / "token-risk-template" / "token-risk-template-a.html"
+TEMPLATE_DEX_PATH    = BASE_DIR / "token-risk-template" / "dex-aggregator-template.html"
+TEMPLATE_DEFI_PATH   = BASE_DIR / "token-risk-template" / "defi-general-template-a.html"
 
-NON_RETRYABLE_ERROR_MARKERS = (
-    "exceeded your current quota",
-    "insufficient_quota",
-    "billing",
-    "quota",
-    "429",
-    "rate limit",
-    "rate_limit",
-    "invalid_api_key",
-    "incorrect api key",
-    "authentication",
-    "unauthorized",
-    "forbidden",
-)
+OUTPUT_DIR_RISK      = BASE_DIR / "token-risk"
+OUTPUT_DIR_DEX       = BASE_DIR / "dex"
+OUTPUT_DIR_DEFI      = BASE_DIR / "defi"
 
-SMALL_WORDS = {
-    "a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on",
-    "or", "the", "to", "vs", "with",
+SITE_URL             = "https://verixiaapps.com"
+SEO_API_BASE         = "https://awake-integrity-production-faa0.up.railway.app"
+SEO_PAGE_ENDPOINT    = f"{SEO_API_BASE}/seo-page"
+SEO_PAGE_TIMEOUT_S   = 90
+
+DAILY_LIMIT          = 8
+
+OG_IMAGE             = f"{SITE_URL}/og-default.png"
+TWITTER_HANDLE       = "@verixiaapps"
+
+# =========================================================================
+# HUB SYSTEM (preserved -- depends on your taxonomy)
+# =========================================================================
+
+HUB_MATCH_RULES = [
+    # Order matters: first match wins.
+    # (regex pattern, hub_slug, hub_title_override_key)
+    (r"\bhoneypot\b",                        "honeypot-tokens",       "honeypot"),
+    (r"\brug\s*pull|rugpull|\brug\b",        "rug-pull-detection",    "rug_pull"),
+    (r"\bscam|fraud|fake|phish",             "scam-token-detection",  "scam"),
+    (r"\bsolana\b.*\bswap\b|\bswap\b.*\bsolana\b|\bspl\b.*\bswap\b",
+                                              "solana-dex-aggregator", "swap"),
+    (r"\bperp(s|etual)|funding\s+rate|liquidation|leverage",
+                                              "defi-perpetuals",       "perps"),
+    (r"\bdex\s+aggregator|swap\s+aggregator|best\s+price\s+swap",
+                                              "solana-dex-aggregator", "aggregator"),
+    (r"\bmeme\s+coin",                       "meme-coin-risk",        "meme"),
+    (r"\bnew\s+token|token\s+launch|presale",
+                                              "new-token-risk",        "new_token"),
+    (r"\bholder|concentration|whale",        "holder-concentration",  "holders"),
+    (r"\blp\s+lock|liquidity\s+lock|locked\s+liquidity",
+                                              "liquidity-lock",        "lp_lock"),
+    (r"\bcontract|smart\s+contract|renounce|mint(able|\s+authority)|freeze|blacklist",
+                                              "contract-risk",         "contract"),
+]
+
+HUB_TITLE_OVERRIDES = {
+    "honeypot":   "Honeypot Token Detection Hub",
+    "rug_pull":   "Rug Pull Detection Hub",
+    "scam":       "Scam Token Detection Hub",
+    "swap":       "Solana DEX Aggregator",
+    "perps":      "DeFi Perpetuals Hub",
+    "aggregator": "Solana DEX Aggregator",
+    "meme":       "Meme Coin Risk Hub",
+    "new_token":  "New Token Risk Hub",
+    "holders":    "Holder Concentration Hub",
+    "lp_lock":    "Liquidity Lock Status Hub",
+    "contract":   "Contract Risk Hub",
 }
 
-BRAND_CASE = {
-    "binance smart chain": "Binance Smart Chain",
-    "market cap":          "Market Cap",
-    "pair age":            "Pair Age",
-    "price action":        "Price Action",
-    "price change":        "Price Change",
-    "trust wallet":        "Trust Wallet",
-    "pool depth":          "Pool Depth",
-    "token risk hub":      "Token Risk Hub",
-    "token risk":          "Token Risk",
-    "metamask":            "MetaMask",
-    "dexscreener":         "Dexscreener",
-    "pancakeswap":         "PancakeSwap",
-    "uniswap":             "Uniswap",
-    "raydium":             "Raydium",
-    "coinbase":            "Coinbase",
-    "ethereum":            "Ethereum",
-    "avalanche":           "Avalanche",
-    "arbitrum":            "Arbitrum",
-    "polygon":             "Polygon",
-    "phantom":             "Phantom",
-    "bitcoin":             "Bitcoin",
-    "solana":              "Solana",
-    "binance":             "Binance",
-    "jupiter":             "Jupiter",
-    "liquidity":           "Liquidity",
-    "volume":              "Volume",
-    "buyers":              "Buyers",
-    "sellers":             "Sellers",
-    "slippage":            "Slippage",
-    "crypto":              "Crypto",
-    "token":               "Token",
-    "market":              "Market",
-    "fdv":                 "FDV",
-    "bsc":                 "BSC",
-    "eth":                 "ETH",
-    "ton":                 "TON",
-    "trx":                 "TRX",
-    "tron":                "Tron",
-    "base":                "Base",
-    "blast":               "Blast",
-    "sui":                 "Sui",
-    "cto":                 "CTO",
-}
+DEFAULT_HUB_SLUG  = "token-risk"
+DEFAULT_HUB_TITLE = "Token Risk Checker"
 
-CHAIN_HINTS = (
-    "solana", "ethereum", "eth", "base", "bsc", "arbitrum", "polygon",
-    "avalanche", "blast", "sui", "ton", "tron", "bitcoin",
-)
+def select_hub(keyword: str) -> tuple[str, str]:
+    """Return (hub_slug, hub_title) for the keyword based on hub rules."""
+    lower = keyword.lower()
+    for pattern, hub_slug, override_key in HUB_MATCH_RULES:
+        if re.search(pattern, lower):
+            title = HUB_TITLE_OVERRIDES.get(override_key, DEFAULT_HUB_TITLE)
+            return hub_slug, title
+    return DEFAULT_HUB_SLUG, DEFAULT_HUB_TITLE
 
-METRIC_HINTS = (
-    "liquidity", "volume", "pair age", "pool depth", "slippage", "fdv",
-    "market cap", "buyers", "sellers", "price action", "price change",
-)
+# =========================================================================
+# SLUG MANAGEMENT
+# =========================================================================
 
-BUY_INTENT_HINTS = (
-    "should i buy", "worth buying", "good investment", "safe to buy",
-    "buy now", "entry", "buy",
-)
+_SLUG_INVALID = re.compile(r"[^a-z0-9\-]+")
+_SLUG_DASHES  = re.compile(r"-{2,}")
 
-SAFETY_HINTS = (
-    "safe", "legit", "risky", "rug pull", "rug", "honeypot", "scam",
-    "sell lock", "sell locked",
-)
+def slugify(keyword: str) -> str:
+    """Generate URL-safe slug from a keyword. Same logic as v12."""
+    s = keyword.lower().strip()
+    s = re.sub(r"[\u2013\u2014]", "-", s)
+    s = re.sub(r"[\s_]+", "-", s)
+    s = _SLUG_INVALID.sub("", s)
+    s = _SLUG_DASHES.sub("-", s)
+    s = s.strip("-")
+    return s[:90] if len(s) > 90 else s
 
-WEAK_MARKERS = (
-    "lorem ipsum",
-    "as an ai",
-    "here are some paragraphs",
-    "let me know if you want",
-    "i can't help with that",
-    "i cannot help with that",
-    "i'm sorry",
-    "i am sorry",
-    "cannot assist",
-    "can't assist",
-    "content policy",
-    "policy",
-)
+def load_lines(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
-# -------------------------
-# HELPERS
-# -------------------------
+def append_line(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(value + "\n")
 
-def normalize_keyword(text: str) -> str:
-    return re.sub(r"\s+", " ", str(text).strip().lower())
+def load_keyword_queue() -> list[str]:
+    """Load keywords from queue, deduped against generated tracking."""
+    if not KEYWORDS_FILE.exists():
+        print(f"[error] Keywords file missing: {KEYWORDS_FILE}", file=sys.stderr)
+        return []
+    all_keywords = load_lines(KEYWORDS_FILE)
+    generated    = set(load_lines(GENERATED_KW_FILE))
+    pending      = [kw for kw in all_keywords if kw not in generated]
+    return pending
 
+# =========================================================================
+# ENGINE API CLIENT
+# =========================================================================
 
-def contains_term_phrase(haystack: str, needle: str) -> bool:
-    haystack_norm = normalize_keyword(haystack)
-    needle_norm   = normalize_keyword(needle)
-    if not haystack_norm or not needle_norm:
-        return False
-    pattern = r"(^|[^a-z0-9])" + re.escape(needle_norm) + r"([^a-z0-9]|$)"
-    return re.search(pattern, haystack_norm, flags=re.IGNORECASE) is not None
-
-
-def clean_base_keyword(text: str) -> str:
-    kw = normalize_keyword(text)
-    kw = re.sub(r"^\s*is\s+this\s+",      "", kw)
-    kw = re.sub(r"^\s*is\s+",             "", kw)
-    kw = re.sub(r"^\s*can\s+i\s+trust\s+","", kw)
-    kw = re.sub(r"^\s*should\s+i\s+buy\s+","", kw)
-    kw = re.sub(r"^\s*check\s+",          "", kw)
-    kw = re.sub(r"\s+safe$",              "", kw)
-    kw = re.sub(r"\s+legit$",             "", kw)
-    kw = re.sub(r"\s+risky$",             "", kw)
-    kw = re.sub(r"\s+real$",              "", kw)
-    kw = re.sub(r"\s+scam$",              "", kw)
-    return re.sub(r"\s+", " ", kw).strip()
-
-
-def display_keyword(text: str) -> str:
-    return clean_base_keyword(text)
-
-
-def apply_brand_case(text: str) -> str:
-    result = f" {text} "
-    for raw, proper in sorted(BRAND_CASE.items(), key=lambda x: len(x[0]), reverse=True):
-        pattern = r"(?<![a-z0-9])" + re.escape(raw) + r"(?![a-z0-9])"
-        result  = re.sub(pattern, proper, result, flags=re.IGNORECASE)
-    return re.sub(r"\s+", " ", result).strip()
-
-
-def title_case(text: str) -> str:
-    text = normalize_keyword(text)
-    if not text:
-        return ""
-    words  = text.split()
-    titled: List[str] = []
-    for i, word in enumerate(words):
-        titled.append(word if i > 0 and word in SMALL_WORDS else word.capitalize())
-    return apply_brand_case(" ".join(titled))
-
-
-def variant_index(keyword: str, count: int) -> int:
-    return sum(ord(c) for c in normalize_keyword(keyword)) % count if count else 0
-
-
-def safe_json(response: requests.Response) -> Dict:
+def fetch_seo_page(keyword: str) -> dict | None:
+    """
+    POST /seo-page on the Node engine. Returns:
+      {
+        keyword, content, templateType,
+        meta: { title, description, h1, intro, contentHeading, contentBridge,
+                breadcrumb, faq, faqSchema, threatBanner, recognitionChips,
+                storyCardTitles, intent, shape, subject, subjects },
+        hlData, hlDataBlock
+      }
+    Returns None on hard failure (network, 5xx, malformed response).
+    """
     try:
-        return response.json()
-    except ValueError as e:
-        snippet = response.text[:200].replace("\n", " ").strip()
-        raise ValueError(f"Invalid JSON response: {snippet}") from e
+        resp = requests.post(
+            SEO_PAGE_ENDPOINT,
+            json={"keyword": keyword},
+            timeout=SEO_PAGE_TIMEOUT_S,
+        )
+    except requests.RequestException as exc:
+        print(f"[seo-page] Network error for {keyword!r}: {exc}", file=sys.stderr)
+        return None
 
+    if resp.status_code != 200:
+        print(f"[seo-page] HTTP {resp.status_code} for {keyword!r}: {resp.text[:200]}", file=sys.stderr)
+        return None
 
-def error_is_non_retryable(exc: Exception) -> bool:
-    message = str(exc).lower()
-    return any(marker in message for marker in NON_RETRYABLE_ERROR_MARKERS)
+    try:
+        payload = resp.json()
+    except ValueError:
+        print(f"[seo-page] Bad JSON for {keyword!r}", file=sys.stderr)
+        return None
 
+    # Minimum field check
+    if not payload.get("content") or not payload.get("meta"):
+        print(f"[seo-page] Missing content/meta for {keyword!r}", file=sys.stderr)
+        return None
 
-def dedupe_preserve_order(items: List[str]) -> List[str]:
-    seen   = set()
-    result: List[str] = []
-    for item in items:
-        key = normalize_keyword(item)
-        if key and key not in seen:
-            seen.add(key)
-            result.append(item)
-    return result
+    return payload
 
+# =========================================================================
+# RELATED PAGES
+# =========================================================================
 
-def clean_text(text: str) -> str:
-    text = str(text or "")
-    text = re.sub(r"```(?:html)?\s*", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*```",          "", text)
-    text = re.sub(r"<script\b[^>]*>.*?</script>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<style\b[^>]*>.*?</style>",   "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"^\s*#{1,6}\s*", "", text, flags=re.MULTILINE)
-    return text.strip()
+def get_related_pages(current_slug: str, current_hub: str, limit: int = 4) -> list[tuple[str, str]]:
+    """
+    Returns up to `limit` (slug, title) pairs of previously-generated pages
+    from the same hub (prioritised), then other hubs as fill-in.
+    Title is reconstructed from the slug.
+    """
+    all_slugs = load_lines(GENERATED_SLUGS_FILE)
+    same_hub  = []
+    other_hub = []
 
+    for line in all_slugs:
+        # Format: <hub_slug>:<page_slug> if stored that way, else just <page_slug>
+        if ":" in line:
+            hub_part, slug = line.split(":", 1)
+        else:
+            hub_part, slug = DEFAULT_HUB_SLUG, line
 
-def strip_all_tags(text: str) -> str:
-    return re.sub(r"<[^>]+>", " ", text)
-
-
-def is_usable_ai_text(text: str) -> bool:
-    if not text:
-        return False
-    raw     = str(text).strip()
-    lowered = raw.lower()
-    if len(raw) < 280:
-        return False
-    if any(marker in lowered for marker in WEAK_MARKERS):
-        return False
-    paragraph_like = (
-        "<p>"  in lowered
-        or "</p>" in lowered
-        or "<ul>" in lowered
-        or raw.count("\n") >= 3
-    )
-    return paragraph_like
-
-
-def normalize_ai_html(text: str) -> str:
-    raw = clean_text(text)
-    if not raw:
-        return ""
-    raw = re.sub(
-        r"</?(html|body|main|section|article|header|footer|aside)[^>]*>",
-        "", raw, flags=re.IGNORECASE,
-    )
-    raw = re.sub(r"<div[^>]*>",  "", raw, flags=re.IGNORECASE)
-    raw = re.sub(r"</div>",      "", raw, flags=re.IGNORECASE)
-    raw = re.sub(r"<a\b[^>]*>(.*?)</a>", r"\1", raw, flags=re.IGNORECASE | re.DOTALL)
-    raw = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", raw, flags=re.IGNORECASE | re.DOTALL)
-
-    allowed_tag_names = {"strong", "em", "b", "i", "code", "p", "ul", "ol", "li", "blockquote"}
-
-    def rebuild_allowed_tag(match: re.Match) -> str:
-        slash = match.group(1)
-        tag   = match.group(2).lower()
-        return f"<{slash}{tag}>" if tag in allowed_tag_names else ""
-
-    raw = re.sub(r"<(/?)([a-z0-9]+)(?:\s[^>]*)?>", rebuild_allowed_tag, raw, flags=re.IGNORECASE)
-    raw = re.sub(r"\n{3,}", "\n\n", raw).strip()
-
-    if re.search(r"</?(p|ul|ol|li|blockquote)\b", raw, flags=re.IGNORECASE):
-        return raw
-
-    plain = strip_all_tags(raw)
-    plain = re.sub(r"\s+", " ", plain).strip()
-    if not plain:
-        return ""
-
-    parts = [part.strip() for part in re.split(r"\n\s*\n+", plain) if part.strip()]
-    if not parts:
-        parts = [plain]
-    return "\n".join(f"<p>{part}</p>" for part in parts)
-
-
-def trim_redundant_ai_html(html: str, raw_keyword: str) -> str:
-    if not html:
-        return ""
-
-    blocks = re.findall(
-        r"<p>.*?</p>|<ul>.*?</ul>|<ol>.*?</ol>|<blockquote>.*?</blockquote>",
-        html, flags=re.I | re.S,
-    )
-    if not blocks:
-        blocks = [html]
-
-    keyword_norm  = normalize_keyword(raw_keyword)
-    keyword_clean = re.sub(r"[^a-z0-9]+", " ", keyword_norm).strip()
-
-    kept: List[str] = []
-    seen_text       = set()
-
-    for block in blocks:
-        plain       = strip_all_tags(block)
-        plain       = re.sub(r"\s+", " ", plain).strip()
-        plain_lower = plain.lower()
-
-        if not plain or len(plain) < 35:
-            continue
-        if any(marker in plain_lower for marker in WEAK_MARKERS):
+        if slug == current_slug:
             continue
 
-        normalized_plain = re.sub(r"[^a-z0-9]+", " ", plain_lower).strip()
-        if normalized_plain in seen_text:
-            continue
+        title = slug_to_title(slug)
+        if hub_part == current_hub:
+            same_hub.append((slug, title, hub_part))
+        else:
+            other_hub.append((slug, title, hub_part))
 
-        if keyword_clean:
-            if normalized_plain.count(keyword_clean) > 2:
-                continue
+    chosen = same_hub[:limit]
+    if len(chosen) < limit:
+        chosen += other_hub[: limit - len(chosen)]
 
-        seen_text.add(normalized_plain)
-        kept.append(block.strip())
+    # Reverse so newest appears first (slugs are appended chronologically)
+    chosen.reverse()
+    return [(slug, title) for slug, title, _ in chosen[:limit]]
 
-    if not kept:
-        return html
-    if len(kept) > 4:
-        kept = kept[:4]
-    return "\n".join(kept)
+def slug_to_title(slug: str) -> str:
+    """Reconstruct a readable title from a slug."""
+    words = slug.replace("-", " ").split()
+    preserve = {
+        "btc": "BTC", "eth": "ETH", "sol": "SOL", "usdc": "USDC", "usdt": "USDT",
+        "bnb": "BNB", "bonk": "BONK", "pepe": "PEPE", "wif": "WIF", "doge": "DOGE",
+        "shib": "SHIB", "lp": "LP", "dex": "DEX", "cex": "CEX", "nft": "NFT",
+        "ai": "AI", "dao": "DAO", "defi": "DeFi", "tvl": "TVL", "kyc": "KYC",
+        "lst": "LST", "lrt": "LRT", "rwa": "RWA", "ico": "ICO", "ido": "IDO",
+        "vs": "vs",
+    }
+    out = []
+    for w in words:
+        if w in preserve:
+            out.append(preserve[w])
+        else:
+            out.append(w.capitalize())
+    return " ".join(out)
 
+def build_links_html(related: list[tuple[str, str]], hub_slug: str) -> str:
+    """Build the related-links HTML block."""
+    if not related:
+        return ""
+    items = []
+    for slug, title in related:
+        href = f"/{hub_slug}/{slug}/"
+        items.append(f'<a class="related-link" href="{href}">{title}</a>')
+    return "\n".join(items)
 
-def build_payload_variants(raw_keyword: str, display_kw: str) -> List[str]:
-    readable = title_case(display_kw)
-    variants = dedupe_preserve_order([
-        raw_keyword,
-        display_kw,
-        readable,
-        f"{display_kw} token risk"     if display_kw else "",
-        f"is {display_kw} safe"        if display_kw and not raw_keyword.startswith("is ") else "",
-        f"should i buy {display_kw}"   if display_kw and not contains_term_phrase(raw_keyword, "buy") else "",
-        f"{display_kw} liquidity risk" if display_kw and not contains_term_phrase(raw_keyword, "liquidity") else "",
-    ])
-    return variants[:6]
+# =========================================================================
+# TEMPLATE RENDERING
+# =========================================================================
 
+def load_template(template_type: str) -> str:
+    """Load template HTML based on type (risk, dex, or defi-general)."""
+    if template_type == "dex":
+        path = TEMPLATE_DEX_PATH
+    elif template_type == "defi-general":
+        path = TEMPLATE_DEFI_PATH
+    else:
+        path = TEMPLATE_RISK_PATH
+    if not path.exists():
+        raise FileNotFoundError(f"Template missing: {path}")
+    return path.read_text(encoding="utf-8")
 
-# -------------------------
-# API CALL
-# -------------------------
-
-def fetch_ai(prompt_keyword: str) -> str:
-    response = requests.post(
-        f"{TOKEN_RISK_API}{TOKEN_RISK_ENDPOINT}",
-        json={"keyword": prompt_keyword, "type": "token-risk"},
-        timeout=TIMEOUT,
+def html_escape(text: str) -> str:
+    """Minimal HTML escape for attribute / inline text contexts."""
+    return (
+        str(text)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
     )
-    response.raise_for_status()
-    data = safe_json(response)
-    return str(data.get("content", "")).strip()
 
+def render_ai_content_html(content: str) -> str:
+    """Render the 4-paragraph engine content as HTML paragraphs."""
+    paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
+    return "\n".join(f"<p>{html_escape(p)}</p>" for p in paragraphs)
 
-# -------------------------
-# MAIN GENERATOR
-# -------------------------
+def build_page_meta_script(meta: dict, hl_data_block: str = "") -> str:
+    """
+    Inject the engine's full meta object as window.__pageMeta. The template's
+    JS reads this -- if present, it skips client-side regeneration of H1,
+    intro, content heading, content bridge, FAQ, chips, and threat banner.
+    """
+    payload = {
+        "title":            meta.get("title", ""),
+        "description":      meta.get("description", ""),
+        "h1":               meta.get("h1", ""),
+        "intro":            meta.get("intro", ""),
+        "contentHeading":   meta.get("contentHeading", ""),
+        "contentBridge":    meta.get("contentBridge", ""),
+        "breadcrumb":       meta.get("breadcrumb", ""),
+        "intent":           meta.get("intent", ""),
+        "shape":            meta.get("shape", ""),
+        "subject":          meta.get("subject", ""),
+        "faq":              meta.get("faq", []),
+        "threatBanner":     meta.get("threatBanner"),
+        "recognitionChips": meta.get("recognitionChips", []),
+        "storyCardTitles":  meta.get("storyCardTitles", []),
+        "hlDataBlock":      hl_data_block or "",
+    }
+    json_blob = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+    # Escape closing script tags inside JSON to be safe
+    safe_blob = json_blob.replace("</", "<\\/")
+    return f'<script id="page-meta">window.__pageMeta = {safe_blob};</script>'
 
-def generate_token_content(keyword: str) -> str:
-    raw_keyword = normalize_keyword(keyword)
-    display_kw  = display_keyword(raw_keyword)
+def render_page(template_html: str, keyword: str, payload: dict,
+                slug: str, hub_slug: str, hub_title: str,
+                related_html: str) -> str:
+    """Replace all placeholders in the template with engine-supplied values."""
+    meta = payload["meta"]
+    content = payload["content"]
+    hl_block = payload.get("hlDataBlock", "") or ""
 
-    if not display_kw:
-        raise ValueError("Empty keyword after normalization")
+    canonical = f"{SITE_URL}/{hub_slug}/{slug}/"
+    page_url  = canonical
+    title     = meta.get("title", "")
+    desc      = meta.get("description", "")
+    h1        = meta.get("h1", "")
+    intro     = meta.get("intro", "")
+    content_heading = meta.get("contentHeading", "")
+    content_bridge  = meta.get("contentBridge", "")
+    breadcrumb_name = meta.get("breadcrumb", "")
+    faq_schema      = meta.get("faqSchema", "")
 
-    logging.info("Generating token content for: %s", raw_keyword)
+    ai_content_html = render_ai_content_html(content)
+    meta_script     = build_page_meta_script(meta, hl_block)
 
-    payload_variants = build_payload_variants(raw_keyword, display_kw)
-    last_error: Optional[Exception] = None
+    substitutions = {
+        # Standard meta
+        "{{TITLE}}":               title,
+        "{{DESCRIPTION}}":         desc,
+        "{{KEYWORD}}":             keyword,
+        "{{CANONICAL_URL}}":       canonical,
+        "{{PAGE_URL}}":            page_url,
+        "{{SITE_URL}}":            SITE_URL,
 
-    for prompt_keyword in payload_variants:
+        # Open Graph / Twitter
+        "{{OG_TITLE}}":            title,
+        "{{OG_DESCRIPTION}}":      desc,
+        "{{OG_URL}}":              page_url,
+        "{{OG_IMAGE}}":            OG_IMAGE,
+        "{{TWITTER_TITLE}}":       title,
+        "{{TWITTER_DESCRIPTION}}": desc,
+        "{{TWITTER_HANDLE}}":      TWITTER_HANDLE,
+
+        # Hero / content (server-rendered; template JS now respects these)
+        "{{STATIC_H1}}":           html_escape(h1),
+        "{{STATIC_INTRO}}":        html_escape(intro),
+        "{{CONTENT_HEADING}}":     html_escape(content_heading),
+        "{{CONTENT_BRIDGE}}":      html_escape(content_bridge),
+        "{{BREADCRUMB_NAME}}":     html_escape(breadcrumb_name),
+
+        # Body content
+        "{{AI_CONTENT}}":          ai_content_html,
+        "{{HL_DATA_BLOCK}}":       hl_block,
+
+        # Schema + meta JSON for template JS
+        "{{SCHEMA_FAQ}}":          faq_schema,
+        "{{PAGE_META_SCRIPT}}":    meta_script,
+
+        # Hub / related
+        "{{HUB_SLUG}}":            hub_slug,
+        "{{HUB_TITLE}}":           html_escape(hub_title),
+        "{{HUB_LINK_HREF}}":       f"/{hub_slug}/",
+        "{{HUB_LINK_TEXT}}":       html_escape(hub_title),
+        "{{RELATED_LINKS}}":       related_html,
+        "{{LINKS_HTML}}":          related_html,
+
+        # Generation timestamp
+        "{{GENERATED_AT}}":        datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+    rendered = template_html
+    for placeholder, value in substitutions.items():
+        rendered = rendered.replace(placeholder, str(value))
+
+    # Insert page-meta script before </head> if {{PAGE_META_SCRIPT}} is not present
+    if "{{PAGE_META_SCRIPT}}" not in template_html and "window.__pageMeta" not in rendered:
+        if "</head>" in rendered:
+            rendered = rendered.replace("</head>", f"{meta_script}\n</head>", 1)
+
+    return rendered
+
+# =========================================================================
+# BUILD LOOP
+# =========================================================================
+
+def write_page(template_type: str, slug: str, hub_slug: str, html: str) -> Path:
+    """Write the rendered HTML to the correct output directory."""
+    if template_type == "dex":
+        output_dir = OUTPUT_DIR_DEX / slug
+    elif template_type == "defi-general":
+        output_dir = OUTPUT_DIR_DEFI / slug
+    else:
+        # Token risk pages: respect the hub slug if it differs from default
+        output_dir = OUTPUT_DIR_RISK / slug
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / "index.html"
+    output_file.write_text(html, encoding="utf-8")
+    return output_file
+
+def record_generated(slug: str, keyword: str, hub_slug: str) -> None:
+    """Mark a slug + keyword as generated so it doesn't rebuild."""
+    append_line(GENERATED_SLUGS_FILE, f"{hub_slug}:{slug}")
+    append_line(GENERATED_KW_FILE, keyword)
+
+def process_keyword(keyword: str) -> bool:
+    """Process a single keyword. Returns True on success, False otherwise."""
+    print(f"[build] -> {keyword!r}")
+    payload = fetch_seo_page(keyword)
+    if not payload:
+        print(f"[build] FAILED: could not fetch payload for {keyword!r}")
+        return False
+
+    template_type = payload.get("templateType", "risk")
+    meta          = payload["meta"]
+
+    slug = slugify(keyword)
+    if not slug:
+        print(f"[build] FAILED: empty slug for {keyword!r}")
+        return False
+
+    hub_slug, hub_title = select_hub(keyword)
+    related     = get_related_pages(slug, hub_slug, limit=4)
+    related_html = build_links_html(related, hub_slug)
+
+    template_html = load_template(template_type)
+    rendered = render_page(
+        template_html=template_html,
+        keyword=keyword,
+        payload=payload,
+        slug=slug,
+        hub_slug=hub_slug,
+        hub_title=hub_title,
+        related_html=related_html,
+    )
+
+    output_file = write_page(template_type, slug, hub_slug, rendered)
+    record_generated(slug, keyword, hub_slug)
+    print(f"[build] OK -> {output_file} (intent={meta.get('intent')}, shape={meta.get('shape')})")
+    return True
+
+def main(limit: int = DAILY_LIMIT) -> int:
+    """Build up to `limit` pages from the keyword queue."""
+    pending = load_keyword_queue()
+    if not pending:
+        print("[build] No pending keywords.")
+        return 0
+
+    print(f"[build] Pending: {len(pending)} | Daily limit: {limit}")
+    todo = pending[:limit]
+    succeeded = 0
+    failed    = 0
+
+    for i, keyword in enumerate(todo, 1):
+        print(f"\n[build] [{i}/{len(todo)}] {keyword}")
         try:
-            raw = fetch_ai(prompt_keyword)
+            ok = process_keyword(keyword)
+            if ok:
+                succeeded += 1
+            else:
+                failed += 1
+        except Exception as exc:
+            failed += 1
+            print(f"[build] EXCEPTION on {keyword!r}: {exc}", file=sys.stderr)
+        time.sleep(0.5)  # Tiny pause between calls
 
-            if not raw:
-                last_error = ValueError(f"Empty content for prompt: {prompt_keyword}")
-                logging.warning(
-                    "Token AI generation returned empty content for %s using prompt '%s'",
-                    raw_keyword, prompt_keyword,
-                )
-                continue
-
-            if not is_usable_ai_text(raw):
-                last_error = ValueError(f"Thin or malformed output for prompt: {prompt_keyword}")
-                logging.warning(
-                    "Token AI generation returned thin content for %s using prompt '%s'",
-                    raw_keyword, prompt_keyword,
-                )
-                continue
-
-            final_content = normalize_ai_html(raw)
-            final_content = trim_redundant_ai_html(final_content, raw_keyword)
-
-            if not final_content:
-                last_error = ValueError(f"Sanitized content became empty for prompt: {prompt_keyword}")
-                logging.warning(
-                    "Token AI content became empty after sanitation for %s using prompt '%s'",
-                    raw_keyword, prompt_keyword,
-                )
-                continue
-
-            # Return the SEO engine output directly.
-            # enforce_structure() was removed -- it wrapped clean content in <h2>/<ul>/<div>
-            # which broke the template's paragraph parser and story card system.
-            # The SEO engine already validates: 4 paragraphs, word counts, no lists, no HTML.
-            return final_content
-
-        except Exception as e:
-            last_error = e
-            logging.warning(
-                "Token AI generation failed for %s using prompt '%s': %s",
-                raw_keyword, prompt_keyword, e,
-            )
-            if error_is_non_retryable(e):
-                raise ValueError(
-                    f"Token AI generation failed for '{raw_keyword}': {e}"
-                ) from e
-
-    raise ValueError(f"Token AI generation failed for '{raw_keyword}': {last_error}")
-
+    print(f"\n[build] Done. Success: {succeeded} | Failed: {failed} | Skipped: {len(pending) - len(todo)}")
+    return 0 if failed == 0 else 1
 
 if __name__ == "__main__":
-    keyword = sys.argv[1] if len(sys.argv) > 1 else "should i buy this solana token"
-    print(generate_token_content(keyword))
- 
+    import argparse
+    parser = argparse.ArgumentParser(description="Build Verixia SEO pages from keyword queue.")
+    parser.add_argument("--limit", type=int, default=DAILY_LIMIT,
+                        help=f"Max pages per run (default {DAILY_LIMIT})")
+    parser.add_argument("--keyword", type=str, default=None,
+                        help="Process a single keyword (bypasses queue + daily limit)")
+    args = parser.parse_args()
+
+    if args.keyword:
+        ok = process_keyword(args.keyword)
+        sys.exit(0 if ok else 1)
+    sys.exit(main(limit=args.limit))
+
+
+# =========================================================================
+# ROUTE_SNIPPET -- add this to your Node server.js / index.js
+# =========================================================================
+#
+# This Python script expects POST /seo-page on the Node API. Add the route
+# below to your existing Express server alongside /seo-content. The engine
+# import is unchanged -- generateSeoPagePayload is already exported.
+#
+# import { generateSeoPagePayload, getTemplateType } from "./seo_engine.js";
+#
+# app.post("/seo-page", async (req, res) => {
+#   try {
+#     const { keyword } = req.body || {};
+#     if (!keyword) return res.status(400).json({ error: "keyword required" });
+#     const payload = await generateSeoPagePayload(keyword);
+#     const templateType = getTemplateType(keyword);
+#     res.json({ ...payload, templateType });
+#   } catch (err) {
+#     console.error("[/seo-page]", err);
+#     res.status(500).json({ error: err.message || "generation failed" });
+#   }
+# });
+#
+# =========================================================================
