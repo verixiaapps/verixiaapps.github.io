@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+"""
 generate_token_content.py -- v13.0
 
 Builds Verixia token-risk and DEX-aggregator SEO pages from the keyword queue.
@@ -21,6 +21,11 @@ What stayed:
   - Related-page linking via get_related_pages() + build_links_html().
   - Daily limit handling.
   - Output paths and file I/O.
+
+v13.0.1 patch:
+  - Added `generate_token_content(keyword)` compatibility shim so legacy
+    callers (build_token_seo_incremental.py) keep working. It returns just
+    the content body string from the /seo-page payload.
 """
 
 from __future__ import annotations
@@ -38,7 +43,7 @@ import requests
 # CONFIG
 # =========================================================================
 
-# Repo layout: this script lives at BASE_DIR/scripts/build_pages.py
+# Repo layout: this script lives at BASE_DIR/scripts/generate_token_content.py
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Paths preserved verbatim from v12 -- do not change without coordinating
@@ -196,6 +201,27 @@ def fetch_seo_page(keyword: str) -> dict | None:
         return None
 
     return payload
+
+# =========================================================================
+# COMPATIBILITY SHIM
+# =========================================================================
+#
+# Legacy callers (e.g. build_token_seo_incremental.py) import
+# `generate_token_content` and expect a plain string of body content for a
+# given keyword. The new architecture fetches a full payload from the Node
+# /seo-page endpoint, so this shim extracts and returns just the `content`
+# field. Returns "" on failure -- callers already handle empty strings.
+
+def generate_token_content(keyword: str) -> str:
+    """Compatibility shim: return just the content body string.
+
+    Wraps fetch_seo_page() and returns payload["content"] (or "" on failure)
+    so legacy importers keep working without changes.
+    """
+    payload = fetch_seo_page(keyword)
+    if not payload:
+        return ""
+    return payload.get("content", "") or ""
 
 # =========================================================================
 # RELATED PAGES
