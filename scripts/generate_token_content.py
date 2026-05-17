@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+
 build_pages.py -- v13.0
 
 Builds Verixia token-risk and DEX-aggregator SEO pages from the keyword queue.
