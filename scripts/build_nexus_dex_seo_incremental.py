@@ -36,8 +36,12 @@ PROTECTED_SLUGS = {
     "solana-perps",
     "altcoin-perps",
     "hyperliquid-frontend",
-    "polymarket-prediction",
-    "prediction-markets",
+    "xstocks-trading",
+    "tokenized-stocks",
+    "buy-stocks-onchain",
+    "stocks-no-kyc",
+    "stocks-24-7",
+    "global-stock-access",
     "solana-swap",
     "buy-token",
     "no-kyc-trading",
@@ -71,13 +75,19 @@ NEXUS_DEX_CLUSTER_TERMS = {
     "hedge", "amplify", "swap", "buy", "sell", "trade", "trading", "dex",
     "cex", "kyc", "wallet", "mobile", "app", "self", "custodial", "non",
     "phantom", "backpack", "solflare", "metamask", "jupiter", "raydium",
-    "orca", "drift", "hyperliquid", "polymarket", "prediction", "bet",
-    "betting", "market", "odds", "outcome", "whale", "smart", "money",
+    "orca", "drift", "hyperliquid", "kamino", "whale", "smart", "money",
     "insider", "deployer", "sniper", "kol", "cohort", "holder", "concentration",
     "launch", "launchpad", "bonding", "curve", "graduate", "fair", "stealth",
     "solana", "ethereum", "bitcoin", "btc", "eth", "sol", "usdc", "usdt",
     "base", "bsc", "arbitrum", "polygon", "spl", "memecoin", "altcoin",
     "shitcoin", "microcap", "pump", "fun",
+    # xStocks / tokenized stocks cluster
+    "xstocks", "xstock", "tokenized", "stocks", "stock", "equity", "equities",
+    "onchain", "fractional", "brokerage", "broker", "backed",
+    "aapl", "tsla", "nvda", "msft", "googl", "amzn", "meta", "mstr", "nflx",
+    "amd", "coin", "hood", "crcl", "spy", "qqq", "gld",
+    "aaplx", "tslax", "nvdax", "msftx", "googlx", "amznx", "metax", "mstrx",
+    "nflxx", "spyx", "qqqx", "crclx",
 }
 
 BRAND_CASE = {
@@ -86,8 +96,8 @@ BRAND_CASE = {
     "trust wallet":        "Trust Wallet",
     "raydium launchlab":   "Raydium LaunchLab",
     "pump fun":            "Pump Fun",
+    "backed finance":      "Backed Finance",
     "hyperliquid":         "Hyperliquid",
-    "polymarket":          "Polymarket",
     "metamask":            "MetaMask",
     "dexscreener":         "Dexscreener",
     "pancakeswap":         "PancakeSwap",
@@ -96,6 +106,9 @@ BRAND_CASE = {
     "coinbase":            "Coinbase",
     "robinhood":           "Robinhood",
     "kalshi":              "Kalshi",
+    "kraken":              "Kraken",
+    "bybit":               "Bybit",
+    "kamino":              "Kamino",
     "ethereum":            "Ethereum",
     "avalanche":           "Avalanche",
     "arbitrum":            "Arbitrum",
@@ -112,6 +125,35 @@ BRAND_CASE = {
     "crypto":              "Crypto",
     "market":              "Market",
     "wallet":              "Wallet",
+    "xstocks":             "xStocks",
+    "xstock":              "xStock",
+    "aaplx":               "AAPLx",
+    "tslax":               "TSLAx",
+    "nvdax":               "NVDAx",
+    "msftx":               "MSFTx",
+    "googlx":              "GOOGLx",
+    "amznx":               "AMZNx",
+    "metax":               "METAx",
+    "mstrx":               "MSTRx",
+    "nflxx":               "NFLXx",
+    "spyx":                "SPYx",
+    "qqqx":                "QQQx",
+    "crclx":               "CRCLx",
+    "aapl":                "AAPL",
+    "tsla":                "TSLA",
+    "nvda":                "NVDA",
+    "msft":                "MSFT",
+    "googl":               "GOOGL",
+    "amzn":                "AMZN",
+    "mstr":                "MSTR",
+    "nflx":                "NFLX",
+    "amd":                 "AMD",
+    "coin":                "COIN",
+    "hood":                "HOOD",
+    "crcl":                "CRCL",
+    "spy":                 "SPY",
+    "qqq":                 "QQQ",
+    "gld":                 "GLD",
     "fdv":                 "FDV",
     "bsc":                 "BSC",
     "eth":                 "ETH",
@@ -155,12 +197,14 @@ BRAND_CASE = {
     "dao":                 "DAO",
     "evm":                 "EVM",
     "etf":                 "ETF",
+    "rwa":                 "RWA",
     "fomc":                "FOMC",
     "cpi":                 "CPI",
     "gdp":                 "GDP",
     "nfl":                 "NFL",
     "nba":                 "NBA",
     "ufc":                 "UFC",
+    "us":                  "U.S.",
 }
 
 SMALL_WORDS = {
@@ -175,8 +219,12 @@ HUB_TITLE_OVERRIDES = {
     "solana-perps":          "SOL Perps Hub",
     "altcoin-perps":         "Altcoin Perps Hub",
     "hyperliquid-frontend":  "Hyperliquid Frontend Hub",
-    "polymarket-prediction": "Polymarket Hub",
-    "prediction-markets":    "Prediction Markets Hub",
+    "xstocks-trading":       "xStocks Trading Hub",
+    "tokenized-stocks":      "Tokenized Stocks Hub",
+    "buy-stocks-onchain":    "Buy Stocks On-Chain Hub",
+    "stocks-no-kyc":         "Stocks No KYC Hub",
+    "stocks-24-7":           "24/7 Stocks Hub",
+    "global-stock-access":   "Global Stock Access Hub",
     "solana-swap":           "Solana Swap Hub",
     "buy-token":             "Buy Token Hub",
     "no-kyc-trading":        "No KYC Trading Hub",
@@ -189,7 +237,81 @@ HUB_TITLE_OVERRIDES = {
 # Ordered from most specific to most general.
 HUB_MATCH_RULES = [
     ("hyperliquid",         "hyperliquid-frontend"),
-    ("polymarket",          "polymarket-prediction"),
+
+    # xStocks / tokenized stocks (specific first)
+    ("xstocks",              "xstocks-trading"),
+    ("xstock",               "xstocks-trading"),
+    ("backed finance",       "xstocks-trading"),
+    ("aaplx",                "xstocks-trading"),
+    ("tslax",                "xstocks-trading"),
+    ("nvdax",                "xstocks-trading"),
+    ("spyx",                 "xstocks-trading"),
+    ("qqqx",                 "xstocks-trading"),
+
+    ("buy us stocks from",   "global-stock-access"),
+    ("us stocks no us bank", "global-stock-access"),
+    ("us stocks for non residents", "global-stock-access"),
+    ("us stocks international", "global-stock-access"),
+    ("global stock",         "global-stock-access"),
+    ("international stock",  "global-stock-access"),
+
+    ("24 7 stock",           "stocks-24-7"),
+    ("stocks 24 hours",      "stocks-24-7"),
+    ("stocks weekend",       "stocks-24-7"),
+    ("trade stocks at night", "stocks-24-7"),
+    ("trade stocks weekends", "stocks-24-7"),
+    ("trade stocks holidays", "stocks-24-7"),
+    ("stocks never close",   "stocks-24-7"),
+    ("always open stock",    "stocks-24-7"),
+    ("stocks after hours",   "stocks-24-7"),
+
+    ("buy stocks no kyc",    "stocks-no-kyc"),
+    ("trade stocks no kyc",  "stocks-no-kyc"),
+    ("stock trading no verification", "stocks-no-kyc"),
+    ("stock trading no signup", "stocks-no-kyc"),
+    ("stocks no id",         "stocks-no-kyc"),
+    ("stocks no account",    "stocks-no-kyc"),
+    ("anonymous stock trading", "stocks-no-kyc"),
+    ("stocks without broker", "stocks-no-kyc"),
+    ("stocks without robinhood", "stocks-no-kyc"),
+    ("stocks without etrade", "stocks-no-kyc"),
+
+    ("buy apple stock",      "buy-stocks-onchain"),
+    ("buy aapl",             "buy-stocks-onchain"),
+    ("buy tesla stock",      "buy-stocks-onchain"),
+    ("buy tsla",             "buy-stocks-onchain"),
+    ("buy nvidia stock",     "buy-stocks-onchain"),
+    ("buy nvda",             "buy-stocks-onchain"),
+    ("buy microsoft stock",  "buy-stocks-onchain"),
+    ("buy msft",             "buy-stocks-onchain"),
+    ("buy google stock",     "buy-stocks-onchain"),
+    ("buy googl",            "buy-stocks-onchain"),
+    ("buy meta stock",       "buy-stocks-onchain"),
+    ("buy amazon stock",     "buy-stocks-onchain"),
+    ("buy amzn",             "buy-stocks-onchain"),
+    ("buy mstr",             "buy-stocks-onchain"),
+    ("buy microstrategy",    "buy-stocks-onchain"),
+    ("buy spy",              "buy-stocks-onchain"),
+    ("buy qqq",              "buy-stocks-onchain"),
+    ("buy netflix stock",    "buy-stocks-onchain"),
+    ("buy nflx",             "buy-stocks-onchain"),
+    ("buy coinbase stock",   "buy-stocks-onchain"),
+    ("buy robinhood stock",  "buy-stocks-onchain"),
+    ("buy circle stock",     "buy-stocks-onchain"),
+    ("buy crcl",             "buy-stocks-onchain"),
+
+    ("tokenized stocks",     "tokenized-stocks"),
+    ("tokenized equity",     "tokenized-stocks"),
+    ("onchain stocks",       "tokenized-stocks"),
+    ("onchain equities",     "tokenized-stocks"),
+    ("stocks on solana",     "tokenized-stocks"),
+    ("stocks on blockchain", "tokenized-stocks"),
+    ("stocks as spl tokens", "tokenized-stocks"),
+    ("buy stocks with crypto", "tokenized-stocks"),
+    ("buy stocks with usdc", "tokenized-stocks"),
+    ("buy stocks with sol",  "tokenized-stocks"),
+
+    # Perps
     ("btc perps",           "bitcoin-perps"),
     ("bitcoin perps",       "bitcoin-perps"),
     ("bitcoin futures",     "bitcoin-perps"),
@@ -208,10 +330,8 @@ HUB_MATCH_RULES = [
     ("pepe perps",          "altcoin-perps"),
     ("doge perps",          "altcoin-perps"),
     ("hype perps",          "altcoin-perps"),
-    ("prediction market",   "prediction-markets"),
-    ("bet on",              "prediction-markets"),
-    ("odds",                "prediction-markets"),
-    ("yes or no market",    "prediction-markets"),
+
+    # Whale / launch
     ("whale tracker",       "whale-tracking"),
     ("smart money",         "whale-tracking"),
     ("insider",             "whale-tracking"),
@@ -223,6 +343,8 @@ HUB_MATCH_RULES = [
     ("launchpad",           "token-launch"),
     ("bonding curve",       "token-launch"),
     ("deploy token",        "token-launch"),
+
+    # Swap / buy token
     ("solana swap",         "solana-swap"),
     ("solana dex",          "solana-swap"),
     ("dex aggregator",      "solana-swap"),
@@ -235,6 +357,8 @@ HUB_MATCH_RULES = [
     ("buy memecoin",        "buy-token"),
     ("buy spl",             "buy-token"),
     ("buy ",                "buy-token"),
+
+    # Wallet / no KYC (generic, after specific stock rules)
     ("phantom wallet trading",  "wallet-trading"),
     ("backpack wallet trading", "wallet-trading"),
     ("self custodial",      "wallet-trading"),
@@ -244,6 +368,8 @@ HUB_MATCH_RULES = [
     ("without kyc",         "no-kyc-trading"),
     ("no signup",           "no-kyc-trading"),
     ("no verification",     "no-kyc-trading"),
+
+    # Perps fallback
     ("perps",               "perps-trading"),
     ("perpetual",           "perps-trading"),
     ("leverage",            "perps-trading"),
@@ -433,10 +559,18 @@ def build_static_h1(keyword):
 
         if "hyperliquid" in lower:
             return f"Trade Hyperliquid From Solana -- {s or 'Wallet-Based, No MetaMask'}"
-        if "polymarket" in lower:
-            return f"Use Polymarket From Solana -- {s or 'Wallet-Based, No Bridge'}"
-        if "prediction" in lower or "bet on" in lower or "odds" in lower:
-            return f"Prediction Market -- {s or 'From Your Wallet, No KYC'}"
+        if "xstocks" in lower or "xstock" in lower or "tokenized stock" in lower or "tokenized equity" in lower:
+            return f"xStocks on Solana -- {s or 'AAPL, TSLA, NVDA From Your Wallet'}"
+        if any(t in lower for t in ["aaplx","tslax","nvdax","spyx","qqqx","mstrx","metax","amznx","googlx","msftx","nflxx","crclx"]):
+            return f"Tokenized Stocks -- {s or 'On-Chain Equity From Your Wallet'}"
+        if ("stocks" in lower or "stock" in lower) and ("solana" in lower or "onchain" in lower or "spl" in lower):
+            return f"Stocks on Solana -- {s or 'Tokenized Equities From Your Wallet'}"
+        if ("stocks" in lower or "stock" in lower) and ("no kyc" in lower or "without kyc" in lower or "no signup" in lower or "no account" in lower):
+            return f"Stocks No KYC -- {s or 'Buy U.S. Equities From Your Wallet'}"
+        if ("stocks" in lower or "stock" in lower) and ("24" in lower or "weekend" in lower or "after hours" in lower or "holiday" in lower or "night" in lower):
+            return f"Trade Stocks 24/7 -- {s or 'On-Chain, Never Close'}"
+        if ("stocks" in lower or "stock" in lower) and ("from europe" in lower or "from asia" in lower or "from india" in lower or "international" in lower or "non resident" in lower):
+            return f"Global U.S. Stocks Access -- {s or 'No Broker, No Bank, Wallet-Only'}"
         if "whale" in lower or "smart money" in lower or "insider" in lower or "deployer" in lower or "sniper" in lower:
             return f"Whale & Smart-Money Tracking -- {s or 'Real-Time On-Chain'}"
         if "launch" in lower or "launchpad" in lower or "bonding curve" in lower:
@@ -474,15 +608,31 @@ def build_static_intro(keyword):
             "Trade Hyperliquid markets directly from a Solana wallet without bridging to Arbitrum or "
             "installing MetaMask. Mobile-first access using Phantom, Backpack, or Solflare."
         )
-    if "polymarket" in lower:
+    if "xstocks" in lower or "xstock" in lower or "tokenized stock" in lower or "tokenized equity" in lower:
         return (
-            "Use Polymarket-style prediction markets from a Solana wallet without bridging USDC to "
-            "Polygon. Bet on outcomes directly from your existing wallet on mobile."
+            "Trade tokenized U.S. stocks like AAPLx, TSLAx, NVDAx, and SPYx directly from a Solana "
+            "wallet. Each xStock is backed 1:1 by the real share in regulated custody, trades 24/7, "
+            "and is fully composable across Solana DeFi -- no brokerage account and no KYC at the protocol level."
         )
-    if "prediction" in lower or "bet on" in lower:
+    if ("stocks" in lower or "stock" in lower) and ("no kyc" in lower or "without kyc" in lower or "no signup" in lower or "no account" in lower):
         return (
-            "Trade outcomes on crypto prices, elections, sports, and economic events from your "
-            "Solana wallet. No KYC, no signup, mobile-first prediction market access."
+            "Buy U.S. stocks with no KYC, no broker signup, and no ID upload. Tokenized xStocks on "
+            "Solana trade as SPL tokens directly from Phantom, Backpack, or Solflare. Your wallet is your account."
+        )
+    if ("stocks" in lower or "stock" in lower) and ("24" in lower or "weekend" in lower or "after hours" in lower or "holiday" in lower or "night" in lower):
+        return (
+            "Tokenized U.S. stocks on Solana trade 24/7 -- nights, weekends, and holidays. Buy or sell "
+            "AAPLx, TSLAx, NVDAx, SPYx, and QQQx outside U.S. market hours directly from your wallet."
+        )
+    if ("stocks" in lower or "stock" in lower) and ("from europe" in lower or "from asia" in lower or "from india" in lower or "international" in lower or "non resident" in lower):
+        return (
+            "Non-U.S. users can buy AAPL, TSLA, NVDA, SPY exposure via xStocks on Solana from anywhere "
+            "in the world. No U.S. bank account, no brokerage, no KYC at the protocol level -- just a Solana wallet funded with USDC."
+        )
+    if "stocks" in lower or "stock" in lower:
+        return (
+            "Trade tokenized stocks on Solana from your wallet. Apple, Tesla, Nvidia, S&P 500, and "
+            "more as SPL tokens with 24/7 trading, fractional positions, and full DeFi composability."
         )
     if "whale" in lower or "smart money" in lower or "insider" in lower:
         return (
@@ -510,7 +660,7 @@ def build_static_intro(keyword):
             "Best-price aggregation with no signup and no centralized exchange listing required."
         )
     return (
-        "Self-custodial trading from your Solana wallet -- perps, swaps, and prediction markets in "
+        "Self-custodial trading from your Solana wallet -- perps, swaps, and tokenized stocks in "
         "one interface. No KYC, no signup, no centralized custody. Every trade settles on-chain."
     )
 
@@ -685,9 +835,9 @@ def build_schema_faq(keyword):
         ),
         (
             "How does pricing work compared to centralized exchanges?",
-            "Spot swaps route through Jupiter, Raydium, and Orca for best price. Perps and prediction "
-            "markets settle on-chain at posted market prices. There are no platform deposit fees, no "
-            "withdrawal fees, and no minimum balances.",
+            "Spot swaps and tokenized stock trades route through Jupiter, Raydium, and Orca for best "
+            "price. Perps settle on-chain at posted market prices. There are no platform deposit fees, "
+            "no withdrawal fees, and no minimum balances.",
         ),
     ]
 
@@ -698,19 +848,41 @@ def build_schema_faq(keyword):
             "from a Solana wallet like Phantom or Backpack. There is no need to bridge to Arbitrum or "
             "install MetaMask. Your trades route to Hyperliquid liquidity from your existing wallet.",
         )
-    elif "polymarket" in lower:
+    elif "xstocks" in lower or "xstock" in lower or "tokenized stock" in lower or "tokenized equity" in lower or any(t in lower for t in ["aaplx","tslax","nvdax","spyx","qqqx"]):
         intent_item = (
-            "Can I use Polymarket from a Solana wallet?",
-            "Yes. Nexus DEX provides a wallet-based interface to Polymarket-style outcome markets "
-            "without requiring you to bridge USDC to Polygon or use MetaMask. Bet on elections, "
-            "crypto prices, sports, and macro events directly from Phantom or Backpack on mobile.",
+            "What are xStocks and how do they work?",
+            "xStocks are tokenized 1:1 representations of real U.S. stocks and ETFs (AAPLx for Apple, "
+            "TSLAx for Tesla, NVDAx for Nvidia, SPYx for the S&P 500, etc.) issued by Backed Finance "
+            "and now part of Kraken. Each token is backed by the underlying share held in regulated "
+            "Swiss custody, trades 24/7 as an SPL token on Solana, and is fully composable across DeFi.",
         )
-    elif "prediction" in lower or "bet on" in lower or "odds" in lower:
+    elif ("stocks" in lower or "stock" in lower) and ("no kyc" in lower or "without kyc" in lower or "no signup" in lower or "no account" in lower):
         intent_item = (
-            "What kinds of prediction markets are available?",
-            "Crypto price levels (BTC, ETH, SOL), elections, Fed rate decisions, sports outcomes, and "
-            "major event predictions. Resolution windows range from minutes to months. All markets "
-            "settle on-chain from the same wallet you use for spot and perps.",
+            "Can I really buy U.S. stocks without KYC?",
+            "Yes. xStocks on Solana are SPL tokens, so there is no brokerage account, no SSN, and no "
+            "ID upload at the protocol level. Connect Phantom, Backpack, or Solflare, fund with USDC, "
+            "and buy AAPLx, TSLAx, NVDAx, SPYx, or QQQx. Availability and tax rules still depend on your jurisdiction.",
+        )
+    elif ("stocks" in lower or "stock" in lower) and ("24" in lower or "weekend" in lower or "after hours" in lower or "holiday" in lower or "night" in lower):
+        intent_item = (
+            "Can I really trade stocks 24/7?",
+            "Yes. xStocks trade around the clock on Solana DEXes. You can buy or sell AAPLx, TSLAx, "
+            "NVDAx, SPYx, and QQQx on weekends, after U.S. market hours, and on holidays. Liquidity "
+            "may be thinner outside market hours, but the markets never fully close.",
+        )
+    elif ("stocks" in lower or "stock" in lower) and ("from europe" in lower or "from asia" in lower or "from india" in lower or "international" in lower or "non resident" in lower):
+        intent_item = (
+            "Can non-U.S. users buy U.S. stocks here?",
+            "Yes. xStocks are designed so users outside the U.S. can get exposure to AAPL, TSLA, NVDA, "
+            "SPY, and other equities without a U.S. brokerage or U.S. bank account. Just a Solana "
+            "wallet funded with USDC. Local tax and regulatory rules still apply.",
+        )
+    elif ("stocks" in lower or "stock" in lower):
+        intent_item = (
+            "How do tokenized stocks work?",
+            "Tokenized stocks like xStocks live on Solana as SPL tokens, each backed 1:1 by the real "
+            "underlying share in regulated custody. They trade 24/7, support fractional positions, "
+            "and can be LP'd on Raydium or used as collateral on Kamino just like any other SPL token.",
         )
     elif "whale" in lower or "smart money" in lower or "insider" in lower or "deployer" in lower:
         intent_item = (
@@ -768,7 +940,7 @@ def build_title(keyword):
     raw      = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     if not raw:
-        return "Nexus DEX | Self-Custodial Perps, Swaps & Prediction Markets"
+        return "Nexus DEX | Self-Custodial Perps, Swaps & Tokenized Stocks"
     if is_guidance_style_keyword(raw):
         return f"{title_case(raw)} | Nexus DEX Wallet Guide"
     if raw.startswith("is this "):
@@ -789,7 +961,7 @@ def build_description(keyword):
     clean_kw = display_keyword(keyword)
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
-            f"Use Nexus DEX for {readable}. Self-custodial perps, swaps, and prediction markets "
+            f"Use Nexus DEX for {readable}. Self-custodial perps, swaps, and tokenized stocks "
             f"from your Solana wallet with no KYC, no signup, and mobile-first access."
         )
     return (
