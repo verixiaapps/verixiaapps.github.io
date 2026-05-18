@@ -25,8 +25,12 @@ PROTECTED_SLUGS = {
     "solana-perps",
     "altcoin-perps",
     "hyperliquid-frontend",
-    "polymarket-prediction",
-    "prediction-markets",
+    "xstocks-trading",
+    "tokenized-stocks",
+    "buy-stocks-onchain",
+    "stocks-no-kyc",
+    "stocks-24-7",
+    "global-stock-access",
     "solana-swap",
     "buy-token",
     "no-kyc-trading",
@@ -52,13 +56,19 @@ NEXUS_DEX_CLUSTER_TERMS = {
     "hedge", "amplify", "swap", "buy", "sell", "trade", "trading", "dex",
     "cex", "kyc", "wallet", "mobile", "app", "self", "custodial", "non",
     "phantom", "backpack", "solflare", "metamask", "jupiter", "raydium",
-    "orca", "drift", "hyperliquid", "polymarket", "prediction", "bet",
-    "betting", "market", "odds", "outcome", "whale", "smart", "money",
+    "orca", "drift", "hyperliquid", "kamino", "whale", "smart", "money",
     "insider", "deployer", "sniper", "kol", "cohort", "holder", "concentration",
     "launch", "launchpad", "bonding", "curve", "graduate", "fair", "stealth",
     "solana", "ethereum", "bitcoin", "btc", "eth", "sol", "usdc", "usdt",
     "base", "bsc", "arbitrum", "polygon", "spl", "memecoin", "altcoin",
     "shitcoin", "microcap", "pump", "fun",
+    # xStocks / tokenized stocks cluster
+    "xstocks", "xstock", "tokenized", "stocks", "stock", "equity", "equities",
+    "onchain", "fractional", "brokerage", "broker", "backed",
+    "aapl", "tsla", "nvda", "msft", "googl", "amzn", "meta", "mstr", "nflx",
+    "amd", "coin", "hood", "crcl", "spy", "qqq", "gld",
+    "aaplx", "tslax", "nvdax", "msftx", "googlx", "amznx", "metax", "mstrx",
+    "nflxx", "spyx", "qqqx", "crclx",
 }
 
 BRAND_CASE = {
@@ -67,8 +77,8 @@ BRAND_CASE = {
     "trust wallet": "Trust Wallet",
     "raydium launchlab": "Raydium LaunchLab",
     "pump fun": "Pump Fun",
+    "backed finance": "Backed Finance",
     "hyperliquid": "Hyperliquid",
-    "polymarket": "Polymarket",
     "metamask": "MetaMask",
     "dexscreener": "Dexscreener",
     "pancakeswap": "PancakeSwap",
@@ -77,6 +87,9 @@ BRAND_CASE = {
     "coinbase": "Coinbase",
     "robinhood": "Robinhood",
     "kalshi": "Kalshi",
+    "kraken": "Kraken",
+    "bybit": "Bybit",
+    "kamino": "Kamino",
     "ethereum": "Ethereum",
     "avalanche": "Avalanche",
     "arbitrum": "Arbitrum",
@@ -93,6 +106,35 @@ BRAND_CASE = {
     "crypto": "Crypto",
     "market": "Market",
     "wallet": "Wallet",
+    "xstocks": "xStocks",
+    "xstock": "xStock",
+    "aaplx": "AAPLx",
+    "tslax": "TSLAx",
+    "nvdax": "NVDAx",
+    "msftx": "MSFTx",
+    "googlx": "GOOGLx",
+    "amznx": "AMZNx",
+    "metax": "METAx",
+    "mstrx": "MSTRx",
+    "nflxx": "NFLXx",
+    "spyx": "SPYx",
+    "qqqx": "QQQx",
+    "crclx": "CRCLx",
+    "aapl": "AAPL",
+    "tsla": "TSLA",
+    "nvda": "NVDA",
+    "msft": "MSFT",
+    "googl": "GOOGL",
+    "amzn": "AMZN",
+    "mstr": "MSTR",
+    "nflx": "NFLX",
+    "amd": "AMD",
+    "coin": "COIN",
+    "hood": "HOOD",
+    "crcl": "CRCL",
+    "spy": "SPY",
+    "qqq": "QQQ",
+    "gld": "GLD",
     "fdv": "FDV",
     "bsc": "BSC",
     "eth": "ETH",
@@ -136,12 +178,14 @@ BRAND_CASE = {
     "dao": "DAO",
     "evm": "EVM",
     "etf": "ETF",
+    "rwa": "RWA",
     "fomc": "FOMC",
     "cpi": "CPI",
     "gdp": "GDP",
     "nfl": "NFL",
     "nba": "NBA",
     "ufc": "UFC",
+    "us": "U.S.",
 }
 
 SMALL_WORDS = {
@@ -156,8 +200,12 @@ HUB_TITLE_OVERRIDES = {
     "solana-perps": "SOL Perps Hub",
     "altcoin-perps": "Altcoin Perps Hub",
     "hyperliquid-frontend": "Hyperliquid Frontend Hub",
-    "polymarket-prediction": "Polymarket Hub",
-    "prediction-markets": "Prediction Markets Hub",
+    "xstocks-trading": "xStocks Trading Hub",
+    "tokenized-stocks": "Tokenized Stocks Hub",
+    "buy-stocks-onchain": "Buy Stocks On-Chain Hub",
+    "stocks-no-kyc": "Stocks No KYC Hub",
+    "stocks-24-7": "24/7 Stocks Hub",
+    "global-stock-access": "Global Stock Access Hub",
     "solana-swap": "Solana Swap Hub",
     "buy-token": "Buy Token Hub",
     "no-kyc-trading": "No KYC Trading Hub",
@@ -167,9 +215,84 @@ HUB_TITLE_OVERRIDES = {
     "how-to-guides": "Nexus DEX Guides Hub",
 }
 
+# Order matters: most specific first
 HUB_MATCH_RULES = [
     ("hyperliquid", "hyperliquid-frontend"),
-    ("polymarket", "polymarket-prediction"),
+
+    # xStocks / tokenized stocks (specific BEFORE generic stock terms)
+    ("xstocks", "xstocks-trading"),
+    ("xstock", "xstocks-trading"),
+    ("backed finance", "xstocks-trading"),
+    ("aaplx", "xstocks-trading"),
+    ("tslax", "xstocks-trading"),
+    ("nvdax", "xstocks-trading"),
+    ("spyx", "xstocks-trading"),
+    ("qqqx", "xstocks-trading"),
+
+    ("buy us stocks from", "global-stock-access"),
+    ("us stocks no us bank", "global-stock-access"),
+    ("us stocks for non residents", "global-stock-access"),
+    ("us stocks international", "global-stock-access"),
+    ("global stock", "global-stock-access"),
+    ("international stock", "global-stock-access"),
+
+    ("24 7 stock", "stocks-24-7"),
+    ("stocks 24 hours", "stocks-24-7"),
+    ("stocks weekend", "stocks-24-7"),
+    ("trade stocks at night", "stocks-24-7"),
+    ("trade stocks weekends", "stocks-24-7"),
+    ("trade stocks holidays", "stocks-24-7"),
+    ("stocks never close", "stocks-24-7"),
+    ("always open stock", "stocks-24-7"),
+    ("stocks after hours", "stocks-24-7"),
+
+    ("buy stocks no kyc", "stocks-no-kyc"),
+    ("trade stocks no kyc", "stocks-no-kyc"),
+    ("stock trading no verification", "stocks-no-kyc"),
+    ("stock trading no signup", "stocks-no-kyc"),
+    ("stocks no id", "stocks-no-kyc"),
+    ("stocks no account", "stocks-no-kyc"),
+    ("anonymous stock trading", "stocks-no-kyc"),
+    ("stocks without broker", "stocks-no-kyc"),
+    ("stocks without robinhood", "stocks-no-kyc"),
+    ("stocks without etrade", "stocks-no-kyc"),
+
+    ("buy apple stock", "buy-stocks-onchain"),
+    ("buy aapl", "buy-stocks-onchain"),
+    ("buy tesla stock", "buy-stocks-onchain"),
+    ("buy tsla", "buy-stocks-onchain"),
+    ("buy nvidia stock", "buy-stocks-onchain"),
+    ("buy nvda", "buy-stocks-onchain"),
+    ("buy microsoft stock", "buy-stocks-onchain"),
+    ("buy msft", "buy-stocks-onchain"),
+    ("buy google stock", "buy-stocks-onchain"),
+    ("buy googl", "buy-stocks-onchain"),
+    ("buy meta stock", "buy-stocks-onchain"),
+    ("buy amazon stock", "buy-stocks-onchain"),
+    ("buy amzn", "buy-stocks-onchain"),
+    ("buy mstr", "buy-stocks-onchain"),
+    ("buy microstrategy", "buy-stocks-onchain"),
+    ("buy spy", "buy-stocks-onchain"),
+    ("buy qqq", "buy-stocks-onchain"),
+    ("buy netflix stock", "buy-stocks-onchain"),
+    ("buy nflx", "buy-stocks-onchain"),
+    ("buy coinbase stock", "buy-stocks-onchain"),
+    ("buy robinhood stock", "buy-stocks-onchain"),
+    ("buy circle stock", "buy-stocks-onchain"),
+    ("buy crcl", "buy-stocks-onchain"),
+
+    ("tokenized stocks", "tokenized-stocks"),
+    ("tokenized equity", "tokenized-stocks"),
+    ("onchain stocks", "tokenized-stocks"),
+    ("onchain equities", "tokenized-stocks"),
+    ("stocks on solana", "tokenized-stocks"),
+    ("stocks on blockchain", "tokenized-stocks"),
+    ("stocks as spl tokens", "tokenized-stocks"),
+    ("buy stocks with crypto", "tokenized-stocks"),
+    ("buy stocks with usdc", "tokenized-stocks"),
+    ("buy stocks with sol", "tokenized-stocks"),
+
+    # Perps
     ("btc perps", "bitcoin-perps"),
     ("bitcoin perps", "bitcoin-perps"),
     ("bitcoin futures", "bitcoin-perps"),
@@ -188,26 +311,30 @@ HUB_MATCH_RULES = [
     ("pepe perps", "altcoin-perps"),
     ("doge perps", "altcoin-perps"),
     ("hype perps", "altcoin-perps"),
-    ("prediction market", "prediction-markets"),
-    ("bet on", "prediction-markets"),
-    ("odds", "prediction-markets"),
-    ("yes or no market", "prediction-markets"),
+
+    # Whale
     ("whale tracker", "whale-tracking"),
     ("smart money", "whale-tracking"),
     ("insider", "whale-tracking"),
     ("deployer", "whale-tracking"),
     ("sniper", "whale-tracking"),
     ("kol wallet", "whale-tracking"),
+
+    # Launch
     ("launch token", "token-launch"),
     ("token launch", "token-launch"),
     ("launchpad", "token-launch"),
     ("bonding curve", "token-launch"),
     ("deploy token", "token-launch"),
+
+    # Swap
     ("solana swap", "solana-swap"),
     ("solana dex", "solana-swap"),
     ("dex aggregator", "solana-swap"),
     ("best price swap", "solana-swap"),
     ("swap", "solana-swap"),
+
+    # Buy token
     ("buy bonk", "buy-token"),
     ("buy wif", "buy-token"),
     ("buy pepe", "buy-token"),
@@ -215,18 +342,25 @@ HUB_MATCH_RULES = [
     ("buy memecoin", "buy-token"),
     ("buy spl", "buy-token"),
     ("buy ", "buy-token"),
+
+    # Wallet
     ("phantom wallet trading", "wallet-trading"),
     ("backpack wallet trading", "wallet-trading"),
     ("self custodial", "wallet-trading"),
     ("non custodial", "wallet-trading"),
     ("wallet based", "wallet-trading"),
+
+    # No KYC (generic, after specific stocks-no-kyc rules)
     ("no kyc", "no-kyc-trading"),
     ("without kyc", "no-kyc-trading"),
     ("no signup", "no-kyc-trading"),
     ("no verification", "no-kyc-trading"),
+
+    # Perps (generic fallback, after specific assets)
     ("perps", "perps-trading"),
     ("perpetual", "perps-trading"),
     ("leverage", "perps-trading"),
+
     ("how to", "how-to-guides"),
 ]
 
@@ -238,10 +372,13 @@ LOW_VALUE_SINGLE_TERMS = {
 HIGH_INTENT_TERMS = {
     "perps", "perp", "perpetual", "leverage", "leveraged", "long", "short",
     "hedge", "kyc", "wallet", "mobile", "phantom", "backpack", "solflare",
-    "hyperliquid", "polymarket", "prediction", "bet", "odds", "outcome",
-    "whale", "smart", "money", "insider", "deployer", "sniper", "kol",
-    "launch", "launchpad", "bonding", "deploy", "swap", "buy", "sell",
+    "hyperliquid", "whale", "smart", "money", "insider", "deployer", "sniper",
+    "kol", "launch", "launchpad", "bonding", "deploy", "swap", "buy", "sell",
     "trade", "custodial",
+    # xStocks high-intent
+    "xstocks", "xstock", "tokenized", "stocks", "stock", "equity", "equities",
+    "aapl", "tsla", "nvda", "msft", "googl", "amzn", "meta", "mstr", "spy", "qqq",
+    "aaplx", "tslax", "nvdax", "spyx", "qqqx",
 }
 
 rejected_count = 0
@@ -379,7 +516,7 @@ def build_title(keyword):
     readable = readable_keyword(keyword)
 
     if not raw:
-        return "Nexus DEX | Self-Custodial Perps, Swaps & Prediction Markets"
+        return "Nexus DEX | Self-Custodial Perps, Swaps & Tokenized Stocks"
 
     if is_guidance_style_keyword(raw):
         return f"{title_case(raw)} | Nexus DEX Wallet Guide"
@@ -407,7 +544,7 @@ def build_description(keyword):
 
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
-            f"Use Nexus DEX for {readable}. Self-custodial perps, swaps, and prediction markets "
+            f"Use Nexus DEX for {readable}. Self-custodial perps, swaps, and tokenized stocks "
             f"from your Solana wallet with no KYC, no signup, and mobile-first access."
         )
 
@@ -496,14 +633,22 @@ def keyword_quality_score(keyword):
         score += 10
     if "leverage" in kw or "leveraged" in kw:
         score += 8
-    if "prediction market" in kw or "polymarket" in kw:
-        score += 10
     if "hyperliquid" in kw:
         score += 10
     if "no kyc" in kw or "without kyc" in kw or "no signup" in kw:
         score += 10
     if "self custodial" in kw or "non custodial" in kw or "wallet based" in kw:
         score += 8
+
+    # xStocks / tokenized stocks
+    if "xstocks" in kw or "xstock" in kw or "tokenized stock" in kw or "tokenized equity" in kw:
+        score += 10
+    if "stocks on solana" in kw or "onchain stocks" in kw or "stocks as spl" in kw:
+        score += 8
+    if "24 7 stock" in kw or "stocks 24 hours" in kw or "stocks weekend" in kw:
+        score += 7
+    if any(tok in kw for tok in ["aapl", "tsla", "nvda", "msft", "googl", "amzn", "spy", "qqq", "mstr"]):
+        score += 6
 
     # Asset signals
     if any(term in kw for term in ["btc", "bitcoin", "eth", "ethereum", "sol", "solana"]):
