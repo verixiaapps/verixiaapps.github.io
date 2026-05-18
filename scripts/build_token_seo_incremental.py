@@ -778,38 +778,21 @@ def build_aligned_generated_records(existing_pages_list, extra_pages=None):
 # -------------------------
 
 def generate_ai_text(keyword, keyword_display):
-    raw_keyword   = normalize_keyword(keyword)
-    clean_keyword = normalize_keyword(keyword_display)
-    readable      = readable_keyword(keyword_display)
+    raw_keyword = normalize_keyword(keyword)
+    results = []
 
-    attempts = [
-        raw_keyword,
-        clean_keyword,
-        readable,
-        f"{clean_keyword} token risk" if clean_keyword else "",
-        f"is {clean_keyword} safe" if clean_keyword and not raw_keyword.startswith("is ") else "",
-        f"should i buy {clean_keyword}" if clean_keyword and not contains_term_phrase(raw_keyword, "buy") else "",
-    ]
-
-    seen       = set()
-    last_error = None
-
-    for prompt in attempts:
-        prompt_norm = normalize_keyword(prompt)
-        if not prompt_norm or prompt_norm in seen:
-            continue
-        seen.add(prompt_norm)
+    for _ in range(2):
         try:
-            ai_text = sanitize_ai_html(generate_token_content(prompt))
+            ai_text = sanitize_ai_html(generate_token_content(raw_keyword))
             if ai_text:
-                return ai_text
+                results.append(ai_text)
         except Exception as e:
-            last_error = e
-            print(f"[error] AI generation failed for '{prompt}': {e}")
+            print(f"[warn] AI call failed for '{raw_keyword}': {e}")
 
-    if last_error:
-        raise ValueError(f"AI generation failed for all prompts: {last_error}")
-    raise ValueError("AI generation failed for all prompts")
+    if not results:
+        return ""
+
+    return max(results, key=len)
 
 
 # -------------------------
@@ -868,11 +851,11 @@ print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
-generated_count      = 0
+generated_count        = 0
 skipped_existing_count = 0
-failed_count         = 0
-processed_keywords   = set()
-new_pages_this_run   = []
+skipped_no_content     = 0
+processed_keywords     = set()
+new_pages_this_run     = []
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
@@ -898,11 +881,10 @@ for page in queue_pages:
     description = build_description(keyword)
     canonical   = build_canonical(slug)
 
-    try:
-        ai_text = generate_ai_text(keyword, keyword_display)
-    except Exception as e:
-        failed_count += 1
-        print(f"[failed] {keyword} -> {e}")
+    ai_text = generate_ai_text(keyword, keyword_display)
+    if not ai_text:
+        skipped_no_content += 1
+        print(f"[skipped] No AI content produced for: {keyword}")
         continue
 
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
@@ -966,7 +948,7 @@ write_lines(KEYWORD_FILE, remaining_keywords)
 
 print(
     f"Done. Generated {generated_count} new pages. "
-    f"Skipped {skipped_existing_count} existing pages. "
-    f"Failed {failed_count} keywords."
+    f"Skipped {skipped_existing_count} existing. "
+    f"Skipped {skipped_no_content} with no AI content."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
