@@ -26,9 +26,11 @@ BANNED_SUBSTRINGS = [
     "no kyc no kyc",
     "kyc kyc",
     "nexus dex nexus dex",
-    "polymarket polymarket",
     "hyperliquid hyperliquid",
-    "prediction prediction",
+    "xstocks xstocks",
+    "stocks stocks",
+    "stock stock",
+    "tokenized tokenized",
     "whale whale",
     "launch launch",
     "self custodial self custodial",
@@ -61,8 +63,13 @@ LOW_VALUE_EXACT = {
     "long",
     "short",
     "hedge",
-    "prediction",
-    "bet",
+    "stock",
+    "stocks",
+    "equity",
+    "equities",
+    "xstocks",
+    "xstock",
+    "tokenized",
     "whale",
     "launch",
     "no kyc",
@@ -94,10 +101,6 @@ HIGH_INTENT_MARKERS = [
     "backpack",
     "solflare",
     "hyperliquid",
-    "polymarket",
-    "prediction market",
-    "bet on",
-    "odds",
     "whale",
     "smart money",
     "insider",
@@ -112,6 +115,39 @@ HIGH_INTENT_MARKERS = [
     "dex aggregator",
     "best price",
     "nexus dex",
+    # xStocks / tokenized stocks
+    "xstocks",
+    "xstock",
+    "tokenized stock",
+    "tokenized stocks",
+    "tokenized equity",
+    "tokenized equities",
+    "onchain stocks",
+    "stocks on solana",
+    "stocks as spl",
+    "buy stocks",
+    "trade stocks",
+    "stocks no kyc",
+    "stocks without",
+    "stocks 24",
+    "stocks weekend",
+    "stocks after hours",
+    "us stocks",
+    "aapl",
+    "tsla",
+    "nvda",
+    "msft",
+    "googl",
+    "amzn",
+    "mstr",
+    "spy",
+    "qqq",
+    "aaplx",
+    "tslax",
+    "nvdax",
+    "spyx",
+    "qqqx",
+    "backed finance",
 ]
 
 QUESTION_STARTERS = (
@@ -154,9 +190,6 @@ STRONG_SIGNAL_TERMS = {
     "backpack",
     "solflare",
     "hyperliquid",
-    "polymarket",
-    "prediction",
-    "bet",
     "whale",
     "smart money",
     "insider",
@@ -186,6 +219,34 @@ STRONG_SIGNAL_TERMS = {
     "ray",
     "spx",
     "fartcoin",
+    # xStocks tickers + concepts
+    "xstocks",
+    "xstock",
+    "tokenized",
+    "stocks",
+    "stock",
+    "equity",
+    "equities",
+    "onchain",
+    "aapl",
+    "tsla",
+    "nvda",
+    "msft",
+    "googl",
+    "amzn",
+    "meta",
+    "mstr",
+    "spy",
+    "qqq",
+    "nflx",
+    "coin",
+    "hood",
+    "crcl",
+    "aaplx",
+    "tslax",
+    "nvdax",
+    "spyx",
+    "qqqx",
 }
 
 CHAIN_TERMS = {
@@ -219,6 +280,9 @@ METRIC_TERMS = {
     "on chain",
     "wallet only",
     "from wallet",
+    "24 7",
+    "fractional",
+    "1:1 backed",
 }
 
 BUY_TERMS = {
@@ -229,10 +293,12 @@ BUY_TERMS = {
     "long",
     "short",
     "hedge",
-    "bet on",
     "leverage",
     "open position",
     "close position",
+    "lp",
+    "borrow",
+    "collateral",
 }
 
 SAFETY_TERMS = {
@@ -409,13 +475,22 @@ def quality_score(phrase: str):
     has_custody      = any(contains_term_phrase(phrase, term) for term in SAFETY_TERMS)
     has_no_kyc       = contains_term_phrase(phrase, "no kyc") or contains_term_phrase(phrase, "without kyc")
     has_perps        = contains_term_phrase(phrase, "perps") or contains_term_phrase(phrase, "perpetual")
-    has_prediction   = contains_term_phrase(phrase, "prediction") or contains_term_phrase(phrase, "polymarket")
+    has_xstocks      = (
+        contains_term_phrase(phrase, "xstocks")
+        or contains_term_phrase(phrase, "xstock")
+        or contains_term_phrase(phrase, "tokenized stock")
+        or contains_term_phrase(phrase, "tokenized stocks")
+        or contains_term_phrase(phrase, "tokenized equity")
+        or contains_term_phrase(phrase, "stocks on solana")
+        or contains_term_phrase(phrase, "onchain stocks")
+        or any(contains_term_phrase(phrase, t) for t in ["aaplx", "tslax", "nvdax", "spyx", "qqqx"])
+    )
     has_hyperliquid  = contains_term_phrase(phrase, "hyperliquid")
     has_whale        = contains_term_phrase(phrase, "whale") or contains_term_phrase(phrase, "smart money") or contains_term_phrase(phrase, "insider")
     has_launch       = contains_term_phrase(phrase, "launch") or contains_term_phrase(phrase, "launchpad")
     has_feature      = any(contains_term_phrase(phrase, term) for term in METRIC_TERMS)
     has_chain        = any(contains_term_phrase(phrase, term) for term in CHAIN_TERMS)
-    has_venue        = any(contains_term_phrase(phrase, term) for term in {"swap", "dex", "perps", "polymarket", "hyperliquid"})
+    has_venue        = any(contains_term_phrase(phrase, term) for term in {"swap", "dex", "perps", "hyperliquid", "xstocks", "kamino", "raydium"})
 
     signature_len = len(phrase_signature(phrase).split())
 
@@ -423,7 +498,7 @@ def quality_score(phrase: str):
         0 if has_action else 1,
         0 if has_custody else 1,
         0 if has_no_kyc else 1,
-        0 if has_perps or has_prediction or has_hyperliquid else 1,
+        0 if has_perps or has_xstocks or has_hyperliquid else 1,
         0 if has_whale or has_launch else 1,
         0 if has_feature else 1,
         0 if has_chain else 1,
