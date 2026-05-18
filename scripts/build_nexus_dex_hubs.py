@@ -25,12 +25,12 @@ REPORT_PATH = os.path.join(OUTPUT_DIR, "_hub_build_report.json")
 BRAND_CASE = {
     "nexus dex": "Nexus DEX",
     "hyperliquid": "Hyperliquid",
-    "polymarket": "Polymarket",
     "jupiter": "Jupiter",
     "raydium": "Raydium",
     "raydium launchlab": "Raydium LaunchLab",
     "orca": "Orca",
     "drift": "Drift",
+    "kamino": "Kamino",
     "pump fun": "Pump Fun",
     "phantom": "Phantom",
     "backpack": "Backpack",
@@ -39,6 +39,9 @@ BRAND_CASE = {
     "coinbase": "Coinbase",
     "binance": "Binance",
     "robinhood": "Robinhood",
+    "kraken": "Kraken",
+    "bybit": "Bybit",
+    "backed finance": "Backed Finance",
     "kalshi": "Kalshi",
     "solana": "Solana",
     "ethereum": "Ethereum",
@@ -75,6 +78,30 @@ BRAND_CASE = {
     "griffain": "GRIFFAIN",
     "chillguy": "CHILLGUY",
     "zerebro": "ZEREBRO",
+    "xstocks": "xStocks",
+    "xstock": "xStock",
+    "aaplx": "AAPLx",
+    "tslax": "TSLAx",
+    "nvdax": "NVDAx",
+    "spyx": "SPYx",
+    "qqqx": "QQQx",
+    "metax": "METAx",
+    "mstrx": "MSTRx",
+    "msftx": "MSFTx",
+    "googlx": "GOOGLx",
+    "amznx": "AMZNx",
+    "nflxx": "NFLXx",
+    "crclx": "CRCLx",
+    "aapl": "AAPL",
+    "tsla": "TSLA",
+    "nvda": "NVDA",
+    "spy": "SPY",
+    "qqq": "QQQ",
+    "msft": "MSFT",
+    "googl": "GOOGL",
+    "amzn": "AMZN",
+    "mstr": "MSTR",
+    "nflx": "NFLX",
     "dex": "DEX",
     "cex": "CEX",
     "kyc": "KYC",
@@ -85,6 +112,7 @@ BRAND_CASE = {
     "dao": "DAO",
     "evm": "EVM",
     "etf": "ETF",
+    "rwa": "RWA",
     "spot etf": "Spot ETF",
     "bitcoin etf": "Bitcoin ETF",
     "ethereum etf": "Ethereum ETF",
@@ -125,11 +153,11 @@ HUB_INTROS = {
     "solana-perps": "SOL perps on Nexus DEX let you trade Solana with leverage natively from your wallet. No off-chain account, no friction. Go long or short on SOL from the same wallet you already use for swaps and tokens.",
     "altcoin-perps": "Altcoin and memecoin perps on Nexus DEX cover assets most centralized exchanges do not list. Trade WIF, BONK, PEPE, HYPE, and dozens of trending tokens with leverage directly from your wallet, mobile-first.",
     "hyperliquid-frontend": "Trade Hyperliquid markets directly from a Solana wallet without bridging to Arbitrum or installing MetaMask. Nexus DEX gives you mobile-first access to Hyperliquid perps using Phantom, Backpack, or Solflare.",
-    "polymarket-prediction": "Use Polymarket-style prediction markets from a Solana wallet without bridging to Polygon or going through KYC. Bet on elections, crypto prices, sports, and Fed decisions directly from your Phantom wallet on mobile.",
+    "xstocks-defi": "Trade tokenized U.S. stocks on Nexus DEX directly from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx, QQQx, and other xStocks live as SPL tokens on Solana, backed 1:1 by real shares held in regulated custody by Backed Finance. No brokerage account, no KYC at the protocol level, 24/7 trading, and full DeFi composability from Phantom, Backpack, or Solflare.",
     "prediction-markets": "Prediction markets on Nexus DEX let you trade outcomes on crypto prices, politics, sports, and economic events directly from your wallet. No KYC, no signup, mobile-first, with markets resolving from minutes to months.",
     "solana-swap": "Swap any Solana token on Nexus DEX with best-price routing across Jupiter, Raydium, and Orca. Connect Phantom or Backpack, paste a token address, and trade SPL tokens with low slippage and no centralized account.",
     "buy-token": "Buy any Solana token directly from your wallet, memecoins, AI tokens, new listings, Pump Fun graduates. Nexus DEX aggregates liquidity across Jupiter, Raydium, and Orca so you get the best price without signup or KYC.",
-    "no-kyc-trading": "No-KYC trading on Nexus DEX means no identity verification, no account creation, and no centralized custody. Connect a wallet, sign a transaction, and trade perps, spot, or prediction markets without ever sharing personal data.",
+    "no-kyc-trading": "No-KYC trading on Nexus DEX means no identity verification, no account creation, and no centralized custody. Connect a wallet, sign a transaction, and trade perps, spot, tokenized stocks, or prediction markets without ever sharing personal data.",
     "whale-tracking": "Track Solana whales, smart money, and memecoin insiders in real time. Nexus DEX surfaces top traders, early buyers, deployer clusters, and KOL wallets so you can see who is accumulating before the chart moves.",
     "token-launch": "Launch a Solana token from your wallet without code, KYC, or upfront fees. Deploy memecoins via bonding curve, graduate to Raydium liquidity, and reach buyers without going through Pump Fun or third-party launchpads.",
     "wallet-trading": "Trade fully self-custodial from Phantom, Backpack, or Solflare. Nexus DEX never holds your funds, never requires KYC, and never asks you to deposit. Your wallet is your account, and every trade settles on-chain.",
@@ -143,11 +171,11 @@ HUB_TITLES = {
     "solana-perps": "SOL Perps on Nexus DEX: Solana Leverage Trading From Your Wallet",
     "altcoin-perps": "Altcoin & Memecoin Perps: WIF, BONK, PEPE Leverage Trading",
     "hyperliquid-frontend": "Trade Hyperliquid From Solana: Mobile, Wallet-Based, No MetaMask",
-    "polymarket-prediction": "Use Polymarket From Solana: Mobile, Wallet-Based, No Bridge",
+    "xstocks-defi": "xStocks on Nexus DEX: Trade AAPL, TSLA, NVDA Tokenized Stocks From Your Wallet",
     "prediction-markets": "Prediction Markets: Bet on BTC, ETH, Elections & Sports From Wallet",
     "solana-swap": "Solana DEX Aggregator: Best Price Swaps, No KYC, Mobile",
     "buy-token": "Buy Solana Tokens: Memecoins, New Launches & SPL Tokens From Wallet",
-    "no-kyc-trading": "No KYC Trading: Perps, Swaps & Prediction Markets From Wallet",
+    "no-kyc-trading": "No KYC Trading: Perps, Swaps, Stocks & Prediction Markets From Wallet",
     "whale-tracking": "Solana Whale Tracking: Smart Money, Insiders & Early Buyers",
     "token-launch": "Launch a Solana Token: No KYC, From Your Wallet, Mobile",
     "wallet-trading": "Wallet-Based Trading: Self-Custodial Perps, Swaps & Prediction",
@@ -161,11 +189,11 @@ HUB_META_DESCRIPTIONS = {
     "solana-perps": "Long or short SOL with leverage on Nexus DEX. Trade Solana perpetuals natively from the same wallet you use for spot, with no off-chain account or KYC.",
     "altcoin-perps": "Trade altcoin and memecoin perps on Nexus DEX: WIF, BONK, PEPE, HYPE, and more. Leverage trading from your wallet with no KYC, no signup, and mobile-first access.",
     "hyperliquid-frontend": "Use Hyperliquid from a Solana wallet on Nexus DEX. Mobile-first, no MetaMask, no bridging to Arbitrum. Trade Hyperliquid perps directly from Phantom or Backpack.",
-    "polymarket-prediction": "Use Polymarket from a Solana wallet on Nexus DEX. Mobile-first, no MetaMask, no bridging to Polygon. Bet on outcomes directly from Phantom.",
+    "xstocks-defi": "Trade tokenized U.S. stocks on Nexus DEX from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx 24/7 with no brokerage account and no KYC at the protocol level.",
     "prediction-markets": "Prediction markets on Nexus DEX let you bet on crypto prices, elections, sports, and Fed decisions from your wallet. No KYC, no signup, mobile-first access.",
     "solana-swap": "Swap any Solana token on Nexus DEX with best-price routing across Jupiter, Raydium, and Orca. No KYC, no account, mobile-first, low slippage.",
     "buy-token": "Buy Solana tokens, memecoins, and new launches directly from your wallet on Nexus DEX. Best-price routing across Jupiter, Raydium, and Orca with no signup or KYC.",
-    "no-kyc-trading": "No-KYC trading on Nexus DEX covers perps, spot swaps, and prediction markets. Connect a wallet, sign a transaction, and trade without ever sharing personal data.",
+    "no-kyc-trading": "No-KYC trading on Nexus DEX covers perps, spot, tokenized stocks, and prediction markets. Connect a wallet, sign a transaction, and trade without sharing data.",
     "whale-tracking": "Track Solana whales, smart money, memecoin insiders, deployer clusters, and KOL wallets on Nexus DEX. See who is accumulating before the chart moves.",
     "token-launch": "Launch a Solana token from your wallet on Nexus DEX. No KYC, no code, no upfront fees. Deploy memecoins via bonding curve and graduate to Raydium liquidity.",
     "wallet-trading": "Self-custodial trading on Nexus DEX from Phantom, Backpack, or Solflare. Your wallet is your account. Every trade settles on-chain with no deposit and no KYC.",
@@ -209,11 +237,11 @@ HUB_KEY_FEATURES = {
         "Full Hyperliquid order book and depth from a mobile-first interface",
         "Use Phantom, Backpack, or Solflare with familiar Solana flows",
     ],
-    "polymarket-prediction": [
-        "Use Polymarket from a Solana wallet without bridging to Polygon",
-        "No MetaMask, no centralized account, no KYC required",
-        "Trade outcomes on elections, crypto prices, sports, and economic events",
-        "Mobile-first prediction market access from Phantom or Backpack",
+    "xstocks-defi": [
+        "Trade 60+ tokenized U.S. stocks and ETFs (AAPLx, TSLAx, NVDAx, SPYx, QQQx) as SPL tokens",
+        "Each xStock is backed 1:1 by the real underlying share in regulated Swiss custody",
+        "24/7 trading from your wallet, no brokerage account and no market hours",
+        "Composable across Solana DeFi: LP on Raydium, collateralize on Kamino, swap via Jupiter",
     ],
     "prediction-markets": [
         "Bet on BTC, ETH, SOL price levels with short and long resolution windows",
@@ -236,7 +264,7 @@ HUB_KEY_FEATURES = {
     "no-kyc-trading": [
         "No identity verification, no account creation, no document uploads",
         "Self-custodial, wallet-based, with funds always under your control",
-        "Covers perps, spot swaps, and prediction markets in one interface",
+        "Covers perps, spot swaps, tokenized stocks, and prediction markets in one interface",
         "Mobile-first, accessible from any Solana wallet",
     ],
     "whale-tracking": [
@@ -252,7 +280,7 @@ HUB_KEY_FEATURES = {
         "Mobile-first launch flow accessible from Phantom or Backpack",
     ],
     "wallet-trading": [
-        "Fully self-custodial across perps, swaps, and prediction markets",
+        "Fully self-custodial across perps, swaps, stocks, and prediction markets",
         "Nexus DEX never holds funds, never custodies, never freezes accounts",
         "Every trade settles on-chain from your wallet signature",
         "Works with Phantom, Backpack, Solflare, and other Solana wallets",
@@ -290,9 +318,11 @@ HUB_FAQS = {
         ("Do I need a separate Hyperliquid account?", "No. Nexus DEX routes to Hyperliquid markets from your existing Solana wallet, so there is no separate signup or Arbitrum wallet required."),
         ("Is this the official Hyperliquid app?", "No. Nexus DEX is a wallet-based frontend that connects Solana wallets to Hyperliquid liquidity without requiring MetaMask or an Arbitrum bridge."),
     ],
-    "polymarket-prediction": [
-        ("Can I really use Polymarket from a Solana wallet?", "Yes. Nexus DEX provides a wallet-based interface to Polymarket-style outcome markets without requiring you to bridge USDC to Polygon or use MetaMask."),
-        ("Is this available in the US?", "Polymarket access depends on the user's jurisdiction. Nexus DEX does not provide tax or legal advice. Check your local regulations before trading."),
+    "xstocks-defi": [
+        ("What are xStocks?", "xStocks are tokenized 1:1 representations of real U.S. stocks and ETFs (like AAPLx for Apple, TSLAx for Tesla, NVDAx for Nvidia) issued by Backed Finance, a Swiss-regulated entity acquired by Kraken in December 2025. Each token is backed by the underlying share held in regulated custody, and they live on Solana as SPL tokens."),
+        ("Do I need a brokerage account or KYC?", "No. xStocks trade as SPL tokens, so there is no brokerage signup at the protocol level. Connect a Solana wallet, fund it with USDC or SOL, and trade. Note that availability and tax treatment depend on your jurisdiction, so check local rules before trading."),
+        ("Do I get dividends and voting rights?", "Dividends are passed on automatically through a rebasing multiplier, so your xStock balance increases when the underlying pays a dividend. xStocks do not carry shareholder voting rights or a direct legal claim to the underlying company shares."),
+        ("Can I use xStocks in DeFi?", "Yes. xStocks are composable SPL tokens. You can LP them on Raydium or Orca, use them as collateral on Kamino, and route swaps through Jupiter just like any other Solana asset."),
     ],
     "prediction-markets": [
         ("What kinds of markets are available?", "Crypto price levels (BTC, ETH, SOL), elections, Fed rate decisions, sports outcomes, and major event predictions. Resolution windows range from minutes to months."),
@@ -364,10 +394,10 @@ HUB_GET_STARTED_STEPS = {
         "Open the Hyperliquid markets section inside Nexus DEX.",
         "Pick a market, set leverage and direction, and sign from your wallet.",
     ],
-    "polymarket-prediction": [
-        "Connect a Solana wallet funded with USDC.",
-        "Browse Polymarket-style outcome markets inside Nexus DEX.",
-        "Pick yes or no on an outcome, set position size, and sign from your wallet.",
+    "xstocks-defi": [
+        "Connect a Solana wallet (Phantom, Backpack, or Solflare) funded with USDC or SOL.",
+        "Search for a ticker like AAPLx, TSLAx, NVDAx, SPYx, or QQQx inside Nexus DEX.",
+        "Review the best-price route across Jupiter, Raydium, and Orca, then sign the swap from your wallet.",
     ],
     "prediction-markets": [
         "Connect a Solana wallet with USDC for position collateral.",
@@ -387,7 +417,7 @@ HUB_GET_STARTED_STEPS = {
     "no-kyc-trading": [
         "Install a Solana wallet (Phantom, Backpack, or Solflare).",
         "Fund the wallet with SOL or USDC from any source you control.",
-        "Connect to Nexus DEX and trade perps, spot, or prediction markets. No identity check required.",
+        "Connect to Nexus DEX and trade perps, spot, stocks, or prediction markets. No identity check required.",
     ],
     "whale-tracking": [
         "Open the whale tracker section inside Nexus DEX.",
@@ -418,11 +448,11 @@ HUB_HOW_IT_WORKS = {
     "solana-perps": "SOL perp positions use USDC collateral. The market tracks the SOL perp price live, applies funding rates on a fixed interval, and settles PnL from your wallet signature.",
     "altcoin-perps": "Altcoin perps work the same way as BTC, ETH, and SOL perps. Your wallet posts USDC margin, opens leverage against a listed altcoin market, and settles PnL on-chain.",
     "hyperliquid-frontend": "Nexus DEX provides a wallet-based interface to Hyperliquid markets. Your Solana wallet signs trades that route through to Hyperliquid liquidity without requiring you to bridge to Arbitrum or use MetaMask.",
-    "polymarket-prediction": "Nexus DEX routes prediction market positions to Polymarket-style outcome contracts. Your Solana wallet signs the position and the contract pays out automatically when the market resolves.",
+    "xstocks-defi": "xStocks are issued by Backed Finance as SPL tokens on Solana, with each token backed 1:1 by the underlying U.S. share held in regulated Swiss custody. Trades route through Solana DEXes like Raydium and Orca via Jupiter's aggregation and settle directly to your wallet. Dividends are passed on automatically through a rebasing multiplier that updates your token balance, and corporate actions like stock splits adjust the same way. You can hold xStocks in your Solana wallet, LP them, or use them as collateral in Kamino just like any other SPL token.",
     "prediction-markets": "Each prediction market is an outcome contract with a defined resolution source. You take a yes or no side, the position is collateralized from your wallet, and the contract pays winners automatically at resolution.",
     "solana-swap": "Nexus DEX queries Jupiter, Raydium, and Orca for the best price on your swap. The selected route is executed in a single transaction signed from your wallet.",
     "buy-token": "When you buy a token, Nexus DEX finds the best price across Jupiter, Raydium, and Orca, including aggregator hops if they reduce slippage. Your wallet signs one transaction and the trade settles instantly.",
-    "no-kyc-trading": "Every trade type on Nexus DEX, whether perp, spot, or prediction, settles from your wallet signature. There is no off-chain account, no identity check, and no custodial wrapper between you and the market.",
+    "no-kyc-trading": "Every trade type on Nexus DEX, whether perp, spot, xStocks, or prediction, settles from your wallet signature. There is no off-chain account, no identity check, and no custodial wrapper between you and the market.",
     "whale-tracking": "The whale tracker indexes on-chain trading activity across Solana, ranks wallets by profitability and timing, and surfaces patterns like accumulation, deployer clusters, and sniper behavior.",
     "token-launch": "The launchpad deploys an SPL token, attaches a bonding curve for early trading, and automatically migrates liquidity to Raydium once the graduation threshold is hit. Everything is signed from your wallet.",
     "wallet-trading": "Nexus DEX is fully non-custodial. Your wallet holds the funds, signs the transactions, and receives the proceeds. The platform never takes custody and cannot freeze, pause, or reverse your trades.",
@@ -436,7 +466,7 @@ HUB_TARGETING = {
     "solana-perps": "SOL perp users are usually already active on Solana for swaps and tokens. They want leverage on SOL from the same wallet without moving funds to a centralized exchange.",
     "altcoin-perps": "Altcoin perp users are typically memecoin traders, low-cap speculators, and people looking for leverage on assets centralized exchanges do not list.",
     "hyperliquid-frontend": "This is for Solana-native traders who want Hyperliquid liquidity but do not want to install MetaMask, bridge to Arbitrum, or maintain a second wallet.",
-    "polymarket-prediction": "This is for prediction market users who hold funds on Solana and do not want to bridge USDC to Polygon or set up a MetaMask wallet just to bet on outcomes.",
+    "xstocks-defi": "xStocks users include non-U.S. residents who want easier access to U.S. equities without a traditional brokerage account, crypto-native investors who want stock exposure that lives inside DeFi, and retail traders who want fractional positions, 24/7 access, and self-custody instead of relying on a broker.",
     "prediction-markets": "Prediction market users include crypto price speculators, political and election bettors, sports outcome traders, and macro-focused users tracking Fed decisions and economic data.",
     "solana-swap": "This is for anyone swapping SPL tokens who wants best-price routing without juggling Jupiter, Raydium, and Orca interfaces separately, or who prefers a mobile-first interface.",
     "buy-token": "Buy-token users include memecoin traders, new-launch speculators, AI token buyers, and anyone trying to acquire a Solana token that is not listed on a centralized exchange.",
@@ -497,13 +527,19 @@ INTENT_HINTS = {
     "buy": "spot buys",
     "bet": "prediction market bets",
     "prediction": "prediction market positions",
-    "polymarket": "Polymarket-style outcomes",
     "hyperliquid": "Hyperliquid liquidity",
     "whale": "whale and smart-money tracking",
     "smart": "whale and smart-money tracking",
     "launch": "token launching",
     "launchpad": "token launching",
     "hedge": "hedging strategies",
+    "xstocks": "tokenized stock exposure",
+    "xstock": "tokenized stock exposure",
+    "stocks": "tokenized stock exposure",
+    "stock": "tokenized stock exposure",
+    "equity": "tokenized equity exposure",
+    "equities": "tokenized equity exposure",
+    "tokenized": "tokenized asset exposure",
 }
 
 GENERIC_COMPARISON_POINTS = [
@@ -582,14 +618,18 @@ HUB_COMPARISON_POINTS = {
             "Default Hyperliquid mobile experience requires MetaMask Mobile or WalletConnect setup."
         ),
     ],
-    "polymarket-prediction": [
+    "xstocks-defi": [
         (
-            "Use Polymarket-style markets directly from a Solana wallet, with USDC you already hold on Solana.",
-            "The default Polymarket flow requires bridging USDC to Polygon and using a MetaMask wallet."
+            "Trade AAPLx, TSLAx, NVDAx, and SPYx 24/7 from a Solana wallet using SPL token flows you already know.",
+            "Traditional brokerages only trade during U.S. market hours and require account approval and identity verification."
         ),
         (
-            "Mobile-first prediction market access from Phantom or Backpack.",
-            "Default Polymarket mobile flow requires MetaMask Mobile or WalletConnect."
+            "xStocks are composable in DeFi. LP them on Raydium, borrow against them on Kamino, route through Jupiter.",
+            "Stocks held at Robinhood, Schwab, or Fidelity sit in a brokerage account and cannot be moved into DeFi protocols."
+        ),
+        (
+            "Self-custody: your xStocks live in your wallet, not in a broker's account that can be frozen or restricted.",
+            "Brokerage accounts are subject to account holds, T+1 settlement, and platform policies you do not control."
         ),
     ],
     "prediction-markets": [
@@ -712,10 +752,11 @@ HUB_SCENARIO_EXAMPLES = {
         "A mobile user wants to access Hyperliquid from Phantom on iOS.",
         "A user wants to keep Hyperliquid exposure inside their existing Solana wallet workflow.",
     ],
-    "polymarket-prediction": [
-        "A user wants to bet on a Polymarket-style outcome without bridging USDC to Polygon.",
-        "A Solana-native user wants Polymarket access from Phantom or Backpack.",
-        "A mobile-first user wants prediction market access without a second wallet.",
+    "xstocks-defi": [
+        "A non-U.S. user wants Apple and Nvidia exposure without opening a U.S. brokerage account.",
+        "A crypto-native investor wants to hold TSLAx and SPYx in their Solana wallet alongside SOL and USDC.",
+        "A DeFi user wants to LP NVDAx/USDC on Raydium or use AAPLx as collateral on Kamino.",
+        "A weekend trader wants to buy stock exposure outside U.S. market hours without waiting for Monday open.",
     ],
     "prediction-markets": [
         "A trader wants to bet on the next FOMC rate decision from a Solana wallet.",
@@ -734,7 +775,7 @@ HUB_SCENARIO_EXAMPLES = {
     ],
     "no-kyc-trading": [
         "A user in a jurisdiction with limited CEX access wants to trade without KYC.",
-        "A privacy-focused trader wants to swap, perp-trade, and bet without sharing identity documents.",
+        "A privacy-focused trader wants to swap, perp-trade, hold tokenized stocks, and bet without sharing identity documents.",
         "A user burned by past KYC leaks wants to keep personal data out of the trading flow entirely.",
     ],
     "whale-tracking": [
@@ -908,6 +949,8 @@ def score_keyword(keyword, hub_terms):
         score += 2
     if {"buy", "swap", "trade"} & kw_tokens:
         score += 2
+    if "xstocks" in kw_tokens or "xstock" in kw_tokens or "tokenized" in kw_tokens:
+        score += 3
     if kw.startswith("how to ") or kw.startswith("where to "):
         score += 1
 
@@ -1211,7 +1254,9 @@ def detect_hub_context(hub_slug, hub_terms):
 
     if any(x in combined for x in ["perps", "perp", "leverage", "futures"]):
         return "perps"
-    if any(x in combined for x in ["polymarket", "prediction", "bet on", "outcome", "odds"]):
+    if any(x in combined for x in ["xstocks", "xstock", "tokenized stock", "tokenized equity", "aaplx", "tslax", "nvdax", "spyx", "qqqx"]):
+        return "xstocks"
+    if any(x in combined for x in ["prediction", "bet on", "outcome", "odds"]):
         return "prediction"
     if any(x in combined for x in ["swap", "buy", "spl token", "aggregator"]):
         return "swap"
@@ -1236,6 +1281,12 @@ COMMON_SCENARIO_TEMPLATES = {
         "A user wants to take a position on an outcome without signing up at a sportsbook or prediction venue.",
         "A trader wants to hedge an event-driven exposure from the same wallet they use for spot.",
         "A mobile user wants prediction market access without bridging USDC to another chain.",
+    ],
+    "xstocks": [
+        "A non-U.S. user wants Apple, Tesla, or Nvidia exposure without opening a U.S. brokerage account.",
+        "A crypto-native investor wants to hold tokenized stocks alongside SOL and USDC in the same wallet.",
+        "A DeFi user wants to LP a stock token against USDC or use it as collateral on Kamino.",
+        "A weekend trader wants stock exposure outside U.S. market hours without waiting for the next open.",
     ],
     "swap": [
         "A user wants the best price on a token swap without checking three aggregators manually.",
