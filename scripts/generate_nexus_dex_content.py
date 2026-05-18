@@ -1,33 +1,13 @@
 #!/usr/bin/env python3
 """
-generate_nexus_dex_content.py -- v1.0
+generate_nexus_dex_content.py -- v1.1
 
 Builds Verixia Nexus DEX SEO pages from the keyword queue.
 
-Architecture (mirrors generate_token_content.py v13):
-  - Title, description, H1, hero intro, content H2, content bridge, FAQ, schema,
-    threat banner, recognition chips, and story card titles all come from the
-    Node SEO engine's `buildPageMeta(keyword)` -- single source of truth.
-  - Python does NOT reimplement intent detection, subject extraction, or
-    keyword cleaning. Those live in the engine.
-  - Expects the same POST /seo-page endpoint on the Node server that returns
-    the full page payload (content + meta + hlData). If the engine needs to
-    return Nexus-DEX-flavored content rather than token-risk content, either
-    route by keyword on the engine side or point SEO_PAGE_ENDPOINT below at
-    a separate Nexus-DEX-specific endpoint.
-
-What stays in Python:
-  - Keyword queue loading and slug management.
-  - Hub link selection (HUB_MATCH_RULES, HUB_TITLE_OVERRIDES) -- depends on
-    the Nexus DEX hub taxonomy, kept in Python.
-  - Related-page linking via get_related_pages() + build_links_html().
-  - Daily limit handling.
-  - Output paths and file I/O.
-
-Compatibility shim:
-  - Exposes `generate_nexus_dex_content(keyword)` that returns just the content
-    body string for legacy callers (build_nexus_dex_seo_incremental.py,
-    build_nexus_dex_seo.py).
+v1.1 changes:
+  - Polymarket and prediction-markets hubs removed
+  - xStocks / tokenized-stocks / buy-stocks-onchain / stocks-no-kyc /
+    stocks-24-7 / global-stock-access hubs added
 """
 
 from __future__ import annotations
@@ -45,7 +25,6 @@ import requests
 # CONFIG
 # =========================================================================
 
-# Repo layout: this script lives at BASE_DIR/scripts/generate_nexus_dex_content.py
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 KEYWORDS_FILE        = BASE_DIR / "data" / "nexus_dex_keywords.txt"
@@ -75,8 +54,22 @@ HUB_MATCH_RULES = [
     # (regex pattern, hub_slug, hub_title_override_key)
     (r"\bhyperliquid\b",
         "hyperliquid-frontend", "hyperliquid"),
-    (r"\bpolymarket\b",
-        "polymarket-prediction", "polymarket"),
+
+    # xStocks / tokenized stocks (specific first)
+    (r"\bxstocks?\b|\baaplx\b|\btslax\b|\bnvdax\b|\bspyx\b|\bqqqx\b|backed\s+finance",
+        "xstocks-trading", "xstocks"),
+    (r"buy\s+us\s+stocks\s+from|us\s+stocks\s+no\s+us\s+bank|us\s+stocks\s+for\s+non\s+residents|us\s+stocks\s+international|global\s+stock|international\s+stock",
+        "global-stock-access", "global_stocks"),
+    (r"24\s*7\s+stock|stocks\s+24\s+hours|stocks\s+weekend|trade\s+stocks\s+at\s+night|trade\s+stocks\s+weekends|trade\s+stocks\s+holidays|stocks\s+never\s+close|always\s+open\s+stock|stocks\s+after\s+hours",
+        "stocks-24-7", "stocks_247"),
+    (r"buy\s+stocks\s+no\s+kyc|trade\s+stocks\s+no\s+kyc|stock\s+trading\s+no\s+verification|stock\s+trading\s+no\s+signup|stocks\s+no\s+id|stocks\s+no\s+account|anonymous\s+stock|stocks\s+without\s+(broker|robinhood|etrade)",
+        "stocks-no-kyc", "stocks_no_kyc"),
+    (r"buy\s+(apple|aapl|tesla|tsla|nvidia|nvda|microsoft|msft|google|googl|meta|amazon|amzn|mstr|microstrategy|spy|qqq|netflix|nflx|coinbase|robinhood|circle|crcl)\b",
+        "buy-stocks-onchain", "buy_stocks"),
+    (r"tokenized\s+stocks?|tokenized\s+equit(y|ies)|onchain\s+stocks|onchain\s+equit(y|ies)|stocks?\s+on\s+(solana|blockchain)|stocks?\s+as\s+spl|buy\s+stocks?\s+with\s+(crypto|usdc|sol)",
+        "tokenized-stocks", "tokenized_stocks"),
+
+    # Perps
     (r"\bbtc\s+perp|bitcoin\s+perp|bitcoin\s+futures|bitcoin\s+perpetual",
         "bitcoin-perps", "btc_perps"),
     (r"\beth\s+perp|ethereum\s+perp|ethereum\s+futures|ethereum\s+perpetual",
@@ -85,8 +78,8 @@ HUB_MATCH_RULES = [
         "solana-perps", "sol_perps"),
     (r"\bmemecoin\s+perp|altcoin\s+perp|\bwif\s+perp|\bbonk\s+perp|\bpepe\s+perp|\bdoge\s+perp|\bhype\s+perp",
         "altcoin-perps", "altcoin_perps"),
-    (r"\bprediction\s+market|\bbet\s+on\b|\bodds\b|yes\s+or\s+no\s+market",
-        "prediction-markets", "prediction"),
+
+    # Whale / launch / swap / buy
     (r"\bwhale\b|\bsmart\s+money\b|\binsider\b|\bdeployer\b|\bsniper\b|kol\s+wallet",
         "whale-tracking", "whale"),
     (r"\blaunch\s+token|\btoken\s+launch|\blaunchpad\b|bonding\s+curve|deploy\s+token",
@@ -95,10 +88,14 @@ HUB_MATCH_RULES = [
         "solana-swap", "swap"),
     (r"\bbuy\s+bonk|\bbuy\s+wif|\bbuy\s+pepe|\bbuy\s+trump|\bbuy\s+memecoin|\bbuy\s+spl|\bbuy\b",
         "buy-token", "buy_token"),
+
+    # Wallet / no KYC (generic, after specific rules above)
     (r"phantom\s+wallet\s+trading|backpack\s+wallet\s+trading|self\s+custodial|non\s+custodial|wallet\s+based",
         "wallet-trading", "wallet"),
     (r"no\s+kyc|without\s+kyc|no\s+signup|no\s+verification",
         "no-kyc-trading", "no_kyc"),
+
+    # Perps fallback
     (r"\bperp(s|etual)|\bleverage|\blong\b|\bshort\b|\bhedge\b",
         "perps-trading", "perps"),
     (r"\bswap\b",
@@ -108,21 +105,25 @@ HUB_MATCH_RULES = [
 ]
 
 HUB_TITLE_OVERRIDES = {
-    "hyperliquid":   "Hyperliquid Frontend Hub",
-    "polymarket":    "Polymarket Hub",
-    "btc_perps":     "Bitcoin Perps Hub",
-    "eth_perps":     "Ethereum Perps Hub",
-    "sol_perps":     "SOL Perps Hub",
-    "altcoin_perps": "Altcoin Perps Hub",
-    "prediction":    "Prediction Markets Hub",
-    "whale":         "Whale Tracking Hub",
-    "launch":        "Token Launch Hub",
-    "swap":          "Solana Swap Hub",
-    "buy_token":     "Buy Token Hub",
-    "wallet":        "Wallet Trading Hub",
-    "no_kyc":        "No KYC Trading Hub",
-    "perps":         "Perps Trading Hub",
-    "how_to":        "Nexus DEX Guides Hub",
+    "hyperliquid":      "Hyperliquid Frontend Hub",
+    "xstocks":          "xStocks Trading Hub",
+    "tokenized_stocks": "Tokenized Stocks Hub",
+    "buy_stocks":       "Buy Stocks On-Chain Hub",
+    "stocks_no_kyc":    "Stocks No KYC Hub",
+    "stocks_247":       "24/7 Stocks Hub",
+    "global_stocks":    "Global Stock Access Hub",
+    "btc_perps":        "Bitcoin Perps Hub",
+    "eth_perps":        "Ethereum Perps Hub",
+    "sol_perps":        "SOL Perps Hub",
+    "altcoin_perps":    "Altcoin Perps Hub",
+    "whale":            "Whale Tracking Hub",
+    "launch":           "Token Launch Hub",
+    "swap":             "Solana Swap Hub",
+    "buy_token":        "Buy Token Hub",
+    "wallet":           "Wallet Trading Hub",
+    "no_kyc":           "No KYC Trading Hub",
+    "perps":            "Perps Trading Hub",
+    "how_to":           "Nexus DEX Guides Hub",
 }
 
 DEFAULT_HUB_SLUG  = "nexus-dex"
@@ -179,17 +180,7 @@ def load_keyword_queue() -> list[str]:
 # =========================================================================
 
 def fetch_seo_page(keyword: str) -> dict | None:
-    """
-    POST /seo-page on the Node engine. Returns:
-      {
-        keyword, content, templateType,
-        meta: { title, description, h1, intro, contentHeading, contentBridge,
-                breadcrumb, faq, faqSchema, threatBanner, recognitionChips,
-                storyCardTitles, intent, shape, subject, subjects },
-        hlData, hlDataBlock
-      }
-    Returns None on hard failure (network, 5xx, malformed response).
-    """
+    """POST /seo-page on the Node engine. Returns the payload or None on failure."""
     try:
         resp = requests.post(
             SEO_PAGE_ENDPOINT,
@@ -210,7 +201,6 @@ def fetch_seo_page(keyword: str) -> dict | None:
         print(f"[seo-page] Bad JSON for {keyword!r}", file=sys.stderr)
         return None
 
-    # Minimum field check
     if not payload.get("content") or not payload.get("meta"):
         print(f"[seo-page] Missing content/meta for {keyword!r}", file=sys.stderr)
         return None
@@ -220,19 +210,9 @@ def fetch_seo_page(keyword: str) -> dict | None:
 # =========================================================================
 # COMPATIBILITY SHIM
 # =========================================================================
-#
-# Legacy callers (build_nexus_dex_seo_incremental.py, build_nexus_dex_seo.py)
-# import `generate_nexus_dex_content` and expect a plain string of body
-# content for a given keyword. The architecture fetches a full payload from
-# the Node /seo-page endpoint, so this shim extracts and returns just the
-# `content` field. Returns "" on failure -- callers already handle empty.
 
 def generate_nexus_dex_content(keyword: str) -> str:
-    """Compatibility shim: return just the content body string.
-
-    Wraps fetch_seo_page() and returns payload["content"] (or "" on failure)
-    so legacy importers keep working without changes.
-    """
+    """Compatibility shim: return just the content body string."""
     payload = fetch_seo_page(keyword)
     if not payload:
         return ""
@@ -243,17 +223,11 @@ def generate_nexus_dex_content(keyword: str) -> str:
 # =========================================================================
 
 def get_related_pages(current_slug: str, current_hub: str, limit: int = 4) -> list[tuple[str, str]]:
-    """
-    Returns up to `limit` (slug, title) pairs of previously-generated pages
-    from the same hub (prioritised), then other hubs as fill-in.
-    Title is reconstructed from the slug.
-    """
     all_slugs = load_lines(GENERATED_SLUGS_FILE)
     same_hub  = []
     other_hub = []
 
     for line in all_slugs:
-        # Format: <hub_slug>:<page_slug> if stored that way, else just <page_slug>
         if ":" in line:
             hub_part, slug = line.split(":", 1)
         else:
@@ -272,7 +246,6 @@ def get_related_pages(current_slug: str, current_hub: str, limit: int = 4) -> li
     if len(chosen) < limit:
         chosen += other_hub[: limit - len(chosen)]
 
-    # Reverse so newest appears first (slugs are appended chronologically)
     chosen.reverse()
     return [(slug, title) for slug, title, _ in chosen[:limit]]
 
@@ -292,6 +265,15 @@ def slug_to_title(slug: str) -> str:
         "lst": "LST", "lrt": "LRT", "rwa": "RWA", "ico": "ICO", "ido": "IDO",
         "etf": "ETF", "fomc": "FOMC", "cpi": "CPI", "gdp": "GDP",
         "nfl": "NFL", "nba": "NBA", "ufc": "UFC",
+        # xStocks tickers
+        "xstocks": "xStocks", "xstock": "xStock",
+        "aapl": "AAPL", "tsla": "TSLA", "nvda": "NVDA", "msft": "MSFT",
+        "googl": "GOOGL", "amzn": "AMZN", "mstr": "MSTR", "nflx": "NFLX",
+        "spy": "SPY", "qqq": "QQQ", "crcl": "CRCL", "hood": "HOOD", "coin": "COIN",
+        "aaplx": "AAPLx", "tslax": "TSLAx", "nvdax": "NVDAx", "spyx": "SPYx",
+        "qqqx": "QQQx", "mstrx": "MSTRx", "metax": "METAx", "amznx": "AMZNx",
+        "googlx": "GOOGLx", "msftx": "MSFTx", "nflxx": "NFLXx", "crclx": "CRCLx",
+        "us": "U.S.",
         "vs": "vs",
     }
     out = []
@@ -317,13 +299,11 @@ def build_links_html(related: list[tuple[str, str]], hub_slug: str) -> str:
 # =========================================================================
 
 def load_template() -> str:
-    """Load the Nexus DEX template HTML."""
     if not TEMPLATE_PATH.exists():
         raise FileNotFoundError(f"Template missing: {TEMPLATE_PATH}")
     return TEMPLATE_PATH.read_text(encoding="utf-8")
 
 def html_escape(text: str) -> str:
-    """Minimal HTML escape for attribute / inline text contexts."""
     return (
         str(text)
         .replace("&", "&amp;")
@@ -333,16 +313,10 @@ def html_escape(text: str) -> str:
     )
 
 def render_ai_content_html(content: str) -> str:
-    """Render the engine content as HTML paragraphs."""
     paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
     return "\n".join(f"<p>{html_escape(p)}</p>" for p in paragraphs)
 
 def build_page_meta_script(meta: dict, hl_data_block: str = "") -> str:
-    """
-    Inject the engine's full meta object as window.__pageMeta. The template's
-    JS reads this -- if present, it skips client-side regeneration of H1,
-    intro, content heading, content bridge, FAQ, chips, and threat banner.
-    """
     payload = {
         "title":            meta.get("title", ""),
         "description":      meta.get("description", ""),
@@ -361,14 +335,12 @@ def build_page_meta_script(meta: dict, hl_data_block: str = "") -> str:
         "hlDataBlock":      hl_data_block or "",
     }
     json_blob = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
-    # Escape closing script tags inside JSON to be safe
     safe_blob = json_blob.replace("</", "<\\/")
     return f'<script id="page-meta">window.__pageMeta = {safe_blob};</script>'
 
 def render_page(template_html: str, keyword: str, payload: dict,
                 slug: str, hub_slug: str, hub_title: str,
                 related_html: str) -> str:
-    """Replace all placeholders in the template with engine-supplied values."""
     meta = payload["meta"]
     content = payload["content"]
     hl_block = payload.get("hlDataBlock", "") or ""
@@ -388,7 +360,6 @@ def render_page(template_html: str, keyword: str, payload: dict,
     meta_script     = build_page_meta_script(meta, hl_block)
 
     substitutions = {
-        # Standard meta
         "{{TITLE}}":               title,
         "{{DESCRIPTION}}":         desc,
         "{{KEYWORD}}":             keyword,
@@ -396,7 +367,6 @@ def render_page(template_html: str, keyword: str, payload: dict,
         "{{PAGE_URL}}":            page_url,
         "{{SITE_URL}}":            SITE_URL,
 
-        # Open Graph / Twitter
         "{{OG_TITLE}}":            title,
         "{{OG_DESCRIPTION}}":      desc,
         "{{OG_URL}}":              page_url,
@@ -405,22 +375,18 @@ def render_page(template_html: str, keyword: str, payload: dict,
         "{{TWITTER_DESCRIPTION}}": desc,
         "{{TWITTER_HANDLE}}":      TWITTER_HANDLE,
 
-        # Hero / content (server-rendered; template JS respects these)
         "{{STATIC_H1}}":           html_escape(h1),
         "{{STATIC_INTRO}}":        html_escape(intro),
         "{{CONTENT_HEADING}}":     html_escape(content_heading),
         "{{CONTENT_BRIDGE}}":      html_escape(content_bridge),
         "{{BREADCRUMB_NAME}}":     html_escape(breadcrumb_name),
 
-        # Body content
         "{{AI_CONTENT}}":          ai_content_html,
         "{{HL_DATA_BLOCK}}":       hl_block,
 
-        # Schema + meta JSON for template JS
         "{{SCHEMA_FAQ}}":          faq_schema,
         "{{PAGE_META_SCRIPT}}":    meta_script,
 
-        # Hub / related
         "{{HUB_SLUG}}":            hub_slug,
         "{{HUB_TITLE}}":           html_escape(hub_title),
         "{{HUB_LINK_HREF}}":       f"/nexus-dex/{hub_slug}/",
@@ -428,7 +394,6 @@ def render_page(template_html: str, keyword: str, payload: dict,
         "{{RELATED_LINKS}}":       related_html,
         "{{LINKS_HTML}}":          related_html,
 
-        # Generation timestamp
         "{{GENERATED_AT}}":        datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
@@ -436,7 +401,6 @@ def render_page(template_html: str, keyword: str, payload: dict,
     for placeholder, value in substitutions.items():
         rendered = rendered.replace(placeholder, str(value))
 
-    # Insert page-meta script before </head> if {{PAGE_META_SCRIPT}} is not present
     if "{{PAGE_META_SCRIPT}}" not in template_html and "window.__pageMeta" not in rendered:
         if "</head>" in rendered:
             rendered = rendered.replace("</head>", f"{meta_script}\n</head>", 1)
@@ -448,7 +412,6 @@ def render_page(template_html: str, keyword: str, payload: dict,
 # =========================================================================
 
 def write_page(slug: str, html: str) -> Path:
-    """Write the rendered HTML to the Nexus DEX output directory."""
     output_dir = OUTPUT_DIR / slug
     output_dir.mkdir(parents=True, exist_ok=True)
     output_file = output_dir / "index.html"
@@ -456,12 +419,10 @@ def write_page(slug: str, html: str) -> Path:
     return output_file
 
 def record_generated(slug: str, keyword: str, hub_slug: str) -> None:
-    """Mark a slug + keyword as generated so it doesn't rebuild."""
     append_line(GENERATED_SLUGS_FILE, f"{hub_slug}:{slug}")
     append_line(GENERATED_KW_FILE, keyword)
 
 def process_keyword(keyword: str) -> bool:
-    """Process a single keyword. Returns True on success, False otherwise."""
     print(f"[build] -> {keyword!r}")
     payload = fetch_seo_page(keyword)
     if not payload:
@@ -496,7 +457,6 @@ def process_keyword(keyword: str) -> bool:
     return True
 
 def main(limit: int = DAILY_LIMIT) -> int:
-    """Build up to `limit` pages from the keyword queue."""
     pending = load_keyword_queue()
     if not pending:
         print("[build] No pending keywords.")
@@ -518,7 +478,7 @@ def main(limit: int = DAILY_LIMIT) -> int:
         except Exception as exc:
             failed += 1
             print(f"[build] EXCEPTION on {keyword!r}: {exc}", file=sys.stderr)
-        time.sleep(0.5)  # Tiny pause between calls
+        time.sleep(0.5)
 
     print(f"\n[build] Done. Success: {succeeded} | Failed: {failed} | Skipped: {len(pending) - len(todo)}")
     return 0 if failed == 0 else 1
@@ -536,36 +496,3 @@ if __name__ == "__main__":
         ok = process_keyword(args.keyword)
         sys.exit(0 if ok else 1)
     sys.exit(main(limit=args.limit))
-
-
-# =========================================================================
-# ROUTE_SNIPPET -- the Node server.js / index.js side
-# =========================================================================
-#
-# This Python script POSTs {"keyword": "...", "site": "nexus-dex"} to the
-# /seo-page endpoint. The "site" field lets the engine route to Nexus-DEX
-# content generation (vs token-risk). If your engine doesn't yet handle the
-# "site" field, either:
-#
-#   (a) update the engine to read req.body.site and switch system prompts,
-#       OR
-#   (b) point SEO_PAGE_ENDPOINT at a separate endpoint like /seo-page-nexus
-#       and add a dedicated route on the Node side.
-#
-# Example route handler with site routing:
-#
-# import { generateSeoPagePayload } from "./seo_engine.js";
-#
-# app.post("/seo-page", async (req, res) => {
-#   try {
-#     const { keyword, site } = req.body || {};
-#     if (!keyword) return res.status(400).json({ error: "keyword required" });
-#     const payload = await generateSeoPagePayload(keyword, { site: site || "token-risk" });
-#     res.json({ ...payload, templateType: "nexus-dex" });
-#   } catch (err) {
-#     console.error("[/seo-page]", err);
-#     res.status(500).json({ error: err.message || "generation failed" });
-#   }
-# });
-#
-# =========================================================================
