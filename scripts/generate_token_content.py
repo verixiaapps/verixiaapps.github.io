@@ -63,7 +63,7 @@ OUTPUT_DIR_DEFI      = BASE_DIR / "defi"
 SITE_URL             = "https://verixiaapps.com"
 SEO_API_BASE         = "https://awake-integrity-production-faa0.up.railway.app"
 SEO_PAGE_ENDPOINT    = f"{SEO_API_BASE}/seo-page"
-SEO_PAGE_TIMEOUT_S   = 90
+SEO_PAGE_TIMEOUT_S   = 45  # reduced from 90 -- engine worst case is now ~25s per pass
 
 DAILY_LIMIT          = 8
 
