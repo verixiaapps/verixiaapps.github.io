@@ -884,7 +884,7 @@ body{{padding-top:84px;}}
     <span>Token Risk</span>
   </a>
   <div class="top-actions">
-    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">📱 Get App</a>
+    <a class="app-top" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer"> swap </a>
   </div>
 </div>
 <div class="page-shell">
