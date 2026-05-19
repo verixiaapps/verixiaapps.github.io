@@ -778,21 +778,37 @@ def build_aligned_generated_records(existing_pages_list, extra_pages=None):
 # -------------------------
 
 def generate_ai_text(keyword, keyword_display):
-    raw_keyword = normalize_keyword(keyword)
-    results = []
+    raw_keyword   = normalize_keyword(keyword)
+    clean_keyword = normalize_keyword(keyword_display)
+    readable      = readable_keyword(keyword_display)
 
-    for _ in range(2):
+    attempts = [
+        raw_keyword,
+        clean_keyword,
+        readable,
+        f"{clean_keyword} token risk" if clean_keyword else "",
+        f"{clean_keyword} on-chain risk" if clean_keyword else "",
+    ]
+
+    seen       = set()
+    last_error = None
+
+    for prompt in attempts:
+        prompt_norm = normalize_keyword(prompt)
+        if not prompt_norm or prompt_norm in seen:
+            continue
+        seen.add(prompt_norm)
         try:
-            ai_text = sanitize_ai_html(generate_token_content(raw_keyword))
+            ai_text = sanitize_ai_html(generate_token_content(prompt))
             if ai_text:
-                results.append(ai_text)
+                return ai_text
         except Exception as e:
-            print(f"[warn] AI call failed for '{raw_keyword}': {e}")
+            last_error = e
+            print(f"[error] AI generation failed for '{prompt}': {e}", flush=True)
 
-    if not results:
-        return ""
-
-    return max(results, key=len)
+    if last_error:
+        raise ValueError(f"AI generation failed for all prompts: {last_error}")
+    raise ValueError("AI generation failed for all prompts")
 
 
 # -------------------------
@@ -842,18 +858,18 @@ for keyword in keywords:
 existing_pages = dedupe_pages_by_slug(filesystem_pages)
 queue_pages    = dedupe_pages_by_slug(queue_pages)
 
-print(f"Loaded {len(keywords)} keywords from queue.")
-print(f"Unique queued pages after slug dedupe: {len(queue_pages)}")
-print(f"Duplicate queued keywords skipped: {duplicate_queue_count}")
-print(f"Known generated slugs: {len(generated_slugs)}")
-print(f"Known generated keywords: {len(generated_keywords)}")
-print(f"Existing pages available for internal links: {len(existing_pages)}")
-print(f"Daily limit: {DAILY_LIMIT}")
-print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
+print(f"Loaded {len(keywords)} keywords from queue.", flush=True)
+print(f"Unique queued pages after slug dedupe: {len(queue_pages)}", flush=True)
+print(f"Duplicate queued keywords skipped: {duplicate_queue_count}", flush=True)
+print(f"Known generated slugs: {len(generated_slugs)}", flush=True)
+print(f"Known generated keywords: {len(generated_keywords)}", flush=True)
+print(f"Existing pages available for internal links: {len(existing_pages)}", flush=True)
+print(f"Daily limit: {DAILY_LIMIT}", flush=True)
+print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}", flush=True)
 
 generated_count        = 0
 skipped_existing_count = 0
-skipped_no_content     = 0
+failed_count           = 0
 processed_keywords     = set()
 new_pages_this_run     = []
 
@@ -868,7 +884,7 @@ for page in queue_pages:
 
     if slug in PROTECTED_SLUGS:
         processed_keywords.add(keyword)
-        print("Skipping protected page:", slug)
+        print("Skipping protected page:", slug, flush=True)
         continue
 
     if page_exists(slug):
@@ -881,10 +897,11 @@ for page in queue_pages:
     description = build_description(keyword)
     canonical   = build_canonical(slug)
 
-    ai_text = generate_ai_text(keyword, keyword_display)
-    if not ai_text:
-        skipped_no_content += 1
-        print(f"[skipped] No AI content produced for: {keyword}")
+    try:
+        ai_text = generate_ai_text(keyword, keyword_display)
+    except Exception as e:
+        failed_count += 1
+        print(f"[failed] {keyword} -> {e}", flush=True)
         continue
 
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
@@ -932,7 +949,8 @@ for page in queue_pages:
 
     print(
         f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
-        f"-> hub: {find_best_hub_slug(keyword)}"
+        f"-> hub: {find_best_hub_slug(keyword)}",
+        flush=True,
     )
 
 remaining_keywords = []
@@ -949,7 +967,7 @@ write_lines(KEYWORD_FILE, remaining_keywords)
 print(
     f"Done. Generated {generated_count} new pages. "
     f"Skipped {skipped_existing_count} existing. "
-    f"Skipped {skipped_no_content} with no AI content."
+    f"Failed {failed_count} keywords.",
+    flush=True,
 )
-print(f"Remaining keywords in queue: {len(remaining_keywords)}")
- 
+print(f"Remaining keywords in queue: {len(remaining_keywords)}", flush=True)
