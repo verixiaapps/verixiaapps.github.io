@@ -772,7 +772,7 @@ function detectLocalIntent(kw) {
     return 'routing';
   if (/\b(wallet|phantom|solflare|backpack|seed\s*phrase|seedphrase|hardware\s*wallet|ledger|self[\s-]?custody|cold\s*storage|hot\s*wallet|wallet\s*security|secure\s*wallet|connect\s*wallet)\b/.test(lower))
     return 'wallet';
-  if (/\b(mev|sandwich|frontrun\w*|backrun|jito\s*tip|priority\s*fee|maximal\s*extractable|protected\s+swap)\b/.test(lower))
+  if (/\b(mev|sandwich|frontrun\w*|backrun|jito\s*tip|maximal\s*extractable|protected\s+swap)\b/.test(lower))
     return 'mev';
   return 'swap';
 }
@@ -909,7 +909,7 @@ function renderRecognitionChips() {
       ];
     } else {
       items = [
-        ["Solana DeFi at a glance","Fast block times, low transaction costs, full ecosystem of DEXes -- all reachable from one wallet, no account."],
+        ["Solana DeFi at a glance","Fast block times and a full ecosystem of DEXes -- all reachable from one wallet, no account, no KYC."],
         ["What DeFi actually means","Your wallet, your keys, your tokens. The smart contract executes the swap directly between counterparties. No platform holds funds, no account exists."],
         ["Wallet to swap in two clicks","Connect a Solana wallet once. Pick token in, pick token out, sign. Verixia routes across every major DEX for best price."],
         ["The trade-off","Self-custody means you are responsible for your own keys. The upside: no account to freeze, no exchange to fail, no KYC reviewer to ban you."]
@@ -1184,15 +1184,15 @@ var FAQ_EXTRAS = {
     {q:"Does protected routing slow down execution?",
      a:"No. Solana settles in sub-second blocks. The route is computed in the same window as the quote, then settles in the next block. Protection is structural, not a separate slow step."},
     {q:"What can I do as a user to reduce MEV exposure?",
-     a:"Use an aggregator instead of going to a single pool. Split larger orders into multiple smaller swaps. Avoid trading hot tokens at peak congestion. Use a wallet that supports priority fees for time-sensitive trades."}
+     a:"Use an aggregator instead of going to a single pool. Split larger orders into multiple smaller swaps. Avoid trading hot tokens at peak congestion. Routing through deeper pools makes sandwich attacks structurally harder for searchers to execute."}
   ],
   swap: [
     {q:"How is Verixia different from a centralized exchange?",
      a:"Verixia is DeFi -- there is no account, no email, no KYC, no withdrawal limits, no support tickets. Your Solana wallet holds the keys; smart contracts execute swaps directly between counterparties. A centralized exchange custodies your funds and requires identity verification. Both have trade-offs -- DeFi means responsibility for your own keys in exchange for full self-custody."},
     {q:"What tokens can I swap on Verixia?",
      a:"Every SPL token with on-chain liquidity on a major Solana DEX -- SOL, USDC, USDT, JUP, BONK, WIF, JTO, RAY, ORCA, PYTH, DRIFT, and thousands more. If a token has a pool somewhere on Solana, the router can find a path to it."},
-    {q:"Is there a fee?",
-     a:"DEX fees go to the underlying liquidity providers on Raydium, Orca, and the rest -- standard for any Solana DEX swap. Verixia is the routing interface; the price you see in the quote includes all DEX fees, so the number quoted is the number that lands in your wallet."}
+    {q:"Does Verixia hold my funds?",
+     a:"No. Verixia is non-custodial. Your wallet holds the keys throughout. The swap signs from the wallet and settles on-chain directly between counterparties via the underlying DEX pools -- Verixia never takes custody at any point."}
   ]
 };
 function renderFaq() {
@@ -1399,7 +1399,7 @@ var SUPP_CARDS_FALLBACK = {
     {icon:"&#9889;",   title:"Speed itself protects", body:"Solana's sub-second block times leave a tighter window for searchers than slower chains. Faster settlement is structural protection."}
   ],
   swap: [
-    {icon:"&#9889;",   title:"Fast block times, low cost", body:"Solana's speed makes DeFi viable for iterative strategies. Sub-second blocks let aggregators reroute and resubmit quickly."},
+    {icon:"&#9889;",   title:"Fast block times", body:"Solana's speed makes DeFi viable for iterative strategies. Sub-second blocks let aggregators reroute and resubmit quickly."},
     {icon:"&#128274;", title:"It is DeFi -- no account exists", body:"Your wallet holds the keys. Every swap settles directly against the smart contract. No account to freeze, no exchange to fail."},
     {icon:"&#127919;", title:"One wallet, every pool", body:"The same Solana wallet swaps on Raydium, Orca, Meteora, Phoenix, Lifinity and the rest through one quote. Best price, every time."}
   ]
