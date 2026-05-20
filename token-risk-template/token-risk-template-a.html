@@ -935,118 +935,22 @@ function applyStatVariation(){
   window.__seededTaxPct=seededInt(s,202,4,18)+"%";
 }
 
-function cleanKeywordForSentence(kw){
-  return normalizeKeyword(kw)
-    .replace(/\btoken\b/gi,"").replace(/\bcoin\b/gi,"").replace(/\bcrypto\b/gi,"")
-    .replace(/\brisk\b/gi,"").replace(/\bsafe\b/gi,"").replace(/\blegit\b/gi,"")
-    .replace(/\bscam\b/gi,"").replace(/\bhoneypot\b/gi,"").replace(/\brug\s*pull\b/gi,"")
-    .replace(/\bcheck\b/gi,"").replace(/\bchecker\b/gi,"").replace(/\breview\b/gi,"")
-    .replace(/\bwarning\b/gi,"").replace(/\balert\b/gi,"").replace(/\bdanger\b/gi,"")
-    .replace(/\bbefore\s+buy(ing)?\b/gi,"").replace(/\bbefore\s+invest(ing)?\b/gi,"").replace(/\bbefore\s+you\s+buy\b/gi,"")
-    .replace(/\bto\s+buy\b/gi,"").replace(/\bto\s+trade\b/gi,"").replace(/\bfor\s+sale\b/gi,"")
-    .replace(/\bis\b/gi,"").replace(/\bthis\b/gi,"").replace(/\bwhat\b/gi,"").replace(/\bhow\b/gi,"")
-    .replace(/\bthe\b/gi,"").replace(/\ba\b/gi,"")
-    .replace(/\s+/g," ").trim();
-}
+/* =====  v16 FIX: engine meta is the only source of truth for headings.
+   The buggy client-side fallbacks (buildHeroTitle etc.) have been removed;
+   if engine meta is missing we leave the server-rendered STATIC_H1 / STATIC_INTRO
+   intact (Python builder fills those from engine meta with a safe minimal
+   sub-intent fallback). This prevents the platform-trap H1 regression. ===== */
 
-function titleCase(str){
-  return String(str||"").replace(/\b\w/g,function(c){return c.toUpperCase();});
-}
-function extractSubject(kw){
-  var ck=cleanKeywordForSentence(kw);
-  ck=ck
-    .replace(/\bgood\b/gi,"").replace(/\bbad\b/gi,"").replace(/\bworth\b/gi,"")
-    .replace(/\bprice(s)?\b/gi,"").replace(/\btoday\b/gi,"").replace(/\bnow\b/gi,"").replace(/\btomorrow\b/gi,"")
-    .replace(/\bfees?\b/gi,"").replace(/\bsignal(s)?\b/gi,"").replace(/\bexplain(ed)?\b/gi,"")
-    .replace(/\bwork(s|ing)?\b/gi,"").replace(/\bdoes\b/gi,"").replace(/\bdo\b/gi,"")
-    .replace(/\bi\b/gi,"").replace(/\bmy\b/gi,"").replace(/\byou(r)?\b/gi,"")
-    .replace(/\bcan\b/gi,"").replace(/\bshould\b/gi,"").replace(/\bwill\b/gi,"").replace(/\bwould\b/gi,"")
-    .replace(/\binvest(ing|ment|or)?\b/gi,"").replace(/\btrad(e|ing|er)?\b/gi,"")
-    .replace(/\bmarket(s)?\b/gi,"").replace(/\bguide\b/gi,"").replace(/\btip(s)?\b/gi,"")
-    .replace(/\bare\b/gi,"").replace(/\bof\b/gi,"").replace(/\bin\b/gi,"").replace(/\bon\b/gi,"")
-    .replace(/\bvs\b/gi,"").replace(/\bversus\b/gi,"")
-    .replace(/\bbuy(ing)?\b/gi,"").replace(/\bsell(ing)?\b/gi,"")
-    .replace(/\bsafety\b/gi,"").replace(/\bsign(s)?\b/gi,"").replace(/\brisks?\b/gi,"")
-    .replace(/\bsurviv(e|al|ing)?\b/gi,"").replace(/\breward(s)?\b/gi,"")
-    .replace(/\b\d{4}\b/g,"")
-    .replace(/\s+/g," ").trim();
-  var words=ck.split(" ").filter(function(w){return w.length>2;});
-  return words.length>0?words.slice(0,3).join(" "):"";
-}
-
-function softExtract(kw){
-  var stop=["is","a","an","the","and","or","but","for","with","from","this","that","these","those","was","are","be","been","to","of","in","on","at","by","as","if","it","its","do","did","has","have","had","not","no","so","up","out","than","then","when","where","who","why","how","what","will","would","could","should","can","may","might"];
-  var words=normalizeKeyword(kw).split(" ").filter(function(w){return w.length>1&&!stop.includes(w);});
-  return words.slice(0,3).join(" ");
-}
-
-function buildHeroTitle(kw){
-  try{
-    var raw=normalizeKeyword(kw),lower=safeLower(kw);
-    if(!raw)return"Token Risk Check -- On-Chain Analysis";
-    var subject=extractSubject(kw);
-    var s=subject&&subject.length>2?titleCase(subject):"";
-    if(containsAny(lower,["honeypot"]))return"Honeypot Token Check -- "+(s||"Solana + EVM");
-    if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"Rug Pull Token Check -- "+(s||"Solana + EVM");
-    if(containsAny(lower,["scam","fake","fraud","phish"]))return"Scam Token Check -- "+(s?"Is "+s+" Legitimate?":"Verify Before Buying");
-    if(containsAny(lower,["safe","legit","real","trust"])){var sSafe=s&&!["Trust","Safe","Real","Legit"].includes(s)?s:"This Token";return"Token Risk Check -- Is "+sSafe+" Safe?";}
-    if(containsAny(lower,["risk","risky","danger","warning","red flag"]))return(s||"Token")+" Risk -- On-Chain Safety Check";
-    if(containsAny(lower,["how","what","why","explain","does","work","guide","learn","understand","tutorial","beginner"]))return s?"On-Chain Guide -- "+s+" Risk Analysis":"Token Risk Guide -- On-Chain Safety Analysis";
-    if(containsAny(lower,["vs","versus","compare","comparison","difference","between"])){var parts=lower.replace(/\bvs\b|\bversus\b/g,"|||").split("|||").map(function(p){return titleCase(extractSubject(p.trim()));}).filter(function(x){return x&&x.length>2;});return parts.length>1?parts.join(" vs ")+" -- Token Risk Comparison":(s?s+" -- Token Risk Comparison":"Token Risk Comparison -- Solana + EVM");}
-    if(containsAny(lower,["better","best","top","choose","pick"])){var sBest=s&&!["Best","Top"].includes(s)?s:"";return sBest?"Best "+sBest+"? On-Chain Risk Comparison":"Token Risk Comparison -- Solana + EVM";}
-    if(containsAny(lower,["price","chart","pump","moon","dip","worth","prediction","forecast"]))return s?"Is "+s+" Worth Buying? On-Chain Risk Check":"Token Risk Check -- Price + On-Chain Signals";
-    if(containsAny(lower,["buy","invest","should","portfolio","entry"]))return s?"Should I Buy "+s+"? Token Risk Check":"Token Risk Check -- Before You Buy";
-    if(s)return"Is "+s+" Safe? Token Risk Check";
-    var soft=softExtract(kw);
-    if(soft&&soft.length>2)return titleCase(soft)+" -- Token Risk Check";
-    return"Token Risk Check -- On-Chain Analysis";
-  }catch(e){return"Token Risk Check -- On-Chain Analysis";}
-}
-
-function buildHeroSubheading(kw){
-  var lower=safeLower(kw);
-  var subject=extractSubject(kw);
-  var s=subject&&subject.length>2?displayKeyword(subject):"this token";
-  if(containsAny(lower,["honeypot"]))
-    return"Check whether this token blocks selling at the contract level. Honeypot tokens look identical to legitimate tokens until you try to exit.";
-  if(containsAny(lower,["rug pull","rug-pull","rugpull"]))
-    return"Review the liquidity lock status, holder concentration, and contract permissions before committing to a position.";
-  if(containsAny(lower,["scam","fake","fraud"]))
-    return"Verify the contract structure, on-chain trading history, and developer wallet activity before buying in.";
-  if(containsAny(lower,["how","what","why","explain","does","work","guide","tutorial"]))
-    return"On-chain analysis covers contract structure, liquidity depth, holder concentration, and exit conditions -- the signals that matter before any trade.";
-  if(containsAny(lower,["vs","versus","compare","best","top","difference"]))
-    return"Compare on-chain risk signals across tokens. Liquidity depth, LP lock status, and holder concentration are visible before the price moves.";
-  if(containsAny(lower,["price","worth","pump","moon","buy","invest","should"]))
-    return"Check the on-chain structure before committing. Thin liquidity, unlocked LP, and concentrated wallets are visible signals before any price move.";
-  return"Paste any contract address for an instant on-chain risk assessment -- honeypot detection, liquidity analysis, holder concentration, and contract permissions.";
-}
-
-function buildContentHeading(kw){
-  var lower=safeLower(kw);
-  var subject=extractSubject(kw);
-  var s=subject&&subject.length>2?displayKeyword(subject):"";
-  if(containsAny(lower,["honeypot"]))return"What Makes a Token a Honeypot -- and How to Detect It";
-  if(containsAny(lower,["rug pull","rug-pull","rugpull"]))return"How Rug Pulls Work -- and What to Check Before Buying";
-  if(containsAny(lower,["holder","concentration","whale","distribution"]))return"Why Holder Concentration Is a Structural Risk Signal";
-  if(containsAny(lower,["liquidity","lp lock","locked"]))return"How Liquidity Pool Structure Determines Token Exit Risk";
-  if(containsAny(lower,["contract","renounced","mint","owner"]))return"What Token Contract Permissions Reveal About Risk";
-  if(containsAny(lower,["how","what","why","explain","does","work","guide","tutorial"]))
-    return s?"How to Read On-Chain Risk Signals for "+displayKeyword(s):"How to Read On-Chain Risk Signals Before Buying";
-  if(containsAny(lower,["vs","versus","compare","best","top"]))
-    return s?displayKeyword(s)+" -- On-Chain Risk Comparison":"Token Risk Comparison -- On-Chain Signals";
-  if(containsAny(lower,["price","worth","buy","invest","should"]))
-    return s?"On-Chain Risk Signals for "+displayKeyword(s)+" Before You Buy":"What On-Chain Signals Show Before a Price Move";
-  if(s)return"How to Check If "+displayKeyword(s)+" Is Safe -- On-Chain Analysis";
-  return"How to Check If a Crypto Token Is Safe";
-}
-
-function buildContentBridge(kw){
-  var lower=safeLower(kw);
-  var ck=cleanKeywordForSentence(kw)||"this token";
-  if(containsAny(lower,["honeypot"]))return"Paste the contract address above to check whether "+displayKeyword(ck)+" has sell restrictions, fee traps, or whitelist-only exit conditions.";
-  if(containsAny(lower,["rug pull","rug-pull"]))return"Use the checker above to review the liquidity lock, holder concentration, and contract permissions for "+displayKeyword(ck)+" before buying in.";
-  return"Use the tool above to check "+displayKeyword(ck)+"'s contract structure, liquidity depth, and holder distribution before you swap into it.";
+function setKeywordHeadings(){
+  var meta = window.__pageMeta || {};
+  var h1   = document.getElementById("heroKeyword");
+  var sub  = document.getElementById("heroSubheading");
+  var ch   = document.getElementById("contentHeading");
+  var cb   = document.getElementById("contentBridge");
+  if (h1  && meta.h1)             h1.textContent  = meta.h1;
+  if (sub && meta.intro)          sub.textContent = meta.intro;
+  if (ch  && meta.contentHeading) ch.textContent  = meta.contentHeading;
+  if (cb  && meta.contentBridge)  cb.textContent  = meta.contentBridge;
 }
 
 /* =====  v13 EDIT: prefer window.__pageMeta from engine, fall back to client logic  ===== */
@@ -1104,19 +1008,6 @@ function renderRecognitionChips(){
     }
   }
   wrap.innerHTML=items.map(function(item){return'<div class="recognition-chip"><span class="recognition-label">'+escapeHtml(item[0])+'</span><span class="recognition-copy">'+escapeHtml(item[1])+'</span></div>';}).join("");
-}
-
-function setKeywordHeadings(){
-  var meta=window.__pageMeta||{};
-  var kw=(RAW_KEYWORD||"").trim();
-  var h1=document.getElementById("heroKeyword");
-  var sub=document.getElementById("heroSubheading");
-  var ch=document.getElementById("contentHeading");
-  var cb=document.getElementById("contentBridge");
-  if(h1)h1.textContent=meta.h1||(kw?buildHeroTitle(kw):h1.textContent);
-  if(sub)sub.textContent=meta.intro||(kw?buildHeroSubheading(kw):sub.textContent);
-  if(ch)ch.textContent=meta.contentHeading||(kw?buildContentHeading(kw):ch.textContent);
-  if(cb)cb.textContent=meta.contentBridge||(kw?buildContentBridge(kw):cb.textContent);
 }
 
 function getThreatBannerConfig(kw){
