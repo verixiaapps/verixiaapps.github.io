@@ -1,5 +1,6 @@
 import os
 import re
+import json
 from html import escape
 from pathlib import Path
 
@@ -19,6 +20,7 @@ MORE_LINKS_COUNT = 10
 
 PROTECTED_SLUGS = {"token-risk", "token-risk-hub"}
 
+# Required placeholders (page won't build if any are missing)
 REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{TITLE}}",
     "{{DESCRIPTION}}",
@@ -28,6 +30,24 @@ REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{MORE_LINKS}}",
     "{{HUB_LINK}}",
     "{{CANONICAL_URL}}",
+}
+
+# Optional placeholders — engine provides values; template uses them if present.
+# Missing optional placeholders are silently skipped (no template edit needed today).
+OPTIONAL_TEMPLATE_PLACEHOLDERS = {
+    "{{H1}}",
+    "{{INTRO}}",
+    "{{CONTENT_HEADING}}",
+    "{{CONTENT_BRIDGE}}",
+    "{{BREADCRUMB}}",
+    "{{THREAT_BANNER}}",
+    "{{CONTRACT_BREAKDOWN}}",
+    "{{FAQ}}",
+    "{{FAQ_SCHEMA}}",
+    "{{SUBJECT_DISPLAY}}",
+    "{{SUBJECT_TYPE}}",
+    "{{SUB_INTENT}}",
+    "{{CANONICAL_PAIR_ADDRESS}}",
 }
 
 TOKEN_CLUSTER_TERMS = {
@@ -155,11 +175,19 @@ HIGH_INTENT_TERMS = {
     "sellers", "slippage", "price", "chart", "token", "risk",
 }
 
+# Length targets for validation (engine output should land in range)
+TITLE_MIN = 35
+TITLE_MAX = 78
+DESCRIPTION_MIN = 110
+DESCRIPTION_MAX = 170
+
 rejected_count = 0
 deduped_keywords_count = 0
 skipped_duplicate_keywords_count = 0
 skipped_weak_keywords_count = 0
 ai_failure_count = 0
+engine_meta_used_count = 0
+python_meta_fallback_count = 0
 
 
 # -----------------------------
@@ -264,6 +292,11 @@ def escape_html(text):
     return escape(str(text), quote=True)
 
 
+# -----------------------------
+# PYTHON-SIDE FALLBACK META BUILDERS
+# Only used when the engine returns no meta (rare; defensive).
+# Preserves prior behavior verbatim.
+# -----------------------------
 def is_guidance_style_keyword(keyword):
     kw = normalize_keyword(keyword)
     return (
@@ -284,7 +317,7 @@ def is_question_style_keyword(keyword):
     return kw.startswith(("is ", "can ", "should ", "what ", "why ", "when ", "where "))
 
 
-def build_title(keyword):
+def build_title_python(keyword):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
 
@@ -311,7 +344,7 @@ def build_title(keyword):
     return f"{readable} Token Risk | Liquidity, Volume, Pair Age & Warning Signs"
 
 
-def build_description(keyword):
+def build_description_python(keyword):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     clean_kw = display_keyword(keyword)
@@ -332,8 +365,14 @@ def build_canonical(slug):
     return f"{SITE}/token-risk/{slug}/"
 
 
+# -----------------------------
+# TEMPLATE / KEYWORDS
+# -----------------------------
 def validate_template_placeholders(template_html):
-    missing = [placeholder for placeholder in REQUIRED_TEMPLATE_PLACEHOLDERS if placeholder not in template_html]
+    missing = [
+        placeholder for placeholder in REQUIRED_TEMPLATE_PLACEHOLDERS
+        if placeholder not in template_html
+    ]
     if missing:
         raise ValueError("Template is missing required placeholders: " + ", ".join(sorted(missing)))
 
@@ -365,6 +404,9 @@ def load_template():
     return template
 
 
+# -----------------------------
+# HUB ROUTING (Python-side; engine doesn't do this)
+# -----------------------------
 def find_best_hub_slug(keyword):
     keyword_norm = normalize_keyword(keyword)
     for term, slug in HUB_MATCH_RULES:
@@ -379,6 +421,9 @@ def build_hub_link_html(keyword):
     return f'<a href="/token-risk/{hub_slug}/">{escape_html(hub_title)}</a>'
 
 
+# -----------------------------
+# DEDUP / QUALITY GATE
+# -----------------------------
 def is_weak_keyword(keyword):
     tokens = canonical_keyword(keyword).split()
 
@@ -466,6 +511,9 @@ def dedupe_keywords(raw_keywords):
     return canonical_keywords
 
 
+# -----------------------------
+# RELATED / MORE LINKS (Python-side; engine doesn't do these either)
+# -----------------------------
 def get_related_pages(current_page, all_pages, limit):
     current_slug = current_page["slug"]
     current_keyword = current_page["keyword"]
@@ -562,6 +610,9 @@ def get_more_links(current_page, all_pages, limit, exclude_slugs=None):
     return selected
 
 
+# -----------------------------
+# VALIDATION + FILE HELPERS
+# -----------------------------
 def validate_page_output(slug, title, description, canonical, related_pages):
     errors = []
 
@@ -571,10 +622,10 @@ def validate_page_output(slug, title, description, canonical, related_pages):
         errors.append("canonical mismatch")
     if len(related_pages) == 0:
         errors.append("no related pages")
-    if len(title) < 35 or len(title) > 78:
-        errors.append("title length out of target range")
-    if len(description) < 110 or len(description) > 170:
-        errors.append("description length out of target range")
+    if len(title) < TITLE_MIN or len(title) > TITLE_MAX:
+        errors.append(f"title length out of target range ({len(title)} chars)")
+    if len(description) < DESCRIPTION_MIN or len(description) > DESCRIPTION_MAX:
+        errors.append(f"description length out of target range ({len(description)} chars)")
 
     return errors
 
@@ -617,89 +668,122 @@ def build_related_anchor(keyword):
     return f"{readable} Token Risk"
 
 
+# -----------------------------
+# CONTENT HANDLING (engine output)
+# -----------------------------
 def is_usable_ai_text(text):
+    """Light check on the engine's content. Engine has its own validator + no-failure
+    contract, so this is just a defensive belt-and-suspenders before write."""
     if not text:
         return False
-
     raw = str(text).strip()
-    lowered = raw.lower()
-
-    if len(raw) < 350:
+    if len(raw) < 250:
         return False
 
+    lowered = raw.lower()
     weak_markers = {
         "lorem ipsum",
         "as an ai",
-        "here are some paragraphs",
         "let me know if you want",
         "i can't help with that",
         "i cannot help with that",
-        "i’m sorry",
         "i am sorry",
+        "i'm sorry",
         "cannot assist",
         "can't assist",
-        "policy",
-        "content policy",
     }
-
     if any(marker in lowered for marker in weak_markers):
         return False
+    return True
 
-    paragraph_like = (
-        "<p>" in lowered
-        or "</p>" in lowered
-        or "\n\n" in raw
-        or raw.count("\n") >= 3
+
+def wrap_paragraphs(text):
+    """Engine returns plain paragraphs separated by blank lines. Wrap in <p> tags."""
+    text = str(text or "").strip()
+    if not text:
+        return ""
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    return "\n".join(f"<p>{escape_html(p)}</p>" for p in paragraphs)
+
+
+def call_engine(keyword):
+    """Single call into the new risk engine via generate_token_content.
+    Expected return shape: dict with `content` (str) and `meta` (dict).
+
+    Backward-compat: if generate_token_content returns a plain string,
+    treat it as content-only and fall back to Python-side meta builders.
+    """
+    result = generate_token_content(keyword)
+
+    if isinstance(result, dict):
+        return {
+            "content": result.get("content") or "",
+            "meta":    result.get("meta") or {},
+        }
+
+    # Legacy shape (string only)
+    return {"content": str(result or ""), "meta": {}}
+
+
+# -----------------------------
+# THREAT BANNER / CONTRACT BREAKDOWN RENDERERS
+# (only injected when the template has the matching placeholder)
+# -----------------------------
+def render_threat_banner(meta):
+    banner = meta.get("threatBanner") if meta else None
+    if not banner:
+        return ""
+    tier = escape_html(banner.get("tier", "info"))
+    icon = escape_html(banner.get("icon", "i"))
+    title = escape_html(banner.get("title", ""))
+    copy = escape_html(banner.get("copy", ""))
+    if not title:
+        return ""
+    return (
+        f'<div class="vx-threat vx-threat--{tier}">'
+        f'<span class="vx-threat-icon">{icon}</span>'
+        f'<div><strong>{title}</strong><p>{copy}</p></div>'
+        f'</div>'
     )
 
-    return paragraph_like
+
+def render_contract_breakdown(meta):
+    """Inline the engine's contract-breakdown HTML if present.
+    The engine puts this in meta.contractBreakdownHtml when canonical pair
+    contract data is available."""
+    if not meta:
+        return ""
+    inline = meta.get("contractBreakdownHtml") or ""
+    return str(inline)
 
 
-def generate_ai_text(keyword, keyword_display):
-    attempts = []
-    raw_keyword = normalize_keyword(keyword)
-    clean_keyword = normalize_keyword(keyword_display)
+def render_faq(meta):
+    faq = meta.get("faq") if meta else None
+    if not faq:
+        return ""
+    items = []
+    for i, item in enumerate(faq):
+        q = escape_html(item.get("q", ""))
+        a = escape_html(item.get("a", ""))
+        if not q or not a:
+            continue
+        open_attr = " open" if i == 0 else ""
+        items.append(
+            f'<details class="vx-faq-item"{open_attr}>'
+            f'<summary class="vx-faq-q">{q}</summary>'
+            f'<div class="vx-faq-a"><p>{a}</p></div>'
+            f'</details>'
+        )
+    if not items:
+        return ""
+    return '<section class="vx-faq"><div class="vx-faq-list">' + "\n".join(items) + '</div></section>'
 
-    if raw_keyword:
-        attempts.append(raw_keyword)
 
-    if clean_keyword and clean_keyword != raw_keyword:
-        attempts.append(clean_keyword)
-
-    readable = readable_keyword(keyword_display)
-    if readable:
-        attempts.append(readable)
-
-    if clean_keyword:
-        attempts.append(f"{clean_keyword} token risk")
-
-    if clean_keyword and not raw_keyword.startswith("is "):
-        attempts.append(f"is {clean_keyword} safe")
-
-    if clean_keyword and not contains_term_phrase(raw_keyword, "buy"):
-        attempts.append(f"should i buy {clean_keyword}")
-
-    seen = set()
-    ordered_attempts = []
-
-    for item in attempts:
-        item_norm = normalize_keyword(item)
-        if item_norm and item_norm not in seen:
-            seen.add(item_norm)
-            ordered_attempts.append(item)
-
-    last_error = None
-
-    for attempt in ordered_attempts:
-        try:
-            ai_text = generate_token_content(attempt)
-            if is_usable_ai_text(ai_text):
-                return ai_text
-            last_error = f"thin or malformed output for prompt: {attempt}"
-        except Exception as e:
-            last_error = str(e)
-
-    raise ValueError(last_error or "AI generation failed")
+def render_faq_schema(meta):
+    schema = meta.get("faqSchema") if meta else None
+    if not schema:
+        return ""
+    return f'<script type="application/ld+json">{schema}</script>'
 
 
 # -----------------------------
@@ -743,60 +827,110 @@ for page in pages:
     path = folder / "index.html"
     folder.mkdir(parents=True, exist_ok=True)
 
-    title = build_title(keyword)
-    description = build_description(keyword)
-    canonical = build_canonical(slug)
-
+    # 1. Call the risk engine (single call -- no retry loop; engine has no-failure contract)
     try:
-        ai_text = generate_ai_text(keyword, keyword_display)
+        engine_result = call_engine(keyword)
+        ai_text = engine_result["content"]
+        engine_meta = engine_result["meta"] or {}
     except Exception as e:
         ai_failure_count += 1
         append_rejected_keyword(keyword, e)
-        print("AI generation rejected for", keyword, ":", e)
+        print("Risk engine call failed for", keyword, ":", e)
         continue
 
+    if not is_usable_ai_text(ai_text):
+        ai_failure_count += 1
+        append_rejected_keyword(keyword, "engine returned thin/unusable content")
+        print("Engine content unusable for", keyword)
+        continue
+
+    # 2. Meta: prefer engine output; fall back to Python builders if missing
+    if engine_meta.get("title"):
+        title = engine_meta["title"]
+        engine_meta_used_count += 1
+    else:
+        title = build_title_python(keyword)
+        python_meta_fallback_count += 1
+
+    if engine_meta.get("description"):
+        description = engine_meta["description"]
+    else:
+        description = build_description_python(keyword)
+
+    h1 = engine_meta.get("h1") or readable_keyword(keyword) or keyword_display
+    intro = engine_meta.get("intro") or ""
+    content_heading = engine_meta.get("contentHeading") or ""
+    content_bridge = engine_meta.get("contentBridge") or ""
+    breadcrumb = engine_meta.get("breadcrumb") or readable_keyword(keyword)
+    subject_display = engine_meta.get("subjectDisplay") or keyword_display
+    subject_type = engine_meta.get("subjectType") or "generic"
+    sub_intent = engine_meta.get("subIntent") or "general"
+    canonical_pair = engine_meta.get("canonicalPair") or {}
+    canonical_pair_address = canonical_pair.get("address") or ""
+
+    canonical = build_canonical(slug)
+
+    # 3. Related + more links + hub (Python-side; engine doesn't own these)
     related_pages = get_related_pages(page, pages, RELATED_LINKS_COUNT)
     related_slugs = {p["slug"] for p in related_pages}
-
-    more_links_pages = get_more_links(
-        page,
-        pages,
-        MORE_LINKS_COUNT,
-        exclude_slugs=related_slugs,
-    )
-
+    more_links_pages = get_more_links(page, pages, MORE_LINKS_COUNT, exclude_slugs=related_slugs)
     hub_link_html = build_hub_link_html(keyword)
 
+    # 4. Validate
     validation_errors = validate_page_output(slug, title, description, canonical, related_pages)
     if validation_errors:
         validation_error_count += 1
         print("Validation warning for", slug, ":", "; ".join(validation_errors))
 
+    # 5. Render link blocks
     links_html = "".join(
         f'<li><a href="/token-risk/{r["slug"]}/">{escape_html(build_related_anchor(r["keyword"]))}</a></li>\n'
         for r in related_pages
     )
-
     more_links_html = "".join(
         f'<li><a href="/token-risk/{r["slug"]}/">{escape_html(build_related_anchor(r["keyword"]))}</a></li>\n'
         for r in more_links_pages
     )
 
+    # 6. Render content + engine-driven optional blocks
+    ai_content_html = wrap_paragraphs(ai_text)
+    threat_banner_html = render_threat_banner(engine_meta)
+    contract_breakdown_html = render_contract_breakdown(engine_meta)
+    faq_html = render_faq(engine_meta)
+    faq_schema_html = render_faq_schema(engine_meta)
+
+    # 7. Apply to template
     html = template
+    # Required placeholders
     html = html.replace("{{TITLE}}", escape_html(title))
     html = html.replace("{{DESCRIPTION}}", escape_html(description))
     html = html.replace("{{KEYWORD}}", escape_html(keyword_display))
-    html = html.replace("{{AI_CONTENT}}", ai_text)
+    html = html.replace("{{AI_CONTENT}}", ai_content_html)
     html = html.replace("{{RELATED_LINKS}}", links_html)
     html = html.replace("{{MORE_LINKS}}", more_links_html)
     html = html.replace("{{HUB_LINK}}", hub_link_html)
     html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
 
+    # Optional placeholders (no-op if not in template)
+    html = html.replace("{{H1}}", escape_html(h1))
+    html = html.replace("{{INTRO}}", escape_html(intro))
+    html = html.replace("{{CONTENT_HEADING}}", escape_html(content_heading))
+    html = html.replace("{{CONTENT_BRIDGE}}", escape_html(content_bridge))
+    html = html.replace("{{BREADCRUMB}}", escape_html(breadcrumb))
+    html = html.replace("{{THREAT_BANNER}}", threat_banner_html)
+    html = html.replace("{{CONTRACT_BREAKDOWN}}", contract_breakdown_html)
+    html = html.replace("{{FAQ}}", faq_html)
+    html = html.replace("{{FAQ_SCHEMA}}", faq_schema_html)
+    html = html.replace("{{SUBJECT_DISPLAY}}", escape_html(subject_display))
+    html = html.replace("{{SUBJECT_TYPE}}", escape_html(subject_type))
+    html = html.replace("{{SUB_INTENT}}", escape_html(sub_intent))
+    html = html.replace("{{CANONICAL_PAIR_ADDRESS}}", escape_html(canonical_pair_address))
+
     try:
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
         generated_count += 1
-        print("Generated:", slug)
+        print("Generated:", slug, "  (subjectType=", subject_type, "subIntent=", sub_intent + ")")
     except Exception as e:
         error_count += 1
         print("Error writing page for", slug, ":", e)
@@ -808,6 +942,8 @@ print("Duplicate / fragmented keywords removed:", deduped_keywords_count)
 print("Duplicate slug groups skipped:", skipped_duplicate_keywords_count)
 print("Weak / low-value keywords skipped:", skipped_weak_keywords_count)
 print("Pages generated:", generated_count)
+print("Engine meta used:", engine_meta_used_count)
+print("Python meta fallback used:", python_meta_fallback_count)
 print("AI generations rejected:", ai_failure_count)
 print("Rejected keywords logged:", rejected_count)
 print("Validation warnings:", validation_error_count)
