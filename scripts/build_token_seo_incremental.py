@@ -31,7 +31,15 @@ DAILY_LIMIT         = int(os.getenv("DAILY_LIMIT", "100"))
 PROTECTED_SLUGS   = {"token-risk", "token-risk-hub"}
 FALLBACK_HUB_SLUG = "token-risk-hub"
 
-REQUIRED_TEMPLATE_PLACEHOLDERS = {
+# -------------------------
+# TEMPLATE PLACEHOLDER REQUIREMENTS
+# -------------------------
+# Two sets: legacy (pre-v1.1 template) and modern (v1.1+ template with
+# context-aware _JSON / _JS variants + per-page rating fields).
+# The script auto-detects which template is in use and validates against
+# the matching set. This keeps deploys backward-compatible during rollout.
+
+REQUIRED_PLACEHOLDERS_LEGACY = {
     "{{TITLE}}",
     "{{DESCRIPTION}}",
     "{{KEYWORD}}",
@@ -47,6 +55,43 @@ REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{OG_IMAGE}}",
     "{{HL_DATA_BLOCK}}",
     "{{SCHEMA_FAQ}}",
+}
+
+# v1.1 template requires the HTML-context fields PLUS the JSON-LD / JS-string
+# variants. {{HL_DATA_BLOCK}} is removed (engine no longer emits it).
+# {{KEYWORD}} is also removed in favor of {{KEYWORD_JS}} / {{KEYWORD_JSON}}.
+REQUIRED_PLACEHOLDERS_V11 = {
+    # HTML body / attribute context
+    "{{TITLE}}",
+    "{{DESCRIPTION}}",
+    "{{STATIC_H1}}",
+    "{{STATIC_INTRO}}",
+    "{{BREADCRUMB_NAME}}",
+    "{{CANONICAL_URL}}",
+    "{{OG_IMAGE}}",
+    "{{MODIFIED_DATE}}",
+    "{{PUBLISHED_DATE}}",
+    # JSON-LD / JS context
+    "{{TITLE_JSON}}",
+    "{{DESCRIPTION_JSON}}",
+    "{{KEYWORD_JS}}",
+    "{{KEYWORD_JSON}}",
+    "{{BREADCRUMB_NAME_JSON}}",
+    "{{CANONICAL_URL_JSON}}",
+    "{{OG_IMAGE_JSON}}",
+    "{{MODIFIED_DATE_JSON}}",
+    "{{PUBLISHED_DATE_JSON}}",
+    # Per-page rating + social proof
+    "{{AGGREGATE_RATING_JSON}}",
+    "{{RATING_DISPLAY}}",
+    "{{SOCIAL_PROOF_COUNT}}",
+    # Full <script> blocks
+    "{{SCHEMA_FAQ}}",
+    # HTML fragments
+    "{{HUB_LINK}}",
+    "{{AI_CONTENT}}",
+    "{{RELATED_LINKS}}",
+    "{{MORE_LINKS}}",
 }
 
 TOKEN_CLUSTER_TERMS = {
@@ -261,6 +306,80 @@ def escape_html(text):
     return escape(str(text), quote=True)
 
 
+def escape_json_string(text):
+    """Escape a value for embedding inside a JSON string that is itself
+    embedded in a <script> block. Mirrors the JS engine's escapeJsonString.
+    Use for ANY field landing inside <script type=\"application/ld+json\">
+    or inside a JS string literal in a <script>."""
+    if text is None:
+        return ""
+    # json.dumps gives us a JSON string with outer quotes; strip them.
+    encoded = json.dumps(str(text), ensure_ascii=False)[1:-1]
+    # Defuse </script and <!-- breakouts.
+    encoded = re.sub(r"</script", r"<\\/script", encoded, flags=re.IGNORECASE)
+    encoded = encoded.replace("<!--", "<\\!--")
+    return encoded
+
+
+def stable_hash(text):
+    """Mirrors the JS engine's stableHash (32-bit FNV-ish).
+    Used so the Python build script and the JS engine produce IDENTICAL
+    per-page ratings for the same keyword."""
+    clean = re.sub(r"\s+", " ", str(text or "").strip())
+    # Apply the same Unicode normalisation the JS engine does
+    clean = (clean
+             .replace("\u2013", "-").replace("\u2014", "-")
+             .replace("\u201C", '"').replace("\u201D", '"')
+             .replace("\u2018", "'").replace("\u2019", "'"))
+    h = 0
+    for ch in clean:
+        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
+    return h
+
+
+def build_page_signals(keyword,
+                       rating_value=None,
+                       rating_count=None,
+                       social_proof_checks=None):
+    """Deterministic per-page rating, review count, and social proof check
+    count. Same formula as the JS engine's buildPageSignals(). Override
+    values with explicit args when you have real data."""
+    h = stable_hash(keyword)
+    if rating_value is None:
+        rating_choices = [4.6, 4.7, 4.8, 4.9]
+        rating = rating_choices[h % len(rating_choices)]
+    else:
+        rating = max(1.0, min(5.0, float(rating_value)))
+    if rating_count is None:
+        review_count = 1800 + ((h >> 3) & 0xFFFFFFFF) % 2401
+    else:
+        review_count = max(0, int(rating_count))
+    if social_proof_checks is None:
+        checks = 42000 + ((h >> 7) & 0xFFFFFFFF) % 36001
+    else:
+        checks = max(0, int(social_proof_checks))
+    return {
+        "ratingValue":         rating,
+        "reviewCount":         review_count,
+        "socialProofChecks":   checks,
+        "ratingDisplay":       f"{rating:.1f} / 5 from {review_count:,} users",
+        "socialProofDisplay":  f"{checks:,} risk checks run",
+    }
+
+
+def build_aggregate_rating_json(signals):
+    """Serialize the AggregateRating snippet exactly the way the JS engine
+    does. Returned string is ready to be substituted into the SoftwareApplication
+    schema where the old hardcoded {ratingValue:4.8,...} object used to sit."""
+    payload = {
+        "@type":       "AggregateRating",
+        "ratingValue": f"{signals['ratingValue']:.1f}",
+        "reviewCount": str(signals["reviewCount"]),
+        "bestRating":  "5",
+    }
+    return json.dumps(payload, ensure_ascii=False)
+
+
 def is_guidance_style_keyword(keyword):
     kw = normalize_keyword(keyword)
     return (
@@ -352,10 +471,26 @@ def humanize_slug(slug):
     return title_case(slug.replace("-", " "))
 
 
-def validate_template_placeholders(template_html):
-    missing = [p for p in REQUIRED_TEMPLATE_PLACEHOLDERS if p not in template_html]
+def detect_template_version(template_html):
+    """Returns 'v11' if the template uses the v1.1 _JSON / _JS variants,
+    'legacy' otherwise. Detection is based on the presence of any of the
+    v1.1-only placeholders."""
+    v11_markers = (
+        "{{TITLE_JSON}}",
+        "{{KEYWORD_JS}}",
+        "{{AGGREGATE_RATING_JSON}}",
+    )
+    return "v11" if any(m in template_html for m in v11_markers) else "legacy"
+
+
+def validate_template_placeholders(template_html, version):
+    required = REQUIRED_PLACEHOLDERS_V11 if version == "v11" else REQUIRED_PLACEHOLDERS_LEGACY
+    missing = [p for p in required if p not in template_html]
     if missing:
-        raise ValueError("Template is missing required placeholders: " + ", ".join(sorted(missing)))
+        raise ValueError(
+            f"Template (version={version}) is missing required placeholders: "
+            + ", ".join(sorted(missing))
+        )
 
 
 def find_best_hub_slug(keyword):
@@ -680,6 +815,8 @@ def call_engine(keyword):
 # -------------------------
 # HL_DATA_BLOCK + PAGE_META_SCRIPT RENDERERS
 # -------------------------
+# HL_DATA_BLOCK is no longer emitted by the v1.1 template, but the renderer
+# is preserved here so legacy templates still work during rollout.
 
 def render_hl_data_block(meta):
     """Render a live-data block from canonical pair info + observations.
@@ -783,10 +920,12 @@ ensure_file(GENERATED_KEYWORDS_FILE)
 with open(TEMPLATE_FILE, encoding="utf-8") as f:
     template = f.read()
 
-validate_template_placeholders(template)
+TEMPLATE_VERSION = detect_template_version(template)
+validate_template_placeholders(template, TEMPLATE_VERSION)
 
 # Detect whether template includes the optional PAGE_META_SCRIPT placeholder
 TEMPLATE_HAS_PAGE_META = "{{PAGE_META_SCRIPT}}" in template
+TEMPLATE_IS_V11        = TEMPLATE_VERSION == "v11"
 
 keywords = load_keywords()
 if not keywords:
@@ -828,6 +967,7 @@ print(f"Known generated keywords: {len(generated_keywords)}", flush=True)
 print(f"Existing pages available for internal links: {len(existing_pages)}", flush=True)
 print(f"Daily limit: {DAILY_LIMIT}", flush=True)
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}", flush=True)
+print(f"Template version: {TEMPLATE_VERSION}", flush=True)
 print(f"Template has PAGE_META_SCRIPT: {TEMPLATE_HAS_PAGE_META}", flush=True)
 
 generated_count        = 0
@@ -896,8 +1036,22 @@ for page in queue_pages:
     breadcrumb     = engine_meta.get("breadcrumb")  or (title_case(keyword_display) or readable_keyword(keyword))
     faq_schema     = engine_meta.get("faqSchema")   or build_schema_faq_python_fallback(keyword)
     canonical      = build_canonical(slug)
+    og_image       = build_og_image(slug)
+    modified_date  = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     hl_data_html   = render_hl_data_block(engine_meta)
     page_meta_html = render_page_meta_script(engine_meta, keyword, slug)
+
+    # Per-page signals (rating + social proof). Mirrors the JS engine.
+    # If engine_meta supplies pageSignals (v18.2+), use those values verbatim
+    # so client and server agree exactly. Otherwise compute locally.
+    engine_signals = engine_meta.get("pageSignals") or {}
+    signals = build_page_signals(
+        keyword,
+        rating_value=engine_signals.get("ratingValue"),
+        rating_count=engine_signals.get("reviewCount"),
+        social_proof_checks=engine_signals.get("socialProofChecks"),
+    )
+    aggregate_rating_json = build_aggregate_rating_json(signals)
 
     # 3. Related + more links
     related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
@@ -909,24 +1063,62 @@ for page in queue_pages:
 
     hub_link_html = build_hub_link_html(keyword)
 
-    # 4. Render
-    replacements = {
-        "{{TITLE}}":           escape_html(title),
-        "{{DESCRIPTION}}":     escape_html(description),
-        "{{KEYWORD}}":         escape_html(keyword_display),
-        "{{AI_CONTENT}}":      ai_text,
-        "{{RELATED_LINKS}}":   build_links_html(related_pages),
-        "{{MORE_LINKS}}":      build_links_html(more_pages),
-        "{{HUB_LINK}}":        hub_link_html,
-        "{{CANONICAL_URL}}":   escape_html(canonical),
-        "{{MODIFIED_DATE}}":   datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "{{BREADCRUMB_NAME}}": escape_html(breadcrumb),
-        "{{STATIC_H1}}":       escape_html(static_h1),
-        "{{STATIC_INTRO}}":    escape_html(static_intro),
-        "{{OG_IMAGE}}":        escape_html(build_og_image(slug)),
-        "{{HL_DATA_BLOCK}}":   hl_data_html,
-        "{{SCHEMA_FAQ}}":      faq_schema,
-    }
+    # 4. Build replacements based on template version
+    if TEMPLATE_IS_V11:
+        # v1.1 template -- context-aware variants
+        replacements = {
+            # HTML body / attribute context
+            "{{TITLE}}":                 escape_html(title),
+            "{{DESCRIPTION}}":           escape_html(description),
+            "{{STATIC_H1}}":             escape_html(static_h1),
+            "{{STATIC_INTRO}}":          escape_html(static_intro),
+            "{{BREADCRUMB_NAME}}":       escape_html(breadcrumb),
+            "{{CANONICAL_URL}}":         escape_html(canonical),
+            "{{OG_IMAGE}}":              escape_html(og_image),
+            "{{MODIFIED_DATE}}":         escape_html(modified_date),
+            "{{PUBLISHED_DATE}}":        escape_html(modified_date),
+            # JSON-LD / JS string context
+            "{{TITLE_JSON}}":            escape_json_string(title),
+            "{{DESCRIPTION_JSON}}":      escape_json_string(description),
+            "{{KEYWORD_JS}}":            escape_json_string(keyword_display),
+            "{{KEYWORD_JSON}}":          escape_json_string(keyword_display),
+            "{{BREADCRUMB_NAME_JSON}}":  escape_json_string(breadcrumb),
+            "{{CANONICAL_URL_JSON}}":    escape_json_string(canonical),
+            "{{OG_IMAGE_JSON}}":         escape_json_string(og_image),
+            "{{MODIFIED_DATE_JSON}}":    escape_json_string(modified_date),
+            "{{PUBLISHED_DATE_JSON}}":   escape_json_string(modified_date),
+            # Per-page rating + social proof
+            "{{AGGREGATE_RATING_JSON}}": aggregate_rating_json,
+            "{{RATING_DISPLAY}}":        escape_html(signals["ratingDisplay"]),
+            "{{SOCIAL_PROOF_COUNT}}":    escape_html(signals["socialProofDisplay"]),
+            # Full <script> blocks
+            "{{SCHEMA_FAQ}}":            faq_schema,
+            # HTML fragments
+            "{{HUB_LINK}}":              hub_link_html,
+            "{{AI_CONTENT}}":            ai_text,
+            "{{RELATED_LINKS}}":         build_links_html(related_pages),
+            "{{MORE_LINKS}}":            build_links_html(more_pages),
+        }
+    else:
+        # Legacy template -- bare placeholders, no _JSON / _JS variants
+        replacements = {
+            "{{TITLE}}":           escape_html(title),
+            "{{DESCRIPTION}}":     escape_html(description),
+            "{{KEYWORD}}":         escape_html(keyword_display),
+            "{{AI_CONTENT}}":      ai_text,
+            "{{RELATED_LINKS}}":   build_links_html(related_pages),
+            "{{MORE_LINKS}}":      build_links_html(more_pages),
+            "{{HUB_LINK}}":        hub_link_html,
+            "{{CANONICAL_URL}}":   escape_html(canonical),
+            "{{MODIFIED_DATE}}":   modified_date,
+            "{{BREADCRUMB_NAME}}": escape_html(breadcrumb),
+            "{{STATIC_H1}}":       escape_html(static_h1),
+            "{{STATIC_INTRO}}":    escape_html(static_intro),
+            "{{OG_IMAGE}}":        escape_html(og_image),
+            "{{HL_DATA_BLOCK}}":   hl_data_html,
+            "{{SCHEMA_FAQ}}":      faq_schema,
+        }
+
     if TEMPLATE_HAS_PAGE_META:
         replacements["{{PAGE_META_SCRIPT}}"] = page_meta_html
 
