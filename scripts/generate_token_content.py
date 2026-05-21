@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
 """
-generate_token_content.py -- v13.0
+generate_token_content.py -- v13.1
 
 Builds Verixia token-risk and DEX-aggregator SEO pages from the keyword queue.
 
-What changed from v12.x:
-  - Title, description, H1, hero intro, content H2, content bridge, FAQ, schema,
-    threat banner, recognition chips, and story card titles all come from the
-    Node SEO engine's `buildPageMeta(keyword)` -- single source of truth.
+v13.1 (CURRENT):
+  - Added per-keyword endpoint routing. Token-risk keywords now POST to
+    /token-risk-page (backed by riskEngine.js v18.5). DEX-aggregator and
+    DeFi-perps keywords keep using /seo-page (backed by tokenriskseoengine.js).
+  - select_engine_endpoint() picks the right URL using the existing
+    HUB_MATCH_RULES, so routing follows the same taxonomy as hub selection.
+  - No other behavior changed. Templates, slugs, related links, generated
+    tracking files all work the same.
+
+v13.0 (preserved):
+  - Title, description, H1, hero intro, content H2, content bridge, FAQ,
+    schema, threat banner, recognition chips, and story card titles all come
+    from the Node SEO engine's `buildPageMeta(keyword)` -- single source of
+    truth.
   - Python no longer reimplements intent detection, subject extraction, or
     keyword cleaning. Those live in the engine.
-  - One new endpoint required on the Node server: POST /seo-page returns the
-    full page payload (content + meta + hlData). See ROUTE_SNIPPET at the
-    bottom of this file -- 8 lines to add to your existing server.js.
 
-What stayed:
-  - Keyword queue loading and slug management.
-  - Hub link selection (HUB_MATCH_RULES, HUB_TITLE_OVERRIDES) -- depends on
-    your hub taxonomy, kept in Python.
-  - Related-page linking via get_related_pages() + build_links_html().
-  - Daily limit handling.
-  - Output paths and file I/O.
-
-v13.0.1 patch:
-  - Added `generate_token_content(keyword)` compatibility shim so legacy
-    callers (build_token_seo_incremental.py) keep working. It returns just
-    the content body string from the /seo-page payload.
+v13.0.1 patch (preserved):
+  - `generate_token_content(keyword)` compatibility shim returns just the
+    content body string from the page payload for legacy callers.
 """
 
 from __future__ import annotations
@@ -62,8 +60,13 @@ OUTPUT_DIR_DEFI      = BASE_DIR / "defi"
 
 SITE_URL             = "https://verixiaapps.com"
 SEO_API_BASE         = "https://awake-integrity-production-faa0.up.railway.app"
-SEO_PAGE_ENDPOINT    = f"{SEO_API_BASE}/seo-page"
-SEO_PAGE_TIMEOUT_S   = 45  # reduced from 90 -- engine worst case is now ~25s per pass
+
+# Two engine endpoints (v13.1):
+#   /seo-page         -> tokenriskseoengine.js  (LEGACY -- dex + defi-general)
+#   /token-risk-page  -> riskEngine.js v18.5    (NEW    -- token-risk only)
+SEO_PAGE_ENDPOINT             = f"{SEO_API_BASE}/seo-page"
+SEO_TOKEN_RISK_PAGE_ENDPOINT  = f"{SEO_API_BASE}/token-risk-page"
+SEO_PAGE_TIMEOUT_S            = 45  # engine worst case is now ~25s per pass
 
 DAILY_LIMIT          = 8
 
@@ -110,6 +113,11 @@ HUB_TITLE_OVERRIDES = {
     "contract":   "Contract Risk Hub",
 }
 
+# Hub slugs that should NOT route to the new /token-risk-page endpoint.
+# These keep using the legacy /seo-page endpoint because they produce
+# templates (dex-aggregator, defi-general) that the legacy engine handles.
+NON_TOKEN_RISK_HUBS = {"solana-dex-aggregator", "defi-perpetuals"}
+
 DEFAULT_HUB_SLUG  = "token-risk"
 DEFAULT_HUB_TITLE = "Token Risk Checker"
 
@@ -121,6 +129,19 @@ def select_hub(keyword: str) -> tuple[str, str]:
             title = HUB_TITLE_OVERRIDES.get(override_key, DEFAULT_HUB_TITLE)
             return hub_slug, title
     return DEFAULT_HUB_SLUG, DEFAULT_HUB_TITLE
+
+def select_engine_endpoint(keyword: str) -> str:
+    """Pick the engine endpoint URL for `keyword`.
+
+    Token-risk keywords route to /token-risk-page (riskEngine.js v18.5).
+    DEX-aggregator and DeFi-perps keywords route to /seo-page
+    (tokenriskseoengine.js -- legacy). Everything else defaults to the
+    new token-risk endpoint, matching the default hub.
+    """
+    hub_slug, _ = select_hub(keyword)
+    if hub_slug in NON_TOKEN_RISK_HUBS:
+        return SEO_PAGE_ENDPOINT
+    return SEO_TOKEN_RISK_PAGE_ENDPOINT
 
 # =========================================================================
 # SLUG MANAGEMENT
@@ -165,7 +186,7 @@ def load_keyword_queue() -> list[str]:
 
 def fetch_seo_page(keyword: str) -> dict | None:
     """
-    POST /seo-page on the Node engine. Returns:
+    POST the appropriate engine endpoint for `keyword`. Returns:
       {
         keyword, content, templateType,
         meta: { title, description, h1, intro, contentHeading, contentBridge,
@@ -175,29 +196,31 @@ def fetch_seo_page(keyword: str) -> dict | None:
       }
     Returns None on hard failure (network, 5xx, malformed response).
     """
+    endpoint = select_engine_endpoint(keyword)
+
     try:
         resp = requests.post(
-            SEO_PAGE_ENDPOINT,
+            endpoint,
             json={"keyword": keyword},
             timeout=SEO_PAGE_TIMEOUT_S,
         )
     except requests.RequestException as exc:
-        print(f"[seo-page] Network error for {keyword!r}: {exc}", file=sys.stderr)
+        print(f"[seo-page] Network error at {endpoint} for {keyword!r}: {exc}", file=sys.stderr)
         return None
 
     if resp.status_code != 200:
-        print(f"[seo-page] HTTP {resp.status_code} for {keyword!r}: {resp.text[:200]}", file=sys.stderr)
+        print(f"[seo-page] HTTP {resp.status_code} at {endpoint} for {keyword!r}: {resp.text[:200]}", file=sys.stderr)
         return None
 
     try:
         payload = resp.json()
     except ValueError:
-        print(f"[seo-page] Bad JSON for {keyword!r}", file=sys.stderr)
+        print(f"[seo-page] Bad JSON at {endpoint} for {keyword!r}", file=sys.stderr)
         return None
 
     # Minimum field check
     if not payload.get("content") or not payload.get("meta"):
-        print(f"[seo-page] Missing content/meta for {keyword!r}", file=sys.stderr)
+        print(f"[seo-page] Missing content/meta at {endpoint} for {keyword!r}", file=sys.stderr)
         return None
 
     return payload
@@ -209,8 +232,8 @@ def fetch_seo_page(keyword: str) -> dict | None:
 # Legacy callers (e.g. build_token_seo_incremental.py) import
 # `generate_token_content` and expect a plain string of body content for a
 # given keyword. The new architecture fetches a full payload from the Node
-# /seo-page endpoint, so this shim extracts and returns just the `content`
-# field. Returns "" on failure -- callers already handle empty strings.
+# endpoint, so this shim extracts and returns just the `content` field.
+# Returns "" on failure -- callers already handle empty strings.
 
 def generate_token_content(keyword: str) -> str:
     """Compatibility shim: return just the content body string.
@@ -453,6 +476,8 @@ def record_generated(slug: str, keyword: str, hub_slug: str) -> None:
 def process_keyword(keyword: str) -> bool:
     """Process a single keyword. Returns True on success, False otherwise."""
     print(f"[build] -> {keyword!r}")
+    endpoint = select_engine_endpoint(keyword)
+    print(f"[build]    endpoint: {endpoint}")
     payload = fetch_seo_page(keyword)
     if not payload:
         print(f"[build] FAILED: could not fetch payload for {keyword!r}")
@@ -483,7 +508,11 @@ def process_keyword(keyword: str) -> bool:
 
     output_file = write_page(template_type, slug, hub_slug, rendered)
     record_generated(slug, keyword, hub_slug)
-    print(f"[build] OK -> {output_file} (intent={meta.get('intent')}, shape={meta.get('shape')})")
+    extras = []
+    if payload.get("dataMode"):    extras.append(f"mode={payload['dataMode']}")
+    if payload.get("score"):       extras.append(f"score={payload['score']}")
+    extras_str = f" ({', '.join(extras)})" if extras else ""
+    print(f"[build] OK -> {output_file} (intent={meta.get('intent')}, shape={meta.get('shape')}){extras_str}")
     return True
 
 def main(limit: int = DAILY_LIMIT) -> int:
@@ -530,26 +559,13 @@ if __name__ == "__main__":
 
 
 # =========================================================================
-# ROUTE_SNIPPET -- add this to your Node server.js / index.js
+# ROUTE_SNIPPETS -- already in server.js as of v13.1
 # =========================================================================
 #
-# This Python script expects POST /seo-page on the Node API. Add the route
-# below to your existing Express server alongside /seo-content. The engine
-# import is unchanged -- generateSeoPagePayload is already exported.
+# /seo-page          -> tokenriskseoengine.js (legacy, dex + defi-general)
+# /token-risk-page   -> riskEngine.js v18.5   (token-risk template only)
 #
-# import { generateSeoPagePayload, getTemplateType } from "./seo_engine.js";
-#
-# app.post("/seo-page", async (req, res) => {
-#   try {
-#     const { keyword } = req.body || {};
-#     if (!keyword) return res.status(400).json({ error: "keyword required" });
-#     const payload = await generateSeoPagePayload(keyword);
-#     const templateType = getTemplateType(keyword);
-#     res.json({ ...payload, templateType });
-#   } catch (err) {
-#     console.error("[/seo-page]", err);
-#     res.status(500).json({ error: err.message || "generation failed" });
-#   }
-# });
-#
+# Routing decision lives in select_engine_endpoint() above. The legacy
+# /seo-page route handles solana-dex-aggregator and defi-perpetuals hubs;
+# everything else goes to /token-risk-page.
 # =========================================================================
