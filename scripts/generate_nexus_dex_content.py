@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-generate_nexus_dex_content.py -- v1.1
+generate_nexus_dex_content.py -- v1.2
 
 Builds Verixia Nexus DEX SEO pages from the keyword queue.
 
-v1.1 changes:
-  - Polymarket and prediction-markets hubs removed
-  - xStocks / tokenized-stocks / buy-stocks-onchain / stocks-no-kyc /
-    stocks-24-7 / global-stock-access hubs added
+v1.2 changes (over v1.1):
+  - Exposes pageSignals (ratingValue, reviewCount, aggregateRatingJson) to
+    window.__pageMeta so the template can render the rating chip.
+  - Injects per-page aggregateRating JSON-LD into <head> so Google sees
+    the rating signal in the rendered HTML.
+  - Exposes supplementaryHeading + supplementaryIntro so the
+    "Why X is different" section never renders as a bare H3.
+  - SUPP_HEADING / SUPP_INTRO substitutions wired into the template.
 """
 
 from __future__ import annotations
@@ -51,7 +55,6 @@ TWITTER_HANDLE       = "@verixiaapps"
 
 HUB_MATCH_RULES = [
     # Order matters: first match wins.
-    # (regex pattern, hub_slug, hub_title_override_key)
     (r"\bhyperliquid\b",
         "hyperliquid-frontend", "hyperliquid"),
 
@@ -317,26 +320,71 @@ def render_ai_content_html(content: str) -> str:
     return "\n".join(f"<p>{html_escape(p)}</p>" for p in paragraphs)
 
 def build_page_meta_script(meta: dict, hl_data_block: str = "") -> str:
+    """v1.2: pageSignals + supplementaryHeading/Intro exposed to window.__pageMeta."""
     payload = {
-        "title":            meta.get("title", ""),
-        "description":      meta.get("description", ""),
-        "h1":               meta.get("h1", ""),
-        "intro":            meta.get("intro", ""),
-        "contentHeading":   meta.get("contentHeading", ""),
-        "contentBridge":    meta.get("contentBridge", ""),
-        "breadcrumb":       meta.get("breadcrumb", ""),
-        "intent":           meta.get("intent", ""),
-        "shape":            meta.get("shape", ""),
-        "subject":          meta.get("subject", ""),
-        "faq":              meta.get("faq", []),
-        "threatBanner":     meta.get("threatBanner"),
-        "recognitionChips": meta.get("recognitionChips", []),
-        "storyCardTitles":  meta.get("storyCardTitles", []),
-        "hlDataBlock":      hl_data_block or "",
+        "title":                meta.get("title", ""),
+        "description":          meta.get("description", ""),
+        "h1":                   meta.get("h1", ""),
+        "intro":                meta.get("intro", ""),
+        "contentHeading":       meta.get("contentHeading", ""),
+        "contentBridge":        meta.get("contentBridge", ""),
+        "breadcrumb":           meta.get("breadcrumb", ""),
+        "intent":               meta.get("intent", ""),
+        "shape":                meta.get("shape", ""),
+        "subject":              meta.get("subject", ""),
+        "faq":                  meta.get("faq", []),
+        "threatBanner":         meta.get("threatBanner"),
+        "recognitionChips":     meta.get("recognitionChips", []),
+        "storyCardTitles":      meta.get("storyCardTitles", []),
+        "supplementaryCards":   meta.get("supplementaryCards", []),
+        # v16.2 PATCH 2 surface
+        "supplementaryHeading": meta.get("supplementaryHeading", ""),
+        "supplementaryIntro":   meta.get("supplementaryIntro", ""),
+        # v16.1 PATCH 4 surface
+        "pageSignals":          meta.get("pageSignals", {}),
+        "author":               meta.get("author", {}),
+        "hlDataBlock":          hl_data_block or "",
     }
     json_blob = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
     safe_blob = json_blob.replace("</", "<\\/")
     return f'<script id="page-meta">window.__pageMeta = {safe_blob};</script>'
+
+def build_aggregate_rating_jsonld(meta: dict, canonical_url: str) -> str:
+    """v1.2: emit AggregateRating JSON-LD so Google sees the rating signal.
+
+    Wraps the engine's pageSignals.aggregateRatingJson into a parent
+    SoftwareApplication/Service entity so the rating attaches to the page.
+    """
+    sig = meta.get("pageSignals") or {}
+    rating_value = sig.get("ratingValue")
+    review_count = sig.get("reviewCount")
+    title = meta.get("title", "") or "Verixia Solana DeFi"
+    description = meta.get("description", "") or "Solana DeFi"
+    if rating_value is None or not review_count:
+        return ""
+    blob = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": title,
+        "description": description,
+        "url": canonical_url,
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": f"{float(rating_value):.1f}",
+            "reviewCount": str(int(review_count)),
+            "bestRating": "5",
+            "worstRating": "1",
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+        },
+    }
+    json_blob = json.dumps(blob, separators=(",", ":"), ensure_ascii=False)
+    return f'<script type="application/ld+json">{json_blob}</script>'
 
 def render_page(template_html: str, keyword: str, payload: dict,
                 slug: str, hub_slug: str, hub_title: str,
@@ -355,6 +403,13 @@ def render_page(template_html: str, keyword: str, payload: dict,
     content_bridge  = meta.get("contentBridge", "")
     breadcrumb_name = meta.get("breadcrumb", "")
     faq_schema      = meta.get("faqSchema", "")
+
+    # v16.2 PATCH 2 substitutions
+    supp_heading = meta.get("supplementaryHeading", "") or "Why Solana DeFi is different"
+    supp_intro   = meta.get("supplementaryIntro", "") or ""
+
+    # v16.2 PATCH 4 substitutions -- per-page aggregate rating
+    rating_jsonld = build_aggregate_rating_jsonld(meta, canonical)
 
     ai_content_html = render_ai_content_html(content)
     meta_script     = build_page_meta_script(meta, hl_block)
@@ -387,6 +442,12 @@ def render_page(template_html: str, keyword: str, payload: dict,
         "{{SCHEMA_FAQ}}":          faq_schema,
         "{{PAGE_META_SCRIPT}}":    meta_script,
 
+        # v16.2 new placeholders
+        "{{SUPP_HEADING}}":        html_escape(supp_heading),
+        "{{SUPP_INTRO}}":          html_escape(supp_intro),
+        "{{AGGREGATE_RATING_JSONLD}}": rating_jsonld,
+        "{{MODIFIED_DATE}}":       datetime.now(timezone.utc).isoformat(timespec="seconds"),
+
         "{{HUB_SLUG}}":            hub_slug,
         "{{HUB_TITLE}}":           html_escape(hub_title),
         "{{HUB_LINK_HREF}}":       f"/nexus-dex/{hub_slug}/",
@@ -401,9 +462,17 @@ def render_page(template_html: str, keyword: str, payload: dict,
     for placeholder, value in substitutions.items():
         rendered = rendered.replace(placeholder, str(value))
 
+    # Belt and braces: if the template didn't carry the placeholder for the
+    # page meta script, inject before </head>.
     if "{{PAGE_META_SCRIPT}}" not in template_html and "window.__pageMeta" not in rendered:
         if "</head>" in rendered:
             rendered = rendered.replace("</head>", f"{meta_script}\n</head>", 1)
+
+    # Same for aggregate rating JSON-LD: inject before </head> if the template
+    # is older and doesn't carry the placeholder.
+    if "{{AGGREGATE_RATING_JSONLD}}" not in template_html and rating_jsonld and "AggregateRating" not in rendered:
+        if "</head>" in rendered:
+            rendered = rendered.replace("</head>", f"{rating_jsonld}\n</head>", 1)
 
     return rendered
 
