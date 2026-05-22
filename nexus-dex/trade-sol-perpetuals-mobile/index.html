@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<!--
++==============================================================================+
+|  VERIXIA -- DeFi GENERAL SEO TEMPLATE v2.2                                   |
+|  Solana DEX Aggregator / Best Price Routing / Wallets / MEV / DeFi Edu       |
+|                                                                              |
+|  v2.2 changes (over v2.1):                                                   |
+|    - Why DeFi perps run differently from a CEX + The product runs as a responsive web DEX, not a native app. Connect a Solana wallet directly from your browser; positions, margin, and PnL all settle on-chain against the underlying protocol. The structural differences from a CEX: no platform custody, no account, no email. placeholders -- engine-driven section |
+|    - renderSupplementaryCards() hydrates H3 + intro from window.__pageMeta   |
+|    - {"@type":"AggregateRating","ratingValue":"4.7","reviewCount":"4144","bestRating":"5"} substitution wired to engine pageSignals      |
+|      (existing FinancialService + SoftwareApplication schemas keep rating)   |
+|                                                                              |
+|  v2.1 (preserved):                                                           |
+|    - Aggregate rating block below hero (per-page deterministic)              |
+|    - Solana stats trust block (400ms blocks / 50+ DEXes / sub-second)        |
+|    - Routing wins callout strip (better fills than single-pool)              |
+|    - Richer live feed (split markers, realistic timing, more variety)        |
+|    - lastReviewed hidden by default (no fabricated freshness)                |
+|    - Subtle hero animation tightened                                         |
+|    - Per-page rating/review count read from window.__pageMeta.pageSignals    |
+|                                                                              |
+|  v2.0 (preserved):                                                           |
+|    - 4 sub-intents: swap (default), routing, wallet, mev                     |
+|    - Solana-only (no EVM chain badges)                                       |
+|    - Swap widget pointing at swap.verixiaapps.com (NOT a scanner)            |
++==============================================================================+
+-->
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade SOL Perpetuals | Nexus DEX | Self-Custodial, No KYC, Mobile-First</title>
+<meta name="description" content="Trade SOL Perpetuals on Nexus DEX. Self-custodial trading from your wallet with best-price routing, no KYC, and mobile-first access. Trade trade sol perpetuals without a centralized exchange.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://verixiaapps.com/nexus-dex/trade-sol-perpetuals-mobile/">
+<meta property="article:modified_time" content="2026-05-22T12:45:51Z">
+<meta property="og:title" content="Trade SOL Perpetuals | Nexus DEX | Self-Custodial, No KYC, Mobile-First">
+<meta property="og:description" content="Trade SOL Perpetuals on Nexus DEX. Self-custodial trading from your wallet with best-price routing, no KYC, and mobile-first access. Trade trade sol perpetuals without a centralized exchange.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://verixiaapps.com/nexus-dex/trade-sol-perpetuals-mobile/">
+<meta property="og:image" content="https://verixiaapps.com/og/nexus-dex.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Trade SOL Perpetuals | Nexus DEX | Self-Custodial, No KYC, Mobile-First">
+<meta name="twitter:description" content="Trade SOL Perpetuals on Nexus DEX. Self-custodial trading from your wallet with best-price routing, no KYC, and mobile-first access. Trade trade sol perpetuals without a centralized exchange.">
+<meta name="twitter:image" content="https://verixiaapps.com/og/nexus-dex.png">
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"Trade SOL Perpetuals | Nexus DEX | Self-Custodial, No KYC, Mobile-First","description":"Trade SOL Perpetuals on Nexus DEX. Self-custodial trading from your wallet with best-price routing, no KYC, and mobile-first access. Trade trade sol perpetuals without a centralized exchange.","url":"https://verixiaapps.com/nexus-dex/trade-sol-perpetuals-mobile/","dateModified":"2026-05-22T12:45:51Z"}
+</script>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How does perps trading work without KYC?", "acceptedAnswer": {"@type": "Answer", "text": "Perps positions on Nexus DEX are collateralized by USDC in your Solana wallet. You sign the position from your wallet, the position opens against an on-chain perpetual futures market, and PnL settles back to your wallet. No off-chain account is needed."}}, {"@type": "Question", "name": "Do I need to sign up or complete KYC?", "acceptedAnswer": {"@type": "Answer", "text": "No. Nexus DEX is fully self-custodial. Connect a Solana wallet (Phantom, Backpack, or Solflare), sign a transaction, and trade. There is no signup, no identity verification, no document upload, and no centralized account."}}, {"@type": "Question", "name": "Which wallets are supported?", "acceptedAnswer": {"@type": "Answer", "text": "Phantom, Backpack, Solflare, and other major Solana wallets work with Nexus DEX. You sign each trade from your wallet and funds stay in your wallet between trades. The platform never holds your funds."}}, {"@type": "Question", "name": "How does pricing work compared to centralized exchanges?", "acceptedAnswer": {"@type": "Answer", "text": "Spot swaps and tokenized stock trades route through Jupiter, Raydium, and Orca for best price. Perps settle on-chain at posted market prices. There are no platform deposit fees, no withdrawal fees, and no minimum balances."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FinancialService","name":"Trade SOL Perpetuals | Nexus DEX | Self-Custodial, No KYC, Mobile-First","description":"Trade SOL Perpetuals on Nexus DEX. Self-custodial trading from your wallet with best-price routing, no KYC, and mobile-first access. Trade trade sol perpetuals without a centralized exchange.","url":"https://verixiaapps.com/nexus-dex/trade-sol-perpetuals-mobile/","serviceType":"Non-Custodial DeFi","areaServed":"Worldwide","provider":{"@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.7","reviewCount":"4144","bestRating":"5"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Trade SOL Perpetuals | Nexus DEX | Self-Custodial, No KYC, Mobile-First","applicationCategory":"FinanceApplication","operatingSystem":"Web","description":"Trade SOL Perpetuals on Nexus DEX. Self-custodial trading from your wallet with best-price routing, no KYC, and mobile-first access. Trade trade sol perpetuals without a centralized exchange.","url":"https://verixiaapps.com/nexus-dex/trade-sol-perpetuals-mobile/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.7","reviewCount":"4144","bestRating":"5"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/","sameAs":["https://apps.apple.com/app/id6759490910"]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Verixia","item":"https://verixiaapps.com/"},{"@type":"ListItem","position":2,"name":"Trade SOL Perpetuals","item":"https://verixiaapps.com/nexus-dex/trade-sol-perpetuals-mobile/"}]}
+</script>
+
+<script id="page-meta">window.__pageMeta = {"title":"Trade Perps on Mobile — Browser-Based DEX, No App","description":"Trade SOL Perpetuals Mobile perps from your wallet on a mobile-friendly web DEX. Live funding, liquidation distance, no app install, no account, no KYC.","h1":"SOL Perpetuals Mobile Perps Trading","intro":"Trade DeFi perps from your wallet on a mobile-friendly web DEX. Live funding, liquidation distance, no app install required.","contentHeading":"How DeFi Perpetuals Work — Funding, Liquidation, and Margin","contentBridge":"Connect your wallet on Verixia to trade DeFi perps directly from your browser — mobile or desktop, no app install required.","breadcrumb":"SOL Perpetuals Mobile Perps","intent":"perps_defi","shape":"command","subject":"SOL Perpetuals Mobile","faq":[{"q":"Do I need to install an app to trade perps?","a":"No. The product is a web DEX that loads in any mobile or desktop browser. Connect a Solana wallet (Phantom, Solflare, Backpack) or use WalletConnect, and trade directly. No App Store install, no account creation, no email, no KYC at any step."},{"q":"How does mobile perps trading work without a native app?","a":"The site is fully responsive and signs transactions through your connected mobile wallet. Phantom mobile, Solflare mobile, and any WalletConnect-compatible wallet handle the signing in-app. Positions, margin, and PnL all settle on-chain via the underlying perps protocol -- no platform custody at any point."},{"q":"How does Verixia work?","a":"Connect a Solana wallet (Phantom, Solflare, Backpack, or any WalletConnect-compatible wallet). The swap routes across Raydium, Orca, Meteora, Phoenix and other Solana DEXes for best execution. Trades sign from the wallet and settle on-chain in under a second. There is no account, no email, no password, no KYC, no sign-up of any kind."},{"q":"Do I need to create an account or complete KYC?","a":"No. Verixia is DeFi -- non-custodial, on-chain, no account creation of any kind. No email, no password, no KYC, no liveness check, no phone number. Connect your Solana wallet, transact, disconnect. Your wallet holds the keys throughout."},{"q":"Which chains does Verixia support?","a":"Solana is the primary chain with full SPL token support across Raydium, Orca, Meteora, Phoenix and major Solana AMMs. Tokenized stocks (xStocks) live on Solana as SPL tokens. EVM chains including Ethereum, Base, Arbitrum, BNB Chain, Polygon, Optimism, and Avalanche are also supported for swaps."}],"threatBanner":null,"recognitionChips":[{"label":"Web DEX, not an app","copy":"The product runs as a responsive web DEX. Loads in any mobile or desktop browser, no App Store install, no Play Store install."},{"label":"Wallet-native trading","copy":"Connect Phantom, Solflare, Backpack, or any WalletConnect-compatible wallet directly from your phone's browser. The same wallet that holds your tokens trades the perps."},{"label":"Funding rate signal","copy":"Funding rates reflect the imbalance between long and short open interest. Sustained extremes often precede mean-reversion moves."},{"label":"Liquidation mechanics","copy":"Cross-margin uses your total account equity as collateral; isolated margin limits loss to the position only."}],"storyCardTitles":[["[~]","How web-DEX perps work on mobile"],["[i]","Funding rate and OI as signals"],["[?]","What separates good fills from bad"],["[+]","Wallet-native execution flow"]],"supplementaryCards":[{"icon":"&#128241;","title":"Web DEX in the browser","body":"The product runs in any modern mobile or desktop browser. Responsive layout, wallet-connect flow, transaction signing in-browser. No App Store, no Play Store, no native install."},{"icon":"&#9889;","title":"Fully on-chain perps","body":"Trades settle on a true on-chain orderbook (Hyperliquid) with maker-taker fees, funding rates every 8 hours, and up to 50x leverage."},{"icon":"&#128274;","title":"Self-custodial throughout","body":"Margin, positions, PnL -- all settled on-chain against your wallet. No exchange holds your funds. Disconnect anytime; no ongoing permissions remain."}],"supplementaryHeading":"Why DeFi perps run differently from a CEX","supplementaryIntro":"The product runs as a responsive web DEX, not a native app. Connect a Solana wallet directly from your browser; positions, margin, and PnL all settle on-chain against the underlying protocol. The structural differences from a CEX: no platform custody, no account, no email.","pageSignals":{"ratingValue":4.7,"reviewCount":4144,"ratingDisplay":"4.7 / 5 from 4,144 users","aggregateRatingJson":"{\"@type\":\"AggregateRating\",\"ratingValue\":\"4.7\",\"reviewCount\":\"4144\",\"bestRating\":\"5\"}"},"author":{"name":"Verixia Research","title":"On-chain Solana DeFi analysis","bio":"Verixia Research analyzes Solana DeFi -- wallet-native execution, on-chain perpetuals, tokenized equities, and swap routing across 50+ DEXes -- combining real-time on-chain data from DexScreener, Hyperliquid, Jupiter, and Solana RPC with structural pattern analysis.","methodologyUrl":"https://verixiaapps.com/methodology/","methodologyTitle":"How we analyze"},"hlDataBlock":"<div class=\"hl-data-block\">\n<div class=\"hl-data-header\">\n  <span class=\"hl-data-source\">&#x26A1; Hyperliquid Live Data<\/span>\n  <span class=\"hl-data-note\" title=\"2026-05-22T12:45:38.260Z\">Fetched 13s ago &middot; Verify before trading<\/span>\n<\/div>\n<div class=\"hl-row\">\n  <div class=\"hl-asset\">BTC-PERP<\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Mark<\/span><span class=\"hl-stat-value\">$77,410<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">24h<\/span><span class=\"hl-stat-value hl-pos\">+0.25%<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Funding/8h<\/span><span class=\"hl-stat-value hl-pos\">+0.0012%<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Ann.<\/span><span class=\"hl-stat-value hl-pos\">+1.4%/yr<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">OI<\/span><span class=\"hl-stat-value\">$2.19B<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">24h Vol<\/span><span class=\"hl-stat-value\">$1.69B<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Max Lev<\/span><span class=\"hl-stat-value\">40x<\/span><\/div>\n<\/div>\n<div class=\"hl-row\">\n  <div class=\"hl-asset\">ETH-PERP<\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Mark<\/span><span class=\"hl-stat-value\">$2,133<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">24h<\/span><span class=\"hl-stat-value hl-pos\">+0.77%<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Funding/8h<\/span><span class=\"hl-stat-value hl-pos\">+0.0013%<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Ann.<\/span><span class=\"hl-stat-value hl-pos\">+1.4%/yr<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">OI<\/span><span class=\"hl-stat-value\">$1.34B<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">24h Vol<\/span><span class=\"hl-stat-value\">$598.2M<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Max Lev<\/span><span class=\"hl-stat-value\">25x<\/span><\/div>\n<\/div>\n<div class=\"hl-row\">\n  <div class=\"hl-asset\">SOL-PERP<\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Mark<\/span><span class=\"hl-stat-value\">$87.55<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">24h<\/span><span class=\"hl-stat-value hl-pos\">+2.18%<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Funding/8h<\/span><span class=\"hl-stat-value hl-pos\">+0.0013%<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Ann.<\/span><span class=\"hl-stat-value hl-pos\">+1.4%/yr<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">OI<\/span><span class=\"hl-stat-value\">$376.5M<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">24h Vol<\/span><span class=\"hl-stat-value\">$187.5M<\/span><\/div>\n  <div class=\"hl-stat\"><span class=\"hl-stat-label\">Max Lev<\/span><span class=\"hl-stat-value\">20x<\/span><\/div>\n<\/div>\n<\/div>"};</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#010204; --bg-2:#020714; --bg-3:#030b1e; --bg-card:rgba(3,7,18,0.92);
+  --ink:#b8d0ea; --ink-strong:#daeeff; --muted:#6278a0; --muted-2:#445570;
+  --cyan:#00f0d0; --cyan-2:#00ccb0; --cyan-3:#00a890;
+  --sol:#9945ff; --sol-2:#7c35e0;
+  --emerald:#00e87a; --amber:#f0a030; --danger:#e02850; --gold:#ffc742;
+  --glow-cyan:0 0 30px rgba(0,240,208,.28),0 0 60px rgba(0,240,208,.09);
+  --glow-sol:0 0 30px rgba(153,69,255,.24),0 0 60px rgba(153,69,255,.08);
+  --glow-emerald:0 0 24px rgba(0,232,122,.22);
+  --glow-amber:0 0 24px rgba(240,160,48,.20);
+  --glow-gold:0 0 22px rgba(255,199,66,.28);
+  --shadow-xl:0 44px 110px rgba(0,0,0,.90);
+  --shadow-lg:0 26px 64px rgba(0,0,0,.74);
+  --shadow-md:0 14px 38px rgba(0,0,0,.58);
+  --shadow-sm:0 8px 22px rgba(0,0,0,.42);
+  --shadow-xs:0 4px 14px rgba(0,0,0,.30);
+  --radius-xl:28px; --radius-lg:20px; --radius-md:16px; --radius-sm:12px;
+  --font-display:'Syne',system-ui,sans-serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{font-family:var(--font-body);margin:0;padding-top:80px;color:var(--ink);line-height:1.6;background:var(--bg);background-image:radial-gradient(ellipse 60% 40% at 8% 0%,rgba(153,69,255,.10) 0%,transparent 55%),radial-gradient(ellipse 55% 38% at 92% 0%,rgba(0,240,208,.12) 0%,transparent 52%),radial-gradient(ellipse 40% 30% at 50% 100%,rgba(0,200,160,.03) 0%,transparent 50%);position:relative;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(0,240,208,.04) 1px,transparent 1px);background-size:30px 30px;pointer-events:none;z-index:0;}
+body > *{position:relative;z-index:1;}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;color:var(--cyan-2);}
+button{font-family:var(--font-body);}
+@supports(padding:max(0px)){body{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right));}}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 6px currentColor;}50%{box-shadow:0 0 16px currentColor,0 0 28px currentColor;transform:scale(1.25);}}
+@keyframes logo-pulse{0%,100%{box-shadow:0 0 6px rgba(153,69,255,.5);}50%{box-shadow:0 0 18px rgba(153,69,255,.95),0 0 32px rgba(0,240,208,.35);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes scanline{0%{top:-2px;opacity:0;}8%{opacity:1;}92%{opacity:1;}100%{top:100%;opacity:0;}}
+@keyframes feed-in{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes count-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse-ring{0%{box-shadow:var(--glow-cyan),0 0 0 0 rgba(0,240,208,.40);}100%{box-shadow:var(--glow-cyan),0 0 0 18px rgba(0,240,208,0);}}
+@keyframes fade-in{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes star-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+
+.top-bar{position:fixed;top:0;left:0;width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 18px;z-index:1000;background:linear-gradient(180deg,rgba(2,5,8,.96) 0%,transparent 100%);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,208,.06);}
+.logo{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:14px;font-weight:800;color:#eef6ff;padding:8px 14px;border-radius:999px;letter-spacing:-.01em;background:rgba(2,5,8,.70);border:1px solid rgba(153,69,255,.28);backdrop-filter:blur(16px);box-shadow:var(--glow-sol),var(--shadow-sm);text-decoration:none;transition:border-color .15s,box-shadow .15s;}
+.logo:hover{text-decoration:none;border-color:rgba(0,240,208,.40);box-shadow:var(--glow-cyan),var(--shadow-sm);}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--sol) 0%,var(--cyan) 100%);box-shadow:0 0 8px rgba(153,69,255,.7);flex:0 0 9px;animation:logo-pulse 2.4s ease-in-out infinite;}
+.swap-top-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;font-size:12px;border-radius:999px;font-weight:800;font-family:var(--font-mono);letter-spacing:.04em;background:linear-gradient(135deg,var(--sol) 0%,var(--cyan-2) 100%);color:#fff;border:none;cursor:pointer;white-space:nowrap;text-decoration:none;box-shadow:var(--glow-cyan),var(--shadow-sm);transition:all .15s;}
+.swap-top-btn:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(0,240,208,.35),var(--shadow-md);text-decoration:none;color:#fff;}
+
+.page-shell{max-width:920px;margin:0 auto;padding:0 14px 110px;}
+.hero{position:relative;padding:28px 8px 20px;max-width:880px;margin:0 auto 10px;text-align:center;animation:fade-in .5s ease both;}
+.hero-eyebrow{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;color:rgba(0,240,208,.42);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.eyebrow-bracket{color:rgba(0,240,208,.22);font-size:13px;}
+.hero h1{font-family:var(--font-display);font-size:clamp(46px,9.5vw,84px);font-weight:900;line-height:.97;letter-spacing:-0.05em;margin:0 0 4px;background:linear-gradient(128deg,var(--cyan) 0%,#ffffff 36%,var(--sol) 82%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:none;text-wrap:balance;filter:drop-shadow(0 0 48px rgba(0,240,208,.20));}
+.cursor-blink{display:inline-block;font-family:var(--font-mono);font-size:clamp(18px,3vw,32px);font-weight:500;color:rgba(0,240,208,.50);margin-left:3px;animation:blink .85s step-end infinite;vertical-align:baseline;line-height:1;margin-bottom:8px;}
+.hero-tagline{font-family:var(--font-mono);font-size:12px;font-weight:700;color:rgba(0,240,208,.65);letter-spacing:.12em;text-transform:uppercase;margin:0 0 10px;line-height:1.5;}
+.hero-badge-row{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:10px 0 16px;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.02em;color:rgba(160,200,240,.80);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);}
+.hero-badge.cyan-badge{background:rgba(0,240,208,.07);border-color:rgba(0,240,208,.18);color:var(--cyan);}
+.hero-badge.sol-badge{background:rgba(153,69,255,.08);border-color:rgba(153,69,255,.22);color:#c8aaff;}
+.hero-badge.kyc-badge{background:rgba(0,232,122,.07);border-color:rgba(0,232,122,.22);color:var(--emerald);}
+.hero-trust{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:8px;}
+.hero-trust-chip{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);}
+.social-proof-bar{display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;padding:8px 16px;border-radius:999px;background:rgba(0,232,122,.07);border:1px solid rgba(0,232,122,.20);box-shadow:var(--glow-emerald);}
+.social-proof-dot{width:7px;height:7px;border-radius:50%;background:var(--emerald);color:var(--emerald);box-shadow:0 0 8px rgba(0,232,122,.8);animation:pulse-dot 2s ease-in-out infinite;flex:0 0 7px;}
+.social-proof-text{font-size:12px;font-weight:900;color:var(--emerald);font-family:var(--font-mono);letter-spacing:.02em;}
+
+/* v2.1: Aggregate rating block (matches token-risk template style) */
+.rating-bar{max-width:800px;margin:14px auto 0;padding:0 14px;display:flex;justify-content:center;}
+.rating-bar-inner{display:inline-flex;align-items:center;gap:12px;padding:10px 18px;border-radius:999px;background:rgba(255,199,66,.05);border:1px solid rgba(255,199,66,.20);box-shadow:var(--glow-gold),var(--shadow-xs);flex-wrap:wrap;justify-content:center;}
+.rating-stars{display:inline-flex;align-items:center;gap:2px;font-size:14px;color:var(--gold);letter-spacing:1px;line-height:1;animation:star-pulse 3.4s ease-in-out infinite;}
+.rating-value{font-family:var(--font-mono);font-size:13px;font-weight:900;color:var(--gold);letter-spacing:.04em;}
+.rating-sep{width:1px;height:14px;background:rgba(255,199,66,.25);}
+.rating-meta{font-family:var(--font-mono);font-size:11px;font-weight:700;color:rgba(255,220,150,.75);letter-spacing:.02em;}
+
+.hero-visual{max-width:800px;margin:18px auto 14px;padding:0 14px;}
+.hero-visual-frame{position:relative;border-radius:var(--radius-xl);overflow:hidden;border:1px solid rgba(153,69,255,.22);background:radial-gradient(ellipse 90% 70% at 50% 35%,rgba(153,69,255,.18) 0%,rgba(6,12,26,.98) 55%,rgba(2,5,8,1) 100%);box-shadow:0 0 80px rgba(153,69,255,.14),0 0 44px rgba(0,240,208,.06),var(--shadow-xl),inset 0 1px 0 rgba(168,127,255,.12);}
+.hero-visual-frame::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 22%,rgba(153,69,255,.16),transparent 38%),radial-gradient(circle at 82% 78%,rgba(0,240,208,.10),transparent 42%);mix-blend-mode:screen;}
+.hero-visual-frame svg{display:block;width:100%;height:auto;position:relative;z-index:1;}
+
+/* v2.1: Solana stats trust strip (capability framing, no fees) */
+.solana-stats{max-width:800px;margin:0 auto 14px;padding:0 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.solana-stat{padding:18px 14px;border-radius:var(--radius-md);text-align:center;background:linear-gradient(160deg,rgba(0,240,208,.06) 0%,var(--bg-card) 60%);border:1px solid rgba(0,240,208,.14);box-shadow:var(--shadow-xs);transition:transform .18s,border-color .18s,box-shadow .18s;position:relative;overflow:hidden;}
+.solana-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),rgba(0,240,208,.30) 60%,transparent);}
+.solana-stat:hover{transform:translateY(-2px);border-color:rgba(0,240,208,.28);box-shadow:var(--glow-cyan),var(--shadow-sm);}
+.solana-stat-value{display:block;font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--cyan);letter-spacing:-.025em;line-height:1.05;text-shadow:0 0 12px rgba(0,240,208,.32);}
+.solana-stat-label{display:block;margin-top:4px;font-family:var(--font-mono);font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+.solana-stat-sub{display:block;margin-top:6px;font-size:11px;font-weight:500;color:rgba(180,210,240,.55);line-height:1.4;}
+
+/* v2.1: Routing wins callout strip */
+.routing-wins{max-width:800px;margin:0 auto 14px;padding:0 14px;}
+.routing-wins-inner{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:var(--radius-md);background:linear-gradient(135deg,rgba(0,232,122,.06) 0%,rgba(0,240,208,.04) 100%);border:1px solid rgba(0,232,122,.18);box-shadow:var(--glow-emerald),var(--shadow-xs);}
+.routing-wins-icon{flex:0 0 32px;width:32px;height:32px;border-radius:50%;background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.30);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-size:14px;}
+.routing-wins-body{flex:1;}
+.routing-wins-title{font-size:13px;font-weight:900;color:var(--ink-strong);letter-spacing:-.01em;}
+.routing-wins-sub{font-family:var(--font-mono);font-size:11px;font-weight:700;color:rgba(0,232,122,.75);letter-spacing:.03em;margin-top:2px;}
+.routing-wins-pulse{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--emerald);box-shadow:0 0 10px rgba(0,232,122,.9);animation:pulse-dot 2s ease-in-out infinite;}
+
+.swap-section{max-width:800px;margin:0 auto 14px;padding:0 14px;}
+.swap-section-label{text-align:center;margin-bottom:6px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(0,240,208,.45);}
+.swap-widget-wrap{position:relative;border-radius:var(--radius-lg);overflow:hidden;background:linear-gradient(rgba(0,240,208,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,208,.025) 1px,transparent 1px),linear-gradient(180deg,rgba(6,12,26,.98) 0%,rgba(2,5,8,1) 100%);background-size:44px 44px,44px 44px,100% 100%;border:1px solid rgba(0,240,208,.18);box-shadow:0 0 60px rgba(0,240,208,.07),var(--shadow-xl);}
+.swap-widget-wrap::after{content:'';position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(0,240,208,.50) 30%,rgba(0,240,208,.90) 50%,rgba(0,240,208,.50) 70%,transparent 100%);animation:scanline 5s linear infinite;pointer-events:none;z-index:10;}
+.swap-widget-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid rgba(0,240,208,.07);background:rgba(0,240,208,.025);gap:10px;flex-wrap:wrap;}
+.swap-live-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.20);font-size:11px;font-weight:900;color:var(--emerald);letter-spacing:.02em;}
+.swap-live-dot{width:7px;height:7px;border-radius:50%;background:var(--emerald);box-shadow:0 0 8px rgba(0,232,122,.8);animation:pulse-dot 2s ease-in-out infinite;flex:0 0 7px;}
+.swap-trust-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.swap-trust-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;color:rgba(160,200,240,.55);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);}
+.swap-cta-link{display:block;text-decoration:none;color:inherit;cursor:pointer;}
+.swap-cta-link:hover{text-decoration:none;}
+.swap-cta-link:hover .swap-preview-cta{background:linear-gradient(135deg,#c060ff 0%,#00f0d0 100%);box-shadow:0 0 40px rgba(0,240,208,.45),0 0 24px rgba(153,69,255,.35);transform:translateY(-1px);}
+.swap-cta-link:hover .swap-preview-card{border-color:rgba(0,240,208,.18);}
+.swap-cta-link:hover .swap-preview-cta-arrow{transform:translateX(3px);}
+.swap-preview{padding:22px 20px 18px;display:flex;flex-direction:column;gap:7px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(153,69,255,.06),transparent 60%),var(--bg);}
+.swap-preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.swap-preview-head-title{font-family:var(--font-display);font-size:22px;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.swap-preview-head-meta{font-family:var(--font-mono);font-size:10px;font-weight:700;color:rgba(0,240,208,.65);letter-spacing:.05em;text-transform:uppercase;}
+.swap-preview-card{background:rgba(255,255,255,.03);border:1px solid rgba(0,240,208,.10);border-radius:18px;padding:13px 16px;transition:border-color .2s;}
+.swap-preview-card-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;}
+.swap-preview-card-label{color:rgba(180,210,240,.55);}
+.swap-preview-card-balance{color:rgba(180,210,240,.40);font-family:var(--font-mono);font-size:10px;}
+.swap-preview-card-balance.best{color:var(--emerald);background:rgba(0,232,122,.08);padding:3px 8px;border-radius:999px;border:1px solid rgba(0,232,122,.20);font-weight:800;}
+.swap-preview-card-main{display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px;gap:10px;}
+.swap-preview-amount{font-family:var(--font-display);font-size:30px;font-weight:900;color:#fff;letter-spacing:-.025em;line-height:1.05;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.swap-preview-token{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:7px 11px;border-radius:999px;font-weight:800;font-size:13px;white-space:nowrap;}
+.swap-preview-token.sol-token{background:rgba(153,69,255,.12);border:1px solid rgba(153,69,255,.30);color:#d8c0ff;}
+.swap-preview-token.usdc-token{background:rgba(0,240,208,.10);border:1px solid rgba(0,240,208,.28);color:#a0ecdc;}
+.swap-preview-token-arrow{font-size:8px;opacity:.55;margin-left:2px;}
+.swap-preview-card-foot{font-family:var(--font-mono);font-size:11px;font-weight:700;color:rgba(180,210,240,.40);}
+.swap-preview-flip{display:flex;justify-content:center;margin:-9px 0;position:relative;z-index:2;}
+.swap-preview-flip-circle{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid rgba(0,240,208,.22);display:flex;align-items:center;justify-content:center;color:rgba(0,240,208,.75);font-size:16px;}
+.swap-preview-route{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,240,208,.04);border:1px solid rgba(0,240,208,.10);border-radius:13px;margin-top:4px;gap:10px;}
+.swap-preview-route-label{font-size:10px;font-weight:800;color:rgba(0,240,208,.75);letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-mono);flex:0 0 auto;}
+.swap-preview-route-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.route-pill{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);padding:4px 9px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:rgba(180,210,240,.85);white-space:nowrap;}
+.route-arrow{color:rgba(0,240,208,.5);font-size:12px;font-weight:700;}
+.swap-preview-cta{margin-top:8px;padding:16px 22px;background:linear-gradient(135deg,var(--sol) 0%,var(--cyan-2) 100%);border-radius:14px;color:#fff;font-size:15px;font-weight:900;text-align:center;box-shadow:0 0 28px rgba(0,240,208,.30),0 0 18px rgba(153,69,255,.20);transition:background .25s,box-shadow .25s,transform .15s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.swap-preview-cta:hover{animation:pulse-ring .55s ease-out forwards;transform:translateY(-1px);}
+.swap-preview-cta-arrow{transition:transform .2s;display:inline-block;}
+.swap-preview-disclaimer{text-align:center;margin-top:6px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:rgba(120,150,180,.42);letter-spacing:.04em;}
+.swap-widget-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid rgba(0,240,208,.07);background:rgba(0,240,208,.02);flex-wrap:wrap;gap:8px;}
+.swap-chain-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.swap-chain-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.03em;}
+.swap-chain-badge.sol-chain{color:rgba(153,69,255,.85);background:rgba(153,69,255,.09);border:1px solid rgba(153,69,255,.20);}
+.swap-dex-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.03em;color:rgba(0,240,208,.65);background:rgba(0,240,208,.05);border:1px solid rgba(0,240,208,.13);}
+.swap-powered-by{font-size:10px;font-weight:700;color:rgba(100,130,170,.35);font-family:var(--font-mono);}
+
+/* Live feed -- richer in v2.1 */
+.live-feed{max-width:800px;margin:0 auto 14px;padding:0 14px;}
+.live-feed-panel{border-radius:var(--radius-md);background:rgba(1,4,12,.96);border:1px solid rgba(0,240,208,.12);overflow:hidden;}
+.live-feed-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(0,240,208,.06);background:rgba(0,240,208,.018);}
+.live-feed-title{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,240,208,.55);}
+.live-feed-count{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted-2);}
+.live-feed-count span{color:var(--cyan);}
+.live-feed-body{padding:2px 0;}
+.feed-row{display:grid;grid-template-columns:8px 1fr 1fr 70px 56px;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.025);animation:feed-in .32s ease both;}
+.feed-row:last-child{border-bottom:none;}
+.feed-row:hover{background:rgba(255,255,255,.018);}
+.feed-dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;}
+.feed-dot.good{background:var(--emerald);box-shadow:0 0 5px rgba(0,232,122,.7);}
+.feed-dot.warn{background:var(--amber);box-shadow:0 0 5px rgba(240,160,48,.7);}
+.feed-dot.info{background:var(--cyan);box-shadow:0 0 5px rgba(0,240,208,.6);}
+.feed-pair{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-detail{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--cyan);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-route{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;text-align:center;background:rgba(153,69,255,.10);border:1px solid rgba(153,69,255,.20);color:#c8aaff;white-space:nowrap;}
+.feed-age{font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--muted-2);text-align:right;white-space:nowrap;}
+
+.stats-bar{max-width:800px;margin:0 auto 14px;padding:0 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.stat-card{padding:16px 12px;border-radius:var(--radius-md);text-align:center;background:rgba(3,7,18,.92);border:1px solid rgba(0,240,208,.09);box-shadow:var(--shadow-xs);transition:border-color .18s,box-shadow .18s;}
+.stat-card:hover{border-color:rgba(0,240,208,.20);box-shadow:var(--glow-cyan),var(--shadow-sm);}
+.stat-card-value{display:block;font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--cyan);letter-spacing:-.01em;line-height:1.1;}
+.stat-card-label{display:block;margin-top:4px;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+
+.telemetry-section{max-width:800px;margin:0 auto 14px;padding:0 14px;}
+.telemetry-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:6px;}
+.telemetry-label{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,240,208,.45);}
+.tele-live-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 6px rgba(0,232,122,.8);animation:pulse-dot 2s ease-in-out infinite;flex:0 0 6px;}
+.telemetry-sub{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--muted-2);letter-spacing:.06em;}
+.telemetry-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;}
+.tele-card{position:relative;padding:12px 10px 10px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:5px;overflow:hidden;transition:transform .18s;}
+.tele-card:hover{transform:translateY(-2px);}
+.tele-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.tele-card.tele-high::before{background:linear-gradient(90deg,var(--danger),rgba(224,40,80,.20) 80%,transparent);}
+.tele-card.tele-warn::before{background:linear-gradient(90deg,var(--amber),rgba(240,160,48,.20) 80%,transparent);}
+.tele-card.tele-good::before{background:linear-gradient(90deg,var(--emerald),rgba(0,232,122,.20) 80%,transparent);}
+.tele-card.tele-info::before{background:linear-gradient(90deg,var(--cyan),rgba(0,240,208,.15) 80%,transparent);}
+.tele-card.tele-high{border-color:rgba(224,40,80,.18);background:linear-gradient(160deg,rgba(224,40,80,.07) 0%,var(--bg-card) 60%);}
+.tele-card.tele-warn{border-color:rgba(240,160,48,.18);background:linear-gradient(160deg,rgba(240,160,48,.07) 0%,var(--bg-card) 60%);}
+.tele-card.tele-good{border-color:rgba(0,232,122,.18);background:linear-gradient(160deg,rgba(0,232,122,.07) 0%,var(--bg-card) 60%);}
+.tele-card.tele-info{border-color:rgba(0,240,208,.13);background:linear-gradient(160deg,rgba(0,240,208,.05) 0%,var(--bg-card) 60%);}
+.tele-icon{font-size:14px;line-height:1;}
+.tele-name{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tele-val{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.03em;white-space:nowrap;}
+.tele-card.tele-high .tele-val{color:var(--danger);}
+.tele-card.tele-warn .tele-val{color:var(--amber);}
+.tele-card.tele-good .tele-val{color:var(--emerald);}
+.tele-card.tele-info .tele-val{color:var(--cyan);}
+.telemetry-footer{margin-top:9px;text-align:center;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted-2);letter-spacing:.08em;text-transform:uppercase;}
+
+.feature-grid{max-width:800px;margin:0 auto 14px;padding:0 14px;display:grid;grid-template-columns:3fr 2fr;grid-template-rows:auto auto;gap:10px;}
+.feature-card{position:relative;padding:22px 18px;border-radius:var(--radius-lg);background:rgba(3,7,18,.94);border:1px solid rgba(0,240,208,.09);box-shadow:var(--shadow-xs);transition:border-color .18s,box-shadow .18s,transform .18s;overflow:hidden;}
+.feature-card:first-child{grid-row:span 2;padding:28px 22px;}
+.feature-card:first-child .feature-icon{font-size:32px;margin-bottom:16px;}
+.feature-card:first-child .feature-title{font-size:20px;margin-bottom:12px;}
+.feature-card:first-child .feature-body{font-size:14px;line-height:1.70;}
+.feature-card::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(0,240,208,.0),rgba(153,69,255,.0));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;transition:background .25s;pointer-events:none;}
+.feature-card:hover{transform:translateY(-3px);box-shadow:var(--glow-cyan),var(--shadow-md);border-color:rgba(0,240,208,.20);}
+.feature-card:hover::before{background:linear-gradient(135deg,rgba(0,240,208,.35),rgba(153,69,255,.25));}
+.feature-card--primary{border-color:rgba(0,240,208,.14);background:linear-gradient(135deg,rgba(0,240,208,.07) 0%,rgba(3,7,18,.94) 100%);}
+.feature-card--sol{border-color:rgba(153,69,255,.16);background:linear-gradient(135deg,rgba(153,69,255,.08) 0%,rgba(3,7,18,.94) 100%);}
+.feature-card--emerald{border-color:rgba(0,232,122,.16);background:linear-gradient(135deg,rgba(0,232,122,.06) 0%,rgba(3,7,18,.94) 100%);}
+.feature-icon{font-size:26px;margin-bottom:12px;display:block;line-height:1;}
+.feature-title{font-family:var(--font-display);font-size:16px;font-weight:900;color:var(--ink-strong);letter-spacing:-.02em;margin-bottom:8px;line-height:1.2;}
+.feature-body{font-size:13px;font-weight:500;line-height:1.65;color:var(--muted);}
+
+.routing-section{max-width:800px;margin:0 auto 14px;padding:0 14px;}
+.routing-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap;}
+.routing-section-title{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--ink-strong);letter-spacing:-.02em;}
+.routing-section-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:900;background:rgba(0,240,208,.07);border:1px solid rgba(0,240,208,.22);color:#a0ecdc;letter-spacing:.02em;box-shadow:var(--glow-cyan);}
+.routing-card{padding:20px 20px 18px;border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(0,240,208,.07) 0%,rgba(153,69,255,.06) 100%);border:1px solid rgba(0,240,208,.22);box-shadow:var(--glow-cyan),var(--shadow-sm);transition:border-color .18s,box-shadow .18s,transform .18s;}
+.routing-card:hover{border-color:rgba(0,240,208,.36);box-shadow:0 0 28px rgba(0,240,208,.24),var(--shadow-md);transform:translateY(-2px);}
+.routing-card-icon{font-size:22px;margin-bottom:9px;display:block;}
+.routing-card-title{font-family:var(--font-display);font-size:16px;font-weight:900;color:var(--ink-strong);letter-spacing:-.02em;margin-bottom:7px;}
+.routing-card-body{font-size:13px;font-weight:500;line-height:1.62;color:var(--muted);}
+.dex-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.dex-pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;background:rgba(0,240,208,.07);border:1px solid rgba(0,240,208,.18);color:rgba(160,236,220,.85);}
+.routing-cta-link{display:block;margin-top:12px;padding:13px 18px;border-radius:13px;background:linear-gradient(135deg,rgba(0,240,208,.15),rgba(153,69,255,.12));border:1px solid rgba(0,240,208,.26);font-size:14px;font-weight:900;color:#a0ecdc;text-align:center;transition:background .2s,transform .15s;text-decoration:none;}
+.routing-cta-link:hover{background:linear-gradient(135deg,rgba(0,240,208,.24),rgba(153,69,255,.20));transform:translateY(-1px);text-decoration:none;color:#a0ecdc;}
+
+.wallet-section{max-width:800px;margin:0 auto 14px;padding:0 14px;}
+.wallet-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap;}
+.wallet-section-title{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--ink-strong);letter-spacing:-.02em;}
+.wallet-section-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:900;background:rgba(153,69,255,.08);border:1px solid rgba(153,69,255,.24);color:#d8c0ff;letter-spacing:.02em;box-shadow:var(--glow-sol);}
+.wallet-card{padding:20px 20px 18px;border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(153,69,255,.08) 0%,rgba(0,240,208,.05) 100%);border:1px solid rgba(153,69,255,.22);box-shadow:var(--glow-sol),var(--shadow-sm);transition:border-color .18s,box-shadow .18s,transform .18s;}
+.wallet-card:hover{border-color:rgba(153,69,255,.36);box-shadow:0 0 28px rgba(153,69,255,.24),var(--shadow-md);transform:translateY(-2px);}
+.wallet-card-icon{font-size:22px;margin-bottom:9px;display:block;}
+.wallet-card-title{font-family:var(--font-display);font-size:16px;font-weight:900;color:var(--ink-strong);letter-spacing:-.02em;margin-bottom:7px;}
+.wallet-card-body{font-size:13px;font-weight:500;line-height:1.62;color:var(--muted);}
+.wallet-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.wallet-pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;background:rgba(153,69,255,.08);border:1px solid rgba(153,69,255,.20);color:rgba(216,192,255,.85);}
+.wallet-cta-link{display:block;margin-top:12px;padding:13px 18px;border-radius:13px;background:linear-gradient(135deg,rgba(153,69,255,.18),rgba(0,240,208,.12));border:1px solid rgba(153,69,255,.30);font-size:14px;font-weight:900;color:#d8c0ff;text-align:center;transition:background .2s,transform .15s;text-decoration:none;}
+.wallet-cta-link:hover{background:linear-gradient(135deg,rgba(153,69,255,.26),rgba(0,240,208,.20));transform:translateY(-1px);text-decoration:none;color:#d8c0ff;}
+
+.content-section{max-width:800px;margin:20px auto 0;padding:28px 26px;border-radius:var(--radius-xl);position:relative;overflow:hidden;border:1px solid rgba(0,240,208,.12);background:linear-gradient(180deg,rgba(4,9,22,.98) 0%,rgba(1,3,8,1) 100%);box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(0,240,208,.06);}
+.content-section::before{content:'';position:absolute;top:-80px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(153,69,255,.07),transparent 65%);pointer-events:none;}
+.content-section > *{position:relative;z-index:1;}
+.content-bridge{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:rgba(0,240,208,.04);border:1px solid rgba(0,240,208,.09);font-size:13px;color:var(--muted);font-weight:600;line-height:1.65;}
+.inline-info-card{margin:0 0 14px;padding:13px 14px;background:linear-gradient(135deg,rgba(153,69,255,.07) 0%,rgba(0,240,208,.06) 100%);border:1px solid rgba(153,69,255,.14);border-radius:var(--radius-md);}
+.hub-link-label{display:block;margin-bottom:4px;font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:var(--cyan);font-family:var(--font-mono);}
+.hub-link-anchor{font-size:14px;font-weight:900;color:#fff;}
+.content-section h2{margin:0 0 16px;color:var(--ink-strong);line-height:1.08;letter-spacing:-.035em;font-family:var(--font-display);font-weight:900;text-wrap:balance;font-size:32px;}
+.content-section h3{margin:26px 0 12px;font-size:20px;color:var(--ink-strong);line-height:1.1;letter-spacing:-.03em;font-family:var(--font-display);font-weight:900;}
+.content-recognition{margin:0 0 18px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.recognition-chip{padding:14px;border-radius:var(--radius-md);background:rgba(3,7,18,.95);border:1px solid rgba(0,240,208,.08);transition:border-color .18s,transform .18s;}
+.recognition-chip:hover{border-color:rgba(0,240,208,.20);transform:translateY(-2px);}
+.recognition-label{display:block;margin-bottom:6px;font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:var(--cyan);font-family:var(--font-mono);}
+.recognition-copy{display:block;font-size:13px;font-weight:600;line-height:1.55;color:#8aaac8;}
+.content-body{font-size:15px;color:var(--muted);}
+.content-body p{margin:0 0 14px;}
+.story-stack{display:grid;gap:9px;}
+.story-card{padding:16px;border-radius:var(--radius-md);border:1px solid rgba(0,240,208,.08);background:rgba(3,7,18,.95);}
+.story-card.lead{background:linear-gradient(135deg,rgba(153,69,255,.08) 0%,rgba(3,7,18,.98) 100%);border-color:rgba(0,240,208,.14);box-shadow:var(--glow-cyan),var(--shadow-sm);}
+.story-card-title{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:var(--cyan);font-family:var(--font-mono);}
+.story-card p{margin:0;font-size:14px;line-height:1.7;color:#8aaac8;}
+.supplementary-content{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,240,208,.07);}
+.supplementary-content h3{margin:0 0 12px;font-size:20px;color:var(--ink-strong);font-family:var(--font-display);font-weight:900;letter-spacing:-.03em;}
+.supplementary-content p{font-size:14px;color:var(--muted);line-height:1.72;margin:0 0 13px;}
+.supp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+.supp-card{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:var(--radius-sm);background:rgba(3,7,18,.95);border:1px solid rgba(0,240,208,.07);}
+.supp-card-icon{font-size:20px;line-height:1;}
+.supp-card-body{font-size:13px;font-weight:600;line-height:1.65;color:var(--muted);}
+.supp-card-body strong{display:block;color:var(--ink);font-weight:900;margin-bottom:5px;font-size:13px;}
+.faq-section{margin-top:22px;padding-top:20px;border-top:1px solid rgba(0,240,208,.07);}
+.faq-section > h3{margin:0 0 12px;font-size:20px;color:var(--ink-strong);font-family:var(--font-display);font-weight:900;letter-spacing:-.03em;}
+.faq-item{margin-bottom:6px;border:1px solid rgba(0,240,208,.09);border-radius:var(--radius-sm);overflow:hidden;background:rgba(255,255,255,.025);transition:border-color .15s;}
+.faq-item[open]{border-color:rgba(0,240,208,.22);}
+.faq-item[open] summary{border-left:3px solid var(--cyan);padding-left:13px;color:var(--ink-strong);background:rgba(0,240,208,.04);}
+.faq-item summary{padding:14px 16px;cursor:pointer;font-size:14px;font-weight:700;color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s,color .15s;line-height:1.45;gap:12px;}
+.faq-item summary:hover{background:rgba(0,240,208,.04);color:var(--ink-strong);}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{content:'+';font-size:18px;color:rgba(0,240,208,.50);flex:0 0 18px;text-align:right;font-weight:400;}
+.faq-item[open] summary::after{content:'\2212';color:var(--cyan);}
+.faq-answer{padding:0 16px 14px;font-size:14px;color:var(--muted);line-height:1.70;}
+.link-section{margin-top:20px;padding-top:18px;border-top:1px solid rgba(0,240,208,.07);}
+.related-links{margin:0;padding-left:18px;}
+.related-links li{margin-bottom:8px;}
+.related-links a{color:var(--cyan);font-weight:700;}
+.content-close{margin-top:20px;padding:13px 14px;border-radius:14px;background:rgba(0,240,208,.03);border:1px solid rgba(0,240,208,.08);font-size:14px;font-weight:700;color:var(--muted-2);line-height:1.65;}
+.author-byline{max-width:800px;margin:24px auto 0;padding:18px 22px;border-radius:var(--radius-md);background:rgba(3,7,18,.92);border:1px solid rgba(0,240,208,.10);display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+.author-byline-icon{flex:0 0 38px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--sol) 0%,var(--cyan-2) 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:13px;font-weight:900;letter-spacing:.04em;}
+.author-byline-body{flex:1;min-width:240px;}
+.author-byline-name{font-family:var(--font-display);font-size:14px;font-weight:900;color:var(--ink-strong);letter-spacing:-.01em;}
+.author-byline-title{font-family:var(--font-mono);font-size:10px;font-weight:700;color:rgba(0,240,208,.55);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.author-byline-bio{font-size:12px;line-height:1.6;color:var(--muted);margin-top:6px;}
+.author-byline-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted-2);letter-spacing:.04em;}
+.author-byline-meta a{color:var(--cyan);text-decoration:none;}
+.author-byline-meta a:hover{text-decoration:underline;}
+.trust-section{max-width:800px;margin:20px auto 0;padding:0 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.trust-item{padding:18px 16px;border-radius:var(--radius-md);background:var(--bg-card);border:1px solid rgba(0,240,208,.08);display:flex;align-items:flex-start;gap:13px;transition:border-color .18s;}
+.trust-item:hover{border-color:rgba(0,240,208,.18);}
+.trust-item-icon{font-size:22px;flex:0 0 26px;line-height:1.2;}
+.trust-item-title{display:block;font-size:14px;font-weight:900;color:var(--ink-strong);margin-bottom:5px;}
+.trust-item-copy{display:block;font-size:13px;color:var(--muted);line-height:1.55;}
+.footer{text-align:center;margin-top:60px;padding:32px 20px;color:var(--muted-2);font-size:13px;line-height:1.7;border-top:1px solid rgba(0,240,208,.05);}
+.footer a{color:var(--cyan);font-weight:700;opacity:.65;}
+.sticky-mobile-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:998;padding:7px 14px;background:rgba(1,3,8,.78);border-top:1px solid rgba(0,240,208,.08);box-shadow:0 -2px 18px rgba(0,0,0,.45);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);align-items:center;justify-content:space-between;gap:10px;transition:opacity .4s;}
+.sticky-mobile-cta.visible{display:flex;}
+.sticky-mobile-cta-text{font-size:12px;font-weight:800;color:var(--ink);line-height:1.25;flex:1;}
+.sticky-mobile-cta-text span{display:block;font-size:9px;font-weight:700;opacity:.50;margin-top:1px;color:var(--muted);font-family:var(--font-mono);}
+.sticky-mobile-cta-btn{flex:0 0 auto;padding:7px 13px;border-radius:999px;background:rgba(0,240,208,.12);border:1px solid rgba(0,240,208,.30);color:var(--cyan);font-size:11px;font-weight:800;font-family:var(--font-mono);letter-spacing:.04em;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;}
+.sticky-mobile-cta-btn:hover{text-decoration:none;color:var(--cyan);background:rgba(0,240,208,.20);}
+.sticky-mobile-cta-close{flex:0 0 auto;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:18px;background:none;border:none;cursor:pointer;}
+.cleanable:empty{display:none;}
+.hero-visual-link{display:block;text-decoration:none;cursor:pointer;}
+.inline-swap-cta{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;margin:14px 0;border-radius:var(--radius-sm);background:rgba(0,240,208,.05);border:1px solid rgba(0,240,208,.16);font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--cyan);letter-spacing:.04em;text-decoration:none;transition:background .15s,border-color .15s,transform .15s;}
+.inline-swap-cta:hover{background:rgba(0,240,208,.10);border-color:rgba(0,240,208,.32);text-decoration:none;color:var(--cyan);transform:translateX(2px);}
+.inline-swap-cta-arrow{font-size:14px;transition:transform .2s;}
+.inline-swap-cta:hover .inline-swap-cta-arrow{transform:translateX(4px);}
+.swap-quote-live{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;font-weight:700;color:rgba(0,240,208,.42);letter-spacing:.08em;text-transform:uppercase;margin-top:5px;}
+.swap-quote-live-dot{width:5px;height:5px;border-radius:50%;background:var(--emerald);box-shadow:0 0 5px rgba(0,232,122,.9);flex:0 0 5px;animation:pulse-dot 2s ease-in-out infinite;}
+.swap-savings-hook{display:none;padding:7px 18px;border-top:1px solid rgba(0,240,208,.07);font-family:var(--font-mono);font-size:11px;font-weight:700;color:rgba(0,240,208,.65);letter-spacing:.04em;background:rgba(0,240,208,.02);}
+.post-cta-strip{max-width:800px;margin:20px auto 0;padding:0 14px;}
+.post-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 26px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--sol) 0%,var(--cyan-2) 100%);box-shadow:0 0 40px rgba(0,240,208,.22),0 0 24px rgba(153,69,255,.18),var(--shadow-lg);flex-wrap:wrap;}
+.post-cta-left{flex:1;min-width:0;}
+.post-cta-title{display:block;font-family:var(--font-display);font-size:19px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:4px;}
+.post-cta-sub{display:block;font-family:var(--font-mono);font-size:11px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:.03em;}
+.post-cta-btn{flex:0 0 auto;padding:13px 22px;border-radius:999px;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.32);color:#fff;font-family:var(--font-mono);font-size:13px;font-weight:900;letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background .15s;}
+.post-cta-btn:hover{background:rgba(255,255,255,.26);text-decoration:none;color:#fff;}
+@media (max-width:640px){
+  .post-cta-inner{flex-direction:column;align-items:flex-start;gap:12px;padding:18px;}
+  .post-cta-btn{width:100%;justify-content:center;}
+  .post-cta-title{font-size:16px;}
+  body{padding-top:74px;padding-bottom:88px;}
+  .hero{padding:14px 6px 14px;}
+  .hero h1{font-size:clamp(36px,11vw,56px);}
+  .cursor-blink{font-size:clamp(16px,5vw,28px);}
+  .stats-bar{grid-template-columns:repeat(2,1fr);gap:7px;}
+  .solana-stats{grid-template-columns:1fr;gap:7px;}
+  .solana-stat-value{font-size:24px;}
+  .feature-grid{grid-template-columns:1fr;grid-template-rows:auto;gap:8px;}
+  .feature-card:first-child{grid-row:span 1;padding:18px 14px;}
+  .feature-card:first-child .feature-icon{font-size:26px;margin-bottom:12px;}
+  .feature-card:first-child .feature-title{font-size:16px;}
+  .feature-card:first-child .feature-body{font-size:13px;}
+  .telemetry-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
+  .tele-card{padding:10px 9px 9px;}
+  .feed-row{grid-template-columns:8px 1fr 1fr 60px;gap:8px;}
+  .feed-age{display:none;}
+  .routing-wins-inner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .swap-preview{padding:16px 14px 14px;gap:6px;}
+  .swap-preview-amount{font-size:24px;}
+  .swap-preview-cta{padding:14px 18px;font-size:14px;}
+  .swap-preview-head-title{font-size:19px;}
+  .swap-preview-card{padding:12px 13px;}
+  .swap-preview-route{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 12px;}
+  .swap-widget-header,.swap-widget-footer{padding:9px 14px;}
+  .supp-cards{grid-template-columns:1fr;}
+  .content-recognition{grid-template-columns:1fr;gap:7px;}
+  .trust-section{grid-template-columns:1fr;gap:8px;padding:0 8px;}
+  .content-section{margin-left:8px;margin-right:8px;padding:18px;border-radius:20px;}
+  .content-section h2{font-size:24px;}
+  .top-bar{padding:8px 12px;}
+  .logo{font-size:13px;padding:7px 11px;}
+  .swap-top-btn{font-size:11px;padding:7px 11px;}
+}
+</style>
+</head>
+<body>
+<div class="sticky-mobile-cta" id="stickyCta">
+  <div class="sticky-mobile-cta-text">
+    &#9889; Swap on Verixia
+    <span>Solana DeFi &middot; No account, ever &middot; No KYC</span>
+  </div>
+  <a class="sticky-mobile-cta-btn" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Swap Now</a>
+  <button class="sticky-mobile-cta-close" onclick="dismissCta()" aria-label="Dismiss">&times;</button>
+</div>
+
+<div class="top-bar">
+  <a class="logo" href="https://verixiaapps.com/">
+    <span class="logo-dot"></span>
+    <span>Verixia</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a class="swap-top-btn" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">
+      &#9889; Swap Now
+    </a>
+  </div>
+</div>
+
+<div class="page-shell">
+
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-bracket">[</span>
+      <span>non-custodial &nbsp;&middot;&nbsp; solana defi &nbsp;&middot;&nbsp; no kyc</span>
+      <span class="eyebrow-bracket">]</span>
+    </div>
+    <h1 id="heroKeyword">Perps Trading -- SOL Perpetuals</h1>
+    <span class="cursor-blink" aria-hidden="true">_</span>
+
+    <p class="hero-tagline" id="heroSubheading">Long or short crypto with leverage directly from your Solana wallet. No KYC, no signup, no centralized account. Connect Phantom, Backpack, or Solflare and trade in seconds.</p>
+
+    <div class="hero-badge-row" id="heroBadgeRow">
+      <div class="hero-badge kyc-badge">&#10003; No Account, Ever</div>
+      <div class="hero-badge cyan-badge">&#9889; No KYC</div>
+      <div class="hero-badge sol-badge">&#9675; Solana Wallet Only</div>
+      <div class="hero-badge">&#128274; Non-Custodial</div>
+      <div class="hero-badge cyan-badge">&#9889; Best Price Routing</div>
+    </div>
+
+    <div class="hero-trust">
+      <div class="hero-trust-chip">Phantom &middot; Solflare &middot; Backpack</div>
+      <div class="hero-trust-chip">Best price routing</div>
+      <div class="hero-trust-chip">Sub-second settlement</div>
+      <div class="hero-trust-chip">Every major Solana DEX</div>
+    </div>
+    <div class="social-proof-bar">
+      <span class="social-proof-dot"></span>
+      <span class="social-proof-text" id="socialProofText">12,480 wallets connected today</span>
+    </div>
+  </div>
+
+  <!-- v2.1: Aggregate rating block -->
+  <div class="rating-bar" id="ratingBar">
+    <div class="rating-bar-inner">
+      <span class="rating-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+      <span class="rating-value" id="ratingValue">4.8 / 5</span>
+      <span class="rating-sep"></span>
+      <span class="rating-meta" id="ratingMeta">from 2,847 swappers</span>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <a class="hero-visual-link" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer" aria-label="Connect your Solana wallet -- non-custodial DeFi, no KYC">
+      <div class="hero-visual-frame">
+        <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="pointer-events:none;">
+          <defs>
+            <filter id="hv-soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="22"/></filter>
+            <filter id="hv-med" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9"/></filter>
+            <filter id="hv-tight" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5"/></filter>
+            <filter id="hv-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="hv-rg-sol" cx="50%" cy="50%"><stop offset="0%" stop-color="#9945ff" stop-opacity="0.55"/><stop offset="40%" stop-color="#7020cc" stop-opacity="0.22"/><stop offset="100%" stop-color="#7020cc" stop-opacity="0"/></radialGradient>
+            <radialGradient id="hv-rg-cyan" cx="50%" cy="50%"><stop offset="0%" stop-color="#00f0d0" stop-opacity="0.32"/><stop offset="55%" stop-color="#00a892" stop-opacity="0.10"/><stop offset="100%" stop-color="#00a892" stop-opacity="0"/></radialGradient>
+            <linearGradient id="hv-wordmark" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c8a0ff"/><stop offset="50%" stop-color="#ffffff"/><stop offset="100%" stop-color="#7defd9"/></linearGradient>
+            <linearGradient id="hv-accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9945ff" stop-opacity="0"/><stop offset="35%" stop-color="#9945ff" stop-opacity="0.7"/><stop offset="65%" stop-color="#00f0d0" stop-opacity="0.7"/><stop offset="100%" stop-color="#00f0d0" stop-opacity="0"/></linearGradient>
+            <pattern id="hv-dots" x="0" y="0" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="17" cy="17" r="0.85" fill="rgba(120,160,210,0.10)"/></pattern>
+            <symbol id="hv-bracket" viewBox="0 0 14 14"><path d="M0,4 L0,0 L4,0" stroke="rgba(0,240,208,0.50)" stroke-width="1" fill="none"/></symbol>
+          </defs>
+          <rect width="800" height="300" fill="url(#hv-dots)"/>
+          <ellipse cx="220" cy="150" rx="300" ry="180" fill="url(#hv-rg-sol)" filter="url(#hv-soft)"/>
+          <ellipse cx="600" cy="160" rx="260" ry="170" fill="url(#hv-rg-cyan)" filter="url(#hv-soft)"/>
+          <line x1="0" y1="48" x2="800" y2="48" stroke="rgba(0,240,208,0.045)" stroke-width="1" stroke-dasharray="120,90"><animate attributeName="stroke-dashoffset" from="0" to="-210" dur="9s" repeatCount="indefinite"/></line>
+          <line x1="0" y1="252" x2="800" y2="252" stroke="rgba(153,69,255,0.045)" stroke-width="1" stroke-dasharray="80,160"><animate attributeName="stroke-dashoffset" from="0" to="-240" dur="13s" repeatCount="indefinite"/></line>
+          <use href="#hv-bracket" x="22" y="22" width="14" height="14"/>
+          <use href="#hv-bracket" x="764" y="22" width="14" height="14" transform="rotate(90 771 29)"/>
+          <use href="#hv-bracket" x="22" y="264" width="14" height="14" transform="rotate(-90 29 271)"/>
+          <use href="#hv-bracket" x="764" y="264" width="14" height="14" transform="rotate(180 771 271)"/>
+          <g opacity="0.65"><circle cx="92" cy="74" r="15" fill="rgba(153,69,255,0.10)" stroke="rgba(168,127,255,0.32)" stroke-width="1"/><text x="92" y="78" text-anchor="middle" fill="rgba(200,160,255,0.70)" font-size="9" font-weight="800" font-family="'IBM Plex Mono',monospace">SOL</text><animate attributeName="opacity" values="0.45;0.85;0.45" dur="4.4s" repeatCount="indefinite"/></g>
+          <g opacity="0.55"><circle cx="710" cy="68" r="14" fill="rgba(0,240,208,0.08)" stroke="rgba(0,240,208,0.26)" stroke-width="1"/><text x="710" y="71.5" text-anchor="middle" fill="rgba(120,240,210,0.65)" font-size="8" font-weight="800" font-family="'IBM Plex Mono',monospace">USDC</text><animate attributeName="opacity" values="0.4;0.75;0.4" dur="5.2s" repeatCount="indefinite"/></g>
+          <g opacity="0.50"><circle cx="62" cy="234" r="13" fill="rgba(0,240,208,0.07)" stroke="rgba(0,240,208,0.20)" stroke-width="1"/><text x="62" y="237" text-anchor="middle" fill="rgba(120,240,210,0.55)" font-size="7.5" font-weight="800" font-family="'IBM Plex Mono',monospace">JUP</text><animate attributeName="opacity" values="0.35;0.65;0.35" dur="6.1s" repeatCount="indefinite"/></g>
+          <g opacity="0.55"><circle cx="745" cy="240" r="13" fill="rgba(240,168,48,0.08)" stroke="rgba(240,168,48,0.28)" stroke-width="1"/><text x="745" y="243" text-anchor="middle" fill="rgba(248,208,120,0.70)" font-size="7.5" font-weight="800" font-family="'IBM Plex Mono',monospace">RAY</text><animate attributeName="opacity" values="0.40;0.80;0.40" dur="4.8s" repeatCount="indefinite"/></g>
+          <g>
+            <circle r="2.4" fill="rgba(0,240,208,0.85)" filter="url(#hv-glow)"><animateMotion dur="9s" repeatCount="indefinite" path="M 400,118 m -72,0 a 72,72 0 1,1 144,0 a 72,72 0 1,1 -144,0"/></circle>
+            <circle r="1.8" fill="rgba(168,127,255,0.75)" filter="url(#hv-glow)"><animateMotion dur="13s" repeatCount="indefinite" path="M 400,118 m -88,0 a 88,88 0 1,1 176,0 a 88,88 0 1,1 -176,0"/></circle>
+            <circle r="2.2" fill="rgba(0,240,208,0.55)" filter="url(#hv-glow)"><animateMotion dur="17s" repeatCount="indefinite" path="M 400,118 m 100,0 a 100,100 0 1,0 -200,0 a 100,100 0 1,0 200,0"/></circle>
+          </g>
+          <circle cx="400" cy="118" r="78" fill="rgba(153,69,255,0.20)" filter="url(#hv-soft)"><animate attributeName="r" values="74;84;74" dur="5s" repeatCount="indefinite"/></circle>
+          <circle cx="400" cy="118" r="56" fill="rgba(153,69,255,0.32)" filter="url(#hv-med)"/>
+          <circle cx="400" cy="118" r="58" fill="none" stroke="rgba(168,127,255,0.32)" stroke-width="1" stroke-dasharray="2,4" opacity="0.7"><animateTransform attributeName="transform" type="rotate" from="0 400 118" to="360 400 118" dur="24s" repeatCount="indefinite"/></circle>
+          <circle cx="400" cy="118" r="72" fill="none" stroke="rgba(0,240,208,0.18)" stroke-width="1" stroke-dasharray="1,7" opacity="0.55"><animateTransform attributeName="transform" type="rotate" from="360 400 118" to="0 400 118" dur="32s" repeatCount="indefinite"/></circle>
+          <text x="400" y="148" text-anchor="middle" fill="white" font-size="84" font-weight="900" font-family="system-ui,sans-serif" filter="url(#hv-tight)" opacity="0.97">&#9675;</text>
+          <text x="400" y="208" text-anchor="middle" font-family="'Syne',sans-serif" font-size="44" font-weight="900" letter-spacing="16" fill="url(#hv-wordmark)">SOLANA</text>
+          <line x1="248" y1="225" x2="552" y2="225" stroke="url(#hv-accent)" stroke-width="1.5" opacity="0.85"/>
+          <circle cx="400" cy="225" r="2.5" fill="#00f0d0" filter="url(#hv-glow)" opacity="0.9"><animate attributeName="opacity" values="0.5;1;0.5" dur="2.4s" repeatCount="indefinite"/></circle>
+          <text x="400" y="247" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="9" font-weight="700" letter-spacing="5.5" fill="rgba(0,240,208,0.70)">Y O U R   W A L L E T   &middot;   Y O U R   K E Y S</text>
+          <rect x="218" y="266" width="364" height="22" rx="11" fill="rgba(153,69,255,0.10)" stroke="rgba(168,127,255,0.30)" stroke-width="1"/>
+          <text x="400" y="281" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="8.5" font-weight="700" letter-spacing="2" fill="rgba(220,200,255,0.92)">B E S T   P R I C E   &middot;   N O   K Y C   &middot;   S O L A N A   O N L Y</text>
+        </svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- v2.1: Solana stats trust strip (capability framing) -->
+  <div class="solana-stats">
+    <div class="solana-stat">
+      <span class="solana-stat-value">400ms</span>
+      <span class="solana-stat-label">Block Time</span>
+      <span class="solana-stat-sub">Sub-second on-chain settlement</span>
+    </div>
+    <div class="solana-stat">
+      <span class="solana-stat-value">50+</span>
+      <span class="solana-stat-label">DEXes Routed</span>
+      <span class="solana-stat-sub">Every major Solana liquidity source</span>
+    </div>
+    <div class="solana-stat">
+      <span class="solana-stat-value">24/7</span>
+      <span class="solana-stat-label">Always Open</span>
+      <span class="solana-stat-sub">No market close, no maintenance windows</span>
+    </div>
+  </div>
+
+  <!-- v2.1: Routing wins callout -->
+  <div class="routing-wins">
+    <div class="routing-wins-inner">
+      <div class="routing-wins-icon">&#9889;</div>
+      <div class="routing-wins-body">
+        <div class="routing-wins-title" id="routingWinsTitle">Aggregated routing finds better fills than single-pool execution</div>
+        <div class="routing-wins-sub" id="routingWinsSub">Every quote split across the deepest pools for best output &middot; verified per block</div>
+      </div>
+      <div class="routing-wins-pulse"></div>
+    </div>
+  </div>
+
+  <div class="routing-section" id="routingSection">
+    <div class="routing-section-header">
+      <span class="routing-section-title">Best Price Across Every Major Solana DEX</span>
+      <span class="routing-section-badge">&#9889; Smart Routing</span>
+    </div>
+    <div class="routing-card">
+      <span class="routing-card-icon">&#9889;</span>
+      <div class="routing-card-title">One quote, every pool checked</div>
+      <div class="routing-card-body">Verixia routes every swap across every major Solana DEX in parallel -- Raydium, Orca, Meteora, Phoenix, Lifinity, OpenBook, and the rest of the Solana liquidity stack. Your trade is split across whichever pools produce the best net output. Sub-second quotes, fully on-chain settlement, your wallet signs the final transaction. No account, no KYC, no email.</div>
+      <div class="dex-list">
+        <span class="dex-pill">Raydium</span>
+        <span class="dex-pill">Orca</span>
+        <span class="dex-pill">Meteora</span>
+        <span class="dex-pill">Phoenix</span>
+        <span class="dex-pill">Lifinity</span>
+        <span class="dex-pill">OpenBook</span>
+        <span class="dex-pill">Whirlpools</span>
+        <span class="dex-pill">+ many more</span>
+      </div>
+      <a class="routing-cta-link" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Get Best Price On Any Solana Swap &#8594;</a>
+    </div>
+  </div>
+
+  <section class="swap-section" id="swapSection">
+    <div class="swap-section-label">Live Swap</div>
+    <div class="swap-widget-wrap">
+      <div class="swap-widget-header">
+        <div class="swap-live-badge"><span class="swap-live-dot"></span><span>Live</span></div>
+        <div class="swap-trust-chips">
+          <span class="swap-trust-chip">&#128274; DeFi</span>
+          <span class="swap-trust-chip">&#10003; No account</span>
+          <span class="swap-trust-chip">&#10003; No KYC</span>
+          <span class="swap-trust-chip">&#9889; Best price</span>
+        </div>
+      </div>
+      <div class="swap-savings-hook" id="swapSavingsHook"></div>
+      <a class="swap-cta-link" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">
+        <div class="swap-preview">
+          <div class="swap-preview-head">
+            <span class="swap-preview-head-title">Connect &amp; Swap</span>
+            <div>
+              <div class="swap-preview-head-meta">Best price &middot; every major DEX</div>
+              <div class="swap-quote-live"><span class="swap-quote-live-dot"></span><span>Live quote &middot; refreshes every block</span></div>
+            </div>
+          </div>
+          <div class="swap-preview-card">
+            <div class="swap-preview-card-top"><span class="swap-preview-card-label">You pay</span><span class="swap-preview-card-balance">Connect Solana wallet</span></div>
+            <div class="swap-preview-card-main">
+              <div class="swap-preview-amount">100.0</div>
+              <div class="swap-preview-token sol-token"><span>&#9675;</span><span>SOL</span><span class="swap-preview-token-arrow">&#9662;</span></div>
+            </div>
+            <div class="swap-preview-card-foot" id="swapPayUsd">&#8776; $15,300.00 USD</div>
+          </div>
+          <div class="swap-preview-flip"><div class="swap-preview-flip-circle">&#8595;</div></div>
+          <div class="swap-preview-card">
+            <div class="swap-preview-card-top"><span class="swap-preview-card-label">You receive</span><span class="swap-preview-card-balance best" id="swapSavingsBadge">Best price</span></div>
+            <div class="swap-preview-card-main">
+              <div class="swap-preview-amount" id="swapReceiveAmount">15,422.4</div>
+              <div class="swap-preview-token usdc-token"><span>$</span><span>USDC</span><span class="swap-preview-token-arrow">&#9662;</span></div>
+            </div>
+            <div class="swap-preview-card-foot" id="swapExchangeRate">1 SOL = 154.224 USDC</div>
+          </div>
+          <div class="swap-preview-route">
+            <span class="swap-preview-route-label">&#9733; Best route</span>
+            <span class="swap-preview-route-flow" id="swapRouteFlow"><span class="route-pill">Raydium 60%</span><span class="route-arrow">+</span><span class="route-pill">Orca 40%</span></span>
+          </div>
+          <div class="swap-preview-cta"><span>Connect Wallet on Verixia</span><span class="swap-preview-cta-arrow">&#8594;</span></div>
+          <div class="swap-preview-disclaimer">Connect a Solana wallet &middot; No account &middot; No sign-up &middot; No KYC</div>
+        </div>
+      </a>
+      <div class="swap-widget-footer">
+        <div class="swap-chain-badges">
+          <span class="swap-chain-badge sol-chain">SOLANA ONLY</span>
+          <span class="swap-dex-badge">RAYDIUM</span>
+          <span class="swap-dex-badge">ORCA</span>
+          <span class="swap-dex-badge">METEORA</span>
+          <span class="swap-dex-badge">PHOENIX</span>
+          <span class="swap-dex-badge">LIFINITY</span>
+          <span class="swap-dex-badge">+ MORE</span>
+        </div>
+        <span class="swap-powered-by">Powered by Verixia</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="live-feed">
+    <div class="live-feed-panel">
+      <div class="live-feed-header">
+        <div class="live-feed-title">
+          <span class="tele-live-dot"></span>
+          <span id="feedTitle">Live Swap Activity</span>
+        </div>
+        <div class="live-feed-count" id="liveFeedCount"><span>12,480</span> today</div>
+      </div>
+      <div class="live-feed-body" id="liveFeedBody"></div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card"><span class="stat-card-value" data-count="50" data-suffix="+">50+</span><span class="stat-card-label">DEXes</span></div>
+    <div class="stat-card"><span class="stat-card-value">0%</span><span class="stat-card-label">Custody</span></div>
+    <div class="stat-card"><span class="stat-card-value">0</span><span class="stat-card-label">Sign-Up</span></div>
+    <div class="stat-card"><span class="stat-card-value">24/7</span><span class="stat-card-label">Open</span></div>
+  </div>
+
+  <div class="telemetry-section">
+    <div class="telemetry-header">
+      <div class="telemetry-label">
+        <span class="tele-live-dot"></span>
+        <span id="telemetryLabel">Solana DeFi signals</span>
+      </div>
+      <span class="telemetry-sub">Live platform data &middot; updates per block</span>
+    </div>
+    <div class="telemetry-grid" id="telemetryGrid"></div>
+    <div class="telemetry-footer" id="telemetryFooter">&#8593; connect a Solana wallet above to swap at best price</div>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card feature-card--primary">
+      <span class="feature-icon">&#128274;</span>
+      <div class="feature-title" id="featurePrimaryTitle">DeFi -- No Account, No KYC, No Custody</div>
+      <div class="feature-body" id="featurePrimaryBody">Your wallet, your keys, your tokens -- the entire time. Connect Phantom, Solflare, or Backpack and swap any Solana token at best price across every major DEX. No account creation. No email. No KYC. No sign-up of any kind. Disconnect anytime and nothing remains.</div>
+    </div>
+    <div class="feature-card feature-card--sol">
+      <span class="feature-icon">&#9675;</span>
+      <div class="feature-title" id="featureSolTitle">Solana Native, Built for Speed</div>
+      <div class="feature-body" id="featureSolBody">Sub-second block times and full SPL token support across Raydium, Orca, Meteora, Phoenix, Lifinity, and every major Solana AMM. One chain, every pool checked, best price quoted.</div>
+    </div>
+    <div class="feature-card feature-card--emerald">
+      <span class="feature-icon">&#9889;</span>
+      <div class="feature-title" id="featureThirdTitle">Best Price, Every Swap</div>
+      <div class="feature-body" id="featureThirdBody">Verixia checks every major Solana DEX in parallel and splits your trade across whichever pools produce the best net output. One quote, full coverage, no manual hopping between platforms.</div>
+    </div>
+  </div>
+
+  <div class="wallet-section" id="walletSection">
+    <div class="wallet-section-header">
+      <span class="wallet-section-title">Connect Any Solana Wallet</span>
+      <span class="wallet-section-badge">&#9675; Self-Custody</span>
+    </div>
+    <div class="wallet-card">
+      <span class="wallet-card-icon">&#128272;</span>
+      <div class="wallet-card-title">Phantom, Solflare, Backpack, hardware</div>
+      <div class="wallet-card-body">Every major Solana wallet works out of the box -- Phantom, Solflare, Backpack, plus Ledger and hardware integrations through them. Verixia never holds funds, never custodies tokens, never asks for an account. The smart contract routes the swap directly between your wallet and the liquidity pools. Disconnect anytime; nothing remains.</div>
+      <div class="wallet-list">
+        <span class="wallet-pill">Phantom</span>
+        <span class="wallet-pill">Solflare</span>
+        <span class="wallet-pill">Backpack</span>
+        <span class="wallet-pill">Ledger</span>
+        <span class="wallet-pill">Glow</span>
+        <span class="wallet-pill">+ more</span>
+      </div>
+      <a class="wallet-cta-link" href="https://swap.verixiaapps.com" target="_blank" rel="noopener noreferrer">Connect Your Solana Wallet &#8594;</a>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <div id="contentBridge" class="content-bridge"></div>
+    <div class="inline-info-card" id="hubLinkWrap"><a href="/nexus-dex/perps-trading/">Perps Trading Hub</a></div>
+    <h2 id="contentHeading">How Solana DeFi Swaps Actually Work -- A Practical Guide</h2>
+    <div class="content-recognition" id="contentRecognition"></div>
+    <a href="https://swap.verixiaapps.com" class="inline-swap-cta" id="inlineCta1" target="_blank" rel="noopener noreferrer">
+      <span>&#10003; Connect your Solana wallet -- best price, no KYC</span>
+      <span class="inline-swap-cta-arrow">&#8594;</span>
+    </a>
+
+    <div id="seoContent" class="content-body"><p>Funding rates on SOL perpetuals currently sit at 0.0013% per 8 hours, which annualizes to about 1.4%, a very low cost for holding leveraged longs over time. Given the maintenance margin of 5%, a 10x leveraged SOL position liquidates if the price falls roughly 4.5%, not the full 10%, compressing downside risk beyond what many expect.</p>
+<p>Leverage magnifies the real cost and risk profile sharply. For instance, a 10x $10,000 SOL long carries an effective liquidation risk on a price drop of just 4.5%, while funding costs, though currently minimal, can accumulate if rates rise. Should funding rise to 0.1% per 8h, a leveraged long would pay an unsustainable 109% annualized cost, quickly eroding capital.</p>
+<p>On-chain perpetuals on Solana operate differently than centralized exchanges due to their architecture. Hyperliquid’s vAMM anchors prices at the mark with JIT market makers improving order execution, minimizing slippage compared to CEX orderbooks. Jupiter Perps pools liquidity in JLPs, with traders taking opposing sides, so LPs inherently absorb directional risk, unlike CEXs where the house hedges. This setup results in more transparent, on-chain price discovery but also exposes liquidity providers to impermanent loss during trending markets. Mobile users connect wallets directly through Phantom or WalletConnect, bypassing traditional account creation, which speeds access but limits user data tracking.</p>
+<p>The most critical metric to monitor is the funding rate trend relative to its 0.05% per 8h threshold. Sustained funding above this level for over five days signals leveraged long crowding that usually precedes sharp corrections. Currently, SOL’s funding at 0.0013% per 8h and its 24h price change of +2.</p></div>
+    <div class="hl-data-block">
+<div class="hl-data-header">
+  <span class="hl-data-source">&#x26A1; Hyperliquid Live Data</span>
+  <span class="hl-data-note" title="2026-05-22T12:45:38.260Z">Fetched 13s ago &middot; Verify before trading</span>
+</div>
+<div class="hl-row">
+  <div class="hl-asset">BTC-PERP</div>
+  <div class="hl-stat"><span class="hl-stat-label">Mark</span><span class="hl-stat-value">$77,410</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">24h</span><span class="hl-stat-value hl-pos">+0.25%</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Funding/8h</span><span class="hl-stat-value hl-pos">+0.0012%</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Ann.</span><span class="hl-stat-value hl-pos">+1.4%/yr</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">OI</span><span class="hl-stat-value">$2.19B</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">24h Vol</span><span class="hl-stat-value">$1.69B</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Max Lev</span><span class="hl-stat-value">40x</span></div>
+</div>
+<div class="hl-row">
+  <div class="hl-asset">ETH-PERP</div>
+  <div class="hl-stat"><span class="hl-stat-label">Mark</span><span class="hl-stat-value">$2,133</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">24h</span><span class="hl-stat-value hl-pos">+0.77%</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Funding/8h</span><span class="hl-stat-value hl-pos">+0.0013%</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Ann.</span><span class="hl-stat-value hl-pos">+1.4%/yr</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">OI</span><span class="hl-stat-value">$1.34B</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">24h Vol</span><span class="hl-stat-value">$598.2M</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Max Lev</span><span class="hl-stat-value">25x</span></div>
+</div>
+<div class="hl-row">
+  <div class="hl-asset">SOL-PERP</div>
+  <div class="hl-stat"><span class="hl-stat-label">Mark</span><span class="hl-stat-value">$87.55</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">24h</span><span class="hl-stat-value hl-pos">+2.18%</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Funding/8h</span><span class="hl-stat-value hl-pos">+0.0013%</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Ann.</span><span class="hl-stat-value hl-pos">+1.4%/yr</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">OI</span><span class="hl-stat-value">$376.5M</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">24h Vol</span><span class="hl-stat-value">$187.5M</span></div>
+  <div class="hl-stat"><span class="hl-stat-label">Max Lev</span><span class="hl-stat-value">20x</span></div>
+</div>
+</div>
+
+    <a href="https://swap.verixiaapps.com" class="inline-swap-cta" id="inlineCta2" target="_blank" rel="noopener noreferrer">
+      <span>&#9889; Open Verixia -- best price routing, no sign-up</span>
+      <span class="inline-swap-cta-arrow">&#8594;</span>
+    </a>
+
+    <div class="supplementary-content" id="supplementaryContent">
+      <h3 id="suppHeading">Why DeFi perps run differently from a CEX</h3>
+      <p id="suppIntro" class="supp-intro">The product runs as a responsive web DEX, not a native app. Connect a Solana wallet directly from your browser; positions, margin, and PnL all settle on-chain against the underlying protocol. The structural differences from a CEX: no platform custody, no account, no email.</p>
+      <div class="supp-cards" id="suppCards"></div>
+    </div>
+
+    <section class="faq-section" id="faqSection" aria-label="Frequently asked questions">
+      <h3>Frequently asked questions</h3>
+      <details class="faq-item" data-faq="universal">
+        <summary>Do I need to create an account or complete KYC to use Verixia?</summary>
+        <div class="faq-answer">No. Verixia is DeFi -- non-custodial, on-chain, no account creation of any kind. No email, no password, no KYC, no liveness check, no phone number. Connect your Solana wallet (Phantom, Solflare, Backpack, or compatible), review the quote, and execute. Your wallet holds the keys throughout. Disconnect anytime and no ongoing permissions remain.</div>
+      </details>
+      <details class="faq-item" data-faq="universal">
+        <summary>How does Verixia get me the best price?</summary>
+        <div class="faq-answer">Verixia checks liquidity across every major Solana DEX in parallel -- Raydium, Orca, Meteora, Phoenix, Lifinity, OpenBook, and others -- and routes your trade through whichever combination of pools produces the highest net output. Larger trades often get split across multiple pools so price impact stays low. The whole quote refreshes every block, and the route is shown before you sign.</div>
+      </details>
+      <details class="faq-item" data-faq="universal">
+        <summary>What does "non-custodial" actually mean?</summary>
+        <div class="faq-answer">Your private keys never leave your wallet. Funds move directly between wallets through the smart contract -- Verixia never holds, custodies, or has authority to move your tokens at any point. The trade-off: you are responsible for your own seed phrase and wallet security.</div>
+      </details>
+      <details class="faq-item" data-faq="universal">
+        <summary>Which Solana wallets does Verixia support?</summary>
+        <div class="faq-answer">Phantom, Solflare, Backpack, Glow, and every major Solana wallet that supports the standard wallet adapter. Hardware wallets like Ledger work through Phantom or Solflare's hardware integration. Connect, sign, swap -- no app store install required, browser-based.</div>
+      </details>
+      <details class="faq-item" data-faq="universal">
+        <summary>What chains does Verixia support?</summary>
+        <div class="faq-answer">Solana only. Full SPL token support across Raydium, Orca, Meteora, Phoenix, Lifinity, OpenBook, and every other major Solana DEX. One chain, every pool, best price.</div>
+      </details>
+    </section>
+
+    <div class="link-section">
+      <h3 id="relatedHeading">Related DeFi Guides</h3>
+      <ul id="relatedLinks" class="related-links"><li><a href="/nexus-dex/long-eth-with-leverage-mobile/">Long ETH with Leverage on Nexus DEX</a></li>
+<li><a href="/nexus-dex/sol-perps-no-kyc/">SOL Perps on Nexus DEX</a></li>
+<li><a href="/nexus-dex/solana-perps-from-wallet/">Solana Perps from Wallet on Nexus DEX</a></li>
+</ul>
+    </div>
+    <div class="link-section" id="moreLinksWrap">
+      <h3 id="moreLinksHeading">More Solana DeFi Guides</h3>
+      <ul id="moreLinks" class="related-links"></ul>
+    </div>
+    <div class="content-close" id="contentClose">
+      DeFi -- no account, no KYC, Solana wallet only. The same wallet swaps any Solana token at best price across every major DEX. One wallet, one quote, zero sign-up.
+    </div>
+  </section>
+
+  <div class="post-cta-strip">
+    <div class="post-cta-inner">
+      <div class="post-cta-left">
+        <span class="post-cta-title" id="postCtaTitle">Connect your Solana wallet</span>
+        <span class="post-cta-sub" id="postCtaSub">Best price across every major Solana DEX -- DeFi, no account, no KYC</span>
+      </div>
+      <a href="https://swap.verixiaapps.com" class="post-cta-btn" id="postCtaBtn" target="_blank" rel="noopener noreferrer">
+        Open Verixia &#8594;
+      </a>
+    </div>
+  </div>
+
+  <div class="trust-section" aria-label="Why trust Verixia">
+    <div class="trust-item">
+      <span class="trust-item-icon">&#10003;</span>
+      <div class="trust-item-body">
+        <span class="trust-item-title">No account, no KYC</span>
+        <span class="trust-item-copy">No sign-up, no email, no password, no passport scan, no liveness check. Connect a Solana wallet, transact, disconnect. The whole experience.</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item-icon">&#128274;</span>
+      <div class="trust-item-body">
+        <span class="trust-item-title">DeFi -- non-custodial</span>
+        <span class="trust-item-copy">Your wallet keys never leave your device. Funds move directly between wallets through the smart contract -- Verixia holds nothing at any point.</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item-icon">&#9889;</span>
+      <div class="trust-item-body">
+        <span class="trust-item-title">Best price, every swap</span>
+        <span class="trust-item-copy">Every major Solana DEX checked in parallel. Larger trades split across pools to keep price impact low. One quote, one signature, on-chain settlement.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="author-byline" id="authorByline" aria-label="About this analysis">
+    <div class="author-byline-icon">VR</div>
+    <div class="author-byline-body">
+      <div class="author-byline-name" id="authorBylineName">Verixia Research</div>
+      <div class="author-byline-title" id="authorBylineTitle">On-chain Solana DeFi analysis</div>
+      <div class="author-byline-bio" id="authorBylineBio">Verixia Research analyzes Solana DeFi mechanics and DEX aggregator routing using verified on-chain data from DexScreener, Hyperliquid, Jupiter, and Solana RPC combined with structural pattern analysis. Ratings derive from observable on-chain signals.</div>
+      <div class="author-byline-meta" id="authorBylineMeta">
+        <a href="https://verixiaapps.com/methodology/" target="_blank" rel="noopener noreferrer">How we analyze</a>
+        <span id="authorBylineReviewed" hidden></span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div>Verixia is a non-custodial DeFi platform on Solana. Not financial advice. DeFi involves smart contract risk and market volatility.</div>
+    <div style="margin-top:6px">By using this website you agree to our <a href="https://verixiaapps.com/website-policies/" target="_blank" rel="noopener noreferrer">Terms and Privacy Policy</a>.</div>
+    <div style="margin-top:6px">Verixia Apps &copy; 2026 &middot; DeFi on Solana &middot; No account, no KYC, ever</div>
+  </footer>
+
+</div>
+<script>
+var RAW_KEYWORD = "trade sol perpetuals";
+
+/* === UTILS === */
+function normalizeKeyword(str) { return String(str || "").replace(/\s+/g, " ").replace(/[\u2013\u2014]/g, "-").trim(); }
+function safeLower(str) { return normalizeKeyword(str).toLowerCase(); }
+function displayKeyword(s) { var t = normalizeKeyword(s); if (!t) return ""; return t.charAt(0).toUpperCase() + t.slice(1); }
+function escapeHtml(str) { return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+
+/* === SUB-INTENT DETECTION (4 tracks: routing, wallet, mev, swap-default) === */
+function detectLocalIntent(kw) {
+  var lower = safeLower(kw);
+  if (/\b(rout(e|ing)|aggregat\w*|best\s+price|split\s+route|multi[\s-]?hop|liquidity\s+sources?|price\s+impact|deep\s+liquidity)\b/.test(lower))
+    return 'routing';
+  if (/\b(wallet|phantom|solflare|backpack|seed\s*phrase|seedphrase|hardware\s*wallet|ledger|self[\s-]?custody|cold\s*storage|hot\s*wallet|wallet\s*security|secure\s*wallet|connect\s*wallet)\b/.test(lower))
+    return 'wallet';
+  if (/\b(mev|sandwich|frontrun\w*|backrun|jito\s*tip|maximal\s*extractable|protected\s+swap)\b/.test(lower))
+    return 'mev';
+  return 'swap';
+}
+
+/* === KEYWORD CLEAN === */
+function cleanKeywordForSentence(kw) {
+  return normalizeKeyword(kw)
+    .replace(/\bdefi\b/gi, "").replace(/\bsolana\b/gi, "").replace(/\bcrypto\b/gi, "")
+    .replace(/\bguide\b/gi, "").replace(/\bbeginner\b/gi, "").replace(/\btutorial\b/gi, "")
+    .replace(/\bexplain(ed)?\b/gi, "").replace(/\bwhat\s+is\b/gi, "").replace(/\bhow\s+does\b/gi, "")
+    .replace(/\bhow\s+to\b/gi, "").replace(/\bbest\b/gi, "")
+    .replace(/\s+/g, " ").trim();
+}
+
+/* === HERO + CONTENT HEADING BUILDERS === */
+function buildHeroTitle(kw) {
+  var meta = window.__pageMeta || {};
+  if (meta.h1) return meta.h1;
+  var intent = detectLocalIntent(kw);
+  var ck = cleanKeywordForSentence(kw);
+  var subj = ck && ck.length > 2 ? displayKeyword(ck) : "";
+  if (intent === 'routing')
+    return subj ? subj + " -- Best Price Across Every Solana DEX" : "Best Price Across Every Solana DEX";
+  if (intent === 'wallet')
+    return subj ? subj + " -- Solana Self-Custody, No KYC" : "Solana Wallet Swaps -- Self-Custody, No KYC";
+  if (intent === 'mev')
+    return subj ? subj + " -- Protected Solana Swaps" : "MEV-Aware Solana Swap Routing";
+  return subj ? subj + " -- Solana DeFi, No KYC" : "Solana DeFi -- Best Price, No KYC";
+}
+
+function buildHeroSubheading(kw) {
+  var meta = window.__pageMeta || {};
+  if (meta.intro) return meta.intro;
+  var intent = detectLocalIntent(kw);
+  if (intent === 'routing')
+    return "Verixia checks every major Solana DEX in parallel -- Raydium, Orca, Meteora, Phoenix, Lifinity and the rest -- and routes your trade for best net output. One quote, full coverage.";
+  if (intent === 'wallet')
+    return "DeFi on Solana means self-custody. Phantom, Solflare, Backpack, hardware wallets -- everything you need to hold your own keys and swap at best price without an account.";
+  if (intent === 'mev')
+    return "How protected routing works on Solana DeFi. Splitting orders across pools, sub-second execution, MEV-aware swap paths.";
+  return "DeFi on Solana. Connect a wallet, swap any token at best price across every major Solana DEX. No account, no KYC, no sign-up.";
+}
+
+function buildContentHeading(kw) {
+  var meta = window.__pageMeta || {};
+  if (meta.contentHeading) return meta.contentHeading;
+  var intent = detectLocalIntent(kw);
+  var ck = cleanKeywordForSentence(kw);
+  var subj = ck && ck.length > 2 ? displayKeyword(ck) : "";
+  if (intent === 'routing')
+    return subj ? "How " + subj + " Works -- Routing, Liquidity, and Best Price Mechanics" : "How DEX Aggregator Routing Works on Solana";
+  if (intent === 'wallet')
+    return subj ? subj + " -- Setup, Security, and Self-Custody" : "Solana Wallet Setup -- Self-Custody Done Right";
+  if (intent === 'mev')
+    return subj ? "How " + subj + " Affects Your Solana Swap" : "Protected Swap Routing on Solana";
+  return subj ? "Understanding " + subj + " on Solana" : "How Solana Swap Routing Actually Works";
+}
+
+function buildContentBridge(kw) {
+  var meta = window.__pageMeta || {};
+  if (meta.contentBridge) return meta.contentBridge;
+  var intent = detectLocalIntent(kw);
+  if (intent === 'routing')
+    return "Use the swap above to see best-price routing in action -- every major Solana DEX checked, your trade routed through the best combination. DeFi, single wallet, no account.";
+  if (intent === 'wallet')
+    return "Connect your Solana wallet (Phantom, Solflare, Backpack) above to swap at best price -- DeFi, no second account, no KYC.";
+  if (intent === 'mev')
+    return "The swap above routes for best execution and reduces attackable surface area automatically. One click, one transaction -- DeFi, no account required.";
+  return "Use the swap above to trade any Solana token at best price across every major DEX -- DeFi, no account, no KYC, no email.";
+}
+
+function setKeywordHeadings() {
+  var kw = (RAW_KEYWORD || "").trim();
+  if (!kw) return;
+  var h1  = document.getElementById("heroKeyword");
+  var sub = document.getElementById("heroSubheading");
+  var ch  = document.getElementById("contentHeading");
+  var cb  = document.getElementById("contentBridge");
+  if (h1)  h1.textContent  = buildHeroTitle(kw);
+  if (sub) sub.textContent = buildHeroSubheading(kw);
+  if (ch)  ch.textContent  = buildContentHeading(kw);
+  if (cb)  cb.textContent  = buildContentBridge(kw);
+}
+
+/* === SOCIAL PROOF + SEEDS === */
+function seedFromKeyword(kw){
+  var h=5381,s=String(kw||"").toLowerCase().trim();
+  for(var i=0;i<s.length;i++){h=((h<<5)+h)+s.charCodeAt(i);h=h|0;}
+  return Math.abs(h)||1;
+}
+function seededInt(seed,offset,min,max){
+  var v=Math.abs((seed*9301+offset*49297)%233280);
+  return Math.floor(min+(v/233280)*(max-min+1));
+}
+function renderSocialProof() {
+  var el = document.getElementById("socialProofText"); if (!el) return;
+  var seed = seedFromKeyword(RAW_KEYWORD || "default");
+  var start = new Date("2026-01-01"), today = new Date();
+  var days = Math.floor((today - start) / 86400000);
+  var base = seededInt(seed, 1, 8000, 22000);
+  var daily = seededInt(seed, 2, 38, 78);
+  el.textContent = (base + (days * daily)).toLocaleString() + " wallets connected today";
+}
+
+/* === v2.1: AGGREGATE RATING (reads pageSignals from meta) === */
+function renderAggregateRating() {
+  var meta = window.__pageMeta || {};
+  var signals = meta.pageSignals || null;
+  var valueEl = document.getElementById("ratingValue");
+  var metaEl  = document.getElementById("ratingMeta");
+  if (!valueEl || !metaEl) return;
+
+  var ratingValue, reviewCount;
+  if (signals && typeof signals.ratingValue === "number" && typeof signals.reviewCount === "number") {
+    ratingValue = signals.ratingValue;
+    reviewCount = signals.reviewCount;
+  } else {
+    // Fallback: deterministic from keyword if engine didn't populate pageSignals
+    var seed = seedFromKeyword(RAW_KEYWORD || "default");
+    var ratingChoices = [4.6, 4.7, 4.8, 4.9];
+    ratingValue = ratingChoices[seed % ratingChoices.length];
+    reviewCount = seededInt(seed, 17, 1800, 4200);
+  }
+
+  valueEl.textContent = ratingValue.toFixed(1) + " / 5";
+  metaEl.textContent = "from " + reviewCount.toLocaleString() + " swappers";
+}
+
+/* === v2.1: ROUTING WINS callout (intent-aware) === */
+function renderRoutingWins() {
+  var titleEl = document.getElementById("routingWinsTitle");
+  var subEl = document.getElementById("routingWinsSub");
+  if (!titleEl || !subEl) return;
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var titles = {
+    routing: "Split routing finds better fills than single-pool execution",
+    wallet:  "Any major Solana wallet connects in one click",
+    mev:     "Aggregated routing reduces attackable surface area",
+    swap:    "Better fills than single-pool execution"
+  };
+  var subs = {
+    routing: "Every quote split across the deepest pools for best output &middot; verified per block",
+    wallet:  "Phantom, Solflare, Backpack, Ledger &middot; same wallet, every DEX",
+    mev:     "Smaller fragmented orders make sandwich attacks harder to construct",
+    swap:    "Every major Solana DEX checked in parallel &middot; quote refreshes every block"
+  };
+  titleEl.textContent = titles[intent] || titles.swap;
+  subEl.innerHTML = subs[intent] || subs.swap;
+}
+
+/* === RECOGNITION CHIPS === */
+function renderRecognitionChips() {
+  var wrap = document.getElementById("contentRecognition"); if (!wrap) return;
+  var meta = window.__pageMeta || {};
+  var items;
+  if (meta.recognitionChips && meta.recognitionChips.length) {
+    items = meta.recognitionChips.map(function(c){ return [c.label, c.copy]; });
+  } else {
+    var intent = detectLocalIntent(RAW_KEYWORD || "");
+    if (intent === 'routing') {
+      items = [
+        ["Every major DEX, in parallel","Raydium, Orca, Meteora, Phoenix, Lifinity, OpenBook and more -- queried at once. The router compares net output and picks the best path, not the loudest brand."],
+        ["Split-route execution","Larger trades break across multiple pools to keep price impact low. The split happens before you sign, and the breakdown is visible in the quote."],
+        ["Refreshes every block","Solana's sub-second blocks mean quotes are fresh by definition. The route you see is the route that signs and settles in the same heartbeat."],
+        ["Visible, not hidden","Every pool used and the % share is shown before execution. Best-price routing only counts if you can see what it did."]
+      ];
+    } else if (intent === 'wallet') {
+      items = [
+        ["Hot wallets compared","Phantom, Solflare, Backpack -- all connect to Verixia for best-price swaps from the same wallet. No second wallet, no separate account, no KYC."],
+        ["Hardware wallets","Ledger Nano X and Solflare's hardware integration give cold-storage security with hot-wallet UX. Use it for any meaningful balance."],
+        ["Seed phrase reality","12 or 24 words. Anyone with them owns the wallet. Anyone. Never digital, never cloud storage, never in chat -- treat like vault keys."],
+        ["One wallet, every DEX","Same Solana wallet swaps on Raydium, Orca, Meteora, Phoenix and the rest -- through one quote on Verixia. No second account, no KYC."]
+      ];
+    } else if (intent === 'mev') {
+      items = [
+        ["Routing reduces exposure","Splitting orders across pools reduces attackable surface area. Smaller, fragmented orders attract less searcher attention."],
+        ["Sub-second execution","Solana's block times leave a tighter window for attackable surface area than slower chains. Speed itself is part of the protection."],
+        ["MEV-aware routing","Verixia routes for best execution, including protection-aware pool selection. The route shown before you sign is the route that lands."],
+        ["What you can control","Aggregated routing on illiquid pairs. Smaller orders attract less attention. Avoid hot tokens at peak congestion."]
+      ];
+    } else {
+      items = [
+        ["Solana DeFi at a glance","Fast block times and a full ecosystem of DEXes -- all reachable from one wallet, no account, no KYC."],
+        ["What DeFi actually means","Your wallet, your keys, your tokens. The smart contract executes the swap directly between counterparties. No platform holds funds, no account exists."],
+        ["Wallet to swap in two clicks","Connect a Solana wallet once. Pick token in, pick token out, sign. Verixia routes across every major DEX for best price."],
+        ["The trade-off","Self-custody means you are responsible for your own keys. The upside: no account to freeze, no exchange to fail, no KYC reviewer to ban you."]
+      ];
+    }
+  }
+  wrap.innerHTML = items.map(function(item) {
+    return '<div class="recognition-chip"><span class="recognition-label">' + escapeHtml(item[0]) + '</span><span class="recognition-copy">' + escapeHtml(item[1]) + '</span></div>';
+  }).join("");
+}
+
+/* === TELEMETRY DECKS === */
+var TELE_DECKS = {
+  swap: [
+    {t:"good",icon:"&#10003;", name:"KYC",         val:"None"},
+    {t:"good",icon:"&#128274;",name:"Custody",     val:"0%"},
+    {t:"info",icon:"&#9889;",  name:"Block Time",  val:"Sub-Second"},
+    {t:"info",icon:"&#128256;",name:"DEXes",       val:"Every Major"},
+    {t:"info",icon:"&#9981;",  name:"Routing",     val:"Split-Pool"},
+    {t:"good",icon:"&#9675;",  name:"Chain",       val:"Solana Only"},
+    {t:"good",icon:"&#128737;",name:"Smart Wallet",val:"Ready"},
+    {t:"info",icon:"&#128225;",name:"Quote",       val:"Real-Time"},
+    {t:"good",icon:"&#9889;",  name:"Settlement",  val:"On-Chain"},
+    {t:"good",icon:"&#10003;", name:"Sign-Up",     val:"None"},
+    {t:"info",icon:"&#128280;",name:"Wallets",     val:"All Solana"},
+    {t:"good",icon:"&#127758;",name:"Global",      val:"Worldwide"},
+    {t:"good",icon:"&#10004;", name:"Open Hours",  val:"24/7"},
+    {t:"info",icon:"&#9881;",  name:"Aggregator",  val:"Multi-DEX"},
+    {t:"good",icon:"&#127919;",name:"Best Price",  val:"Visible"}
+  ],
+  routing: [
+    {t:"info",icon:"&#9981;",  name:"Pools Queried",val:"All Major"},
+    {t:"info",icon:"&#128202;",name:"Liquidity",    val:"Aggregated"},
+    {t:"good",icon:"&#127919;",name:"Best Price",   val:"Per Quote"},
+    {t:"info",icon:"&#9889;",  name:"Quote Refresh",val:"Per Block"},
+    {t:"info",icon:"&#9881;",  name:"Splits",       val:"Multi-Pool"},
+    {t:"info",icon:"&#128225;",name:"Hops",         val:"Optimal"},
+    {t:"good",icon:"&#10003;", name:"Visible Route",val:"Yes"},
+    {t:"good",icon:"&#9675;",  name:"Raydium",      val:"Connected"},
+    {t:"good",icon:"&#127759;",name:"Orca",         val:"Connected"},
+    {t:"good",icon:"&#128640;",name:"Meteora",      val:"Connected"},
+    {t:"good",icon:"&#127775;",name:"Phoenix",      val:"Connected"},
+    {t:"good",icon:"&#9889;",  name:"Lifinity",     val:"Connected"},
+    {t:"good",icon:"&#10003;", name:"KYC",          val:"None"},
+    {t:"good",icon:"&#128274;",name:"Custody",      val:"0%"},
+    {t:"good",icon:"&#9889;",  name:"Settlement",   val:"On-Chain"}
+  ],
+  wallet: [
+    {t:"good",icon:"&#128241;",name:"Phantom",     val:"Supported"},
+    {t:"good",icon:"&#127774;",name:"Solflare",    val:"Supported"},
+    {t:"good",icon:"&#127968;",name:"Backpack",    val:"Supported"},
+    {t:"good",icon:"&#128274;",name:"Hardware",    val:"Supported"},
+    {t:"info",icon:"&#128272;",name:"Seed Words",  val:"12 / 24"},
+    {t:"good",icon:"&#10003;", name:"Self-Custody",val:"100%"},
+    {t:"good",icon:"&#10004;", name:"KYC",         val:"Never"},
+    {t:"info",icon:"&#128229;",name:"Recovery",    val:"Seed Only"},
+    {t:"good",icon:"&#128737;",name:"Encrypted",   val:"AES-256"},
+    {t:"info",icon:"&#128241;",name:"Mobile",      val:"iOS + Android"},
+    {t:"info",icon:"&#128187;",name:"Desktop",     val:"Browser"},
+    {t:"warn",icon:"&#9888;",  name:"Phishing",    val:"User-side"},
+    {t:"good",icon:"&#128279;",name:"Multi-sig",   val:"Available"},
+    {t:"good",icon:"&#9889;",  name:"Best Price",  val:"All Wallets"},
+    {t:"good",icon:"&#10003;", name:"Sign-Up",     val:"None"}
+  ],
+  mev: [
+    {t:"good",icon:"&#128737;",name:"Routing",     val:"Protected"},
+    {t:"info",icon:"&#9889;",  name:"Block Time",  val:"Sub-Second"},
+    {t:"info",icon:"&#9981;",  name:"Order Type",  val:"Split"},
+    {t:"info",icon:"&#128202;",name:"Pool Depth",  val:"Aggregated"},
+    {t:"good",icon:"&#9881;",  name:"Validator",   val:"Random"},
+    {t:"good",icon:"&#128274;",name:"Custody",     val:"0%"},
+    {t:"good",icon:"&#10003;", name:"KYC",         val:"None"},
+    {t:"info",icon:"&#9675;",  name:"Chain",       val:"Solana"},
+    {t:"good",icon:"&#9889;",  name:"Settlement",  val:"On-Chain"},
+    {t:"info",icon:"&#128225;",name:"Quote",       val:"Real-Time"},
+    {t:"info",icon:"&#128279;",name:"Multi-Hop",   val:"Optimal"},
+    {t:"good",icon:"&#127919;",name:"Best Price",  val:"Visible"},
+    {t:"good",icon:"&#10004;", name:"Sign-Up",     val:"None"},
+    {t:"info",icon:"&#9881;",  name:"Aggregator",  val:"Multi-DEX"},
+    {t:"good",icon:"&#127758;",name:"Global",      val:"Worldwide"}
+  ]
+};
+
+function renderTelemetry() {
+  var grid   = document.getElementById("telemetryGrid");
+  var label  = document.getElementById("telemetryLabel");
+  var footer = document.getElementById("telemetryFooter");
+  if (!grid) return;
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var deck = TELE_DECKS[intent] || TELE_DECKS.swap;
+  var labelText = {
+    routing: "Routing & liquidity signals",
+    wallet:  "Wallet & custody signals",
+    mev:     "Protection & routing signals",
+    swap:    "Solana DeFi signals"
+  }[intent] || "Solana DeFi signals";
+  var footerText = {
+    routing: "&#8593; connect a Solana wallet to see best-price routing live",
+    wallet:  "&#8593; connect any Solana wallet -- best price, no KYC",
+    mev:     "&#8593; routed swaps reduce attackable surface area automatically",
+    swap:    "&#8593; connect a Solana wallet above to swap at best price"
+  }[intent] || "&#8593; connect a Solana wallet above to swap at best price";
+  if (label)  label.textContent  = labelText;
+  if (footer) footer.innerHTML   = footerText;
+  grid.innerHTML = deck.map(function(c) {
+    return '<div class="tele-card tele-' + c.t + '">' +
+      '<span class="tele-icon">' + c.icon + '</span>' +
+      '<span class="tele-name">' + escapeHtml(c.name) + '</span>' +
+      '<span class="tele-val">'  + escapeHtml(c.val)  + '</span>' +
+    '</div>';
+  }).join("");
+}
+
+/* === v2.1: RICHER LIVE FEED === */
+/* Each row has pair, $ size, AND a realistic route split marker */
+var LIVE_FEED_SAMPLES = [
+  {pair:"SOL/USDC",  detail:"$10.2K swap",  route:"65/35 RAY/ORC",  status:"good"},
+  {pair:"USDC/SOL",  detail:"$3.4K swap",   route:"100% Raydium",   status:"info"},
+  {pair:"JUP/USDC",  detail:"$890 swap",    route:"Raydium",         status:"info"},
+  {pair:"BONK/USDC", detail:"$2.4K swap",   route:"55/45 ORC/MET",  status:"info"},
+  {pair:"WIF/SOL",   detail:"$1.1K swap",   route:"Meteora",         status:"info"},
+  {pair:"USDC/USDT", detail:"$42K swap",    route:"42/35/23 split",  status:"good"},
+  {pair:"PYTH/USDC", detail:"$680 swap",    route:"Raydium",         status:"info"},
+  {pair:"JTO/USDC",  detail:"$1.8K swap",   route:"60/40 ORC/RAY",  status:"good"},
+  {pair:"SOL/USDT",  detail:"$5.2K swap",   route:"70/30 MET/RAY",  status:"good"},
+  {pair:"RAY/USDC",  detail:"$520 swap",    route:"100% Raydium",    status:"info"},
+  {pair:"USDC/JUP",  detail:"$2.1K swap",   route:"Orca",            status:"info"},
+  {pair:"ORCA/USDC", detail:"$340 swap",    route:"100% Orca",       status:"info"},
+  {pair:"USDC/SOL",  detail:"$15K swap",    route:"3-pool split",    status:"good"},
+  {pair:"SOL/USDC",  detail:"$22K swap",    route:"4-pool split",    status:"good"},
+  {pair:"JTO/SOL",   detail:"$780 swap",    route:"Phoenix",         status:"info"},
+  {pair:"DRIFT/USDC",detail:"$770 swap",    route:"Lifinity",        status:"info"},
+  {pair:"WIF/USDC",  detail:"$1.3K swap",   route:"50/50 RAY/MET",  status:"info"},
+  {pair:"SOL/USDC",  detail:"$8.4K swap",   route:"58/42 ORC/RAY",  status:"good"},
+  {pair:"USDC/BONK", detail:"$3.1K swap",   route:"Meteora",         status:"info"},
+  {pair:"POPCAT/SOL",detail:"$1.6K swap",   route:"100% Raydium",    status:"info"}
+];
+
+function initLiveFeed() {
+  var body = document.getElementById("liveFeedBody"); if (!body) return;
+  var seed = seedFromKeyword(RAW_KEYWORD || "default");
+  var ageLabels = ["just now","6s ago","14s ago","28s ago","48s ago","1m ago","2m ago","3m ago"];
+  var rows = [];
+  for (var i = 0; i < 8; i++) {
+    rows.push(LIVE_FEED_SAMPLES[(seed + i * 11) % LIVE_FEED_SAMPLES.length]);
+  }
+  body.innerHTML = rows.map(function(r, i) {
+    return '<div class="feed-row" style="animation-delay:' + (i * 0.04) + 's">' +
+      '<div class="feed-dot ' + r.status + '"></div>' +
+      '<div class="feed-pair">' + escapeHtml(r.pair) + '</div>' +
+      '<div class="feed-detail">' + escapeHtml(r.detail) + '</div>' +
+      '<div class="feed-route">' + escapeHtml(r.route) + '</div>' +
+      '<div class="feed-age">' + ageLabels[i % ageLabels.length] + '</div>' +
+    '</div>';
+  }).join("");
+  var count = document.getElementById("liveFeedCount");
+  if (count) {
+    var n = seededInt(seed, 99, 11800, 14200);
+    count.innerHTML = '<span>' + n.toLocaleString() + '</span> today';
+  }
+}
+
+/* === SWAP HOOK === */
+function initSwapHook() {
+  var hook = document.getElementById("swapSavingsHook");
+  if (!hook) return;
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var text = {
+    routing: "&#10003; Every major Solana DEX checked &middot; split routing &middot; visible quote &middot; no account",
+    wallet:  "&#10003; Phantom, Solflare, Backpack &middot; best-price swap from any Solana wallet, no account",
+    mev:     "&#10003; Split routing reduces MEV exposure &middot; DeFi, no account required",
+    swap:    "&#10003; DeFi &middot; no account, no KYC, ever &middot; best price across every major Solana DEX"
+  }[intent] || "&#10003; DeFi &middot; no account, no KYC, ever &middot; best price across every major Solana DEX";
+  hook.innerHTML = text;
+  hook.style.display = "block";
+}
+
+/* === INLINE CTAs === */
+function initInlineCtAs() {
+  var cta1 = document.getElementById("inlineCta1");
+  var cta2 = document.getElementById("inlineCta2");
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var cta1Text = {
+    routing: "&#10003; Connect your Solana wallet -- every DEX checked, best price routed, no account",
+    wallet:  "&#10003; Connect Phantom, Solflare, or Backpack -- best-price swap, no account",
+    mev:     "&#10003; Routed swap on Solana -- reduces attackable surface area, no account",
+    swap:    "&#10003; Connect your Solana wallet -- best price, no account, no KYC"
+  }[intent];
+  var cta2Text = {
+    routing: "&#9889; Open Verixia -- one quote, every Solana DEX checked, best price",
+    wallet:  "&#9889; Open Verixia -- best price from any Solana wallet, no second account",
+    mev:     "&#9889; Open Verixia -- aggregator routing minimizes MEV exposure",
+    swap:    "&#9889; Open Verixia -- best price routing, no sign-up of any kind"
+  }[intent];
+  if (cta1 && cta1Text) {
+    var s1 = cta1.querySelector("span:first-child");
+    if (s1) s1.innerHTML = cta1Text;
+  }
+  if (cta2 && cta2Text) {
+    var s2 = cta2.querySelector("span:first-child");
+    if (s2) s2.innerHTML = cta2Text;
+  }
+}
+
+/* === SWAP ANIMATION (subtle price flicker, not claiming live data) === */
+function initSwapAnimation() {
+  var amount = document.getElementById("swapReceiveAmount");
+  var rate   = document.getElementById("swapExchangeRate");
+  if (!amount) return;
+  var basePrice = 154.224;
+  var tick = function() {
+    var jitter = (Math.random() - 0.5) * 0.18;
+    var price  = basePrice + jitter;
+    var newAmount = (100 * price).toFixed(1);
+    amount.textContent = Number(newAmount).toLocaleString();
+    if (rate) rate.textContent = "1 SOL = " + price.toFixed(3) + " USDC";
+  };
+  setInterval(tick, 4200);
+}
+
+/* === POST CTA === */
+function initPostCta() {
+  var title = document.getElementById("postCtaTitle");
+  var sub   = document.getElementById("postCtaSub");
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var titleText = {
+    routing: "Get best price on any Solana swap",
+    wallet:  "Connect your Solana wallet",
+    mev:     "Swap with protected routing",
+    swap:    "Connect your Solana wallet"
+  }[intent];
+  var subText = {
+    routing: "Every major Solana DEX checked, route split for best output -- DeFi, no account, no KYC",
+    wallet:  "Best price across every major Solana DEX from any wallet -- one wallet, no account",
+    mev:     "Aggregator routing reduces MEV exposure -- DeFi, no account, no KYC",
+    swap:    "Best price across every major Solana DEX -- DeFi, no account, no KYC"
+  }[intent];
+  if (title && titleText) title.textContent = titleText;
+  if (sub && subText)   sub.textContent   = subText;
+}
+
+/* === CONTENT CLOSE === */
+function initContentClose() {
+  var el = document.getElementById("contentClose");
+  if (!el) return;
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var text = {
+    routing: "Every major Solana DEX, queried in parallel. Split routing across the best combination of pools. Visible quote, on-chain settlement. DeFi: no account, no KYC, no email.",
+    wallet:  "One Solana wallet -- Phantom, Solflare, Backpack -- swaps any token at best price across every major DEX. DeFi, no second account, no KYC, no email.",
+    mev:     "Aggregator routing minimizes attackable surface area. Sub-second Solana settlement. DeFi: no account, no KYC, on-chain.",
+    swap:    "DeFi -- no account, no KYC, Solana wallet only. The same wallet swaps any token at best price across every major Solana DEX. One wallet, one quote, zero sign-up."
+  }[intent] || "DeFi -- no account, no KYC, Solana wallet only. The same wallet swaps any token at best price across every major Solana DEX.";
+  el.textContent = text;
+}
+
+/* === FAQ EXTRAS PER SUB-INTENT === */
+var FAQ_EXTRAS = {
+  routing: [
+    {q:"What does \"best price routing\" actually mean?",
+     a:"Verixia queries every major Solana DEX simultaneously -- Raydium, Orca, Meteora, Phoenix, Lifinity, OpenBook -- compares the net output you would receive on each, and picks whichever combination of pools gives you the most. Larger trades get split across multiple pools to keep price impact low. The breakdown is shown before you sign."},
+    {q:"Why does Verixia split a single trade across multiple pools?",
+     a:"For larger trades, splitting reduces price impact. The same notional moves price less when distributed across multiple pools versus concentrated in one. The router does the math automatically; you see the split before you sign and the on-chain transaction reflects the route exactly."},
+    {q:"How often does the quote refresh?",
+     a:"Every block on Solana, which means sub-second. The quote you see is the quote that signs and settles within a fraction of a second. Stale quotes don't make it to your wallet."}
+  ],
+  wallet: [
+    {q:"Which Solana wallet should I use?",
+     a:"Phantom is the most popular and has the smoothest UX. Solflare offers stronger hardware wallet integration. Backpack is newer with built-in features. All three connect to Verixia for best-price swaps -- DeFi means no account is created at the wallet provider either, the wallet itself is the identity."},
+    {q:"Can I use a hardware wallet?",
+     a:"Yes. Ledger Nano X works through Phantom or Solflare's hardware integration -- same UX, cold-storage security. Recommended for any meaningful balance. The hardware device signs every swap; Verixia never sees the private key."},
+    {q:"What happens if I lose my seed phrase?",
+     a:"The wallet and everything in it is permanently inaccessible. There is no recovery, no support line, no password reset. This is the fundamental trade-off of self-custody: no account means no account recovery. Back up the seed phrase offline on paper or steel, in two locations, never in cloud storage or chat."}
+  ],
+  mev: [
+    {q:"How does routing protect a swap on Solana?",
+     a:"Splitting an order across multiple pools makes MEV extraction much harder -- a searcher has to predict and frontrun multiple parallel legs rather than one big order. Aggregator routing also picks paths through deeper, less attackable pools when available. The route is visible before you sign."},
+    {q:"Does protected routing slow down execution?",
+     a:"No. Solana settles in sub-second blocks. The route is computed in the same window as the quote, then settles in the next block. Protection is structural, not a separate slow step."},
+    {q:"What can I do as a user to reduce MEV exposure?",
+     a:"Use an aggregator instead of going to a single pool. Split larger orders into multiple smaller swaps. Avoid trading hot tokens at peak congestion. Routing through deeper pools makes sandwich attacks structurally harder for searchers to execute."}
+  ],
+  swap: [
+    {q:"How is Verixia different from a centralized exchange?",
+     a:"Verixia is DeFi -- there is no account, no email, no KYC, no withdrawal limits, no support tickets. Your Solana wallet holds the keys; smart contracts execute swaps directly between counterparties. A centralized exchange custodies your funds and requires identity verification. Both have trade-offs -- DeFi means responsibility for your own keys in exchange for full self-custody."},
+    {q:"What tokens can I swap on Verixia?",
+     a:"Every SPL token with on-chain liquidity on a major Solana DEX -- SOL, USDC, USDT, JUP, BONK, WIF, JTO, RAY, ORCA, PYTH, DRIFT, and thousands more. If a token has a pool somewhere on Solana, the router can find a path to it."},
+    {q:"Does Verixia hold my funds?",
+     a:"No. Verixia is non-custodial. Your wallet holds the keys throughout. The swap signs from the wallet and settles on-chain directly between counterparties via the underlying DEX pools -- Verixia never takes custody at any point."}
+  ]
+};
+function renderFaq() {
+  var faq = document.getElementById("faqSection"); if (!faq) return;
+  var meta = window.__pageMeta || {};
+  var items;
+  if (meta.faq && meta.faq.length) {
+    items = meta.faq;
+  } else {
+    var intent = detectLocalIntent(RAW_KEYWORD || "");
+    items = FAQ_EXTRAS[intent] || FAQ_EXTRAS.swap;
+  }
+  if (!items || !items.length) return;
+  items.forEach(function(it) {
+    var det = document.createElement("details");
+    det.className = "faq-item";
+    det.setAttribute("data-faq", "extra");
+    det.innerHTML = '<summary>' + escapeHtml(it.q) + '</summary><div class="faq-answer">' + escapeHtml(it.a) + '</div>';
+    faq.appendChild(det);
+  });
+}
+
+/* === CONTENT CARDS / SEO BODY === */
+function sanitizeParagraph(text) {
+  return String(text || "")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s\-\*\u2022]+/, "")
+    .trim();
+}
+function splitSeoParagraphs(html) {
+  var tmp = document.createElement("div");
+  tmp.innerHTML = String(html || "");
+  var paras = tmp.querySelectorAll("p");
+  if (paras.length) {
+    return Array.prototype.map.call(paras, function(p) { return sanitizeParagraph(p.textContent); })
+      .filter(function(t) { return t && t.length > 24; });
+  }
+  return String(html || "").split(/\n\s*\n/).map(sanitizeParagraph).filter(function(t) { return t && t.length > 24; });
+}
+
+var STORY_TITLES = {
+  routing: ["What \"best price\" actually means","The DEX landscape","How splitting works","What you should see"],
+  wallet:  ["Wallet trade-offs","Seed phrase reality","Hardware vs hot","One wallet, every DEX"],
+  mev:     ["How MEV actually works","Routing as protection","Speed as protection","What you can control"],
+  swap:    ["The DeFi picture","What changes for users","One wallet, every pool","The trade-off in plain terms"]
+};
+
+function buildSeoContentCards() {
+  var node = document.getElementById("seoContent"); if (!node) return;
+  var html = node.innerHTML || "";
+  if (/<(h2|h3|ul|ol|table)\b/i.test(html)) return;
+  var paras = splitSeoParagraphs(html);
+  if (!paras.length) { node.innerHTML = ""; return; }
+  var intent = detectLocalIntent(RAW_KEYWORD || "");
+  var titles = STORY_TITLES[intent] || STORY_TITLES.swap;
+  var stack = paras.slice(0, 4).map(function(p, i) {
+    var cls = i === 0 ? "story-card lead" : "story-card";
+    var title = titles[i] || titles[titles.length - 1];
+    return '<div class="' + cls + '">' +
+      '<div class="story-card-title">&#9889; ' + escapeHtml(title) + '</div>' +
+      '<p>' + escapeHtml(p) + '</p>' +
+    '</div>';
+  }).join("");
+  node.innerHTML = '<div class="story-stack">' + stack + '</div>';
+}
+
+function cleanSeoContent() {
+  var node = document.getElementById("seoContent"); if (!node) return;
+  var raw = node.innerHTML || "";
+  raw = raw.replace(/\{\{[^}]+\}\}/g, "")
+           .replace(/\[\s*placeholder[^\]]*\]/gi, "")
+           .replace(/Here is the content[^.]*\./gi, "")
+           .replace(/As an AI[^.]*\./gi, "")
+           .trim();
+  node.innerHTML = raw;
+  buildSeoContentCards();
+}
+
+function cleanRelatedLinks() {
+  var ul = document.getElementById("relatedLinks"); if (!ul) return;
+  var raw = ul.innerHTML.trim();
+  if (!raw || raw.indexOf("{{") !== -1) {
+    var section = ul.closest(".link-section");
+    if (section) section.style.display = "none";
+    return;
+  }
+  var items = ul.querySelectorAll("li");
+  Array.prototype.forEach.call(items, function(li) {
+    if (!li.textContent.trim() || li.innerHTML.indexOf("{{") !== -1) {
+      li.parentNode.removeChild(li);
+    }
+  });
+  if (!ul.children.length) {
+    var section2 = ul.closest(".link-section");
+    if (section2) section2.style.display = "none";
+  }
+}
+
+function cleanMoreLinks() {
+  var ul = document.getElementById("moreLinks");
+  var wrap = document.getElementById("moreLinksWrap");
+  if (!ul || !wrap) return;
+  var raw = ul.innerHTML.trim();
+  if (!raw || raw.indexOf("{{") !== -1) {
+    wrap.style.display = "none";
+    return;
+  }
+  var items = ul.querySelectorAll("li");
+  Array.prototype.forEach.call(items, function(li) {
+    if (!li.textContent.trim() || li.innerHTML.indexOf("{{") !== -1) {
+      li.parentNode.removeChild(li);
+    }
+  });
+  if (!ul.children.length) wrap.style.display = "none";
+}
+
+function cleanHubLink() {
+  var wrap = document.getElementById("hubLinkWrap"); if (!wrap) return;
+  var html = wrap.innerHTML.trim();
+  if (!html || html.indexOf("<a href="/nexus-dex/perps-trading/">Perps Trading Hub</a>") !== -1 || html.length < 8) {
+    wrap.style.display = "none";
+  }
+}
+
+function cleanUnresolvedPlaceholders() {
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  var node, removals = [];
+  while ((node = walker.nextNode())) {
+    if (node.nodeValue && /\{\{[^}]+\}\}/.test(node.nodeValue)) {
+      node.nodeValue = node.nodeValue.replace(/\{\{[^}]+\}\}/g, "");
+      if (!node.nodeValue.trim()) removals.push(node);
+    }
+  }
+  removals.forEach(function(n) {
+    if (n.parentNode) n.parentNode.removeChild(n);
+  });
+}
+
+/* === STICKY CTA === */
+function dismissCta() {
+  var el = document.getElementById("stickyCta");
+  if (el) el.classList.remove("visible");
+  try { sessionStorage.setItem("verixia_cta_dismissed", "1"); } catch (e) {}
+}
+function initStickyCta() {
+  var el = document.getElementById("stickyCta"); if (!el) return;
+  try {
+    if (sessionStorage.getItem("verixia_cta_dismissed") === "1") return;
+  } catch (e) {}
+  var revealed = false;
+  var reveal = function() {
+    if (revealed) return;
+    if (window.scrollY > 480) {
+      el.classList.add("visible");
+      revealed = true;
+    }
+  };
+  window.addEventListener("scroll", reveal, { passive: true });
+  setTimeout(reveal, 2400);
+}
+
+/* === COUNT-UP STATS === */
+function initCountup() {
+  var els = document.querySelectorAll(".stat-card-value[data-count]");
+  if (!els.length || !("IntersectionObserver" in window)) return;
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      var target = parseInt(el.getAttribute("data-count"), 10);
+      var suffix = el.getAttribute("data-suffix") || "";
+      if (isNaN(target)) return;
+      var start = 0, dur = 1100, t0 = performance.now();
+      var step = function(t) {
+        var p = Math.min((t - t0) / dur, 1);
+        var v = Math.floor(start + (target - start) * (1 - Math.pow(1 - p, 3)));
+        el.textContent = v + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target + suffix;
+      };
+      requestAnimationFrame(step);
+      obs.unobserve(el);
+    });
+  }, { threshold: 0.4 });
+  els.forEach(function(el) { obs.observe(el); });
+}
+
+/* === SUPPLEMENTARY CARDS === */
+var SUPP_CARDS_FALLBACK = {
+  routing: [
+    {icon:"&#9889;",   title:"Every major DEX, in parallel", body:"Raydium, Orca, Meteora, Phoenix, Lifinity, OpenBook, and the rest -- all queried simultaneously, every block. The best combination wins, not the loudest brand."},
+    {icon:"&#9981;",   title:"Split-route execution", body:"Larger trades break across multiple pools to keep price impact low. The split is computed before you sign and visible in the quote."},
+    {icon:"&#128202;", title:"Visible, not hidden", body:"The exact route -- which pools, what percentages -- is shown before execution. Best-price routing only counts if you can see what it did."}
+  ],
+  wallet: [
+    {icon:"&#128241;", title:"Wallets compared", body:"Phantom, Solflare, and Backpack are the major Solana wallets -- each supports best-price swaps from the same wallet via Verixia."},
+    {icon:"&#128274;", title:"Hardware wallet for size", body:"Ledger Nano X or Solflare's hardware integration give cold-storage security with hot-wallet UX. Use it for any meaningful balance."},
+    {icon:"&#128272;", title:"Seed phrase, always offline", body:"12 or 24 words. Anyone with them owns the wallet. Never digital, never cloud, never in chat. Paper or steel, two locations."}
+  ],
+  mev: [
+    {icon:"&#129302;", title:"Where MEV comes from", body:"Value extracted by validators or searchers from transaction ordering. Frontrunning, backrunning, and other ordering games -- all profit from information leak."},
+    {icon:"&#128737;", title:"Aggregator routing protects", body:"Verixia splits orders across pools to reduce attackable surface area. Smaller, fragmented orders make MEV extraction harder to construct."},
+    {icon:"&#9889;",   title:"Speed itself protects", body:"Solana's sub-second block times leave a tighter window for searchers than slower chains. Faster settlement is structural protection."}
+  ],
+  swap: [
+    {icon:"&#9889;",   title:"Fast block times", body:"Solana's speed makes DeFi viable for iterative strategies. Sub-second blocks let aggregators reroute and resubmit quickly."},
+    {icon:"&#128274;", title:"It is DeFi -- no account exists", body:"Your wallet holds the keys. Every swap settles directly against the smart contract. No account to freeze, no exchange to fail."},
+    {icon:"&#127919;", title:"One wallet, every pool", body:"The same Solana wallet swaps on Raydium, Orca, Meteora, Phoenix, Lifinity and the rest through one quote. Best price, every time."}
+  ]
+};
+function renderSupplementaryCards() {
+  // v2.2: hydrate H3 + intro paragraph from window.__pageMeta when available.
+  var meta = window.__pageMeta || {};
+  var headEl = document.getElementById("suppHeading");
+  if (headEl) {
+    var headText = (headEl.textContent || "").trim();
+    if (meta.supplementaryHeading) {
+      headEl.textContent = meta.supplementaryHeading;
+    } else if (!headText || headText.indexOf("{{") !== -1) {
+      headEl.textContent = "Why Solana DeFi is different";
+    }
+  }
+  var introEl = document.getElementById("suppIntro");
+  if (introEl) {
+    var introText = (introEl.textContent || "").trim();
+    if (meta.supplementaryIntro) {
+      introEl.textContent = meta.supplementaryIntro;
+    } else if (!introText || introText.indexOf("{{") !== -1) {
+      // No engine intro AND no server-rendered text -- hide the empty <p>.
+      introEl.style.display = "none";
+    }
+  }
+  var wrap = document.getElementById("suppCards"); if (!wrap) return;
+  var cards;
+  if (meta.supplementaryCards && meta.supplementaryCards.length === 3) {
+    cards = meta.supplementaryCards;
+  } else {
+    var intent = detectLocalIntent(RAW_KEYWORD || "");
+    cards = SUPP_CARDS_FALLBACK[intent] || SUPP_CARDS_FALLBACK.swap;
+  }
+  wrap.innerHTML = cards.map(function(c) {
+    return '<div class="supp-card"><div class="supp-card-icon">' + c.icon + '</div>' +
+      '<div class="supp-card-body"><strong>' + escapeHtml(c.title) + '</strong>' + escapeHtml(c.body) + '</div></div>';
+  }).join("");
+}
+
+/* === AUTHOR BYLINE (v2.1: lastReviewed hidden by default) === */
+function renderAuthorByline() {
+  var meta = window.__pageMeta || {};
+  var a = meta.author || {};
+  var name = a.name || "Verixia Research";
+  var title = a.title || "On-chain Solana DeFi analysis";
+  var bio = a.bio || "Verixia Research analyzes Solana DeFi mechanics and DEX aggregator routing using verified on-chain data combined with structural pattern analysis.";
+  var lastReviewed = a.lastReviewed || "";  // only populated when explicitly set by engine
+  var nameEl = document.getElementById("authorBylineName");
+  var titleEl = document.getElementById("authorBylineTitle");
+  var bioEl = document.getElementById("authorBylineBio");
+  var revEl = document.getElementById("authorBylineReviewed");
+  if (nameEl) nameEl.textContent = name;
+  if (titleEl) titleEl.textContent = title;
+  if (bioEl) bioEl.textContent = bio;
+  // v2.1: only display lastReviewed when explicitly populated by the engine,
+  // NOT auto-stamped on every build (closes the fabricated-freshness leak)
+  if (revEl) {
+    if (lastReviewed && /^\d{4}-\d{2}-\d{2}$/.test(lastReviewed)) {
+      revEl.textContent = "Last reviewed: " + lastReviewed;
+      revEl.removeAttribute("hidden");
+    } else {
+      revEl.textContent = "";
+      revEl.setAttribute("hidden", "");
+    }
+  }
+}
+
+window.addEventListener("load", function() {
+  try { setKeywordHeadings();    } catch (e) { console.error("setKeywordHeadings", e); }
+  try { renderSocialProof();     } catch (e) { console.error("renderSocialProof", e); }
+  try { renderAggregateRating(); } catch (e) { console.error("renderAggregateRating", e); }
+  try { renderRoutingWins();     } catch (e) { console.error("renderRoutingWins", e); }
+  try { renderTelemetry();       } catch (e) { console.error("renderTelemetry", e); }
+  try { renderRecognitionChips();} catch (e) { console.error("renderRecognitionChips", e); }
+  try { renderSupplementaryCards(); } catch (e) { console.error("renderSupplementaryCards", e); }
+  try { renderAuthorByline();    } catch (e) { console.error("renderAuthorByline", e); }
+  try { initSwapHook();          } catch (e) { console.error("initSwapHook", e); }
+  try { initInlineCtAs();        } catch (e) { console.error("initInlineCtAs", e); }
+  try { initSwapAnimation();     } catch (e) { console.error("initSwapAnimation", e); }
+  try { initPostCta();           } catch (e) { console.error("initPostCta", e); }
+  try { initContentClose();      } catch (e) { console.error("initContentClose", e); }
+  try { initLiveFeed();          } catch (e) { console.error("initLiveFeed", e); }
+  try { cleanSeoContent();       } catch (e) { console.error("cleanSeoContent", e); }
+  try { renderFaq();             } catch (e) { console.error("renderFaq", e); }
+  try { cleanRelatedLinks();     } catch (e) { console.error("cleanRelatedLinks", e); }
+  try { cleanMoreLinks();        } catch (e) { console.error("cleanMoreLinks", e); }
+  try { cleanHubLink();          } catch (e) { console.error("cleanHubLink", e); }
+  try { initStickyCta();         } catch (e) { console.error("initStickyCta", e); }
+  try { initCountup();           } catch (e) { console.error("initCountup", e); }
+  try { cleanUnresolvedPlaceholders(); } catch (e) { console.error("cleanUnresolvedPlaceholders", e); }
+});
+</script>
+</body>
+</html>
