@@ -1328,15 +1328,46 @@ for page in queue_pages:
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    title       = build_title(keyword)
-    description = build_description(keyword)
-    canonical   = build_canonical(slug)
 
     # v1.1: pull full meta from engine
     engine_payload = fetch_engine_payload(keyword)
     meta           = (engine_payload or {}).get("meta") or {}
     hl_block       = (engine_payload or {}).get("hlDataBlock") or ""
     ai_text_engine = (engine_payload or {}).get("content") or ""
+
+    # v1.2: prefer engine values for title/h1/desc/intro/breadcrumb when available.
+    # The engine knows the keyword's intent + sub-intent and produces tighter,
+    # more on-topic copy than the local Python static functions.
+    engine_title       = meta.get("title", "").strip()
+    engine_description = meta.get("description", "").strip()
+    engine_h1          = meta.get("h1", "").strip()
+    engine_intro       = meta.get("intro", "").strip()
+    engine_breadcrumb  = meta.get("breadcrumb", "").strip()
+    engine_faq_schema  = meta.get("faqSchema", "").strip()
+
+    title       = engine_title       or build_title(keyword)
+    description = engine_description or build_description(keyword)
+    h1_text     = engine_h1          or build_static_h1(keyword)
+    intro_text  = engine_intro       or build_static_intro(keyword)
+    breadcrumb  = engine_breadcrumb  or (title_case(keyword_display) or readable_keyword(keyword))
+    faq_schema  = engine_faq_schema  or build_schema_faq(keyword)
+
+    # v1.2: cap title at 60 chars. Engine usually under, but if Python fallback
+    # produced a longer one, trim the suffix variants ("Mobile-First" first).
+    if len(title) > 60:
+        trimmed = re.sub(r",?\s*Mobile-First\s*$", "", title)
+        if len(trimmed) <= 60:
+            title = trimmed
+        else:
+            trimmed = re.sub(r",?\s*No KYC,?\s*Mobile-First\s*$", "", title)
+            if len(trimmed) <= 60:
+                title = trimmed
+            else:
+                # Last resort: hard cut at 60 on a word boundary
+                cut = title[:60].rsplit(" ", 1)[0]
+                title = cut if cut else title[:60]
+
+    canonical = build_canonical(slug)
 
     # If engine returned content, use it; else fall back to legacy AI fetch
     if ai_text_engine:
@@ -1379,13 +1410,13 @@ for page in queue_pages:
             "{{HUB_LINK}}":               hub_link_html,
             "{{CANONICAL_URL}}":          escape_html(canonical),
             "{{MODIFIED_DATE}}":          datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "{{BREADCRUMB_NAME}}":        escape_html(title_case(keyword_display) or readable_keyword(keyword)),
-            "{{STATIC_H1}}":              escape_html(build_static_h1(keyword)),
-            "{{STATIC_INTRO}}":           escape_html(build_static_intro(keyword)),
+            "{{BREADCRUMB_NAME}}":        escape_html(breadcrumb),
+            "{{STATIC_H1}}":              escape_html(h1_text),
+            "{{STATIC_INTRO}}":           escape_html(intro_text),
             "{{OG_IMAGE}}":               escape_html(build_og_image(slug)),
             "{{HL_DATA_BLOCK}}":          hl_block,
             "{{PAGE_META_SCRIPT}}":       page_meta_script,
-            "{{SCHEMA_FAQ}}":             build_schema_faq(keyword),
+            "{{SCHEMA_FAQ}}":             faq_schema,
             # v1.1: new placeholders
             "{{AGGREGATE_RATING_JSON}}":  aggregate_json,
             "{{SUPP_HEADING}}":           escape_html(supp_heading),
