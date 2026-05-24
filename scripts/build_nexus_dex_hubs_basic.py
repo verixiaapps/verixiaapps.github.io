@@ -42,13 +42,13 @@ BRAND_CASE = {
 
 # Per-hub titles (richer SEO than generic)
 HUB_TITLES = {
-    "perps-trading": "Perps Trading on Nexus DEX: Leverage, No KYC, Wallet-Based",
-    "bitcoin-perps": "Bitcoin Perps: Long, Short & Leverage BTC From Your Wallet",
-    "ethereum-perps": "Ethereum Perps: Long, Short & Leverage ETH From Your Wallet",
-    "solana-perps": "SOL Perps: Solana Leverage Trading From Your Wallet",
-    "altcoin-perps": "Altcoin & Memecoin Perps: WIF, BONK, PEPE Leverage",
+    "crypto-markets": "Perps Trading on Nexus DEX: Leverage, No KYC, Wallet-Based",
+    "bitcoin-markets": "Bitcoin Perps: Long, Short & Leverage BTC From Your Wallet",
+    "ethereum-markets": "Ethereum Perps: Long, Short & Leverage ETH From Your Wallet",
+    "solana-markets": "SOL Perps: Solana Leverage Trading From Your Wallet",
+    "altcoin-markets": "Altcoin & Memecoin Perps: WIF, BONK, PEPE Leverage",
     "hyperliquid-frontend": "Trade Hyperliquid From Solana: No MetaMask, No Bridge",
-    "xstocks-trading": "xStocks on Nexus DEX: Trade AAPL, TSLA, NVDA From Your Wallet",
+    "global-markets": "xStocks on Nexus DEX: Trade AAPL, TSLA, NVDA From Your Wallet",
     "tokenized-stocks": "Tokenized Stocks on Solana: Apple, Tesla, Nvidia On-Chain",
     "buy-stocks-onchain": "Buy Apple, Tesla, Nvidia & More On Solana: xStocks From Wallet",
     "stocks-no-kyc": "Buy U.S. Stocks With No KYC: xStocks From a Solana Wallet",
@@ -65,13 +65,13 @@ HUB_TITLES = {
 
 # Per-hub meta descriptions
 HUB_META_DESCRIPTIONS = {
-    "perps-trading": "Trade crypto perps with leverage on Nexus DEX. No KYC, no signup, no centralized account. Long or short BTC, ETH, SOL, and altcoins from your wallet.",
-    "bitcoin-perps": "Long or short Bitcoin with leverage on Nexus DEX. Trade BTC perpetuals from a Solana wallet with no KYC, no account, and mobile-first access.",
-    "ethereum-perps": "Long or short Ethereum with leverage on Nexus DEX. Trade ETH perpetuals from your Solana wallet with no MetaMask, no account, no KYC.",
-    "solana-perps": "Long or short SOL with leverage on Nexus DEX. Trade Solana perpetuals from the same wallet you use for spot, with no off-chain account.",
-    "altcoin-perps": "Trade altcoin and memecoin perps on Nexus DEX: WIF, BONK, PEPE, HYPE. Leverage from your wallet, no KYC, no signup, mobile-first.",
+    "crypto-markets": "Trade crypto perps with leverage on Nexus DEX. No KYC, no signup, no centralized account. Long or short BTC, ETH, SOL, and altcoins from your wallet.",
+    "bitcoin-markets": "Long or short Bitcoin with leverage on Nexus DEX. Trade BTC perpetuals from a Solana wallet with no KYC, no account, and mobile-first access.",
+    "ethereum-markets": "Long or short Ethereum with leverage on Nexus DEX. Trade ETH perpetuals from your Solana wallet with no MetaMask, no account, no KYC.",
+    "solana-markets": "Long or short SOL with leverage on Nexus DEX. Trade Solana perpetuals from the same wallet you use for spot, with no off-chain account.",
+    "altcoin-markets": "Trade altcoin and memecoin perps on Nexus DEX: WIF, BONK, PEPE, HYPE. Leverage from your wallet, no KYC, no signup, mobile-first.",
     "hyperliquid-frontend": "Use Hyperliquid from a Solana wallet on Nexus DEX. Mobile-first, no MetaMask, no Arbitrum bridge. Trade Hyperliquid perps from Phantom.",
-    "xstocks-trading": "Trade tokenized U.S. stocks on Nexus DEX from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx 24/7 with no brokerage account, no KYC at protocol level.",
+    "global-markets": "Trade tokenized U.S. stocks on Nexus DEX from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx 24/7 with no brokerage account, no KYC at protocol level.",
     "tokenized-stocks": "Trade tokenized stocks on Solana from your wallet. Apple, Tesla, Nvidia, S&P 500 as SPL tokens with 24/7 trading and no brokerage account.",
     "buy-stocks-onchain": "Buy AAPL, TSLA, NVDA, MSFT, GOOGL, AMZN, SPY, QQQ on Solana as xStocks. Wallet-based, 24/7, no broker, fractional, DeFi composable.",
     "stocks-no-kyc": "Buy U.S. stocks with no KYC, no broker signup, and no ID check. xStocks on Solana trade as SPL tokens from Phantom, Backpack, Solflare.",
