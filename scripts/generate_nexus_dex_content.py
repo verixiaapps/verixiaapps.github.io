@@ -60,7 +60,7 @@ HUB_MATCH_RULES = [
 
     # xStocks / tokenized stocks (specific first)
     (r"\bxstocks?\b|\baaplx\b|\btslax\b|\bnvdax\b|\bspyx\b|\bqqqx\b|backed\s+finance",
-        "xstocks-trading", "xstocks"),
+        "global-markets", "xstocks"),
     (r"buy\s+us\s+stocks\s+from|us\s+stocks\s+no\s+us\s+bank|us\s+stocks\s+for\s+non\s+residents|us\s+stocks\s+international|global\s+stock|international\s+stock",
         "global-stock-access", "global_stocks"),
     (r"24\s*7\s+stock|stocks\s+24\s+hours|stocks\s+weekend|trade\s+stocks\s+at\s+night|trade\s+stocks\s+weekends|trade\s+stocks\s+holidays|stocks\s+never\s+close|always\s+open\s+stock|stocks\s+after\s+hours",
@@ -74,13 +74,13 @@ HUB_MATCH_RULES = [
 
     # Perps
     (r"\bbtc\s+perp|bitcoin\s+perp|bitcoin\s+futures|bitcoin\s+perpetual",
-        "bitcoin-perps", "btc_perps"),
+        "bitcoin-markets", "btc_perps"),
     (r"\beth\s+perp|ethereum\s+perp|ethereum\s+futures|ethereum\s+perpetual",
-        "ethereum-perps", "eth_perps"),
+        "ethereum-markets", "eth_perps"),
     (r"\bsol\s+perp|solana\s+perp|sol\s+perpetual",
-        "solana-perps", "sol_perps"),
+        "solana-markets", "sol_perps"),
     (r"\bmemecoin\s+perp|altcoin\s+perp|\bwif\s+perp|\bbonk\s+perp|\bpepe\s+perp|\bdoge\s+perp|\bhype\s+perp",
-        "altcoin-perps", "altcoin_perps"),
+        "altcoin-markets", "altcoin_perps"),
 
     # Whale / launch / swap / buy
     (r"\bwhale\b|\bsmart\s+money\b|\binsider\b|\bdeployer\b|\bsniper\b|kol\s+wallet",
@@ -100,7 +100,7 @@ HUB_MATCH_RULES = [
 
     # Perps fallback
     (r"\bperp(s|etual)|\bleverage|\blong\b|\bshort\b|\bhedge\b",
-        "perps-trading", "perps"),
+        "crypto-markets", "perps"),
     (r"\bswap\b",
         "solana-swap", "swap"),
     (r"how\s+to\b",
@@ -109,23 +109,23 @@ HUB_MATCH_RULES = [
 
 HUB_TITLE_OVERRIDES = {
     "hyperliquid":      "Hyperliquid Frontend Hub",
-    "xstocks":          "xStocks Trading Hub",
+    "xstocks":          "Global Markets Hub",
     "tokenized_stocks": "Tokenized Stocks Hub",
     "buy_stocks":       "Buy Stocks On-Chain Hub",
     "stocks_no_kyc":    "Stocks No KYC Hub",
     "stocks_247":       "24/7 Stocks Hub",
     "global_stocks":    "Global Stock Access Hub",
-    "btc_perps":        "Bitcoin Perps Hub",
-    "eth_perps":        "Ethereum Perps Hub",
-    "sol_perps":        "SOL Perps Hub",
-    "altcoin_perps":    "Altcoin Perps Hub",
+    "btc_perps":        "Bitcoin Markets Hub",
+    "eth_perps":        "Ethereum Markets Hub",
+    "sol_perps":        "SOL Markets Hub",
+    "altcoin_perps":    "Altcoin Markets Hub",
     "whale":            "Whale Tracking Hub",
     "launch":           "Token Launch Hub",
     "swap":             "Solana Swap Hub",
     "buy_token":        "Buy Token Hub",
     "wallet":           "Wallet Trading Hub",
     "no_kyc":           "No KYC Trading Hub",
-    "perps":            "Perps Trading Hub",
+    "perps":            "Crypto Markets Hub",
     "how_to":           "Nexus DEX Guides Hub",
 }
 
@@ -565,4 +565,3 @@ if __name__ == "__main__":
         ok = process_keyword(args.keyword)
         sys.exit(0 if ok else 1)
     sys.exit(main(limit=args.limit))
- 
