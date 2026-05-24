@@ -19,13 +19,13 @@ MORE_LINKS_COUNT = 10
 
 PROTECTED_SLUGS = {
     "nexus-dex",
-    "perps-trading",
-    "bitcoin-perps",
-    "ethereum-perps",
-    "solana-perps",
-    "altcoin-perps",
+    "crypto-markets",
+    "bitcoin-markets",
+    "ethereum-markets",
+    "solana-markets",
+    "altcoin-markets",
     "hyperliquid-frontend",
-    "xstocks-trading",
+    "global-markets",
     "tokenized-stocks",
     "buy-stocks-onchain",
     "stocks-no-kyc",
@@ -194,13 +194,13 @@ SMALL_WORDS = {
 }
 
 HUB_TITLE_OVERRIDES = {
-    "perps-trading": "Perps Trading Hub",
-    "bitcoin-perps": "Bitcoin Perps Hub",
-    "ethereum-perps": "Ethereum Perps Hub",
-    "solana-perps": "SOL Perps Hub",
-    "altcoin-perps": "Altcoin Perps Hub",
+    "crypto-markets": "Crypto Markets Hub",
+    "bitcoin-markets": "Bitcoin Markets Hub",
+    "ethereum-markets": "Ethereum Markets Hub",
+    "solana-markets": "SOL Markets Hub",
+    "altcoin-markets": "Altcoin Markets Hub",
     "hyperliquid-frontend": "Hyperliquid Frontend Hub",
-    "xstocks-trading": "xStocks Trading Hub",
+    "global-markets": "Global Markets Hub",
     "tokenized-stocks": "Tokenized Stocks Hub",
     "buy-stocks-onchain": "Buy Stocks On-Chain Hub",
     "stocks-no-kyc": "Stocks No KYC Hub",
@@ -220,14 +220,14 @@ HUB_MATCH_RULES = [
     ("hyperliquid", "hyperliquid-frontend"),
 
     # xStocks / tokenized stocks (specific BEFORE generic stock terms)
-    ("xstocks", "xstocks-trading"),
-    ("xstock", "xstocks-trading"),
-    ("backed finance", "xstocks-trading"),
-    ("aaplx", "xstocks-trading"),
-    ("tslax", "xstocks-trading"),
-    ("nvdax", "xstocks-trading"),
-    ("spyx", "xstocks-trading"),
-    ("qqqx", "xstocks-trading"),
+    ("xstocks", "global-markets"),
+    ("xstock", "global-markets"),
+    ("backed finance", "global-markets"),
+    ("aaplx", "global-markets"),
+    ("tslax", "global-markets"),
+    ("nvdax", "global-markets"),
+    ("spyx", "global-markets"),
+    ("qqqx", "global-markets"),
 
     ("buy us stocks from", "global-stock-access"),
     ("us stocks no us bank", "global-stock-access"),
@@ -293,24 +293,24 @@ HUB_MATCH_RULES = [
     ("buy stocks with sol", "tokenized-stocks"),
 
     # Perps
-    ("btc perps", "bitcoin-perps"),
-    ("bitcoin perps", "bitcoin-perps"),
-    ("bitcoin futures", "bitcoin-perps"),
-    ("bitcoin perpetual", "bitcoin-perps"),
-    ("eth perps", "ethereum-perps"),
-    ("ethereum perps", "ethereum-perps"),
-    ("ethereum futures", "ethereum-perps"),
-    ("ethereum perpetual", "ethereum-perps"),
-    ("sol perps", "solana-perps"),
-    ("solana perps", "solana-perps"),
-    ("sol perpetual", "solana-perps"),
-    ("memecoin perps", "altcoin-perps"),
-    ("altcoin perps", "altcoin-perps"),
-    ("wif perps", "altcoin-perps"),
-    ("bonk perps", "altcoin-perps"),
-    ("pepe perps", "altcoin-perps"),
-    ("doge perps", "altcoin-perps"),
-    ("hype perps", "altcoin-perps"),
+    ("btc perps", "bitcoin-markets"),
+    ("bitcoin perps", "bitcoin-markets"),
+    ("bitcoin futures", "bitcoin-markets"),
+    ("bitcoin perpetual", "bitcoin-markets"),
+    ("eth perps", "ethereum-markets"),
+    ("ethereum perps", "ethereum-markets"),
+    ("ethereum futures", "ethereum-markets"),
+    ("ethereum perpetual", "ethereum-markets"),
+    ("sol perps", "solana-markets"),
+    ("solana perps", "solana-markets"),
+    ("sol perpetual", "solana-markets"),
+    ("memecoin perps", "altcoin-markets"),
+    ("altcoin perps", "altcoin-markets"),
+    ("wif perps", "altcoin-markets"),
+    ("bonk perps", "altcoin-markets"),
+    ("pepe perps", "altcoin-markets"),
+    ("doge perps", "altcoin-markets"),
+    ("hype perps", "altcoin-markets"),
 
     # Whale
     ("whale tracker", "whale-tracking"),
@@ -357,9 +357,9 @@ HUB_MATCH_RULES = [
     ("no verification", "no-kyc-trading"),
 
     # Perps (generic fallback, after specific assets)
-    ("perps", "perps-trading"),
-    ("perpetual", "perps-trading"),
-    ("leverage", "perps-trading"),
+    ("perps", "crypto-markets"),
+    ("perpetual", "crypto-markets"),
+    ("leverage", "crypto-markets"),
 
     ("how to", "how-to-guides"),
 ]
@@ -596,7 +596,7 @@ def find_best_hub_slug(keyword):
     for term, slug in HUB_MATCH_RULES:
         if contains_term_phrase(keyword_norm, term):
             return slug
-    return "perps-trading"
+    return "crypto-markets"
 
 
 def build_hub_link_html(keyword):
