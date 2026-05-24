@@ -147,13 +147,13 @@ LOW_SIGNAL_VARIATION_WORDS = {
 }
 
 HUB_INTROS = {
-    "perps-trading": "Perps trading on Nexus DEX lets you long or short crypto with leverage directly from your own wallet. No KYC, no signup, no centralized account, no deposit. Connect a Solana wallet, pick a market, and open a perpetual futures position in seconds.",
-    "bitcoin-perps": "Bitcoin perps on Nexus DEX let you long or short BTC with leverage directly from your wallet. Skip the centralized exchange account, the KYC process, and the deposit flow. Trade BTC perpetuals mobile-first from any Solana wallet.",
-    "ethereum-perps": "Ethereum perps on Nexus DEX let you long or short ETH with leverage from your wallet. No off-chain account, no identity check, no MetaMask required. Open ETH perpetual positions directly from Phantom, Backpack, or Solflare.",
-    "solana-perps": "SOL perps on Nexus DEX let you trade Solana with leverage natively from your wallet. No off-chain account, no friction. Go long or short on SOL from the same wallet you already use for swaps and tokens.",
-    "altcoin-perps": "Altcoin and memecoin perps on Nexus DEX cover assets most centralized exchanges do not list. Trade WIF, BONK, PEPE, HYPE, and dozens of trending tokens with leverage directly from your wallet, mobile-first.",
+    "crypto-markets": "Perps trading on Nexus DEX lets you long or short crypto with leverage directly from your own wallet. No KYC, no signup, no centralized account, no deposit. Connect a Solana wallet, pick a market, and open a perpetual futures position in seconds.",
+    "bitcoin-markets": "Bitcoin perps on Nexus DEX let you long or short BTC with leverage directly from your wallet. Skip the centralized exchange account, the KYC process, and the deposit flow. Trade BTC perpetuals mobile-first from any Solana wallet.",
+    "ethereum-markets": "Ethereum perps on Nexus DEX let you long or short ETH with leverage from your wallet. No off-chain account, no identity check, no MetaMask required. Open ETH perpetual positions directly from Phantom, Backpack, or Solflare.",
+    "solana-markets": "SOL perps on Nexus DEX let you trade Solana with leverage natively from your wallet. No off-chain account, no friction. Go long or short on SOL from the same wallet you already use for swaps and tokens.",
+    "altcoin-markets": "Altcoin and memecoin perps on Nexus DEX cover assets most centralized exchanges do not list. Trade WIF, BONK, PEPE, HYPE, and dozens of trending tokens with leverage directly from your wallet, mobile-first.",
     "hyperliquid-frontend": "Trade Hyperliquid markets directly from a Solana wallet without bridging to Arbitrum or installing MetaMask. Nexus DEX gives you mobile-first access to Hyperliquid perps using Phantom, Backpack, or Solflare.",
-    "xstocks-trading": "Trade tokenized U.S. stocks on Nexus DEX directly from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx, QQQx, and other xStocks live as SPL tokens on Solana, backed 1:1 by real shares held in regulated custody by Backed Finance. No brokerage account, no KYC at the protocol level, 24/7 trading, and full DeFi composability from Phantom, Backpack, or Solflare.",
+    "global-markets": "Trade tokenized U.S. stocks on Nexus DEX directly from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx, QQQx, and other xStocks live as SPL tokens on Solana, backed 1:1 by real shares held in regulated custody by Backed Finance. No brokerage account, no KYC at the protocol level, 24/7 trading, and full DeFi composability from Phantom, Backpack, or Solflare.",
     "tokenized-stocks": "Tokenized stocks on Nexus DEX bring real U.S. equities on-chain as SPL tokens on Solana. Each token is backed 1:1 by the underlying share held in regulated custody, tradeable 24/7 from your wallet, and fully composable across Solana DeFi. Buy fractional Apple, Tesla, Nvidia, and S&P 500 exposure without a brokerage account.",
     "buy-stocks-onchain": "Buy Apple, Tesla, Nvidia, Microsoft, and dozens of other U.S. stocks on-chain from a Solana wallet. AAPLx, TSLAx, NVDAx, MSFTx, GOOGLx, AMZNx, METAx, MSTRx, SPYx, QQQx, and more trade as SPL tokens via Nexus DEX aggregation across Jupiter, Raydium, and Orca. No broker, no KYC at the protocol level.",
     "stocks-no-kyc": "Buy U.S. stocks without KYC, brokerage signup, or ID verification. Tokenized xStocks on Solana trade as SPL tokens from your wallet, so you skip the broker account, the identity check, and the deposit flow. Connect Phantom or Backpack and trade AAPLx, TSLAx, NVDAx, SPYx straight from your wallet.",
@@ -166,23 +166,23 @@ HUB_INTROS = {
     "whale-tracking": "Track Solana whales, smart money, and memecoin insiders in real time. Nexus DEX surfaces top traders, early buyers, deployer clusters, and KOL wallets so you can see who is accumulating before the chart moves.",
     "token-launch": "Launch a Solana token from your wallet without code, KYC, or upfront fees. Deploy memecoins via bonding curve, graduate to Raydium liquidity, and reach buyers without going through Pump Fun or third-party launchpads.",
     "wallet-trading": "Trade fully self-custodial from Phantom, Backpack, or Solflare. Nexus DEX never holds your funds, never requires KYC, and never asks you to deposit. Your wallet is your account, and every trade settles on-chain.",
-    "how-to-guides": "Step-by-step guides for trading perps, betting on prediction markets, launching tokens, and tracking whales using Nexus DEX. Built for Solana wallet users who want to skip centralized exchanges and KYC entirely.",
+    "how-to-guides": "Step-by-step guides for trading perps, prediction markets, launching tokens, and tracking whales using Nexus DEX. Built for Solana wallet users who want to skip centralized exchanges and KYC entirely.",
 }
 
 HUB_TITLES = {
-    "perps-trading": "Perps Trading on Nexus DEX: Features, Leverage & How To Start",
-    "bitcoin-perps": "Bitcoin Perps on Nexus DEX: Long, Short & Leverage From Your Wallet",
-    "ethereum-perps": "Ethereum Perps on Nexus DEX: ETH Long, Short & Leverage Trading",
-    "solana-perps": "SOL Perps on Nexus DEX: Solana Leverage Trading From Your Wallet",
-    "altcoin-perps": "Altcoin & Memecoin Perps: WIF, BONK, PEPE Leverage Trading",
+    "crypto-markets": "Perps Trading on Nexus DEX: Features, Leverage & How To Start",
+    "bitcoin-markets": "Bitcoin Perps on Nexus DEX: Long, Short & Leverage From Your Wallet",
+    "ethereum-markets": "Ethereum Perps on Nexus DEX: ETH Long, Short & Leverage Trading",
+    "solana-markets": "SOL Perps on Nexus DEX: Solana Leverage Trading From Your Wallet",
+    "altcoin-markets": "Altcoin & Memecoin Perps: WIF, BONK, PEPE Leverage Trading",
     "hyperliquid-frontend": "Trade Hyperliquid From Solana: Mobile, Wallet-Based, No MetaMask",
-    "xstocks-trading": "xStocks on Nexus DEX: Trade AAPL, TSLA, NVDA Tokenized Stocks From Your Wallet",
+    "global-markets": "xStocks on Nexus DEX: Trade AAPL, TSLA, NVDA Tokenized Stocks From Your Wallet",
     "tokenized-stocks": "Tokenized Stocks on Solana: Trade Apple, Tesla, Nvidia On-Chain",
     "buy-stocks-onchain": "Buy Apple, Tesla, Nvidia & More On Solana: xStocks From Your Wallet",
     "stocks-no-kyc": "Buy U.S. Stocks With No KYC: xStocks From a Solana Wallet",
     "stocks-24-7": "Trade Stocks 24/7 On-Chain: Weekends, After Hours, No Market Close",
     "global-stock-access": "Buy U.S. Stocks Globally: xStocks From Europe, Asia, India, LATAM",
-    "prediction-markets": "Prediction Markets: Bet on BTC, ETH, Elections & Sports From Wallet",
+    "prediction-markets": "Prediction Markets: Trade BTC, ETH, Elections & Sports From Wallet",
     "solana-swap": "Solana DEX Aggregator: Best Price Swaps, No KYC, Mobile",
     "buy-token": "Buy Solana Tokens: Memecoins, New Launches & SPL Tokens From Wallet",
     "no-kyc-trading": "No KYC Trading: Perps, Swaps, Stocks & Prediction Markets From Wallet",
@@ -193,19 +193,19 @@ HUB_TITLES = {
 }
 
 HUB_META_DESCRIPTIONS = {
-    "perps-trading": "Trade crypto perps with leverage on Nexus DEX. No KYC, no signup, no centralized account. Long or short BTC, ETH, SOL, and altcoins from your wallet.",
-    "bitcoin-perps": "Long or short Bitcoin with leverage on Nexus DEX. Trade BTC perpetuals directly from your Solana wallet with no KYC, no account, and mobile-first access.",
-    "ethereum-perps": "Long or short Ethereum with leverage on Nexus DEX. Trade ETH perpetuals from your Solana wallet with no MetaMask, no account, and no KYC requirements.",
-    "solana-perps": "Long or short SOL with leverage on Nexus DEX. Trade Solana perpetuals natively from the same wallet you use for spot, with no off-chain account or KYC.",
-    "altcoin-perps": "Trade altcoin and memecoin perps on Nexus DEX: WIF, BONK, PEPE, HYPE, and more. Leverage trading from your wallet with no KYC, no signup, and mobile-first access.",
+    "crypto-markets": "Trade crypto perps with leverage on Nexus DEX. No KYC, no signup, no centralized account. Long or short BTC, ETH, SOL, and altcoins from your wallet.",
+    "bitcoin-markets": "Long or short Bitcoin with leverage on Nexus DEX. Trade BTC perpetuals directly from your Solana wallet with no KYC, no account, and mobile-first access.",
+    "ethereum-markets": "Long or short Ethereum with leverage on Nexus DEX. Trade ETH perpetuals from your Solana wallet with no MetaMask, no account, and no KYC requirements.",
+    "solana-markets": "Long or short SOL with leverage on Nexus DEX. Trade Solana perpetuals natively from the same wallet you use for spot, with no off-chain account or KYC.",
+    "altcoin-markets": "Trade altcoin and memecoin perps on Nexus DEX: WIF, BONK, PEPE, HYPE, and more. Leverage trading from your wallet with no KYC, no signup, and mobile-first access.",
     "hyperliquid-frontend": "Use Hyperliquid from a Solana wallet on Nexus DEX. Mobile-first, no MetaMask, no bridging to Arbitrum. Trade Hyperliquid perps directly from Phantom or Backpack.",
-    "xstocks-trading": "Trade tokenized U.S. stocks on Nexus DEX from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx 24/7 with no brokerage account and no KYC at the protocol level.",
+    "global-markets": "Trade tokenized U.S. stocks on Nexus DEX from a Solana wallet. AAPLx, TSLAx, NVDAx, SPYx 24/7 with no brokerage account and no KYC at the protocol level.",
     "tokenized-stocks": "Trade tokenized stocks on Solana from your wallet. Apple, Tesla, Nvidia, S&P 500 as SPL tokens with 24/7 trading, fractional positions, and no brokerage account.",
     "buy-stocks-onchain": "Buy AAPL, TSLA, NVDA, MSFT, GOOGL, AMZN, SPY, QQQ on Solana as xStocks. Wallet-based, 24/7, no broker, fractional positions, and DeFi composable.",
     "stocks-no-kyc": "Buy U.S. stocks with no KYC, no broker signup, and no ID check. xStocks on Solana trade as SPL tokens directly from Phantom, Backpack, or Solflare.",
     "stocks-24-7": "Trade tokenized U.S. stocks 24/7 on Solana. AAPLx, TSLAx, NVDAx, SPYx never close — buy and sell on weekends, after hours, and holidays from your wallet.",
     "global-stock-access": "Buy U.S. stocks from Europe, Asia, India, LATAM, and Africa via xStocks on Solana. No U.S. bank, no broker, no KYC at the protocol level. Just a wallet and USDC.",
-    "prediction-markets": "Prediction markets on Nexus DEX let you bet on crypto prices, elections, sports, and Fed decisions from your wallet. No KYC, no signup, mobile-first access.",
+    "prediction-markets": "Prediction markets on Nexus DEX let you trade crypto prices, elections, sports, and Fed decisions from your wallet. No KYC, no signup, mobile-first access.",
     "solana-swap": "Swap any Solana token on Nexus DEX with best-price routing across Jupiter, Raydium, and Orca. No KYC, no account, mobile-first, low slippage.",
     "buy-token": "Buy Solana tokens, memecoins, and new launches directly from your wallet on Nexus DEX. Best-price routing across Jupiter, Raydium, and Orca with no signup or KYC.",
     "no-kyc-trading": "No-KYC trading on Nexus DEX covers perps, spot, tokenized stocks, and prediction markets. Connect a wallet, sign a transaction, and trade without sharing data.",
@@ -216,31 +216,31 @@ HUB_META_DESCRIPTIONS = {
 }
 
 HUB_KEY_FEATURES = {
-    "perps-trading": [
+    "crypto-markets": [
         "Long or short BTC, ETH, SOL, and altcoin perpetual futures with up to 50x leverage",
         "No KYC, no signup, no centralized account, no deposit required",
         "Connect any Solana wallet (Phantom, Backpack, Solflare) and trade in seconds",
         "Mobile-first interface built for fast position entry and management",
     ],
-    "bitcoin-perps": [
+    "bitcoin-markets": [
         "Long or short BTC with leverage directly from your Solana wallet",
         "No off-chain account, no KYC, no deposit flow to navigate",
         "Live funding rates, open interest, and live BTC perp price",
         "Mobile-first execution with isolated or cross margin",
     ],
-    "ethereum-perps": [
+    "ethereum-markets": [
         "Long or short ETH with leverage from a Solana wallet, no MetaMask required",
         "No off-chain account, no identity check, no bridging to Ethereum",
         "Live ETH funding rates, perp price, and open interest data",
         "Mobile-first execution from Phantom, Backpack, or Solflare",
     ],
-    "solana-perps": [
+    "solana-markets": [
         "Trade SOL with leverage natively from the same wallet you use for spot",
         "No off-chain account, no KYC, no deposit step",
         "Live SOL funding rates, open interest, and perp price",
         "Cross or isolated margin, mobile-first execution",
     ],
-    "altcoin-perps": [
+    "altcoin-markets": [
         "Perps on memecoins and altcoins most centralized exchanges do not list",
         "Coverage of WIF, BONK, PEPE, HYPE, POPCAT, and other trending tokens",
         "Leverage trading directly from your Solana wallet, no KYC required",
@@ -252,7 +252,7 @@ HUB_KEY_FEATURES = {
         "Full Hyperliquid order book and depth from a mobile-first interface",
         "Use Phantom, Backpack, or Solflare with familiar Solana flows",
     ],
-    "xstocks-trading": [
+    "global-markets": [
         "Trade 60+ tokenized U.S. stocks and ETFs (AAPLx, TSLAx, NVDAx, SPYx, QQQx) as SPL tokens",
         "Each xStock is backed 1:1 by the real underlying share in regulated Swiss custody",
         "24/7 trading from your wallet, no brokerage account and no market hours",
@@ -289,7 +289,7 @@ HUB_KEY_FEATURES = {
         "Self-custodial — no broker can geo-block, freeze, or close your account",
     ],
     "prediction-markets": [
-        "Bet on BTC, ETH, SOL price levels with short and long resolution windows",
+        "Trade BTC, ETH, SOL price levels with short and long resolution windows",
         "Markets on elections, Fed decisions, sports outcomes, and major events",
         "Self-custodial, wallet-based, no KYC and no signup required",
         "Mobile-first interface with live odds and quick position entry",
@@ -339,23 +339,23 @@ HUB_KEY_FEATURES = {
 }
 
 HUB_FAQS = {
-    "perps-trading": [
+    "crypto-markets": [
         ("Do I need to sign up or complete KYC?", "No. Nexus DEX perps trading requires only a connected Solana wallet. There is no account creation, no identity verification, and no document upload."),
         ("Which wallets can I use?", "Phantom, Backpack, Solflare, and other major Solana wallets are supported. You sign each trade from your wallet and funds stay in your wallet between positions."),
     ],
-    "bitcoin-perps": [
+    "bitcoin-markets": [
         ("Can I trade BTC perps without KYC?", "Yes. BTC perps on Nexus DEX are accessible from a connected Solana wallet without any identity verification or account creation."),
         ("What leverage is available?", "Leverage tiers depend on market conditions, but BTC perps typically support up to 50x with both isolated and cross margin modes."),
     ],
-    "ethereum-perps": [
+    "ethereum-markets": [
         ("Do I need MetaMask to trade ETH perps?", "No. ETH perps on Nexus DEX work from a Solana wallet like Phantom or Backpack. There is no need to install MetaMask or hold ETH on Ethereum mainnet."),
         ("Can I short ETH on mobile?", "Yes. The entire perps interface is mobile-first, including position entry, leverage selection, and order management."),
     ],
-    "solana-perps": [
+    "solana-markets": [
         ("Can I trade SOL perps from the same wallet I use for swaps?", "Yes. SOL perps work from any standard Solana wallet, so you can trade leverage and spot tokens from the same Phantom or Backpack wallet."),
         ("What is the funding rate?", "Funding rates are displayed live on the SOL perp market page. They update on a fixed interval and apply to open positions."),
     ],
-    "altcoin-perps": [
+    "altcoin-markets": [
         ("Which altcoins have perp markets?", "Coverage includes WIF, BONK, PEPE, HYPE, POPCAT, and other trending Solana and major-chain tokens. New listings are added as liquidity supports them."),
         ("How quickly do new perp markets get listed?", "New perp markets typically launch within days of meaningful liquidity forming, often the same day on trending tokens."),
     ],
@@ -363,7 +363,7 @@ HUB_FAQS = {
         ("Do I need a separate Hyperliquid account?", "No. Nexus DEX routes to Hyperliquid markets from your existing Solana wallet, so there is no separate signup or Arbitrum wallet required."),
         ("Is this the official Hyperliquid app?", "No. Nexus DEX is a wallet-based frontend that connects Solana wallets to Hyperliquid liquidity without requiring MetaMask or an Arbitrum bridge."),
     ],
-    "xstocks-trading": [
+    "global-markets": [
         ("What are xStocks?", "xStocks are tokenized 1:1 representations of real U.S. stocks and ETFs (like AAPLx for Apple, TSLAx for Tesla, NVDAx for Nvidia) issued by Backed Finance, a Swiss-regulated entity acquired by Kraken in December 2025. Each token is backed by the underlying share held in regulated custody, and they live on Solana as SPL tokens."),
         ("Do I need a brokerage account or KYC?", "No. xStocks trade as SPL tokens, so there is no brokerage signup at the protocol level. Connect a Solana wallet, fund it with USDC or SOL, and trade. Note that availability and tax treatment depend on your jurisdiction, so check local rules before trading."),
         ("Do I get dividends and voting rights?", "Dividends are passed on automatically through a rebasing multiplier, so your xStock balance increases when the underlying pays a dividend. xStocks do not carry shareholder voting rights or a direct legal claim to the underlying company shares."),
@@ -409,27 +409,27 @@ GENERIC_FAQS = [
 ]
 
 HUB_GET_STARTED_STEPS = {
-    "perps-trading": [
+    "crypto-markets": [
         "Install Phantom, Backpack, or Solflare and fund it with SOL or USDC.",
         "Connect your wallet to Nexus DEX and open the perps interface.",
         "Pick a market (BTC, ETH, SOL, or altcoin), set leverage, and sign the position from your wallet.",
     ],
-    "bitcoin-perps": [
+    "bitcoin-markets": [
         "Connect a Solana wallet with SOL or USDC for margin.",
         "Open the BTC perp market and pick long or short with your chosen leverage.",
         "Sign the position from your wallet. Manage stops and take-profits from the same screen.",
     ],
-    "ethereum-perps": [
+    "ethereum-markets": [
         "Connect a Solana wallet (Phantom, Backpack, or Solflare) and fund it with USDC.",
         "Open the ETH perp market and pick direction and leverage.",
         "Sign the position from your wallet. No MetaMask, no Ethereum gas required.",
     ],
-    "solana-perps": [
+    "solana-markets": [
         "Connect the same Solana wallet you use for swaps.",
         "Open the SOL perp market and choose long, short, or hedging configuration.",
         "Sign the position from your wallet and monitor live funding rates.",
     ],
-    "altcoin-perps": [
+    "altcoin-markets": [
         "Connect a Solana wallet with USDC for margin.",
         "Browse listed altcoin perps (WIF, BONK, PEPE, HYPE, etc.) and pick a market.",
         "Set leverage, pick direction, and sign the position from your wallet.",
@@ -439,7 +439,7 @@ HUB_GET_STARTED_STEPS = {
         "Open the Hyperliquid markets section inside Nexus DEX.",
         "Pick a market, set leverage and direction, and sign from your wallet.",
     ],
-    "xstocks-trading": [
+    "global-markets": [
         "Connect a Solana wallet (Phantom, Backpack, or Solflare) funded with USDC or SOL.",
         "Search for a ticker like AAPLx, TSLAx, NVDAx, SPYx, or QQQx inside Nexus DEX.",
         "Review the best-price route across Jupiter, Raydium, and Orca, then sign the swap from your wallet.",
@@ -487,13 +487,13 @@ HUB_GET_STARTED_STEPS = {
 }
 
 HUB_HOW_IT_WORKS = {
-    "perps-trading": "Nexus DEX perps route through on-chain perpetual futures markets. Your wallet posts USDC margin, opens a leveraged position, and settles the PnL on-chain. There is no centralized order book holding your funds.",
-    "bitcoin-perps": "BTC perp positions on Nexus DEX are collateralized by USDC in your wallet. The position opens against an on-chain market, tracks the BTC perp price live, and settles directly from your wallet signature.",
-    "ethereum-perps": "ETH perp positions use USDC collateral from your Solana wallet. The position tracks an on-chain ETH perp market without requiring you to hold ETH on Ethereum mainnet or pay Ethereum gas.",
-    "solana-perps": "SOL perp positions use USDC collateral. The market tracks the SOL perp price live, applies funding rates on a fixed interval, and settles PnL from your wallet signature.",
-    "altcoin-perps": "Altcoin perps work the same way as BTC, ETH, and SOL perps. Your wallet posts USDC margin, opens leverage against a listed altcoin market, and settles PnL on-chain.",
+    "crypto-markets": "Nexus DEX perps route through on-chain perpetual futures markets. Your wallet posts USDC margin, opens a leveraged position, and settles the PnL on-chain. There is no centralized order book holding your funds.",
+    "bitcoin-markets": "BTC perp positions on Nexus DEX are collateralized by USDC in your wallet. The position opens against an on-chain market, tracks the BTC perp price live, and settles directly from your wallet signature.",
+    "ethereum-markets": "ETH perp positions use USDC collateral from your Solana wallet. The position tracks an on-chain ETH perp market without requiring you to hold ETH on Ethereum mainnet or pay Ethereum gas.",
+    "solana-markets": "SOL perp positions use USDC collateral. The market tracks the SOL perp price live, applies funding rates on a fixed interval, and settles PnL from your wallet signature.",
+    "altcoin-markets": "Altcoin perps work the same way as BTC, ETH, and SOL perps. Your wallet posts USDC margin, opens leverage against a listed altcoin market, and settles PnL on-chain.",
     "hyperliquid-frontend": "Nexus DEX provides a wallet-based interface to Hyperliquid markets. Your Solana wallet signs trades that route through to Hyperliquid liquidity without requiring you to bridge to Arbitrum or use MetaMask.",
-    "xstocks-trading": "xStocks are issued by Backed Finance as SPL tokens on Solana, with each token backed 1:1 by the underlying U.S. share held in regulated Swiss custody. Trades route through Solana DEXes like Raydium and Orca via Jupiter's aggregation and settle directly to your wallet. Dividends are passed on automatically through a rebasing multiplier that updates your token balance, and corporate actions like stock splits adjust the same way. You can hold xStocks in your Solana wallet, LP them, or use them as collateral in Kamino just like any other SPL token.",
+    "global-markets": "xStocks are issued by Backed Finance as SPL tokens on Solana, with each token backed 1:1 by the underlying U.S. share held in regulated Swiss custody. Trades route through Solana DEXes like Raydium and Orca via Jupiter's aggregation and settle directly to your wallet. Dividends are passed on automatically through a rebasing multiplier that updates your token balance, and corporate actions like stock splits adjust the same way. You can hold xStocks in your Solana wallet, LP them, or use them as collateral in Kamino just like any other SPL token.",
     "prediction-markets": "Each prediction market is an outcome contract with a defined resolution source. You take a yes or no side, the position is collateralized from your wallet, and the contract pays winners automatically at resolution.",
     "solana-swap": "Nexus DEX queries Jupiter, Raydium, and Orca for the best price on your swap. The selected route is executed in a single transaction signed from your wallet.",
     "buy-token": "When you buy a token, Nexus DEX finds the best price across Jupiter, Raydium, and Orca, including aggregator hops if they reduce slippage. Your wallet signs one transaction and the trade settles instantly.",
@@ -505,14 +505,14 @@ HUB_HOW_IT_WORKS = {
 }
 
 HUB_TARGETING = {
-    "perps-trading": "This is for traders who want leverage without a centralized exchange account. Common users include Solana-native traders, mobile-first users, and people exiting Binance, Coinbase, or other CEXes after KYC or geography issues.",
-    "bitcoin-perps": "BTC perp users typically want directional exposure with leverage but do not want to KYC or hold funds on a centralized exchange. Many are Solana-native and want to keep collateral in their existing wallet.",
-    "ethereum-perps": "ETH perp users typically want leverage on ETH without bridging back to Ethereum mainnet, paying Ethereum gas, or maintaining a separate MetaMask wallet.",
-    "solana-perps": "SOL perp users are usually already active on Solana for swaps and tokens. They want leverage on SOL from the same wallet without moving funds to a centralized exchange.",
-    "altcoin-perps": "Altcoin perp users are typically memecoin traders, low-cap speculators, and people looking for leverage on assets centralized exchanges do not list.",
+    "crypto-markets": "This is for traders who want leverage without a centralized exchange account. Common users include Solana-native traders, mobile-first users, and people exiting Binance, Coinbase, or other CEXes after KYC or geography issues.",
+    "bitcoin-markets": "BTC perp users typically want directional exposure with leverage but do not want to KYC or hold funds on a centralized exchange. Many are Solana-native and want to keep collateral in their existing wallet.",
+    "ethereum-markets": "ETH perp users typically want leverage on ETH without bridging back to Ethereum mainnet, paying Ethereum gas, or maintaining a separate MetaMask wallet.",
+    "solana-markets": "SOL perp users are usually already active on Solana for swaps and tokens. They want leverage on SOL from the same wallet without moving funds to a centralized exchange.",
+    "altcoin-markets": "Altcoin perp users are typically memecoin traders, low-cap speculators, and people looking for leverage on assets centralized exchanges do not list.",
     "hyperliquid-frontend": "This is for Solana-native traders who want Hyperliquid liquidity but do not want to install MetaMask, bridge to Arbitrum, or maintain a second wallet.",
-    "xstocks-trading": "xStocks users include non-U.S. residents who want easier access to U.S. equities without a traditional brokerage account, crypto-native investors who want stock exposure that lives inside DeFi, and retail traders who want fractional positions, 24/7 access, and self-custody instead of relying on a broker.",
-    "prediction-markets": "Prediction market users include crypto price speculators, political and election bettors, sports outcome traders, and macro-focused users tracking Fed decisions and economic data.",
+    "global-markets": "xStocks users include non-U.S. residents who want easier access to U.S. equities without a traditional brokerage account, crypto-native investors who want stock exposure that lives inside DeFi, and retail traders who want fractional positions, 24/7 access, and self-custody instead of relying on a broker.",
+    "prediction-markets": "Prediction market users include crypto price speculators, political and election traders, sports outcome traders, and macro-focused users tracking Fed decisions and economic data.",
     "solana-swap": "This is for anyone swapping SPL tokens who wants best-price routing without juggling Jupiter, Raydium, and Orca interfaces separately, or who prefers a mobile-first interface.",
     "buy-token": "Buy-token users include memecoin traders, new-launch speculators, AI token buyers, and anyone trying to acquire a Solana token that is not listed on a centralized exchange.",
     "no-kyc-trading": "No-KYC users include privacy-focused traders, users in jurisdictions with limited centralized exchange access, and crypto-native users who prefer self-custody as a default.",
@@ -570,7 +570,7 @@ INTENT_HINTS = {
     "perpetual": "perpetual futures",
     "swap": "spot swaps",
     "buy": "spot buys",
-    "bet": "prediction market bets",
+    "bet": "prediction market positions",
     "prediction": "prediction market positions",
     "hyperliquid": "Hyperliquid liquidity",
     "whale": "whale and smart-money tracking",
@@ -603,7 +603,7 @@ GENERIC_COMPARISON_POINTS = [
 ]
 
 HUB_COMPARISON_POINTS = {
-    "perps-trading": [
+    "crypto-markets": [
         (
             "Open a perp position by signing one transaction from your Solana wallet. Margin stays in your wallet between positions.",
             "Open a CEX perp position by depositing funds to the exchange first, then opening leverage on their internal ledger."
@@ -613,7 +613,7 @@ HUB_COMPARISON_POINTS = {
             "Centralized perp venues require KYC, identity documents, and often block users by geography."
         ),
     ],
-    "bitcoin-perps": [
+    "bitcoin-markets": [
         (
             "Trade BTC perps from a Solana wallet with USDC margin, no off-chain account required.",
             "Trade BTC perps on a CEX after KYC, deposit, and account setup specific to that platform."
@@ -623,7 +623,7 @@ HUB_COMPARISON_POINTS = {
             "CEX BTC positions sit on the exchange's books and depend on the platform's solvency and policies."
         ),
     ],
-    "ethereum-perps": [
+    "ethereum-markets": [
         (
             "Trade ETH perps from a Solana wallet without holding ETH on Ethereum mainnet or paying Ethereum gas.",
             "Most centralized ETH perp venues require ETH on Ethereum or USDT on the venue's chain."
@@ -633,7 +633,7 @@ HUB_COMPARISON_POINTS = {
             "Bridging or using a separate MetaMask wallet adds friction, gas, and security considerations."
         ),
     ],
-    "solana-perps": [
+    "solana-markets": [
         (
             "SOL perp positions use the same Solana wallet you already use for spot trades.",
             "Centralized SOL perp venues require depositing SOL or USDC into the exchange first."
@@ -643,7 +643,7 @@ HUB_COMPARISON_POINTS = {
             "Centralized venues settle internally on a closed ledger you cannot independently verify."
         ),
     ],
-    "altcoin-perps": [
+    "altcoin-markets": [
         (
             "Altcoin and memecoin perp markets often go live the same day as a token gains liquidity.",
             "Centralized exchanges typically wait weeks or months to list new memecoin perps, if at all."
@@ -663,7 +663,7 @@ HUB_COMPARISON_POINTS = {
             "Default Hyperliquid mobile experience requires MetaMask Mobile or WalletConnect setup."
         ),
     ],
-    "xstocks-trading": [
+    "global-markets": [
         (
             "Trade AAPLx, TSLAx, NVDAx, and SPYx 24/7 from a Solana wallet using SPL token flows you already know.",
             "Traditional brokerages only trade during U.S. market hours and require account approval and identity verification."
@@ -767,27 +767,27 @@ GENERIC_SCENARIO_EXAMPLES = [
 ]
 
 HUB_SCENARIO_EXAMPLES = {
-    "perps-trading": [
+    "crypto-markets": [
         "A trader wants 10x BTC leverage from a Solana wallet without a centralized exchange account.",
         "A user wants to short ETH for a few hours without bridging or opening a new wallet.",
         "A trader wants to manage multiple perp positions from a phone without juggling multiple apps.",
     ],
-    "bitcoin-perps": [
+    "bitcoin-markets": [
         "A trader wants to long BTC with 25x leverage but does not want to KYC.",
         "A user wants to short BTC briefly during a news event without funding a centralized account first.",
         "A Solana-native trader wants BTC exposure without holding BTC on a centralized exchange.",
     ],
-    "ethereum-perps": [
+    "ethereum-markets": [
         "A trader wants ETH leverage but does not want to bridge USDC back to Ethereum mainnet.",
         "A user wants to short ETH without installing MetaMask or paying Ethereum gas.",
         "A Solana-native user wants ETH exposure without juggling two wallets.",
     ],
-    "solana-perps": [
+    "solana-markets": [
         "A trader holds SOL in Phantom and wants to add leverage exposure from the same wallet.",
         "A user wants to hedge a SOL spot position without moving funds to a centralized exchange.",
         "A trader wants to scalp SOL perps from mobile during a volatile session.",
     ],
-    "altcoin-perps": [
+    "altcoin-markets": [
         "A memecoin trader wants leverage on WIF or BONK that centralized exchanges do not offer.",
         "A user wants to short a low-cap token during a euphoric pump without an off-chain account.",
         "A trader wants exposure to a brand-new perp listing the same day liquidity goes live.",
@@ -797,16 +797,16 @@ HUB_SCENARIO_EXAMPLES = {
         "A mobile user wants to access Hyperliquid from Phantom on iOS.",
         "A user wants to keep Hyperliquid exposure inside their existing Solana wallet workflow.",
     ],
-    "xstocks-trading": [
+    "global-markets": [
         "A non-U.S. user wants Apple and Nvidia exposure without opening a U.S. brokerage account.",
         "A crypto-native investor wants to hold TSLAx and SPYx in their Solana wallet alongside SOL and USDC.",
         "A DeFi user wants to LP NVDAx/USDC on Raydium or use AAPLx as collateral on Kamino.",
         "A weekend trader wants to buy stock exposure outside U.S. market hours without waiting for Monday open.",
     ],
     "prediction-markets": [
-        "A trader wants to bet on the next FOMC rate decision from a Solana wallet.",
+        "A trader wants to take a position on the next FOMC rate decision from a Solana wallet.",
         "A sports fan wants to take a side on an NFL game without signing up at a sportsbook.",
-        "A crypto user wants to bet on BTC reaching a specific price level by a deadline.",
+        "A crypto user wants to trade BTC reaching a specific price level by a deadline.",
     ],
     "solana-swap": [
         "A user wants the best price on a USDC-to-SOL swap without checking three aggregators manually.",
@@ -820,7 +820,7 @@ HUB_SCENARIO_EXAMPLES = {
     ],
     "no-kyc-trading": [
         "A user in a jurisdiction with limited CEX access wants to trade without KYC.",
-        "A privacy-focused trader wants to swap, perp-trade, hold tokenized stocks, and bet without sharing identity documents.",
+        "A privacy-focused trader wants to swap, perp-trade, hold tokenized stocks, and trade prediction markets without sharing identity documents.",
         "A user burned by past KYC leaks wants to keep personal data out of the trading flow entirely.",
     ],
     "whale-tracking": [
