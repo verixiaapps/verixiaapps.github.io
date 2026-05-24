@@ -1,5 +1,5 @@
 CLUSTERS = {
-    "perps-trading": [
+    "crypto-markets": [
         "perps",
         "perp trading",
         "perpetual futures",
@@ -16,7 +16,7 @@ CLUSTERS = {
         "perps from solana",
     ],
 
-    "bitcoin-perps": [
+    "bitcoin-markets": [
         "btc perps",
         "bitcoin perps",
         "btc leverage",
@@ -31,7 +31,7 @@ CLUSTERS = {
         "btc perps solana",
     ],
 
-    "ethereum-perps": [
+    "ethereum-markets": [
         "eth perps",
         "ethereum perps",
         "eth leverage",
@@ -44,7 +44,7 @@ CLUSTERS = {
         "eth perps no kyc",
     ],
 
-    "solana-perps": [
+    "solana-markets": [
         "sol perps",
         "solana perps",
         "sol leverage",
@@ -57,7 +57,7 @@ CLUSTERS = {
         "solana perps no kyc",
     ],
 
-    "altcoin-perps": [
+    "altcoin-markets": [
         "memecoin perps",
         "altcoin perps",
         "memecoin leverage",
@@ -85,7 +85,7 @@ CLUSTERS = {
         "hyperliquid without metamask",
     ],
 
-    "xstocks-trading": [
+    "global-markets": [
         "xstocks",
         "xstocks solana",
         "xstocks no kyc",
