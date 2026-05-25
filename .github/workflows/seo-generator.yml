@@ -398,6 +398,42 @@ jobs:
              echo '</urlset>'
            } > sitemap.xml
          }
+         realign_tracking_files() {
+           python3 - <<'PY'
+         import re
+         from collections import defaultdict
+         from pathlib import Path
+         kw_path = Path("data/generated_keywords.txt")
+         sl_path = Path("data/generated_slugs.txt")
+         def slugify(s):
+             s = s.lower()
+             s = re.sub(r"[^a-z0-9]+", "-", s)
+             return s.strip("-")
+         keywords = [l for l in kw_path.read_text().splitlines() if l.strip()]
+         slugs = [l for l in sl_path.read_text().splitlines() if l.strip()]
+         bucket = defaultdict(list)
+         seen = set()
+         for kw in keywords:
+             s = slugify(kw)
+             if s in seen: continue
+             seen.add(s)
+             bucket[s].append(kw)
+         reordered = []
+         for s in slugs:
+             if bucket[s]:
+                 reordered.append(bucket[s].pop(0))
+             else:
+                 reordered.append(s.replace("-", " "))
+         extra_slugs = []
+         for v in bucket.values():
+             for kw in v:
+                 reordered.append(kw)
+                 extra_slugs.append(slugify(kw))
+         if extra_slugs:
+             sl_path.write_text("\n".join(slugs + extra_slugs) + "\n")
+         kw_path.write_text("\n".join(reordered) + "\n")
+         PY
+         }
          commit_and_push() {
            local commit_message="$1"
            git status --short
@@ -466,6 +502,7 @@ jobs:
              echo "Generated tracking files missing during rebuild."
              exit 1
            fi
+           realign_tracking_files
            if [ "$(wc -l < "$GENERATED_SLUGS_FILE" | tr -d ' ')" -ne "$(wc -l < "$GENERATED_KEYWORDS_FILE" | tr -d ' ')" ]; then
              echo "generated_slugs.txt and generated_keywords.txt are not line-aligned."
              exit 1
@@ -486,6 +523,7 @@ jobs:
            mv "$RUNNER_TEMP/generated_slugs_kept.txt" "$GENERATED_SLUGS_FILE"
            mv "$RUNNER_TEMP/generated_keywords_kept.txt" "$GENERATED_KEYWORDS_FILE"
            DAILY_LIMIT="$current_batch_size" python scripts/build_seo_incremental.py
+           realign_tracking_files
            python scripts/build_hubs.py
            build_root_sitemap
            next_progress=$((progress + current_batch_size))
