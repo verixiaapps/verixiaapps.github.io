@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import subprocess
 from html import escape
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -23,6 +24,7 @@ SITE = "https://verixiaapps.com"
 RELATED_LINKS_COUNT = 6
 MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
+COMMIT_EVERY = 30
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
 FALLBACK_HUB_SLUG = "general-scams"
@@ -408,6 +410,40 @@ def sanitize_ai_html(text):
 
 
 # -----------------------------
+# GIT CHECKPOINT
+# -----------------------------
+def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords):
+   """Write tracking files and commit+push progress to origin."""
+   sorted_keywords = sorted(new_generated_keywords, key=slugify)
+   write_lines(GENERATED_KEYWORDS_FILE, sorted_keywords)
+   write_lines(GENERATED_SLUGS_FILE, [slugify(k) for k in sorted_keywords])
+   write_lines(KEYWORD_FILE, remaining_keywords)
+
+   try:
+       subprocess.run(["git", "add", "-A"], check=True)
+       result = subprocess.run(
+           ["git", "diff", "--cached", "--quiet"],
+           capture_output=True
+       )
+       if result.returncode == 0:
+           print(f"[checkpoint] No changes to commit at {generated_count} pages.")
+           return
+
+       subprocess.run(
+           ["git", "commit", "-m", f"Progress checkpoint: {generated_count} pages generated"],
+           check=True
+       )
+       subprocess.run(["git", "fetch", "origin", "main"], check=True)
+       subprocess.run(
+           ["git", "push", "--force-with-lease", "origin", "HEAD:main"],
+           check=True
+       )
+       print(f"[checkpoint] Committed and pushed at {generated_count} pages.")
+   except subprocess.CalledProcessError as e:
+       print(f"[checkpoint] Git error at {generated_count} pages: {e}")
+
+
+# -----------------------------
 # AI GENERATION
 # -----------------------------
 def generate_ai_text(keyword, keyword_display):
@@ -659,6 +695,9 @@ processed_keywords = set()
 new_generated_slugs = set(generated_slugs)
 new_generated_keywords = set(generated_keywords)
 
+# Build remaining_keywords as a mutable list we update on each checkpoint
+remaining_keywords = [normalize_keyword(kw) for kw in keywords]
+
 for page in queue_pages:
    if generated_count >= DAILY_LIMIT:
        break
@@ -670,6 +709,7 @@ for page in queue_pages:
 
    if slug in PROTECTED_SLUGS:
        processed_keywords.add(keyword)
+       remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
        print("Skipping protected page:", slug)
        continue
 
@@ -678,6 +718,7 @@ for page in queue_pages:
        new_generated_slugs.add(slug)
        new_generated_keywords.add(keyword)
        processed_keywords.add(keyword)
+       remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
        continue
 
    os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -718,6 +759,7 @@ for page in queue_pages:
    new_generated_slugs.add(slug)
    new_generated_keywords.add(keyword)
    processed_keywords.add(keyword)
+   remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
 
    existing_pages.append({"keyword": keyword, "slug": slug})
    existing_pages = dedupe_pages_by_slug(existing_pages)
@@ -728,18 +770,12 @@ for page in queue_pages:
        f"-> hub: {find_best_hub_slug(keyword)}"
    )
 
-remaining_keywords = []
-for keyword in keywords:
-   keyword_norm = normalize_keyword(keyword)
-   if keyword_norm not in processed_keywords:
-       remaining_keywords.append(keyword_norm)
+   # ---- CHECKPOINT EVERY 30 PAGES ----
+   if generated_count % COMMIT_EVERY == 0:
+       git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords)
 
-# Write keywords sorted by their slug, then derive slugs from the sorted keywords.
-# This guarantees the two files are always line-aligned.
-sorted_keywords = sorted(new_generated_keywords, key=slugify)
-write_lines(GENERATED_KEYWORDS_FILE, sorted_keywords)
-write_lines(GENERATED_SLUGS_FILE, [slugify(k) for k in sorted_keywords])
-write_lines(KEYWORD_FILE, remaining_keywords)
+# Final write + commit for whatever remains after the last checkpoint
+git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords)
 
 print(
    f"Done. Generated {generated_count} new pages. "
