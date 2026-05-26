@@ -3,11 +3,25 @@ name: SEO Page Generator Auto
 "on":
  workflow_dispatch:
    inputs:
-     manual_daily_limit:
-       description: "Pages to generate on this manual run"
+     run_mode:
+       description: "What to do on this run"
+       required: true
+       default: "generate"
+       type: choice
+       options:
+         - generate
+         - rebuild_wipe
+         - rebuild_missing
+     pages_to_run:
+       description: "How many pages to generate on this run"
        required: false
        default: "1000"
        type: string
+     resume:
+       description: "Resume where it left off (skip slugs already in generated_slugs.txt)"
+       required: false
+       default: "true"
+       type: boolean
      batch_size:
        description: "Commit every N pages"
        required: false
@@ -32,6 +46,8 @@ jobs:
      GENERATED_SLUGS_FILE: "data/generated_slugs.txt"
      OUTPUT_DIR: "scam-check-now"
      PROTECTED_SLUG: "is-this-a-scam"
+     RUN_MODE: ${{ github.event.inputs.run_mode }}
+     RESUME: ${{ github.event.inputs.resume }}
 
    steps:
      - name: Checkout repo
@@ -72,7 +88,16 @@ jobs:
          git reset --hard origin/main
          git clean -fd
 
-     - name: Wipe scam-check-now folder (preserve protected slug)
+     - name: Show run plan
+       shell: bash
+       run: |
+         echo "Run mode:    $RUN_MODE"
+         echo "Resume:      $RESUME"
+         echo "Pages:       ${{ github.event.inputs.pages_to_run }}"
+         echo "Batch size:  ${{ github.event.inputs.batch_size }}"
+
+     - name: Wipe scam-check-now folder (rebuild_wipe only, no resume)
+       if: github.event.inputs.run_mode == 'rebuild_wipe' && github.event.inputs.resume != 'true'
        shell: bash
        run: |
          set -euo pipefail
@@ -89,22 +114,28 @@ jobs:
          mkdir -p "$OUTPUT_DIR"
 
      - name: Rebuild keywords queue from generated_keywords.txt
+       if: startsWith(github.event.inputs.run_mode, 'rebuild_')
        shell: bash
        run: |
          set -euo pipefail
-         if [ -s "$GENERATED_KEYWORDS_FILE" ]; then
-           cp "$GENERATED_KEYWORDS_FILE" "$KEYWORDS_FILE"
-           echo "Loaded $(wc -l < "$KEYWORDS_FILE" | tr -d ' ') keywords into queue from generated_keywords.txt"
-         else
+         if [ ! -s "$GENERATED_KEYWORDS_FILE" ]; then
            echo "generated_keywords.txt is empty. Nothing to rebuild."
            exit 1
          fi
 
-         # Clear tracking files so script regenerates everything fresh
-         : > "$GENERATED_KEYWORDS_FILE"
-         : > "$GENERATED_SLUGS_FILE"
+         cp "$GENERATED_KEYWORDS_FILE" "$KEYWORDS_FILE"
+         echo "Loaded $(wc -l < "$KEYWORDS_FILE" | tr -d ' ') keywords into queue from generated_keywords.txt"
 
-     - name: Commit wipe before generation starts
+         if [ "$RESUME" != "true" ]; then
+           echo "Resume OFF -> clearing generated tracking files"
+           : > "$GENERATED_KEYWORDS_FILE"
+           : > "$GENERATED_SLUGS_FILE"
+         else
+           echo "Resume ON  -> keeping generated_slugs.txt so done slugs are skipped"
+         fi
+
+     - name: Commit pre-generation state (rebuild only)
+       if: startsWith(github.event.inputs.run_mode, 'rebuild_')
        shell: bash
        run: |
          set -euo pipefail
@@ -113,15 +144,21 @@ jobs:
            echo "Nothing to commit before generation."
            exit 0
          fi
-         git commit -m "Wipe scam-check-now and reset tracking files for fresh rebuild"
+         if [ "$RUN_MODE" = "rebuild_wipe" ] && [ "$RESUME" != "true" ]; then
+           git commit -m "Wipe scam-check-now and reset tracking files for fresh rebuild"
+         else
+           git commit -m "Prepare queue for ${RUN_MODE} (resume=${RESUME})"
+         fi
          git fetch origin main
          git push --force-with-lease origin HEAD:main
 
      - name: Run incremental build with checkpointing
        shell: bash
        env:
-         DAILY_LIMIT: ${{ github.event.inputs.manual_daily_limit }}
+         DAILY_LIMIT: ${{ github.event.inputs.pages_to_run }}
          COMMIT_EVERY: ${{ github.event.inputs.batch_size }}
+         RESUME: ${{ github.event.inputs.resume }}
+         RUN_MODE: ${{ github.event.inputs.run_mode }}
        run: python scripts/build_seo_incremental.py
 
      - name: Build hub pages
@@ -158,8 +195,8 @@ jobs:
            echo '</urlset>'
          } > sitemap.xml
 
-     - name: Final commit and push
-       if: success()
+     - name: Final commit and push (always)
+       if: always()
        shell: bash
        run: |
          set -euo pipefail
@@ -168,6 +205,6 @@ jobs:
            echo "Nothing left to commit."
            exit 0
          fi
-         git commit -m "Final commit: hubs + sitemap after full rebuild"
+         git commit -m "Checkpoint: progress from ${RUN_MODE} run (job status: ${{ job.status }})"
          git fetch origin main
          git push --force-with-lease origin HEAD:main
