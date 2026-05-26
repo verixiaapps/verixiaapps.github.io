@@ -2,52 +2,55 @@ import os
 import re
 from collections import Counter
 
-SEED_FILE = "data/nexus_dex_seed_keywords.txt"
+SEED_FILE    = "data/nexus_dex_seed_keywords.txt"
 PATTERN_FILE = "data/nexus_dex_patterns.txt"
-OUTPUT_FILE = "data/nexus_dex_keywords.txt"
+OUTPUT_FILE  = "data/nexus_dex_keywords.txt"
+
 MAX_KEYWORDS = 5000
-MIN_WORDS = 2
-MAX_WORDS = 12
+MIN_WORDS    = 2
+MAX_WORDS    = 12
+
+# =============================================================================
+# v18.4 filters
+# All perps/Hyperliquid/leverage/stock-broker terms removed. The script
+# enforces the Solana-DeFi-native voice through HIGH_INTENT_MARKERS and
+# STRONG_SIGNAL_TERMS.
+# =============================================================================
 
 BANNED_SUBSTRINGS = [
-    "perps perps",
-    "perp perp",
-    "perpetual perpetual",
     "swap swap",
     "buy buy",
     "sell sell",
     "trade trade",
     "wallet wallet",
-    "leverage leverage",
-    "long long",
-    "short short",
     "is is ",
     "no no ",
     "no kyc no kyc",
     "kyc kyc",
+    "verixia verixia",
     "nexus dex nexus dex",
-    "hyperliquid hyperliquid",
-    "xstocks xstocks",
-    "stocks stocks",
+    "wonderland wonderland",
+    "bridge bridge",
+    "memecoin memecoin",
+    "meme meme",
+    "brand brand",
     "stock stock",
     "tokenized tokenized",
     "whale whale",
     "launch launch",
+    "signal signal",
+    "trending trending",
     "self custodial self custodial",
     "non custodial non custodial",
     "wallet based wallet based",
-    "perps trading perps trading",
     "wallet trading wallet trading",
     "swap on swap",
     "buy on buy",
     "from wallet from wallet",
-    "on nexus dex on nexus dex",
+    "on verixia on verixia",
 ]
 
 LOW_VALUE_EXACT = {
-    "perps",
-    "perp",
-    "perpetual",
     "swap",
     "buy",
     "sell",
@@ -59,95 +62,108 @@ LOW_VALUE_EXACT = {
     "dex",
     "cex",
     "kyc",
-    "leverage",
-    "long",
-    "short",
-    "hedge",
+    "bridge",
+    "bridges",
+    "meme",
+    "memecoin",
+    "memes",
     "stock",
     "stocks",
-    "equity",
-    "equities",
-    "xstocks",
-    "xstock",
+    "brand",
     "tokenized",
     "whale",
     "launch",
+    "signal",
+    "signals",
+    "trending",
     "no kyc",
+    "verixia",
     "nexus dex",
-    "perps trading",
+    "wonderland",
     "wallet trading",
     "self custodial",
     "non custodial",
 }
 
+# Markers that signal a high-value Solana DeFi query. A keyword must contain
+# at least one of these OR start with a question word to survive filtering.
 HIGH_INTENT_MARKERS = [
-    "perps",
-    "perp",
-    "perpetual",
-    "leverage",
-    "leveraged",
-    "long",
-    "short",
-    "hedge",
+    # commercial
     "no kyc",
     "without kyc",
     "no signup",
+    "no account",
     "no verification",
+    "anonymous",
+    "permissionless",
     "self custodial",
     "non custodial",
     "wallet based",
+    "wallet native",
+    "wallet only",
     "mobile",
     "phantom",
     "backpack",
     "solflare",
-    "hyperliquid",
+    # core actions
+    "swap",
+    "buy",
+    "trade",
+    "ape",
+    "send",
+    # solana DEX aggregation
+    "dex aggregator",
+    "best price",
+    "jupiter",
+    "raydium",
+    "orca",
+    "meteora",
+    # v18.4 product surfaces
+    "wonderland",
+    "memecoin",
+    "meme",
+    "brand token",
+    "brand tokens",
+    "tokenized",
+    "bridge",
+    "to solana",
+    "from solana",
+    "cross chain",
+    "wormhole",
+    "debridge",
+    "allbridge",
+    # signals / discovery
+    "trending",
+    "signals",
+    "fresh launch",
+    "fresh launches",
+    "top gainers",
+    "volume leaders",
+    "hot solana",
+    "pumping",
+    "mooning",
+    "discovery",
+    # whale tracking
     "whale",
     "smart money",
     "insider",
     "deployer",
     "sniper",
+    "kol wallet",
+    "early buyers",
+    "first buyers",
+    # token launch
     "launch",
     "launchpad",
     "bonding curve",
-    "swap",
-    "buy",
-    "trade",
-    "dex aggregator",
-    "best price",
+    "graduate",
+    "deploy",
+    # brand tickers (Solana SPL tokens that track popular brands)
+    "aaplx", "tslax", "nvdax", "msftx", "googlx", "amznx", "metax", "mstrx",
+    "nflxx", "spyx", "qqqx", "crclx", "hoodx", "coinx", "orclx", "crmx",
+    # branded products
+    "verixia",
     "nexus dex",
-    # xStocks / tokenized stocks
-    "xstocks",
-    "xstock",
-    "tokenized stock",
-    "tokenized stocks",
-    "tokenized equity",
-    "tokenized equities",
-    "onchain stocks",
-    "stocks on solana",
-    "stocks as spl",
-    "buy stocks",
-    "trade stocks",
-    "stocks no kyc",
-    "stocks without",
-    "stocks 24",
-    "stocks weekend",
-    "stocks after hours",
-    "us stocks",
-    "aapl",
-    "tsla",
-    "nvda",
-    "msft",
-    "googl",
-    "amzn",
-    "mstr",
-    "spy",
-    "qqq",
-    "aaplx",
-    "tslax",
-    "nvdax",
-    "spyx",
-    "qqqx",
-    "backed finance",
 ]
 
 QUESTION_STARTERS = (
@@ -169,120 +185,120 @@ BAD_PREFIXES = (
     "should i buy should i buy ",
     "how to how to ",
     "can i can i ",
+    "buy buy ",
+    "swap swap ",
+    "bridge bridge ",
 )
 
+# Tokens that signal the keyword is on-topic for Verixia (Solana DeFi). At
+# least one must appear in the phrase to pass filtering.
 STRONG_SIGNAL_TERMS = {
-    "perps",
-    "perp",
-    "perpetual",
-    "leverage",
-    "leveraged",
-    "long",
-    "short",
-    "hedge",
+    # commercial signals
     "no kyc",
     "without kyc",
     "no signup",
+    "no account",
     "self custodial",
     "non custodial",
     "wallet based",
+    "wallet only",
     "phantom",
     "backpack",
     "solflare",
-    "hyperliquid",
+    # action signals
+    "swap",
+    "buy",
+    "trade",
+    "ape",
+    # discovery / intel signals
     "whale",
     "smart money",
     "insider",
     "deployer",
     "sniper",
+    "trending",
+    "signals",
+    "discovery",
+    "pumping",
+    "mooning",
+    "hot",
+    # launch signals
     "launch",
     "launchpad",
-    "bonding curve",
-    "swap",
-    "buy",
-    "trade",
-    "dex",
+    "bonding",
+    "graduate",
+    # chain / network signals
     "solana",
-    "ethereum",
-    "eth",
     "sol",
-    "btc",
-    "bitcoin",
-    "bonk",
-    "wif",
-    "pepe",
-    "doge",
-    "hype",
-    "popcat",
-    "trump",
-    "jup",
-    "ray",
-    "spx",
-    "fartcoin",
-    # xStocks tickers + concepts
-    "xstocks",
-    "xstock",
+    "usdc",
+    "spl",
+    # bridge signals
+    "bridge",
+    "wormhole",
+    "debridge",
+    "allbridge",
+    "cross chain",
+    # meme signals (popular Solana memes)
+    "hoppy", "fartcoin", "pepe", "wif", "bonk", "popcat", "mew", "wen",
+    "bome", "myro", "ponke", "michi", "trump", "moodeng", "goat", "pnut",
+    "pengu", "neiro", "fwog", "useless", "doge", "shib", "floki",
+    # solana ecosystem tokens
+    "jup", "ray", "pyth", "jto", "raydium", "jupiter", "orca", "meteora",
+    # brand tokens (Solana SPL tokens that track popular brands)
+    "aaplx", "tslax", "nvdax", "msftx", "googlx", "amznx", "metax", "mstrx",
+    "nflxx", "spyx", "qqqx", "crclx", "hoodx", "coinx", "orclx", "crmx",
     "tokenized",
-    "stocks",
-    "stock",
-    "equity",
-    "equities",
-    "onchain",
-    "aapl",
-    "tsla",
-    "nvda",
-    "msft",
-    "googl",
-    "amzn",
-    "meta",
-    "mstr",
-    "spy",
-    "qqq",
-    "nflx",
-    "coin",
-    "hood",
-    "crcl",
-    "aaplx",
-    "tslax",
-    "nvdax",
-    "spyx",
-    "qqqx",
+    "brand",
+    "memecoin",
+    "wonderland",
 }
 
+# Solana-relevant chain context (used in bridge templates + scoring)
 CHAIN_TERMS = {
     "solana",
+    "sol",
     "ethereum",
     "eth",
-    "sol",
-    "bitcoin",
-    "btc",
-    "arbitrum",
-    "polygon",
     "base",
-    "bsc",
+    "arbitrum",
+    "arb",
+    "optimism",
+    "op",
+    "polygon",
     "avalanche",
-    "blast",
+    "avax",
+    "bnb",
+    "bsc",
+    "binance",
     "sui",
+    "aptos",
+    "near",
     "ton",
-    "tron",
 }
 
 METRIC_TERMS = {
     "no kyc",
     "without kyc",
     "no signup",
+    "no account",
+    "no verification",
     "self custodial",
     "non custodial",
     "wallet based",
+    "wallet only",
     "mobile",
     "best price",
     "dex aggregator",
     "on chain",
-    "wallet only",
     "from wallet",
     "24 7",
-    "fractional",
-    "1:1 backed",
+    "weekend",
+    "after hours",
+    "global",
+    "global access",
+    "settled in usdc",
+    "permissionless",
+    "anonymous",
 }
 
 BUY_TERMS = {
@@ -290,12 +306,9 @@ BUY_TERMS = {
     "buy",
     "sell",
     "trade",
-    "long",
-    "short",
-    "hedge",
-    "leverage",
-    "open position",
-    "close position",
+    "ape",
+    "send",
+    "bridge",
     "lp",
     "borrow",
     "collateral",
@@ -305,10 +318,13 @@ SAFETY_TERMS = {
     "no kyc",
     "without kyc",
     "no signup",
+    "no account",
     "no verification",
     "self custodial",
     "non custodial",
     "wallet based",
+    "anonymous",
+    "permissionless",
 }
 
 STOPWORDS = {
@@ -342,11 +358,23 @@ def clean_phrase(text: str) -> str:
 
 
 def load_lines(path: str):
+    """Load lines from a file. Skips empty lines and any line starting with '#'
+    (so comments in the patterns file don't get treated as patterns)."""
     if not os.path.exists(path):
         print(f"File not found: {path}")
         return []
     with open(path, "r", encoding="utf-8") as f:
-        return [clean_phrase(line) for line in f if clean_phrase(line)]
+        out = []
+        for raw in f:
+            stripped = raw.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("#"):
+                continue
+            cleaned = clean_phrase(stripped)
+            if cleaned:
+                out.append(cleaned)
+        return out
 
 
 def word_count(text: str) -> int:
@@ -459,6 +487,9 @@ def is_valid_phrase(phrase: str) -> bool:
 
 
 def quality_score(phrase: str):
+    """Lower is better. Scores keywords by how well they match v18.4 product
+    surfaces: brand tokens, Wonderland memes, bridges, signals, whale tracking,
+    no-KYC swaps."""
     phrase = clean_phrase(phrase)
     count = word_count(phrase)
 
@@ -471,35 +502,89 @@ def quality_score(phrase: str):
     starts_check   = phrase.startswith("check ")
     starts_can     = phrase.startswith("can ")
 
-    has_action       = any(contains_term_phrase(phrase, term) for term in BUY_TERMS)
-    has_custody      = any(contains_term_phrase(phrase, term) for term in SAFETY_TERMS)
-    has_no_kyc       = contains_term_phrase(phrase, "no kyc") or contains_term_phrase(phrase, "without kyc")
-    has_perps        = contains_term_phrase(phrase, "perps") or contains_term_phrase(phrase, "perpetual")
-    has_xstocks      = (
-        contains_term_phrase(phrase, "xstocks")
-        or contains_term_phrase(phrase, "xstock")
-        or contains_term_phrase(phrase, "tokenized stock")
-        or contains_term_phrase(phrase, "tokenized stocks")
-        or contains_term_phrase(phrase, "tokenized equity")
-        or contains_term_phrase(phrase, "stocks on solana")
-        or contains_term_phrase(phrase, "onchain stocks")
-        or any(contains_term_phrase(phrase, t) for t in ["aaplx", "tslax", "nvdax", "spyx", "qqqx"])
+    has_action  = any(contains_term_phrase(phrase, term) for term in BUY_TERMS)
+    has_custody = any(contains_term_phrase(phrase, term) for term in SAFETY_TERMS)
+    has_no_kyc  = contains_term_phrase(phrase, "no kyc") or contains_term_phrase(phrase, "without kyc")
+
+    # Product-surface buckets (one of these is the ideal hit)
+    has_memes = (
+        contains_term_phrase(phrase, "wonderland")
+        or contains_term_phrase(phrase, "memecoin")
+        or contains_term_phrase(phrase, "meme")
+        or any(contains_term_phrase(phrase, t) for t in
+               ["hoppy", "fartcoin", "pepe", "wif", "bonk", "popcat", "mew",
+                "bome", "myro", "michi", "trump", "moodeng", "goat", "pnut",
+                "pengu", "neiro", "fwog", "useless"])
     )
-    has_hyperliquid  = contains_term_phrase(phrase, "hyperliquid")
-    has_whale        = contains_term_phrase(phrase, "whale") or contains_term_phrase(phrase, "smart money") or contains_term_phrase(phrase, "insider")
-    has_launch       = contains_term_phrase(phrase, "launch") or contains_term_phrase(phrase, "launchpad")
-    has_feature      = any(contains_term_phrase(phrase, term) for term in METRIC_TERMS)
-    has_chain        = any(contains_term_phrase(phrase, term) for term in CHAIN_TERMS)
-    has_venue        = any(contains_term_phrase(phrase, term) for term in {"swap", "dex", "perps", "hyperliquid", "xstocks", "kamino", "raydium"})
+    has_brand = (
+        contains_term_phrase(phrase, "brand token")
+        or contains_term_phrase(phrase, "brand tokens")
+        or contains_term_phrase(phrase, "tokenized")
+        or any(contains_term_phrase(phrase, t) for t in
+               ["aaplx", "tslax", "nvdax", "msftx", "googlx", "amznx", "metax",
+                "mstrx", "nflxx", "spyx", "qqqx", "crclx", "hoodx", "coinx",
+                "orclx", "crmx"])
+    )
+    has_bridge = (
+        contains_term_phrase(phrase, "bridge")
+        or contains_term_phrase(phrase, "to solana")
+        or contains_term_phrase(phrase, "cross chain")
+        or contains_term_phrase(phrase, "wormhole")
+        or contains_term_phrase(phrase, "debridge")
+        or contains_term_phrase(phrase, "allbridge")
+    )
+    has_signals = (
+        contains_term_phrase(phrase, "trending")
+        or contains_term_phrase(phrase, "signals")
+        or contains_term_phrase(phrase, "fresh launches")
+        or contains_term_phrase(phrase, "top gainers")
+        or contains_term_phrase(phrase, "pumping")
+        or contains_term_phrase(phrase, "mooning")
+        or contains_term_phrase(phrase, "discovery")
+    )
+    has_whale = (
+        contains_term_phrase(phrase, "whale")
+        or contains_term_phrase(phrase, "smart money")
+        or contains_term_phrase(phrase, "insider")
+        or contains_term_phrase(phrase, "deployer")
+        or contains_term_phrase(phrase, "sniper")
+    )
+    has_launch = (
+        contains_term_phrase(phrase, "launch")
+        or contains_term_phrase(phrase, "launchpad")
+        or contains_term_phrase(phrase, "bonding")
+        or contains_term_phrase(phrase, "graduate")
+    )
+
+    has_feature = any(contains_term_phrase(phrase, term) for term in METRIC_TERMS)
+    has_chain   = any(contains_term_phrase(phrase, term) for term in CHAIN_TERMS)
+    has_venue   = any(contains_term_phrase(phrase, term) for term in
+                      {"swap", "dex", "raydium", "jupiter", "orca", "meteora",
+                       "verixia", "nexus dex"})
 
     signature_len = len(phrase_signature(phrase).split())
 
+    # Lower tuple value = better. Each "0 if X" condition pulls the score down.
+    # The product-surface dimensions come early so we get coverage across
+    # memes, brands, bridges, signals, whale tracking, and launches in the
+    # top results -- rather than 5000 question-form swaps that crowd out
+    # the discovery and intel keywords.
     return (
         0 if has_action else 1,
         0 if has_custody else 1,
         0 if has_no_kyc else 1,
-        0 if has_perps or has_xstocks or has_hyperliquid else 1,
-        0 if has_whale or has_launch else 1,
+        # Product-surface coverage: any of memes / brands / bridges / signals
+        # / whale / launch counts as a strong hit
+        0 if (has_memes or has_brand or has_bridge or has_signals
+              or has_whale or has_launch) else 1,
+        # Explicit boost for discovery + intel buckets so they make the
+        # 5000-keyword cap (otherwise they get crowded out by swaps + bridges)
+        0 if has_whale else 1,
+        0 if has_signals else 1,
+        0 if has_memes else 1,
+        0 if has_brand else 1,
+        0 if has_bridge else 1,
+        0 if has_launch else 1,
         0 if has_feature else 1,
         0 if has_chain else 1,
         0 if has_venue else 1,
@@ -545,31 +630,39 @@ def dedupe_preserve_best(phrases):
 
 def main():
     os.makedirs("data", exist_ok=True)
-    seeds = [seed for seed in load_lines(SEED_FILE) if is_valid_seed(seed)]
+    seeds    = [seed for seed in load_lines(SEED_FILE) if is_valid_seed(seed)]
     patterns = load_lines(PATTERN_FILE)
+
     if not seeds:
         print(f"No usable seed keywords found in {SEED_FILE}")
         return
     if not patterns:
         print(f"No patterns found in {PATTERN_FILE}")
         return
+
     keywords = []
     for seed in seeds:
         for pattern in patterns:
-            if "{keyword}" not in pattern:
-                continue
-            phrase = clean_phrase(pattern.replace("{keyword}", seed))
+            if "{keyword}" in pattern:
+                phrase = clean_phrase(pattern.replace("{keyword}", seed))
+            else:
+                # Standalone pattern (no substitution). Emitted once after
+                # dedup, regardless of how many seeds the loop touches.
+                phrase = clean_phrase(pattern)
             if is_valid_phrase(phrase):
                 keywords.append(phrase)
+
     keywords = dedupe_preserve_best(keywords)
     keywords = sorted(keywords, key=quality_score)
     keywords = keywords[:MAX_KEYWORDS]
+
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         for kw in keywords:
             f.write(kw + "\n")
-    print(f"Seeds loaded: {len(seeds)}")
+
+    print(f"Seeds loaded:    {len(seeds)}")
     print(f"Patterns loaded: {len(patterns)}")
-    print(f"Generated {len(keywords)} nexus dex keywords")
+    print(f"Generated {len(keywords)} Verixia keywords (capped at {MAX_KEYWORDS})")
 
 
 if __name__ == "__main__":
