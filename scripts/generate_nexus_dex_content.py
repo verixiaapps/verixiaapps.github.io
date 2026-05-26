@@ -1,30 +1,25 @@
 #!/usr/bin/env python3
 """
-generate_nexus_dex_content.py -- v2.0 (canonical builder)
+generate_nexus_dex_content.py -- v3.0 (Verixia / Solana-DeFi-native)
 
-Builds Verixia Nexus DEX SEO pages from the keyword queue.
+Builds Verixia SEO pages from the keyword queue against engine v18.4.
 
-Design rules (v2.0):
-  - Single source of truth: the Node SEO engine (v16.2+) at /seo-page.
-  - No content fallbacks. If engine fails or returns weak content,
-    the keyword stays in the queue and is retried on the next run.
-  - Quality floor: MIN_PUBLISH_SCORE = 80. Engine still scores at 72
-    internally, but Python refuses to publish anything weaker.
-  - Two-pass retry: one engine call, and on transient failure, one retry.
-    Beyond that, skip and log.
-  - Placeholder names match the v2.3 template exactly:
-      {{TITLE}} {{DESCRIPTION}} {{KEYWORD}} {{AI_CONTENT}}
-      {{RELATED_LINKS}} {{MORE_LINKS}} {{HUB_LINK}}
-      {{CANONICAL_URL}} {{MODIFIED_DATE}} {{BREADCRUMB_NAME}}
-      {{STATIC_H1}} {{STATIC_INTRO}} {{OG_IMAGE}} {{HL_DATA_BLOCK}}
-      {{SCHEMA_FAQ}} {{AGGREGATE_RATING_JSON}}
-      {{SUPP_HEADING}} {{SUPP_INTRO}} {{PAGE_META_SCRIPT}}
-  - prediction_markets intent is routed to the event-markets hub.
-  - AggregateRating is exposed inline in the visual chip only (the
-    template's FinancialService/SoftwareApplication JSON-LD that
-    references {{AGGREGATE_RATING_JSON}} must be stripped from the
-    template, see template v2.4). This file no longer emits
-    AggregateRating JSON-LD.
+What's new in v3.0:
+  - Dropped Hyperliquid integration entirely (no more hlDataBlock, no more
+    hyperliquid-frontend hub).
+  - Dropped prediction markets entirely (no more event-markets hub, no more
+    polymarket/kalshi routing). Filter your keyword file with
+    filter_keywords.py before running this so those keywords never arrive.
+  - Added five new hubs aligned to v18.4 product surfaces:
+        wonderland-memes   for /memes/ pages
+        live-signals       for /signals/ pages
+        brand-tokens       for /brands/ pages
+        solana-bridges     for /bridge/ pages
+        solana-swaps       for /swap/ pages (replaces old solana-swap)
+  - Wires the v18.4 payload directly: recognition chips, supplementary cards,
+    FAQ, jitter, observations, all flow into the template via the meta script.
+  - Quality floor preserved: MIN_PUBLISH_SCORE = 80.
+  - Two-pass retry preserved: one engine call, one retry on transient error.
 """
 
 from __future__ import annotations
@@ -56,12 +51,14 @@ OUTPUT_DIR           = BASE_DIR / "nexus-dex"
 
 SITE_URL             = "https://verixiaapps.com"
 SEO_API_BASE         = "https://awake-integrity-production-faa0.up.railway.app"
-SEO_PAGE_ENDPOINT    = f"{SEO_API_BASE}/seo-page"
+SEO_PAGE_ENDPOINT    = f"{SEO_API_BASE}/verixia/seo-page"
+SEO_RESET_ENDPOINT   = f"{SEO_API_BASE}/verixia/reset-build"
+SEO_REPORT_ENDPOINT  = f"{SEO_API_BASE}/verixia/build-report"
 SEO_PAGE_TIMEOUT_S   = 90
 
 DAILY_LIMIT          = 100
 
-# Engine accepts >=72. Python publishes only >=80.
+# Engine accepts >=72 internally. Python publishes only >=80.
 MIN_PUBLISH_SCORE    = 80
 
 OG_IMAGE             = f"{SITE_URL}/og/nexus-dex.png"
@@ -70,126 +67,114 @@ TWITTER_HANDLE       = "@verixiaapps"
 RELATED_LINKS_COUNT  = 6
 MORE_LINKS_COUNT     = 10
 
-# Protected slugs are hub pages that this script never overwrites.
+# Protected hub slugs the script will never overwrite.
 PROTECTED_SLUGS = {
+    # core
     "nexus-dex",
     "crypto-markets",
     "bitcoin-markets",
     "ethereum-markets",
     "solana-markets",
     "altcoin-markets",
-    "hyperliquid-frontend",
-    "global-markets",
+    # v18.4 product surfaces
+    "wonderland-memes",
+    "live-signals",
+    "brand-tokens",
+    "solana-bridges",
+    "solana-swaps",
+    # commercial / discovery / how-to
+    "no-kyc-trading",
+    "wallet-trading",
+    "whale-tracking",
+    "token-launch",
+    "how-to-guides",
+    # brands sub-hubs
     "tokenized-stocks",
     "buy-stocks-onchain",
     "stocks-no-kyc",
     "stocks-24-7",
     "global-stock-access",
-    "solana-swap",
-    "buy-token",
-    "no-kyc-trading",
-    "whale-tracking",
-    "token-launch",
-    "wallet-trading",
-    "how-to-guides",
-    "event-markets",
-    "prediction-markets",
+    "global-markets",
 }
 
 # =========================================================================
-# HUB SYSTEM
+# HUB SYSTEM v18.4
 # =========================================================================
-# Order matters: first match wins. Prediction markets routed to event-markets.
+# Order matters: first match wins.
+#
+# Dropped from v2: prediction-markets, hyperliquid-frontend.
 
 HUB_MATCH_RULES = [
-    # ---- Prediction markets (NEW, highest priority) ----
-    (r"\b(polymarket|kalshi)\b",
-        "event-markets", "predictions"),
-    (r"prediction\s+market|outcome\s+market|yes/?no\s+shares?|implied\s+probabilit",
-        "event-markets", "predictions"),
-    (r"\b(btc|bitcoin|eth|ethereum|sol|solana)\s+price\s+(prediction|target|forecast)\b",
-        "event-markets", "predictions"),
-    (r"will\s+(bitcoin|btc|ethereum|eth|solana|sol)\s+(hit|reach|cross|break)\b",
-        "event-markets", "predictions"),
-    (r"crypto[\s-]?native\s+predictions?|defi\s+outcome|onchain\s+prediction",
-        "event-markets", "predictions"),
-    (r"bonding\s+curve\s+graduation|memecoin\s+graduation\s+market",
-        "event-markets", "predictions"),
+    # ---- Memes (Wonderland) ----
+    (r"\b(hoppy|fartcoin|pepe|wif|bonk|popcat|mew|wen|bome|myro|ponke|michi|chonk|trump|melania|floki|moodeng|goat|fwog|pnut|act|gigachad|pengu|neiro|lockin|useless)\b",
+        "wonderland-memes", "wonderland"),
+    (r"meme[\s-]?coin|memecoin|meme[\s-]?token|wonderland|degen[\s-]?coin|degen[\s-]?token|moonshot|fresh[\s-]?launch|new[\s-]?launch|low[\s-]?cap[\s-]?gem|community[\s-]?coin",
+        "wonderland-memes", "wonderland"),
 
-    # ---- Hyperliquid ----
-    (r"\bhyperliquid\b",
-        "hyperliquid-frontend", "hyperliquid"),
+    # ---- Signals / discovery ----
+    (r"trending\s+(solana|coins|tokens|crypto)|what.?s\s+(pumping|mooning|hot)|hot\s+(right\s+now|coins|tokens)|fresh\s+(launches|tokens|coins)|new\s+solana\s+(coins|tokens|launches)|top\s+gainers|volume\s+leaders|\bsignals\b|\bdiscovery\b",
+        "live-signals", "signals"),
 
-    # ---- xStocks / tokenized stocks (specific tickers first) ----
-    (r"\bxstocks?\b|\baaplx\b|\btslax\b|\bnvdax\b|\bspyx\b|\bqqqx\b|\bmstrx\b|\bgooglx\b|\bmsftx\b|\bamznx\b|\bmetax\b|\bnflxx\b|\bcrclx\b|\bhoodx\b|backed\s+finance",
-        "global-markets", "xstocks"),
-    (r"buy\s+us\s+stocks\s+from|us\s+stocks\s+no\s+us\s+bank|us\s+stocks\s+for\s+non\s+residents|us\s+stocks\s+international|global\s+stock|international\s+stock",
-        "global-stock-access", "global_stocks"),
+    # ---- Brand tokens (specific tickers + companies) ----
+    (r"\baaplx\b|\btslax\b|\bnvdax\b|\bmsftx\b|\bgooglx\b|\bamznx\b|\bmetax\b|\bmstrx\b|\bnflxx\b|\bspyx\b|\bqqqx\b|\bcrclx\b|\bhoodx\b|\bcoinx\b|\borclx\b|\bcrmx\b",
+        "brand-tokens", "brands"),
+    (r"\b(apple|tesla|nvidia|microsoft|google|alphabet|meta|amazon|netflix|microstrategy|coinbase|circle|robinhood|oracle|salesforce)\b\s*(on\s+solana|onchain|24/7|defi|crypto|usdc|no\s*kyc|brand)",
+        "brand-tokens", "brands"),
+    (r"brand\s+tokens?|tokenized\s+(stocks?|equit(y|ies))|onchain\s+(stocks?|equit(y|ies))|stocks?\s+on\s+(solana|blockchain)|stocks?\s+as\s+spl|buy\s+stocks?\s+with\s+(crypto|usdc|sol)",
+        "brand-tokens", "brands"),
     (r"24\s*7\s+stock|stocks?\s+24\s+hours?|stocks?\s+weekend|trade\s+stocks?\s+at\s+night|trade\s+stocks?\s+weekends?|trade\s+stocks?\s+holidays?|stocks?\s+never\s+close|always\s+open\s+stock|stocks?\s+after\s+hours?",
-        "stocks-24-7", "stocks_247"),
-    (r"buy\s+stocks?\s+no\s+kyc|trade\s+stocks?\s+no\s+kyc|stock\s+trading\s+no\s+verification|stock\s+trading\s+no\s+signup|stocks?\s+no\s+id|stocks?\s+no\s+account|anonymous\s+stock|stocks?\s+without\s+(broker|robinhood|etrade)",
-        "stocks-no-kyc", "stocks_no_kyc"),
-    (r"buy\s+(apple|aapl|tesla|tsla|nvidia|nvda|microsoft|msft|google|googl|alphabet|meta|amazon|amzn|mstr|microstrategy|spy|qqq|netflix|nflx|coinbase|robinhood|circle|crcl)\b",
-        "buy-stocks-onchain", "buy_stocks"),
-    (r"tokenized\s+stocks?|tokenized\s+equit(y|ies)|onchain\s+stocks?|onchain\s+equit(y|ies)|stocks?\s+on\s+(solana|blockchain)|stocks?\s+as\s+spl|buy\s+stocks?\s+with\s+(crypto|usdc|sol)",
-        "tokenized-stocks", "tokenized_stocks"),
+        "brand-tokens", "brands"),
+    (r"buy\s+stocks?\s+no\s+kyc|trade\s+stocks?\s+no\s+kyc|stock\s+trading\s+no\s+verification|anonymous\s+stock|stocks?\s+without\s+(broker|robinhood|etrade)",
+        "brand-tokens", "brands"),
+    (r"buy\s+us\s+stocks\s+from|us\s+stocks\s+no\s+us\s+bank|us\s+stocks\s+for\s+non\s+residents|us\s+stocks\s+international|global\s+stock|international\s+stock",
+        "brand-tokens", "brands"),
 
-    # ---- Perps by asset ----
-    (r"\bbtc\s+perp|bitcoin\s+perp|bitcoin\s+futures|bitcoin\s+perpetual",
-        "bitcoin-markets", "btc_perps"),
-    (r"\beth\s+perp|ethereum\s+perp|ethereum\s+futures|ethereum\s+perpetual",
-        "ethereum-markets", "eth_perps"),
-    (r"\bsol\s+perp|solana\s+perp|sol\s+perpetual",
-        "solana-markets", "sol_perps"),
-    (r"\bmemecoin\s+perp|altcoin\s+perp|\bwif\s+perp|\bbonk\s+perp|\bpepe\s+perp|\bdoge\s+perp|\bhype\s+perp",
-        "altcoin-markets", "altcoin_perps"),
+    # ---- Bridges ----
+    (r"\bbridge\b.*\bsolana\b|cross[\s-]?chain.*solana|wormhole|debridge|allbridge",
+        "solana-bridges", "bridges"),
+    (r"\b(ethereum|base|arbitrum|optimism|polygon|avalanche|bnb|binance|bsc|sui|aptos|near|celo|moonbeam|kava|ton|kaspa|cosmos|osmosis|injective|sei|monad|berachain|blast|linea|scroll|mantle|zksync|starknet)\b\s*(to\s+solana|->.*solana|bridge)",
+        "solana-bridges", "bridges"),
 
-    # ---- Whale / launch / swap / buy ----
+    # ---- Swaps (token-specific or solana-swap commercial) ----
+    (r"how\s+to\s+(buy|swap|trade)\s+\w+\s+(on\s+)?solana|swap\s+\w+\s+(on\s+)?solana|buy\s+\w+\s+on\s+solana",
+        "solana-swaps", "swap"),
+    (r"\bsolana\s+(swap|swaps|dex|aggregator|exchange|trading|defi)\b|\bdex\s+aggregator|best\s+price\s+swap",
+        "solana-swaps", "swap"),
+    (r"\b(jup|ray|raydium|orca|meteora|phoenix|jupiter)\b.*(swap|buy|trade|how\s+to)",
+        "solana-swaps", "swap"),
+
+    # ---- Whale / on-chain intelligence ----
     (r"\bwhale\b|\bsmart\s+money\b|\binsider\b|\bdeployer\b|\bsniper\b|kol\s+wallet",
         "whale-tracking", "whale"),
-    (r"\blaunch\s+token|\btoken\s+launch|\blaunchpad\b|bonding\s+curve|deploy\s+token",
-        "token-launch", "launch"),
-    (r"\bsolana\s+swap|\bsolana\s+dex|\bdex\s+aggregator|best\s+price\s+swap",
-        "solana-swap", "swap"),
-    (r"\bbuy\s+(bonk|wif|pepe|trump|memecoin|spl)\b|\bbuy\b",
-        "buy-token", "buy_token"),
 
-    # ---- Wallet / no-KYC (generic, after specific rules) ----
-    (r"phantom\s+wallet\s+trading|backpack\s+wallet\s+trading|self\s+custodial|non\s+custodial|wallet\s+based",
+    # ---- Token launch ----
+    (r"\blaunch\s+token|\btoken\s+launch|\blaunchpad\b|bonding\s+curve|deploy\s+token|fresh\s+pool",
+        "token-launch", "launch"),
+
+    # ---- Wallet / no-KYC commercial buckets ----
+    (r"phantom\s+wallet\s+trading|backpack\s+wallet\s+trading|self\s+custodial|non\s+custodial|wallet\s+based|wallet[\s-]?native",
         "wallet-trading", "wallet"),
-    (r"no\s+kyc|without\s+kyc|no\s+signup|no\s+verification",
+    (r"no\s+kyc|without\s+kyc|no\s+signup|no\s+verification|no\s+account|anonymous\s+(crypto|swap|dex|trading|exchange|defi)",
         "no-kyc-trading", "no_kyc"),
 
-    # ---- Perps fallback ----
-    (r"\bperp(s|etual)|\bleverage|\blong\b|\bshort\b|\bhedge\b",
-        "crypto-markets", "perps"),
+    # ---- Generic catch-alls ----
     (r"\bswap\b",
-        "solana-swap", "swap"),
+        "solana-swaps", "swap"),
     (r"how\s+to\b",
         "how-to-guides", "how_to"),
 ]
 
 HUB_TITLE_OVERRIDES = {
-    "predictions":      "Prediction Markets Hub",
-    "hyperliquid":      "Hyperliquid Frontend Hub",
-    "xstocks":          "Global Markets Hub",
-    "tokenized_stocks": "Tokenized Stocks Hub",
-    "buy_stocks":       "Buy Stocks On-Chain Hub",
-    "stocks_no_kyc":    "Stocks No KYC Hub",
-    "stocks_247":       "24/7 Stocks Hub",
-    "global_stocks":    "Global Stock Access Hub",
-    "btc_perps":        "Bitcoin Markets Hub",
-    "eth_perps":        "Ethereum Markets Hub",
-    "sol_perps":        "SOL Markets Hub",
-    "altcoin_perps":    "Altcoin Markets Hub",
-    "whale":            "Whale Tracking Hub",
-    "launch":           "Token Launch Hub",
-    "swap":             "Solana Swap Hub",
-    "buy_token":        "Buy Token Hub",
-    "wallet":           "Wallet Trading Hub",
-    "no_kyc":           "No KYC Trading Hub",
-    "perps":            "Crypto Markets Hub",
-    "how_to":           "Nexus DEX Guides Hub",
+    "wonderland":  "Wonderland Memes Hub",
+    "signals":     "Live Signals Hub",
+    "brands":      "Brand Tokens Hub",
+    "bridges":     "Solana Bridges Hub",
+    "swap":        "Solana Swaps Hub",
+    "whale":       "Whale Tracking Hub",
+    "launch":      "Token Launch Hub",
+    "wallet":      "Wallet Trading Hub",
+    "no_kyc":      "No KYC Trading Hub",
+    "how_to":     "Verixia Guides Hub",
 }
 
 DEFAULT_HUB_SLUG  = "crypto-markets"
@@ -234,11 +219,6 @@ def append_line(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
         f.write(value + "\n")
-
-
-def write_lines(path: Path, values: list[str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(values) + ("\n" if values else ""), encoding="utf-8")
 
 
 def html_escape(text) -> str:
@@ -298,9 +278,36 @@ def fetch_seo_page(keyword: str, attempt: int = 1) -> dict | None:
     return payload
 
 
+def reset_build_registry() -> bool:
+    """Call /reset-build at the start of a build to clear the engine's
+    output gate and anti-repetition registries."""
+    try:
+        resp = requests.post(SEO_RESET_ENDPOINT, timeout=10)
+        if resp.status_code == 200:
+            print(f"[build] engine build registries reset")
+            return True
+        print(f"[build] reset failed: HTTP {resp.status_code}")
+        return False
+    except requests.RequestException as exc:
+        print(f"[build] reset failed: {exc}")
+        return False
+
+
+def fetch_build_report() -> dict | None:
+    """Call /build-report at the end of a build for the dedup/score sidecar."""
+    try:
+        resp = requests.get(SEO_REPORT_ENDPOINT, timeout=10)
+        if resp.status_code == 200:
+            return resp.json()
+        print(f"[build] report fetch failed: HTTP {resp.status_code}")
+        return None
+    except requests.RequestException as exc:
+        print(f"[build] report fetch failed: {exc}")
+        return None
+
+
 def is_publishable(payload: dict) -> tuple[bool, str]:
-    """Quality gate: engine must report score >= MIN_PUBLISH_SCORE, and
-    content must look structurally valid (4 paragraphs, real prose)."""
+    """Quality gate."""
     meta = payload.get("meta") or {}
     score = payload.get("score")
     if score is None:
@@ -308,6 +315,9 @@ def is_publishable(payload: dict) -> tuple[bool, str]:
 
     if isinstance(score, (int, float)) and score < MIN_PUBLISH_SCORE:
         return False, f"score {score} < {MIN_PUBLISH_SCORE}"
+
+    if payload.get("duplicateRisk"):
+        return False, "duplicate fingerprint flagged by engine output gate"
 
     content = (payload.get("content") or "").strip()
     if len(content) < 400:
@@ -317,8 +327,6 @@ def is_publishable(payload: dict) -> tuple[bool, str]:
     if len(paragraphs) < 3:
         return False, f"only {len(paragraphs)} paragraphs (need >=3)"
 
-    # Engine should have stamped these. If they're missing, the page would
-    # render badly even if the body is fine.
     required_meta_fields = ("title", "description", "h1", "intro")
     missing = [f for f in required_meta_fields if not (meta.get(f) or "").strip()]
     if missing:
@@ -328,12 +336,12 @@ def is_publishable(payload: dict) -> tuple[bool, str]:
 
 
 # =========================================================================
-# COMPATIBILITY SHIM (kept for legacy callers)
+# COMPATIBILITY SHIM (kept for legacy callers like build_nexus_dex_seo.py)
 # =========================================================================
 
 def generate_nexus_dex_content(keyword: str) -> str:
     """Legacy interface: return only the content body. Use process_keyword()
-    instead in new code."""
+    in new code."""
     payload = fetch_seo_page(keyword)
     if not payload:
         return ""
@@ -348,8 +356,6 @@ def generate_nexus_dex_content(keyword: str) -> str:
 # =========================================================================
 
 def _load_generated_pages() -> list[dict]:
-    """Build [{slug, keyword, hub_slug}] from tracking files, aligned line by
-    line. If they're out of sync, fall back to the slugs file only."""
     slugs_lines    = load_lines(GENERATED_SLUGS_FILE)
     keyword_lines  = load_lines(GENERATED_KW_FILE)
 
@@ -371,7 +377,6 @@ def _load_generated_pages() -> list[dict]:
             hub_slug = hub_part or select_hub(kw)[0]
             pages.append({"slug": slug, "keyword": kw, "hub_slug": hub_slug})
     else:
-        # Lines drifted: reconstruct from slugs alone.
         for hub_part, slug in parsed_slugs:
             if slug in PROTECTED_SLUGS:
                 continue
@@ -387,23 +392,18 @@ def slug_to_title(slug: str) -> str:
         "btc":"BTC","eth":"ETH","sol":"SOL","usdc":"USDC","usdt":"USDT",
         "bnb":"BNB","bonk":"BONK","pepe":"PEPE","wif":"WIF","doge":"DOGE",
         "shib":"SHIB","hype":"HYPE","popcat":"POPCAT","trump":"TRUMP",
-        "jup":"JUP","ray":"RAY","pyth":"PYTH","jto":"JTO","spx":"SPX",
-        "ai16z":"ai16z","fartcoin":"FARTCOIN","moodeng":"MOODENG",
-        "pnut":"PNUT","goat":"GOAT","griffain":"GRIFFAIN","chillguy":"CHILLGUY",
-        "zerebro":"ZEREBRO",
+        "jup":"JUP","ray":"RAY","pyth":"PYTH","jto":"JTO",
+        "fartcoin":"FARTCOIN","moodeng":"MOODENG","hoppy":"HOPPY",
+        "pnut":"PNUT","goat":"GOAT","mew":"MEW","bome":"BOME",
         "lp":"LP","dex":"DEX","cex":"CEX","nft":"NFT","spl":"SPL",
-        "ai":"AI","dao":"DAO","defi":"DeFi","tvl":"TVL","kyc":"KYC",
-        "lst":"LST","lrt":"LRT","rwa":"RWA","ico":"ICO","ido":"IDO",
-        "etf":"ETF","fomc":"FOMC","cpi":"CPI","gdp":"GDP",
-        "nfl":"NFL","nba":"NBA","ufc":"UFC",
-        "xstocks":"xStocks","xstock":"xStock",
+        "dao":"DAO","defi":"DeFi","tvl":"TVL","kyc":"KYC",
         "aapl":"AAPL","tsla":"TSLA","nvda":"NVDA","msft":"MSFT",
         "googl":"GOOGL","amzn":"AMZN","mstr":"MSTR","nflx":"NFLX",
         "spy":"SPY","qqq":"QQQ","crcl":"CRCL","hood":"HOOD","coin":"COIN",
         "aaplx":"AAPLx","tslax":"TSLAx","nvdax":"NVDAx","spyx":"SPYx",
         "qqqx":"QQQx","mstrx":"MSTRx","metax":"METAx","amznx":"AMZNx",
         "googlx":"GOOGLx","msftx":"MSFTx","nflxx":"NFLXx","crclx":"CRCLx",
-        "hoodx":"HOODx",
+        "hoodx":"HOODx","coinx":"COINx","orclx":"ORCLx","crmx":"CRMx",
         "us":"U.S.","vs":"vs",
     }
     small = {"a","an","and","as","at","by","for","from","in","of","on","or","the","to","vs","with"}
@@ -424,15 +424,14 @@ def _tokens(text: str) -> set[str]:
 
 
 def _rank_candidates(current: dict, all_pages: list[dict]) -> list[dict]:
-    """Rank candidate pages by hub overlap then token overlap."""
     cur_tokens = _tokens(current["keyword"])
     cur_hub    = current["hub_slug"]
 
     def score(p):
         if p["slug"] == current["slug"]:
             return None
-        same_hub  = 1 if p["hub_slug"] == cur_hub else 0
-        overlap   = len(_tokens(p["keyword"]) & cur_tokens)
+        same_hub = 1 if p["hub_slug"] == cur_hub else 0
+        overlap  = len(_tokens(p["keyword"]) & cur_tokens)
         return (-same_hub, -overlap, len(p["keyword"]), p["slug"])
 
     scored = [(score(p), p) for p in all_pages]
@@ -442,8 +441,6 @@ def _rank_candidates(current: dict, all_pages: list[dict]) -> list[dict]:
 
 
 def get_related_and_more(current_slug: str, current_keyword: str, current_hub: str) -> tuple[list[dict], list[dict]]:
-    """Return (related, more) page lists. Related comes from the same hub
-    when possible; more fills in from neighbouring hubs."""
     all_pages = _load_generated_pages()
     current = {"slug": current_slug, "keyword": current_keyword, "hub_slug": current_hub}
     ranked = _rank_candidates(current, all_pages)
@@ -474,8 +471,11 @@ def build_hub_link_html(hub_slug: str, hub_title: str) -> str:
 # META-DRIVEN PAGE BUILD
 # =========================================================================
 
-def build_page_meta_script(meta: dict, hl_data_block: str = "") -> str:
-    """Expose engine meta to window.__pageMeta for template hydration."""
+def build_page_meta_script(meta: dict) -> str:
+    """Expose engine meta to window.__pageMeta for template hydration.
+
+    v18.4 dropped hlDataBlock entirely.
+    """
     payload = {
         "title":                meta.get("title", ""),
         "description":          meta.get("description", ""),
@@ -486,19 +486,16 @@ def build_page_meta_script(meta: dict, hl_data_block: str = "") -> str:
         "breadcrumb":           meta.get("breadcrumb", ""),
         "intent":               meta.get("intent", ""),
         "subIntent":            meta.get("subIntent", ""),
-        "shape":                meta.get("shape", ""),
+        "framingName":          meta.get("framingName", ""),
         "subject":              meta.get("subject", ""),
         "faq":                  meta.get("faq", []),
-        "threatBanner":         meta.get("threatBanner"),
         "recognitionChips":     meta.get("recognitionChips", []),
-        "storyCardTitles":      meta.get("storyCardTitles", []),
-        "supplementaryCards":   meta.get("supplementaryCards", []),
         "supplementaryHeading": meta.get("supplementaryHeading", ""),
         "supplementaryIntro":   meta.get("supplementaryIntro", ""),
-        "ecosystemCards":       meta.get("ecosystemCards", []),
+        "supplementaryCards":   meta.get("supplementaryCards", []),
         "pageSignals":          meta.get("pageSignals", {}),
-        "author":               meta.get("author", {}),
-        "hlDataBlock":          hl_data_block or "",
+        "jitter":               meta.get("jitter", {}),
+        "observations":         meta.get("observations", []),
     }
     blob = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).replace("</", "<\\/")
     return f'<script id="page-meta">window.__pageMeta = {blob};</script>'
@@ -509,7 +506,6 @@ def _enforce_title_length(title: str, fallback: str) -> str:
     title = (title or "").strip() or fallback
     if len(title) <= 60:
         return title
-    # Try to drop trailing comma-clauses first.
     candidates = [
         re.sub(r",?\s*Mobile-First\s*$", "", title),
         re.sub(r",?\s*No KYC,?\s*Mobile-First\s*$", "", title),
@@ -531,15 +527,14 @@ def render_page(template_html: str,
     """Substitute every placeholder. Raises ValueError if anything is left."""
     meta     = payload["meta"]
     content  = payload["content"]
-    hl_block = payload.get("hlDataBlock", "") or ""
 
     related, more = get_related_and_more(slug, keyword, hub_slug)
 
-    canonical = f"{SITE_URL}/nexus-dex/{slug}/"
-    title     = _enforce_title_length(meta.get("title"), f"{keyword} | Nexus DEX")
-    desc      = meta.get("description", "") or ""
-    h1        = meta.get("h1", "") or ""
-    intro     = meta.get("intro", "") or ""
+    canonical       = f"{SITE_URL}/nexus-dex/{slug}/"
+    title           = _enforce_title_length(meta.get("title"), f"{keyword} | Verixia")
+    desc            = meta.get("description", "") or ""
+    h1              = meta.get("h1", "") or ""
+    intro           = meta.get("intro", "") or ""
     breadcrumb_name = meta.get("breadcrumb", "") or slug_to_title(slug)
     faq_schema      = meta.get("faqSchema", "") or "{}"
     page_signals    = meta.get("pageSignals") or {}
@@ -548,18 +543,17 @@ def render_page(template_html: str,
                              or json.dumps({
                                  "@type": "AggregateRating",
                                  "ratingValue": "4.8",
-                                 "reviewCount": "2500",
+                                 "reviewCount": "2847",
                                  "bestRating": "5",
                              }, ensure_ascii=False))
 
-    supp_heading = (meta.get("supplementaryHeading", "") or "Why Solana DeFi is different").strip()
+    supp_heading = (meta.get("supplementaryHeading", "") or "Why Verixia").strip()
     supp_intro   = (meta.get("supplementaryIntro", "") or "").strip()
 
-    # Engine produces clean prose paragraphs separated by blank lines.
     paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
     ai_content_html = "\n".join(f"<p>{html_escape(p)}</p>" for p in paragraphs)
 
-    meta_script = build_page_meta_script(meta, hl_block)
+    meta_script = build_page_meta_script(meta)
 
     substitutions = {
         "{{TITLE}}":                  html_escape(title),
@@ -575,12 +569,15 @@ def render_page(template_html: str,
         "{{STATIC_H1}}":              html_escape(h1),
         "{{STATIC_INTRO}}":           html_escape(intro),
         "{{OG_IMAGE}}":               html_escape(OG_IMAGE),
-        "{{HL_DATA_BLOCK}}":          hl_block,
         "{{SCHEMA_FAQ}}":             faq_schema,
         "{{AGGREGATE_RATING_JSON}}":  aggregate_rating_json,
         "{{SUPP_HEADING}}":           html_escape(supp_heading),
         "{{SUPP_INTRO}}":             html_escape(supp_intro),
         "{{PAGE_META_SCRIPT}}":       meta_script,
+        # Dropped placeholder from v2 (Hyperliquid). Kept here as empty for
+        # any legacy template that still references it; safe to remove from
+        # both engine and template eventually.
+        "{{HL_DATA_BLOCK}}":          "",
     }
 
     rendered = template_html
@@ -622,7 +619,6 @@ def record_rejected(keyword: str, reason: str) -> None:
 
 
 def process_keyword(keyword: str, template_html: str) -> bool:
-    """Generate one page. Returns True only if the page was published."""
     slug = slugify(keyword)
     if not slug:
         record_rejected(keyword, "empty slug")
@@ -658,15 +654,30 @@ def process_keyword(keyword: str, template_html: str) -> bool:
     meta = payload.get("meta", {})
     print(f"[build] OK   -> {out_file} "
           f"(hub={hub_slug}, intent={meta.get('intent')}, "
-          f"sub={meta.get('subIntent')}, score={payload.get('score')})")
+          f"sub={meta.get('subIntent')}, framing={meta.get('framingName')}, "
+          f"score={payload.get('score')})")
     return True
 
 
-def main(limit: int = DAILY_LIMIT) -> int:
+def write_build_report_sidecar(report: dict) -> None:
+    """Write the build report to a sidecar JSON file in data/ for inspection."""
+    report_path = BASE_DIR / "data" / "nexus_dex_build_report.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"[build] sidecar report written: {report_path}")
+
+
+def main(limit: int = DAILY_LIMIT, reset: bool = True) -> int:
     pending = load_keyword_queue()
     if not pending:
         print("[build] no pending keywords")
         return 0
+
+    # v18.4: reset engine build registries so n-gram tracking and output gate
+    # are clean for this build run
+    if reset:
+        reset_build_registry()
 
     template_html = load_template()
     todo = pending[:limit]
@@ -689,19 +700,29 @@ def main(limit: int = DAILY_LIMIT) -> int:
 
     print(f"\n[build] done. ok={succeeded} failed={failed} "
           f"remaining={len(pending) - len(todo) + failed}")
+
+    # v18.4: fetch + persist the engine's build report sidecar
+    report = fetch_build_report()
+    if report:
+        report["python_succeeded"] = succeeded
+        report["python_failed"] = failed
+        write_build_report_sidecar(report)
+
     return 0 if failed == 0 else 1
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Build Verixia Nexus DEX SEO pages.")
+    parser = argparse.ArgumentParser(description="Build Verixia SEO pages (engine v18.4).")
     parser.add_argument("--limit", type=int, default=DAILY_LIMIT,
                         help=f"max pages per run (default {DAILY_LIMIT})")
     parser.add_argument("--keyword", type=str, default=None,
                         help="process a single keyword (bypasses queue + limit)")
+    parser.add_argument("--no-reset", action="store_true",
+                        help="skip resetting engine build registries (use for incremental runs)")
     args = parser.parse_args()
 
     if args.keyword:
         tpl = load_template()
         ok = process_keyword(args.keyword, tpl)
         sys.exit(0 if ok else 1)
-    sys.exit(main(limit=args.limit))
+    sys.exit(main(limit=args.limit, reset=not args.no_reset))
