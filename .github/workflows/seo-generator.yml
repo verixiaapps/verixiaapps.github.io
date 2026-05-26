@@ -1,210 +1,244 @@
 name: SEO Page Generator Auto
 
 "on":
- workflow_dispatch:
-   inputs:
-     run_mode:
-       description: "What to do on this run"
-       required: true
-       default: "generate"
-       type: choice
-       options:
-         - generate
-         - rebuild_wipe
-         - rebuild_missing
-     pages_to_run:
-       description: "How many pages to generate on this run"
-       required: false
-       default: "1000"
-       type: string
-     resume:
-       description: "Resume where it left off (skip slugs already in generated_slugs.txt)"
-       required: false
-       default: "true"
-       type: boolean
-     batch_size:
-       description: "Commit every N pages"
-       required: false
-       default: "30"
-       type: string
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "What to do on this run"
+        required: true
+        default: "generate"
+        type: choice
+        options:
+          - generate
+          - rebuild_wipe
+          - rebuild_missing
+      pages_to_run:
+        description: "How many pages to generate on this run"
+        required: false
+        default: "1000"
+        type: string
+      resume:
+        description: "Resume where it left off (skip slugs already in generated_slugs.txt)"
+        required: false
+        default: "true"
+        type: boolean
+      batch_size:
+        description: "Commit every N pages"
+        required: false
+        default: "30"
+        type: string
+      seed_from_sitemap:
+        description: "Seed generated_keywords.txt from sitemap.xml before running (one-time recovery)"
+        required: false
+        default: "false"
+        type: boolean
 
 permissions:
- contents: write
+  contents: write
 
 concurrency:
- group: repo-main-writer
- cancel-in-progress: true
+  group: repo-main-writer
+  cancel-in-progress: true
 
 jobs:
- generate:
-   runs-on: ubuntu-latest
-   timeout-minutes: 1440
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1440
 
-   env:
-     KEYWORDS_FILE: "data/keywords.txt"
-     GENERATED_KEYWORDS_FILE: "data/generated_keywords.txt"
-     GENERATED_SLUGS_FILE: "data/generated_slugs.txt"
-     OUTPUT_DIR: "scam-check-now"
-     PROTECTED_SLUG: "is-this-a-scam"
-     RUN_MODE: ${{ github.event.inputs.run_mode }}
-     RESUME: ${{ github.event.inputs.resume }}
+    env:
+      KEYWORDS_FILE: "data/keywords.txt"
+      GENERATED_KEYWORDS_FILE: "data/generated_keywords.txt"
+      GENERATED_SLUGS_FILE: "data/generated_slugs.txt"
+      OUTPUT_DIR: "scam-check-now"
+      PROTECTED_SLUG: "is-this-a-scam"
+      RUN_MODE: ${{ github.event.inputs.run_mode }}
+      RESUME: ${{ github.event.inputs.resume }}
 
-   steps:
-     - name: Checkout repo
-       uses: actions/checkout@v4
-       with:
-         fetch-depth: 0
-         ref: main
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
 
-     - name: Setup Python
-       uses: actions/setup-python@v5
-       with:
-         python-version: "3.11"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-     - name: Install dependencies
-       shell: bash
-       run: |
-         set -euo pipefail
-         python -m pip install --upgrade pip
-         if [ -f requirements.txt ]; then
-           pip install -r requirements.txt
-         else
-           pip install openai requests
-         fi
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install openai requests
+          fi
 
-     - name: Configure git
-       shell: bash
-       run: |
-         set -euo pipefail
-         git config user.name "seo-bot"
-         git config user.email "bot@users.noreply.github.com"
+      - name: Configure git
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "seo-bot"
+          git config user.email "bot@users.noreply.github.com"
 
-     - name: Sync latest main before build
-       shell: bash
-       run: |
-         set -euo pipefail
-         git fetch origin main
-         git checkout main
-         git reset --hard origin/main
-         git clean -fd
+      - name: Sync latest main before build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+          git clean -fd
 
-     - name: Show run plan
-       shell: bash
-       run: |
-         echo "Run mode:    $RUN_MODE"
-         echo "Resume:      $RESUME"
-         echo "Pages:       ${{ github.event.inputs.pages_to_run }}"
-         echo "Batch size:  ${{ github.event.inputs.batch_size }}"
+      - name: Show run plan
+        shell: bash
+        run: |
+          echo "Run mode:           $RUN_MODE"
+          echo "Resume:             $RESUME"
+          echo "Pages:              ${{ github.event.inputs.pages_to_run }}"
+          echo "Batch size:         ${{ github.event.inputs.batch_size }}"
+          echo "Seed from sitemap:  ${{ github.event.inputs.seed_from_sitemap }}"
 
-     - name: Wipe scam-check-now folder (rebuild_wipe only, no resume)
-       if: github.event.inputs.run_mode == 'rebuild_wipe' && github.event.inputs.resume != 'true'
-       shell: bash
-       run: |
-         set -euo pipefail
-         if [ -d "$OUTPUT_DIR" ]; then
-           find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
-             slug=$(basename "$dir")
-             if [ "$slug" = "$PROTECTED_SLUG" ]; then
-               echo "Preserving protected: $slug"
-               continue
-             fi
-             rm -rf "$dir"
-           done
-         fi
-         mkdir -p "$OUTPUT_DIR"
+      # One-time recovery: pull slugs out of sitemap.xml and write them
+      # to generated_keywords.txt so the rebuild has a queue to work from.
+      # Skips the protected slug. Sorted + deduped.
+      - name: Seed generated_keywords.txt from sitemap.xml
+        if: github.event.inputs.seed_from_sitemap == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f sitemap.xml ]; then
+            echo "sitemap.xml not found at repo root. Cannot seed."
+            exit 1
+          fi
+          mkdir -p data
+          grep -oE 'scam-check-now/[^/]+/' sitemap.xml \
+            | sed -E 's|scam-check-now/||; s|/$||' \
+            | grep -v "^${PROTECTED_SLUG}\$" \
+            | sort -u > "$GENERATED_KEYWORDS_FILE"
+          echo "Seeded $(wc -l < "$GENERATED_KEYWORDS_FILE" | tr -d ' ') slugs into $GENERATED_KEYWORDS_FILE"
 
-     - name: Rebuild keywords queue from generated_keywords.txt
-       if: startsWith(github.event.inputs.run_mode, 'rebuild_')
-       shell: bash
-       run: |
-         set -euo pipefail
-         if [ ! -s "$GENERATED_KEYWORDS_FILE" ]; then
-           echo "generated_keywords.txt is empty. Nothing to rebuild."
-           exit 1
-         fi
+          git add "$GENERATED_KEYWORDS_FILE"
+          if git diff --cached --quiet; then
+            echo "No changes to commit from seeding."
+          else
+            git commit -m "Seed generated_keywords.txt from sitemap.xml"
+            git fetch origin main
+            git push --force-with-lease origin HEAD:main
+          fi
 
-         cp "$GENERATED_KEYWORDS_FILE" "$KEYWORDS_FILE"
-         echo "Loaded $(wc -l < "$KEYWORDS_FILE" | tr -d ' ') keywords into queue from generated_keywords.txt"
+      - name: Wipe scam-check-now folder (rebuild_wipe only, no resume)
+        if: github.event.inputs.run_mode == 'rebuild_wipe' && github.event.inputs.resume != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$OUTPUT_DIR" ]; then
+            find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
+              slug=$(basename "$dir")
+              if [ "$slug" = "$PROTECTED_SLUG" ]; then
+                echo "Preserving protected: $slug"
+                continue
+              fi
+              rm -rf "$dir"
+            done
+          fi
+          mkdir -p "$OUTPUT_DIR"
 
-         if [ "$RESUME" != "true" ]; then
-           echo "Resume OFF -> clearing generated tracking files"
-           : > "$GENERATED_KEYWORDS_FILE"
-           : > "$GENERATED_SLUGS_FILE"
-         else
-           echo "Resume ON  -> keeping generated_slugs.txt so done slugs are skipped"
-         fi
+      - name: Rebuild keywords queue from generated_keywords.txt
+        if: startsWith(github.event.inputs.run_mode, 'rebuild_')
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s "$GENERATED_KEYWORDS_FILE" ]; then
+            echo "generated_keywords.txt is empty. Nothing to rebuild."
+            exit 1
+          fi
 
-     - name: Commit pre-generation state (rebuild only)
-       if: startsWith(github.event.inputs.run_mode, 'rebuild_')
-       shell: bash
-       run: |
-         set -euo pipefail
-         git add -A
-         if git diff --cached --quiet; then
-           echo "Nothing to commit before generation."
-           exit 0
-         fi
-         if [ "$RUN_MODE" = "rebuild_wipe" ] && [ "$RESUME" != "true" ]; then
-           git commit -m "Wipe scam-check-now and reset tracking files for fresh rebuild"
-         else
-           git commit -m "Prepare queue for ${RUN_MODE} (resume=${RESUME})"
-         fi
-         git fetch origin main
-         git push --force-with-lease origin HEAD:main
+          cp "$GENERATED_KEYWORDS_FILE" "$KEYWORDS_FILE"
+          echo "Loaded $(wc -l < "$KEYWORDS_FILE" | tr -d ' ') keywords into queue from generated_keywords.txt"
 
-     - name: Run incremental build with checkpointing
-       shell: bash
-       env:
-         DAILY_LIMIT: ${{ github.event.inputs.pages_to_run }}
-         COMMIT_EVERY: ${{ github.event.inputs.batch_size }}
-         RESUME: ${{ github.event.inputs.resume }}
-         RUN_MODE: ${{ github.event.inputs.run_mode }}
-       run: python scripts/build_seo_incremental.py
+          if [ "$RESUME" != "true" ]; then
+            echo "Resume OFF -> clearing generated tracking files"
+            : > "$GENERATED_KEYWORDS_FILE"
+            : > "$GENERATED_SLUGS_FILE"
+          else
+            echo "Resume ON  -> keeping generated_slugs.txt so done slugs are skipped"
+          fi
 
-     - name: Build hub pages
-       if: success()
-       shell: bash
-       run: python scripts/build_hubs.py
+      - name: Commit pre-generation state (rebuild only)
+        if: startsWith(github.event.inputs.run_mode, 'rebuild_')
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit before generation."
+            exit 0
+          fi
+          if [ "$RUN_MODE" = "rebuild_wipe" ] && [ "$RESUME" != "true" ]; then
+            git commit -m "Wipe scam-check-now and reset tracking files for fresh rebuild"
+          else
+            git commit -m "Prepare queue for ${RUN_MODE} (resume=${RESUME})"
+          fi
+          git fetch origin main
+          git push --force-with-lease origin HEAD:main
 
-     - name: Build ROOT sitemap
-       if: success()
-       shell: bash
-       run: |
-         set -euo pipefail
-         get_lastmod() {
-           local file_path="$1"
-           local commit_date
-           commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
-           if [ -n "$commit_date" ]; then
-             echo "$commit_date"
-           else
-             date -u +%F
-           fi
-         }
-         {
-           echo '<?xml version="1.0" encoding="UTF-8"?>'
-           echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-           ROOT_LASTMOD=$(get_lastmod "index.html")
-           echo "<url><loc>https://verixiaapps.com/</loc><lastmod>${ROOT_LASTMOD}</lastmod></url>"
-           find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
-             [ -f "$dir/index.html" ] || continue
-             slug=$(basename "$dir")
-             page_lastmod=$(get_lastmod "$dir/index.html")
-             echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
-           done
-           echo '</urlset>'
-         } > sitemap.xml
+      - name: Run incremental build with checkpointing
+        shell: bash
+        env:
+          DAILY_LIMIT: ${{ github.event.inputs.pages_to_run }}
+          COMMIT_EVERY: ${{ github.event.inputs.batch_size }}
+          RESUME: ${{ github.event.inputs.resume }}
+          RUN_MODE: ${{ github.event.inputs.run_mode }}
+        run: python scripts/build_seo_incremental.py
 
-     - name: Final commit and push (always)
-       if: always()
-       shell: bash
-       run: |
-         set -euo pipefail
-         git add -A
-         if git diff --cached --quiet; then
-           echo "Nothing left to commit."
-           exit 0
-         fi
-         git commit -m "Checkpoint: progress from ${RUN_MODE} run (job status: ${{ job.status }})"
-         git fetch origin main
-         git push --force-with-lease origin HEAD:main
+      - name: Build hub pages
+        if: success()
+        shell: bash
+        run: python scripts/build_hubs.py
+
+      - name: Build ROOT sitemap
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          get_lastmod() {
+            local file_path="$1"
+            local commit_date
+            commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
+            if [ -n "$commit_date" ]; then
+              echo "$commit_date"
+            else
+              date -u +%F
+            fi
+          }
+          {
+            echo '<?xml version="1.0" encoding="UTF-8"?>'
+            echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+            ROOT_LASTMOD=$(get_lastmod "index.html")
+            echo "<url><loc>https://verixiaapps.com/</loc><lastmod>${ROOT_LASTMOD}</lastmod></url>"
+            find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
+              [ -f "$dir/index.html" ] || continue
+              slug=$(basename "$dir")
+              page_lastmod=$(get_lastmod "$dir/index.html")
+              echo "<url><loc>https://verixiaapps.com/scam-check-now/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
+            done
+            echo '</urlset>'
+          } > sitemap.xml
+
+      - name: Final commit and push (always)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing left to commit."
+            exit 0
+          fi
+          git commit -m "Checkpoint: progress from ${RUN_MODE} run (job status: ${{ job.status }})"
+          git fetch origin main
+          git push --force-with-lease origin HEAD:main
