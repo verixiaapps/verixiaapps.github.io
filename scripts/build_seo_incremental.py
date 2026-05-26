@@ -24,7 +24,9 @@ SITE = "https://verixiaapps.com"
 RELATED_LINKS_COUNT = 6
 MORE_LINKS_COUNT = 10
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", "100"))
-COMMIT_EVERY = 30
+COMMIT_EVERY = int(os.getenv("COMMIT_EVERY", "30"))
+RESUME = os.getenv("RESUME", "true").lower() == "true"
+RUN_MODE = os.getenv("RUN_MODE", "generate")
 
 PROTECTED_SLUGS = {"is-this-a-scam"}
 FALLBACK_HUB_SLUG = "general-scams"
@@ -686,6 +688,9 @@ print(f"Known generated slugs: {len(generated_slugs)}")
 print(f"Known generated keywords: {len(generated_keywords)}")
 print(f"Existing pages available for internal links: {len(existing_pages)}")
 print(f"Daily limit: {DAILY_LIMIT}")
+print(f"Commit every: {COMMIT_EVERY}")
+print(f"Resume mode: {RESUME}")
+print(f"Run mode: {RUN_MODE}")
 print(f"Fallback hub slug: {FALLBACK_HUB_SLUG}")
 
 generated_count = 0
@@ -713,7 +718,10 @@ for page in queue_pages:
        print("Skipping protected page:", slug)
        continue
 
-   if page_exists(slug):
+   # Skip existing pages unless the user explicitly turned resume off.
+   # When RESUME is false, we re-generate even if the file already exists
+   # (useful for rebuild_wipe + resume=false, or forced regens).
+   if page_exists(slug) and RESUME:
        skipped_existing_count += 1
        new_generated_slugs.add(slug)
        new_generated_keywords.add(keyword)
@@ -770,7 +778,7 @@ for page in queue_pages:
        f"-> hub: {find_best_hub_slug(keyword)}"
    )
 
-   # ---- CHECKPOINT EVERY 30 PAGES ----
+   # ---- CHECKPOINT EVERY N PAGES ----
    if generated_count % COMMIT_EVERY == 0:
        git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords)
 
