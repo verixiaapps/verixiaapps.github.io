@@ -24,6 +24,7 @@ name: SEO Page Generator
 
 permissions:
   contents: write
+  workflows: write
 
 concurrency:
   group: repo-main-writer
@@ -93,96 +94,56 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           if [ ! -f sitemap.xml ]; then
             echo "sitemap.xml not found at repo root. Cannot reseed."
             exit 1
           fi
-
           mkdir -p data
-
           echo "Wiping $OUTPUT_DIR (preserving $PROTECTED_SLUG)..."
           if [ -d "$OUTPUT_DIR" ]; then
             find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
               slug=$(basename "$dir")
               if [ "$slug" = "$PROTECTED_SLUG" ]; then
-                echo "  preserving $slug"
                 continue
               fi
               rm -rf "$dir"
             done
           fi
           mkdir -p "$OUTPUT_DIR"
-
-          echo "Extracting slugs from sitemap.xml..."
           grep -oE 'scam-check-now/[^/]+/' sitemap.xml \
             | sed -E 's|scam-check-now/||; s|/$||' \
             > data/_raw_slugs.txt || true
-
-          RAW_COUNT=$(wc -l < data/_raw_slugs.txt | tr -d ' ' || echo 0)
-          echo "Raw slugs extracted: $RAW_COUNT"
-
           : > "$KEYWORDS_FILE"
           : > data/_skipped_slugs.txt
-
           while IFS= read -r raw_slug; do
             [ -z "$raw_slug" ] && continue
-
             clean=$(echo "$raw_slug" \
               | tr '[:upper:]' '[:lower:]' \
               | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')
-
-            if [ "$clean" = "$PROTECTED_SLUG" ]; then
-              continue
-            fi
-
-            if [ -z "$clean" ]; then
-              echo "$raw_slug" >> data/_skipped_slugs.txt
-              continue
-            fi
-
+            if [ "$clean" = "$PROTECTED_SLUG" ]; then continue; fi
+            if [ -z "$clean" ]; then echo "$raw_slug" >> data/_skipped_slugs.txt; continue; fi
             len=${#clean}
             if [ "$len" -lt 3 ] || [ "$len" -gt 120 ]; then
               echo "$raw_slug" >> data/_skipped_slugs.txt
               continue
             fi
-
             if ! echo "$clean" | grep -qE '[a-z]'; then
               echo "$raw_slug" >> data/_skipped_slugs.txt
               continue
             fi
-
             keyword=$(echo "$clean" | tr '-' ' ')
             echo "$keyword" >> "$KEYWORDS_FILE"
           done < data/_raw_slugs.txt
-
           sort -u "$KEYWORDS_FILE" -o "$KEYWORDS_FILE"
-
           QCOUNT=$(wc -l < "$KEYWORDS_FILE" | tr -d ' ')
-          SKIPPED=$(wc -l < data/_skipped_slugs.txt | tr -d ' ' || echo 0)
-          echo "Queue after normalize+dedupe: $QCOUNT keywords"
-          echo "Skipped (bad slugs):          $SKIPPED"
-
-          if [ "$SKIPPED" != "0" ]; then
-            echo "--- skipped slug examples ---"
-            head -20 data/_skipped_slugs.txt || true
-            echo "-----------------------------"
-          fi
-
           rm -f data/_raw_slugs.txt
-
           if [ "$QCOUNT" = "0" ]; then
             echo "Queue is empty after normalize. Aborting."
             exit 1
           fi
-
-          echo "Clearing tracking files..."
           : > "$GENERATED_KEYWORDS_FILE"
           : > "$GENERATED_SLUGS_FILE"
-
-          git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
-          git reset HEAD -- .github/workflows 2>/dev/null || true
-
+          git add -A
           if git diff --cached --quiet; then
             echo "Nothing to commit before generation."
           else
@@ -207,7 +168,6 @@ jobs:
             | awk 'length($0) >= 3 && length($0) <= 200' \
             | sort -u > "$KEYWORDS_FILE"
           rm -f data/_pre_normalize.txt
-          echo "Queue after normalize: $(wc -l < "$KEYWORDS_FILE" | tr -d ' ')"
 
       - name: Run build
         shell: bash
@@ -219,10 +179,6 @@ jobs:
         run: |
           set +e
           python scripts/build_seo_incremental.py
-          EXIT=$?
-          if [ "$EXIT" != "0" ]; then
-            echo "Builder exited with code $EXIT (continuing to commit/sitemap)."
-          fi
           exit 0
 
       - name: Build hub pages
@@ -242,11 +198,7 @@ jobs:
             local file_path="$1"
             local commit_date
             commit_date=$(git log -1 --format=%cs -- "$file_path" 2>/dev/null || true)
-            if [ -n "$commit_date" ]; then
-              echo "$commit_date"
-            else
-              date -u +%F
-            fi
+            if [ -n "$commit_date" ]; then echo "$commit_date"; else date -u +%F; fi
           }
           {
             echo '<?xml version="1.0" encoding="UTF-8"?>'
@@ -267,9 +219,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
-          git reset HEAD -- .github/workflows 2>/dev/null || true
-
+          git add -A
           if git diff --cached --quiet; then
             echo "Nothing left to commit."
             exit 0
@@ -277,4 +227,3 @@ jobs:
           git commit -m "SEO run: ${RUN_MODE} (status: ${{ job.status }})"
           git fetch origin main
           git push --force-with-lease origin HEAD:main
-
