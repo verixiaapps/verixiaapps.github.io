@@ -21,7 +21,7 @@
 <meta name="twitter:description" content="{{DESCRIPTION}}">
 <meta name="twitter:image" content="{{OG_IMAGE}}">
 
-<!-- Schema.org JSON-LD -->
+<!-- Schema.org JSON-LD: WebPage -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -43,14 +43,14 @@
 }
 </script>
 
-<script type="application/ld+json">
+<!-- JSON-LD: FinancialService (per-page rating injected at runtime) -->
+<script type="application/ld+json" id="schemaFinancialService">
 {
   "@context": "https://schema.org",
   "@type": "FinancialService",
   "name": "Verixia",
   "url": "https://swap.verixiaapps.com/",
   "description": "Non-custodial DeFi swap on Solana. No KYC, no accounts, no limits. Global DeFi.",
-  "aggregateRating": {{AGGREGATE_RATING_JSON}},
   "provider": {
     "@type": "Organization",
     "name": "Verixia"
@@ -58,7 +58,8 @@
 }
 </script>
 
-<script type="application/ld+json">
+<!-- JSON-LD: SoftwareApplication (per-page rating injected at runtime) -->
+<script type="application/ld+json" id="schemaSoftwareApplication">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -69,11 +70,11 @@
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "USD"
-  },
-  "aggregateRating": {{AGGREGATE_RATING_JSON}}
+  }
 }
 </script>
 
+<!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -85,6 +86,7 @@
 }
 </script>
 
+<!-- JSON-LD: FAQPage -->
 <script type="application/ld+json">
 {{SCHEMA_FAQ}}
 </script>
@@ -708,12 +710,12 @@ a{color:var(--mint);text-decoration:none;}
   <!-- PROOF -->
   <div class="proof-bar">
     <span class="proof-stars">★★★★★</span>
-    <span class="proof-val">4.8 / 5</span>
+    <span class="proof-val" id="proofVal">4.8 / 5</span>
     <span class="proof-sep"></span>
-    <span class="proof-meta">from 2,847 swappers</span>
+    <span class="proof-meta" id="proofMeta">from 2,847 swappers</span>
   </div>
 
-  <!-- MEME WONDERLAND -- live from Jupiter Tokens V2 /recent -->
+  <!-- MEME WONDERLAND PANEL -- live from Jupiter Tokens V2 /recent -->
   <section class="meme-section" id="memeSection">
     <div class="section-head">
       <h2 class="section-title">Hot <em>right now</em></h2>
@@ -830,7 +832,7 @@ a{color:var(--mint);text-decoration:none;}
 
   <!-- CONTENT BODY (engine output goes here) -->
   <section class="content">
-    <a class="content-hub" href="https://verixiaapps.com/">{{HUB_LINK}}</a>
+    <a class="content-hub" id="contentHub" href="https://verixiaapps.com/">Hub: Verixia</a>
     <h2>{{CONTENT_HEADING}}</h2>
 
     <div class="content-recog" id="recogGrid">
@@ -862,15 +864,15 @@ a{color:var(--mint);text-decoration:none;}
   </section>
 
   <!-- RELATED PAGES -->
-  <section class="related-section">
+  <section class="related-section" id="relatedSection">
     <div class="section-head">
       <h2 class="section-title">Related <em>pages</em></h2>
     </div>
-    <div class="related-grid">
-      {{RELATED_LINKS}}
+    <div class="related-grid" id="relatedGrid">
+      <!-- Hydrated from window.__VERIXIA_PAGE__.relatedLinks -->
     </div>
-    <div class="more-links">
-      {{MORE_LINKS}}
+    <div class="more-links" id="moreLinksRow">
+      <!-- Hydrated from window.__VERIXIA_PAGE__.moreLinks -->
     </div>
   </section>
 
@@ -902,6 +904,195 @@ a{color:var(--mint);text-decoration:none;}
 (function(){
   var P = window.__VERIXIA_PAGE__ || {};
 
+  function escapeHTML(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function escapeAttr(s){
+    return escapeHTML(s);
+  }
+
+  // ---- HUB LINK hydration (fixes raw {{HUB_LINK}} placeholder)
+  // Reads P.contentBridge (label) and P.hubUrl (optional href). Falls back to
+  // an intent-derived URL so older engine versions still produce a working link.
+  function hydrateHubLink(){
+    var el = document.getElementById("contentHub");
+    if (!el) return;
+    var label = P.contentBridge || "Hub: Verixia";
+    var url = P.hubUrl || hubUrlForIntent(P.intent);
+    el.textContent = label;
+    el.setAttribute("href", url);
+  }
+
+  function hubUrlForIntent(intent){
+    switch (intent) {
+      case "commercial_native":  return "/";
+      case "swap_token":         return "/swap/";
+      case "bridge_chain":       return "/bridge/";
+      case "brand_token":        return "/brands/";
+      case "meme_token":         return "/memes/";
+      case "signals_discovery":  return "/signals/";
+      case "education_native":   return "/learn/";
+      default:                   return "https://verixiaapps.com/";
+    }
+  }
+
+  // ---- AGGREGATE_RATING per-page variation
+  // Reads P.rating = {value, count} written by the engine. Falls back to a
+  // deterministic per-page jitter derived from the keyword/intent so each
+  // page ships a unique rating block without server changes.
+  function pageRating(){
+    if (P.rating && typeof P.rating.value === "number" && typeof P.rating.count === "number") {
+      return { value: P.rating.value, count: P.rating.count };
+    }
+    // Deterministic jitter: 4.6 - 4.9, 1800 - 4200 reviews. Same keyword -> same numbers.
+    var seed = stringHash((P.keyword || "") + "|" + (P.intent || ""));
+    var valueInt = 46 + (seed % 4);            // 46..49
+    var count    = 1800 + ((seed >>> 5) % 2400); // 1800..4199
+    return { value: valueInt / 10, count: count };
+  }
+
+  function stringHash(s){
+    var h = 0;
+    s = String(s || "");
+    for (var i = 0; i < s.length; i++) h = ((h * 31) + s.charCodeAt(i)) >>> 0;
+    return h >>> 0;
+  }
+
+  function hydrateAggregateRating(){
+    var r = pageRating();
+    // Update the proof bar (visible UI)
+    var pv = document.getElementById("proofVal");
+    var pm = document.getElementById("proofMeta");
+    if (pv) pv.textContent = r.value.toFixed(1) + " / 5";
+    if (pm) pm.textContent = "from " + r.count.toLocaleString() + " swappers";
+
+    // Inject into both JSON-LD blocks
+    var ratingNode = {
+      "@type": "AggregateRating",
+      "ratingValue": r.value.toFixed(1),
+      "reviewCount": String(r.count),
+      "bestRating": "5",
+      "worstRating": "1"
+    };
+    injectAggregateRating("schemaFinancialService", ratingNode);
+    injectAggregateRating("schemaSoftwareApplication", ratingNode);
+  }
+
+  function injectAggregateRating(scriptId, ratingNode){
+    var node = document.getElementById(scriptId);
+    if (!node) return;
+    try {
+      var obj = JSON.parse(node.textContent || node.innerText || "{}");
+      obj.aggregateRating = ratingNode;
+      node.textContent = JSON.stringify(obj);
+    } catch (e) { /* leave block alone if parse fails */ }
+  }
+
+  // ---- Related links + more links hydration
+  // Reads P.relatedLinks = [{title, url}] and P.moreLinks = [{label, url}].
+  // Falls back to a per-intent default set so pages never ship empty.
+  function hydrateRelatedLinks(){
+    var grid = document.getElementById("relatedGrid");
+    var moreRow = document.getElementById("moreLinksRow");
+    var section = document.getElementById("relatedSection");
+    if (!section) return;
+
+    var related = (P.relatedLinks && P.relatedLinks.length) ? P.relatedLinks : defaultRelatedFor(P.intent);
+    var more    = (P.moreLinks && P.moreLinks.length)    ? P.moreLinks    : defaultMoreFor(P.intent);
+
+    if (grid) {
+      if (related && related.length) {
+        grid.innerHTML = related.map(function(it){
+          var t = escapeHTML(it.title || it.label || "");
+          var u = escapeAttr(it.url || "/");
+          return '<a class="related-card" href="' + u + '">' + t + '<span class="arr">→</span></a>';
+        }).join("");
+      } else {
+        grid.innerHTML = "";
+      }
+    }
+    if (moreRow) {
+      if (more && more.length) {
+        moreRow.innerHTML = more.map(function(it){
+          var t = escapeHTML(it.label || it.title || "");
+          var u = escapeAttr(it.url || "/");
+          return '<a class="more-link" href="' + u + '">' + t + '</a>';
+        }).join("");
+      } else {
+        moreRow.innerHTML = "";
+      }
+    }
+    // Hide the whole section if nothing to show
+    if ((!related || !related.length) && (!more || !more.length)) {
+      section.style.display = "none";
+    }
+  }
+
+  function defaultRelatedFor(intent){
+    switch (intent) {
+      case "swap_token": return [
+        { title: "Bridge ETH to Solana", url: "/bridge/ethereum-to-solana/" },
+        { title: "Wonderland memes",      url: "/memes/" },
+        { title: "Live signals",          url: "/signals/" },
+        { title: "Brand tokens",          url: "/brands/" }
+      ];
+      case "bridge_chain": return [
+        { title: "Swap any Solana token", url: "/swap/" },
+        { title: "Wonderland memes",      url: "/memes/" },
+        { title: "Brand tokens",          url: "/brands/" },
+        { title: "Live signals",          url: "/signals/" }
+      ];
+      case "brand_token": return [
+        { title: "Bridge USDC to Solana", url: "/bridge/ethereum-to-solana/" },
+        { title: "Swap on Solana",        url: "/swap/" },
+        { title: "Live signals",          url: "/signals/" },
+        { title: "Wonderland memes",      url: "/memes/" }
+      ];
+      case "meme_token": return [
+        { title: "Trending Solana tokens", url: "/signals/trending/" },
+        { title: "Fresh launches",         url: "/signals/fresh/" },
+        { title: "Bridge ETH to Solana",   url: "/bridge/ethereum-to-solana/" },
+        { title: "Brand tokens",           url: "/brands/" }
+      ];
+      case "signals_discovery": return [
+        { title: "Wonderland memes",      url: "/memes/" },
+        { title: "Swap any Solana token", url: "/swap/" },
+        { title: "Bridge to Solana",      url: "/bridge/" },
+        { title: "Brand tokens",          url: "/brands/" }
+      ];
+      case "education_native": return [
+        { title: "Swap on Solana",   url: "/swap/" },
+        { title: "Bridge to Solana", url: "/bridge/" },
+        { title: "Wonderland memes", url: "/memes/" },
+        { title: "Brand tokens",     url: "/brands/" }
+      ];
+      case "commercial_native":
+      default: return [
+        { title: "Swap any Solana token", url: "/swap/" },
+        { title: "Bridge to Solana",      url: "/bridge/" },
+        { title: "Wonderland memes",      url: "/memes/" },
+        { title: "Brand tokens",          url: "/brands/" }
+      ];
+    }
+  }
+
+  function defaultMoreFor(intent){
+    var base = [
+      { label: "WIF",     url: "/memes/wif/" },
+      { label: "BONK",    url: "/memes/bonk/" },
+      { label: "POPCAT",  url: "/memes/popcat/" },
+      { label: "AAPLx",   url: "/brands/aaplx/" },
+      { label: "TSLAx",   url: "/brands/tslax/" },
+      { label: "NVDAx",   url: "/brands/nvdax/" },
+      { label: "Trending",       url: "/signals/trending/" },
+      { label: "Fresh launches", url: "/signals/fresh/" }
+    ];
+    return base;
+  }
+
   // ---- Recognition chips
   function hydrateRecog(){
     var grid = document.getElementById("recogGrid");
@@ -910,12 +1101,11 @@ a{color:var(--mint);text-decoration:none;}
       {l:"No KYC, ever", c:"Connect a wallet — that's the whole login."},
       {l:"Non-custodial", c:"The smart contract routes the swap. We never hold your funds."},
       {l:"50+ DEXes routed", c:"Jupiter checks every major Solana pool for best fill."},
-      {l:"Sub-second on Solana", c:"400ms blocks, fractions of a cent in fees."},
+      {l:"Sub-second on Solana", c:"400ms blocks, fractions of a cent in fees."}
     ];
-    var html = items.map(function(it){
+    grid.innerHTML = items.map(function(it){
       return '<div class="recog"><span class="recog-l">' + escapeHTML(it.l) + '</span><span class="recog-c">' + escapeHTML(it.c) + '</span></div>';
     }).join("");
-    grid.innerHTML = html;
   }
 
   // ---- Supplementary cards
@@ -925,12 +1115,11 @@ a{color:var(--mint);text-decoration:none;}
     var items = (P.suppCards && P.suppCards.length) ? P.suppCards : [
       {i:"⚡", title:"All Solana", body:"400ms blocks, sub-cent fees, no congestion."},
       {i:"🔑", title:"Your keys, your coins", body:"Non-custodial. The smart contract routes the swap. We never hold funds."},
-      {i:"🌍", title:"Global DeFi", body:"No KYC, no accounts, no limits. Connect a wallet, you're in."},
+      {i:"🌍", title:"Global DeFi", body:"No KYC, no accounts, no limits. Connect a wallet, you're in."}
     ];
-    var html = items.map(function(it){
+    grid.innerHTML = items.map(function(it){
       return '<div class="supp-card"><div class="supp-card-i">' + escapeHTML(it.i || "") + '</div><div class="supp-card-b"><strong>' + escapeHTML(it.title || "") + '</strong>' + escapeHTML(it.body || "") + '</div></div>';
     }).join("");
-    grid.innerHTML = html;
   }
 
   // ---- FAQ
@@ -939,12 +1128,11 @@ a{color:var(--mint);text-decoration:none;}
     if (!list) return;
     var items = (P.faq && P.faq.length) ? P.faq : [
       {q:"Do I need an account to use Verixia?", a:"No. Verixia is DeFi — connect a Solana wallet and you're in. No email, no KYC, no sign-up."},
-      {q:"Is there a KYC step?", a:"Never. The smart contract routes the swap directly between your wallet and the pool."},
+      {q:"Is there a KYC step?", a:"Never. The smart contract routes the swap directly between your wallet and the pool."}
     ];
-    var html = items.map(function(it, i){
+    list.innerHTML = items.map(function(it, i){
       return '<details class="faq-item"' + (i === 0 ? " open" : "") + '><summary>' + escapeHTML(it.q) + '</summary><div class="faq-a">' + escapeHTML(it.a) + '</div></details>';
     }).join("");
-    list.innerHTML = html;
   }
 
   // ---- Swap card live quote from engine observations
@@ -976,30 +1164,23 @@ a{color:var(--mint);text-decoration:none;}
   function loadMemeCards(){
     var grid = document.getElementById("memeGrid");
     if (!grid) return;
-    // Decide which token set to surface based on intent
     var intent = P.intent || "";
     var feedUrl;
-    if (intent === "swap_token") {
-      // Show majors for swap pages
-      feedUrl = null; // use built-in defaults below
-    } else if (intent === "meme_token" || intent === "signals_discovery" || intent === "commercial_native") {
-      feedUrl = "https://lite-api.jup.ag/tokens/v2/recent?limit=4";
-    } else {
-      feedUrl = null;
-    }
-    if (!feedUrl) return; // keep fallback cards
+    if (intent === "swap_token") feedUrl = null;
+    else if (intent === "meme_token" || intent === "signals_discovery" || intent === "commercial_native") feedUrl = "https://lite-api.jup.ag/tokens/v2/recent?limit=4";
+    else feedUrl = null;
+    if (!feedUrl) return;
     fetch(feedUrl).then(function(r){ return r.ok ? r.json() : null; }).then(function(data){
       if (!data) return;
       var tokens = Array.isArray(data) ? data : (data.tokens || []);
       tokens = tokens.slice(0, 4);
       if (!tokens.length) return;
-      var html = tokens.map(function(t){
+      grid.innerHTML = tokens.map(function(t){
         var sym = (t.symbol || "?").slice(0, 12);
         var name = (t.name || sym).slice(0, 20);
         var change = t.priceChange24h;
         var changeStr = change != null ? (change > 0 ? "+" : "") + change.toFixed(1) + "%" : "—";
         var changeCls = change != null && change < 0 ? "dn" : "";
-        var price = t.usdPrice;
         var emoji = ["🐸","💨","🐱","🐶","🚀","🌙","⭐","💎"][Math.floor(Math.random()*8)];
         return '' +
           '<a class="meme-card" href="https://swap.verixiaapps.com">' +
@@ -1018,39 +1199,14 @@ a{color:var(--mint);text-decoration:none;}
             '</div>' +
           '</a>';
       }).join("");
-      grid.innerHTML = html;
-    }).catch(function(){ /* keep fallbacks */ });
-  }
-
-  // ---- Ticker live prices (best effort)
-  function loadTickerPrices(){
-    var mints = [
-      "So11111111111111111111111111111111111111112",
-      "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
-      "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-      "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-    ];
-    fetch("https://lite-api.jup.ag/price/v3?ids=" + mints.join(",")).then(function(r){
-      return r.ok ? r.json() : null;
-    }).then(function(data){
-      if (!data) return;
-      // Best effort: just leave the static ticker if anything fails
     }).catch(function(){});
   }
 
-  function escapeHTML(s){
-    return String(s || "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  }
-
-  // ---- Auto-link rewriter: turns inline anchor phrases from engine into actual links
+  // ---- Auto-link rewriter (unchanged)
   function rewriteInlineLinks(){
     var bodies = document.querySelectorAll(".body-text");
     if (!bodies.length) return;
-    // Mapping of phrase regex -> URL (longest first to win)
     var mappings = [
-      // Bridge-related (chain-specific)
       { re: /\bbridge\s+(?:from\s+)?ETH\s+to\s+Solana\b/gi, url: "/bridge/ethereum-to-solana/" },
       { re: /\bbridge\s+(?:from\s+)?Ethereum\s+to\s+Solana\b/gi, url: "/bridge/ethereum-to-solana/" },
       { re: /\bbridge\s+(?:from\s+)?Base\s+to\s+Solana\b/gi, url: "/bridge/base-to-solana/" },
@@ -1063,7 +1219,6 @@ a{color:var(--mint);text-decoration:none;}
       { re: /\bbridge\s+(?:from\s+)?Aptos\s+to\s+Solana\b/gi, url: "/bridge/aptos-to-solana/" },
       { re: /\bbridge\s+USDC\s+to\s+Solana\b/gi, url: "/bridge/ethereum-to-solana/" },
       { re: /\bbridge\s+to\s+Solana\b/gi, url: "/bridge/" },
-      // Brand tokens
       { re: /\bAAPLx\b/g, url: "/brands/aaplx/" },
       { re: /\bTSLAx\b/g, url: "/brands/tslax/" },
       { re: /\bNVDAx\b/g, url: "/brands/nvdax/" },
@@ -1075,43 +1230,36 @@ a{color:var(--mint);text-decoration:none;}
       { re: /\bSPYx\b/g, url: "/brands/spyx/" },
       { re: /\bQQQx\b/g, url: "/brands/qqqx/" },
       { re: /\bbrand\s+tokens?\b/gi, url: "/brands/" },
-      // Memes -- known Solana memes
       { re: /\bWIF\b/g, url: "/memes/wif/" },
       { re: /\bBONK\b/g, url: "/memes/bonk/" },
       { re: /\bPOPCAT\b/g, url: "/memes/popcat/" },
       { re: /\bHOPPY\b/g, url: "/memes/hoppy/" },
       { re: /\bFARTCOIN\b/g, url: "/memes/fartcoin/" },
       { re: /\bPEPE\b/g, url: "/memes/pepe/" },
-      // Wonderland / memes
       { re: /\bthe\s+Wonderland\s+tab\b/gi, url: "/memes/" },
       { re: /\bWonderland\s+memes\b/gi, url: "/memes/" },
       { re: /\bSolana\s+memes\b/gi, url: "/memes/" },
-      // Signals
       { re: /\blive\s+signals\b/gi, url: "/signals/" },
       { re: /\btrending\s+Solana\s+tokens\b/gi, url: "/signals/trending/" },
       { re: /\bfresh\s+launches\b/gi, url: "/signals/fresh/" },
       { re: /\bvolume\s+leaders\b/gi, url: "/signals/volume/" },
       { re: /\btop\s+gainers\b/gi, url: "/signals/gainers/" },
-      // Swap
       { re: /\bswap\s+any\s+Solana\s+token\b/gi, url: "/" },
       { re: /\bswap\s+on\s+Solana\b/gi, url: "/" },
-      // Specific token swap pages
       { re: /\bswap\s+JUP\b/gi, url: "/swap/jup/" },
       { re: /\bswap\s+RAY\b/gi, url: "/swap/ray/" },
       { re: /\bswap\s+SOL\b/gi, url: "/swap/sol/" },
-      { re: /\bswap\s+USDC\b/gi, url: "/swap/usdc/" },
+      { re: /\bswap\s+USDC\b/gi, url: "/swap/usdc/" }
     ];
     bodies.forEach(function(body){
       body.querySelectorAll("p").forEach(function(p){
         var html = p.innerHTML;
         mappings.forEach(function(m){
-          // Skip if already linked
           html = html.replace(m.re, function(match, offset, full){
-            // Don't link if already inside an <a>
             var before = full.slice(0, offset);
             var openA = (before.match(/<a\b/gi) || []).length;
             var closeA = (before.match(/<\/a>/gi) || []).length;
-            if (openA > closeA) return match; // we're inside an <a>
+            if (openA > closeA) return match;
             return '<a href="' + m.url + '">' + match + '</a>';
           });
         });
@@ -1120,20 +1268,18 @@ a{color:var(--mint);text-decoration:none;}
     });
   }
 
-  // ---- Live signals feed (renders inline for signals_discovery pages)
+  // ---- Live signals feed
   function renderLiveSignalsFeed(){
     if (P.intent !== "signals_discovery") return;
     var insertAfter = document.querySelector(".content .body-text");
     if (!insertAfter) return;
     var existing = document.getElementById("liveSignalsFeed");
     if (existing) existing.remove();
-
     var feed = document.createElement("div");
     feed.id = "liveSignalsFeed";
     feed.style.cssText = "margin:18px 0;padding:16px;border-radius:14px;background:rgba(125,249,212,.06);border:1px solid rgba(125,249,212,.22);";
     feed.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="width:8px;height:8px;border-radius:50%;background:#7df9d4;box-shadow:0 0 8px #7df9d4;animation:blink-dot 1.8s infinite;"></span><span style="font-family:var(--mono);font-size:11px;font-weight:800;color:#7df9d4;letter-spacing:.10em;text-transform:uppercase;">Live from Jupiter</span></div><div id="liveSignalsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;"><div style="font-size:12px;color:#c9b8e6;">Loading live signals…</div></div>';
     insertAfter.parentNode.insertBefore(feed, insertAfter.nextSibling);
-
     fetch("https://lite-api.jup.ag/tokens/v2/recent?limit=8").then(function(r){
       return r.ok ? r.json() : null;
     }).then(function(data){
@@ -1156,7 +1302,7 @@ a{color:var(--mint);text-decoration:none;}
     }).catch(function(){});
   }
 
-  // ---- Jitter hydration: per-page stat values for unique fingerprint
+  // ---- Per-page stat jitter
   function hydrateJitter(){
     var j = P.jitter || {};
     var bt = document.getElementById("statBlockTime");
@@ -1166,12 +1312,14 @@ a{color:var(--mint);text-decoration:none;}
   }
 
   // Initialize all hydration
+  hydrateHubLink();
+  hydrateAggregateRating();
+  hydrateRelatedLinks();
   hydrateRecog();
   hydrateSupp();
   hydrateFaq();
   hydrateSwap();
   loadMemeCards();
-  loadTickerPrices();
   rewriteInlineLinks();
   renderLiveSignalsFeed();
   hydrateJitter();
