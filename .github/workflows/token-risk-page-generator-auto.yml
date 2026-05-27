@@ -34,7 +34,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 350
 
     env:
       KEYWORDS_FILE: "data/token_keywords.txt"
@@ -269,8 +269,10 @@ jobs:
           commit_and_push() {
             local commit_message="$1"
 
-            # Stage everything except workflow files (token lacks `workflows` scope)
-            git add -A -- ':!.github/workflows' ':!.github/workflows/**'
+            # Stage everything EXCEPT workflow files (GITHUB_TOKEN lacks `workflows` scope).
+            git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
+            # Defensive: unstage any workflow file that slipped in.
+            git reset HEAD -- .github/workflows 2>/dev/null || true
 
             if git diff --cached --quiet; then
               echo "No changes to commit for: $commit_message"
@@ -316,7 +318,7 @@ jobs:
             produced=$((after_count - before_count))
 
             if [ "$produced" -le 0 ]; then
-              echo "No new pages produced in batch #$batch_number. Committing any hub/sitemap changes and stopping."
+              echo "No new pages produced in batch #$batch_number. Committing any hub/sitemap drift and stopping."
               commit_and_push "Token Risk SEO batch #$batch_number (no new pages, hub/sitemap refresh)"
               break
             fi
@@ -369,8 +371,10 @@ jobs:
             local commit_message="$1"
 
             git status --short
-            # Stage everything except workflow files (token lacks `workflows` scope)
-            git add -A -- ':!.github/workflows' ':!.github/workflows/**'
+            # Stage everything EXCEPT workflow files (GITHUB_TOKEN lacks `workflows` scope).
+            git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
+            # Defensive: unstage any workflow file that slipped in.
+            git reset HEAD -- .github/workflows 2>/dev/null || true
 
             if git diff --cached --quiet; then
               echo "No changes to commit for: $commit_message"
@@ -517,13 +521,13 @@ jobs:
           fi
 
           git status --short
-          # Stage only specific tracked files, never workflow files
+          # Stage only specific tracked files, never workflow files.
           git add "$KEYWORDS_FILE" 2>/dev/null || true
           git add "$REBUILD_PROGRESS_FILE" 2>/dev/null || true
           git add "$REBUILD_KEYWORDS_SOURCE_FILE" 2>/dev/null || true
           git add "$REBUILD_SLUGS_SOURCE_FILE" 2>/dev/null || true
 
-          # Defensive: ensure no workflow file slipped into the index
+          # Defensive: ensure no workflow file slipped into the index.
           git reset HEAD -- .github/workflows 2>/dev/null || true
 
           if git diff --cached --quiet; then
