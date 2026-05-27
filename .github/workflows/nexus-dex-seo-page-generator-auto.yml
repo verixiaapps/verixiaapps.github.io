@@ -34,7 +34,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 350
 
     env:
       KEYWORDS_FILE: "data/nexus_dex_keywords.txt"
@@ -285,7 +285,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -A
+          git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
+          git reset HEAD -- .github/workflows 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
@@ -349,7 +350,8 @@ jobs:
             local commit_message="$1"
 
             git status --short
-            git add -A
+            git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
+            git reset HEAD -- .github/workflows 2>/dev/null || true
 
             if git diff --cached --quiet; then
               echo "No changes to commit for: $commit_message"
@@ -497,6 +499,7 @@ jobs:
 
           git status --short
           git add "$KEYWORDS_FILE" "$REBUILD_PROGRESS_FILE" "$REBUILD_KEYWORDS_SOURCE_FILE" "$REBUILD_SLUGS_SOURCE_FILE" 2>/dev/null || true
+          git reset HEAD -- .github/workflows 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No final rebuild-state changes to commit"
@@ -523,3 +526,4 @@ jobs:
                 "$RUNNER_TEMP/nexus_dex_generated_slugs_kept.txt" \
                 "$RUNNER_TEMP/nexus_dex_generated_keywords_kept.txt" \
                 "$RUNNER_TEMP/original_nexus_dex_keywords_queue.txt"
+
