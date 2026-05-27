@@ -230,21 +230,12 @@ jobs:
             exit 1
           fi
 
-      - name: Standard incremental build
+      - name: Standard incremental build in batches of 30
         if: steps.limits.outputs.full_rebuild != 'true'
         shell: bash
         env:
-          DAILY_LIMIT: ${{ steps.limits.outputs.effective_daily_limit }}
-        run: python scripts/build_token_seo_incremental.py
-
-      - name: Build hub pages after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
-        run: python scripts/build_token_hubs.py
-
-      - name: Build token-risk sitemap after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
+          TOTAL_LIMIT: ${{ steps.limits.outputs.effective_daily_limit }}
+          BATCH_SIZE: "30"
         run: |
           set -euo pipefail
 
@@ -259,54 +250,83 @@ jobs:
             fi
           }
 
-          {
-            echo '<?xml version="1.0" encoding="UTF-8"?>'
-            echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+          build_token_risk_sitemap() {
+            {
+              echo '<?xml version="1.0" encoding="UTF-8"?>'
+              echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
 
-            find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
-              [ -f "$dir/index.html" ] || continue
-              slug=$(basename "$dir")
-              page_lastmod=$(get_lastmod "$dir/index.html")
-              echo "<url><loc>https://verixiaapps.com/token-risk/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
-            done
+              find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d | sort | while read -r dir; do
+                [ -f "$dir/index.html" ] || continue
+                slug=$(basename "$dir")
+                page_lastmod=$(get_lastmod "$dir/index.html")
+                echo "<url><loc>https://verixiaapps.com/token-risk/$slug/</loc><lastmod>${page_lastmod}</lastmod></url>"
+              done
 
-            echo '</urlset>'
-          } > token-risk-sitemap.xml
+              echo '</urlset>'
+            } > token-risk-sitemap.xml
+          }
 
-      - name: Show changed files after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git status --short
+          commit_and_push() {
+            local commit_message="$1"
 
-      - name: Commit generated pages and sitemap after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add -A
+            # Stage everything except workflow files (token lacks `workflows` scope)
+            git add -A -- ':!.github/workflows' ':!.github/workflows/**'
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
+            if git diff --cached --quiet; then
+              echo "No changes to commit for: $commit_message"
+              return 0
+            fi
 
-          git commit -m "Token Risk SEO auto generation + hub update + sitemap update"
+            git commit -m "$commit_message"
+            git fetch origin main
 
-      - name: Push generated pages and sitemap after standard run
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
+            if git diff --quiet origin/main..HEAD; then
+              echo "Nothing to push for: $commit_message"
+              return 0
+            fi
 
-          if git diff --quiet origin/main..HEAD; then
-            echo "Nothing to push"
-            exit 0
-          fi
+            git push --force-with-lease origin HEAD:main
+          }
 
-          git push --force-with-lease origin HEAD:main
+          total_processed=0
+          batch_number=0
+
+          while [ "$total_processed" -lt "$TOTAL_LIMIT" ]; do
+            remaining=$((TOTAL_LIMIT - total_processed))
+            current_batch_size="$BATCH_SIZE"
+            if [ "$remaining" -lt "$current_batch_size" ]; then
+              current_batch_size="$remaining"
+            fi
+
+            if [ ! -s "$KEYWORDS_FILE" ]; then
+              echo "Keyword queue empty. Stopping."
+              break
+            fi
+
+            batch_number=$((batch_number + 1))
+            echo "Starting standard batch #$batch_number (target size $current_batch_size)"
+
+            before_count=$(wc -l < "$GENERATED_SLUGS_FILE" | tr -d ' ')
+
+            DAILY_LIMIT="$current_batch_size" python scripts/build_token_seo_incremental.py
+            python scripts/build_token_hubs.py
+            build_token_risk_sitemap
+
+            after_count=$(wc -l < "$GENERATED_SLUGS_FILE" | tr -d ' ')
+            produced=$((after_count - before_count))
+
+            if [ "$produced" -le 0 ]; then
+              echo "No new pages produced in batch #$batch_number. Committing any hub/sitemap changes and stopping."
+              commit_and_push "Token Risk SEO batch #$batch_number (no new pages, hub/sitemap refresh)"
+              break
+            fi
+
+            git status --short || true
+            commit_and_push "Token Risk SEO batch #$batch_number (+$produced pages, hub + sitemap)"
+
+            total_processed=$((total_processed + produced))
+            echo "Total processed so far: $total_processed / $TOTAL_LIMIT"
+          done
 
       - name: Manual full rebuild in resumable batches
         if: success() && steps.limits.outputs.full_rebuild == 'true'
@@ -349,7 +369,8 @@ jobs:
             local commit_message="$1"
 
             git status --short
-            git add -A
+            # Stage everything except workflow files (token lacks `workflows` scope)
+            git add -A -- ':!.github/workflows' ':!.github/workflows/**'
 
             if git diff --cached --quiet; then
               echo "No changes to commit for: $commit_message"
@@ -496,7 +517,14 @@ jobs:
           fi
 
           git status --short
-          git add "$KEYWORDS_FILE" "$REBUILD_PROGRESS_FILE" "$REBUILD_KEYWORDS_SOURCE_FILE" "$REBUILD_SLUGS_SOURCE_FILE" 2>/dev/null || true
+          # Stage only specific tracked files, never workflow files
+          git add "$KEYWORDS_FILE" 2>/dev/null || true
+          git add "$REBUILD_PROGRESS_FILE" 2>/dev/null || true
+          git add "$REBUILD_KEYWORDS_SOURCE_FILE" 2>/dev/null || true
+          git add "$REBUILD_SLUGS_SOURCE_FILE" 2>/dev/null || true
+
+          # Defensive: ensure no workflow file slipped into the index
+          git reset HEAD -- .github/workflows 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No final rebuild-state changes to commit"
