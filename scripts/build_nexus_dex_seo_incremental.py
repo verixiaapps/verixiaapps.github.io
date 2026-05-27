@@ -1,16 +1,3 @@
-"""
-build_nexus_dex_seo_incremental.py -- v3.1
-
-Merges:
-  - Legacy v1 quality logic: dedupe by canonical slug, keyword_quality_score,
-    is_weak_keyword filter, validate_page_output warnings, strict
-    is_usable_ai_text (350+ chars + paragraph check), structured rejection log.
-  - Incremental/checkpoint pattern from working scam-check:
-    in-process AI via generate_nexus_dex_content, no HTTP engine, RESUME
-    skip-existing, checkpoint every COMMIT_EVERY pages, line-aligned
-    tracking files (slugs + keywords).
-"""
-
 import os
 import re
 import sys
@@ -855,11 +842,16 @@ def append_rejected_keyword(keyword, reason):
 # -----------------------------
 # GIT CHECKPOINT
 # -----------------------------
-def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords):
+def get_remaining_keywords(raw_keywords, processed_keywords):
+    """Compute remaining keywords by excluding already-processed ones."""
+    return [kw for kw in raw_keywords if normalize_keyword(kw) not in processed_keywords]
+
+
+def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords):
     sorted_keywords = sorted(new_generated_keywords, key=slugify)
     write_lines(GENERATED_KEYWORDS_FILE, sorted_keywords)
     write_lines(GENERATED_SLUGS_FILE, [slugify(k) for k in sorted_keywords])
-    write_lines(KEYWORD_FILE, remaining_keywords)
+    write_lines(KEYWORD_FILE, get_remaining_keywords(raw_keywords, processed_keywords))
 
     try:
         subprocess.run(["git", "add", "-A"], check=True)
@@ -1163,10 +1155,10 @@ generated_count = 0
 skipped_existing_count = 0
 ai_failure_count = 0
 validation_error_count = 0
+# FIX: use a set to track processed keywords; never filter the full list in the loop
 processed_keywords = set()
 new_generated_slugs = set(generated_slugs)
 new_generated_keywords = set(generated_keywords)
-remaining_keywords = [normalize_keyword(kw) for kw in raw_keywords]
 
 for page in queue_pages:
     if generated_count >= DAILY_LIMIT:
@@ -1174,12 +1166,12 @@ for page in queue_pages:
 
     slug = page["slug"]
     keyword = page["keyword"]
+    keyword_norm = normalize_keyword(keyword)
     keyword_display = display_keyword(keyword)
     path = page_path(slug)
 
     if slug in PROTECTED_SLUGS:
-        processed_keywords.add(keyword)
-        remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
+        processed_keywords.add(keyword_norm)
         print("Skipping protected page:", slug)
         continue
 
@@ -1187,8 +1179,7 @@ for page in queue_pages:
         skipped_existing_count += 1
         new_generated_slugs.add(slug)
         new_generated_keywords.add(keyword)
-        processed_keywords.add(keyword)
-        remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
+        processed_keywords.add(keyword_norm)
         continue
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -1242,8 +1233,7 @@ for page in queue_pages:
 
     new_generated_slugs.add(slug)
     new_generated_keywords.add(keyword)
-    processed_keywords.add(keyword)
-    remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
+    processed_keywords.add(keyword_norm)
 
     existing_pages.append({"keyword": keyword, "slug": slug})
     existing_pages = dedupe_pages_by_slug(existing_pages)
@@ -1255,10 +1245,12 @@ for page in queue_pages:
     )
 
     if generated_count % COMMIT_EVERY == 0:
-        git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords)
+        git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords)
 
 # Final checkpoint
-git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, remaining_keywords)
+git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords)
+
+remaining_count = len(get_remaining_keywords(raw_keywords, processed_keywords))
 
 print(f"\n--- NEXUS DEX SEO BUILD REPORT ---")
 print(f"Raw keywords loaded: {len(raw_keywords)}")
@@ -1270,4 +1262,4 @@ print(f"Pages generated: {generated_count}")
 print(f"Pages skipped (already on disk): {skipped_existing_count}")
 print(f"AI generations rejected: {ai_failure_count}")
 print(f"Validation warnings: {validation_error_count}")
-print(f"Remaining keywords in queue: {len(remaining_keywords)}")
+print(f"Remaining keywords in queue: {remaining_count}")
