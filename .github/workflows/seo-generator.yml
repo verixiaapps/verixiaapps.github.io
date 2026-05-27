@@ -1,3 +1,5 @@
+FILE 2: scam-check seo-generator.yml (full file)
+
 name: SEO Page Generator
 
 "on":
@@ -88,8 +90,6 @@ jobs:
           echo "Pages:      ${{ github.event.inputs.pages_to_run }}"
           echo "Batch size: ${{ github.event.inputs.batch_size }}"
 
-      # rebuild_all: wipe scam-check-now (preserve protected), reseed
-      # keyword queue from sitemap.xml, normalize, clear tracking files.
       - name: Rebuild all (wipe + reseed from sitemap)
         if: github.event.inputs.run_mode == 'rebuild_all'
         shell: bash
@@ -130,42 +130,34 @@ jobs:
           while IFS= read -r raw_slug; do
             [ -z "$raw_slug" ] && continue
 
-            # Normalize: lowercase, replace anything non-alphanumeric with -,
-            # collapse runs of -, strip leading/trailing -.
             clean=$(echo "$raw_slug" \
               | tr '[:upper:]' '[:lower:]' \
               | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')
 
-            # Skip protected.
             if [ "$clean" = "$PROTECTED_SLUG" ]; then
               continue
             fi
 
-            # Skip empty after cleanup.
             if [ -z "$clean" ]; then
               echo "$raw_slug" >> data/_skipped_slugs.txt
               continue
             fi
 
-            # Skip absurd lengths.
             len=${#clean}
             if [ "$len" -lt 3 ] || [ "$len" -gt 120 ]; then
               echo "$raw_slug" >> data/_skipped_slugs.txt
               continue
             fi
 
-            # Skip slugs with no letters (pure numbers / garbage).
             if ! echo "$clean" | grep -qE '[a-z]'; then
               echo "$raw_slug" >> data/_skipped_slugs.txt
               continue
             fi
 
-            # Convert slug -> keyword (kebab -> spaces).
             keyword=$(echo "$clean" | tr '-' ' ')
             echo "$keyword" >> "$KEYWORDS_FILE"
           done < data/_raw_slugs.txt
 
-          # Dedupe.
           sort -u "$KEYWORDS_FILE" -o "$KEYWORDS_FILE"
 
           QCOUNT=$(wc -l < "$KEYWORDS_FILE" | tr -d ' ')
@@ -190,7 +182,9 @@ jobs:
           : > "$GENERATED_KEYWORDS_FILE"
           : > "$GENERATED_SLUGS_FILE"
 
-          git add -A
+          git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
+          git reset HEAD -- .github/workflows 2>/dev/null || true
+
           if git diff --cached --quiet; then
             echo "Nothing to commit before generation."
           else
@@ -199,8 +193,6 @@ jobs:
             git push --force-with-lease origin HEAD:main
           fi
 
-      # Sanity-normalize the queue on any normal run too, so a hand-edited
-      # file or a stray bad row can't crash the generator.
       - name: Normalize keyword queue (normal run)
         if: github.event.inputs.run_mode == 'normal'
         shell: bash
@@ -219,9 +211,6 @@ jobs:
           rm -f data/_pre_normalize.txt
           echo "Queue after normalize: $(wc -l < "$KEYWORDS_FILE" | tr -d ' ')"
 
-      # Builder is responsible for skipping individual keywords that fail.
-      # Workflow never aborts on builder exit code -- commits and rebuilds
-      # sitemap regardless so partial progress always gets saved.
       - name: Run build
         shell: bash
         env:
@@ -280,7 +269,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -A
+          git add -A -- ':(exclude).github/workflows' ':(exclude).github/workflows/**'
+          git reset HEAD -- .github/workflows 2>/dev/null || true
+
           if git diff --cached --quiet; then
             echo "Nothing left to commit."
             exit 0
@@ -288,3 +279,4 @@ jobs:
           git commit -m "SEO run: ${RUN_MODE} (status: ${{ job.status }})"
           git fetch origin main
           git push --force-with-lease origin HEAD:main
+
