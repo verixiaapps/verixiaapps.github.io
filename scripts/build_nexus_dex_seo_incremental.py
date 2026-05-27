@@ -1,17 +1,3 @@
-"""
-build_nexus_dex_seo_incremental.py -- v2.0.1 (Verixia / v18.4 engine)
-
-Incremental builder for Verixia SEO pages. Only renders new pages (slugs that
-don't already exist on disk).
-
-What changed from v2.0 -> v2.0.1:
-  - render_page_html is now tolerant: any leftover {{TOKEN}} the replacements
-    dict doesn't cover is stripped (replaced with empty string) and a warning
-    is printed instead of raising ValueError. Previously a template/replacement
-    mismatch killed the page render mid-loop and the keyword stayed in queue
-    forever, burning engine time on every retry.
-"""
-
 import json
 import os
 import re
