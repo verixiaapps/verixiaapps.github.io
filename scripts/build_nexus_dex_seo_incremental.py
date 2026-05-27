@@ -1,25 +1,15 @@
 """
-build_nexus_dex_seo_incremental.py -- v2.0 (Verixia / v18.4 engine)
+build_nexus_dex_seo_incremental.py -- v2.0.1 (Verixia / v18.4 engine)
 
 Incremental builder for Verixia SEO pages. Only renders new pages (slugs that
 don't already exist on disk).
 
-What changed from v1.2 -> v2.0:
-  - Dropped Hyperliquid integration (no hlDataBlock variable, no hyperliquid
-    hub, no Hyperliquid keywords in BRAND_CASE or cluster terms).
-  - Dropped prediction markets (no event-markets hub, no polymarket/kalshi
-    routing).
-  - Dropped all Python-side fallback content generators (build_static_h1,
-    build_static_intro, build_supp_heading_local, build_supp_intro_local,
-    build_schema_faq, build_title, build_description, generate_ai_text).
-    The engine has internal two-pass + alt-framing + low-temp retry. If it
-    cannot produce a page above MIN_PUBLISH_SCORE, the keyword stays in the
-    queue. No off-brand fallback content is ever published.
-  - Added v18.4 hubs: wonderland-memes, live-signals, brand-tokens,
-    solana-bridges, solana-swaps.
-  - Added scale-hardening hooks: /reset-build at start, /build-report at end,
-    duplicate-risk rejection from engine output gate.
-  - Updated BRAND_CASE + cluster terms for Solana-DeFi voice.
+What changed from v2.0 -> v2.0.1:
+  - render_page_html is now tolerant: any leftover {{TOKEN}} the replacements
+    dict doesn't cover is stripped (replaced with empty string) and a warning
+    is printed instead of raising ValueError. Previously a template/replacement
+    mismatch killed the page render mid-loop and the keyword stayed in queue
+    forever, burning engine time on every retry.
 """
 
 import json
@@ -710,12 +700,18 @@ def discover_existing_output_pages(existing_keyword_map=None):
 
 
 def render_page_html(template_html, replacements):
+    """Substitute all known placeholders. Any leftover {{TOKEN}} is logged once
+    and stripped to empty string instead of raising. This keeps the build
+    rolling when the template gains a new placeholder before the Python
+    replacements dict catches up."""
     html = template_html
     for placeholder, value in replacements.items():
         html = html.replace(placeholder, value)
     unresolved = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html)))
     if unresolved:
-        raise ValueError("Unresolved template placeholders remain: " + ", ".join(unresolved))
+        print(f"[warn] stripping unresolved template placeholders: {', '.join(unresolved)}")
+        for token in unresolved:
+            html = html.replace(token, "")
     return html
 
 
