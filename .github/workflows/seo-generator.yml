@@ -89,8 +89,7 @@ jobs:
           echo "Batch size: ${{ github.event.inputs.batch_size }}"
 
       # rebuild_all: wipe scam-check-now (preserve protected), reseed
-      # keyword queue from sitemap.xml, clear tracking files. Then the
-      # generator runs against a fresh queue with nothing marked done.
+      # keyword queue from sitemap.xml, normalize, clear tracking files.
       - name: Rebuild all (wipe + reseed from sitemap)
         if: github.event.inputs.run_mode == 'rebuild_all'
         shell: bash
@@ -117,17 +116,73 @@ jobs:
           fi
           mkdir -p "$OUTPUT_DIR"
 
-          echo "Reseeding keyword queue from sitemap.xml..."
+          echo "Extracting slugs from sitemap.xml..."
           grep -oE 'scam-check-now/[^/]+/' sitemap.xml \
             | sed -E 's|scam-check-now/||; s|/$||' \
-            | grep -v "^${PROTECTED_SLUG}\$" \
-            | sort -u > "$KEYWORDS_FILE"
+            > data/_raw_slugs.txt || true
+
+          RAW_COUNT=$(wc -l < data/_raw_slugs.txt | tr -d ' ' || echo 0)
+          echo "Raw slugs extracted: $RAW_COUNT"
+
+          : > "$KEYWORDS_FILE"
+          : > data/_skipped_slugs.txt
+
+          while IFS= read -r raw_slug; do
+            [ -z "$raw_slug" ] && continue
+
+            # Normalize: lowercase, replace anything non-alphanumeric with -,
+            # collapse runs of -, strip leading/trailing -.
+            clean=$(echo "$raw_slug" \
+              | tr '[:upper:]' '[:lower:]' \
+              | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')
+
+            # Skip protected.
+            if [ "$clean" = "$PROTECTED_SLUG" ]; then
+              continue
+            fi
+
+            # Skip empty after cleanup.
+            if [ -z "$clean" ]; then
+              echo "$raw_slug" >> data/_skipped_slugs.txt
+              continue
+            fi
+
+            # Skip absurd lengths.
+            len=${#clean}
+            if [ "$len" -lt 3 ] || [ "$len" -gt 120 ]; then
+              echo "$raw_slug" >> data/_skipped_slugs.txt
+              continue
+            fi
+
+            # Skip slugs with no letters (pure numbers / garbage).
+            if ! echo "$clean" | grep -qE '[a-z]'; then
+              echo "$raw_slug" >> data/_skipped_slugs.txt
+              continue
+            fi
+
+            # Convert slug -> keyword (kebab -> spaces).
+            keyword=$(echo "$clean" | tr '-' ' ')
+            echo "$keyword" >> "$KEYWORDS_FILE"
+          done < data/_raw_slugs.txt
+
+          # Dedupe.
+          sort -u "$KEYWORDS_FILE" -o "$KEYWORDS_FILE"
 
           QCOUNT=$(wc -l < "$KEYWORDS_FILE" | tr -d ' ')
-          echo "Queue: $QCOUNT keywords"
+          SKIPPED=$(wc -l < data/_skipped_slugs.txt | tr -d ' ' || echo 0)
+          echo "Queue after normalize+dedupe: $QCOUNT keywords"
+          echo "Skipped (bad slugs):          $SKIPPED"
+
+          if [ "$SKIPPED" != "0" ]; then
+            echo "--- skipped slug examples ---"
+            head -20 data/_skipped_slugs.txt || true
+            echo "-----------------------------"
+          fi
+
+          rm -f data/_raw_slugs.txt
 
           if [ "$QCOUNT" = "0" ]; then
-            echo "Queue is empty after seeding. Aborting."
+            echo "Queue is empty after normalize. Aborting."
             exit 1
           fi
 
@@ -139,11 +194,34 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nothing to commit before generation."
           else
-            git commit -m "rebuild_all: wipe pages, reseed queue from sitemap"
+            git commit -m "rebuild_all: wipe pages, reseed normalized queue from sitemap"
             git fetch origin main
             git push --force-with-lease origin HEAD:main
           fi
 
+      # Sanity-normalize the queue on any normal run too, so a hand-edited
+      # file or a stray bad row can't crash the generator.
+      - name: Normalize keyword queue (normal run)
+        if: github.event.inputs.run_mode == 'normal'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s "$KEYWORDS_FILE" ]; then
+            echo "Queue is empty. Nothing to normalize."
+            exit 0
+          fi
+          cp "$KEYWORDS_FILE" data/_pre_normalize.txt
+          awk 'NF' data/_pre_normalize.txt \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' \
+            | awk 'length($0) >= 3 && length($0) <= 200' \
+            | sort -u > "$KEYWORDS_FILE"
+          rm -f data/_pre_normalize.txt
+          echo "Queue after normalize: $(wc -l < "$KEYWORDS_FILE" | tr -d ' ')"
+
+      # Builder is responsible for skipping individual keywords that fail.
+      # Workflow never aborts on builder exit code -- commits and rebuilds
+      # sitemap regardless so partial progress always gets saved.
       - name: Run build
         shell: bash
         env:
@@ -151,15 +229,25 @@ jobs:
           COMMIT_EVERY: ${{ github.event.inputs.batch_size }}
           RESUME: "true"
           RUN_MODE: ${{ github.event.inputs.run_mode }}
-        run: python scripts/build_seo_incremental.py
+        run: |
+          set +e
+          python scripts/build_seo_incremental.py
+          EXIT=$?
+          if [ "$EXIT" != "0" ]; then
+            echo "Builder exited with code $EXIT (continuing to commit/sitemap)."
+          fi
+          exit 0
 
       - name: Build hub pages
-        if: success()
+        if: always()
         shell: bash
-        run: python scripts/build_hubs.py
+        run: |
+          set +e
+          python scripts/build_hubs.py
+          exit 0
 
       - name: Rebuild root sitemap
-        if: success()
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
