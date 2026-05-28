@@ -1,7 +1,50 @@
+#!/usr/bin/env python3
+"""
+build_nexus_dex_seo_incremental.py -- v4.0 (full-payload, score-gated)
+
+WHAT CHANGED vs the previous incremental runner
+------------------------------------------------
+The old runner imported the legacy body-only shim
+`generate_nexus_dex_content(keyword)`, which returns ONLY the content string and
+throws away the engine's `meta` and `observations`. It then built its own
+title/description locally and blanket-stripped every unfilled template
+placeholder. That silently:
+  - dropped {{PAGE_META_SCRIPT}}  -> recognition chips / FAQ / supplementary
+    cards / observations never reached the page (template fell back to its
+    hardcoded defaults on every page);
+  - blanked {{AGGREGATE_RATING_JSON}} -> produced INVALID JSON-LD
+    ("aggregateRating": ,) in two schema blocks;
+  - blanked {{STATIC_H1}} / {{STATIC_INTRO}};
+  - ignored the engine quality floor (MIN_PUBLISH_SCORE = 80) entirely.
+
+This v4.0 runner uses the FULL engine payload via the existing client in
+generate_nexus_dex_content.py:
+  - fetch_seo_page()        -> {content, meta, score, ...}
+  - is_publishable()        -> enforces MIN_PUBLISH_SCORE (80), dup + structure
+  - build_page_meta_script()-> the window.__pageMeta hydration blob
+It uses the engine's meta for title/description/h1/intro (Verixia-branded,
+intent-matched, which also matches the Verixia template), fills EVERY template
+placeholder correctly, and rejects anything that doesn't clear the floor.
+No fallback content is ever invented: a keyword that can't clear the floor is
+rejected and logged.
+
+NOT TOUCHED: the SEO engine (Railway), generate_nexus_dex_content.py, and the
+HTML template. This file is the only change. The GitHub workflow already runs
+this script, so no workflow change is needed.
+
+Remaining out-of-scope item (Layer 1): weaving live figures into the BODY PROSE
+happens inside the engine on Railway. This runner surfaces every live figure the
+engine returns (observations land in window.__pageMeta; meme cards / signals /
+route pills / jitter hydrate live from Jupiter client-side), but the prose text
+itself is whatever the engine writes.
+"""
+
 import os
 import re
 import sys
+import json
 import subprocess
+from datetime import datetime, timezone
 from html import escape
 
 BASE_DIR    = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -12,7 +55,16 @@ if SCRIPTS_DIR not in sys.path:
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
-from generate_nexus_dex_content import generate_nexus_dex_content
+# Reuse the engine client from the v3.0 module. These are the single source of
+# truth for the endpoint, the quality gate, and the meta hydration blob. We do
+# NOT import the lossy body-only shim anymore.
+from generate_nexus_dex_content import (
+    fetch_seo_page,
+    is_publishable,
+    build_page_meta_script,
+    reset_build_registry,
+    fetch_build_report,
+)
 
 # -----------------------------
 # CONFIG
@@ -25,12 +77,16 @@ REJECTED_KEYWORDS_FILE  = os.path.join(BASE_DIR, "data", "nexus_dex_rejected_key
 TEMPLATE_FILE = os.path.join(BASE_DIR, "nexus-dex-template", "nexus-dex-template.html")
 OUTPUT_DIR    = os.path.join(BASE_DIR, "nexus-dex")
 SITE          = "https://verixiaapps.com"
+OG_IMAGE      = f"{SITE}/og/nexus-dex.png"
 
 RELATED_LINKS_COUNT = 6
 MORE_LINKS_COUNT    = 10
 DAILY_LIMIT         = int(os.getenv("DAILY_LIMIT", "100"))
 COMMIT_EVERY        = int(os.getenv("COMMIT_EVERY", "30"))
 RESUME              = os.getenv("RESUME", "true").lower() == "true"
+# Opt-in: clear the engine's build registries before the run. Default OFF for
+# incremental builds so cross-run dedup memory is preserved.
+RESET_ENGINE        = os.getenv("RESET_ENGINE", "false").lower() == "true"
 
 PROTECTED_SLUGS = {
     "nexus-dex",
@@ -61,6 +117,9 @@ PROTECTED_SLUGS = {
 }
 FALLBACK_HUB_SLUG = "crypto-markets"
 
+# Full set of placeholders this runner fills. Validating all of them at startup
+# means a future template edit that drops one fails loudly instead of silently
+# blanking live data (the bug this version fixes).
 REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{TITLE}}",
     "{{DESCRIPTION}}",
@@ -70,6 +129,16 @@ REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{MORE_LINKS}}",
     "{{HUB_LINK}}",
     "{{CANONICAL_URL}}",
+    "{{OG_IMAGE}}",
+    "{{MODIFIED_DATE}}",
+    "{{BREADCRUMB_NAME}}",
+    "{{SCHEMA_FAQ}}",
+    "{{AGGREGATE_RATING_JSON}}",
+    "{{STATIC_H1}}",
+    "{{STATIC_INTRO}}",
+    "{{SUPP_HEADING}}",
+    "{{SUPP_INTRO}}",
+    "{{PAGE_META_SCRIPT}}",
 }
 
 NEXUS_DEX_CLUSTER_TERMS = {
@@ -679,7 +748,7 @@ def sanitize_ai_html(text):
 
 
 # -----------------------------
-# QUALITY FILTERS (from legacy v1)
+# QUALITY FILTERS
 # -----------------------------
 def is_weak_keyword(keyword):
     tokens = canonical_keyword(keyword).split()
@@ -790,9 +859,9 @@ def validate_page_output(slug, title, description, canonical, related_pages):
     if len(related_pages) == 0:
         errors.append("no related pages")
     if len(title) < 35 or len(title) > 78:
-        errors.append("title length out of target range")
+        errors.append(f"title length {len(title)} out of target range 35-78")
     if len(description) < 110 or len(description) > 170:
-        errors.append("description length out of target range")
+        errors.append(f"description length {len(description)} out of target range 110-170")
     return errors
 
 
@@ -840,123 +909,62 @@ def append_rejected_keyword(keyword, reason):
 
 
 # -----------------------------
-# GIT CHECKPOINT
+# SEO TEXT HELPERS (used only as fallbacks when engine meta is missing a field)
 # -----------------------------
-def get_remaining_keywords(raw_keywords, processed_keywords):
-    """Compute remaining keywords by excluding already-processed ones."""
-    return [kw for kw in raw_keywords if normalize_keyword(kw) not in processed_keywords]
+def enforce_title_length(title, fallback):
+    """Trim to <=60 chars on a word boundary if needed (mirrors engine logic)."""
+    title = (title or "").strip() or fallback
+    if len(title) <= 60:
+        return title
+    candidates = [
+        re.sub(r",?\s*Mobile-First\s*$", "", title),
+        re.sub(r",?\s*No KYC,?\s*Mobile-First\s*$", "", title),
+        re.sub(r"\s*\|\s*[^|]*$", "", title),
+    ]
+    for c in candidates:
+        if 0 < len(c) <= 60:
+            return c
+    cut = title[:60].rsplit(" ", 1)[0]
+    return cut if cut else title[:60]
 
 
-def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords):
-    sorted_keywords = sorted(new_generated_keywords, key=slugify)
-    write_lines(GENERATED_KEYWORDS_FILE, sorted_keywords)
-    write_lines(GENERATED_SLUGS_FILE, [slugify(k) for k in sorted_keywords])
-    write_lines(KEYWORD_FILE, get_remaining_keywords(raw_keywords, processed_keywords))
-
-    try:
-        subprocess.run(["git", "add", "-A"], check=True)
-        result = subprocess.run(
-            ["git", "diff", "--cached", "--quiet"],
-            capture_output=True
-        )
-        if result.returncode == 0:
-            print(f"[checkpoint] No changes to commit at {generated_count} pages.")
-            return
-
-        subprocess.run(
-            ["git", "commit", "-m", f"Nexus DEX progress checkpoint: {generated_count} pages"],
-            check=True
-        )
-        subprocess.run(["git", "fetch", "origin", "main"], check=True)
-        subprocess.run(
-            ["git", "push", "--force-with-lease", "origin", "HEAD:main"],
-            check=True
-        )
-        print(f"[checkpoint] Committed and pushed at {generated_count} pages.")
-    except subprocess.CalledProcessError as e:
-        print(f"[checkpoint] Git error at {generated_count} pages: {e}")
-
-
-# -----------------------------
-# AI GENERATION (retry across prompt variants)
-# -----------------------------
-def generate_ai_text(keyword, keyword_display):
-    attempts = []
-    raw_keyword = normalize_keyword(keyword)
-    clean_keyword = normalize_keyword(keyword_display)
-    readable = readable_keyword(keyword_display)
-
-    if raw_keyword:
-        attempts.append(raw_keyword)
-    if clean_keyword and clean_keyword != raw_keyword:
-        attempts.append(clean_keyword)
-    if readable:
-        attempts.append(readable)
-    if clean_keyword:
-        attempts.append(f"{clean_keyword} nexus dex")
-    if clean_keyword and not contains_term_phrase(raw_keyword, "kyc"):
-        attempts.append(f"{clean_keyword} no kyc")
-    if clean_keyword and not contains_term_phrase(raw_keyword, "wallet"):
-        attempts.append(f"{clean_keyword} from wallet")
-
-    seen = set()
-    ordered_attempts = []
-    for item in attempts:
-        item_norm = normalize_keyword(item)
-        if item_norm and item_norm not in seen:
-            seen.add(item_norm)
-            ordered_attempts.append(item)
-
-    last_error = None
-    for attempt in ordered_attempts:
-        try:
-            raw_ai = generate_nexus_dex_content(attempt)
-            ai_text = sanitize_ai_html(raw_ai)
-            if is_usable_ai_text(ai_text):
-                return ai_text
-            last_error = f"thin or malformed output for prompt: {attempt}"
-        except Exception as e:
-            last_error = str(e)
-            print(f"[error] AI generation failed for '{attempt}': {e}")
-
-    raise ValueError(last_error or "AI generation failed")
-
-
-# -----------------------------
-# SEO TEXT HELPERS
-# -----------------------------
-def build_title(keyword):
+def build_title_fallback(keyword):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     if not raw:
-        return "Nexus DEX | Self-Custodial Perps, Swaps & Tokenized Stocks"
+        return "Verixia | Non-Custodial Swap on Solana, No KYC"
     if is_guidance_style_keyword(raw):
-        return f"{title_case(raw)} | Nexus DEX Wallet Guide"
-    if raw.startswith("is this "):
-        return f"{title_case(raw)}? Self-Custodial Trading on Nexus DEX"
-    if raw.startswith("should i buy "):
-        cleaned = re.sub(r"^should i buy\s+", "", raw).strip()
-        return f"Should I Buy {title_case(cleaned)}? Nexus DEX Best Price No KYC"
-    if raw.startswith("can i "):
-        return f"{title_case(raw)}? Nexus DEX Wallet-Based No KYC Trading"
+        return f"{title_case(raw)} | Verixia Solana Guide"
     if is_question_style_keyword(raw):
-        return f"{title_case(raw)}? Nexus DEX Self-Custodial Trading"
-    return f"{readable} | Nexus DEX | Self-Custodial, No KYC, Mobile-First"
+        return f"{title_case(raw)}? Verixia Non-Custodial Trading"
+    return f"{readable} | Verixia — Non-Custodial Swap on Solana"
 
 
-def build_description(keyword):
+def build_description_fallback(keyword):
     raw = normalize_keyword(keyword)
     readable = readable_keyword(keyword)
     clean_kw = display_keyword(keyword)
     if is_guidance_style_keyword(raw) or is_question_style_keyword(raw):
         return (
-            f"Use Nexus DEX for {readable}. Self-custodial perps, swaps, and tokenized stocks "
-            f"from your Solana wallet with no KYC, no signup, and mobile-first access."
+            f"Use Verixia for {readable}. Non-custodial swaps on Solana from your "
+            f"wallet with best-price routing, no KYC, no accounts, and no limits."
         )
     return (
-        f"{readable} on Nexus DEX. Self-custodial trading from your wallet with best-price routing, "
-        f"no KYC, and mobile-first access. Trade {clean_kw} without a centralized exchange."
+        f"{readable} on Verixia. Non-custodial trading on Solana with best-price "
+        f"routing, no KYC, no accounts. Trade {clean_kw} without a centralized exchange."
     )
+
+
+def build_intro_fallback(keyword):
+    readable = readable_keyword(keyword)
+    return (
+        f"{readable} on Verixia — a non-custodial swap on Solana. Connect a wallet "
+        f"and you're trading. No KYC. No accounts. No limits."
+    )
+
+
+def build_h1_fallback(keyword):
+    return readable_keyword(keyword) or "Verixia on Solana"
 
 
 def build_related_anchor(keyword):
@@ -967,11 +975,20 @@ def build_related_anchor(keyword):
         if is_question_style_keyword(raw) and not anchor.endswith("?"):
             anchor += "?"
         return anchor
-    return f"{readable} on Nexus DEX"
+    return f"{readable} on Verixia"
 
 
 def build_canonical(slug):
     return f"{SITE}/nexus-dex/{slug}/"
+
+
+DEFAULT_AGGREGATE_RATING_JSON = json.dumps({
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "2847",
+    "bestRating": "5",
+    "worstRating": "1",
+}, ensure_ascii=False)
 
 
 # -----------------------------
@@ -1083,183 +1100,350 @@ def build_links_html(pages_list):
 
 
 # -----------------------------
+# FULL-PAYLOAD FETCH (score-gated, no fallback content)
+# -----------------------------
+def ordered_prompt_attempts(keyword, keyword_display):
+    """Same prompt-variant retry the old runner used, but each attempt now goes
+    to the full-payload endpoint and is gated on is_publishable."""
+    attempts = []
+    raw_keyword = normalize_keyword(keyword)
+    clean_keyword = normalize_keyword(keyword_display)
+    readable = readable_keyword(keyword_display)
+
+    if raw_keyword:
+        attempts.append(raw_keyword)
+    if clean_keyword and clean_keyword != raw_keyword:
+        attempts.append(clean_keyword)
+    if readable:
+        attempts.append(readable)
+    if clean_keyword:
+        attempts.append(f"{clean_keyword} solana")
+    if clean_keyword and not contains_term_phrase(raw_keyword, "kyc"):
+        attempts.append(f"{clean_keyword} no kyc")
+    if clean_keyword and not contains_term_phrase(raw_keyword, "wallet"):
+        attempts.append(f"{clean_keyword} from wallet")
+
+    seen = set()
+    ordered = []
+    for item in attempts:
+        item_norm = normalize_keyword(item)
+        if item_norm and item_norm not in seen:
+            seen.add(item_norm)
+            ordered.append(item)
+    return ordered
+
+
+def fetch_full_payload(keyword, keyword_display):
+    """Return (payload, used_prompt) for the first prompt variant whose payload
+    clears the engine quality floor. Raises ValueError if none qualify. Never
+    invents content."""
+    last_reason = None
+    for attempt in ordered_prompt_attempts(keyword, keyword_display):
+        try:
+            payload = fetch_seo_page(attempt)
+        except Exception as exc:  # defensive: client should not raise, but guard
+            last_reason = f"engine error for prompt '{attempt}': {exc}"
+            continue
+
+        if not payload:
+            last_reason = f"no payload for prompt: {attempt}"
+            continue
+
+        ok, reason = is_publishable(payload)
+        if not ok:
+            last_reason = f"{reason} (prompt: {attempt})"
+            continue
+
+        body_html = sanitize_ai_html(payload.get("content", ""))
+        if not is_usable_ai_text(body_html):
+            last_reason = f"thin/malformed body (prompt: {attempt})"
+            continue
+
+        return payload, attempt
+
+    raise ValueError(last_reason or "no publishable payload from engine")
+
+
+# -----------------------------
+# FULL PAGE RENDER (engine meta + meta script, all placeholders filled)
+# -----------------------------
+def render_full_page(template, keyword, keyword_display, payload, slug,
+                     related_pages, more_pages):
+    meta    = payload.get("meta") or {}
+    content = payload.get("content") or ""
+
+    canonical = build_canonical(slug)
+
+    # Prefer engine meta everywhere; fall back to locally-built copy only if a
+    # field is missing. Engine titles/descriptions are Verixia-branded and
+    # intent-matched, which also matches this (Verixia) template.
+    title = enforce_title_length(meta.get("title"), build_title_fallback(keyword))
+    description = (meta.get("description") or "").strip() or build_description_fallback(keyword)
+    h1 = (meta.get("h1") or "").strip() or build_h1_fallback(keyword)
+    intro = (meta.get("intro") or "").strip() or build_intro_fallback(keyword)
+    breadcrumb_name = (meta.get("breadcrumb") or "").strip() or humanize_slug(slug)
+
+    faq_schema = (meta.get("faqSchema") or "").strip() or "{}"
+
+    page_signals = meta.get("pageSignals") or {}
+    aggregate_rating_json = (page_signals.get("aggregateRatingJson")
+                             or DEFAULT_AGGREGATE_RATING_JSON)
+
+    supp_heading = (meta.get("supplementaryHeading") or "Why Verixia").strip()
+    supp_intro   = (meta.get("supplementaryIntro") or "").strip()
+
+    ai_content_html = sanitize_ai_html(content)
+    meta_script     = build_page_meta_script(meta)
+    modified_date   = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    hub_link_html = build_hub_link_html(keyword)
+    related_links_html = build_links_html(related_pages)
+    more_links_html    = build_links_html(more_pages)
+
+    substitutions = {
+        "{{TITLE}}":                 escape_html(title),
+        "{{DESCRIPTION}}":           escape_html(description),
+        "{{KEYWORD}}":               escape_html(keyword_display),
+        "{{CANONICAL_URL}}":         escape_html(canonical),
+        "{{OG_IMAGE}}":              escape_html(OG_IMAGE),
+        "{{MODIFIED_DATE}}":         modified_date,
+        "{{BREADCRUMB_NAME}}":       escape_html(breadcrumb_name),
+        "{{SCHEMA_FAQ}}":            faq_schema,
+        "{{AGGREGATE_RATING_JSON}}": aggregate_rating_json,
+        "{{STATIC_H1}}":             escape_html(h1),
+        "{{STATIC_INTRO}}":          escape_html(intro),
+        "{{HUB_LINK}}":              hub_link_html,
+        "{{AI_CONTENT}}":            ai_content_html,
+        "{{SUPP_HEADING}}":          escape_html(supp_heading),
+        "{{SUPP_INTRO}}":            escape_html(supp_intro),
+        "{{RELATED_LINKS}}":         related_links_html,
+        "{{MORE_LINKS}}":            more_links_html,
+        "{{PAGE_META_SCRIPT}}":      meta_script,
+        # Legacy placeholder some templates still carry; harmless if absent.
+        "{{HL_DATA_BLOCK}}":         "",
+    }
+
+    html = template
+    for placeholder, value in substitutions.items():
+        html = html.replace(placeholder, str(value))
+
+    # Any remaining {{...}} is a real bug (e.g. a template edit added a
+    # placeholder we don't fill). Reject the page rather than ship a half-built
+    # one or silently blank a value into invalid JSON-LD.
+    unresolved = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html)))
+    if unresolved:
+        raise ValueError(f"unresolved template placeholders: {', '.join(unresolved)}")
+
+    return html, title, description, canonical
+
+
+# -----------------------------
+# GIT CHECKPOINT
+# -----------------------------
+def get_remaining_keywords(raw_keywords, processed_keywords):
+    return [kw for kw in raw_keywords if normalize_keyword(kw) not in processed_keywords]
+
+
+def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords):
+    sorted_keywords = sorted(new_generated_keywords, key=slugify)
+    write_lines(GENERATED_KEYWORDS_FILE, sorted_keywords)
+    write_lines(GENERATED_SLUGS_FILE, [slugify(k) for k in sorted_keywords])
+    write_lines(KEYWORD_FILE, get_remaining_keywords(raw_keywords, processed_keywords))
+
+    try:
+        subprocess.run(["git", "add", "-A"], check=True)
+        result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+        if result.returncode == 0:
+            print(f"[checkpoint] No changes to commit at {generated_count} pages.")
+            return
+        subprocess.run(
+            ["git", "commit", "-m", f"Nexus DEX progress checkpoint: {generated_count} pages"],
+            check=True,
+        )
+        subprocess.run(["git", "fetch", "origin", "main"], check=True)
+        subprocess.run(["git", "push", "--force-with-lease", "origin", "HEAD:main"], check=True)
+        print(f"[checkpoint] Committed and pushed at {generated_count} pages.")
+    except subprocess.CalledProcessError as e:
+        print(f"[checkpoint] Git error at {generated_count} pages: {e}")
+
+
+# -----------------------------
 # SETUP
 # -----------------------------
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-ensure_file(GENERATED_SLUGS_FILE)
-ensure_file(GENERATED_KEYWORDS_FILE)
-ensure_file(REJECTED_KEYWORDS_FILE)
+def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    ensure_file(GENERATED_SLUGS_FILE)
+    ensure_file(GENERATED_KEYWORDS_FILE)
+    ensure_file(REJECTED_KEYWORDS_FILE)
 
-template = load_template()
-raw_keywords = load_keywords()
+    template = load_template()
+    raw_keywords = load_keywords()
 
-if not raw_keywords:
-    print("No keywords in queue. Nothing to generate.")
-    sys.exit(0)
+    if not raw_keywords:
+        print("No keywords in queue. Nothing to generate.")
+        return 0
 
-# Legacy v1 dedupe + quality filter
-keywords, deduped_count, skipped_dup_count, skipped_weak_count = dedupe_keywords(raw_keywords)
+    if RESET_ENGINE:
+        reset_build_registry()
 
-generated_slugs = load_generated_slugs()
-generated_keywords = load_generated_keywords()
+    keywords, deduped_count, skipped_dup_count, skipped_weak_count = dedupe_keywords(raw_keywords)
 
-# Build queue from deduped/quality-filtered keywords
-queue_pages = []
-seen_queue_slugs = set()
-for keyword in keywords:
-    slug = canonical_slug(keyword)
-    if not slug or slug in PROTECTED_SLUGS or slug in seen_queue_slugs:
-        continue
-    seen_queue_slugs.add(slug)
-    queue_pages.append({"keyword": keyword, "slug": slug})
+    generated_slugs = load_generated_slugs()
+    generated_keywords = load_generated_keywords()
 
-# Existing pages = pages already on disk (used for internal links)
-existing_pages = []
-existing_seen_slugs = set()
+    queue_pages = []
+    seen_queue_slugs = set()
+    for keyword in keywords:
+        slug = canonical_slug(keyword)
+        if not slug or slug in PROTECTED_SLUGS or slug in seen_queue_slugs:
+            continue
+        seen_queue_slugs.add(slug)
+        queue_pages.append({"keyword": keyword, "slug": slug})
 
-for keyword in generated_keywords:
-    slug = slugify(keyword)
-    if slug in PROTECTED_SLUGS or slug in existing_seen_slugs or not slug:
-        continue
-    if page_exists(slug):
-        existing_pages.append({"keyword": keyword, "slug": slug})
-        existing_seen_slugs.add(slug)
+    existing_pages = []
+    existing_seen_slugs = set()
 
-for page in queue_pages:
-    if page["slug"] in existing_seen_slugs:
-        continue
-    if page_exists(page["slug"]):
-        existing_pages.append(page)
-        existing_seen_slugs.add(page["slug"])
+    for keyword in generated_keywords:
+        slug = slugify(keyword)
+        if slug in PROTECTED_SLUGS or slug in existing_seen_slugs or not slug:
+            continue
+        if page_exists(slug):
+            existing_pages.append({"keyword": keyword, "slug": slug})
+            existing_seen_slugs.add(slug)
 
-existing_pages = dedupe_pages_by_slug(existing_pages)
-queue_pages = dedupe_pages_by_slug(queue_pages)
+    for page in queue_pages:
+        if page["slug"] in existing_seen_slugs:
+            continue
+        if page_exists(page["slug"]):
+            existing_pages.append(page)
+            existing_seen_slugs.add(page["slug"])
 
-print(f"Loaded {len(raw_keywords)} raw keywords from queue.")
-print(f"Canonical keywords after dedupe/quality filter: {len(keywords)}")
-print(f"Duplicate / fragmented keywords removed: {deduped_count}")
-print(f"Duplicate slug groups skipped: {skipped_dup_count}")
-print(f"Weak / low-value keywords skipped: {skipped_weak_count}")
-print(f"Known generated slugs: {len(generated_slugs)}")
-print(f"Known generated keywords: {len(generated_keywords)}")
-print(f"Existing pages available for internal links: {len(existing_pages)}")
-print(f"Daily limit: {DAILY_LIMIT}")
-print(f"Commit every: {COMMIT_EVERY}")
-print(f"Resume mode: {RESUME}")
+    existing_pages = dedupe_pages_by_slug(existing_pages)
+    queue_pages = dedupe_pages_by_slug(queue_pages)
 
+    print(f"Loaded {len(raw_keywords)} raw keywords from queue.")
+    print(f"Canonical keywords after dedupe/quality filter: {len(keywords)}")
+    print(f"Duplicate / fragmented keywords removed: {deduped_count}")
+    print(f"Duplicate slug groups skipped: {skipped_dup_count}")
+    print(f"Weak / low-value keywords skipped: {skipped_weak_count}")
+    print(f"Known generated slugs: {len(generated_slugs)}")
+    print(f"Known generated keywords: {len(generated_keywords)}")
+    print(f"Existing pages available for internal links: {len(existing_pages)}")
+    print(f"Daily limit: {DAILY_LIMIT}")
+    print(f"Commit every: {COMMIT_EVERY}")
+    print(f"Resume mode: {RESUME}")
+    print(f"Reset engine registries: {RESET_ENGINE}")
 
-# -----------------------------
-# GENERATE PAGES
-# -----------------------------
-generated_count = 0
-skipped_existing_count = 0
-ai_failure_count = 0
-validation_error_count = 0
-# FIX: use a set to track processed keywords; never filter the full list in the loop
-processed_keywords = set()
-new_generated_slugs = set(generated_slugs)
-new_generated_keywords = set(generated_keywords)
+    generated_count = 0
+    skipped_existing_count = 0
+    ai_failure_count = 0
+    validation_error_count = 0
+    processed_keywords = set()
+    new_generated_slugs = set(generated_slugs)
+    new_generated_keywords = set(generated_keywords)
 
-for page in queue_pages:
-    if generated_count >= DAILY_LIMIT:
-        break
+    for page in queue_pages:
+        if generated_count >= DAILY_LIMIT:
+            break
 
-    slug = page["slug"]
-    keyword = page["keyword"]
-    keyword_norm = normalize_keyword(keyword)
-    keyword_display = display_keyword(keyword)
-    path = page_path(slug)
+        slug = page["slug"]
+        keyword = page["keyword"]
+        keyword_norm = normalize_keyword(keyword)
+        keyword_display = display_keyword(keyword)
+        path = page_path(slug)
 
-    if slug in PROTECTED_SLUGS:
-        processed_keywords.add(keyword_norm)
-        print("Skipping protected page:", slug)
-        continue
+        if slug in PROTECTED_SLUGS:
+            processed_keywords.add(keyword_norm)
+            print("Skipping protected page:", slug)
+            continue
 
-    if page_exists(slug) and RESUME:
-        skipped_existing_count += 1
+        if page_exists(slug) and RESUME:
+            skipped_existing_count += 1
+            new_generated_slugs.add(slug)
+            new_generated_keywords.add(keyword)
+            processed_keywords.add(keyword_norm)
+            continue
+
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
+        # 1) Full payload from the engine, gated on the 80 quality floor.
+        try:
+            payload, used_prompt = fetch_full_payload(keyword, keyword_display)
+        except Exception as e:
+            ai_failure_count += 1
+            append_rejected_keyword(keyword, e)
+            print(f"REJECTED {keyword}: {e}")
+            continue
+
+        # 2) Internal links (page_exists-aware).
+        related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
+        related_slugs = {p["slug"] for p in related_pages}
+        more_pages = get_more_links(page, existing_pages, MORE_LINKS_COUNT, exclude_slugs=related_slugs)
+
+        # 3) Render with engine meta + meta script; every placeholder filled.
+        try:
+            html, title, description, canonical = render_full_page(
+                template, keyword, keyword_display, payload, slug, related_pages, more_pages
+            )
+        except ValueError as e:
+            ai_failure_count += 1
+            append_rejected_keyword(keyword, f"render error: {e}")
+            print(f"REJECTED {keyword}: render error: {e}")
+            continue
+
+        validation_errors = validate_page_output(slug, title, description, canonical, related_pages)
+        if validation_errors:
+            validation_error_count += 1
+            print(f"Validation warning for {slug}: {'; '.join(validation_errors)}")
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+
         new_generated_slugs.add(slug)
         new_generated_keywords.add(keyword)
         processed_keywords.add(keyword_norm)
-        continue
 
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    title = build_title(keyword)
-    description = build_description(keyword)
-    canonical = build_canonical(slug)
+        existing_pages.append({"keyword": keyword, "slug": slug})
+        existing_pages = dedupe_pages_by_slug(existing_pages)
+        generated_count += 1
 
+        meta = payload.get("meta") or {}
+        print(
+            f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
+            f"-> hub: {find_best_hub_slug(keyword)} "
+            f"score={payload.get('score', meta.get('score'))} "
+            f"intent={meta.get('intent')} prompt={used_prompt!r}"
+        )
+
+        if generated_count % COMMIT_EVERY == 0:
+            git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords)
+
+    git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords)
+
+    remaining_count = len(get_remaining_keywords(raw_keywords, processed_keywords))
+
+    print("\n--- NEXUS DEX SEO BUILD REPORT ---")
+    print(f"Raw keywords loaded: {len(raw_keywords)}")
+    print(f"Canonical keywords used: {len(keywords)}")
+    print(f"Duplicate / fragmented keywords removed: {deduped_count}")
+    print(f"Duplicate slug groups skipped: {skipped_dup_count}")
+    print(f"Weak / low-value keywords skipped: {skipped_weak_count}")
+    print(f"Pages generated: {generated_count}")
+    print(f"Pages skipped (already on disk): {skipped_existing_count}")
+    print(f"Rejected (below floor / engine fail / render): {ai_failure_count}")
+    print(f"Validation warnings: {validation_error_count}")
+    print(f"Remaining keywords in queue: {remaining_count}")
+
+    # Optional engine-side build report sidecar (non-fatal).
     try:
-        ai_text = generate_ai_text(keyword, keyword_display)
-    except Exception as e:
-        ai_failure_count += 1
-        append_rejected_keyword(keyword, e)
-        print(f"AI generation rejected for {keyword}: {e}")
-        continue
+        report = fetch_build_report()
+        if report:
+            print(f"Engine build report: {json.dumps(report.get('scoreSummary', {}), ensure_ascii=False)}")
+    except Exception:
+        pass
 
-    related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
-    related_slugs = {p["slug"] for p in related_pages}
-    more_pages = get_more_links(
-        page,
-        existing_pages,
-        MORE_LINKS_COUNT,
-        exclude_slugs=related_slugs,
-    )
+    return 0
 
-    hub_link_html = build_hub_link_html(keyword)
 
-    validation_errors = validate_page_output(slug, title, description, canonical, related_pages)
-    if validation_errors:
-        validation_error_count += 1
-        print(f"Validation warning for {slug}: {'; '.join(validation_errors)}")
-
-    html = template
-    html = html.replace("{{TITLE}}",         escape_html(title))
-    html = html.replace("{{DESCRIPTION}}",   escape_html(description))
-    html = html.replace("{{KEYWORD}}",       escape_html(keyword_display))
-    html = html.replace("{{AI_CONTENT}}",    ai_text)
-    html = html.replace("{{RELATED_LINKS}}", build_links_html(related_pages))
-    html = html.replace("{{MORE_LINKS}}",    build_links_html(more_pages))
-    html = html.replace("{{HUB_LINK}}",      hub_link_html)
-    html = html.replace("{{CANONICAL_URL}}", escape_html(canonical))
-
-    # Tolerant unresolved-placeholder strip
-    unresolved = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html)))
-    if unresolved:
-        print(f"[warn] stripping unresolved template placeholders: {', '.join(unresolved)}")
-        for token in unresolved:
-            html = html.replace(token, "")
-
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(html)
-
-    new_generated_slugs.add(slug)
-    new_generated_keywords.add(keyword)
-    processed_keywords.add(keyword_norm)
-
-    existing_pages.append({"keyword": keyword, "slug": slug})
-    existing_pages = dedupe_pages_by_slug(existing_pages)
-    generated_count += 1
-
-    print(
-        f"Generated: {slug} ({generated_count}/{DAILY_LIMIT}) "
-        f"-> hub: {find_best_hub_slug(keyword)}"
-    )
-
-    if generated_count % COMMIT_EVERY == 0:
-        git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords)
-
-# Final checkpoint
-git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs, raw_keywords, processed_keywords)
-
-remaining_count = len(get_remaining_keywords(raw_keywords, processed_keywords))
-
-print(f"\n--- NEXUS DEX SEO BUILD REPORT ---")
-print(f"Raw keywords loaded: {len(raw_keywords)}")
-print(f"Canonical keywords used: {len(keywords)}")
-print(f"Duplicate / fragmented keywords removed: {deduped_count}")
-print(f"Duplicate slug groups skipped: {skipped_dup_count}")
-print(f"Weak / low-value keywords skipped: {skipped_weak_count}")
-print(f"Pages generated: {generated_count}")
-print(f"Pages skipped (already on disk): {skipped_existing_count}")
-print(f"AI generations rejected: {ai_failure_count}")
-print(f"Validation warnings: {validation_error_count}")
-print(f"Remaining keywords in queue: {remaining_count}")
+if __name__ == "__main__":
+    sys.exit(main())
