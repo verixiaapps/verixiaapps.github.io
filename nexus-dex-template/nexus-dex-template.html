@@ -319,47 +319,54 @@ a{color:var(--mint);text-decoration:none;}
 }
 .section-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--pink);box-shadow:0 0 8px var(--pink);animation:blink-dot 1.8s ease-in-out infinite;}
 
-.meme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.meme-grid{display:flex;flex-direction:column;gap:10px;}
 .meme-card{
-  position:relative;padding:14px;border-radius:18px;
+  position:relative;padding:14px 16px;border-radius:18px;
   background:linear-gradient(160deg,var(--card-2),var(--card));
   border:1px solid var(--border);
   box-shadow:var(--shadow-card);
   transition:transform .2s,border-color .2s,box-shadow .2s;
-  text-decoration:none;color:inherit;display:block;overflow:hidden;
+  color:inherit;display:flex;align-items:center;gap:14px;overflow:hidden;
 }
+/* Stretched overlay link makes the whole card tappable without nesting
+   anchors (Buy/Sell sit above it via z-index). */
+.meme-card-link{position:absolute;inset:0;z-index:1;border-radius:inherit;}
+.meme-card>*:not(.meme-card-link){position:relative;z-index:2;}
+.meme-actions a{position:relative;z-index:3;}
+/* Left block: identity + gain. Grows to fill. */
+.meme-info{flex:1;min-width:0;}
 .meme-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,var(--mint),var(--pink) 50%,var(--violet));
 }
 .meme-card:hover{transform:translateY(-3px);border-color:var(--border-strong);box-shadow:var(--shadow-pink),var(--shadow-card);}
-.meme-card-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.meme-card-head{display:flex;align-items:center;gap:11px;margin-bottom:8px;}
 .meme-avatar{
-  width:38px;height:38px;border-radius:50%;
+  width:44px;height:44px;border-radius:50%;
   background:linear-gradient(135deg,var(--lime),var(--mint));
   display:flex;align-items:center;justify-content:center;
-  font-size:21px;
+  font-size:24px;
   box-shadow:0 0 12px rgba(125,249,212,.40);
-  flex:0 0 38px;
+  flex:0 0 44px;
 }
 .meme-name{
-  font-family:var(--display);font-weight:900;font-size:16px;letter-spacing:-.02em;color:#fff;
-  display:flex;align-items:center;gap:5px;
+  font-family:var(--display);font-weight:900;font-size:17px;letter-spacing:-.02em;color:#fff;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.1;
 }
 .meme-hot{
   display:inline-flex;align-items:center;gap:2px;
-  padding:2px 6px;border-radius:999px;
-  font-family:var(--mono);font-size:8.5px;font-weight:800;letter-spacing:.06em;
+  padding:2px 7px;border-radius:999px;
+  font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.06em;
   background:rgba(255,111,191,.15);border:1px solid rgba(255,111,191,.40);color:var(--pink);
 }
-.meme-age{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase;margin-top:1px;}
-.meme-gain{font-family:var(--display);font-weight:900;font-size:25px;letter-spacing:-.03em;line-height:1;color:var(--mint);}
+.meme-age{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.meme-gain{font-family:var(--display);font-weight:900;font-size:27px;letter-spacing:-.03em;line-height:1;color:var(--mint);display:inline-block;}
 .meme-gain.dn{color:var(--danger);}
-.meme-period{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink-mute);margin-top:2px;}
-.meme-actions{display:flex;gap:5px;margin-top:10px;}
+.meme-period{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-mute);margin-top:3px;}
+.meme-actions{display:flex;flex-direction:column;gap:7px;flex:0 0 118px;}
 .btn-buy,.btn-sell{
-  flex:1;padding:8px 0;border-radius:11px;
-  font-family:var(--display);font-weight:800;font-size:12.5px;letter-spacing:.02em;
+  padding:11px 0;border-radius:12px;
+  font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.02em;
   border:none;cursor:pointer;text-align:center;text-decoration:none;
   transition:transform .12s;
 }
@@ -419,6 +426,11 @@ a{color:var(--mint);text-decoration:none;}
 }
 .swap-token.sol{background:linear-gradient(135deg,rgba(168,127,255,.20),rgba(168,127,255,.10));border:1px solid rgba(168,127,255,.40);color:#d8c0ff;}
 .swap-token.usdc{background:linear-gradient(135deg,rgba(125,249,212,.18),rgba(125,249,212,.08));border:1px solid rgba(125,249,212,.40);color:var(--mint);}
+.swap-token.pink{background:linear-gradient(135deg,rgba(255,111,191,.18),rgba(255,111,191,.08));border:1px solid rgba(255,111,191,.40);color:var(--pink);}
+.swap-token.gold{background:linear-gradient(135deg,rgba(255,210,74,.18),rgba(255,210,74,.08));border:1px solid rgba(255,210,74,.40);color:var(--gold);}
+.swap-token.lime{background:linear-gradient(135deg,rgba(200,255,94,.16),rgba(200,255,94,.07));border:1px solid rgba(200,255,94,.38);color:var(--lime);}
+/* Pay/receive show a token name rather than a number — size it to fit */
+.swap-amount.swap-side{font-size:23px;letter-spacing:-.02em;white-space:nowrap;}
 .swap-row-foot{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);}
 .swap-flip{display:flex;justify-content:center;margin:-9px 0;position:relative;z-index:2;}
 .swap-flip-c{
@@ -653,7 +665,6 @@ a{color:var(--mint);text-decoration:none;}
 .foot-pillars span{color:var(--ink-soft);}
 
 @media (max-width:720px){
-  .meme-grid{grid-template-columns:1fr;}
   .related-list{grid-template-columns:1fr;}
   .supp-cards{grid-template-columns:1fr;}
   .content-recog{grid-template-columns:1fr;}
@@ -661,6 +672,19 @@ a{color:var(--mint);text-decoration:none;}
   .stat-val{font-size:20px;}
   .content{padding:18px 16px;}
   .hero h1{font-size:clamp(36px,10vw,60px);}
+  /* One card per row — tighten the horizontal layout for phones */
+  .meme-card{padding:13px 14px;gap:11px;}
+  .meme-avatar{width:40px;height:40px;flex:0 0 40px;font-size:22px;}
+  .meme-name{font-size:15px;}
+  .meme-gain{font-size:24px;}
+  .meme-actions{flex:0 0 96px;}
+  .btn-buy,.btn-sell{font-size:12px;padding:10px 0;}
+}
+
+@media (max-width:360px){
+  /* Very narrow phones: shrink the action column a touch more */
+  .meme-actions{flex:0 0 84px;}
+  .btn-buy,.btn-sell{font-size:11px;padding:9px 0;}
 }
 </style>
 </head>
@@ -733,7 +757,9 @@ a{color:var(--mint);text-decoration:none;}
       <span class="section-pill"><span class="dot"></span>Live · Wonderland</span>
     </div>
     <div class="meme-grid" id="memeGrid">
-      <a class="meme-card" href="https://swap.verixiaapps.com">
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade HOPPY"></a>
+        <div class="meme-info">
         <div class="meme-card-head">
           <div class="meme-avatar">🐸</div>
           <div>
@@ -743,12 +769,15 @@ a{color:var(--mint);text-decoration:none;}
         </div>
         <div class="meme-gain">+247%</div>
         <div class="meme-period">24h</div>
+        </div>
         <div class="meme-actions">
           <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
           <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
         </div>
-      </a>
-      <a class="meme-card" href="https://swap.verixiaapps.com">
+      </div>
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade FARTCOIN"></a>
+        <div class="meme-info">
         <div class="meme-card-head">
           <div class="meme-avatar" style="background:linear-gradient(135deg,#ffd24a,#ff6fbf);">💨</div>
           <div>
@@ -758,12 +787,15 @@ a{color:var(--mint);text-decoration:none;}
         </div>
         <div class="meme-gain">+412%</div>
         <div class="meme-period">24h</div>
+        </div>
         <div class="meme-actions">
           <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
           <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
         </div>
-      </a>
-      <a class="meme-card" href="https://swap.verixiaapps.com">
+      </div>
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade POPCAT"></a>
+        <div class="meme-info">
         <div class="meme-card-head">
           <div class="meme-avatar" style="background:linear-gradient(135deg,#a87fff,#ff6fbf);">🐱</div>
           <div>
@@ -773,12 +805,15 @@ a{color:var(--mint);text-decoration:none;}
         </div>
         <div class="meme-gain">+68%</div>
         <div class="meme-period">24h</div>
+        </div>
         <div class="meme-actions">
           <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
           <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
         </div>
-      </a>
-      <a class="meme-card" href="https://swap.verixiaapps.com">
+      </div>
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade WIF"></a>
+        <div class="meme-info">
         <div class="meme-card-head">
           <div class="meme-avatar" style="background:linear-gradient(135deg,#7df9d4,#c8ff5e);">🐶</div>
           <div>
@@ -788,11 +823,12 @@ a{color:var(--mint);text-decoration:none;}
         </div>
         <div class="meme-gain">+9.1%</div>
         <div class="meme-period">24h</div>
+        </div>
         <div class="meme-actions">
           <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
           <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
         </div>
-      </a>
+      </div>
     </div>
   </section>
 
@@ -812,19 +848,19 @@ a{color:var(--mint);text-decoration:none;}
         <div class="swap-row">
           <div class="swap-row-top"><span>You pay</span><span class="swap-row-balance">Connect Solana wallet</span></div>
           <div class="swap-row-main">
-            <div class="swap-amount" id="swapInAmount">1.0</div>
-            <div class="swap-token sol">○ SOL ▾</div>
+            <div class="swap-amount swap-side" id="swapInName">Solana</div>
+            <div class="swap-token sol" id="swapInToken">○ SOL ▾</div>
           </div>
-          <div class="swap-row-foot" id="swapInUsd">≈ $— USD</div>
+          <div class="swap-row-foot" id="swapInUsd">Best price across 50+ DEXes</div>
         </div>
         <div class="swap-flip"><div class="swap-flip-c">↓</div></div>
         <div class="swap-row">
           <div class="swap-row-top"><span>You receive</span><span class="swap-row-balance best">⭐ Best price</span></div>
           <div class="swap-row-main">
-            <div class="swap-amount" id="swapOutAmount">—</div>
-            <div class="swap-token usdc">$ USDC ▾</div>
+            <div class="swap-amount swap-side" id="swapOutName">USD Coin</div>
+            <div class="swap-token usdc" id="swapOutToken">$ USDC ▾</div>
           </div>
-          <div class="swap-row-foot" id="swapRate">1 SOL = — USDC</div>
+          <div class="swap-row-foot" id="swapRate">Live rate at swap time · zero hidden fees</div>
         </div>
         <div class="swap-route">
           <span class="swap-route-lbl">⭐ Best route</span>
@@ -907,6 +943,101 @@ a{color:var(--mint);text-decoration:none;}
   </footer>
 
 </div>
+
+<!-- SELF-CONTAINED SWAP PAIR PICKER (no engine dependency) -->
+<script>
+(function(){
+  // 50 real Solana-ecosystem tokens. Each: symbol, full name, pill glyph,
+  // and a color class that maps to .swap-token.{class} styles above.
+  var TOKENS = [
+    {s:"SOL",   n:"Solana",          g:"○", c:"sol"},
+    {s:"USDC",  n:"USD Coin",        g:"$", c:"usdc"},
+    {s:"USDT",  n:"Tether",          g:"$", c:"usdc"},
+    {s:"JUP",   n:"Jupiter",         g:"♃", c:"sol"},
+    {s:"JTO",   n:"Jito",            g:"◇", c:"sol"},
+    {s:"RAY",   n:"Raydium",         g:"◎", c:"sol"},
+    {s:"ORCA",  n:"Orca",            g:"🐋", c:"usdc"},
+    {s:"BONK",  n:"Bonk",            g:"🐕", c:"gold"},
+    {s:"WIF",   n:"dogwifhat",       g:"🐶", c:"lime"},
+    {s:"POPCAT",n:"Popcat",          g:"🐱", c:"pink"},
+    {s:"MEW",   n:"cat in a dogs world", g:"🐈", c:"pink"},
+    {s:"PYTH",  n:"Pyth Network",    g:"◈", c:"sol"},
+    {s:"HNT",   n:"Helium",          g:"📡", c:"sol"},
+    {s:"RENDER",n:"Render",          g:"▦", c:"pink"},
+    {s:"W",     n:"Wormhole",        g:"🌀", c:"sol"},
+    {s:"TNSR",  n:"Tensor",          g:"△", c:"sol"},
+    {s:"DRIFT", n:"Drift",           g:"≈", c:"usdc"},
+    {s:"KMNO",  n:"Kamino",          g:"◐", c:"lime"},
+    {s:"CLOUD", n:"Cloud",           g:"☁", c:"usdc"},
+    {s:"IO",    n:"io.net",          g:"⬡", c:"sol"},
+    {s:"MNDE",  n:"Marinade",        g:"◉", c:"gold"},
+    {s:"MSOL",  n:"Marinade SOL",    g:"◎", c:"sol"},
+    {s:"JITOSOL",n:"Jito SOL",       g:"◇", c:"sol"},
+    {s:"BSOL",  n:"BlazeStake SOL",  g:"🔥", c:"pink"},
+    {s:"INF",   n:"Infinity",        g:"∞", c:"usdc"},
+    {s:"PYUSD", n:"PayPal USD",      g:"$", c:"usdc"},
+    {s:"USDE",  n:"Ethena USDe",     g:"$", c:"usdc"},
+    {s:"SAMO",  n:"Samoyedcoin",     g:"🐕", c:"gold"},
+    {s:"FOXY",  n:"Foxy",            g:"🦊", c:"gold"},
+    {s:"GUAC",  n:"Guacamole",       g:"🥑", c:"lime"},
+    {s:"MYRO",  n:"Myro",            g:"🐶", c:"gold"},
+    {s:"WEN",   n:"Wen",             g:"✶", c:"pink"},
+    {s:"SLERF", n:"Slerf",           g:"🦥", c:"gold"},
+    {s:"BOME",  n:"Book of Meme",    g:"📖", c:"pink"},
+    {s:"PONKE", n:"Ponke",           g:"🐵", c:"gold"},
+    {s:"MOTHER",n:"Mother Iggy",     g:"👩", c:"pink"},
+    {s:"FARTCOIN",n:"Fartcoin",      g:"💨", c:"gold"},
+    {s:"GIGA",  n:"Gigachad",        g:"💪", c:"sol"},
+    {s:"MUMU",  n:"Mumu the Bull",   g:"🐂", c:"pink"},
+    {s:"CHILLGUY",n:"Just a chill guy",g:"😎", c:"lime"},
+    {s:"GME",   n:"GameStop",        g:"🎮", c:"pink"},
+    {s:"ZEUS",  n:"Zeus Network",    g:"⚡", c:"gold"},
+    {s:"SHDW",  n:"Shadow",          g:"🌑", c:"sol"},
+    {s:"AURY",  n:"Aurory",          g:"🎴", c:"sol"},
+    {s:"ATLAS", n:"Star Atlas",      g:"🌌", c:"sol"},
+    {s:"POLIS", n:"Star Atlas DAO",  g:"🏛", c:"sol"},
+    {s:"FIDA",  n:"Bonfida",         g:"◆", c:"usdc"},
+    {s:"SBR",   n:"Saber",           g:"⚔", c:"usdc"},
+    {s:"PRCL",  n:"Parcl",           g:"🏠", c:"usdc"},
+    {s:"NEON",  n:"Neon",            g:"💡", c:"lime"}
+  ];
+  // Majors used as the "you pay" side, so each card reads like a real swap.
+  var MAJORS = ["SOL","USDC","USDT"];
+
+  function hash(str){
+    var h = 0, s = String(str || "");
+    for (var i = 0; i < s.length; i++) h = ((h * 31) + s.charCodeAt(i)) >>> 0;
+    return h >>> 0;
+  }
+  function findToken(sym){
+    for (var i = 0; i < TOKENS.length; i++) if (TOKENS[i].s === sym) return TOKENS[i];
+    return TOKENS[0];
+  }
+  function setSide(nameId, tokenId, t){
+    var nameEl = document.getElementById(nameId);
+    var tokEl  = document.getElementById(tokenId);
+    if (nameEl) nameEl.textContent = t.n;
+    if (tokEl){
+      tokEl.textContent = t.g + " " + t.s + " ▾";
+      tokEl.className = "swap-token " + t.c;
+    }
+  }
+
+  // Page key: prefer engine-provided keyword, else canonical URL/path, else title.
+  var P = (window.__pageMeta || window.__VERIXIA_PAGE__ || {});
+  var key = (P.keyword || "") + "|" + (location.pathname || "") + "|" + (document.title || "");
+  var seed = hash(key);
+
+  // Pay = a major (deterministic); Receive = any token that isn't the pay token.
+  var pay = findToken(MAJORS[seed % MAJORS.length]);
+  var idx = (seed >>> 4) % TOKENS.length;
+  if (TOKENS[idx].s === pay.s) idx = (idx + 1) % TOKENS.length;
+  var receive = TOKENS[idx];
+
+  setSide("swapInName",  "swapInToken",  pay);
+  setSide("swapOutName", "swapOutToken", receive);
+})();
+</script>
 
 <!-- ENGINE PAYLOAD -->
 {{PAGE_META_SCRIPT}}
@@ -1023,27 +1154,18 @@ a{color:var(--mint);text-decoration:none;}
     }).join("");
   }
 
-  // ---- Swap card live quote
+  // ---- Swap card route (numberless card; pair is set by the standalone picker).
+  // Only enhance the route pills if the engine ships live route data — we no
+  // longer write any price/amount text here, so the card never goes stale.
   function hydrateSwap(){
     var data = (P.pageSignals && P.pageSignals.data) || P.data || {};
-    if (data.quote && data.quote.solPriceUsd) {
-      var usd = data.quote.solPriceUsd;
-      var inAmount = document.getElementById("swapInAmount");
-      var outAmount = document.getElementById("swapOutAmount");
-      var rate = document.getElementById("swapRate");
-      var inUsd = document.getElementById("swapInUsd");
-      if (inAmount) inAmount.textContent = "1.0";
-      if (outAmount) outAmount.textContent = usd.toFixed(2);
-      if (rate) rate.textContent = "1 SOL = " + usd.toFixed(2) + " USDC";
-      if (inUsd) inUsd.textContent = "≈ $" + usd.toFixed(2) + " USD";
-      if (data.quote.routes && data.quote.routes.length) {
-        var route = document.getElementById("swapRoute");
-        if (route) {
-          var routes = data.quote.routes.slice(0, 2);
-          route.innerHTML = routes.map(function(r, i){
-            return '<span class="route-pill">' + escapeHTML(r) + '</span>' + (i < routes.length - 1 ? '<span class="route-plus">+</span>' : '');
-          }).join("");
-        }
+    if (data.quote && data.quote.routes && data.quote.routes.length) {
+      var route = document.getElementById("swapRoute");
+      if (route) {
+        var routes = data.quote.routes.slice(0, 2);
+        route.innerHTML = routes.map(function(r, i){
+          return '<span class="route-pill">' + escapeHTML(r) + '</span>' + (i < routes.length - 1 ? '<span class="route-plus">+</span>' : '');
+        }).join("");
       }
     }
   }
@@ -1071,21 +1193,24 @@ a{color:var(--mint);text-decoration:none;}
         var changeCls = change != null && change < 0 ? "dn" : "";
         var emoji = ["🐸","💨","🐱","🐶","🚀","🌙","⭐","💎"][Math.floor(Math.random()*8)];
         return '' +
-          '<a class="meme-card" href="https://swap.verixiaapps.com">' +
-            '<div class="meme-card-head">' +
-              '<div class="meme-avatar">' + emoji + '</div>' +
-              '<div>' +
-                '<div class="meme-name">' + escapeHTML(sym) + ' <span class="meme-hot">🔥 FRESH</span></div>' +
-                '<div class="meme-age">' + escapeHTML(name) + '</div>' +
+          '<div class="meme-card">' +
+            '<a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade ' + escapeHTML(sym) + '"></a>' +
+            '<div class="meme-info">' +
+              '<div class="meme-card-head">' +
+                '<div class="meme-avatar">' + emoji + '</div>' +
+                '<div>' +
+                  '<div class="meme-name">' + escapeHTML(sym) + ' <span class="meme-hot">🔥 FRESH</span></div>' +
+                  '<div class="meme-age">' + escapeHTML(name) + '</div>' +
+                '</div>' +
               '</div>' +
+              '<div class="meme-gain ' + changeCls + '">' + escapeHTML(changeStr) + '</div>' +
+              '<div class="meme-period">24h</div>' +
             '</div>' +
-            '<div class="meme-gain ' + changeCls + '">' + escapeHTML(changeStr) + '</div>' +
-            '<div class="meme-period">24h</div>' +
             '<div class="meme-actions">' +
               '<a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>' +
               '<a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>' +
             '</div>' +
-          '</a>';
+          '</div>';
       }).join("");
     }).catch(function(){});
   }
