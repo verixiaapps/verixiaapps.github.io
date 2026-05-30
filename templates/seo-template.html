@@ -661,6 +661,23 @@ function properTitleCase(s){
   }).join(" ");
   return titleCaseKeyword(out);
 }
+
+/* Pluralize the trailing "scam" -> "scams" when the keyword leads with a quantity word.
+   "common donation scam" -> "common donation scams"
+   "typical romance scam" -> "typical romance scams"
+   Singular keywords like "is paypal a scam" are left alone. */
+function naturalizeKeyword(raw){
+  var t=normalizeKeyword(raw);
+  if(!t)return t;
+  var lower=t.toLowerCase();
+  if(/^(common|typical|popular|top|new|latest|recent|frequent|biggest|worst|major|trending)\s+/.test(lower)){
+    // Only pluralize trailing "scam" (word boundary). Skip if already "scams".
+    if(/\bscam$/i.test(t) && !/\bscams$/i.test(t)){
+      t=t.replace(/\bscam$/i,"scams");
+    }
+  }
+  return t;
+}
 function containsAny(t,arr){return arr.some(function(p){return t.includes(p);});}
 function isGuidanceStyleKeyword(l){return l.startsWith("how to ")||l.startsWith("what to do after ")||l.startsWith("how to recover after ")||l.startsWith("how to secure ")||l.startsWith("how to block ")||l.startsWith("how to avoid ")||l.startsWith("what happens after ")||l.startsWith("what is ")||l.startsWith("why ")||l.startsWith("when ")||l.startsWith("where ")||l.startsWith("who ");}
 function isQuestionStyleKeyword(l){return l.startsWith("is ")||l.startsWith("can ")||l.startsWith("should ")||l.startsWith("could ")||l.startsWith("would ")||l.startsWith("do ")||l.startsWith("does ")||l.startsWith("did ");}
@@ -679,10 +696,11 @@ function buildHeroTitle(kw){
   var raw=normalizeKeyword(kw);
   if(!raw)return"Is This a Scam? Check Before You Click or Send Money";
 
-  /* The keyword as it should appear in the title -- whole, proper title case, brand-corrected.
-     Same text every render so it doubles as the slug-friendly form.  */
-  var K=properTitleCase(raw);
-  var lower=raw.toLowerCase();
+  /* The keyword as it should appear in the title -- whole, naturalized (pluralized where needed),
+     proper title case, brand-corrected. Same render every time so it doubles as a slug-friendly form. */
+  var natural=naturalizeKeyword(raw);
+  var K=properTitleCase(natural);
+  var lower=natural.toLowerCase();
 
   /* If the keyword already ends with a question mark or reads as a complete question,
      just return it with optional appendage variants. Don't double up "?".  */
@@ -789,37 +807,109 @@ function buildHeroTitle(kw){
 }
 
 function buildHeroSubheading(kw){
-  var raw=normalizeKeyword(kw).toLowerCase();
+  var raw=normalizeKeyword(kw);
   if(!raw)return"Paste a suspicious message, email, link, or offer below to check it before you act.";
-  var s=capPart(raw);
-  return pickFor(raw,[
-    "A practical look at "+s+" -- what to recognize, what to verify, and what to do before you click, reply, or send anything.",
-    "Everything you need to know about "+s+" in plain language, with examples and simple steps that actually work.",
-    "Read this before you act on "+s+". Clear examples, honest signals, and the checks that catch the difference.",
-    "How "+s+" actually plays out, and how to stay one step ahead -- without the jargon.",
-    "What "+s+" looks like in real life, and the verification steps that keep you from being a victim.",
-    "A no-fluff guide to "+s+": how it works, who falls for it, how to avoid it."
+  var natural=naturalizeKeyword(raw);
+  var lower=natural.toLowerCase();
+  var ml=titleCaseKeyword(natural.toLowerCase()); /* mid-sentence form: lowercase with brand correction */
+
+  /* Determine keyword shape so the sentence grammatically fits. */
+  var isPlural=/scams$/.test(lower);
+  var isQuestion=/^(is|are|was|were|do|does|did|can|could|should|would|will|what|why|when|where|who|which)\b/.test(lower);
+  var isHowTo=/^how\s+to\s+/.test(lower);
+  var isExamples=/^examples?\s+of\s+/.test(lower);
+  var isWhatAfter=/^what\s+(to\s+do|happens)\s+after\s+/.test(lower);
+  var isDidI=/^did\s+i\s+/.test(lower);
+
+  /* Question / "did i" keywords -- frame as the question being answered. */
+  if(isQuestion||isDidI){
+    return pickFor(lower,[
+      "If you've been asking \""+raw.replace(/[?]+$/,"")+"\" -- this page walks through the signs, the checks, and what to do next.",
+      "Here's a clear, honest look at the question -- with the warning signs and verification steps that actually matter.",
+      "Read this before you click, reply, or send anything. The answer depends on a few specific signals, and they're all here.",
+      "A plain-language answer with real examples, common red flags, and the steps that catch trouble before any money moves.",
+      "Everything you need to spot the pattern, check the source, and decide what to do next -- without the runaround."
+    ]);
+  }
+
+  /* How-to keywords -- frame as the guide content. */
+  if(isHowTo){
+    return pickFor(lower,[
+      "A practical, no-fluff walkthrough -- the steps that actually work in 2025, with real examples along the way.",
+      "Step-by-step guidance you can use right now, with the specific signals to look for and what to do at each stage.",
+      "Clear tips that make a real difference -- not generic advice. Read this once and you'll know exactly what to check.",
+      "Everything you need in one place: the warning signs, the verification steps, and the moves that prevent damage.",
+      "A smart, simple guide built around what actually catches scams in practice -- not what sounds good in theory."
+    ]);
+  }
+
+  /* Examples-of keywords -- frame as case material. */
+  if(isExamples){
+    return pickFor(lower,[
+      "Real cases, real patterns, and the specific details that give them away -- so you can recognize the next one quickly.",
+      "A walkthrough of how these scams actually play out, with the warning signs people noticed too late.",
+      "Concrete examples from real reports, with the verification steps that catch the pattern before any money moves.",
+      "Honest case material -- what the messages looked like, what they asked for, and how victims caught on.",
+      "Detailed examples and the small details that distinguish them from real, legitimate messages."
+    ]);
+  }
+
+  /* What-after recovery keywords */
+  if(isWhatAfter){
+    return pickFor(lower,[
+      "A practical recovery walkthrough -- the steps that actually help, and the order to do them in.",
+      "What comes next after the click, the call, or the payment -- explained clearly, with no panic and no fluff.",
+      "Step-by-step actions to limit damage, secure your accounts, and report what happened to the right places.",
+      "A real-world action plan with the moves that matter most in the first 24 hours and the days that follow.",
+      "Clear guidance on what to do, who to contact, and how to protect what's left -- written for people in the middle of it."
+    ]);
+  }
+
+  /* Default: plural-style noun phrase keyword like "common dhl scams", "irs scam", etc. */
+  if(isPlural){
+    return pickFor(lower,[
+      "A practical look at "+ml+" -- what to recognize, what to verify, and what to do before you click, reply, or send anything.",
+      "Everything you need to know about "+ml+" in plain language, with examples and simple steps that actually work.",
+      "Read this before you act on anything that looks like one of these. Clear examples, honest signals, and the checks that catch the difference.",
+      "How "+ml+" actually play out, and how to stay one step ahead -- without the jargon.",
+      "What "+ml+" look like in real life, and the verification steps that keep you from being a victim.",
+      "A no-fluff guide to "+ml+": how they work, who falls for them, how to avoid them."
+    ]);
+  }
+
+  /* Singular noun phrase keyword fallback (e.g., "irs scam", "venmo refund scam"). */
+  return pickFor(lower,[
+    "A practical look at the "+ml+" pattern -- what to recognize, what to verify, and what to do before you click, reply, or send anything.",
+    "Everything you need to know about the "+ml+" pattern in plain language, with examples and simple steps that actually work.",
+    "Read this before you act on a message that looks like this. Clear examples, honest signals, and the checks that catch the difference.",
+    "How the "+ml+" pattern actually plays out, and how to stay one step ahead -- without the jargon.",
+    "What the "+ml+" pattern looks like in real life, and the verification steps that keep you from being a victim.",
+    "A no-fluff guide to the "+ml+" pattern: how it works, who falls for it, how to avoid it."
   ]);
 }
 
 function buildContentHeading(kw){
-  var raw=normalizeKeyword(kw).toLowerCase();
+  var raw=normalizeKeyword(kw);
   if(!raw)return"What Suspicious Messages Often Look Like";
-  var s=capPart(raw);
-  return pickFor(raw,[
-    "What "+s+" Looks Like Up Close",
-    "Inside "+s+": What People Actually See",
-    "The Anatomy of "+s,
-    s+": What's Really Happening",
-    "Breaking Down "+s+" Step by Step",
-    s+" in Plain English"
+  var natural=naturalizeKeyword(raw);
+  var H=properTitleCase(natural);
+  var lower=natural.toLowerCase();
+  var isPlural=/scams$/.test(lower);
+  var lookVerb=isPlural?"Look":"Looks";
+  return pickFor(lower,[
+    "What "+H+" "+lookVerb+" Like Up Close",
+    "Inside "+H+": What People Actually See",
+    "The Anatomy of "+H,
+    H+": What's Really Happening",
+    "Breaking Down "+H+" Step by Step",
+    H+" in Plain English"
   ]);
 }
 
 function buildContentBridge(kw){
-  var raw=normalizeKeyword(kw).toLowerCase();
+  var raw=normalizeKeyword(kw);
   if(!raw)return"The checker above identifies the pattern before you act on it.";
-  return pickFor(raw,[
+  return pickFor(naturalizeKeyword(raw).toLowerCase(),[
     "Below is what this kind of message looks like in practice -- paste yours above before you act on it.",
     "Here is what people are actually seeing right now. Compare it to whatever reached you before you click or reply.",
     "What follows is the pattern up close. The checker above flags it before damage is done.",
@@ -1388,4 +1478,3 @@ if(document.readyState==="loading"){window.addEventListener("DOMContentLoaded",i
 
 </body>
 </html>
- 
