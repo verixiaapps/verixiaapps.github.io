@@ -135,29 +135,92 @@ def slugify(text):
 
 
 def clean_base_keyword(text):
+   """
+   Normalize any keyword into a clean noun phrase suitable for titles.
+   Strips: pronouns, verbs, narrative phrasing, articles, fillers, scam-suffixes,
+   question prefixes, punctuation, emojis, repeated whitespace.
+   Loops until stable so stacked junk fully unwraps.
+   """
    kw = normalize_keyword(text)
 
-   # Strip question/instruction prefixes — most specific first
-   kw = re.sub(r"^\s*check\s+if\s+",              "", kw)
-   kw = re.sub(r"^\s*find\s+out\s+if\s+",         "", kw)
-   kw = re.sub(r"^\s*how\s+do\s+i\s+know\s+if\s+","", kw)
-   kw = re.sub(r"^\s*can\s+i\s+trust\s+",         "", kw)
-   kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
-   kw = re.sub(r"^\s*is\s+this\s+",               "", kw)  # before bare "is"
-   kw = re.sub(r"^\s*is\s+",                      "", kw)
-   kw = re.sub(r"^\s*this\s+",                    "this ", kw)
+   # Strip emojis and non-ASCII garbage
+   kw = re.sub(r"[^\x00-\x7f]", " ", kw)
+   # Strip punctuation except hyphens within words
+   kw = re.sub(r"[^\w\s-]", " ", kw)
 
-   # Strip trailing qualifiers
-   kw = re.sub(r"\s+a\s+scam$",   "", kw)
-   kw = re.sub(r"\s+or\s+legit$", "", kw)
-   kw = re.sub(r"\s+or\s+scam$",  "", kw)
-   kw = re.sub(r"\s+legit$",      "", kw)
-   kw = re.sub(r"\s+real$",       "", kw)
-   kw = re.sub(r"\s+safe$",       "", kw)
-   kw = re.sub(r"\s+scam$",       "", kw)
-   kw = re.sub(r"\s+a$",          "", kw)
+   # Words removed from anywhere in the string
+   FILLER_WORDS = {
+       # articles
+       "a", "an", "the",
+       # demonstratives
+       "this", "that", "these", "those",
+       # be-verbs / aux
+       "is", "are", "was", "were", "be", "been", "being",
+       "do", "does", "did", "have", "has", "had",
+       "will", "would", "could", "should", "can", "may", "might", "must",
+       # pronouns
+       "i", "me", "my", "mine", "myself",
+       "you", "your", "yours", "yourself",
+       "he", "him", "his", "she", "her", "hers",
+       "it", "its", "we", "us", "our", "ours",
+       "they", "them", "their", "theirs",
+       "someone", "anyone", "everyone", "somebody", "anybody",
+       # conjunctions / prepositions that produce bad titles when stripped of context
+       "and", "but", "or", "so", "if", "then", "than",
+       # vague qualifiers
+       "common", "typical", "general", "generic", "most", "many", "various",
+       "some", "new", "recent", "top", "all", "other", "every", "popular",
+       "known", "fake", "bad", "real", "latest", "best", "worst",
+       "good", "great", "nice", "weird", "strange", "suspicious",
+       # narrative verbs that show up in user phrasing
+       "got", "get", "getting", "received", "receiving", "sent", "sending",
+       "think", "thought", "thinking", "feel", "feeling", "seem", "seems",
+       "help", "please", "trying", "try", "tried",
+       "saw", "see", "seen", "told", "tell", "said", "say",
+       "wondering", "wonder", "asking", "ask",
+       # action words that don't help a title
+       "scammed", "scamming",
+   }
 
-   return re.sub(r"\s+", " ", kw).strip()
+   # Strip multi-word question/instruction prefixes
+   PREFIX_PATTERNS = [
+       r"^\s*how\s+do\s+i\s+know\s+if\s+",
+       r"^\s*how\s+can\s+i\s+tell\s+if\s+",
+       r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with|from)\s+",
+       r"^\s*can\s+i\s+trust\s+",
+       r"^\s*find\s+out\s+if\s+",
+       r"^\s*check\s+if\s+",
+       r"^\s*tell\s+me\s+(?:about|if)\s+",
+   ]
+
+   # Strip trailing qualifier phrases
+   SUFFIX_PATTERNS = [
+       r"\s+a\s+scam$", r"\s+or\s+legit$", r"\s+or\s+scam$",
+       r"\s+legit$", r"\s+real$", r"\s+safe$",
+       r"\s+scam$", r"\s+scams$",
+       r"\s+legit\s+or\s+scam$", r"\s+real\s+or\s+fake$",
+       r"\s+a$",
+   ]
+
+   # Loop until stable
+   for _ in range(12):
+       before = kw
+
+       for pattern in PREFIX_PATTERNS:
+           kw = re.sub(pattern, "", kw)
+
+       for pattern in SUFFIX_PATTERNS:
+           kw = re.sub(pattern, "", kw)
+
+       tokens = [t for t in kw.split() if t and t not in FILLER_WORDS]
+       kw = " ".join(tokens)
+
+       kw = re.sub(r"\s+", " ", kw).strip()
+
+       if kw == before:
+           break
+
+   return kw
 
 
 def display_keyword(text):
@@ -494,19 +557,19 @@ def build_title(keyword):
    raw = normalize_keyword(keyword)
    readable = readable_keyword(keyword)
 
-   if not raw:
-       return "Is This a Scam? Warning Signs, Safety Tips & What To Do"
+   if not readable:
+       raise ValueError(f"keyword has no usable content after cleaning: {keyword!r}")
+
    if is_guidance_style_keyword(raw):
        return f"{title_case(raw)} | Warning Signs, Safety Tips & What To Do"
    if raw.startswith("did i get scammed"):
        return f"{title_case(raw)}? Signs, Risks & What To Do Next"
    if raw.startswith("is this "):
-       return f"{title_case(raw)}? Warning Signs, Risks & What To Do"
+       return f"Is {readable} a Scam? Warning Signs, Risks & What To Do"
    if raw.startswith("is ") and " legit" in raw:
-       cleaned = re.sub(r"\s+legit\b", "", raw).strip()
-       return f"{title_case(cleaned)} Legit or a Scam? Warning Signs & What To Do"
+       return f"{readable} Legit or a Scam? Warning Signs & What To Do"
    if is_question_style_keyword(raw):
-       return f"{title_case(raw)}? Warning Signs, Risks & What To Know"
+       return f"Is {readable} a Scam? Warning Signs, Risks & What To Know"
    return f"Is {readable} a Scam? Warning Signs, Risks & What To Do"
 
 
@@ -722,6 +785,14 @@ for page in queue_pages:
        print("Skipping protected page:", slug)
        continue
 
+   # Reject any keyword that has no usable content after cleaning.
+   # No fallback titles — junk keywords get dropped, full stop.
+   if not keyword_display:
+       failed_count += 1
+       print(f"[reject] unusable keyword (empty after clean): {keyword!r}")
+       remaining_keywords = [kw for kw in remaining_keywords if kw != keyword]
+       continue
+
    # Skip existing pages unless the user explicitly turned resume off.
    # When RESUME is false, we re-generate even if the file already exists
    # (useful for rebuild_wipe + resume=false, or forced regens).
@@ -795,4 +866,3 @@ print(
    f"Failed {failed_count} keywords."
 )
 print(f"Remaining keywords in queue: {len(remaining_keywords)}")
- 
