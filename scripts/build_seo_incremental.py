@@ -137,23 +137,27 @@ def slugify(text):
 def clean_base_keyword(text):
    kw = normalize_keyword(text)
 
-   kw = re.sub(r"^\s*is\s+", "", kw)
-   kw = re.sub(r"^\s*can\s+i\s+trust\s+", "", kw)
+   # Strip question/instruction prefixes — most specific first
+   kw = re.sub(r"^\s*check\s+if\s+",              "", kw)
+   kw = re.sub(r"^\s*find\s+out\s+if\s+",         "", kw)
+   kw = re.sub(r"^\s*how\s+do\s+i\s+know\s+if\s+","", kw)
+   kw = re.sub(r"^\s*can\s+i\s+trust\s+",         "", kw)
    kw = re.sub(r"^\s*did\s+i\s+get\s+scammed\s+(?:by|on|with)\s+", "", kw)
-   kw = re.sub(r"^\s*this\s+", "this ", kw)
+   kw = re.sub(r"^\s*is\s+this\s+",               "", kw)  # before bare "is"
+   kw = re.sub(r"^\s*is\s+",                      "", kw)
+   kw = re.sub(r"^\s*this\s+",                    "this ", kw)
 
-   kw = re.sub(r"\s+a\s+scam$", "", kw)
+   # Strip trailing qualifiers
+   kw = re.sub(r"\s+a\s+scam$",   "", kw)
    kw = re.sub(r"\s+or\s+legit$", "", kw)
-   kw = re.sub(r"\s+or\s+scam$", "", kw)
-   kw = re.sub(r"\s+legit$", "", kw)
-   kw = re.sub(r"\s+real$", "", kw)
-   kw = re.sub(r"\s+safe$", "", kw)
-   kw = re.sub(r"\s+scam$", "", kw)
+   kw = re.sub(r"\s+or\s+scam$",  "", kw)
+   kw = re.sub(r"\s+legit$",      "", kw)
+   kw = re.sub(r"\s+real$",       "", kw)
+   kw = re.sub(r"\s+safe$",       "", kw)
+   kw = re.sub(r"\s+scam$",       "", kw)
+   kw = re.sub(r"\s+a$",          "", kw)
 
-   kw = re.sub(r"\s+a$", "", kw)
-   kw = re.sub(r"\s+", " ", kw).strip()
-
-   return kw
+   return re.sub(r"\s+", " ", kw).strip()
 
 
 def display_keyword(text):
