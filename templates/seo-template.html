@@ -324,12 +324,11 @@ body{padding-top:82px;}
 </div>
 
 <div class="top-bar">
-  <a class="logo" href="https://verixiaapps.com/scam-check-now/">
+  <div class="logo">
     <span class="logo-dot"></span>
     <span>Scam Check Now</span>
-  </a>
+  </div>
   <div class="top-actions">
-    <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">&#x1F4F1; App</a>
     <button class="upgrade-top" onclick="showUpgrade()">Upgrade</button>
   </div>
 </div>
@@ -457,12 +456,6 @@ body{padding-top:82px;}
       <button class="primary-cta-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('yearly')">
         &#x1F513; Unlock Unlimited Checks <span class="cta-sub">&middot; from $3.99</span>
       </button>
-    </div>
-
-    <div class="app-link-card">
-      <h4>The next suspicious message won't wait</h4>
-      <p>Most people who see one suspicious message see another within days. The app lets you check instantly -- before you click, reply, or send anything.</p>
-      <a class="app-link-button" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Download the App</a>
     </div>
 
     <div class="upgrade" id="upgrade">
@@ -627,9 +620,6 @@ function normalizeKeyword(str){return String(str||"").replace(/\s+/g," ").replac
 
 function titleCaseKeyword(s){var map={fedex:"FedEx",paypal:"PayPal",usps:"USPS",ups:"UPS",dhl:"DHL",venmo:"Venmo",zelle:"Zelle",amazon:"Amazon",netflix:"Netflix",spotify:"Spotify",facebook:"Facebook",instagram:"Instagram",google:"Google",microsoft:"Microsoft",apple:"Apple",coinbase:"Coinbase",binance:"Binance",metamask:"MetaMask",solana:"Solana",phantom:"Phantom",linkedin:"LinkedIn",indeed:"Indeed",irs:"IRS",fbi:"FBI",fcc:"FCC",ssa:"SSA"};return String(s||"").replace(/\b(fedex|paypal|usps|ups|dhl|venmo|zelle|amazon|netflix|spotify|facebook|instagram|google|microsoft|apple|coinbase|binance|metamask|solana|phantom|linkedin|indeed|irs|fbi|fcc|ssa)\b/gi,function(m){return map[m.toLowerCase()]||m;});}
 
-/* ==========  FIXED CLEAN + INTENT-AWARE TITLE LOGIC  ========== */
-
-/* Light cleaner. DOES NOT strip "common", "examples", etc. */
 function cleanKeywordBase(k){
   var t=normalizeKeyword(k);
   t=t.replace(/[^\x00-\x7f]/g," ").replace(/[^\w\s-]/g," ");
@@ -641,9 +631,6 @@ function cleanKeywordForSentence(k){
 function displayKeyword(s){var t=normalizeKeyword(s);if(!t)return"";return t.charAt(0).toUpperCase()+t.slice(1);}
 function displayCleanKeyword(s){return displayKeyword(cleanKeywordBase(s));}
 
-/* Proper AP-style title case for headlines.
-   Small words stay lowercase unless first, last, or following a colon/dash/question/period.
-   Then brand-correct (DHL, PayPal, FedEx) on top.  */
 var TITLE_SMALL_WORDS={a:1,an:1,and:1,as:1,at:1,but:1,by:1,en:1,for:1,if:1,in:1,nor:1,of:1,on:1,or:1,per:1,the:1,to:1,vs:1,via:1,with:1};
 function properTitleCase(s){
   var t=normalizeKeyword(s);if(!t)return"";
@@ -662,16 +649,11 @@ function properTitleCase(s){
   return titleCaseKeyword(out);
 }
 
-/* Pluralize the trailing "scam" -> "scams" when the keyword leads with a quantity word.
-   "common donation scam" -> "common donation scams"
-   "typical romance scam" -> "typical romance scams"
-   Singular keywords like "is paypal a scam" are left alone. */
 function naturalizeKeyword(raw){
   var t=normalizeKeyword(raw);
   if(!t)return t;
   var lower=t.toLowerCase();
   if(/^(common|typical|popular|top|new|latest|recent|frequent|biggest|worst|major|trending)\s+/.test(lower)){
-    // Only pluralize trailing "scam" (word boundary). Skip if already "scams".
     if(/\bscam$/i.test(t) && !/\bscams$/i.test(t)){
       t=t.replace(/\bscam$/i,"scams");
     }
@@ -682,34 +664,18 @@ function containsAny(t,arr){return arr.some(function(p){return t.includes(p);});
 function isGuidanceStyleKeyword(l){return l.startsWith("how to ")||l.startsWith("what to do after ")||l.startsWith("how to recover after ")||l.startsWith("how to secure ")||l.startsWith("how to block ")||l.startsWith("how to avoid ")||l.startsWith("what happens after ")||l.startsWith("what is ")||l.startsWith("why ")||l.startsWith("when ")||l.startsWith("where ")||l.startsWith("who ");}
 function isQuestionStyleKeyword(l){return l.startsWith("is ")||l.startsWith("can ")||l.startsWith("should ")||l.startsWith("could ")||l.startsWith("would ")||l.startsWith("do ")||l.startsWith("does ")||l.startsWith("did ");}
 
-/* Deterministic variant rotation - same keyword always picks same variant */
 function keywordHashJS(s){var h=0,str=String(s||"");for(var i=0;i<str.length;i++){h=(h*31+str.charCodeAt(i))>>>0;}return h;}
 function pickFor(keyword,variants){if(!variants||!variants.length)return"";return variants[keywordHashJS(keyword)%variants.length];}
 function capPart(s){return titleCaseKeyword(displayKeyword(String(s||"").trim()));}
 
-/* WHOLE-KEYWORD TITLE BUILDER
-   The full keyword goes into the title untouched (just title-cased + brand-corrected).
-   Variant phrases wrap around it. NEVER strips words from the keyword.
-   Example: keyword "common dhl scam" -> "Common DHL Scam: What You Should Know in 2025"
-   Example: keyword "is paypal a scam" -> "Is PayPal a Scam? A 2025 Reality Check"  */
 function buildHeroTitle(kw){
   var raw=normalizeKeyword(kw);
   if(!raw)return"Is This a Scam? Check Before You Click or Send Money";
-
-  /* The keyword as it should appear in the title -- whole, naturalized (pluralized where needed),
-     proper title case, brand-corrected. Same render every time so it doubles as a slug-friendly form. */
   var natural=naturalizeKeyword(raw);
   var K=properTitleCase(natural);
   var lower=natural.toLowerCase();
-
-  /* If the keyword already ends with a question mark or reads as a complete question,
-     just return it with optional appendage variants. Don't double up "?".  */
   var endsWithQ=/\?$/.test(raw);
 
-  /* Order matters: check specific multi-word patterns FIRST,
-     then fall through to generic question-word detection. */
-
-  /* "How to ___" guidance keywords -- whole keyword stays, advisory tail wraps it. */
   if(/^how\s+to\s+/i.test(lower)){
     return pickFor(lower,[
       K+": A Practical 2025 Guide",
@@ -725,7 +691,6 @@ function buildHeroTitle(kw){
     ]);
   }
 
-  /* "Examples of X scam" -- whole keyword stays, contextual tail wraps it. */
   if(/^examples?\s+of\s+/i.test(lower)){
     return pickFor(lower,[
       K+": Real Cases You Should Know",
@@ -739,7 +704,6 @@ function buildHeroTitle(kw){
     ]);
   }
 
-  /* "What to do after ___" / "What happens after ___" recovery-style keywords. */
   if(/^what\s+(to\s+do|happens)\s+after\s+/i.test(lower)){
     return pickFor(lower,[
       K+" -- A Practical Recovery Guide",
@@ -750,7 +714,6 @@ function buildHeroTitle(kw){
     ]);
   }
 
-  /* "Did I ___" style -- keep the keyword whole, append next-step tails. */
   if(/^did\s+i\s+/i.test(lower)){
     var dBase=endsWithQ?K:K+"?";
     return pickFor(lower,[
@@ -763,7 +726,6 @@ function buildHeroTitle(kw){
     ]);
   }
 
-  /* Generic question-word keywords -- keyword goes first, answer-style tail follows. */
   if(/^(is|are|was|were|do|does|can|could|should|would|will|what|why|when|where|who|which)\b/i.test(lower)){
     var qBase=endsWithQ?K:K+"?";
     return pickFor(lower,[
@@ -780,8 +742,6 @@ function buildHeroTitle(kw){
     ]);
   }
 
-  /* Fallback for everything else (most keywords).
-     Keyword goes whole into the title, framing wraps it. ~20 variants for variety. */
   return pickFor(lower,[
     K+": What You Should Know in 2025",
     K+" Explained",
@@ -811,9 +771,8 @@ function buildHeroSubheading(kw){
   if(!raw)return"Paste a suspicious message, email, link, or offer below to check it before you act.";
   var natural=naturalizeKeyword(raw);
   var lower=natural.toLowerCase();
-  var ml=titleCaseKeyword(natural.toLowerCase()); /* mid-sentence form: lowercase with brand correction */
+  var ml=titleCaseKeyword(natural.toLowerCase());
 
-  /* Determine keyword shape so the sentence grammatically fits. */
   var isPlural=/scams$/.test(lower);
   var isQuestion=/^(is|are|was|were|do|does|did|can|could|should|would|will|what|why|when|where|who|which)\b/.test(lower);
   var isHowTo=/^how\s+to\s+/.test(lower);
@@ -821,7 +780,6 @@ function buildHeroSubheading(kw){
   var isWhatAfter=/^what\s+(to\s+do|happens)\s+after\s+/.test(lower);
   var isDidI=/^did\s+i\s+/.test(lower);
 
-  /* Question / "did i" keywords -- frame as the question being answered. */
   if(isQuestion||isDidI){
     return pickFor(lower,[
       "If you've been asking \""+raw.replace(/[?]+$/,"")+"\" -- this page walks through the signs, the checks, and what to do next.",
@@ -832,7 +790,6 @@ function buildHeroSubheading(kw){
     ]);
   }
 
-  /* How-to keywords -- frame as the guide content. */
   if(isHowTo){
     return pickFor(lower,[
       "A practical, no-fluff walkthrough -- the steps that actually work in 2025, with real examples along the way.",
@@ -843,7 +800,6 @@ function buildHeroSubheading(kw){
     ]);
   }
 
-  /* Examples-of keywords -- frame as case material. */
   if(isExamples){
     return pickFor(lower,[
       "Real cases, real patterns, and the specific details that give them away -- so you can recognize the next one quickly.",
@@ -854,7 +810,6 @@ function buildHeroSubheading(kw){
     ]);
   }
 
-  /* What-after recovery keywords */
   if(isWhatAfter){
     return pickFor(lower,[
       "A practical recovery walkthrough -- the steps that actually help, and the order to do them in.",
@@ -865,7 +820,6 @@ function buildHeroSubheading(kw){
     ]);
   }
 
-  /* Default: plural-style noun phrase keyword like "common dhl scams", "irs scam", etc. */
   if(isPlural){
     return pickFor(lower,[
       "A practical look at "+ml+" -- what to recognize, what to verify, and what to do before you click, reply, or send anything.",
@@ -877,7 +831,6 @@ function buildHeroSubheading(kw){
     ]);
   }
 
-  /* Singular noun phrase keyword fallback (e.g., "irs scam", "venmo refund scam"). */
   return pickFor(lower,[
     "A practical look at the "+ml+" pattern -- what to recognize, what to verify, and what to do before you click, reply, or send anything.",
     "Everything you need to know about the "+ml+" pattern in plain language, with examples and simple steps that actually work.",
@@ -916,8 +869,6 @@ function buildContentBridge(kw){
     "Read what's below, then run your own message through the checker above. The pattern is usually visible before any money moves."
   ]);
 }
-
-/* ==========  END FIXED LOGIC  ========== */
 
 function renderSocialProof(){
   var el=document.getElementById("socialProofText");
@@ -1086,29 +1037,24 @@ function copyLink(){var url=getShareUrl();if(navigator.clipboard&&navigator.clip
 function copyWarningMessage(){var msg=getWarningMessage();if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(msg).then(function(){showShareStatus("Warning copied.");}).catch(function(){fallbackCopy(msg,"Warning copied.");});return;}fallbackCopy(msg,"Warning copied.");}
 function fallbackCopy(v,sm){var i=document.createElement("textarea");i.value=v;i.setAttribute("readonly","");i.style.position="absolute";i.style.left="-9999px";document.body.appendChild(i);i.select();i.setSelectionRange(0,99999);document.execCommand("copy");document.body.removeChild(i);showShareStatus(sm);}
 
-/* ==========  DYNAMIC INTENT-AWARE FAQ POOLS  ==========
-   Each intent has 3 question sets. Each set has 5 Q&A pairs.
-   Hash picks which set so neighboring pages in the same intent differ.
-   That's 5 intents x 3 sets = 15 unique FAQ blocks total across the site.  */
-
 var FAQ_POOLS={
   crypto:[
     [
-      ["How can I tell if a crypto message or wallet request is a scam?","Check the URL bar carefully — scam crypto pages use domains that are one letter off from the real exchange or wallet. Never enter your seed phrase or recovery phrase anywhere outside the official wallet app. If a message asks you to connect your wallet to claim tokens or fix an error, treat it as suspicious until you verify the source independently."],
+      ["How can I tell if a crypto message or wallet request is a scam?","Check the URL bar carefully \u2014 scam crypto pages use domains that are one letter off from the real exchange or wallet. Never enter your seed phrase or recovery phrase anywhere outside the official wallet app. If a message asks you to connect your wallet to claim tokens or fix an error, treat it as suspicious until you verify the source independently."],
       ["What should I do if I already connected my wallet or signed an approval?","Open your wallet immediately and revoke any approvals you do not recognize. Use a token approval checker like Revoke.cash or Etherscan's token approvals page. Move remaining funds to a fresh wallet if the approval granted spending permission. Crypto transactions cannot be reversed once a signed approval has been used."],
       ["Is it safe to share my seed phrase with crypto support?","No. No legitimate exchange, wallet, or support team will ever ask for your seed phrase, recovery phrase, or private key. Anyone asking for it is attempting to drain your wallet. Real support fixes account issues without ever needing those credentials."],
-      ["Why do crypto scams move so fast?","Once a wallet is drained, the funds are split across multiple addresses within minutes and routed through mixers or exchanges. Recovery is rarely possible. Speed is the scammer's advantage — they rely on the gap between when you sign something and when you realize what happened."],
-      ["How can I verify if a crypto airdrop or token offer is real?","Check the official project's verified social channels and website directly — not links sent to you. Real airdrops never require you to connect your wallet to an unknown site or send any amount of crypto first. If you have to pay a 'gas fee' or 'unlock fee' to claim tokens, it's a scam."]
+      ["Why do crypto scams move so fast?","Once a wallet is drained, the funds are split across multiple addresses within minutes and routed through mixers or exchanges. Recovery is rarely possible. Speed is the scammer's advantage \u2014 they rely on the gap between when you sign something and when you realize what happened."],
+      ["How can I verify if a crypto airdrop or token offer is real?","Check the official project's verified social channels and website directly \u2014 not links sent to you. Real airdrops never require you to connect your wallet to an unknown site or send any amount of crypto first. If you have to pay a 'gas fee' or 'unlock fee' to claim tokens, it's a scam."]
     ],
     [
       ["Why did I get a message from crypto support I never contacted?","Scammers monitor public posts where people mention problems with exchanges or wallets. They reply or DM pretending to be official support. Real exchanges do not proactively DM customers, and they do not provide support through Twitter, Telegram, or Discord."],
       ["What does a fake exchange withdrawal page look like?","A fake withdrawal page often shows a countdown timer, a small 'unlock fee' or 'verification deposit' requirement, and a wallet address that does not match the exchange's official wallets. Real exchanges never require you to deposit funds to release a withdrawal."],
-      ["Can scammers drain my wallet without my seed phrase?","Yes — through signed approvals. If you sign a transaction granting unlimited spending permission on a token, the scammer can move that token at any time without needing your seed phrase. Always read what you are signing in your wallet."],
+      ["Can scammers drain my wallet without my seed phrase?","Yes \u2014 through signed approvals. If you sign a transaction granting unlimited spending permission on a token, the scammer can move that token at any time without needing your seed phrase. Always read what you are signing in your wallet."],
       ["What is a wallet drainer site?","A wallet drainer is a malicious site that asks you to connect your wallet to claim an airdrop, mint an NFT, or fix an issue. Once connected and you sign the prompt, the site sweeps your assets. These sites often pixel-match real projects but use a slightly different domain."],
-      ["Is it safe to use a 'recovery service' for stolen crypto?","Almost never. Most crypto recovery services are secondary scams targeting victims of the first one. They charge upfront fees and disappear. Report theft to the FBI IC3 and your exchange — neither will charge you, and legitimate forensic services do not contact victims first."]
+      ["Is it safe to use a 'recovery service' for stolen crypto?","Almost never. Most crypto recovery services are secondary scams targeting victims of the first one. They charge upfront fees and disappear. Report theft to the FBI IC3 and your exchange \u2014 neither will charge you, and legitimate forensic services do not contact victims first."]
     ],
     [
-      ["Why are crypto scams so common in 2025?","FBI IC3 recorded $11.3 billion in crypto-related losses in 2025, a 22% increase. Crypto's irreversibility, anonymous wallet addresses, and global reach make it the preferred payment method for scammers across multiple scam categories — not just crypto-themed ones."],
+      ["Why are crypto scams so common in 2025?","FBI IC3 recorded $11.3 billion in crypto-related losses in 2025, a 22% increase. Crypto's irreversibility, anonymous wallet addresses, and global reach make it the preferred payment method for scammers across multiple scam categories \u2014 not just crypto-themed ones."],
       ["How do scammers use fake support chats?","Fake support agents open chats by pasting your wallet address back to you to seem credible. They then ask you to 'verify ownership' by entering your seed phrase or signing a transaction in their interface. Real support never asks for either."],
       ["What is a pig butchering crypto scam?","Pig butchering scams build trust over weeks through dating apps or social media, then introduce a 'great investment opportunity' on a fake trading platform. The platform shows fake gains, then blocks withdrawals or demands more fees. FTC reported $5.8 billion in losses to this category in 2025."],
       ["Are crypto staking offers from social media real?","Most are not. Real staking happens through the official exchange or wallet you already use. If a Telegram, Discord, or Twitter account is offering high APYs and asking you to send funds to a smart contract address, treat it as a scam until proven otherwise."],
@@ -1117,11 +1063,11 @@ var FAQ_POOLS={
   ],
   job:[
     [
-      ["How can I tell if a job offer is a scam?","Check if the company actually posted the role on its official careers page. Verify the recruiter on LinkedIn — look at how old the profile is, how many connections, whether they have other endorsements. Real recruiters do not move to Telegram or WhatsApp for interviews, and real offers do not arrive without a phone screen or video interview."],
+      ["How can I tell if a job offer is a scam?","Check if the company actually posted the role on its official careers page. Verify the recruiter on LinkedIn \u2014 look at how old the profile is, how many connections, whether they have other endorsements. Real recruiters do not move to Telegram or WhatsApp for interviews, and real offers do not arrive without a phone screen or video interview."],
       ["What information should I never give a recruiter before being hired?","Never share your Social Security number, bank routing details, full date of birth, or scanned ID before a verified offer, signed contract, and confirmed start date with the real company's HR. Background checks and direct deposit setups always happen after the offer is accepted, never as a screening step."],
       ["Why are job scams growing so fast?","FTC reports job scam losses grew from $90M in 2020 to $750M+ in 2025. Remote work made it normal to interview entirely online, which gave scammers cover to impersonate real companies without ever appearing in person."],
-      ["What does a fake onboarding portal look like?","Fake onboarding portals look polished — company logo, employee handbook, direct deposit form — but the domain is something like companyname-onboarding.net or hr-portal-companyname.com instead of the real company domain. The forms collect SSN, banking details, and ID scans."],
-      ["I already gave a recruiter my bank details — what now?","Contact your bank immediately to report potential fraud and request new account numbers if needed. Put a credit freeze on your file at Equifax, Experian, and TransUnion. File a report at ftc.gov/complaint and at ic3.gov. Document every message and email you received."]
+      ["What does a fake onboarding portal look like?","Fake onboarding portals look polished \u2014 company logo, employee handbook, direct deposit form \u2014 but the domain is something like companyname-onboarding.net or hr-portal-companyname.com instead of the real company domain. The forms collect SSN, banking details, and ID scans."],
+      ["I already gave a recruiter my bank details \u2014 what now?","Contact your bank immediately to report potential fraud and request new account numbers if needed. Put a credit freeze on your file at Equifax, Experian, and TransUnion. File a report at ftc.gov/complaint and at ic3.gov. Document every message and email you received."]
     ],
     [
       ["Are LinkedIn job offers always real?","No. LinkedIn has a significant problem with fake recruiter accounts. Scammers create profiles using real employee photos and company logos. Check how long the profile has existed, whether their work history is verifiable, and whether they mutual-connect to anyone you actually know."],
@@ -1132,29 +1078,29 @@ var FAQ_POOLS={
     ],
     [
       ["What is the 'equipment reimbursement' job scam?","A scammer sends you a check or e-deposit for 'remote work equipment,' asks you to forward payment to a specific vendor, and the original deposit reverses days later. You lose the amount you forwarded. No real employer asks new hires to handle payments to vendors before starting."],
-      ["Why do job scammers ask for ID and SSN so early?","Identity theft. They use the data to open credit lines, file fake tax returns, or sell the information on dark markets. The fake job is the cover — collecting your information is the actual goal."],
-      ["Can scammers fake background check companies?","Yes. Scammers create fake background check vendors with realistic-sounding names and websites. The 'background check' is just a form that collects SSN, date of birth, and other sensitive details. Real background checks happen through verified vendors like Sterling, HireRight, or Checkr — and only after a real offer."],
+      ["Why do job scammers ask for ID and SSN so early?","Identity theft. They use the data to open credit lines, file fake tax returns, or sell the information on dark markets. The fake job is the cover \u2014 collecting your information is the actual goal."],
+      ["Can scammers fake background check companies?","Yes. Scammers create fake background check vendors with realistic-sounding names and websites. The 'background check' is just a form that collects SSN, date of birth, and other sensitive details. Real background checks happen through verified vendors like Sterling, HireRight, or Checkr \u2014 and only after a real offer."],
       ["What does a real offer letter include that fakes usually don't?","Real offer letters include a verified company address, official email domain, named hiring manager with a verifiable LinkedIn, signed PDF from a real HR system, and specifics about benefits, start date, and reporting structure. Fake offers are often vague on these details or list a generic 'City, State' address."],
-      ["I paid a 'training fee' for a job — can I get it back?","Possibly. If you paid by credit card, dispute the charge with your card issuer immediately as fraud. If you paid by Zelle, Cash App, or wire, recovery is much harder. File reports with the FTC, IC3, and the platform you used. Real employers never charge fees of any kind."]
+      ["I paid a 'training fee' for a job \u2014 can I get it back?","Possibly. If you paid by credit card, dispute the charge with your card issuer immediately as fraud. If you paid by Zelle, Cash App, or wire, recovery is much harder. File reports with the FTC, IC3, and the platform you used. Real employers never charge fees of any kind."]
     ]
   ],
   delivery:[
     [
       ["How can I tell if a delivery text is a scam?","Real carriers (USPS, UPS, FedEx, DHL) send tracking updates only when you have an active shipment, and the link in the message points to their official domain. Scam texts arrive with a tracking number that does not match any order, ask you to pay a small fee, and use domains like usps-redelivery.net or fedex-pkg-hold.info that are not real carrier domains."],
-      ["Why do scam delivery texts always ask for a small fee?","The fee is the cover — usually $1.99 or $3.50 — to make the page feel legitimate. The real target is your credit card number and CVV, which are captured by the payment form. The card is then used for larger fraudulent charges within hours."],
+      ["Why do scam delivery texts always ask for a small fee?","The fee is the cover \u2014 usually $1.99 or $3.50 \u2014 to make the page feel legitimate. The real target is your credit card number and CVV, which are captured by the payment form. The card is then used for larger fraudulent charges within hours."],
       ["What should I do if I already entered my card on a fake tracking page?","Contact your card issuer immediately to report fraud and cancel the card. Check your statement for any unauthorized charges. Set up transaction alerts. The data is often used within 24-48 hours, so speed matters."],
-      ["How can I verify a real package delivery?","Go directly to the carrier's official site (usps.com, ups.com, fedex.com, dhl.com) and enter your tracking number from your original order confirmation. Never click the link in a delivery text — open a new tab and type the carrier URL yourself."],
+      ["How can I verify a real package delivery?","Go directly to the carrier's official site (usps.com, ups.com, fedex.com, dhl.com) and enter your tracking number from your original order confirmation. Never click the link in a delivery text \u2014 open a new tab and type the carrier URL yourself."],
       ["Why do I get delivery scam texts even when I'm not expecting anything?","Scammers send bulk texts to phone numbers, hoping a percentage of recipients happen to be expecting a package. Most people order from Amazon or other retailers regularly enough that a 'delivery issue' message feels plausible."]
     ],
     [
-      ["What does a fake USPS redelivery page look like?","Fake USPS pages copy the official layout — blue and white branding, eagle logo, tracking number field — but the URL is something like usps-redelivery-portal.com or uspstrack-delivery.net. The page asks for a small 'redelivery fee' and collects card details, billing zip, and CVV."],
+      ["What does a fake USPS redelivery page look like?","Fake USPS pages copy the official layout \u2014 blue and white branding, eagle logo, tracking number field \u2014 but the URL is something like usps-redelivery-portal.com or uspstrack-delivery.net. The page asks for a small 'redelivery fee' and collects card details, billing zip, and CVV."],
       ["Are FedEx and UPS scam texts different?","The setup is identical across carriers. The branding changes (purple for FedEx, brown for UPS), but the pattern is the same: tracking issue, small fee required, fake domain in the address bar, card form on the payment page."],
       ["What is a customs hold delivery scam?","A scammer texts claiming a package is held by customs and a small fee is required for release. The fake page collects card details and sometimes ID information. Real customs holds are handled by the carrier directly and never require online payment through a text message link."],
-      ["Can scammers fake a delivery notification email?","Yes. Fake delivery emails copy carrier branding precisely, use spoofed display names like 'FedEx Delivery' or 'USPS Tracking,' and link to fake tracking pages. The from address gives them away — real carrier emails come from @fedex.com, @ups.com, @usps.com, etc."],
+      ["Can scammers fake a delivery notification email?","Yes. Fake delivery emails copy carrier branding precisely, use spoofed display names like 'FedEx Delivery' or 'USPS Tracking,' and link to fake tracking pages. The from address gives them away \u2014 real carrier emails come from @fedex.com, @ups.com, @usps.com, etc."],
       ["Why are delivery scams so effective?","FTC reported delivery and impersonation scams accounted for $3.5 billion in losses in 2025. They work because most people receive real packages frequently enough that a tracking issue feels normal. The urgency of a 'failed delivery' makes people click before checking."]
     ],
     [
-      ["I clicked a delivery scam link but didn't enter any info — am I safe?","Probably, but check your device. Some delivery scam links push browser notifications, download tracking scripts, or attempt to install apps. Close the page, clear your browser cookies for that domain, and run a security scan if you downloaded anything."],
+      ["I clicked a delivery scam link but didn't enter any info \u2014 am I safe?","Probably, but check your device. Some delivery scam links push browser notifications, download tracking scripts, or attempt to install apps. Close the page, clear your browser cookies for that domain, and run a security scan if you downloaded anything."],
       ["What is the 'package pending' DHL scam?","A scam text claims a DHL package is pending and requires address confirmation or a small fee. The link goes to a fake DHL site (often dh1-delivery.com or similar). The form collects full name, address, phone, and card details. Real DHL never requires payment through text messages."],
       ["Why do scam texts come from random phone numbers?","Scammers use short-code spoofing and rotating phone numbers to avoid carrier blocks. The number you see is rarely the real source. Real carriers use consistent short codes you can verify on their official websites."],
       ["Can I report a delivery scam text?","Yes. Forward the text to 7726 (SPAM) to report it to your carrier. You can also report to the real delivery company through their fraud reporting page (USPS Inspector, UPS fraud, FedEx security, DHL fraud), and file a report at ftc.gov/complaint."],
@@ -1163,48 +1109,48 @@ var FAQ_POOLS={
   ],
   payment:[
     [
-      ["How can I tell if a bank or PayPal alert is a scam?","Check the from address, not just the display name. Real bank and PayPal emails come from official domains like @paypal.com, @chase.com, @bofa.com — not @paypal-security.net or @chase-alerts.com. Real alerts also never require you to click a link to 'verify your account.' Log into your account through the official app or by typing the URL directly."],
-      ["What does a fake bank login page look like?","Fake bank login pages are pixel-perfect copies of the real one — same logo, colors, layout, even the same security badges. The only difference is the URL. Always check the address bar before entering credentials. Real bank URLs are short, consistent, and HTTPS."],
-      ["What should I do if I already entered my login on a fake page?","Change your password immediately through the real bank's app or website. Enable two-factor authentication if it isn't already on. Contact your bank to report the incident — they can flag your account for additional monitoring and watch for unauthorized transactions."],
+      ["How can I tell if a bank or PayPal alert is a scam?","Check the from address, not just the display name. Real bank and PayPal emails come from official domains like @paypal.com, @chase.com, @bofa.com \u2014 not @paypal-security.net or @chase-alerts.com. Real alerts also never require you to click a link to 'verify your account.' Log into your account through the official app or by typing the URL directly."],
+      ["What does a fake bank login page look like?","Fake bank login pages are pixel-perfect copies of the real one \u2014 same logo, colors, layout, even the same security badges. The only difference is the URL. Always check the address bar before entering credentials. Real bank URLs are short, consistent, and HTTPS."],
+      ["What should I do if I already entered my login on a fake page?","Change your password immediately through the real bank's app or website. Enable two-factor authentication if it isn't already on. Contact your bank to report the incident \u2014 they can flag your account for additional monitoring and watch for unauthorized transactions."],
       ["Is it safe to verify my account when a message asks me to?","Only verify through the official app or by typing the bank's URL directly into your browser. Never use the link or phone number in the message itself. Real banks do not require email or text verification to keep your account open."],
-      ["How do scammers know my bank or card brand?","Often they don't — they send the same alert to thousands of people across many banks, hoping a percentage happen to be customers of the bank named in the message. Other times, your email was part of a data breach that included your bank name."]
+      ["How do scammers know my bank or card brand?","Often they don't \u2014 they send the same alert to thousands of people across many banks, hoping a percentage happen to be customers of the bank named in the message. Other times, your email was part of a data breach that included your bank name."]
     ],
     [
-      ["What is a Zelle or Venmo scam?","Scammers pose as buyers, friends, or even your bank's fraud department, asking you to send money through Zelle or Venmo. Once sent, the money is gone — these services do not offer the same fraud protection as credit cards. Never send money to someone you don't know, even if they claim to represent your bank."],
+      ["What is a Zelle or Venmo scam?","Scammers pose as buyers, friends, or even your bank's fraud department, asking you to send money through Zelle or Venmo. Once sent, the money is gone \u2014 these services do not offer the same fraud protection as credit cards. Never send money to someone you don't know, even if they claim to represent your bank."],
       ["What is the 'bank fraud department' scam?","A scammer calls or texts claiming to be your bank's fraud team, says suspicious activity was detected, and instructs you to 'protect' your money by transferring it to a 'safe account' or sending it via Zelle. Real banks never ask you to move money to another account to keep it safe."],
       ["Are Amazon refund emails ever real?","Amazon does send refund confirmations, but only for orders you actually placed. Fake Amazon refund emails reference orders you never made and include a phone number to 'dispute' the charge. The phone number connects to scammers who then ask for remote access to your computer or your bank login."],
-      ["What is a verification code scam?","A scammer triggers a legitimate verification code from a real service to your phone, then contacts you pretending to be the service and asks you to read the code back. Once you do, they access your account. Never share verification codes with anyone — no legitimate service ever needs you to read one back."],
-      ["I sent money via Zelle to a scammer — can I get it back?","Recovery is difficult but worth trying. Report the fraud to your bank immediately — some banks reimburse Zelle fraud under recent settlement agreements. File reports at ftc.gov/complaint and ic3.gov. Document everything. Recovery odds drop sharply after the first 24 hours."]
+      ["What is a verification code scam?","A scammer triggers a legitimate verification code from a real service to your phone, then contacts you pretending to be the service and asks you to read the code back. Once you do, they access your account. Never share verification codes with anyone \u2014 no legitimate service ever needs you to read one back."],
+      ["I sent money via Zelle to a scammer \u2014 can I get it back?","Recovery is difficult but worth trying. Report the fraud to your bank immediately \u2014 some banks reimburse Zelle fraud under recent settlement agreements. File reports at ftc.gov/complaint and ic3.gov. Document everything. Recovery odds drop sharply after the first 24 hours."]
     ],
     [
       ["What does a Geek Squad or antivirus renewal scam look like?","An email arrives claiming your Geek Squad or Norton subscription has auto-renewed for around $400-500 and provides a phone number to dispute the charge. There is no real subscription. If you call, scammers ask for remote access to 'process the refund' and then drain your bank account through the remote session."],
-      ["Why do payment scams always create urgency?","Urgency overrides the natural pause where you would normally verify a source. 'Suspicious login attempt,' 'unauthorized charge,' 'account suspended' — all designed to make you act before you think. Real security alerts give you time and direct you to log in through official channels, not click a link."],
-      ["What is a refund overpayment scam?","A scammer claims they 'accidentally' refunded you too much and asks you to send the difference back via wire, Zelle, or gift card. There was no overpayment — the original 'refund' was a manipulated screen or a check that bounces. The money you send back is gone."],
-      ["Are PayPal invoice emails ever fake?","Yes — scammers send real PayPal invoices for fake services or claim someone used your account. The invoice itself comes from PayPal's real system, which makes it look legitimate. The phone number in the invoice description connects to scammers, not PayPal. Always dispute invoices through PayPal's official app or website."],
-      ["How can I protect myself from payment impersonation scams?","Enable two-factor authentication on every financial account. Set up transaction alerts so unauthorized charges trigger notifications. Use a credit card (not a debit card) for online purchases — credit cards have stronger fraud protection. Never act on alerts that arrive via email or text without verifying through the real app or website."]
+      ["Why do payment scams always create urgency?","Urgency overrides the natural pause where you would normally verify a source. 'Suspicious login attempt,' 'unauthorized charge,' 'account suspended' \u2014 all designed to make you act before you think. Real security alerts give you time and direct you to log in through official channels, not click a link."],
+      ["What is a refund overpayment scam?","A scammer claims they 'accidentally' refunded you too much and asks you to send the difference back via wire, Zelle, or gift card. There was no overpayment \u2014 the original 'refund' was a manipulated screen or a check that bounces. The money you send back is gone."],
+      ["Are PayPal invoice emails ever fake?","Yes \u2014 scammers send real PayPal invoices for fake services or claim someone used your account. The invoice itself comes from PayPal's real system, which makes it look legitimate. The phone number in the invoice description connects to scammers, not PayPal. Always dispute invoices through PayPal's official app or website."],
+      ["How can I protect myself from payment impersonation scams?","Enable two-factor authentication on every financial account. Set up transaction alerts so unauthorized charges trigger notifications. Use a credit card (not a debit card) for online purchases \u2014 credit cards have stronger fraud protection. Never act on alerts that arrive via email or text without verifying through the real app or website."]
     ]
   ],
   general:[
     [
-      ["How can I tell if a message is a scam?","Check the actual sender address, not just the display name — they are often different. Look at what the message is asking for: verification codes, payment, personal information, or account access. Legitimate organizations rarely send unsolicited messages demanding immediate action. If the message creates urgency or threatens a consequence, verify it directly through the official website or phone number."],
+      ["How can I tell if a message is a scam?","Check the actual sender address, not just the display name \u2014 they are often different. Look at what the message is asking for: verification codes, payment, personal information, or account access. Legitimate organizations rarely send unsolicited messages demanding immediate action. If the message creates urgency or threatens a consequence, verify it directly through the official website or phone number."],
       ["What should I do if I already clicked a suspicious link?","Do not enter any information on the page that opened. Close the tab immediately. If you entered a password, change it on the real website right away. If you entered card details, contact your bank to report potential fraud. Run a security check on your device if it prompted you to download anything."],
-      ["What information should I never share in response to a message?","Never share verification codes or one-time passwords — no legitimate organization needs you to read these back. Never share wallet seed phrases or recovery phrases. Never share banking routing numbers, full card numbers, or account passwords in response to an unsolicited message. Never send gift card codes as payment."],
+      ["What information should I never share in response to a message?","Never share verification codes or one-time passwords \u2014 no legitimate organization needs you to read these back. Never share wallet seed phrases or recovery phrases. Never share banking routing numbers, full card numbers, or account passwords in response to an unsolicited message. Never send gift card codes as payment."],
       ["How do scammers make messages look legitimate?","Scammers set the display name to match a trusted brand while the actual from address comes from a completely different domain. They copy logos, layouts, and email formats precisely. The tell is always in the from address, the link destination, or what the message is actually asking for."],
       ["Where can I report a scam?","Report to ftc.gov/complaint for federal tracking, ic3.gov for FBI investigation, and the platform where the scam occurred (Gmail abuse, Facebook reporting, the carrier for SMS spam). Reporting helps build patterns even when individual recovery isn't possible."]
     ],
     [
-      ["Why do I keep getting scam messages?","Your phone number and email are part of one or more data sets sold or leaked through breaches. Scammers buy these lists. You can reduce volume by reporting spam, using a separate email for low-trust signups, and never engaging with scam messages — even to unsubscribe."],
-      ["What is social engineering?","Social engineering is manipulation that gets people to share information or take actions they otherwise wouldn't, through urgency, authority, fear, or trust. Most scams rely on social engineering more than technical tricks — the goal is to get you to skip the verification step you would normally do."],
-      ["How are scams different from phishing?","Phishing is a type of scam specifically designed to steal credentials or personal data through fake messages and websites. All phishing is a scam, but not all scams are phishing — investment scams, romance scams, and tech support scams use different methods."],
+      ["Why do I keep getting scam messages?","Your phone number and email are part of one or more data sets sold or leaked through breaches. Scammers buy these lists. You can reduce volume by reporting spam, using a separate email for low-trust signups, and never engaging with scam messages \u2014 even to unsubscribe."],
+      ["What is social engineering?","Social engineering is manipulation that gets people to share information or take actions they otherwise wouldn't, through urgency, authority, fear, or trust. Most scams rely on social engineering more than technical tricks \u2014 the goal is to get you to skip the verification step you would normally do."],
+      ["How are scams different from phishing?","Phishing is a type of scam specifically designed to steal credentials or personal data through fake messages and websites. All phishing is a scam, but not all scams are phishing \u2014 investment scams, romance scams, and tech support scams use different methods."],
       ["What is the average loss from a scam in 2025?","FTC data shows the median individual scam loss in 2025 was approximately $500, though investment scams averaged $5,000+ per victim and crypto scams averaged over $60,000 per victim according to FBI IC3. Older adults often experience the highest individual losses."],
-      ["Can scammers be tracked or caught?","Some are caught — especially domestic operations or those who reuse infrastructure — but most international scam operations are difficult to prosecute. Reporting helps because it builds patterns and gives law enforcement intelligence even when individual cases can't be resolved."]
+      ["Can scammers be tracked or caught?","Some are caught \u2014 especially domestic operations or those who reuse infrastructure \u2014 but most international scam operations are difficult to prosecute. Reporting helps because it builds patterns and gives law enforcement intelligence even when individual cases can't be resolved."]
     ],
     [
       ["What is a smishing attack?","Smishing is phishing via SMS text message. The scam text contains a link to a fake website where credentials or card details are collected. Common smishing patterns include fake delivery notifications, fake bank alerts, and fake verification codes. Forward smishing texts to 7726 to report them."],
       ["Why do scammers use urgency tactics?","Urgency disables the part of decision-making that asks 'wait, should I check this first?' Phrases like 'account will be suspended,' 'package will be returned,' or 'limited time' are designed to push immediate action. Real organizations almost always allow time for verification."],
       ["What is the FBI IC3 and when should I file a report?","The Internet Crime Complaint Center collects reports of internet-enabled crime and helps coordinate federal investigations. File at ic3.gov for any online scam involving meaningful financial loss, identity theft, or business email compromise. Reports are reviewed and used for pattern analysis even when individual recovery isn't possible."],
-      ["Can I get scammed even if I don't click anything?","Yes — through fake call center scams, voice phishing (vishing), and SIM-swap attacks that don't require any click on your end. Some scams also work through unsolicited package deliveries (brushing scams) or by stealing your data from another company that had it."],
-      ["What's the single most effective protection against scams?","Pause before you act. Verify the source through a separate channel — call the official phone number on your card or the company's real website, not the number in the message. Most scams fail when victims take 60 seconds to check before clicking, replying, or sending money."]
+      ["Can I get scammed even if I don't click anything?","Yes \u2014 through fake call center scams, voice phishing (vishing), and SIM-swap attacks that don't require any click on your end. Some scams also work through unsolicited package deliveries (brushing scams) or by stealing your data from another company that had it."],
+      ["What's the single most effective protection against scams?","Pause before you act. Verify the source through a separate channel \u2014 call the official phone number on your card or the company's real website, not the number in the message. Most scams fail when victims take 60 seconds to check before clicking, replying, or sending money."]
     ]
   ]
 };
@@ -1212,12 +1158,10 @@ var FAQ_POOLS={
 function renderDynamicFAQ(){
   var branch=getKeywordBranch();
   var pools=FAQ_POOLS[branch]||FAQ_POOLS.general;
-  // Pick a set within the intent by hashing the keyword
   var setIndex=keywordHashJS(RAW_KEYWORD||"")%pools.length;
   var faqs=pools[setIndex];
   if(!faqs||!faqs.length)return;
 
-  // Render visible HTML
   var list=document.getElementById("faqList");
   if(list){
     list.innerHTML=faqs.map(function(qa){
@@ -1225,7 +1169,6 @@ function renderDynamicFAQ(){
     }).join("");
   }
 
-  // Rewrite the JSON-LD FAQ schema
   var ld=document.getElementById("faqJsonLd");
   if(ld){
     var entities=faqs.map(function(qa){
@@ -1235,7 +1178,6 @@ function renderDynamicFAQ(){
     ld.textContent=JSON.stringify(schema);
   }
 
-  // Update FAQ heading by intent
   var heading=document.getElementById("faqHeading");
   if(heading){
     var headingMap={
@@ -1248,8 +1190,6 @@ function renderDynamicFAQ(){
     heading.textContent=headingMap[branch]||headingMap.general;
   }
 }
-
-/* ==========  END DYNAMIC FAQ  ========== */
 
 function getKeywordBranch(){
   var lower=normalizeKeyword(RAW_KEYWORD||"").toLowerCase();
@@ -1344,6 +1284,140 @@ async function checkout(priceId){
 }
 </script>
 
+<script>
+(function(){
+if(window.__SCAM_CHECK_EMBEDDED_UPGRADE__)return;
+window.__SCAM_CHECK_EMBEDDED_UPGRADE__=true;
+const API_BASE="https://awake-integrity-production-faa0.up.railway.app";
+const STRIPE_PUBLISHABLE_KEY="pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y";
+const ADS_ID="AW-17956428385";
+const ADS_SEND_TO="AW-17956428385/dE43CO04_IUcEOGopfJC";
+const BROWSER_SUB_KEY="scam_check_browser_subscribed";
+const VERIFIED_SUB_EMAIL_KEY="scam_check_verified_subscriber_email";
+const PRICES={weekly:"price_1T8KOTJjMzyHDzeQDDg1A2TF",monthly:"price_1T8KOUJjMzyHDzeQxaqPFOSB",yearly:"price_1T8KOQJjMzyHDzeQfcU1C1MQ"};
+let stripe=null,checkoutInstance=null,selectedPlanKey="yearly",isInitializingCheckout=false,stripeScriptPromise=null,legacyUpgradeObserver=null;
+let wrapper,buttonRow,checkoutCard,compactRow,compactText,changePlanBtn,planRow,weeklyBtn,monthlyBtn,yearlyBtn,helper,checkoutContainer,status,closeBtn;
+function normalizeEmail(v){return String(v||"").trim().toLowerCase();}
+function getEmailInput(){return document.getElementById("email");}
+function getEnteredEmail(){const i=getEmailInput();return i?normalizeEmail(i.value):"";}
+function getStoredVerifiedEmail(){return normalizeEmail(localStorage.getItem(VERIFIED_SUB_EMAIL_KEY)||"");}
+function setStoredVerifiedEmail(email){const n=normalizeEmail(email);if(n)localStorage.setItem(VERIFIED_SUB_EMAIL_KEY,n);}
+function isBrowserSubscribed(){return localStorage.getItem(BROWSER_SUB_KEY)==="true";}
+function markBrowserSubscribed(v){if(v)localStorage.setItem(BROWSER_SUB_KEY,"true");else localStorage.removeItem(BROWSER_SUB_KEY);}
+function isVerifiedSubscriberForCurrentUser(){const s=getStoredVerifiedEmail(),e=getEnteredEmail();if(!isBrowserSubscribed())return false;if(!s||!e)return false;return e===s;}
+function shouldSuppressUpgrade(){return isVerifiedSubscriberForCurrentUser();}
+function syncPostPurchaseMessage(){const p=document.getElementById("postPurchase");if(!p)return;p.textContent="\u2705 Unlimited scam checks are active with this account";p.style.display=shouldSuppressUpgrade()?"block":"none";}
+function setStatus(t){if(status)status.textContent=t||"";}
+function injectLegacyUpgradeKillCSS(){if(document.getElementById("scam-check-hide-legacy-upgrade"))return;const s=document.createElement("style");s.id="scam-check-hide-legacy-upgrade";s.textContent="#upgrade{display:none!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important;max-height:0!important;min-height:0!important;height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;}";document.head.appendChild(s);}
+function hideLegacyUpgradeUI(){const o=document.getElementById("upgrade");if(o){o.style.setProperty("display","none","important");o.style.setProperty("visibility","hidden","important");o.style.setProperty("pointer-events","none","important");o.style.setProperty("opacity","0","important");o.style.setProperty("max-height","0","important");o.style.setProperty("min-height","0","important");o.style.setProperty("height","0","important");o.style.setProperty("overflow","hidden","important");o.style.setProperty("margin","0","important");o.style.setProperty("padding","0","important");o.style.setProperty("border","0","important");o.setAttribute("hidden","");o.setAttribute("aria-hidden","true");}}
+function watchLegacyUpgradeUI(){if(legacyUpgradeObserver)return;legacyUpgradeObserver=new MutationObserver(function(){hideLegacyUpgradeUI();});legacyUpgradeObserver.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class"]});}
+function ensureAdsScript(){if(document.querySelector('script[src*="googletagmanager.com/gtag/js?id='+ADS_ID+'"]'))return;const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+ADS_ID;document.head.appendChild(s);}
+function ensureGtag(){ensureAdsScript();window.dataLayer=window.dataLayer||[];if(!window.gtag){window.gtag=function(){window.dataLayer.push(arguments);};}try{window.gtag("js",new Date());window.gtag("config",ADS_ID);}catch(e){}}
+function handleReturnState(){ensureGtag();const p=new URLSearchParams(window.location.search);const hC=p.get("conversion")==="1",hS=p.get("subscribed")==="true";if(hC&&!sessionStorage.getItem("ads_conversion")){try{window.gtag("event","conversion",{send_to:ADS_SEND_TO,value:10.0,currency:"USD"});sessionStorage.setItem("ads_conversion","1");}catch(e){}}if(hS)markBrowserSubscribed(true);syncPostPurchaseMessage();if(hC||hS){try{window.history.replaceState({},document.title,window.location.pathname);}catch(e){}}}
+function patchTopUpgradeButton(){const b=document.querySelector(".upgrade-top");if(!b)return;b.setAttribute("type","button");b.removeAttribute("onclick");b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return false;}hideLegacyUpgradeUI();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}
+function patchHostedCheckoutFallback(){window.checkout=async function(priceId){if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return;}const pageUrl=window.location.origin+window.location.pathname;try{const r=await fetch(API_BASE+"/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId,email:null,successUrl:pageUrl+"?subscribed=true&conversion=1",cancelUrl:pageUrl})});const d=await r.json();if(d&&d.url){window.location=d.url;}else{alert("Checkout failed. Please try again.");}}catch(e){alert("Checkout failed. Please try again.");}};}
+function patchShowUpgrade(){window.showUpgrade=function(){hideLegacyUpgradeUI();return;};}
+function patchAnalyzeLimitAutoOpen(){if(!window.fetch||window.__SCAM_CHECK_FETCH_PATCHED__)return;window.__SCAM_CHECK_FETCH_PATCHED__=true;const orig=window.fetch.bind(window);window.fetch=async function(input,init){let url="",isA=false,pb=null;try{url=typeof input==="string"?input:(input&&input.url?input.url:"");isA=!!url&&url.indexOf("/analyze")!==-1;if(isA&&init&&typeof init.body==="string"){try{pb=JSON.parse(init.body);}catch(e){pb=null;}if(pb&&typeof pb==="object"){const ee=normalizeEmail(pb.email||getEnteredEmail());const se=getStoredVerifiedEmail();const ss=!!ee&&!!se&&ee===se&&isBrowserSubscribed();pb.email=ee;pb.subscribed=ss;init=Object.assign({},init,{body:JSON.stringify(pb)});}}}catch(e){}const response=await orig(input,init);try{if(isA){const re=normalizeEmail((pb&&pb.email)||getEnteredEmail());response.clone().json().then(function(data){const bs=!!(data&&(data.subscribed===true||data.activeSubscription===true||data.hasSubscription===true||data.unlimited===true));if(bs){markBrowserSubscribed(true);if(re)setStoredVerifiedEmail(re);else if(data&&data.email)setStoredVerifiedEmail(data.email);syncPostPurchaseMessage();hideLegacyUpgradeUI();return;}syncPostPurchaseMessage();if(data&&data.limit===true){setTimeout(function(){hideLegacyUpgradeUI();if(!shouldSuppressUpgrade()&&window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");},0);}}).catch(function(){});}}catch(e){}return response;};}
+function patchLegacyButtons(){Array.from(document.querySelectorAll('button[onclick],.upgrade-top,.primary-cta-btn,.post-result-upgrade-btn,.sticky-mobile-cta-btn')).forEach(function(btn){const ot=(btn.getAttribute("onclick")||"").trim();const t=(btn.textContent||"").toLowerCase().trim();if(ot==="showUpgrade()"||t.includes("upgrade")||t.includes("unlock")){btn.removeAttribute("onclick");btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return false;}hideLegacyUpgradeUI();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}});}
+function patchSubscriberEmailField(){const i=getEmailInput();if(!i||i.__SCAM_CHECK_EMAIL_PATCHED__)return;i.__SCAM_CHECK_EMAIL_PATCHED__=true;i.addEventListener("input",function(){syncPostPurchaseMessage();hideLegacyUpgradeUI();});}
+function ensureStripeScript(){if(window.Stripe)return Promise.resolve();if(stripeScriptPromise)return stripeScriptPromise;stripeScriptPromise=new Promise(function(resolve,reject){const ex=document.querySelector('script[src="https://js.stripe.com/v3/"]');if(ex){if(window.Stripe){resolve();return;}ex.addEventListener("load",function(){resolve();},{once:true});ex.addEventListener("error",function(){reject(new Error("Stripe failed to load."));},{once:true});return;}const s=document.createElement("script");s.src="https://js.stripe.com/v3/";s.async=true;s.onload=function(){resolve();};s.onerror=function(){reject(new Error("Stripe failed to load."));};document.body.appendChild(s);});return stripeScriptPromise;}
+function getPlanButtonByKey(key){return{weekly:weeklyBtn,monthly:monthlyBtn,yearly:yearlyBtn}[key]||yearlyBtn;}
+function updateCompactSummary(key){const b=getPlanButtonByKey(key);if(!b||!compactText)return;compactText.innerHTML='<div style="font-size:11px;color:#7a9abf;font-weight:700;">Selected plan</div><div style="margin-top:2px;color:#e0e8ff;font-weight:800;">'+b.dataset.planLabel+' \u2022 '+b.dataset.planSubLabel+'</div>';}
+function setActivePlan(key){[weeklyBtn,monthlyBtn,yearlyBtn].forEach(function(btn){if(!btn)return;const a=btn.dataset.planKey===key;btn.dataset.active=a?"true":"false";btn.style.background=a?"linear-gradient(135deg,rgba(249,115,22,.22) 0%,rgba(220,38,38,.18) 100%)":"rgba(255,255,255,.04)";btn.style.borderColor=a?"rgba(249,115,22,.52)":"rgba(255,255,255,.10)";btn.style.boxShadow=a?"0 0 0 1px rgba(249,115,22,.18) inset":"none";btn.style.transform="translateY(0)";});updateCompactSummary(key);}
+function showPlanSelector(){if(!compactRow||!planRow||!helper)return;compactRow.style.display="none";planRow.style.display="grid";helper.style.display="block";}
+function showCompactSelector(){if(!compactRow||!planRow||!helper)return;compactRow.style.display="flex";planRow.style.display="none";helper.style.display="none";}
+async function destroyEmbeddedCheckout(){if(checkoutInstance&&typeof checkoutInstance.destroy==="function"){try{await checkoutInstance.destroy();}catch(e){}}checkoutInstance=null;if(checkoutContainer){checkoutContainer.innerHTML="";checkoutContainer.style.display="none";checkoutContainer.style.minHeight="0";checkoutContainer.style.paddingBottom="0";}}
+async function openCheckoutForPlan(planKey){
+  if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return;}
+  if(isInitializingCheckout)return;
+  if(!PRICES[planKey])return;
+  isInitializingCheckout=true;selectedPlanKey=planKey;setActivePlan(planKey);showCompactSelector();
+  helper.textContent="Loading secure checkout...";setStatus("");
+  checkoutContainer.style.display="block";checkoutContainer.style.minHeight="360px";checkoutContainer.innerHTML="";
+  try{
+    await ensureStripeScript();
+    if(!window.Stripe)throw new Error("Stripe failed to load.");
+    if(!stripe)stripe=Stripe(STRIPE_PUBLISHABLE_KEY);
+    await destroyEmbeddedCheckout();
+    checkoutContainer.style.display="block";checkoutContainer.style.minHeight="520px";checkoutContainer.style.paddingBottom="24px";
+    const fetchClientSecret=async function(){
+      const res=await fetch(API_BASE+"/create-embedded-subscription",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId:PRICES[planKey],returnUrl:window.location.origin+window.location.pathname+"?subscribed=true&conversion=1"})});
+      const d=await res.json();
+      if(!res.ok||!d||!d.clientSecret)throw new Error((d&&d.error)||"No clientSecret");
+      return d.clientSecret;
+    };
+    checkoutInstance=await stripe.initEmbeddedCheckout({fetchClientSecret});
+    checkoutInstance.mount("#embedded-checkout-mount");
+    helper.textContent="Complete payment below.";
+  }catch(e){
+    console.error("Embedded checkout error:",e);
+    await destroyEmbeddedCheckout();
+    showPlanSelector();
+    helper.textContent="Select a plan to load secure checkout.";
+    checkoutContainer.innerHTML="Unable to load checkout.";
+    checkoutContainer.style.display="block";checkoutContainer.style.minHeight="100px";
+    setStatus("Please try again.");
+  }finally{isInitializingCheckout=false;}
+}
+async function openSelectorInternal(){if(!checkoutCard||!buttonRow)return;if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return;}hideLegacyUpgradeUI();await destroyEmbeddedCheckout();buttonRow.style.display="none";checkoutCard.style.display="block";setActivePlan(selectedPlanKey);showPlanSelector();helper.textContent="Select a plan to load secure checkout.";setStatus("");}
+async function closeCheckoutInternal(){await destroyEmbeddedCheckout();checkoutCard.style.display="none";buttonRow.style.display=shouldSuppressUpgrade()?"none":"flex";helper.textContent="Select a plan to load secure checkout.";setStatus("");showPlanSelector();}
+function makePlanButton(label,sublabel,key){
+  const btn=document.createElement("button");btn.type="button";btn.dataset.planKey=key;btn.dataset.planLabel=label;btn.dataset.planSubLabel=sublabel;
+  btn.style.padding="12px 10px";btn.style.borderRadius="13px";btn.style.border="1px solid rgba(255,255,255,.10)";btn.style.background="rgba(255,255,255,.04)";btn.style.color="#d0e4f8";btn.style.cursor="pointer";btn.style.textAlign="left";btn.style.minHeight="68px";btn.style.boxShadow="none";btn.style.transition="transform .15s,border-color .15s,background .15s";
+  const top=document.createElement("div");top.style.fontSize="13px";top.style.fontWeight="900";top.style.lineHeight="1.2";top.style.color="#fff";
+  const bot=document.createElement("div");bot.style.fontSize="11px";bot.style.color="#7a9abf";bot.style.marginTop="4px";bot.style.lineHeight="1.3";
+  if(key==="yearly"){top.innerHTML='Best Value \u2014 Yearly <span style="font-size:9px;background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;border-radius:999px;padding:2px 6px;font-weight:900;vertical-align:middle;">Save 80%</span>';bot.textContent="$39.99 / year \u2014 under $4/mo";}
+  else if(key==="monthly"){top.innerHTML='Monthly Access <span style="font-size:9px;background:rgba(168,127,255,.30);color:#d4b8ff;border-radius:999px;padding:2px 6px;font-weight:900;vertical-align:middle;border:1px solid rgba(168,127,255,.36);">Popular</span>';bot.textContent="$11.99 / month";}
+  else{top.textContent="Try This Week";bot.textContent="$3.99 \u2014 cancel anytime";}
+  btn.appendChild(top);btn.appendChild(bot);
+  btn.addEventListener("mouseenter",function(){if(btn.dataset.active!=="true")btn.style.transform="translateY(-1px)";});
+  btn.addEventListener("mouseleave",function(){btn.style.transform="translateY(0)";});
+  return btn;
+}
+function buildEmbeddedUI(){
+  if(document.getElementById("embedded-toggle-wrapper"))return;
+  wrapper=document.createElement("div");wrapper.id="embedded-toggle-wrapper";wrapper.style.maxWidth="820px";wrapper.style.margin="12px auto 14px";wrapper.style.padding="0 12px";wrapper.style.boxSizing="border-box";
+  buttonRow=document.createElement("div");buttonRow.style.display="none";
+  checkoutCard=document.createElement("div");checkoutCard.style.display="none";checkoutCard.style.marginTop="10px";checkoutCard.style.background="linear-gradient(180deg,rgba(10,16,28,.96) 0%,rgba(6,10,16,.99) 100%)";checkoutCard.style.border="1px solid rgba(249,115,22,.16)";checkoutCard.style.borderRadius="22px";checkoutCard.style.padding="16px";checkoutCard.style.boxShadow="0 0 32px rgba(249,115,22,.10),0 22px 56px rgba(0,0,0,.60)";checkoutCard.style.color="#d0e4f8";
+  const title=document.createElement("div");title.textContent="Unlock unlimited scam checks";title.style.fontSize="20px";title.style.fontWeight="900";title.style.marginBottom="4px";title.style.color="#fff";
+  const sub=document.createElement("div");sub.textContent="Join in seconds. Cancel from your account anytime.";sub.style.fontSize="13px";sub.style.color="#6a8090";sub.style.marginBottom="10px";
+  const trustRow=document.createElement("div");trustRow.style.cssText="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;padding:9px 11px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);";
+  ["\uD83D\uDD12 SSL Secured","\u26A1 Stripe","\u2713 Cancel anytime","\u2713 No hidden fees"].forEach(function(t){var s=document.createElement("span");s.textContent=t;s.style.cssText="font-size:11px;font-weight:800;color:rgba(255,255,255,.40);";trustRow.appendChild(s);});
+  compactRow=document.createElement("div");compactRow.style.display="none";compactRow.style.alignItems="center";compactRow.style.justifyContent="space-between";compactRow.style.gap="10px";compactRow.style.marginBottom="10px";compactRow.style.padding="9px 11px";compactRow.style.borderRadius="13px";compactRow.style.background="rgba(249,115,22,.08)";compactRow.style.border="1px solid rgba(249,115,22,.16)";
+  compactText=document.createElement("div");compactText.style.fontSize="12px";compactText.style.lineHeight="1.35";
+  changePlanBtn=document.createElement("button");changePlanBtn.type="button";changePlanBtn.textContent="Change";changePlanBtn.style.padding="7px 11px";changePlanBtn.style.borderRadius="999px";changePlanBtn.style.border="1px solid rgba(249,115,22,.22)";changePlanBtn.style.background="rgba(249,115,22,.10)";changePlanBtn.style.color="#f97316";changePlanBtn.style.fontWeight="800";changePlanBtn.style.cursor="pointer";changePlanBtn.style.fontSize="12px";changePlanBtn.style.flex="0 0 auto";
+  compactRow.appendChild(compactText);compactRow.appendChild(changePlanBtn);
+  planRow=document.createElement("div");planRow.style.display="grid";planRow.style.gridTemplateColumns="repeat(3,minmax(0,1fr))";planRow.style.gap="8px";planRow.style.marginBottom="10px";
+  yearlyBtn=makePlanButton("Best Value \u2014 Yearly","$39.99 / year","yearly");
+  monthlyBtn=makePlanButton("Monthly Access","$11.99 / month","monthly");
+  weeklyBtn=makePlanButton("Try This Week","$3.99 / week","weekly");
+  planRow.appendChild(yearlyBtn);planRow.appendChild(monthlyBtn);planRow.appendChild(weeklyBtn);
+  helper=document.createElement("div");helper.textContent="Select a plan to load secure checkout.";helper.style.fontSize="12px";helper.style.color="#5a7080";helper.style.marginBottom="8px";helper.style.lineHeight="1.45";
+  checkoutContainer=document.createElement("div");checkoutContainer.id="embedded-checkout-mount";checkoutContainer.style.minHeight="0";checkoutContainer.style.borderRadius="14px";checkoutContainer.style.overflow="hidden";checkoutContainer.style.display="none";
+  status=document.createElement("div");status.style.marginTop="8px";status.style.fontSize="12px";status.style.color="#6a8090";
+  closeBtn=document.createElement("button");closeBtn.type="button";closeBtn.textContent="Close";closeBtn.style.marginTop="10px";closeBtn.style.padding="9px 13px";closeBtn.style.borderRadius="11px";closeBtn.style.border="1px solid rgba(255,255,255,.10)";closeBtn.style.background="rgba(255,255,255,.05)";closeBtn.style.color="#8090a0";closeBtn.style.fontWeight="800";closeBtn.style.cursor="pointer";closeBtn.style.fontSize="12px";
+  checkoutCard.appendChild(title);checkoutCard.appendChild(sub);checkoutCard.appendChild(trustRow);checkoutCard.appendChild(compactRow);checkoutCard.appendChild(planRow);checkoutCard.appendChild(helper);checkoutCard.appendChild(checkoutContainer);checkoutCard.appendChild(status);checkoutCard.appendChild(closeBtn);
+  wrapper.appendChild(buttonRow);wrapper.appendChild(checkoutCard);
+  const target=document.querySelector(".container");
+  if(target){const ts=target.querySelector(".tool-shell")||document.querySelector(".tool-shell");if(ts)target.insertBefore(wrapper,ts);else target.insertBefore(wrapper,target.firstChild);}
+  else{document.body.insertBefore(wrapper,document.body.firstChild);}
+  yearlyBtn.addEventListener("click",function(){openCheckoutForPlan("yearly");});
+  monthlyBtn.addEventListener("click",function(){openCheckoutForPlan("monthly");});
+  weeklyBtn.addEventListener("click",function(){openCheckoutForPlan("weekly");});
+  closeBtn.addEventListener("click",function(){closeCheckoutInternal();});
+  changePlanBtn.addEventListener("click",async function(){await destroyEmbeddedCheckout();showPlanSelector();helper.textContent="Select a plan to load secure checkout.";setStatus("");setActivePlan(selectedPlanKey);});
+  if(window.innerWidth<=640)planRow.style.gridTemplateColumns="1fr";
+  setActivePlan(selectedPlanKey);
+}
+window.openSelector=async function(){if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return;}await openSelectorInternal();setTimeout(function(){const el=document.getElementById("embedded-toggle-wrapper");if(el){try{el.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}}},120);};
+window.openEmbeddedUpgrade=async function(planKey){if(shouldSuppressUpgrade()){hideLegacyUpgradeUI();return;}await openSelectorInternal();setTimeout(function(){const el=document.getElementById("embedded-toggle-wrapper");if(el){try{el.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}}},120);if(planKey&&PRICES[planKey])openCheckoutForPlan(planKey);};
+function init(){injectLegacyUpgradeKillCSS();hideLegacyUpgradeUI();watchLegacyUpgradeUI();handleReturnState();patchTopUpgradeButton();patchHostedCheckoutFallback();patchShowUpgrade();patchAnalyzeLimitAutoOpen();patchLegacyButtons();patchSubscriberEmailField();buildEmbeddedUI();syncPostPurchaseMessage();setTimeout(function(){hideLegacyUpgradeUI();patchLegacyButtons();patchSubscriberEmailField();syncPostPurchaseMessage();},0);setTimeout(function(){hideLegacyUpgradeUI();patchLegacyButtons();patchSubscriberEmailField();syncPostPurchaseMessage();},150);}
+if(document.readyState==="loading"){window.addEventListener("DOMContentLoaded",init);}else{init();}
+})();
+</script>
+
+</body>
+</html>
 <script>
 (function(){
 if(window.__SCAM_CHECK_EMBEDDED_UPGRADE__)return;
