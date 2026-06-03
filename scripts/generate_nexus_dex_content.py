@@ -47,7 +47,7 @@ GENERATED_KW_FILE    = BASE_DIR / "data" / "nexus_dex_generated_keywords.txt"
 REJECTED_FILE        = BASE_DIR / "data" / "nexus_dex_rejected_keywords.txt"
 
 TEMPLATE_PATH        = BASE_DIR / "nexus-dex-template" / "nexus-dex-template.html"
-OUTPUT_DIR           = BASE_DIR / "nexus-dex"
+OUTPUT_DIR           = BASE_DIR / "nexusdex"
 
 SITE_URL             = "https://verixiaapps.com"
 SEO_API_BASE         = "https://awake-integrity-production-faa0.up.railway.app"
@@ -58,7 +58,6 @@ SEO_PAGE_TIMEOUT_S   = 90
 
 DAILY_LIMIT          = 100
 
-# Engine accepts >=72 internally. Python publishes only >=80.
 MIN_PUBLISH_SCORE    = 80
 
 OG_IMAGE             = f"{SITE_URL}/og/nexus-dex.png"
@@ -67,28 +66,23 @@ TWITTER_HANDLE       = "@verixiaapps"
 RELATED_LINKS_COUNT  = 6
 MORE_LINKS_COUNT     = 10
 
-# Protected hub slugs the script will never overwrite.
 PROTECTED_SLUGS = {
-    # core
-    "nexus-dex",
+    "nexusdex",
     "crypto-markets",
     "bitcoin-markets",
     "ethereum-markets",
     "solana-markets",
     "altcoin-markets",
-    # v18.4 product surfaces
     "wonderland-memes",
     "live-signals",
     "brand-tokens",
     "solana-bridges",
     "solana-swaps",
-    # commercial / discovery / how-to
     "no-kyc-trading",
     "wallet-trading",
     "whale-tracking",
     "token-launch",
     "how-to-guides",
-    # brands sub-hubs
     "tokenized-stocks",
     "buy-stocks-onchain",
     "stocks-no-kyc",
@@ -100,22 +94,14 @@ PROTECTED_SLUGS = {
 # =========================================================================
 # HUB SYSTEM v18.4
 # =========================================================================
-# Order matters: first match wins.
-#
-# Dropped from v2: prediction-markets, hyperliquid-frontend.
 
 HUB_MATCH_RULES = [
-    # ---- Memes (Wonderland) ----
     (r"\b(hoppy|fartcoin|pepe|wif|bonk|popcat|mew|wen|bome|myro|ponke|michi|chonk|trump|melania|floki|moodeng|goat|fwog|pnut|act|gigachad|pengu|neiro|lockin|useless)\b",
         "wonderland-memes", "wonderland"),
     (r"meme[\s-]?coin|memecoin|meme[\s-]?token|wonderland|degen[\s-]?coin|degen[\s-]?token|moonshot|fresh[\s-]?launch|new[\s-]?launch|low[\s-]?cap[\s-]?gem|community[\s-]?coin",
         "wonderland-memes", "wonderland"),
-
-    # ---- Signals / discovery ----
     (r"trending\s+(solana|coins|tokens|crypto)|what.?s\s+(pumping|mooning|hot)|hot\s+(right\s+now|coins|tokens)|fresh\s+(launches|tokens|coins)|new\s+solana\s+(coins|tokens|launches)|top\s+gainers|volume\s+leaders|\bsignals\b|\bdiscovery\b",
         "live-signals", "signals"),
-
-    # ---- Brand tokens (specific tickers + companies) ----
     (r"\baaplx\b|\btslax\b|\bnvdax\b|\bmsftx\b|\bgooglx\b|\bamznx\b|\bmetax\b|\bmstrx\b|\bnflxx\b|\bspyx\b|\bqqqx\b|\bcrclx\b|\bhoodx\b|\bcoinx\b|\borclx\b|\bcrmx\b",
         "brand-tokens", "brands"),
     (r"\b(apple|tesla|nvidia|microsoft|google|alphabet|meta|amazon|netflix|microstrategy|coinbase|circle|robinhood|oracle|salesforce)\b\s*(on\s+solana|onchain|24/7|defi|crypto|usdc|no\s*kyc|brand)",
@@ -128,36 +114,24 @@ HUB_MATCH_RULES = [
         "brand-tokens", "brands"),
     (r"buy\s+us\s+stocks\s+from|us\s+stocks\s+no\s+us\s+bank|us\s+stocks\s+for\s+non\s+residents|us\s+stocks\s+international|global\s+stock|international\s+stock",
         "brand-tokens", "brands"),
-
-    # ---- Bridges ----
     (r"\bbridge\b.*\bsolana\b|cross[\s-]?chain.*solana|wormhole|debridge|allbridge",
         "solana-bridges", "bridges"),
     (r"\b(ethereum|base|arbitrum|optimism|polygon|avalanche|bnb|binance|bsc|sui|aptos|near|celo|moonbeam|kava|ton|kaspa|cosmos|osmosis|injective|sei|monad|berachain|blast|linea|scroll|mantle|zksync|starknet)\b\s*(to\s+solana|->.*solana|bridge)",
         "solana-bridges", "bridges"),
-
-    # ---- Swaps (token-specific or solana-swap commercial) ----
     (r"how\s+to\s+(buy|swap|trade)\s+\w+\s+(on\s+)?solana|swap\s+\w+\s+(on\s+)?solana|buy\s+\w+\s+on\s+solana",
         "solana-swaps", "swap"),
     (r"\bsolana\s+(swap|swaps|dex|aggregator|exchange|trading|defi)\b|\bdex\s+aggregator|best\s+price\s+swap",
         "solana-swaps", "swap"),
     (r"\b(jup|ray|raydium|orca|meteora|phoenix|jupiter)\b.*(swap|buy|trade|how\s+to)",
         "solana-swaps", "swap"),
-
-    # ---- Whale / on-chain intelligence ----
     (r"\bwhale\b|\bsmart\s+money\b|\binsider\b|\bdeployer\b|\bsniper\b|kol\s+wallet",
         "whale-tracking", "whale"),
-
-    # ---- Token launch ----
     (r"\blaunch\s+token|\btoken\s+launch|\blaunchpad\b|bonding\s+curve|deploy\s+token|fresh\s+pool",
         "token-launch", "launch"),
-
-    # ---- Wallet / no-KYC commercial buckets ----
     (r"phantom\s+wallet\s+trading|backpack\s+wallet\s+trading|self\s+custodial|non\s+custodial|wallet\s+based|wallet[\s-]?native",
         "wallet-trading", "wallet"),
     (r"no\s+kyc|without\s+kyc|no\s+signup|no\s+verification|no\s+account|anonymous\s+(crypto|swap|dex|trading|exchange|defi)",
         "no-kyc-trading", "no_kyc"),
-
-    # ---- Generic catch-alls ----
     (r"\bswap\b",
         "solana-swaps", "swap"),
     (r"how\s+to\b",
@@ -182,7 +156,6 @@ DEFAULT_HUB_TITLE = "Crypto Markets Hub"
 
 
 def select_hub(keyword: str) -> tuple[str, str]:
-    """Return (hub_slug, hub_title) for the keyword based on hub rules."""
     lower = keyword.lower()
     for pattern, hub_slug, override_key in HUB_MATCH_RULES:
         if re.search(pattern, lower):
@@ -239,10 +212,6 @@ def load_keyword_queue() -> list[str]:
 # =========================================================================
 
 def fetch_seo_page(keyword: str, attempt: int = 1) -> dict | None:
-    """POST /seo-page. Return payload or None on failure.
-
-    One retry on transient errors. No fallback content ever.
-    """
     try:
         resp = requests.post(
             SEO_PAGE_ENDPOINT,
@@ -279,8 +248,6 @@ def fetch_seo_page(keyword: str, attempt: int = 1) -> dict | None:
 
 
 def reset_build_registry() -> bool:
-    """Call /reset-build at the start of a build to clear the engine's
-    output gate and anti-repetition registries."""
     try:
         resp = requests.post(SEO_RESET_ENDPOINT, timeout=10)
         if resp.status_code == 200:
@@ -294,7 +261,6 @@ def reset_build_registry() -> bool:
 
 
 def fetch_build_report() -> dict | None:
-    """Call /build-report at the end of a build for the dedup/score sidecar."""
     try:
         resp = requests.get(SEO_REPORT_ENDPOINT, timeout=10)
         if resp.status_code == 200:
@@ -307,7 +273,6 @@ def fetch_build_report() -> dict | None:
 
 
 def is_publishable(payload: dict) -> tuple[bool, str]:
-    """Quality gate."""
     meta = payload.get("meta") or {}
     score = payload.get("score")
     if score is None:
@@ -336,12 +301,10 @@ def is_publishable(payload: dict) -> tuple[bool, str]:
 
 
 # =========================================================================
-# COMPATIBILITY SHIM (kept for legacy callers like build_nexus_dex_seo.py)
+# COMPATIBILITY SHIM
 # =========================================================================
 
 def generate_nexus_dex_content(keyword: str) -> str:
-    """Legacy interface: return only the content body. Use process_keyword()
-    in new code."""
     payload = fetch_seo_page(keyword)
     if not payload:
         return ""
@@ -387,7 +350,6 @@ def _load_generated_pages() -> list[dict]:
 
 
 def slug_to_title(slug: str) -> str:
-    """Reconstruct a readable title from a slug, preserving ticker casing."""
     preserve = {
         "btc":"BTC","eth":"ETH","sol":"SOL","usdc":"USDC","usdt":"USDT",
         "bnb":"BNB","bonk":"BONK","pepe":"PEPE","wif":"WIF","doge":"DOGE",
@@ -454,7 +416,7 @@ def build_links_html(pages: list[dict]) -> str:
     if not pages:
         return ""
     return "\n".join(
-        f'<li><a href="/nexus-dex/{p["slug"]}/">{html_escape(slug_to_title(p["slug"]))}</a></li>'
+        f'<li><a href="/nexusdex/{p["slug"]}/">{html_escape(slug_to_title(p["slug"]))}</a></li>'
         for p in pages
     )
 
@@ -462,7 +424,7 @@ def build_links_html(pages: list[dict]) -> str:
 def build_hub_link_html(hub_slug: str, hub_title: str) -> str:
     return (
         f'<span class="hub-link-label">Hub:</span> '
-        f'<a class="hub-link-anchor" href="/nexus-dex/{html_escape(hub_slug)}/">'
+        f'<a class="hub-link-anchor" href="/nexusdex/{html_escape(hub_slug)}/">'
         f'{html_escape(hub_title)}</a>'
     )
 
@@ -472,10 +434,6 @@ def build_hub_link_html(hub_slug: str, hub_title: str) -> str:
 # =========================================================================
 
 def build_page_meta_script(meta: dict) -> str:
-    """Expose engine meta to window.__pageMeta for template hydration.
-
-    v18.4 dropped hlDataBlock entirely.
-    """
     payload = {
         "title":                meta.get("title", ""),
         "description":          meta.get("description", ""),
@@ -502,7 +460,6 @@ def build_page_meta_script(meta: dict) -> str:
 
 
 def _enforce_title_length(title: str, fallback: str) -> str:
-    """Trim engine title to <=60 chars on a word boundary if needed."""
     title = (title or "").strip() or fallback
     if len(title) <= 60:
         return title
@@ -524,13 +481,12 @@ def render_page(template_html: str,
                 slug: str,
                 hub_slug: str,
                 hub_title: str) -> str:
-    """Substitute every placeholder. Raises ValueError if anything is left."""
     meta     = payload["meta"]
     content  = payload["content"]
 
     related, more = get_related_and_more(slug, keyword, hub_slug)
 
-    canonical       = f"{SITE_URL}/nexus-dex/{slug}/"
+    canonical       = f"{SITE_URL}/nexusdex/{slug}/"
     title           = _enforce_title_length(meta.get("title"), f"{keyword} | Verixia")
     desc            = meta.get("description", "") or ""
     h1              = meta.get("h1", "") or ""
@@ -574,9 +530,6 @@ def render_page(template_html: str,
         "{{SUPP_HEADING}}":           html_escape(supp_heading),
         "{{SUPP_INTRO}}":             html_escape(supp_intro),
         "{{PAGE_META_SCRIPT}}":       meta_script,
-        # Dropped placeholder from v2 (Hyperliquid). Kept here as empty for
-        # any legacy template that still references it; safe to remove from
-        # both engine and template eventually.
         "{{HL_DATA_BLOCK}}":          "",
     }
 
@@ -660,7 +613,6 @@ def process_keyword(keyword: str, template_html: str) -> bool:
 
 
 def write_build_report_sidecar(report: dict) -> None:
-    """Write the build report to a sidecar JSON file in data/ for inspection."""
     report_path = BASE_DIR / "data" / "nexus_dex_build_report.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -674,8 +626,6 @@ def main(limit: int = DAILY_LIMIT, reset: bool = True) -> int:
         print("[build] no pending keywords")
         return 0
 
-    # v18.4: reset engine build registries so n-gram tracking and output gate
-    # are clean for this build run
     if reset:
         reset_build_registry()
 
@@ -701,7 +651,6 @@ def main(limit: int = DAILY_LIMIT, reset: bool = True) -> int:
     print(f"\n[build] done. ok={succeeded} failed={failed} "
           f"remaining={len(pending) - len(todo) + failed}")
 
-    # v18.4: fetch + persist the engine's build report sidecar
     report = fetch_build_report()
     if report:
         report["python_succeeded"] = succeeded
