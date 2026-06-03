@@ -31,7 +31,7 @@ sys.path.append(BASE_DIR)
 from data.nexus_dex_clusters import CLUSTERS
 
 KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "nexus_dex_generated_keywords.txt")
-OUTPUT_DIR    = os.path.join(BASE_DIR, "nexus-dex")
+OUTPUT_DIR    = os.path.join(BASE_DIR, "nexusdex")
 SITE          = "https://verixiaapps.com"
 
 MAX_LINKS_PER_HUB     = 50
@@ -793,7 +793,7 @@ def trim_meta_description(text, minimum=110, maximum=165):
 
 
 def build_canonical(slug):
-    return f"{SITE}/nexus-dex/{slug}/"
+    return f"{SITE}/nexusdex/{slug}/"
 
 
 def page_path(slug):
@@ -909,7 +909,7 @@ def build_related_link_items(cluster_keywords):
         items.append({
             "slug":   slug,
             "title":  label,
-            "href":   f"/nexus-dex/{slug}/",
+            "href":   f"/nexusdex/{slug}/",
             "anchor": label,
         })
     return items
@@ -1364,7 +1364,7 @@ def build_schema(hub_slug, hub_title, description, intro, link_items, matched_ke
             "@type": "BreadcrumbList",
             "itemListElement": [
                 {"@type": "ListItem", "position": 1, "name": "Home", "item": SITE},
-                {"@type": "ListItem", "position": 2, "name": "Verixia", "item": f"{SITE}/nexus-dex/"},
+                {"@type": "ListItem", "position": 2, "name": "Verixia", "item": f"{SITE}/nexusdex/"},
                 {"@type": "ListItem", "position": 3, "name": hub_title, "item": canonical},
             ],
         },
@@ -1651,13 +1651,13 @@ p,li{{font-size:16px;}}
 <body>
 
 <div class="top-bar">
-  <a class="logo" href="{SITE}/nexus-dex/">
+  <a class="logo" href="{SITE}/nexusdex/">
     <span class="logo-dot"></span>
     <span>Verixia</span>
   </a>
   <div class="top-actions">
     <a class="app-top" href="https://apps.apple.com/app/id6759490910" target="_blank" rel="noopener noreferrer">Get App</a>
-    <a class="checker-top" href="{SITE}/nexus-dex/">Open Verixia</a>
+    <a class="checker-top" href="{SITE}/nexusdex/">Open Verixia</a>
   </div>
 </div>
 
@@ -1682,7 +1682,7 @@ p,li{{font-size:16px;}}
 
   <main class="content-section">
     <div class="breadcrumbs">
-      <a href="{SITE}/">Home</a> / <a href="{SITE}/nexus-dex/">Verixia</a> / <span>{escape_html(hub_title)}</span>
+      <a href="{SITE}/">Home</a> / <a href="{SITE}/nexusdex/">Verixia</a> / <span>{escape_html(hub_title)}</span>
     </div>
 
     <div class="hero-panel">
@@ -1705,7 +1705,7 @@ p,li{{font-size:16px;}}
     <div class="tool-cta-card">
       <h3>Ready to try it?</h3>
       <p>Connect a Solana wallet and start trading from your phone. No signup, no KYC, no centralized account, and one transaction signature per trade.</p>
-      <a class="tool-cta-button" href="{SITE}/nexus-dex/">Open Verixia</a>
+      <a class="tool-cta-button" href="{SITE}/nexusdex/">Open Verixia</a>
       <div class="tool-cta-note">Self-custodial | No signup | Works on mobile</div>
     </div>
 
