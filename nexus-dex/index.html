@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>Verixia — Solana DeFi Central</title>
+<meta name="description" content="Verixia is Solana DeFi Central. Swap any token, bridge any chain, track live signals. No KYC. No accounts. Non-custodial.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800;12..96,900&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#0a0418;
+  --bg-1:#13082a;
+  --bg-2:#1c0d3d;
+  --ink:#f2e9ff;
+  --ink-soft:#c9b8e6;
+  --ink-mute:#8a7aa8;
+  --mint:#7df9d4;
+  --mint-deep:#4dd9b0;
+  --pink:#ff6fbf;
+  --pink-deep:#e84aa3;
+  --violet:#a87fff;
+  --violet-deep:#7c4dff;
+  --lime:#c8ff5e;
+  --gold:#ffd24a;
+  --danger:#ff5577;
+  --card:rgba(28,13,61,.78);
+  --card-2:rgba(38,18,82,.82);
+  --border:rgba(168,127,255,.18);
+  --border-strong:rgba(168,127,255,.32);
+  --shadow-pink:0 0 32px rgba(255,111,191,.28),0 0 64px rgba(255,111,191,.10);
+  --shadow-mint:0 0 32px rgba(125,249,212,.28),0 0 64px rgba(125,249,212,.10);
+  --shadow-violet:0 0 32px rgba(168,127,255,.28),0 0 64px rgba(168,127,255,.10);
+  --shadow-card:0 24px 56px rgba(0,0,0,.45),0 8px 22px rgba(0,0,0,.30);
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;padding:0;
+  font-family:var(--body);
+  color:var(--ink);
+  background:var(--bg-0);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 10% 0%,rgba(255,111,191,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 45% at 90% 8%,rgba(125,249,212,.16) 0%,transparent 55%),
+    radial-gradient(ellipse 80% 40% at 50% 100%,rgba(168,127,255,.14) 0%,transparent 60%);
+  line-height:1.6;
+  overflow-x:hidden;
+  padding-top:64px;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+body>*{position:relative;z-index:1;}
+a{color:var(--mint);text-decoration:none;}
+
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes blink-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(1.3);}}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+@keyframes rise{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes rise2{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(125,249,212,.5);}70%{box-shadow:0 0 0 12px rgba(125,249,212,0);}100%{box-shadow:0 0 0 0 rgba(125,249,212,0);}}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 20px;
+  background:rgba(10,4,24,.82);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(168,127,255,.10);
+}
+.brand{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--display);font-weight:900;font-size:18px;
+  color:#fff;letter-spacing:-.02em;text-decoration:none;
+  padding:6px 14px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(255,111,191,.18),rgba(125,249,212,.14));
+  border:1px solid rgba(255,255,255,.10);
+}
+.brand-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--mint));
+  box-shadow:0 0 10px rgba(255,111,191,.7);
+  animation:blink-dot 2s ease-in-out infinite;
+}
+.nav{display:flex;align-items:center;gap:6px;}
+.nav-link{
+  padding:6px 12px;border-radius:999px;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;
+  color:var(--ink-soft);
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  transition:color .15s,border-color .15s;
+}
+.nav-link:hover{color:var(--mint);border-color:rgba(125,249,212,.28);}
+.cta-top{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:8px 16px;border-radius:999px;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--violet) 100%);
+  color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.02em;
+  text-decoration:none;border:none;cursor:pointer;
+  box-shadow:var(--shadow-pink);
+  transition:transform .15s,box-shadow .15s;
+}
+.cta-top:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 0 40px rgba(255,111,191,.5);}
+
+/* SHELL */
+.shell{max-width:980px;margin:0 auto;padding:0 16px 100px;}
+
+/* HERO */
+.hero{
+  position:relative;padding:44px 0 24px;text-align:center;
+  animation:rise .65s ease both;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 14px;border-radius:999px;
+  background:rgba(125,249,212,.08);
+  border:1px solid rgba(125,249,212,.28);
+  font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--mint);
+  margin-bottom:18px;
+}
+.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:blink-dot 1.8s ease-in-out infinite;}
+
+.hero h1{
+  font-family:var(--display);
+  font-size:clamp(44px,9vw,92px);
+  font-weight:900;letter-spacing:-.045em;line-height:.93;
+  margin:0 0 10px;
+  background:linear-gradient(110deg,#fff 0%,var(--mint) 32%,var(--pink) 62%,var(--violet) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 4px 30px rgba(255,111,191,.20));
+}
+.hero-eyebrow{
+  display:block;
+  font-family:var(--mono);font-size:clamp(12px,1.8vw,15px);font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mint);margin-bottom:6px;opacity:.85;
+}
+.hero-sub{
+  font-size:clamp(15px,2vw,18px);
+  color:var(--ink-soft);font-weight:500;line-height:1.55;
+  max-width:560px;margin:12px auto 20px;
+}
+.hero-sub strong{color:#fff;font-weight:800;}
+
+.hero-ctas{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:22px;
+}
+.btn-primary{
+  padding:14px 28px;border-radius:999px;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--violet) 50%,var(--mint) 100%);
+  background-size:200% 100%;
+  color:#fff;font-family:var(--display);font-weight:900;font-size:15px;
+  text-decoration:none;
+  box-shadow:0 0 32px rgba(255,111,191,.40),0 0 16px rgba(168,127,255,.30);
+  animation:shimmer 6s linear infinite;
+  transition:transform .15s;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02);}
+.btn-ghost{
+  padding:14px 24px;border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(168,127,255,.30);
+  color:var(--ink);font-family:var(--display);font-weight:800;font-size:15px;
+  text-decoration:none;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:transform .15s,border-color .15s;
+}
+.btn-ghost:hover{transform:translateY(-2px);border-color:rgba(125,249,212,.40);color:var(--mint);}
+
+.hero-pillars{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:6px;
+}
+.pillar{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:999px;
+  font-size:12px;font-weight:700;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--ink-soft);
+}
+.pillar.mint{background:rgba(125,249,212,.08);border-color:rgba(125,249,212,.28);color:var(--mint);}
+.pillar.pink{background:rgba(255,111,191,.08);border-color:rgba(255,111,191,.28);color:var(--pink);}
+.pillar.violet{background:rgba(168,127,255,.08);border-color:rgba(168,127,255,.28);color:#c8aaff;}
+.pillar.lime{background:rgba(200,255,94,.07);border-color:rgba(200,255,94,.28);color:var(--lime);}
+
+/* TICKER */
+.ticker-strip{
+  margin:18px auto 0;max-width:780px;
+  background:rgba(28,13,61,.70);
+  border:1px solid var(--border);
+  border-radius:16px;padding:10px 0;
+  overflow:hidden;position:relative;
+}
+.ticker-track{
+  display:flex;gap:28px;width:max-content;
+  animation:ticker 28s linear infinite;
+  font-family:var(--mono);font-size:12.5px;font-weight:700;
+  white-space:nowrap;padding-left:28px;
+}
+.ticker-item{display:inline-flex;align-items:center;gap:6px;color:var(--ink);}
+.ticker-item .sym{color:var(--ink-soft);}
+.ticker-item .up{color:var(--mint);}
+.ticker-item .dn{color:var(--danger);}
+
+/* NETWORK STATS */
+.stats-row{
+  margin:14px auto 0;max-width:780px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+}
+.stat{
+  padding:16px 12px;border-radius:16px;text-align:center;
+  background:linear-gradient(160deg,var(--card-2) 0%,var(--card) 100%);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.stat:nth-child(1){background-image:linear-gradient(160deg,rgba(125,249,212,.10),var(--card) 80%);border-color:rgba(125,249,212,.22);}
+.stat:nth-child(2){background-image:linear-gradient(160deg,rgba(255,111,191,.10),var(--card) 80%);border-color:rgba(255,111,191,.22);}
+.stat:nth-child(3){background-image:linear-gradient(160deg,rgba(168,127,255,.10),var(--card) 80%);border-color:rgba(168,127,255,.22);}
+.stat:nth-child(4){background-image:linear-gradient(160deg,rgba(200,255,94,.08),var(--card) 80%);border-color:rgba(200,255,94,.18);}
+.stat-val{display:block;font-family:var(--display);font-weight:900;font-size:24px;letter-spacing:-.03em;line-height:1;}
+.stat:nth-child(1) .stat-val{color:var(--mint);}
+.stat:nth-child(2) .stat-val{color:var(--pink);}
+.stat:nth-child(3) .stat-val{color:#c8aaff;}
+.stat:nth-child(4) .stat-val{color:var(--lime);}
+.stat-lbl{display:block;margin-top:5px;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);}
+.stat-sub{display:block;margin-top:3px;font-size:10.5px;color:var(--ink-soft);}
+
+/* SECTION HEADING */
+.sec-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;gap:10px;flex-wrap:wrap;
+}
+.sec-title{
+  font-family:var(--display);font-weight:900;font-size:22px;letter-spacing:-.02em;color:#fff;
+}
+.sec-title em{
+  font-style:italic;
+  background:linear-gradient(135deg,var(--pink),var(--mint));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sec-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:800;
+  background:rgba(125,249,212,.10);border:1px solid rgba(125,249,212,.30);
+  color:var(--mint);letter-spacing:.04em;
+}
+.sec-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:blink-dot 1.8s ease-in-out infinite;}
+.sec-pill.pink-pill{background:rgba(255,111,191,.10);border-color:rgba(255,111,191,.30);color:var(--pink);}
+.sec-pill.pink-pill .dot{background:var(--pink);box-shadow:0 0 8px var(--pink);}
+
+/* FEATURE GRID — DeFi suite */
+.features-wrap{margin:28px auto 0;max-width:780px;}
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.feat-card{
+  position:relative;
+  padding:20px 18px 18px;border-radius:20px;
+  background:linear-gradient(160deg,var(--card-2),var(--card));
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+  text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;gap:10px;
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.feat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--mint),var(--pink) 50%,var(--violet));
+}
+.feat-card:hover{transform:translateY(-4px);border-color:var(--border-strong);box-shadow:var(--shadow-pink),var(--shadow-card);}
+.feat-card.big{grid-column:span 2;}
+.feat-icon{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+}
+.feat-icon.mint-icon{background:rgba(125,249,212,.10);border-color:rgba(125,249,212,.24);}
+.feat-icon.pink-icon{background:rgba(255,111,191,.10);border-color:rgba(255,111,191,.24);}
+.feat-icon.violet-icon{background:rgba(168,127,255,.10);border-color:rgba(168,127,255,.24);}
+.feat-icon.gold-icon{background:rgba(255,210,74,.10);border-color:rgba(255,210,74,.24);}
+.feat-icon.lime-icon{background:rgba(200,255,94,.08);border-color:rgba(200,255,94,.22);}
+.feat-title{
+  font-family:var(--display);font-weight:900;font-size:18px;letter-spacing:-.02em;color:#fff;line-height:1.1;
+}
+.feat-desc{font-size:13px;color:var(--ink-soft);line-height:1.6;}
+.feat-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.feat-chip{
+  display:inline-flex;align-items:center;
+  padding:3px 9px;border-radius:999px;
+  font-family:var(--mono);font-size:9.5px;font-weight:700;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  color:var(--ink-soft);
+}
+.feat-chip.m{background:rgba(125,249,212,.08);border-color:rgba(125,249,212,.22);color:var(--mint);}
+.feat-chip.p{background:rgba(255,111,191,.08);border-color:rgba(255,111,191,.22);color:var(--pink);}
+.feat-chip.v{background:rgba(168,127,255,.08);border-color:rgba(168,127,255,.22);color:#c8aaff;}
+.feat-chip.g{background:rgba(255,210,74,.08);border-color:rgba(255,210,74,.22);color:var(--gold);}
+.feat-cta{
+  margin-top:auto;
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.05em;
+  color:var(--mint);
+}
+.feat-cta::after{content:'→';transition:transform .15s;}
+.feat-card:hover .feat-cta::after{transform:translateX(4px);}
+
+/* SWAP CARD */
+.swap-wrap{margin:28px auto 0;max-width:780px;}
+.swap-card{
+  position:relative;border-radius:22px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(38,18,82,.92),rgba(20,8,46,.95));
+  border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-violet),var(--shadow-card);
+}
+.swap-card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;
+  border-bottom:1px solid rgba(168,127,255,.14);
+  background:rgba(168,127,255,.04);
+  gap:8px;flex-wrap:wrap;
+}
+.swap-live{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:999px;
+  font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:.04em;
+  background:rgba(125,249,212,.10);border:1px solid rgba(125,249,212,.30);
+  color:var(--mint);
+}
+.swap-live-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:blink-dot 1.8s ease-in-out infinite;}
+.swap-trust{display:flex;gap:5px;flex-wrap:wrap;}
+.swap-chip{
+  display:inline-flex;align-items:center;
+  padding:3px 8px;border-radius:999px;
+  font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.04em;
+  color:var(--ink-soft);
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+}
+.swap-body{padding:18px;display:flex;flex-direction:column;gap:8px;}
+.swap-row{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(168,127,255,.14);
+  border-radius:16px;padding:13px 15px;
+}
+.swap-row-top{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;font-weight:700;color:var(--ink-mute);}
+.swap-row-balance{font-family:var(--mono);font-size:9.5px;color:var(--ink-mute);}
+.swap-row-balance.best{color:#03261d;background:linear-gradient(135deg,var(--mint),var(--lime));padding:3px 9px;border-radius:999px;font-weight:800;}
+.swap-row-main{display:flex;justify-content:space-between;align-items:center;gap:9px;margin:9px 0 3px;}
+.swap-amount{font-family:var(--display);font-weight:900;font-size:28px;color:#fff;letter-spacing:-.03em;line-height:1;flex:1;}
+.swap-token{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;font-weight:800;font-size:13px;white-space:nowrap;}
+.swap-token.sol{background:linear-gradient(135deg,rgba(168,127,255,.20),rgba(168,127,255,.10));border:1px solid rgba(168,127,255,.40);color:#d8c0ff;}
+.swap-token.usdc{background:linear-gradient(135deg,rgba(125,249,212,.18),rgba(125,249,212,.08));border:1px solid rgba(125,249,212,.40);color:var(--mint);}
+.swap-row-foot{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);}
+.swap-flip{display:flex;justify-content:center;margin:-10px 0;position:relative;z-index:2;}
+.swap-flip-c{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--violet),var(--pink));
+  border:3px solid var(--bg-1);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:16px;
+  box-shadow:0 0 18px rgba(168,127,255,.40);
+}
+.swap-route{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;background:rgba(125,249,212,.05);
+  border:1px solid rgba(125,249,212,.18);border-radius:12px;gap:8px;
+}
+.swap-route-lbl{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);}
+.swap-route-flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+.route-pill{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:var(--ink-soft);white-space:nowrap;}
+.route-plus{color:var(--mint);font-weight:800;}
+.swap-cta{
+  margin-top:5px;
+  padding:16px 18px;border-radius:14px;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--violet) 50%,var(--mint) 100%);
+  background-size:200% 100%;
+  color:#fff;font-family:var(--display);font-weight:900;font-size:16px;letter-spacing:-.01em;
+  text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 0 32px rgba(255,111,191,.40),0 0 16px rgba(168,127,255,.30);
+  animation:shimmer 6s linear infinite;transition:transform .15s;
+}
+.swap-cta:hover{transform:translateY(-1px) scale(1.01);}
+.swap-disclaimer{text-align:center;margin-top:6px;font-family:var(--mono);font-size:9.5px;color:var(--ink-mute);letter-spacing:.04em;}
+
+/* TRENDING / MEME PANEL */
+.meme-section{margin:28px auto 0;max-width:780px;}
+.meme-grid{display:flex;flex-direction:column;gap:9px;}
+.meme-card{
+  position:relative;padding:14px 16px;border-radius:18px;
+  background:linear-gradient(160deg,var(--card-2),var(--card));
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-card);
+  transition:transform .2s,border-color .2s;
+  color:inherit;display:flex;align-items:center;gap:14px;overflow:hidden;
+}
+.meme-card-link{position:absolute;inset:0;z-index:1;border-radius:inherit;}
+.meme-card>*:not(.meme-card-link){position:relative;z-index:2;}
+.meme-actions a{position:relative;z-index:3;}
+.meme-info{flex:1;min-width:0;}
+.meme-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mint),var(--pink) 50%,var(--violet));}
+.meme-card:hover{transform:translateY(-3px);border-color:var(--border-strong);box-shadow:var(--shadow-pink),var(--shadow-card);}
+.meme-card-head{display:flex;align-items:center;gap:11px;margin-bottom:7px;}
+.meme-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--lime),var(--mint));
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 0 12px rgba(125,249,212,.40);flex:0 0 44px;
+}
+.meme-name{font-family:var(--display);font-weight:900;font-size:17px;letter-spacing:-.02em;color:#fff;display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.1;}
+.meme-hot{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:999px;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.06em;background:rgba(255,111,191,.15);border:1px solid rgba(255,111,191,.40);color:var(--pink);}
+.meme-age{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.meme-gain{font-family:var(--display);font-weight:900;font-size:27px;letter-spacing:-.03em;line-height:1;color:var(--mint);display:inline-block;}
+.meme-gain.dn{color:var(--danger);}
+.meme-period{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-mute);margin-top:3px;}
+.meme-actions{display:flex;flex-direction:column;gap:7px;flex:0 0 118px;}
+.btn-buy,.btn-sell{
+  padding:11px 0;border-radius:12px;
+  font-family:var(--display);font-weight:800;font-size:13px;
+  border:none;cursor:pointer;text-align:center;text-decoration:none;
+  transition:transform .12s;display:block;
+}
+.btn-buy{background:linear-gradient(135deg,var(--mint),var(--mint-deep));color:#03261d;box-shadow:0 0 12px rgba(125,249,212,.30);}
+.btn-sell{background:rgba(255,111,191,.10);color:var(--pink);border:1px solid rgba(255,111,191,.40);}
+.btn-buy:hover,.btn-sell:hover{transform:scale(1.03);}
+
+/* ECOSYSTEM / PROTOCOL LOGOS */
+.ecosystem-wrap{margin:28px auto 0;max-width:780px;}
+.ecosystem-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+}
+.eco-card{
+  padding:16px 14px;border-radius:16px;text-align:center;
+  background:var(--card);border:1px solid var(--border);
+  transition:transform .2s,border-color .2s;
+  text-decoration:none;color:inherit;
+}
+.eco-card:hover{transform:translateY(-3px);border-color:var(--border-strong);}
+.eco-icon{font-size:28px;display:block;margin-bottom:6px;}
+.eco-name{font-family:var(--display);font-weight:900;font-size:14px;color:#fff;margin-bottom:3px;}
+.eco-desc{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ink-mute);letter-spacing:.04em;}
+
+/* BRIDGE STRIP */
+.bridge-strip{
+  margin:28px auto 0;max-width:780px;
+  padding:20px 24px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(168,127,255,.10),rgba(125,249,212,.06));
+  border:1px solid rgba(168,127,255,.28);
+  display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+}
+.bridge-l{flex:1;}
+.bridge-t{font-family:var(--display);font-weight:900;font-size:19px;color:#fff;letter-spacing:-.02em;margin-bottom:4px;}
+.bridge-chains{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.chain-pill{
+  padding:4px 9px;border-radius:999px;
+  font-family:var(--mono);font-size:9.5px;font-weight:700;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  color:var(--ink-soft);
+}
+.bridge-btn{
+  padding:12px 22px;border-radius:999px;
+  background:linear-gradient(135deg,var(--violet),var(--pink));
+  color:#fff;font-family:var(--display);font-weight:900;font-size:13.5px;
+  text-decoration:none;white-space:nowrap;
+  box-shadow:var(--shadow-violet);
+  transition:transform .15s;
+}
+.bridge-btn:hover{transform:scale(1.03);}
+
+/* POST CTA */
+.post-cta{
+  margin:28px auto 0;max-width:780px;
+  position:relative;overflow:hidden;
+  padding:28px 30px;border-radius:22px;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--violet) 50%,var(--mint) 100%);
+  background-size:200% 100%;
+  animation:shimmer 8s linear infinite;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  box-shadow:0 0 40px rgba(255,111,191,.40),0 0 24px rgba(168,127,255,.30);
+}
+.post-cta-l{flex:1;min-width:0;}
+.post-cta-t{font-family:var(--display);font-weight:900;font-size:24px;color:#fff;letter-spacing:-.02em;margin-bottom:5px;}
+.post-cta-s{font-family:var(--mono);font-size:11.5px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.03em;}
+.post-cta-btn{
+  flex:0 0 auto;padding:14px 24px;border-radius:999px;
+  background:rgba(255,255,255,.22);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.40);
+  color:#fff;font-family:var(--display);font-weight:900;font-size:14px;
+  text-decoration:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  transition:background .15s,transform .15s;
+}
+.post-cta-btn:hover{background:rgba(255,255,255,.32);transform:scale(1.03);}
+
+/* FAQ */
+.faq-wrap{margin:28px auto 0;max-width:780px;}
+.faq-item{margin-bottom:6px;border:1px solid var(--border);border-radius:12px;background:rgba(168,127,255,.04);overflow:hidden;transition:border-color .15s;}
+.faq-item[open]{border-color:rgba(255,111,191,.30);}
+.faq-item summary{list-style:none;cursor:pointer;padding:13px 16px;font-size:13.5px;font-weight:700;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:9px;transition:color .15s;}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{content:'+';font-size:18px;color:var(--mint);font-weight:400;flex:0 0 18px;text-align:right;}
+.faq-item[open] summary::after{content:'−';color:var(--pink);}
+.faq-item[open] summary{color:#fff;}
+.faq-a{padding:0 16px 13px;font-size:13.5px;color:var(--ink-soft);line-height:1.7;}
+
+/* FOOTER */
+.foot{text-align:center;padding:44px 16px 24px;color:var(--ink-mute);font-size:11.5px;line-height:1.7;}
+.foot a{color:var(--mint);opacity:.8;}
+.foot-pillars{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:14px;font-family:var(--mono);font-size:10.5px;}
+.foot-pillars span{color:var(--ink-soft);}
+
+/* PROOF BAR */
+.proof-bar{
+  margin:14px auto 0;max-width:780px;
+  display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
+  padding:12px 18px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(125,249,212,.06),rgba(255,111,191,.06));
+  border:1px solid rgba(255,255,255,.08);
+}
+.proof-stars{color:var(--gold);font-size:13.5px;letter-spacing:1px;}
+.proof-val{font-family:var(--display);font-weight:900;font-size:14.5px;color:var(--gold);}
+.proof-sep{width:1px;height:13px;background:rgba(255,255,255,.15);}
+.proof-meta{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;}
+
+@media(max-width:760px){
+  .features-grid{grid-template-columns:1fr;}
+  .feat-card.big{grid-column:span 1;}
+  .ecosystem-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .bridge-strip{flex-direction:column;gap:12px;}
+  .nav{display:none;}
+}
+@media(max-width:440px){
+  .ecosystem-grid{grid-template-columns:repeat(2,1fr);}
+  .meme-actions{flex:0 0 96px;}
+  .btn-buy,.btn-sell{font-size:12px;padding:10px 0;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-dot"></span>Verixia</a>
+  <nav class="nav">
+    <a class="nav-link" href="#swap">Swap</a>
+    <a class="nav-link" href="#defi">DeFi</a>
+    <a class="nav-link" href="#trending">Trending</a>
+    <a class="nav-link" href="#bridge">Bridge</a>
+  </nav>
+  <a class="cta-top" href="https://swap.verixiaapps.com">🚀 Launch App</a>
+</header>
+
+<div class="shell">
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="hero-tag"><span class="hero-tag-dot"></span>Solana DeFi Central · Non-Custodial</span>
+    <h1><span class="hero-eyebrow">Built on Solana</span>Your DeFi<br>Home Base</h1>
+    <p class="hero-sub">Swap any token. Bridge any chain. Track live signals. All non-custodial, <strong>no KYC, no accounts</strong> — just connect your wallet and go.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="https://swap.verixiaapps.com">🚀 Start Swapping</a>
+      <a class="btn-ghost" href="#defi">Explore DeFi Suite →</a>
+    </div>
+    <div class="hero-pillars">
+      <span class="pillar mint">✓ No KYC, ever</span>
+      <span class="pillar pink">⚡ 400ms blocks</span>
+      <span class="pillar violet">○ Non-custodial</span>
+      <span class="pillar lime">🌍 69 chains bridged</span>
+      <span class="pillar">🔒 50+ DEXes routed</span>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker-strip">
+    <div class="ticker-track">
+      <span class="ticker-item"><span class="sym">SOL</span><span class="up">+3.2%</span></span>
+      <span class="ticker-item"><span class="sym">JUP</span><span class="up">+5.7%</span></span>
+      <span class="ticker-item"><span class="sym">BONK</span><span class="dn">-2.8%</span></span>
+      <span class="ticker-item"><span class="sym">WIF</span><span class="up">+9.1%</span></span>
+      <span class="ticker-item"><span class="sym">RAY</span><span class="up">+1.4%</span></span>
+      <span class="ticker-item"><span class="sym">PEPE</span><span class="up">+18.4%</span></span>
+      <span class="ticker-item"><span class="sym">POPCAT</span><span class="up">+12.6%</span></span>
+      <span class="ticker-item"><span class="sym">FARTCOIN</span><span class="up">+41.2%</span></span>
+      <span class="ticker-item"><span class="sym">USDC</span><span class="up">$1.00</span></span>
+      <span class="ticker-item"><span class="sym">DRIFT</span><span class="up">+7.3%</span></span>
+      <span class="ticker-item"><span class="sym">JTO</span><span class="dn">-1.2%</span></span>
+      <span class="ticker-item"><span class="sym">ORCA</span><span class="up">+2.9%</span></span>
+      <!-- duplicate for seamless loop -->
+      <span class="ticker-item"><span class="sym">SOL</span><span class="up">+3.2%</span></span>
+      <span class="ticker-item"><span class="sym">JUP</span><span class="up">+5.7%</span></span>
+      <span class="ticker-item"><span class="sym">BONK</span><span class="dn">-2.8%</span></span>
+      <span class="ticker-item"><span class="sym">WIF</span><span class="up">+9.1%</span></span>
+      <span class="ticker-item"><span class="sym">RAY</span><span class="up">+1.4%</span></span>
+      <span class="ticker-item"><span class="sym">PEPE</span><span class="up">+18.4%</span></span>
+      <span class="ticker-item"><span class="sym">POPCAT</span><span class="up">+12.6%</span></span>
+      <span class="ticker-item"><span class="sym">FARTCOIN</span><span class="up">+41.2%</span></span>
+      <span class="ticker-item"><span class="sym">USDC</span><span class="up">$1.00</span></span>
+      <span class="ticker-item"><span class="sym">DRIFT</span><span class="up">+7.3%</span></span>
+      <span class="ticker-item"><span class="sym">JTO</span><span class="dn">-1.2%</span></span>
+      <span class="ticker-item"><span class="sym">ORCA</span><span class="up">+2.9%</span></span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat"><span class="stat-val">400ms</span><span class="stat-lbl">Block Time</span><span class="stat-sub">Sub-second settlement</span></div>
+    <div class="stat"><span class="stat-val">50+</span><span class="stat-lbl">DEXes Routed</span><span class="stat-sub">Best price every swap</span></div>
+    <div class="stat"><span class="stat-val">69</span><span class="stat-lbl">Chains Bridged</span><span class="stat-sub">All into Solana</span></div>
+    <div class="stat"><span class="stat-val">0</span><span class="stat-lbl">KYC Required</span><span class="stat-sub">Connect wallet, go</span></div>
+  </div>
+
+  <!-- PROOF -->
+  <div class="proof-bar">
+    <span class="proof-stars">★★★★★</span>
+    <span class="proof-val">4.8 / 5</span>
+    <span class="proof-sep"></span>
+    <span class="proof-meta">from 3,241 Solana traders</span>
+    <span class="proof-sep"></span>
+    <span class="proof-meta">Powered by Jupiter · Raydium · Orca</span>
+  </div>
+
+  <!-- DEFI SUITE -->
+  <section class="features-wrap" id="defi">
+    <div class="sec-head">
+      <h2 class="sec-title">The <em>DeFi Suite</em></h2>
+      <span class="sec-pill"><span class="dot"></span>All on Solana</span>
+    </div>
+    <div class="features-grid">
+
+      <a class="feat-card big" href="https://swap.verixiaapps.com">
+        <div class="feat-icon mint-icon">⚡</div>
+        <div class="feat-title">Altcoin Swap</div>
+        <div class="feat-desc">Swap any Solana token instantly. Jupiter routing scans 50+ DEXes for the best price and lowest slippage — automatically, every trade.</div>
+        <div class="feat-chips">
+          <span class="feat-chip m">50+ DEXes</span>
+          <span class="feat-chip m">Best price</span>
+          <span class="feat-chip">No KYC</span>
+          <span class="feat-chip">Non-custodial</span>
+        </div>
+        <span class="feat-cta">Swap now</span>
+      </a>
+
+      <a class="feat-card" href="https://swap.verixiaapps.com">
+        <div class="feat-icon pink-icon">🌉</div>
+        <div class="feat-title">Cross-Chain Bridge</div>
+        <div class="feat-desc">Move assets from 69 blockchains into Solana in seconds. ETH, Base, Arbitrum, and more.</div>
+        <div class="feat-chips">
+          <span class="feat-chip p">69 chains</span>
+          <span class="feat-chip">Instant</span>
+        </div>
+        <span class="feat-cta">Bridge now</span>
+      </a>
+
+      <a class="feat-card" href="https://swap.verixiaapps.com">
+        <div class="feat-icon violet-icon">📡</div>
+        <div class="feat-title">Live Signals</div>
+        <div class="feat-desc">Track trending tokens, top gainers, volume leaders, and fresh launches — all live from the Solana ecosystem.</div>
+        <div class="feat-chips">
+          <span class="feat-chip v">Live data</span>
+          <span class="feat-chip">Jupiter</span>
+        </div>
+        <span class="feat-cta">View signals</span>
+      </a>
+
+      <a class="feat-card" href="https://swap.verixiaapps.com">
+        <div class="feat-icon gold-icon">🎰</div>
+        <div class="feat-title">Meme Wonderland</div>
+        <div class="feat-desc">Surf the hottest Solana meme coins. Instant swap directly from the discovery feed.</div>
+        <div class="feat-chips">
+          <span class="feat-chip g">Hot launches</span>
+          <span class="feat-chip">1-tap swap</span>
+        </div>
+        <span class="feat-cta">Explore memes</span>
+      </a>
+
+      <a class="feat-card" href="https://swap.verixiaapps.com">
+        <div class="feat-icon lime-icon">🏦</div>
+        <div class="feat-title">Liquid Staking</div>
+        <div class="feat-desc">Stake SOL and earn yield via mSOL, JitoSOL, bSOL and more — without leaving the app.</div>
+        <div class="feat-chips">
+          <span class="feat-chip">mSOL · JitoSOL</span>
+          <span class="feat-chip">Auto-compound</span>
+        </div>
+        <span class="feat-cta">Stake SOL</span>
+      </a>
+
+      <a class="feat-card" href="https://swap.verixiaapps.com">
+        <div class="feat-icon mint-icon">📊</div>
+        <div class="feat-title">Portfolio Tracker</div>
+        <div class="feat-desc">See your entire Solana portfolio in one view. P&L, holdings, history — all from your wallet address.</div>
+        <div class="feat-chips">
+          <span class="feat-chip m">No login</span>
+          <span class="feat-chip">Live P&L</span>
+        </div>
+        <span class="feat-cta">View portfolio</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- LIVE SWAP CARD -->
+  <section class="swap-wrap" id="swap">
+    <div class="sec-head">
+      <h2 class="sec-title">Quick <em>Swap</em></h2>
+      <span class="sec-pill"><span class="dot"></span>Live quote</span>
+    </div>
+    <div class="swap-card">
+      <div class="swap-card-head">
+        <div class="swap-live"><span class="swap-live-dot"></span>LIVE QUOTE · SOLANA</div>
+        <div class="swap-trust">
+          <span class="swap-chip">🔒 Non-custodial</span>
+          <span class="swap-chip">✓ No Account</span>
+          <span class="swap-chip">✓ No KYC</span>
+          <span class="swap-chip">⚡ Best Price</span>
+        </div>
+      </div>
+      <div class="swap-body">
+        <div class="swap-row">
+          <div class="swap-row-top"><span>You pay</span><span class="swap-row-balance">Connect wallet to see balance</span></div>
+          <div class="swap-row-main">
+            <div class="swap-amount" style="font-size:22px;letter-spacing:-.02em;">Solana</div>
+            <div class="swap-token sol">○ SOL ▾</div>
+          </div>
+          <div class="swap-row-foot">Best price across 50+ DEXes on Solana</div>
+        </div>
+        <div class="swap-flip"><div class="swap-flip-c">↕</div></div>
+        <div class="swap-row">
+          <div class="swap-row-top"><span>You receive</span><span class="swap-row-balance best">⭐ Best route</span></div>
+          <div class="swap-row-main">
+            <div class="swap-amount" style="font-size:22px;letter-spacing:-.02em;">USD Coin</div>
+            <div class="swap-token usdc">$ USDC ▾</div>
+          </div>
+          <div class="swap-row-foot">Live rate at swap time · zero hidden fees</div>
+        </div>
+        <div class="swap-route">
+          <span class="swap-route-lbl">⭐ Best route</span>
+          <span class="swap-route-flow">
+            <span class="route-pill">Raydium 55%</span>
+            <span class="route-plus">+</span>
+            <span class="route-pill">Orca 30%</span>
+            <span class="route-plus">+</span>
+            <span class="route-pill">Phoenix 15%</span>
+          </span>
+        </div>
+        <a class="swap-cta" href="https://swap.verixiaapps.com">🚀 Connect Wallet &amp; Swap →</a>
+        <div class="swap-disclaimer">Phantom · Solflare · Backpack · No account · No KYC · Non-custodial</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRENDING MEME SECTION -->
+  <section class="meme-section" id="trending">
+    <div class="sec-head">
+      <h2 class="sec-title">Trending <em>right now</em></h2>
+      <span class="sec-pill pink-pill"><span class="dot"></span>Live · Wonderland</span>
+    </div>
+    <div class="meme-grid">
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade FARTCOIN"></a>
+        <div class="meme-info">
+          <div class="meme-card-head">
+            <div class="meme-avatar" style="background:linear-gradient(135deg,#ffd24a,#ff6fbf);">💨</div>
+            <div>
+              <div class="meme-name">FARTCOIN <span class="meme-hot">🔥 HOT</span></div>
+              <div class="meme-age">Fresh · Solana</div>
+            </div>
+          </div>
+          <div class="meme-gain">+412%</div>
+          <div class="meme-period">24h</div>
+        </div>
+        <div class="meme-actions">
+          <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
+          <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
+        </div>
+      </div>
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade HOPPY"></a>
+        <div class="meme-info">
+          <div class="meme-card-head">
+            <div class="meme-avatar">🐸</div>
+            <div>
+              <div class="meme-name">HOPPY <span class="meme-hot">🔥 HOT</span></div>
+              <div class="meme-age">Fresh · Solana</div>
+            </div>
+          </div>
+          <div class="meme-gain">+247%</div>
+          <div class="meme-period">24h</div>
+        </div>
+        <div class="meme-actions">
+          <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
+          <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
+        </div>
+      </div>
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade POPCAT"></a>
+        <div class="meme-info">
+          <div class="meme-card-head">
+            <div class="meme-avatar" style="background:linear-gradient(135deg,#a87fff,#ff6fbf);">🐱</div>
+            <div>
+              <div class="meme-name">POPCAT</div>
+              <div class="meme-age">Trending · Solana</div>
+            </div>
+          </div>
+          <div class="meme-gain">+68%</div>
+          <div class="meme-period">24h</div>
+        </div>
+        <div class="meme-actions">
+          <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
+          <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
+        </div>
+      </div>
+      <div class="meme-card">
+        <a class="meme-card-link" href="https://swap.verixiaapps.com" aria-label="Trade WIF"></a>
+        <div class="meme-info">
+          <div class="meme-card-head">
+            <div class="meme-avatar" style="background:linear-gradient(135deg,#7df9d4,#c8ff5e);">🐶</div>
+            <div>
+              <div class="meme-name">WIF</div>
+              <div class="meme-age">Trending · Solana</div>
+            </div>
+          </div>
+          <div class="meme-gain">+9.1%</div>
+          <div class="meme-period">24h</div>
+        </div>
+        <div class="meme-actions">
+          <a class="btn-buy" href="https://swap.verixiaapps.com">🚀 Buy</a>
+          <a class="btn-sell" href="https://swap.verixiaapps.com">Sell</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ECOSYSTEM -->
+  <section class="ecosystem-wrap">
+    <div class="sec-head">
+      <h2 class="sec-title">Powered by the <em>Solana ecosystem</em></h2>
+    </div>
+    <div class="ecosystem-grid">
+      <a class="eco-card" href="https://swap.verixiaapps.com">
+        <span class="eco-icon">♃</span>
+        <div class="eco-name">Jupiter</div>
+        <div class="eco-desc">Best-price routing</div>
+      </a>
+      <a class="eco-card" href="https://swap.verixiaapps.com">
+        <span class="eco-icon">◎</span>
+        <div class="eco-name">Raydium</div>
+        <div class="eco-desc">AMM liquidity</div>
+      </a>
+      <a class="eco-card" href="https://swap.verixiaapps.com">
+        <span class="eco-icon">🐋</span>
+        <div class="eco-name">Orca</div>
+        <div class="eco-desc">Concentrated liquidity</div>
+      </a>
+      <a class="eco-card" href="https://swap.verixiaapps.com">
+        <span class="eco-icon">🌀</span>
+        <div class="eco-name">Wormhole</div>
+        <div class="eco-desc">Cross-chain bridge</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- BRIDGE STRIP -->
+  <div class="bridge-strip" id="bridge">
+    <div class="bridge-l">
+      <div class="bridge-t">🌉 Bridge from any chain</div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:6px;">Move assets from 69 blockchains into Solana — instantly and non-custodially.</div>
+      <div class="bridge-chains">
+        <span class="chain-pill">Ethereum</span>
+        <span class="chain-pill">Base</span>
+        <span class="chain-pill">Arbitrum</span>
+        <span class="chain-pill">Optimism</span>
+        <span class="chain-pill">BNB Chain</span>
+        <span class="chain-pill">Polygon</span>
+        <span class="chain-pill">Avalanche</span>
+        <span class="chain-pill">Sui</span>
+        <span class="chain-pill">+ 61 more</span>
+      </div>
+    </div>
+    <a class="bridge-btn" href="https://swap.verixiaapps.com">Bridge now →</a>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-wrap">
+    <div class="sec-head"><h2 class="sec-title">Frequently <em>asked</em></h2></div>
+    <details class="faq-item" open>
+      <summary>Do I need an account to use Verixia?</summary>
+      <div class="faq-a">No. Connect a Solana wallet — Phantom, Solflare, or Backpack — and you're in. No email, no sign-up, no KYC.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Is Verixia non-custodial?</summary>
+      <div class="faq-a">Yes. The smart contract routes the swap directly between your wallet and the liquidity pool. Verixia never holds your funds at any point.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How fast does a swap settle?</summary>
+      <div class="faq-a">Sub-second. Solana blocks settle in roughly 400ms at fractions of a cent in fees — no congestion, no $30 gas fees.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Which wallets are supported?</summary>
+      <div class="faq-a">Phantom, Solflare, and Backpack are fully supported on both desktop and mobile. Any Solana-compatible wallet works.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How does best-price routing work?</summary>
+      <div class="faq-a">Jupiter aggregates 50+ Solana DEXes — Raydium, Orca, Phoenix, and more — and splits your swap across the optimal paths to get you the best price and lowest slippage automatically.</div>
+    </details>
+  </section>
+
+  <!-- POST CTA -->
+  <div class="post-cta">
+    <div class="post-cta-l">
+      <div class="post-cta-t">Solana DeFi starts here.</div>
+      <div class="post-cta-s">No KYC · No accounts · No limits · Non-custodial · Global DeFi</div>
+    </div>
+    <a class="post-cta-btn" href="https://swap.verixiaapps.com">🚀 Launch Verixia →</a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="foot-pillars">
+      <span>All Solana</span>·<span>No KYC</span>·<span>No accounts</span>·<span>No limits</span>·<span>Non-custodial</span>·<span>Global DeFi</span>
+    </div>
+    <div>Verixia is a non-custodial DeFi platform on Solana. Powered by Jupiter routing.</div>
+    <div style="margin-top:6px;">© 2026 Verixia · Solana DeFi Central</div>
+  </footer>
+
+</div>
+
+</body>
+</html>
