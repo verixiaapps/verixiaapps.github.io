@@ -55,9 +55,6 @@ if SCRIPTS_DIR not in sys.path:
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
-# Reuse the engine client from the v3.0 module. These are the single source of
-# truth for the endpoint, the quality gate, and the meta hydration blob. We do
-# NOT import the lossy body-only shim anymore.
 from generate_nexus_dex_content import (
     fetch_seo_page,
     is_publishable,
@@ -75,7 +72,7 @@ GENERATED_KEYWORDS_FILE = os.path.join(BASE_DIR, "data", "nexus_dex_generated_ke
 REJECTED_KEYWORDS_FILE  = os.path.join(BASE_DIR, "data", "nexus_dex_rejected_keywords.txt")
 
 TEMPLATE_FILE = os.path.join(BASE_DIR, "nexus-dex-template", "nexus-dex-template.html")
-OUTPUT_DIR    = os.path.join(BASE_DIR, "nexus-dex")
+OUTPUT_DIR    = os.path.join(BASE_DIR, "nexusdex")
 SITE          = "https://verixiaapps.com"
 OG_IMAGE      = f"{SITE}/og/nexus-dex.png"
 
@@ -84,12 +81,10 @@ MORE_LINKS_COUNT    = 10
 DAILY_LIMIT         = int(os.getenv("DAILY_LIMIT", "100"))
 COMMIT_EVERY        = int(os.getenv("COMMIT_EVERY", "30"))
 RESUME              = os.getenv("RESUME", "true").lower() == "true"
-# Opt-in: clear the engine's build registries before the run. Default OFF for
-# incremental builds so cross-run dedup memory is preserved.
 RESET_ENGINE        = os.getenv("RESET_ENGINE", "false").lower() == "true"
 
 PROTECTED_SLUGS = {
-    "nexus-dex",
+    "nexusdex",
     "crypto-markets",
     "bitcoin-markets",
     "ethereum-markets",
@@ -117,9 +112,6 @@ PROTECTED_SLUGS = {
 }
 FALLBACK_HUB_SLUG = "crypto-markets"
 
-# Full set of placeholders this runner fills. Validating all of them at startup
-# means a future template edit that drops one fails loudly instead of silently
-# blanking live data (the bug this version fixes).
 REQUIRED_TEMPLATE_PLACEHOLDERS = {
     "{{TITLE}}",
     "{{DESCRIPTION}}",
@@ -359,11 +351,8 @@ HUB_TITLE_OVERRIDES = {
     "solana-swaps": "Solana Swaps Hub",
 }
 
-# Order matters: most specific first
 HUB_MATCH_RULES = [
     ("hyperliquid", "hyperliquid-frontend"),
-
-    # xStocks / brand tokens
     ("xstocks", "global-markets"),
     ("xstock", "global-markets"),
     ("backed finance", "global-markets"),
@@ -372,14 +361,12 @@ HUB_MATCH_RULES = [
     ("nvdax", "global-markets"),
     ("spyx", "global-markets"),
     ("qqqx", "global-markets"),
-
     ("buy us stocks from", "global-stock-access"),
     ("us stocks no us bank", "global-stock-access"),
     ("us stocks for non residents", "global-stock-access"),
     ("us stocks international", "global-stock-access"),
     ("global stock", "global-stock-access"),
     ("international stock", "global-stock-access"),
-
     ("24 7 stock", "stocks-24-7"),
     ("stocks 24 hours", "stocks-24-7"),
     ("stocks weekend", "stocks-24-7"),
@@ -389,7 +376,6 @@ HUB_MATCH_RULES = [
     ("stocks never close", "stocks-24-7"),
     ("always open stock", "stocks-24-7"),
     ("stocks after hours", "stocks-24-7"),
-
     ("buy stocks no kyc", "stocks-no-kyc"),
     ("trade stocks no kyc", "stocks-no-kyc"),
     ("stock trading no verification", "stocks-no-kyc"),
@@ -400,7 +386,6 @@ HUB_MATCH_RULES = [
     ("stocks without broker", "stocks-no-kyc"),
     ("stocks without robinhood", "stocks-no-kyc"),
     ("stocks without etrade", "stocks-no-kyc"),
-
     ("buy apple stock", "buy-stocks-onchain"),
     ("buy aapl", "buy-stocks-onchain"),
     ("buy tesla stock", "buy-stocks-onchain"),
@@ -424,7 +409,6 @@ HUB_MATCH_RULES = [
     ("buy robinhood stock", "buy-stocks-onchain"),
     ("buy circle stock", "buy-stocks-onchain"),
     ("buy crcl", "buy-stocks-onchain"),
-
     ("tokenized stocks", "tokenized-stocks"),
     ("tokenized equity", "tokenized-stocks"),
     ("onchain stocks", "tokenized-stocks"),
@@ -435,8 +419,6 @@ HUB_MATCH_RULES = [
     ("buy stocks with crypto", "tokenized-stocks"),
     ("buy stocks with usdc", "tokenized-stocks"),
     ("buy stocks with sol", "tokenized-stocks"),
-
-    # Perps
     ("btc perps", "bitcoin-markets"),
     ("bitcoin perps", "bitcoin-markets"),
     ("bitcoin futures", "bitcoin-markets"),
@@ -455,30 +437,22 @@ HUB_MATCH_RULES = [
     ("pepe perps", "altcoin-markets"),
     ("doge perps", "altcoin-markets"),
     ("hype perps", "altcoin-markets"),
-
-    # Whale
     ("whale tracker", "whale-tracking"),
     ("smart money", "whale-tracking"),
     ("insider", "whale-tracking"),
     ("deployer", "whale-tracking"),
     ("sniper", "whale-tracking"),
     ("kol wallet", "whale-tracking"),
-
-    # Launch
     ("launch token", "token-launch"),
     ("token launch", "token-launch"),
     ("launchpad", "token-launch"),
     ("bonding curve", "token-launch"),
     ("deploy token", "token-launch"),
-
-    # Swap
     ("solana swap", "solana-swap"),
     ("solana dex", "solana-swap"),
     ("dex aggregator", "solana-swap"),
     ("best price swap", "solana-swap"),
     ("swap", "solana-swap"),
-
-    # Buy token
     ("buy bonk", "buy-token"),
     ("buy wif", "buy-token"),
     ("buy pepe", "buy-token"),
@@ -486,25 +460,18 @@ HUB_MATCH_RULES = [
     ("buy memecoin", "buy-token"),
     ("buy spl", "buy-token"),
     ("buy ", "buy-token"),
-
-    # Wallet
     ("phantom wallet trading", "wallet-trading"),
     ("backpack wallet trading", "wallet-trading"),
     ("self custodial", "wallet-trading"),
     ("non custodial", "wallet-trading"),
     ("wallet based", "wallet-trading"),
-
-    # No KYC
     ("no kyc", "no-kyc-trading"),
     ("without kyc", "no-kyc-trading"),
     ("no signup", "no-kyc-trading"),
     ("no verification", "no-kyc-trading"),
-
-    # Perps fallback
     ("perps", "crypto-markets"),
     ("perpetual", "crypto-markets"),
     ("leverage", "crypto-markets"),
-
     ("how to", "how-to-guides"),
 ]
 
@@ -727,7 +694,7 @@ def find_best_hub_slug(keyword):
 def build_hub_link_html(keyword):
     hub_slug = find_best_hub_slug(keyword)
     hub_title = HUB_TITLE_OVERRIDES.get(hub_slug, f"{humanize_slug(hub_slug)} Hub")
-    return f'<a href="/nexus-dex/{hub_slug}/">{escape_html(hub_title)}</a>'
+    return f'<a href="/nexusdex/{hub_slug}/">{escape_html(hub_title)}</a>'
 
 
 def sanitize_ai_html(text):
@@ -873,16 +840,10 @@ def is_usable_ai_text(text):
     if len(raw) < 350:
         return False
     weak_markers = {
-        "lorem ipsum",
-        "as an ai",
-        "here are some paragraphs",
-        "let me know if you want",
-        "i can't help with that",
-        "i cannot help with that",
-        "i am sorry",
-        "cannot assist",
-        "can't assist",
-        "content policy",
+        "lorem ipsum", "as an ai", "here are some paragraphs",
+        "let me know if you want", "i can't help with that",
+        "i cannot help with that", "i am sorry", "cannot assist",
+        "can't assist", "content policy",
     }
     if any(marker in lowered for marker in weak_markers):
         return False
@@ -898,21 +859,18 @@ def is_usable_ai_text(text):
 def append_rejected_keyword(keyword, reason):
     ensure_file(REJECTED_KEYWORDS_FILE)
     entry = f"{normalize_keyword(keyword)} | {str(reason).strip()}"
-
     existing = set()
     with open(REJECTED_KEYWORDS_FILE, "r", encoding="utf-8") as f:
         existing = {line.strip() for line in f if line.strip()}
-
     if entry not in existing:
         with open(REJECTED_KEYWORDS_FILE, "a", encoding="utf-8") as f:
             f.write(entry + "\n")
 
 
 # -----------------------------
-# SEO TEXT HELPERS (used only as fallbacks when engine meta is missing a field)
+# SEO TEXT HELPERS
 # -----------------------------
 def enforce_title_length(title, fallback):
-    """Trim to <=60 chars on a word boundary if needed (mirrors engine logic)."""
     title = (title or "").strip() or fallback
     if len(title) <= 60:
         return title
@@ -979,7 +937,7 @@ def build_related_anchor(keyword):
 
 
 def build_canonical(slug):
-    return f"{SITE}/nexus-dex/{slug}/"
+    return f"{SITE}/nexusdex/{slug}/"
 
 
 DEFAULT_AGGREGATE_RATING_JSON = json.dumps({
@@ -1093,18 +1051,16 @@ def get_more_links(current_page, all_pages, limit, exclude_slugs=None):
 
 def build_links_html(pages_list):
     return "".join(
-        f'<li><a href="/nexus-dex/{p["slug"]}/">{escape_html(build_related_anchor(p["keyword"]))}</a></li>\n'
+        f'<li><a href="/nexusdex/{p["slug"]}/">{escape_html(build_related_anchor(p["keyword"]))}</a></li>\n'
         for p in pages_list
         if page_exists(p["slug"])
     )
 
 
 # -----------------------------
-# FULL-PAYLOAD FETCH (score-gated, no fallback content)
+# FULL-PAYLOAD FETCH
 # -----------------------------
 def ordered_prompt_attempts(keyword, keyword_display):
-    """Same prompt-variant retry the old runner used, but each attempt now goes
-    to the full-payload endpoint and is gated on is_publishable."""
     attempts = []
     raw_keyword = normalize_keyword(keyword)
     clean_keyword = normalize_keyword(keyword_display)
@@ -1134,14 +1090,11 @@ def ordered_prompt_attempts(keyword, keyword_display):
 
 
 def fetch_full_payload(keyword, keyword_display):
-    """Return (payload, used_prompt) for the first prompt variant whose payload
-    clears the engine quality floor. Raises ValueError if none qualify. Never
-    invents content."""
     last_reason = None
     for attempt in ordered_prompt_attempts(keyword, keyword_display):
         try:
             payload = fetch_seo_page(attempt)
-        except Exception as exc:  # defensive: client should not raise, but guard
+        except Exception as exc:
             last_reason = f"engine error for prompt '{attempt}': {exc}"
             continue
 
@@ -1165,7 +1118,7 @@ def fetch_full_payload(keyword, keyword_display):
 
 
 # -----------------------------
-# FULL PAGE RENDER (engine meta + meta script, all placeholders filled)
+# FULL PAGE RENDER
 # -----------------------------
 def render_full_page(template, keyword, keyword_display, payload, slug,
                      related_pages, more_pages):
@@ -1174,9 +1127,6 @@ def render_full_page(template, keyword, keyword_display, payload, slug,
 
     canonical = build_canonical(slug)
 
-    # Prefer engine meta everywhere; fall back to locally-built copy only if a
-    # field is missing. Engine titles/descriptions are Verixia-branded and
-    # intent-matched, which also matches this (Verixia) template.
     title = enforce_title_length(meta.get("title"), build_title_fallback(keyword))
     description = (meta.get("description") or "").strip() or build_description_fallback(keyword)
     h1 = (meta.get("h1") or "").strip() or build_h1_fallback(keyword)
@@ -1219,7 +1169,6 @@ def render_full_page(template, keyword, keyword_display, payload, slug,
         "{{RELATED_LINKS}}":         related_links_html,
         "{{MORE_LINKS}}":            more_links_html,
         "{{PAGE_META_SCRIPT}}":      meta_script,
-        # Legacy placeholder some templates still carry; harmless if absent.
         "{{HL_DATA_BLOCK}}":         "",
     }
 
@@ -1227,9 +1176,6 @@ def render_full_page(template, keyword, keyword_display, payload, slug,
     for placeholder, value in substitutions.items():
         html = html.replace(placeholder, str(value))
 
-    # Any remaining {{...}} is a real bug (e.g. a template edit added a
-    # placeholder we don't fill). Reject the page rather than ship a half-built
-    # one or silently blank a value into invalid JSON-LD.
     unresolved = sorted(set(re.findall(r"\{\{[A-Z0-9_]+\}\}", html)))
     if unresolved:
         raise ValueError(f"unresolved template placeholders: {', '.join(unresolved)}")
@@ -1268,7 +1214,7 @@ def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs,
 
 
 # -----------------------------
-# SETUP
+# MAIN
 # -----------------------------
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -1366,7 +1312,6 @@ def main():
 
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
-        # 1) Full payload from the engine, gated on the 80 quality floor.
         try:
             payload, used_prompt = fetch_full_payload(keyword, keyword_display)
         except Exception as e:
@@ -1375,12 +1320,10 @@ def main():
             print(f"REJECTED {keyword}: {e}")
             continue
 
-        # 2) Internal links (page_exists-aware).
         related_pages = get_related_pages(page, existing_pages, RELATED_LINKS_COUNT)
         related_slugs = {p["slug"] for p in related_pages}
         more_pages = get_more_links(page, existing_pages, MORE_LINKS_COUNT, exclude_slugs=related_slugs)
 
-        # 3) Render with engine meta + meta script; every placeholder filled.
         try:
             html, title, description, canonical = render_full_page(
                 template, keyword, keyword_display, payload, slug, related_pages, more_pages
@@ -1434,7 +1377,6 @@ def main():
     print(f"Validation warnings: {validation_error_count}")
     print(f"Remaining keywords in queue: {remaining_count}")
 
-    # Optional engine-side build report sidecar (non-fatal).
     try:
         report = fetch_build_report()
         if report:
@@ -1447,4 +1389,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
- 
