@@ -2,7 +2,7 @@ name: Nexus DEX SEO Page Generator Auto
 
 "on":
   workflow_dispatch:
-    inputs: 
+    inputs:
       manual_daily_limit:
         description: "Pages to generate on this manual run"
         required: false
@@ -158,12 +158,12 @@ jobs:
         run: python scripts/build_nexus_dex_seo_incremental.py
 
       - name: Build hub pages
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+        if: success()
         shell: bash
         run: python scripts/build_nexus_dex_hubs.py
 
       - name: Build sitemap
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -184,9 +184,10 @@ jobs:
             done
             echo '</urlset>'
           } > nexus-dex-sitemap.xml
+          echo "[sitemap] $(grep -c '<url>' nexus-dex-sitemap.xml) URLs written"
 
       - name: Commit and push
-        if: success() && steps.limits.outputs.full_rebuild != 'true'
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
