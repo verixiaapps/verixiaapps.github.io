@@ -1,0 +1,210 @@
+name: Create nexus-dex Redirects
+
+on:
+ workflow_dispatch:
+
+jobs:
+ create-redirects:
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout repo
+       uses: actions/checkout@v4
+
+     - name: Create nexus-dex redirect files
+       run: |
+         SLUGS=(
+           best-birdeye-alternative-low-fees
+           best-dexscreener-alternative-low-fees
+           best-photon-alternative-low-fees
+           best-solana-dex-for-new-tokens
+           brand-tokens
+           buy-act-on-solana
+           buy-act-solana
+           buy-ai16z-solana
+           buy-atlas-on-solana
+           buy-bome-on-solana
+           buy-bome-solana
+           buy-cloud-on-solana
+           buy-drift-on-solana
+           buy-drift-solana
+           buy-fartcoin-on-solana
+           buy-fartcoin-solana
+           buy-giga-on-solana
+           buy-giga-solana
+           buy-goat-on-solana
+           buy-goat-solana
+           buy-guac-on-solana
+           buy-guac-solana
+           buy-hnt-on-solana
+           buy-hnt-solana
+           buy-io-solana
+           buy-jitosol-on-solana
+           buy-jitosol-solana
+           buy-jto-on-solana
+           buy-jup-solana
+           buy-kmno-solana
+           buy-mew-on-solana
+           buy-mnde-on-solana
+           buy-mnde-solana
+           buy-msol-on-solana
+           buy-msol-solana
+           buy-mumu-solana
+           buy-myro-on-solana
+           buy-myro-solana
+           buy-pengu-on-solana
+           buy-pengu-solana
+           buy-pnut-on-solana
+           buy-pnut-solana
+           buy-ponke-on-solana
+           buy-ponke-solana
+           buy-popcat-on-solana
+           buy-popcat-solana
+           buy-ray-on-solana
+           buy-ray-solana
+           buy-render-on-solana
+           buy-render-solana
+           buy-samo-solana
+           buy-shdw-on-solana
+           buy-shdw-solana
+           buy-sol-on-solana
+           buy-sol-solana
+           buy-tnsr-on-solana
+           buy-w-solana
+           buy-wen-solana
+           buy-wif-on-solana
+           buy-wif-solana
+           cheaper-alternative-to-jupiter
+           cheaper-alternative-to-orca
+           cheapest-solana-token-swap
+           orca-alternative-solana-dex
+           safest-solana-dex-to-use
+           solana-swap-insufficient-sol-for-fees
+           solana-swap-price-impact-too-high
+           swap-act-to-usdc-solana
+           swap-ai16z-to-sol-solana
+           swap-atlas-to-usdc-solana
+           swap-atlas-to-usdt-solana
+           swap-bome-to-sol-solana
+           swap-bome-to-usdc-solana
+           swap-bome-to-usdt-solana
+           swap-drift-on-solana
+           swap-fartcoin-to-usdc-solana
+           swap-fartcoin-to-usdt-solana
+           swap-giga-to-usdc-solana
+           swap-goat-on-solana
+           swap-goat-to-sol-solana
+           swap-grass-to-sol-solana
+           swap-grass-to-usdt-solana
+           swap-guac-on-solana
+           swap-guac-to-sol-solana
+           swap-guac-to-usdc-solana
+           swap-guac-to-usdt-solana
+           swap-hnt-on-solana
+           swap-io-to-usdt-solana
+           swap-jitosol-on-solana
+           swap-jto-on-solana
+           swap-jup-on-solana
+           swap-jup-to-sol-solana
+           swap-jup-to-usdc-solana
+           swap-jup-to-usdt-solana
+           swap-kmno-to-usdt-solana
+           swap-mnde-on-solana
+           swap-mnde-to-usdc-solana
+           swap-mumu-to-sol-solana
+           swap-mumu-to-usdc-solana
+           swap-myro-to-sol-solana
+           swap-pnut-on-solana
+           swap-ponke-on-solana
+           swap-popcat-to-sol-solana
+           swap-pyth-to-sol-solana
+           swap-ray-to-usdt-solana
+           swap-render-on-solana
+           swap-render-to-usdc-solana
+           swap-shdw-on-solana
+           swap-slerf-on-solana
+           swap-slerf-to-usdc-solana
+           swap-sol-to-ai16z-solana
+           swap-sol-to-cloud-solana
+           swap-sol-to-giga-solana
+           swap-sol-to-goat-solana
+           swap-sol-to-jitosol-solana
+           swap-sol-to-jto-solana
+           swap-sol-to-mnde-solana
+           swap-sol-to-pengu-solana
+           swap-sol-to-ray-solana
+           swap-sol-to-shdw-solana
+           swap-sol-to-wen-solana
+           swap-solana-tokens-with-low-fees
+           swap-tnsr-to-usdc-solana
+           swap-usdc-to-act-solana
+           swap-usdc-to-atlas-solana
+           swap-usdc-to-bome-solana
+           swap-usdc-to-bonk-solana
+           swap-usdc-to-cloud-solana
+           swap-usdc-to-fartcoin-solana
+           swap-usdc-to-giga-solana
+           swap-usdc-to-goat-solana
+           swap-usdc-to-guac-solana
+           swap-usdc-to-io-solana
+           swap-usdc-to-jitosol-solana
+           swap-usdc-to-jto-solana
+           swap-usdc-to-jup-solana
+           swap-usdc-to-mew-solana
+           swap-usdc-to-mnde-solana
+           swap-usdc-to-msol-solana
+           swap-usdc-to-ponke-solana
+           swap-usdc-to-render-solana
+           swap-usdc-to-wen-solana
+           swap-usdc-to-wif-solana
+           swap-usdt-to-ai16z-solana
+           swap-usdt-to-atlas-solana
+           swap-usdt-to-bome-solana
+           swap-usdt-to-bonk-solana
+           swap-usdt-to-drift-solana
+           swap-usdt-to-fartcoin-solana
+           swap-usdt-to-hnt-solana
+           swap-usdt-to-jitosol-solana
+           swap-usdt-to-jup-solana
+           swap-usdt-to-msol-solana
+           swap-usdt-to-mumu-solana
+           swap-usdt-to-popcat-solana
+           swap-usdt-to-pyth-solana
+           swap-usdt-to-render-solana
+           swap-usdt-to-samo-solana
+           swap-usdt-to-shdw-solana
+           swap-usdt-to-sol-solana
+           swap-w-on-solana
+           swap-w-to-usdc-solana
+           swap-w-to-usdt-solana
+           swap-wif-to-sol-solana
+           swap-wif-to-usdc-solana
+           token-launch
+           use-a-solana-dex
+           wallet-rejected-solana-swap-transaction
+           why-is-my-solana-swap-pending
+         )
+
+         for SLUG in "${SLUGS[@]}"; do
+           mkdir -p "nexus-dex/$SLUG"
+           cat > "nexus-dex/$SLUG/index.html" << EOF
+         <!DOCTYPE html>
+         <html lang="en">
+         <head>
+           <meta charset="UTF-8">
+           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+           <title>Redirecting...</title>
+           <meta http-equiv="refresh" content="0; url=https://verixiaapps.com/nexusdex/$SLUG/">
+           <script>window.location.replace("https://verixiaapps.com/nexusdex/$SLUG/");<\/script>
+         </head>
+         <body><p>Redirecting...</p></body>
+         </html>
+         EOF
+         done
+
+     - name: Commit and push
+       run: |
+         git config user.name "github-actions[bot]"
+         git config user.email "github-actions[bot]@users.noreply.github.com"
+         git add nexus-dex/
+         git diff --cached --quiet || git commit -m "Add 169 nexus-dex redirect pages"
+         git push origin HEAD
