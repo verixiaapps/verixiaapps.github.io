@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """
-build_nexus_dex_seo_incremental.py -- v4.0 (full-payload, score-gated)
+build_nexus_dex_seo_incremental.py -- v4.1 (full-payload, score-gated, sitemap-on-checkpoint)
 
-WHAT CHANGED vs the previous incremental runner
-------------------------------------------------
+WHAT CHANGED vs v4.0
+--------------------
+Sitemap (nexus-dex-sitemap.xml) is now regenerated inside git_checkpoint(),
+so every 30-page commit ships a fresh sitemap built by scanning disk
+(every directory in nexusdex/ that contains index.html). This guarantees
+that whatever is committed on main is reflected in the sitemap, even if
+the workflow is killed (timeout / OOM / cancel) before the workflow's
+end-of-run sitemap step runs. The workflow-level sitemap step remains as
+a belt-and-suspenders final pass.
+
+v4.0 notes (still apply):
 The old runner imported the legacy body-only shim
 `generate_nexus_dex_content(keyword)`, which returns ONLY the content string and
 throws away the engine's `meta` and `observations`. It then built its own
@@ -17,7 +26,7 @@ placeholder. That silently:
   - blanked {{STATIC_H1}} / {{STATIC_INTRO}};
   - ignored the engine quality floor (MIN_PUBLISH_SCORE = 80) entirely.
 
-This v4.0 runner uses the FULL engine payload via the existing client in
+This runner uses the FULL engine payload via the existing client in
 generate_nexus_dex_content.py:
   - fetch_seo_page()        -> {content, meta, score, ...}
   - is_publishable()        -> enforces MIN_PUBLISH_SCORE (80), dup + structure
@@ -29,8 +38,7 @@ No fallback content is ever invented: a keyword that can't clear the floor is
 rejected and logged.
 
 NOT TOUCHED: the SEO engine (Railway), generate_nexus_dex_content.py, and the
-HTML template. This file is the only change. The GitHub workflow already runs
-this script, so no workflow change is needed.
+HTML template.
 
 Remaining out-of-scope item (Layer 1): weaving live figures into the BODY PROSE
 happens inside the engine on Railway. This runner surfaces every live figure the
@@ -73,6 +81,7 @@ REJECTED_KEYWORDS_FILE  = os.path.join(BASE_DIR, "data", "nexus_dex_rejected_key
 
 TEMPLATE_FILE = os.path.join(BASE_DIR, "nexus-dex-template", "nexus-dex-template.html")
 OUTPUT_DIR    = os.path.join(BASE_DIR, "nexusdex")
+SITEMAP_FILE  = os.path.join(BASE_DIR, "nexus-dex-sitemap.xml")
 SITE          = "https://verixiaapps.com"
 OG_IMAGE      = f"{SITE}/og/nexus-dex.png"
 
@@ -1184,6 +1193,56 @@ def render_full_page(template, keyword, keyword_display, payload, slug,
 
 
 # -----------------------------
+# SITEMAP
+# -----------------------------
+def _git_lastmod_for(file_path):
+    """Return git-tracked last-commit date for file_path (YYYY-MM-DD), or today UTC."""
+    try:
+        r = subprocess.run(
+            ["git", "log", "-1", "--format=%cs", "--", file_path],
+            capture_output=True, text=True, check=False,
+        )
+        date_str = (r.stdout or "").strip()
+        if date_str:
+            return date_str
+    except Exception:
+        pass
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+def rebuild_sitemap():
+    """
+    Rebuild nexus-dex-sitemap.xml by scanning OUTPUT_DIR on disk.
+
+    Guarantees every /nexusdex/<slug>/index.html present on disk is in the
+    sitemap. Called from git_checkpoint() so each 30-page commit ships a
+    matching sitemap, even if the workflow is killed before the workflow's
+    end-of-run sitemap step runs.
+    """
+    urls = []
+    if os.path.isdir(OUTPUT_DIR):
+        for entry in sorted(os.listdir(OUTPUT_DIR)):
+            dir_path = os.path.join(OUTPUT_DIR, entry)
+            index_path = os.path.join(dir_path, "index.html")
+            if not os.path.isdir(dir_path) or not os.path.isfile(index_path):
+                continue
+            lastmod = _git_lastmod_for(index_path)
+            urls.append(
+                f"<url><loc>{SITE}/nexusdex/{entry}/</loc><lastmod>{lastmod}</lastmod></url>"
+            )
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + ("\n".join(urls) + "\n" if urls else "")
+        + '</urlset>\n'
+    )
+    with open(SITEMAP_FILE, "w", encoding="utf-8") as f:
+        f.write(xml)
+    print(f"[sitemap] Wrote {len(urls)} URLs to nexus-dex-sitemap.xml")
+
+
+# -----------------------------
 # GIT CHECKPOINT
 # -----------------------------
 def get_remaining_keywords(raw_keywords, processed_keywords):
@@ -1196,6 +1255,10 @@ def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs,
     write_lines(GENERATED_SLUGS_FILE, [slugify(k) for k in sorted_keywords])
     write_lines(KEYWORD_FILE, get_remaining_keywords(raw_keywords, processed_keywords))
 
+    # Regenerate sitemap from disk so every committed page is in it,
+    # even if the workflow gets killed before its own end-of-run sitemap step.
+    rebuild_sitemap()
+
     try:
         subprocess.run(["git", "add", "-A"], check=True)
         result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
@@ -1203,12 +1266,12 @@ def git_checkpoint(generated_count, new_generated_keywords, new_generated_slugs,
             print(f"[checkpoint] No changes to commit at {generated_count} pages.")
             return
         subprocess.run(
-            ["git", "commit", "-m", f"Nexus DEX progress checkpoint: {generated_count} pages"],
+            ["git", "commit", "-m", f"Nexus DEX checkpoint: {generated_count} pages + sitemap"],
             check=True,
         )
         subprocess.run(["git", "fetch", "origin", "main"], check=True)
         subprocess.run(["git", "push", "--force-with-lease", "origin", "HEAD:main"], check=True)
-        print(f"[checkpoint] Committed and pushed at {generated_count} pages.")
+        print(f"[checkpoint] Committed and pushed at {generated_count} pages (sitemap included).")
     except subprocess.CalledProcessError as e:
         print(f"[checkpoint] Git error at {generated_count} pages: {e}")
 
@@ -1227,6 +1290,8 @@ def main():
 
     if not raw_keywords:
         print("No keywords in queue. Nothing to generate.")
+        # Even with no new pages, make sure sitemap matches disk before we exit.
+        rebuild_sitemap()
         return 0
 
     if RESET_ENGINE:
