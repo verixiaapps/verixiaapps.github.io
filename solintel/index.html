@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolIntel — Solana Intelligence Platform</title>
+<meta name="description" content="Monitor Solana wallets in real time. Get alerts when whales move, smart money enters positions, and important ecosystem events happen.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+:root {
+  --bg:#040706; --s1:#070c09; --s2:#0a1009; --b1:#111c12; --b2:#172418; --b3:#1e3020;
+  --green:#00ff87; --gdim:#00d470; --red:#ff3d55; --yel:#f0bf30; --blu:#3d9fff; --ora:#ff7030;
+  --t0:#e0ede5; --t1:#6e9478; --t2:#344f3a; --t3:#182a1c;
+  --gfaint:rgba(0,255,135,0.055); --gfaint2:rgba(0,255,135,0.09);
+  --rfaint:rgba(255,61,85,0.09); --yfaint:rgba(240,191,48,0.09);
+  --bfaint:rgba(61,159,255,0.08); --ofaint:rgba(255,112,48,0.08);
+  --mono:'Space Mono',monospace; --head:'Syne',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t0);font-family:var(--mono);font-size:11px;line-height:1.5;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:9999}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* TOPBAR */
+.topbar{height:46px;display:flex;align-items:center;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0;z-index:100}
+.logo-block{width:192px;height:100%;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--b1);flex-shrink:0;cursor:pointer}
+.logo-mark{width:22px;height:22px;border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-dot{width:8px;height:8px;background:var(--green);box-shadow:0 0 10px var(--green),0 0 20px rgba(0,255,135,0.3);animation:breathe 3s ease infinite}
+.logo-text{font-family:var(--head);font-size:17px;font-weight:800;color:var(--t0);letter-spacing:-0.3px}
+.topbar-nav{display:flex;height:100%;flex:1;overflow:hidden}
+.tn{display:flex;align-items:center;gap:6px;padding:0 13px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;border-right:1px solid var(--b1);transition:all 0.12s;white-space:nowrap;background:none;border-top:none;border-left:none;font-family:var(--mono)}
+.tn:hover{color:var(--t1);background:var(--gfaint)}
+.tn.on{color:var(--green);border-bottom-color:var(--green);background:var(--gfaint)}
+.tnb{font-size:8px;font-weight:700;padding:1px 4px;border-radius:1px}
+.tnb-r{background:var(--red);color:#fff}
+.tb-right{display:flex;align-items:center;gap:8px;padding:0 14px;border-left:1px solid var(--b1);flex-shrink:0}
+.tb-btn{padding:5px 11px;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border:1px solid var(--b2);background:transparent;color:var(--t1);transition:all 0.12s}
+.tb-btn.cta{background:var(--green);color:#000;border-color:var(--green);font-weight:700}
+
+/* WORKSPACE */
+.workspace{display:grid;grid-template-columns:192px 1fr 252px;flex:1;overflow:hidden}
+
+/* LEFT PANEL */
+.left{border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;flex-shrink:0}
+.pro-block{padding:14px 14px 13px;background:linear-gradient(180deg,var(--gfaint2) 0%,var(--gfaint) 100%);border-bottom:1px solid var(--b2)}
+.pro-label{font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gdim);margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.5s ease infinite;flex-shrink:0}
+.pro-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.pro-key{font-size:10px;color:var(--t1)}
+.pro-val{font-size:11px;font-weight:700;color:var(--t0)}
+.pro-val.g{color:var(--green)}
+.pro-val.r{color:var(--red)}
+.limit-track{height:2px;background:var(--b2);margin:9px 0 4px}
+.limit-fill{height:100%;background:var(--green);box-shadow:0 0 6px rgba(0,255,135,0.5)}
+.limit-label{font-size:8px;color:var(--t2);margin-bottom:10px}
+.limit-label.warn{color:var(--red)}
+.btn-up{width:100%;background:transparent;border:1px solid rgba(0,255,135,0.22);color:var(--green);padding:7px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+.btn-up:hover{background:var(--green);color:#000}
+.ng{border-bottom:1px solid var(--b1);padding:8px 0}
+.ng-lbl{font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--t3);padding:0 14px;margin-bottom:3px}
+.nl{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;font-size:10px;color:var(--t1);cursor:pointer;transition:all 0.1s;text-decoration:none}
+.nl:hover{background:var(--gfaint);color:var(--t0)}
+.nl.on{background:var(--gfaint);color:var(--green)}
+.nl-l{display:flex;align-items:center;gap:8px}
+.nlb{font-size:8px;padding:1px 5px;border-radius:1px;font-weight:700}
+.nlb-r{background:var(--rfaint);border:1px solid var(--red);color:var(--red)}
+.nlb-g{background:var(--gfaint);border:1px solid var(--gdim);color:var(--gdim)}
+.nlb-n{background:var(--s2);border:1px solid var(--b2);color:var(--t2)}
+
+/* PAGES */
+.page{display:none;flex:1;overflow:hidden;flex-direction:column}
+.page.on{display:flex}
+
+/* CENTER */
+.center{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--b1);flex:1}
+.search{display:flex;align-items:center;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0;height:36px}
+.s-pre{padding:0 12px;font-size:9px;letter-spacing:0.12em;color:var(--green);border-right:1px solid var(--b1);height:100%;display:flex;align-items:center;flex-shrink:0}
+.s-in{flex:1;background:transparent;border:none;color:var(--t0);padding:0 13px;font-family:var(--mono);font-size:11px;outline:none}
+.s-in::placeholder{color:var(--t3)}
+.s-btns{display:flex;height:100%;border-left:1px solid var(--b1)}
+.s-btn{padding:0 13px;font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;background:transparent;border:none;border-right:1px solid var(--b1);color:var(--t2);cursor:pointer;transition:all 0.1s}
+.s-btn:last-child{border-right:none}
+.s-btn:hover{color:var(--t0);background:var(--gfaint)}
+.s-btn.p{color:var(--green);font-weight:700}
+.feed-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:34px;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0}
+.fh-l{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.11em;text-transform:uppercase;color:var(--t1)}
+.fh-count{color:var(--green);font-weight:700}
+.fh-r{display:flex;gap:2px}
+.ff{padding:3px 9px;font-family:var(--mono);font-size:8px;letter-spacing:0.09em;text-transform:uppercase;background:transparent;border:1px solid var(--b2);color:var(--t2);cursor:pointer;transition:all 0.1s}
+.ff.on{border-color:var(--green);color:var(--green);background:var(--gfaint)}
+.feed{flex:1;overflow-y:auto;overflow-x:hidden}
+
+/* EVENT CARD */
+.ev{display:grid;grid-template-columns:4px 1fr;border-bottom:1px solid var(--b1);cursor:pointer;transition:background 0.1s;animation:slidein 0.2s ease both}
+.ev:hover{background:var(--s2)}
+.ev.fresh{background:var(--gfaint)}
+.ev-stripe{flex-shrink:0}
+.es-g{background:var(--green)}
+.es-r{background:var(--red)}
+.es-y{background:var(--yel)}
+.es-b{background:var(--blu)}
+.ev-inner{display:grid;grid-template-columns:52px 1fr auto}
+.ev-signal{display:flex;flex-direction:column;align-items:center;padding:16px 0 16px 14px}
+.sig{width:36px;height:36px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sig-g{background:var(--gfaint2)}
+.sig-r{background:var(--rfaint)}
+.sig-y{background:var(--yfaint)}
+.sig-b{background:var(--bfaint)}
+.ev-body{padding:14px 14px 14px 10px}
+.ev-type{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.et-chip{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;padding:2px 7px;font-weight:700;border-radius:1px}
+.etc-g{background:var(--gfaint2);color:var(--green);border:1px solid rgba(0,255,135,0.2)}
+.etc-r{background:var(--rfaint);color:var(--red);border:1px solid rgba(255,61,85,0.2)}
+.etc-y{background:var(--yfaint);color:var(--yel);border:1px solid rgba(240,191,48,0.2)}
+.etc-b{background:var(--bfaint);color:var(--blu);border:1px solid rgba(61,159,255,0.2)}
+.et-new{font-size:8px;font-weight:700;letter-spacing:0.08em;background:var(--green);color:#000;padding:2px 6px;animation:flash 1.5s ease 3}
+.ev-headline{font-family:var(--head);font-size:14px;font-weight:700;color:var(--t0);line-height:1.3;margin-bottom:6px}
+.ev-number{display:flex;align-items:baseline;gap:5px;margin:8px 0 6px}
+.evn-val{font-family:var(--head);font-size:20px;font-weight:800;line-height:1}
+.evn-g{color:var(--green);text-shadow:0 0 20px rgba(0,255,135,0.3)}
+.evn-r{color:var(--red)}
+.evn-y{color:var(--yel)}
+.evn-label{font-size:10px;color:var(--t1)}
+.ev-detail{font-size:10px;color:var(--t1);line-height:1.6}
+.ev-right{padding:14px 14px 14px 0;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;min-width:90px}
+.ev-time{font-size:9px;color:var(--t2)}
+.ev-cta{font-size:8px;letter-spacing:0.09em;text-transform:uppercase;border:1px solid var(--b2);padding:4px 9px;color:var(--t2);background:transparent;cursor:pointer;font-family:var(--mono);transition:all 0.1s}
+.ev:hover .ev-cta{border-color:var(--green);color:var(--green)}
+.ev.blurred{opacity:0.28;filter:blur(0.8px);pointer-events:none}
+.locked-gate{border-bottom:1px solid var(--b2);background:var(--s1)}
+.lg-bar{height:3px;background:linear-gradient(90deg,var(--yel),var(--red))}
+.lg-body{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;gap:16px}
+.lg-text{font-size:11px;color:var(--t1);line-height:1.5}
+.lg-text strong{color:var(--t0);font-family:var(--head);font-size:13px}
+.lg-btn{padding:8px 16px;background:var(--green);color:#000;border:none;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0}
+
+/* UPGRADE CTA STRIP */
+.up-cta{flex-shrink:0;border-top:1px solid var(--b2);background:linear-gradient(180deg,var(--gfaint) 0%,transparent 100%);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.uc-headline{font-family:var(--head);font-size:13px;font-weight:700;color:var(--t0);margin-bottom:6px}
+.uc-feats{display:flex;flex-wrap:wrap;gap:4px}
+.uc-feat{font-size:9px;color:var(--gdim);border:1px solid var(--b2);padding:2px 7px}
+.uc-feat::before{content:'✓ '}
+.uc-price{font-family:var(--head);font-size:26px;font-weight:800;color:var(--green);line-height:1}
+.uc-note{font-size:9px;color:var(--t2);margin-bottom:8px}
+.uc-btn{background:var(--green);color:#000;border:none;padding:8px 16px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.dex-strip{height:26px;border-top:1px solid var(--b1);background:var(--s1);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.ds-t{font-size:9px;color:var(--t2);flex:1}
+.ds-t strong{color:var(--t1)}
+.ds-l{font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--t2);text-decoration:none;border:1px solid var(--b2);padding:2px 8px;transition:all 0.1s}
+.ds-l:hover{border-color:var(--yel);color:var(--yel)}
+
+/* RIGHT PANEL */
+.right{display:flex;flex-direction:column;overflow:hidden}
+.rp{border-bottom:1px solid var(--b1);flex-shrink:0}
+.rp.scroll{flex:1;overflow-y:auto;min-height:0}
+.rp-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-bottom:1px solid var(--b1);background:var(--s1);position:sticky;top:0;z-index:10}
+.rp-title{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--t2);display:flex;align-items:center;gap:6px}
+.rp-act{font-size:8px;letter-spacing:0.09em;text-transform:uppercase;color:var(--t2);text-decoration:none;cursor:pointer;transition:color 0.1s}
+.rp-act:hover{color:var(--green)}
+.today-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b1)}
+.tg-item{background:var(--s1);padding:11px 13px;display:flex;flex-direction:column;gap:3px}
+.tg-val{font-family:var(--head);font-size:22px;font-weight:800;line-height:1}
+.tg-val.g{color:var(--green)}
+.tg-val.r{color:var(--red)}
+.tg-val.y{color:var(--yel)}
+.tg-val.w{color:var(--t0)}
+.tg-label{font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--t2)}
+.tg-sub{font-size:9px;color:var(--t1)}
+.wi{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background 0.1s}
+.wi:hover{background:var(--gfaint)}
+.wi-pulse{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.wp-on{background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite}
+.wi-av{width:26px;height:26px;background:var(--s2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--t1);flex-shrink:0}
+.wi-info{flex:1;min-width:0}
+.wi-name{font-size:10px;color:var(--t0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi-sub{font-size:9px;color:var(--t2)}
+.wi-add{display:flex;align-items:center;gap:7px;padding:8px 13px;font-size:9px;color:var(--t3);cursor:pointer;letter-spacing:0.08em;text-transform:uppercase}
+.wi-add:hover{color:var(--green)}
+.at{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background 0.1s}
+.at:hover{background:var(--gfaint)}
+.at-lbl{font-size:10px;color:var(--t1)}
+.at-lbl.dim{opacity:0.35}
+.tog{width:28px;height:14px;border-radius:7px;background:var(--b2);position:relative;transition:background 0.18s;flex-shrink:0}
+.tog.on{background:var(--green)}
+.tog::after{content:'';position:absolute;top:2px;width:10px;height:10px;background:#fff;border-radius:50%;transition:left 0.18s}
+.tog.on::after{left:16px}
+.tog:not(.on)::after{left:2px}
+.at-lock{font-size:8px;color:var(--t3);border:1px solid var(--b1);padding:1px 5px;cursor:pointer}
+
+/* STATUS BAR */
+.statusbar{height:24px;background:var(--s1);border-top:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
+.sb-l,.sb-r{display:flex;align-items:center;gap:16px}
+.sbi{font-size:8px;letter-spacing:0.09em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:5px}
+.sd{width:4px;height:4px;border-radius:50%}
+.sdg{background:var(--green);box-shadow:0 0 4px var(--green)}
+.sdy{background:var(--yel)}
+
+/* ALERTS PAGE */
+.alert-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0}
+.alert-item{display:grid;grid-template-columns:4px 1fr;border-bottom:1px solid var(--b1);cursor:pointer;transition:background 0.1s}
+.alert-item:hover{background:var(--s2)}
+.alert-item.unread{background:var(--gfaint)}
+.ai-body{padding:13px 16px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.ai-type{font-size:8px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;margin-bottom:5px}
+.ai-title{font-family:var(--head);font-size:13px;font-weight:700;color:var(--t0);margin-bottom:4px}
+.ai-detail{font-size:10px;color:var(--t1);line-height:1.5}
+.ai-amount{font-family:var(--head);font-size:16px;font-weight:800;line-height:1;margin-bottom:4px}
+.ai-time{font-size:9px;color:var(--t2)}
+.delay-banner{padding:10px 16px;background:var(--yfaint);border-bottom:1px solid rgba(240,191,48,0.2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+
+/* WALLET PAGE */
+.wallet-search{display:flex;align-items:center;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0;height:50px;padding:0 16px;gap:10px}
+.w-pre{font-size:9px;letter-spacing:0.12em;color:var(--green);flex-shrink:0}
+.w-in{flex:1;background:var(--s2);border:1px solid var(--b2);color:var(--t0);padding:8px 12px;font-family:var(--mono);font-size:12px;outline:none}
+.w-btn{padding:8px 16px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;cursor:pointer}
+.w-btn.cta{background:var(--green);color:#000;border:none;font-weight:700}
+.wallet-content{flex:1;overflow-y:auto;padding:0 0 24px}
+.w-inner{max-width:800px;margin:0 auto;padding:20px 16px}
+.risk-block{background:var(--s1);border:1px solid var(--b2);padding:20px 24px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden;margin-bottom:16px}
+.risk-stripe{position:absolute;left:0;top:0;bottom:0;width:3px}
+.risk-score{font-family:var(--head);font-size:56px;font-weight:800;line-height:1;min-width:80px}
+.risk-label{font-family:var(--head);font-size:16px;font-weight:700;color:var(--t0);margin-bottom:4px}
+.risk-sub{font-size:11px;color:var(--t1);margin-bottom:12px}
+.risk-stats{display:flex;gap:12px}
+.rs-item{}
+.rs-label{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.rs-val{font-size:16px;font-weight:700;color:var(--t0)}
+.tx-row{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:12px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);margin-bottom:1px}
+.tx-sig{font-size:11px;color:var(--t0);font-family:var(--mono)}
+.tx-time{font-size:10px;color:var(--t1)}
+.tx-status{font-size:10px}
+.monitor-cta{background:var(--gfaint2);border:1px solid rgba(0,255,135,0.2);padding:18px 20px;margin-top:16px}
+.mc-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--t0);margin-bottom:8px}
+.mc-sub{font-size:11px;color:var(--t1);line-height:1.6;margin-bottom:14px}
+.mc-feats{list-style:none;margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
+.mc-feat{font-size:11px;color:var(--t1);display:flex;align-items:center;gap:8px}
+.mc-btn{width:100%;background:var(--green);color:#000;border:none;padding:10px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer}
+.empty-state{text-align:center;padding:60px 20px}
+.es-icon{font-size:40px;margin-bottom:16px}
+.es-title{font-family:var(--head);font-size:20px;font-weight:700;color:var(--t0);margin-bottom:8px}
+.es-sub{font-size:12px;color:var(--t1);margin-bottom:24px;line-height:1.6}
+.es-examples{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.es-ex{padding:6px 12px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-family:var(--mono);font-size:9px;cursor:pointer}
+
+/* WATCHLISTS PAGE */
+.wl-layout{display:flex;flex:1;overflow:hidden}
+.wl-sidebar{width:260px;border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden}
+.wl-sidebar-hdr{padding:8px 13px;border-bottom:1px solid var(--b1);background:var(--s1);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--t2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.wl-list{flex:1;overflow-y:auto}
+.wl-item{padding:10px 13px;border-bottom:1px solid var(--b1);cursor:pointer;border-left:3px solid transparent;transition:all 0.1s}
+.wl-item:hover{background:var(--gfaint)}
+.wl-item.on{background:var(--gfaint);border-left-color:var(--green)}
+.wl-name{font-size:11px;color:var(--t0);margin-bottom:2px}
+.wl-count{font-size:9px;color:var(--t2)}
+.wl-create{padding:10px 13px;border-top:1px solid var(--b1);flex-shrink:0}
+.wl-create-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--t2);margin-bottom:6px}
+.wl-create-row{display:flex;gap:6px}
+.wl-input{flex:1;background:var(--s2);border:1px solid var(--b2);color:var(--t0);padding:5px 8px;font-family:var(--mono);font-size:10px;outline:none}
+.wl-add-btn{padding:5px 9px;background:var(--green);color:#000;border:none;font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer}
+.wl-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.wl-main-hdr{padding:0 16px;height:44px;border-bottom:1px solid var(--b1);background:var(--s1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.wl-main-title{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t1);display:flex;align-items:center;gap:8px}
+.wl-addr-input{display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--b1);background:var(--s1);flex-shrink:0}
+.wl-addr-in{flex:1;background:var(--s2);border:1px solid var(--b2);color:var(--t0);padding:8px 12px;font-family:var(--mono);font-size:11px;outline:none}
+.wl-watch-btn{padding:8px 14px;background:var(--green);color:#000;border:none;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer}
+.wl-wallets{flex:1;overflow-y:auto}
+.wl-wallet-row{display:grid;grid-template-columns:8px 36px 1fr auto;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--b1);transition:background 0.1s}
+.wl-wallet-row:hover{background:var(--s2)}
+.wl-w-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite}
+.wl-w-av{width:32px;height:32px;background:var(--s2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--t1)}
+.wl-w-addr{font-size:11px;color:var(--t0);font-family:var(--mono);margin-bottom:2px}
+.wl-w-sub{font-size:9px;color:var(--t2)}
+.wl-w-btns{display:flex;gap:6px}
+.wl-view-btn{font-size:8px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--b2);padding:3px 8px;color:var(--t2);background:none;cursor:pointer;font-family:var(--mono)}
+.wl-remove-btn{font-size:8px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--rfaint);padding:3px 8px;color:var(--red);background:var(--rfaint);cursor:pointer;font-family:var(--mono)}
+
+/* PRICING PAGE */
+.pricing-wrap{flex:1;overflow-y:auto}
+.pricing-inner{max-width:860px;margin:0 auto;padding:40px 20px 60px}
+.pricing-hdr{text-align:center;margin-bottom:40px}
+.pricing-eyebrow{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gdim);margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.pricing-title{font-family:var(--head);font-size:36px;font-weight:800;color:var(--t0);letter-spacing:-0.04em;line-height:1.1;margin-bottom:12px}
+.pricing-sub{font-size:13px;color:var(--t1);line-height:1.6;max-width:480px;margin:0 auto}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px}
+.plan-card{padding:24px 20px;border-radius:4px;border:1px solid var(--b2);background:var(--s1);position:relative;display:flex;flex-direction:column}
+.plan-card.highlight{border:1.5px solid rgba(0,255,135,0.40);background:linear-gradient(135deg,rgba(0,255,135,0.07),rgba(0,0,0,0))}
+.plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:700;padding:2px 10px;border-radius:999px;letter-spacing:0.08em;white-space:nowrap}
+.pb-yearly{background:linear-gradient(135deg,var(--green),#00e87a);color:#020508}
+.pb-monthly{background:rgba(153,69,255,0.22);color:#c4a8ff;border:1px solid rgba(153,69,255,0.40)}
+.pb-weekly{background:rgba(0,255,135,0.10);color:var(--green);border:1px solid rgba(0,255,135,0.22)}
+.plan-name{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--t2);margin-bottom:8px}
+.plan-card.highlight .plan-name{color:var(--gdim)}
+.plan-price-row{display:flex;align-items:baseline;gap:4px;margin-bottom:4px}
+.plan-price{font-family:var(--head);font-size:32px;font-weight:800;color:var(--t0);line-height:1}
+.plan-card.highlight .plan-price{color:var(--green)}
+.plan-period{font-size:11px;color:var(--t2)}
+.plan-desc{font-size:11px;color:var(--t1);margin-bottom:20px;line-height:1.4}
+.plan-feats{list-style:none;flex:1;margin-bottom:20px;display:flex;flex-direction:column;gap:6px}
+.plan-feat{font-size:11px;color:var(--t1);display:flex;gap:8px;align-items:flex-start}
+.plan-feat-check{color:var(--green);flex-shrink:0;font-size:10px}
+.plan-btn{width:100%;padding:10px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;border:none}
+.plan-btn:hover{filter:brightness(1.1)}
+.faq-section{border-top:1px solid var(--b1);padding-top:32px}
+.faq-title{text-align:center;margin-bottom:24px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t2)}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:700px;margin:0 auto}
+.faq-item{padding:14px;background:var(--s1);border:1px solid var(--b1)}
+.faq-q{font-size:11px;font-weight:700;color:var(--t0);margin-bottom:6px}
+.faq-a{font-size:10px;color:var(--t1);line-height:1.6}
+.trust-strip{margin-top:24px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.trust-item{font-size:9px;color:var(--t2);letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.trust-check{color:var(--gdim)}
+
+/* UPGRADE MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.on{display:flex}
+.modal-box{background:linear-gradient(180deg,rgba(6,12,26,0.98) 0%,rgba(2,5,8,0.99) 100%);border:1px solid rgba(0,255,135,0.14);border-radius:4px;padding:24px;max-width:560px;width:100%;box-shadow:0 0 32px rgba(0,255,135,0.10),0 22px 56px rgba(0,0,0,0.60);max-height:90vh;overflow-y:auto}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.modal-title{font-family:var(--head);font-size:20px;font-weight:800;color:var(--t0);margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--t1);line-height:1.5}
+.modal-close{background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:0 0 0 16px;flex-shrink:0}
+.plan-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
+.ps-card{padding:13px 12px;border:1px solid var(--b2);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.12s}
+.ps-card.on{border:1.5px solid rgba(0,255,135,0.46);background:linear-gradient(135deg,rgba(0,255,135,0.09),rgba(0,0,0,0))}
+.ps-badge{font-size:8px;font-weight:700;padding:2px 7px;border-radius:999px;margin-bottom:4px;display:inline-block}
+.ps-label{font-size:13px;font-weight:900;color:var(--t0);margin-bottom:2px}
+.ps-card.on .ps-label{color:var(--green)}
+.ps-price{font-size:12px;font-weight:700;color:var(--t0)}
+.ps-note{font-size:10px;color:var(--t2);margin-bottom:8px}
+.ps-feats{list-style:none;display:flex;flex-direction:column;gap:4px}
+.ps-feat{font-size:10px;color:var(--t1);display:flex;gap:5px}
+.ps-feat-check{color:var(--gdim)}
+.modal-cta{width:100%;background:var(--green);color:#000;border:none;padding:12px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;margin-bottom:10px}
+.modal-trust{display:flex;justify-content:center;gap:16px;font-size:9px;color:var(--t2);margin-bottom:12px}
+.modal-restore-link{background:none;border:none;font-family:var(--mono);font-size:10px;color:var(--t2);cursor:pointer;letter-spacing:0.06em;text-decoration:underline;text-decoration-color:var(--b2);display:block;margin:0 auto}
+.checkout-wrap{min-height:400px;border-radius:4px;overflow:hidden}
+.restore-wrap{}
+.restore-row{display:flex;gap:8px;margin-bottom:10px}
+.restore-in{flex:1;background:var(--s2);border:1px solid var(--b2);color:var(--t0);padding:10px 12px;font-family:var(--mono);font-size:12px;outline:none}
+.restore-btn{padding:10px 16px;background:var(--green);color:#000;border:none;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;flex-shrink:0}
+.restore-note{font-size:10px;color:var(--t2);line-height:1.6;margin-bottom:12px}
+.restore-back{background:none;border:none;font-family:var(--mono);font-size:10px;color:var(--t2);cursor:pointer;letter-spacing:0.06em}
+.restore-success{padding:16px;background:var(--gfaint2);border:1px solid rgba(0,255,135,0.2);text-align:center}
+.restore-success-icon{font-size:20px;margin-bottom:8px}
+.restore-success-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--green);margin-bottom:4px}
+.restore-success-sub{font-size:11px;color:var(--t1)}
+.msg-warn{font-size:11px;color:var(--yel);margin-bottom:8px}
+.msg-err{font-size:11px;color:var(--red);margin-bottom:8px}
+.back-btn{margin-top:10px;padding:7px 12px;border:1px solid var(--b2);background:rgba(255,255,255,0.04);color:var(--t1);font-size:11px;cursor:pointer;font-family:var(--mono)}
+
+/* ANIMATIONS */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.15}}
+@keyframes breathe{0%,100%{box-shadow:0 0 8px var(--green),0 0 20px rgba(0,255,135,0.2)}50%{box-shadow:0 0 14px var(--green),0 0 32px rgba(0,255,135,0.4)}}
+@keyframes slidein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes fadedown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-block" onclick="showPage('feed')">
+    <div class="logo-mark"><div class="logo-dot"></div></div>
+    <div class="logo-text">SOLINTEL</div>
+  </div>
+  <div class="topbar-nav">
+    <button class="tn on" id="tn-feed" onclick="showPage('feed')">⚡ Feed</button>
+    <button class="tn" id="tn-alerts" onclick="showPage('alerts')">🔔 Alerts <span class="tnb tnb-r">7</span></button>
+    <button class="tn" id="tn-watchlists" onclick="showPage('watchlists')">👁 Watchlists</button>
+    <button class="tn" id="tn-wallet" onclick="showPage('wallet')">🔍 Wallet Lookup</button>
+    <button class="tn" id="tn-pricing" onclick="showPage('pricing')">💎 Pricing</button>
+  </div>
+  <div class="tb-right">
+    <button class="tb-btn" onclick="openModal('restore')">Sign In</button>
+    <button class="tb-btn cta" onclick="openModal('plans')">Start Monitoring →</button>
+  </div>
+</div>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+<!-- LEFT PANEL (shared) -->
+<div class="left">
+  <div class="pro-block">
+    <div class="pro-label"><div class="live-dot"></div><span id="plan-label">Free Plan</span></div>
+    <div class="pro-row"><div class="pro-key">Wallets tracked</div><div class="pro-val g" id="wallet-count-display">0 / 3</div></div>
+    <div class="pro-row"><div class="pro-key">Alerts today</div><div class="pro-val r">7 fired</div></div>
+    <div class="pro-row"><div class="pro-key">Feed events</div><div class="pro-val">47 today</div></div>
+    <div class="limit-track"><div class="limit-fill" id="limit-fill" style="width:0%"></div></div>
+    <div class="limit-label" id="limit-label">0 slots remaining</div>
+    <button class="btn-up" onclick="openModal('plans')" id="upgrade-btn">Upgrade to Unlimited →</button>
+  </div>
+  <div class="ng">
+    <div class="ng-lbl">Monitor</div>
+    <a class="nl on" id="nl-feed" onclick="showPage('feed')"><div class="nl-l"><span>⚡</span>Feed</div><div class="nlb nlb-g">47</div></a>
+    <a class="nl" id="nl-alerts" onclick="showPage('alerts')"><div class="nl-l"><span>🔔</span>Alerts Center</div><div class="nlb nlb-r">7</div></a>
+    <a class="nl" id="nl-watchlists" onclick="showPage('watchlists')"><div class="nl-l"><span>👁</span>Watchlists</div></a>
+    <a class="nl" id="nl-wallet" onclick="showPage('wallet')"><div class="nl-l"><span>🐋</span>Smart Money</div></a>
+  </div>
+  <div class="ng">
+    <div class="ng-lbl">Research</div>
+    <a class="nl" onclick="showPage('wallet')"><div class="nl-l"><span>🔍</span>Wallet Lookup</div></a>
+    <a class="nl" onclick="showPage('pricing')"><div class="nl-l"><span>💎</span>Pricing</div></a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: FEED
+════════════════════════════════════ -->
+<div class="page on" id="page-feed" style="display:flex;flex:1;overflow:hidden">
+  <div class="center">
+    <div class="search">
+      <div class="s-pre">SOL://</div>
+      <input class="s-in" id="feed-search" placeholder="Search wallet, protocol, treasury, entity…">
+      <div class="s-btns">
+        <button class="s-btn" onclick="goAnalyze()">Analyze</button>
+        <button class="s-btn p" onclick="goWatch()">Watch →</button>
+      </div>
+    </div>
+    <div class="feed-hdr">
+      <div class="fh-l"><div class="live-dot"></div>Live Intelligence Feed<span class="fh-count" id="feed-count">47 events today · 2 unread</span></div>
+      <div class="fh-r">
+        <button class="ff on" onclick="filterFeed(this,'all')">All</button>
+        <button class="ff" onclick="filterFeed(this,'whale')">Whale</button>
+        <button class="ff" onclick="filterFeed(this,'smart')">Smart$</button>
+        <button class="ff" onclick="filterFeed(this,'treasury')">Treasury</button>
+        <button class="ff" onclick="filterFeed(this,'gov')">Gov</button>
+      </div>
+    </div>
+    <div class="feed" id="feed-list"></div>
+    <div class="up-cta">
+      <div>
+        <div class="uc-headline">Never miss an important Solana event again.</div>
+        <div class="uc-feats">
+          <div class="uc-feat">Never miss a whale move</div>
+          <div class="uc-feat">Alerts within seconds</div>
+          <div class="uc-feat">Unlimited wallet tracking</div>
+          <div class="uc-feat">Governance monitoring</div>
+          <div class="uc-feat">Treasury alerts</div>
+        </div>
+      </div>
+      <div style="flex-shrink:0;text-align:right">
+        <div class="uc-price">$11.99</div>
+        <div class="uc-note">/ month · cancel anytime</div>
+        <button class="uc-btn" onclick="openModal('plans')">Start Monitoring →</button>
+      </div>
+    </div>
+    <div class="dex-strip">
+      <div class="ds-t">Intelligence found a position worth acting on? <strong>Execute instantly on swap.verixiaapps.com</strong></div>
+      <a href="https://swap.verixiaapps.com" target="_blank" class="ds-l">Open DEX →</a>
+    </div>
+  </div>
+  <div class="right">
+    <div class="rp">
+      <div class="rp-hdr"><div class="rp-title"><div class="live-dot"></div>Today's Activity</div></div>
+      <div class="today-grid">
+        <div class="tg-item"><div class="tg-val g">47</div><div class="tg-label">Events</div><div class="tg-sub">12 unread</div></div>
+        <div class="tg-item"><div class="tg-val r">7</div><div class="tg-label">Your Alerts</div><div class="tg-sub">3 critical</div></div>
+        <div class="tg-item"><div class="tg-val g">5</div><div class="tg-label">Whale Actions</div><div class="tg-sub">3 buys · 2 exits</div></div>
+        <div class="tg-item"><div class="tg-val y">3</div><div class="tg-label">Gov Proposals</div><div class="tg-sub">1 vote open</div></div>
+        <div class="tg-item"><div class="tg-val w">$28M</div><div class="tg-label">Treasury Moved</div><div class="tg-sub">4 transactions</div></div>
+        <div class="tg-item"><div class="tg-val g">8</div><div class="tg-label">Smart Entries</div><div class="tg-sub">2 exits detected</div></div>
+      </div>
+    </div>
+    <div class="rp">
+      <div class="rp-hdr"><div class="rp-title">My Watchlist</div><a class="rp-act" onclick="showPage('watchlists')">Manage →</a></div>
+      <div id="watchlist-preview"></div>
+      <div class="wi-add" onclick="showPage('watchlists')">+ Add wallet or entity</div>
+    </div>
+    <div class="rp scroll">
+      <div class="rp-hdr"><div class="rp-title">Alert Configuration</div></div>
+      <div class="at"><div class="at-lbl">🐋 Whale movements</div><div class="tog on"></div></div>
+      <div class="at"><div class="at-lbl">💡 Smart wallet entry</div><div class="tog on"></div></div>
+      <div class="at"><div class="at-lbl">⚠️ Smart wallet exit</div><div class="tog on"></div></div>
+      <div class="at"><div class="at-lbl">🏛 Governance proposals</div><div class="tog on"></div></div>
+      <div class="at"><div class="at-lbl">🏦 Treasury activity</div><div class="tog on"></div></div>
+      <div class="at"><div class="at-lbl dim">⚙️ Protocol updates</div><div class="at-lock" onclick="openModal('plans')">Pro</div></div>
+      <div class="at"><div class="at-lbl dim">📡 Ecosystem events</div><div class="at-lock" onclick="openModal('plans')">Pro</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: ALERTS
+════════════════════════════════════ -->
+<div class="page" id="page-alerts" style="display:none;flex:1;overflow:hidden">
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;border-right:1px solid var(--b1)">
+    <div class="alert-hdr">
+      <div style="display:flex;align-items:center;gap:10px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t1)">
+        <div class="live-dot"></div>Alerts Center
+        <span style="background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:1px">3 unread</span>
+      </div>
+      <button style="font-size:9px;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--b2);color:var(--t2);padding:4px 10px;cursor:pointer;font-family:var(--mono)" onclick="markAllRead()">Mark all read</button>
+    </div>
+    <div class="delay-banner" id="delay-banner">
+      <div style="font-size:11px;color:var(--yel)">⏱ Free plan: alerts delayed 60 minutes. <span style="color:var(--t1)">Upgrade for real-time alerts.</span></div>
+      <button style="padding:5px 12px;background:var(--green);color:#000;border:none;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;flex-shrink:0" onclick="openModal('plans')">Get Real-Time →</button>
+    </div>
+    <div style="flex:1;overflow-y:auto" id="alerts-list"></div>
+  </div>
+  <div style="width:252px;overflow-y:auto;border-left:1px solid var(--b1)">
+    <div style="padding:8px 13px;border-bottom:1px solid var(--b1);background:var(--s1);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--t2);position:sticky;top:0;z-index:10">Alert Configuration</div>
+    <div class="at"><div class="at-lbl">🐋 Whale movements</div><div class="tog on"></div></div>
+    <div class="at"><div class="at-lbl">💡 Smart wallet entry</div><div class="tog on"></div></div>
+    <div class="at"><div class="at-lbl">⚠️ Smart wallet exit</div><div class="tog on"></div></div>
+    <div class="at"><div class="at-lbl">🏛 Governance proposals</div><div class="tog on"></div></div>
+    <div class="at"><div class="at-lbl">🏦 Treasury activity</div><div class="tog on"></div></div>
+    <div class="at"><div class="at-lbl dim">⚙️ Protocol updates</div><div class="at-lock" onclick="openModal('plans')">Pro</div></div>
+    <div class="at"><div class="at-lbl dim">📡 Ecosystem events</div><div class="at-lock" onclick="openModal('plans')">Pro</div></div>
+    <div style="margin:12px;border:1px solid rgba(0,255,135,0.2);background:var(--gfaint);padding:14px" id="alerts-upgrade-card">
+      <div style="font-family:var(--head);font-size:13px;font-weight:700;color:var(--t0);margin-bottom:6px">Get Real-Time Alerts</div>
+      <div style="font-size:10px;color:var(--t1);line-height:1.5;margin-bottom:10px">Free plan: 60min delay.<br>Pro: alerts within seconds.</div>
+      <button style="width:100%;background:var(--green);color:#000;border:none;padding:8px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" onclick="openModal('plans')">Upgrade — $11.99/mo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: WATCHLISTS
+════════════════════════════════════ -->
+<div class="page" id="page-watchlists" style="display:none;flex:1;overflow:hidden">
+  <div class="wl-layout">
+    <div class="wl-sidebar">
+      <div class="wl-sidebar-hdr"><span>My Watchlists (1/1)</span></div>
+      <div class="wl-list" id="wl-list">
+        <div class="wl-item on"><div class="wl-name">My Wallets</div><div class="wl-count">0 wallets</div></div>
+      </div>
+      <div class="wl-create">
+        <div class="wl-create-lbl">New Watchlist</div>
+        <div class="wl-create-row">
+          <input class="wl-input" id="new-list-name" placeholder="Smart Money, Whales…" onkeydown="if(event.key==='Enter')createWatchlist()">
+          <button class="wl-add-btn" onclick="createWatchlist()">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="wl-main">
+      <div class="wl-main-hdr">
+        <div class="wl-main-title"><div class="live-dot"></div><span id="monitored-count-display">Monitored Wallets (0/3)</span></div>
+        <button style="padding:5px 12px;background:var(--green);color:#000;border:none;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;display:none" id="upgrade-wallets-btn" onclick="openModal('plans')">Upgrade for Unlimited →</button>
+      </div>
+      <div class="wl-addr-input">
+        <input class="wl-addr-in" id="new-wallet-addr" placeholder="Paste Solana wallet address to monitor…" onkeydown="if(event.key==='Enter')addWallet()">
+        <button class="wl-watch-btn" id="watch-btn" onclick="addWallet()">Watch Wallet →</button>
+      </div>
+      <div class="wl-wallets" id="wl-wallets">
+        <div style="padding:40px 20px;text-align:center">
+          <div style="font-size:24px;margin-bottom:12px">👁</div>
+          <div style="font-family:var(--head);font-size:16px;font-weight:700;color:var(--t0);margin-bottom:6px">No wallets monitored yet</div>
+          <div style="font-size:11px;color:var(--t1);line-height:1.6">Paste a Solana wallet address above to start monitoring.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: WALLET LOOKUP
+════════════════════════════════════ -->
+<div class="page" id="page-wallet" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+  <div class="wallet-search">
+    <div class="w-pre">SOL://</div>
+    <input class="w-in" id="wallet-addr-input" placeholder="Enter Solana wallet address…" onkeydown="if(event.key==='Enter')analyzeWallet()">
+    <button class="w-btn" onclick="analyzeWallet()">Analyze</button>
+    <button class="w-btn cta" id="monitor-btn" onclick="monitorCurrentWallet()">Watch Wallet →</button>
+  </div>
+  <div class="wallet-content">
+    <div class="w-inner" id="wallet-result">
+      <div class="empty-state">
+        <div class="es-icon">🔍</div>
+        <div class="es-title">Wallet Intelligence</div>
+        <div class="es-sub">Enter any Solana wallet address to view activity,<br>assess risk, and start monitoring.</div>
+        <div style="font-size:10px;color:var(--t2);margin-bottom:12px">Try a known wallet:</div>
+        <div class="es-examples">
+          <button class="es-ex" onclick="loadExample('mvines9iiHiQTysrwkJjGf2gb9Ex9jXJX8ns3qwf2kN')">Solana Foundation</button>
+          <button class="es-ex" onclick="loadExample('CuieVDEDtLo7FypDy3rSJCJ9NyY6BPRYonGLqd5UYMF')">Alameda Research</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: PRICING
+════════════════════════════════════ -->
+<div class="page" id="page-pricing" style="display:none;flex:1;overflow:hidden">
+  <div class="pricing-wrap">
+    <div class="pricing-inner">
+      <div class="pricing-hdr">
+        <div class="pricing-eyebrow"><div class="live-dot"></div>Monitoring Plans</div>
+        <h1 class="pricing-title">Never Miss an Important<br>Solana Event Again</h1>
+        <p class="pricing-sub">Monitor wallets, get real-time alerts, track smart money, governance, and treasury activity. Cancel anytime.</p>
+      </div>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div class="plan-badge pb-weekly">Try It</div>
+          <div class="plan-name">Weekly</div>
+          <div class="plan-price-row"><span class="plan-price">$3.99</span><span class="plan-period">/week</span></div>
+          <div class="plan-desc">Try it with no commitment</div>
+          <ul class="plan-feats">
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Unlimited wallets monitored</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Real-time alerts</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Unlimited watchlists</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Cancel anytime</li>
+          </ul>
+          <button class="plan-btn" style="background:rgba(0,255,135,0.10);border:1px solid rgba(0,255,135,0.22);color:var(--green)" onclick="openModal('plans','weekly')">Try It Weekly</button>
+        </div>
+        <div class="plan-card">
+          <div class="plan-badge pb-monthly">Popular</div>
+          <div class="plan-name">Monthly</div>
+          <div class="plan-price-row"><span class="plan-price">$11.99</span><span class="plan-period">/month</span></div>
+          <div class="plan-desc">For active Solana participants</div>
+          <ul class="plan-feats">
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Unlimited wallets monitored</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Real-time alerts</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Unlimited watchlists</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Smart money tracking</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Treasury monitoring</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Cancel anytime</li>
+          </ul>
+          <button class="plan-btn" style="background:rgba(153,69,255,0.22);border:1px solid rgba(153,69,255,0.40);color:#c4a8ff" onclick="openModal('plans','monthly')">Start Monitoring</button>
+        </div>
+        <div class="plan-card highlight">
+          <div class="plan-badge pb-yearly">Save 80%</div>
+          <div class="plan-name">Yearly</div>
+          <div class="plan-price-row"><span class="plan-price">$39.99</span><span class="plan-period">/year</span></div>
+          <div class="plan-desc">Best value — under $4/mo</div>
+          <ul class="plan-feats">
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Unlimited wallets monitored</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Real-time alerts</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Unlimited watchlists</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Smart money tracking</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Treasury monitoring</li>
+            <li class="plan-feat"><span class="plan-feat-check">✓</span>Save 80% vs weekly</li>
+          </ul>
+          <button class="plan-btn" style="background:var(--green);color:#000" onclick="openModal('plans','yearly')">Get Best Value</button>
+        </div>
+      </div>
+      <div class="faq-section">
+        <div class="faq-title">Common Questions</div>
+        <div class="faq-grid">
+          <div class="faq-item"><div class="faq-q">What counts as a monitored wallet?</div><div class="faq-a">Any Solana wallet address you add to your watchlist. You'll receive alerts whenever it makes a significant move.</div></div>
+          <div class="faq-item"><div class="faq-q">How fast are real-time alerts?</div><div class="faq-a">Paid plan alerts fire within seconds of an on-chain event being confirmed. Free plan alerts are delayed 60 minutes.</div></div>
+          <div class="faq-item"><div class="faq-q">Can I cancel anytime?</div><div class="faq-a">Yes. Cancel from your account at any time. Your access continues until the end of the billing period.</div></div>
+          <div class="faq-item"><div class="faq-q">What data sources do you use?</div><div class="faq-a">Helius RPC and Jupiter price feeds — industry-standard Solana infrastructure. All data is fully verifiable on-chain.</div></div>
+        </div>
+      </div>
+      <div class="trust-strip">
+        <span class="trust-item"><span class="trust-check">✓</span>Stripe Secured</span>
+        <span class="trust-item"><span class="trust-check">✓</span>Cancel Anytime</span>
+        <span class="trust-item"><span class="trust-check">✓</span>No Hidden Fees</span>
+        <span class="trust-item"><span class="trust-check">✓</span>Helius-Powered</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /workspace -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="sb-l">
+    <div class="sbi"><div class="sd sdg"></div>RPC Live</div>
+    <div class="sbi"><div class="sd sdg"></div>Feed Active</div>
+    <div class="sbi"><div class="sd sdy"></div>Slot <span id="slot-display">284,912,441</span></div>
+    <div class="sbi">47 events today</div>
+  </div>
+  <div class="sb-r">
+    <div class="sbi"><span id="sb-monitored">0</span> wallets monitored</div>
+    <div class="sbi">SOLINTEL — The Operating System for Solana</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     UPGRADE MODAL
+════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="modal-title">Never Miss an Important Solana Event</div>
+        <div class="modal-sub" id="modal-subtitle">Monitor wallets, get real-time alerts, track what matters.</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+
+    <!-- PLANS VIEW -->
+    <div id="modal-plans">
+      <div class="plan-selector">
+        <div class="ps-card on" id="ps-yearly" onclick="selectPlan('yearly')">
+          <span class="ps-badge" style="background:linear-gradient(135deg,#00ff87,#00e87a);color:#020508">Save 80%</span>
+          <div class="ps-label">Best Value</div>
+          <div class="ps-price">$39.99/yr</div>
+          <div class="ps-note">under $4/mo</div>
+          <ul class="ps-feats">
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>Unlimited wallets</li>
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>Real-time alerts</li>
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>All features</li>
+          </ul>
+        </div>
+        <div class="ps-card" id="ps-monthly" onclick="selectPlan('monthly')">
+          <span class="ps-badge" style="background:rgba(153,69,255,0.22);color:#c4a8ff;border:1px solid rgba(153,69,255,0.30)">Popular</span>
+          <div class="ps-label">Monthly</div>
+          <div class="ps-price">$11.99/mo</div>
+          <div class="ps-note">cancel anytime</div>
+          <ul class="ps-feats">
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>Unlimited wallets</li>
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>Real-time alerts</li>
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>All features</li>
+          </ul>
+        </div>
+        <div class="ps-card" id="ps-weekly" onclick="selectPlan('weekly')">
+          <span class="ps-badge" style="background:rgba(0,255,135,0.10);color:var(--green);border:1px solid rgba(0,255,135,0.22)">Try It</span>
+          <div class="ps-label">Weekly</div>
+          <div class="ps-price">$3.99/wk</div>
+          <div class="ps-note">no commitment</div>
+          <ul class="ps-feats">
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>Full access</li>
+            <li class="ps-feat"><span class="ps-feat-check">✓</span>Cancel anytime</li>
+          </ul>
+        </div>
+      </div>
+      <button class="modal-cta" id="modal-cta-btn" onclick="startCheckout()">Start Monitoring — $39.99/yr</button>
+      <div class="modal-trust"><span>Stripe secured</span><span>Cancel anytime</span><span>No hidden fees</span></div>
+      <button class="modal-restore-link" onclick="showRestore()">Already subscribed? Restore access →</button>
+    </div>
+
+    <!-- CHECKOUT VIEW -->
+    <div id="modal-checkout" style="display:none">
+      <div style="font-size:11px;color:var(--t1);margin-bottom:12px">Complete payment below to start monitoring.</div>
+      <div id="checkout-mount" class="checkout-wrap"></div>
+      <button class="back-btn" onclick="showPlans()">← Back to plans</button>
+    </div>
+
+    <!-- RESTORE VIEW -->
+    <div id="modal-restore" style="display:none">
+      <div id="restore-success" style="display:none" class="restore-success">
+        <div class="restore-success-icon">✓</div>
+        <div class="restore-success-title">Subscription restored</div>
+        <div class="restore-success-sub">Your access has been unlocked. Closing…</div>
+      </div>
+      <div id="restore-form">
+        <div class="restore-row">
+          <input class="restore-in" id="restore-email" type="email" placeholder="Payment email address…" onkeydown="if(event.key==='Enter')doRestore()">
+          <button class="restore-btn" onclick="doRestore()" id="restore-btn">Restore</button>
+        </div>
+        <div id="restore-msg"></div>
+        <div class="restore-note">Enter the email you used at Stripe checkout. Access is verified against your active subscription and stored locally on this device.</div>
+        <button class="restore-back" onclick="showPlans()">← Back to plans</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════
+const API = 'https://awake-integrity-production-faa0.up.railway.app';
+const STRIPE_KEY = 'pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y';
+const PRICE_IDS = {
+  weekly:  'price_1T8KOTJjMzyHDzeQDDg1A2TF',
+  monthly: 'price_1T8KOUJjMzyHDzeQxaqPFOSB',
+  yearly:  'price_1T8KOQJjMzyHDzeQfcU1C1MQ',
+};
+const PLAN_PRICES = { weekly:'$3.99/wk', monthly:'$11.99/mo', yearly:'$39.99/yr' };
+const SOL_MINT = 'So11111111111111111111111111111111111111112';
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let subscribed = localStorage.getItem('solintel_subscribed') === 'true';
+let monitoredWallets = JSON.parse(localStorage.getItem('solintel_monitored_wallets') || '[]');
+let selectedPlan = 'yearly';
+let stripeCheckout = null;
+let currentWalletAddr = '';
+let solPrice = 0;
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  checkSubscribeReturn();
+  renderFeed();
+  renderAlerts();
+  updateUI();
+  startSlotCounter();
+  fetchSolPrice();
+  setInterval(addLiveEvent, 25000);
+});
+
+function checkSubscribeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('solintel_subscribed') === 'true') {
+    const plan = params.get('plan') || 'monthly';
+    markSubscribed(plan);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
+// ═══════════════════════════════════
+// SUBSCRIPTION
+// ═══════════════════════════════════
+function markSubscribed(plan) {
+  localStorage.setItem('solintel_subscribed', 'true');
+  localStorage.setItem('solintel_plan', plan);
+  subscribed = true;
+  updateUI();
+}
+
+function updateUI() {
+  const maxWallets = subscribed ? 999 : 3;
+  const count = monitoredWallets.length;
+  const pct = Math.min(100, (count / (subscribed ? Math.max(count,1) : 3)) * 100);
+
+  document.getElementById('plan-label').textContent = subscribed ? 'Pro Monitoring' : 'Free Plan';
+  document.getElementById('wallet-count-display').textContent = subscribed ? `${count} / ∞` : `${count} / 3`;
+  document.getElementById('limit-fill').style.width = subscribed ? '30%' : `${pct}%`;
+  document.getElementById('limit-label').textContent = subscribed ? 'Unlimited monitoring active' : `${3 - count} slots remaining`;
+  document.getElementById('limit-label').className = 'limit-label' + (!subscribed && count >= 3 ? ' warn' : '');
+  document.getElementById('upgrade-btn').textContent = subscribed ? 'Manage Plan' : 'Upgrade to Unlimited →';
+  document.getElementById('sb-monitored').textContent = count;
+  document.getElementById('monitored-count-display').textContent = subscribed ? `Monitored Wallets (${count}/∞)` : `Monitored Wallets (${count}/3)`;
+  document.getElementById('upgrade-wallets-btn').style.display = (!subscribed && count >= 3) ? 'block' : 'none';
+  document.getElementById('delay-banner').style.display = subscribed ? 'none' : 'flex';
+  document.getElementById('alerts-upgrade-card').style.display = subscribed ? 'none' : 'block';
+
+  renderWatchlistPreview();
+  renderWallets();
+}
+
+// ═══════════════════════════════════
+// PAGE NAVIGATION
+// ═══════════════════════════════════
+function showPage(id) {
+  ['feed','alerts','watchlists','wallet','pricing'].forEach(p => {
+    document.getElementById('page-'+p).style.display = 'none';
+    document.getElementById('tn-'+p)?.classList.remove('on');
+    document.getElementById('nl-'+p)?.classList.remove('on');
+  });
+  document.getElementById('page-'+id).style.display = 'flex';
+  document.getElementById('tn-'+id)?.classList.add('on');
+  document.getElementById('nl-'+id)?.classList.add('on');
+}
+
+// ═══════════════════════════════════
+// FEED
+// ═══════════════════════════════════
+const FEED_EVENTS = [
+  { id:'1', type:'whale_buy', stripe:'es-g', sig:'sig-g', chip:'etc-g', label:'Whale Buy', icon:'🐋', title:'Whale accumulated 85,000 SOL', detail:'Unknown wallet acquired $15.4M SOL across 3 transactions via Jupiter', amount:'$15.4M', amtClass:'evn-g', addr:'9aRK...3vNz', time:'2 min ago', fresh:true },
+  { id:'2', type:'smart_entry', stripe:'es-g', sig:'sig-g', chip:'etc-g', label:'Smart Money Entry', icon:'💡', title:'Smart wallet entered $840K JUP position', detail:'Top-ranked wallet (71% win rate) accumulated 1.18M JUP via DCA over 90 min', amount:'$840K', amtClass:'evn-g', addr:'7xKX...gAs2', time:'14 min ago', fresh:true },
+  { id:'3', type:'treasury', stripe:'es-b', sig:'sig-b', chip:'etc-b', label:'Treasury Movement', icon:'🏦', title:'Solana Foundation moved $4.2M USDC', detail:'Foundation treasury transferred to new 3-of-5 multisig created 4 days ago', amount:'$4.2M', amtClass:'evn-y', addr:'SoLF...n7Ap', time:'38 min ago', fresh:false },
+  { id:'4', type:'smart_exit', stripe:'es-r', sig:'sig-r', chip:'etc-r', label:'Smart Money Exit', icon:'⚠️', title:'High-performance wallet fully exited BONK', detail:'Wallet with 84% win rate sold entire $1.2M position — held since Q3 2023', amount:'$1.2M', amtClass:'evn-r', addr:'BzWq...7dYc', time:'3 hr ago', fresh:false },
+  { id:'5', type:'whale_buy', stripe:'es-g', sig:'sig-g', chip:'etc-g', label:'Whale Buy', icon:'🐋', title:'Whale accumulated 42,000 SOL', detail:'Largest single SOL purchase in 72 hours — new wallet, first transaction', amount:'$7.6M', amtClass:'evn-g', addr:'D4kL...9mPq', time:'5 hr ago', fresh:false },
+  { id:'6', type:'whale_sell', stripe:'es-r', sig:'sig-r', chip:'etc-r', label:'Whale Sell', icon:'⚠️', title:'Large SOL position exited', detail:'22,000 SOL moved to Binance — likely OTC or fiat off-ramp', amount:'$4.0M', amtClass:'evn-r', addr:'Kp9M...2xRt', time:'7 hr ago', fresh:false },
+];
+
+let currentFilter = 'all';
+
+function filterFeed(btn, f) {
+  document.querySelectorAll('.ff').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  currentFilter = f;
+  renderFeed();
+}
+
+function renderFeed() {
+  const el = document.getElementById('feed-list');
+  const filtered = FEED_EVENTS.filter(e => {
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'whale') return e.type === 'whale_buy' || e.type === 'whale_sell';
+    if (currentFilter === 'smart') return e.type === 'smart_entry' || e.type === 'smart_exit';
+    if (currentFilter === 'treasury') return e.type === 'treasury';
+    if (currentFilter === 'gov') return e.type === 'governance';
+    return true;
+  });
+
+  el.innerHTML = filtered.map((e, i) => `
+    <div class="ev${e.fresh?' fresh':''}" style="animation-delay:${i*0.04}s">
+      <div class="ev-stripe ${e.stripe}"></div>
+      <div class="ev-inner">
+        <div class="ev-signal"><div class="sig ${e.sig}">${e.icon}</div></div>
+        <div class="ev-body">
+          <div class="ev-type">
+            <span class="et-chip ${e.chip}">${e.label}</span>
+            ${e.fresh ? '<span class="et-new">New</span>' : ''}
+          </div>
+          <div class="ev-headline">${e.title}</div>
+          <div class="ev-number"><div class="evn-val ${e.amtClass}">${e.amount}</div><div class="evn-label">· ${e.addr}</div></div>
+          <div class="ev-detail">${e.detail}</div>
+        </div>
+        <div class="ev-right">
+          <div class="ev-time">${e.time}</div>
+          <button class="ev-cta" onclick="quickWatch('${e.addr}')">Track Wallet</button>
+        </div>
+      </div>
+    </div>
+  `).join('') + `
+    <div class="locked-gate">
+      <div class="lg-bar"></div>
+      <div class="lg-body">
+        <div class="lg-text"><strong>+40 more events today</strong><br>Whale buys · Treasury transfers · Governance votes · Smart wallet moves</div>
+        <button class="lg-btn" onclick="openModal('plans')">Unlock Full Feed →</button>
+      </div>
+    </div>
+    <div class="ev blurred"><div class="ev-stripe es-g"></div><div class="ev-inner"><div class="ev-signal"><div class="sig sig-g">🐋</div></div><div class="ev-body"><div class="ev-type"><span class="et-chip etc-g">Whale Buy</span></div><div class="ev-headline">Whale accumulated 42,000 SOL in single transaction</div><div class="ev-number"><div class="evn-val evn-g">$7.6M</div></div></div><div class="ev-right"><div class="ev-time">6 hr ago</div></div></div></div>
+    <div class="ev blurred"><div class="ev-stripe es-b"></div><div class="ev-inner"><div class="ev-signal"><div class="sig sig-b">🏦</div></div><div class="ev-body"><div class="ev-type"><span class="et-chip etc-b">Treasury Movement</span></div><div class="ev-headline">Jito Foundation transferred $2.1M to unknown wallet</div><div class="ev-number"><div class="evn-val evn-y">$2.1M</div></div></div><div class="ev-right"><div class="ev-time">7 hr ago</div></div></div></div>
+  `;
+}
+
+function addLiveEvent() {
+  const types = [
+    { stripe:'es-g', sig:'sig-g', chip:'etc-g', label:'Whale Buy', icon:'🐋', amtClass:'evn-g', title:'New whale movement detected', detail:'Large SOL transfer between unknown wallets via Jupiter aggregator' },
+    { stripe:'es-g', sig:'sig-g', chip:'etc-g', label:'Smart Money Entry', icon:'💡', amtClass:'evn-g', title:'Smart wallet building new position', detail:'High win-rate wallet accumulating via DCA' },
+    { stripe:'es-b', sig:'sig-b', chip:'etc-b', label:'Treasury Movement', icon:'🏦', amtClass:'evn-y', title:'Treasury transfer detected', detail:'Foundation wallet moved funds to new multisig' },
+  ];
+  const t = types[Math.floor(Math.random()*types.length)];
+  const amt = `$${(Math.random()*10+1).toFixed(1)}M`;
+  const addr = `${Math.random().toString(36).slice(2,6)}...${Math.random().toString(36).slice(2,6)}`;
+  FEED_EVENTS.unshift({ ...t, id: Date.now().toString(), type:'whale_buy', amount:amt, addr, time:'just now', fresh:true });
+  if (FEED_EVENTS.length > 12) FEED_EVENTS.pop();
+  renderFeed();
+  const c = document.getElementById('feed-count');
+  if (c) c.textContent = `${FEED_EVENTS.length + 41} events today · ${FEED_EVENTS.filter(e=>e.fresh).length} unread`;
+}
+
+function goAnalyze() {
+  const v = document.getElementById('feed-search').value.trim();
+  if (!v) return;
+  document.getElementById('wallet-addr-input').value = v;
+  showPage('wallet');
+  analyzeWallet();
+}
+
+function goWatch() {
+  const v = document.getElementById('feed-search').value.trim();
+  if (!v) return;
+  quickWatch(v);
+}
+
+function quickWatch(addr) {
+  if (!subscribed && monitoredWallets.length >= 3) { openModal('plans'); return; }
+  if (!monitoredWallets.includes(addr)) {
+    monitoredWallets.push(addr);
+    localStorage.setItem('solintel_monitored_wallets', JSON.stringify(monitoredWallets));
+    updateUI();
+  }
+}
+
+// ═══════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════
+const DEMO_ALERTS = [
+  { id:'1', stripe:'es-g', type_color:'var(--green)', type_label:'🐋 Whale Buy', title:'9aRK...3vNz bought 85,000 SOL', detail:'Your monitored wallet accumulated $15.4M SOL via Jupiter', amount:'$15.4M', amt_color:'var(--green)', time:'2m ago', read:false },
+  { id:'2', stripe:'es-g', type_color:'var(--green)', type_label:'💡 Smart Entry', title:'7xKX...gAs2 entered $840K JUP', detail:'Smart wallet you follow built a new position via DCA', amount:'$840K', amt_color:'var(--green)', time:'14m ago', read:false },
+  { id:'3', stripe:'es-b', type_color:'var(--blu)', type_label:'🏦 Treasury', title:'Solana Foundation moved $4.2M', detail:'Treasury wallet transferred to new 3-of-5 multisig', amount:'$4.2M', amt_color:'var(--yel)', time:'38m ago', read:false },
+  { id:'4', stripe:'es-r', type_color:'var(--red)', type_label:'⚠️ Whale Sell', title:'BzWq...7dYc fully exited BONK', detail:'High-performance wallet (84% win rate) sold entire position', amount:'$1.2M', amt_color:'var(--red)', time:'3h ago', read:true },
+  { id:'5', stripe:'es-y', type_color:'var(--yel)', type_label:'🏛 Governance', title:'JUP DAO Proposal #41 created', detail:'New governance proposal — voting opens in 6 hours', amount:'', time:'14m ago', read:true },
+];
+
+function renderAlerts() {
+  const el = document.getElementById('alerts-list');
+  el.innerHTML = DEMO_ALERTS.map(a => `
+    <div class="alert-item${a.read?'':' unread'}" onclick="markRead('${a.id}')">
+      <div class="ev-stripe ${a.stripe}"></div>
+      <div class="ai-body">
+        <div>
+          <div class="ai-type" style="color:${a.type_color}">${a.type_label}${!a.read?'<span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block;margin-left:8px"></span>':''}</div>
+          <div class="ai-title">${a.title}</div>
+          <div class="ai-detail">${a.detail}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          ${a.amount?`<div class="ai-amount" style="color:${a.amt_color}">${a.amount}</div>`:''}
+          <div class="ai-time">${a.time}</div>
+        </div>
+      </div>
+    </div>
+  `).join('') + `
+    <div class="locked-gate">
+      <div class="lg-bar"></div>
+      <div class="lg-body">
+        <div class="lg-text"><strong>Real-time alerts require Pro</strong><br>Free plan shows delayed alerts only. Upgrade to never miss a move.</div>
+        <button class="lg-btn" onclick="openModal('plans')">Get Real-Time Alerts →</button>
+      </div>
+    </div>
+    <div class="alert-item" style="opacity:0.25;filter:blur(0.6px);pointer-events:none"><div class="ev-stripe es-g"></div><div class="ai-body"><div><div class="ai-type" style="color:var(--green)">🐋 Whale Buy</div><div class="ai-title">D4kL...9mPq bought 42,000 SOL</div><div class="ai-detail">Largest single SOL purchase in 72h</div></div><div style="text-align:right"><div class="ai-amount" style="color:var(--green)">$7.6M</div><div class="ai-time">6h ago</div></div></div></div>
+    <div class="alert-item" style="opacity:0.25;filter:blur(0.6px);pointer-events:none"><div class="ev-stripe es-b"></div><div class="ai-body"><div><div class="ai-type" style="color:var(--blu)">🏦 Treasury</div><div class="ai-title">Jito Foundation transferred $2.1M</div><div class="ai-detail">Destination wallet created 12h before transfer</div></div><div style="text-align:right"><div class="ai-amount" style="color:var(--yel)">$2.1M</div><div class="ai-time">7h ago</div></div></div></div>
+  `;
+}
+
+function markRead(id) {
+  const a = DEMO_ALERTS.find(a => a.id === id);
+  if (a) { a.read = true; renderAlerts(); }
+}
+
+function markAllRead() {
+  DEMO_ALERTS.forEach(a => a.read = true);
+  renderAlerts();
+}
+
+// ═══════════════════════════════════
+// WATCHLISTS
+// ═══════════════════════════════════
+function renderWatchlistPreview() {
+  const el = document.getElementById('watchlist-preview');
+  if (!el) return;
+  if (monitoredWallets.length === 0) {
+    el.innerHTML = '<div style="padding:12px 13px;font-size:10px;color:var(--t3)">No wallets monitored yet.</div>';
+    return;
+  }
+  el.innerHTML = monitoredWallets.slice(0,5).map(addr => `
+    <div class="wi">
+      <div class="wi-pulse wp-on"></div>
+      <div class="wi-av">${addr.slice(0,3).toUpperCase()}</div>
+      <div class="wi-info"><div class="wi-name">${addr.slice(0,8)}...${addr.slice(-4)}</div><div class="wi-sub">Wallet · Monitoring</div></div>
+    </div>
+  `).join('');
+}
+
+function renderWallets() {
+  const el = document.getElementById('wl-wallets');
+  if (!el) return;
+  if (monitoredWallets.length === 0) {
+    el.innerHTML = '<div style="padding:40px 20px;text-align:center"><div style="font-size:24px;margin-bottom:12px">👁</div><div style="font-family:var(--head);font-size:16px;font-weight:700;color:var(--t0);margin-bottom:6px">No wallets monitored yet</div><div style="font-size:11px;color:var(--t1);line-height:1.6">Paste a Solana wallet address above to start monitoring.</div></div>';
+    return;
+  }
+  const max = subscribed ? '∞' : 3;
+  el.innerHTML = monitoredWallets.map(addr => `
+    <div class="wl-wallet-row">
+      <div class="wl-w-dot"></div>
+      <div class="wl-w-av">${addr.slice(0,3).toUpperCase()}</div>
+      <div><div class="wl-w-addr">${addr.slice(0,8)}...${addr.slice(-6)}</div><div class="wl-w-sub">Monitoring · Real-time alerts active</div></div>
+      <div class="wl-w-btns">
+        <button class="wl-view-btn" onclick="viewWallet('${addr}')">View</button>
+        <button class="wl-remove-btn" onclick="removeWallet('${addr}')">Remove</button>
+      </div>
+    </div>
+  `).join('') + (!subscribed && monitoredWallets.length >= 3 ? `
+    <div style="margin:16px;border:1px solid rgba(0,255,135,0.2);background:var(--gfaint);padding:16px">
+      <div style="font-family:var(--head);font-size:13px;font-weight:700;color:var(--t0);margin-bottom:6px">Wallet limit reached (3/3)</div>
+      <div style="font-size:10px;color:var(--t1);line-height:1.5;margin-bottom:10px">Upgrade to monitor unlimited wallets.</div>
+      <button style="width:100%;background:var(--green);color:#000;border:none;padding:9px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" onclick="openModal('plans')">Upgrade to Unlimited — $11.99/mo</button>
+    </div>
+  ` : '');
+}
+
+function addWallet() {
+  const addr = document.getElementById('new-wallet-addr').value.trim();
+  if (!addr) return;
+  if (!subscribed && monitoredWallets.length >= 3) { openModal('plans'); return; }
+  if (!monitoredWallets.includes(addr)) {
+    monitoredWallets.push(addr);
+    localStorage.setItem('solintel_monitored_wallets', JSON.stringify(monitoredWallets));
+  }
+  document.getElementById('new-wallet-addr').value = '';
+  updateUI();
+}
+
+function removeWallet(addr) {
+  monitoredWallets = monitoredWallets.filter(w => w !== addr);
+  localStorage.setItem('solintel_monitored_wallets', JSON.stringify(monitoredWallets));
+  updateUI();
+}
+
+function viewWallet(addr) {
+  document.getElementById('wallet-addr-input').value = addr;
+  showPage('wallet');
+  analyzeWallet();
+}
+
+function createWatchlist() {
+  if (!subscribed && document.querySelectorAll('.wl-item').length >= 1) { openModal('plans'); return; }
+  const name = document.getElementById('new-list-name').value.trim();
+  if (!name) return;
+  document.getElementById('new-list-name').value = '';
+}
+
+// ═══════════════════════════════════
+// WALLET LOOKUP
+// ═══════════════════════════════════
+async function fetchSolPrice() {
+  try {
+    const r = await fetch(`https://lite-api.jup.ag/price/v3?ids=${SOL_MINT}`);
+    const d = await r.json();
+    solPrice = Number(d?.[SOL_MINT]?.usdPrice || 0);
+  } catch(e) { solPrice = 0; }
+}
+
+async function analyzeWallet() {
+  const addr = document.getElementById('wallet-addr-input').value.trim();
+  if (!addr) return;
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr)) {
+    document.getElementById('wallet-result').innerHTML = '<div style="padding:12px 16px;background:var(--rfaint);border:1px solid var(--red);color:var(--red);font-size:11px">Invalid Solana address. Enter a valid base58 wallet address.</div>';
+    return;
+  }
+  currentWalletAddr = addr;
+  document.getElementById('wallet-result').innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--t1);font-size:12px"><div style="margin-bottom:8px;color:var(--green);font-size:20px">⟳</div>Loading wallet data…</div>';
+  document.getElementById('monitor-btn').textContent = 'Watch Wallet →';
+
+  try {
+    if (solPrice === 0) await fetchSolPrice();
+
+    const [balRes, txRes] = await Promise.all([
+      fetch(API+'/wallet/rpc', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'getBalance', params:[addr] }) }),
+      fetch(API+'/wallet/rpc', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'getSignaturesForAddress', params:[addr, { limit:10 }] }) }),
+    ]);
+
+    const balData = await balRes.json();
+    const txData = await txRes.json();
+
+    const balance = (balData?.result?.value || 0) / 1e9;
+    const txns = txData?.result || [];
+    const txCount = txns.length;
+
+    let walletType = 'small';
+    if (balance > 100000) walletType = 'whale';
+    else if (balance > 10000) walletType = 'large';
+    else if (txCount > 100) walletType = 'active';
+    else if (txCount > 20) walletType = 'regular';
+
+    let score = 50;
+    if (txCount > 100) score += 10;
+    else if (txCount > 20) score += 5;
+    if (balance > 1000) score += 10;
+    if (balance > 100) score += 5;
+    score = Math.min(100, score);
+
+    const riskColor = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--yel)' : 'var(--red)';
+    const riskLabel = score >= 70 ? 'Low Risk — Trusted Wallet' : score >= 40 ? 'Medium Risk — Review Needed' : 'High Risk — Caution Required';
+    const typeLabels = { whale:'🐋 Whale', large:'💰 Large', active:'⚡ Active', regular:'👤 Regular', small:'🔍 Small' };
+    const usdVal = solPrice > 0 ? '$' + (balance * solPrice).toLocaleString('en-US', { maximumFractionDigits:0 }) : '—';
+    const isMonitored = monitoredWallets.includes(addr);
+
+    document.getElementById('monitor-btn').textContent = isMonitored ? '✓ Monitoring' : 'Watch Wallet →';
+    document.getElementById('monitor-btn').style.background = isMonitored ? 'var(--s2)' : 'var(--green)';
+    document.getElementById('monitor-btn').style.color = isMonitored ? 'var(--gdim)' : '#000';
+
+    document.getElementById('wallet-result').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--t2);margin-bottom:4px">// Wallet Intelligence</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--t0);margin-bottom:6px">${addr.slice(0,8)}<span style="color:var(--t3)">···</span>${addr.slice(-6)}</div>
+            <span style="font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border:1px solid rgba(0,255,135,0.3);color:var(--gdim);background:var(--gfaint)">${typeLabels[walletType]||walletType}</span>
+            ${isMonitored ? '<span style="font-size:9px;padding:2px 7px;border:1px solid var(--gdim);color:var(--green);background:var(--gfaint2);margin-left:6px">● Monitoring</span>' : ''}
+          </div>
+        </div>
+        <div class="risk-block">
+          <div class="risk-stripe" style="background:${riskColor};box-shadow:0 0 12px ${riskColor}"></div>
+          <div class="risk-score" style="color:${riskColor};text-shadow:0 0 20px ${riskColor}44">${score}</div>
+          <div style="flex:1">
+            <div class="risk-label">${riskLabel}</div>
+            <div class="risk-sub">Based on on-chain activity and wallet behavior patterns</div>
+            <div class="risk-stats">
+              <div class="rs-item"><div class="rs-label">SOL Balance</div><div class="rs-val">${balance.toFixed(2)} SOL</div></div>
+              <div class="rs-item"><div class="rs-label">USD Value</div><div class="rs-val">${usdVal}</div></div>
+              <div class="rs-item"><div class="rs-label">Recent Txns</div><div class="rs-val">${txCount}</div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t1);display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="display:inline-block;width:3px;height:12px;background:var(--green)"></span>Recent Transactions</div>
+          <div style="display:flex;flex-direction:column;gap:1px">
+            ${txns.length === 0
+              ? '<div style="padding:12px 14px;background:var(--s1);border:1px solid var(--b1);color:var(--t2);font-size:11px">No recent transactions found.</div>'
+              : txns.map(tx => `
+                <div class="tx-row">
+                  <div class="tx-sig">${tx.signature ? tx.signature.slice(0,8)+'...' : '—'}</div>
+                  <div class="tx-time">${tx.blockTime ? new Date(tx.blockTime*1000).toLocaleString() : '—'}</div>
+                  <div class="tx-status" style="color:${tx.err===null?'var(--green)':'var(--red)'}">${tx.err===null?'Success':'Failed'}</div>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+        ${!isMonitored ? `
+          <div class="monitor-cta">
+            <div class="mc-title">Monitor This Wallet</div>
+            <div class="mc-sub">Get notified the moment this wallet makes a move.</div>
+            <ul class="mc-feats">
+              <li class="mc-feat"><span style="color:var(--green);font-weight:700;font-size:10px">✓</span>Never miss a whale move</li>
+              <li class="mc-feat"><span style="color:var(--green);font-weight:700;font-size:10px">✓</span>Alerts within seconds</li>
+              <li class="mc-feat"><span style="color:var(--green);font-weight:700;font-size:10px">✓</span>Track unlimited wallets</li>
+            </ul>
+            <button class="mc-btn" onclick="monitorCurrentWallet()">Start Monitoring — $11.99/mo</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('wallet-result').innerHTML = '<div style="padding:12px 16px;background:var(--rfaint);border:1px solid var(--red);color:var(--red);font-size:11px">Could not load wallet data. Check the address and try again.</div>';
+  }
+}
+
+function monitorCurrentWallet() {
+  if (!currentWalletAddr) return;
+  if (!subscribed && monitoredWallets.length >= 3) { openModal('plans'); return; }
+  quickWatch(currentWalletAddr);
+  document.getElementById('monitor-btn').textContent = '✓ Monitoring';
+  document.getElementById('monitor-btn').style.background = 'var(--s2)';
+  document.getElementById('monitor-btn').style.color = 'var(--gdim)';
+  analyzeWallet();
+}
+
+function loadExample(addr) {
+  document.getElementById('wallet-addr-input').value = addr;
+  analyzeWallet();
+}
+
+// ═══════════════════════════════════
+// MODAL
+// ═══════════════════════════════════
+function openModal(view, plan) {
+  if (plan) { selectedPlan = plan; selectPlan(plan); }
+  document.getElementById('modal-overlay').classList.add('on');
+  if (view === 'restore') showRestore();
+  else showPlans();
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('on');
+  if (stripeCheckout) { try { stripeCheckout.destroy(); } catch(e){} stripeCheckout = null; }
+  document.getElementById('checkout-mount').innerHTML = '';
+  showPlans();
+}
+
+function showPlans() {
+  document.getElementById('modal-title').textContent = 'Never Miss an Important Solana Event';
+  document.getElementById('modal-subtitle').textContent = 'Monitor wallets, get real-time alerts, track what matters.';
+  document.getElementById('modal-plans').style.display = 'block';
+  document.getElementById('modal-checkout').style.display = 'none';
+  document.getElementById('modal-restore').style.display = 'none';
+}
+
+function showRestore() {
+  document.getElementById('modal-title').textContent = 'Restore Access';
+  document.getElementById('modal-subtitle').textContent = 'Enter the email you used at checkout to restore your subscription.';
+  document.getElementById('modal-plans').style.display = 'none';
+  document.getElementById('modal-checkout').style.display = 'none';
+  document.getElementById('modal-restore').style.display = 'block';
+  document.getElementById('restore-success').style.display = 'none';
+  document.getElementById('restore-form').style.display = 'block';
+  document.getElementById('restore-msg').innerHTML = '';
+  document.getElementById('restore-email').value = '';
+}
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  ['yearly','monthly','weekly'].forEach(p => {
+    document.getElementById('ps-'+p)?.classList.toggle('on', p === plan);
+  });
+  const prices = { yearly:'$39.99/yr', monthly:'$11.99/mo', weekly:'$3.99/wk' };
+  document.getElementById('modal-cta-btn').textContent = `Start Monitoring — ${prices[plan]}`;
+}
+
+async function startCheckout() {
+  const priceId = PRICE_IDS[selectedPlan];
+  if (!priceId) return;
+
+  document.getElementById('modal-plans').style.display = 'none';
+  document.getElementById('modal-checkout').style.display = 'block';
+  document.getElementById('checkout-mount').innerHTML = '<div style="padding:40px;text-align:center;color:var(--t1)">Loading checkout…</div>';
+
+  try {
+    const stripe = Stripe(STRIPE_KEY);
+    const fetchClientSecret = async () => {
+      const res = await fetch(API+'/create-embedded-subscription', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          priceId,
+          returnUrl: window.location.origin + window.location.pathname + '?solintel_subscribed=true&plan=' + selectedPlan
+        })
+      });
+      const data = await res.json();
+      if (!data?.clientSecret) throw new Error('No client secret');
+      return data.clientSecret;
+    };
+    stripeCheckout = await stripe.initEmbeddedCheckout({ fetchClientSecret });
+    document.getElementById('checkout-mount').innerHTML = '';
+    stripeCheckout.mount('#checkout-mount');
+  } catch(e) {
+    document.getElementById('checkout-mount').innerHTML = '<div style="padding:16px;color:var(--red);font-size:11px">Could not load checkout. Please try again.</div>';
+  }
+}
+
+async function doRestore() {
+  const email = document.getElementById('restore-email').value.trim();
+  if (!email) return;
+  document.getElementById('restore-btn').textContent = '...';
+  document.getElementById('restore-btn').disabled = true;
+  document.getElementById('restore-msg').innerHTML = '';
+
+  try {
+    const res = await fetch(API+'/analyze-token', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', email:email.toLowerCase(), subscribed:false })
+    });
+    const data = await res.json();
+
+    if (data?.subscriber === true) {
+      markSubscribed('monthly');
+      localStorage.setItem('solintel_verified_email', email.toLowerCase());
+      document.getElementById('restore-form').style.display = 'none';
+      document.getElementById('restore-success').style.display = 'block';
+      setTimeout(() => closeModal(), 1500);
+    } else if (data?.limit === true || data?.subscriber === false) {
+      document.getElementById('restore-msg').innerHTML = '<div class="msg-warn">No active subscription found for that email. Check the address or subscribe below.</div>';
+    } else {
+      document.getElementById('restore-msg').innerHTML = '<div class="msg-err">Could not check subscription. Please try again.</div>';
+    }
+  } catch(e) {
+    document.getElementById('restore-msg').innerHTML = '<div class="msg-err">Could not connect. Please try again.</div>';
+  }
+
+  document.getElementById('restore-btn').textContent = 'Restore';
+  document.getElementById('restore-btn').disabled = false;
+}
+
+// ═══════════════════════════════════
+// SLOT COUNTER
+// ═══════════════════════════════════
+let slot = 284912441;
+function startSlotCounter() {
+  setInterval(() => {
+    slot += Math.floor(Math.random() * 3 + 1);
+    const el = document.getElementById('slot-display');
+    if (el) el.textContent = slot.toLocaleString();
+  }, 400);
+}
+</script>
+</body>
+</html>
