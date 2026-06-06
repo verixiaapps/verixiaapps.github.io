@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insiders — On-chain insider buys on Solana</title>
+<meta name="description" content="We catch the on-chain pattern that preceded WIF, POPCAT, PNUT. Same-day fresh wallets dropping conviction money on brand new tokens. Pay in SOL.">
+<meta property="og:title" content="Insiders — Catch the 2,000% Solana runners">
+<meta property="og:description" content="When 3+ same-day fresh wallets drop $2K+ each on a token under 6 hours old, we catch it. Pay in SOL.">
+<link rel="stylesheet" href="insiders.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/bs58@5.0.0/bs58.min.js" defer></script>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="scanline"></div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">INSIDERS</div>
+    </div>
+    <nav class="topnav">
+      <a href="#feed" class="topnav-link">Calls</a>
+      <a href="#trade" class="topnav-link">Trade</a>
+      <a href="#tracker" class="topnav-link">Smart Wallets</a>
+      <a href="#rug" class="topnav-link">Rug Check</a>
+      <a href="#deep" class="topnav-link">Deep Dive</a>
+      <a href="https://swap.verixiaapps.com" target="_blank" rel="noopener" class="topnav-link topnav-dex">Trade →</a>
+      <a href="#subscribe" class="topnav-link">Subscribe</a>
+      <a href="https://swap.verixiaapps.com" target="_blank" rel="noopener" class="topnav-link topnav-dex">Verixia DEX &rarr;</a>
+    </nav>
+    <div class="wallet-area">
+      <button class="wallet-btn" id="wallet-btn">Connect Wallet</button>
+    </div>
+  </div>
+</header>
+
+<!-- DEX RIBBON -->
+<a href="https://swap.verixiaapps.com" target="_blank" rel="noopener" class="dex-ribbon">
+  <span class="dex-ribbon-tag">VERIXIA DEX</span>
+  <span class="dex-ribbon-text">Direct on-chain swaps on Solana. No KYC, no middleman.</span>
+  <span class="dex-ribbon-cta">Trade now &rarr;</span>
+</a>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1 class="hero-h1">
+      The on-chain pattern<br>
+      that preceded <span class="hl">WIF, POPCAT, PNUT</span>.<br>
+      Caught within <span class="hl">2 minutes</span>.
+    </h1>
+    <p class="hero-sub">
+      When three or more same-day fresh wallets each drop $2,000+ on a token under six hours old &mdash; under one ten-millionth of a dollar &mdash; with no deployer funding linking them, we catch it.
+    </p>
+
+    <div class="stat-row" id="stat-row">
+      <div class="stat"><div class="stat-v" id="stat-total">&mdash;</div><div class="stat-l">Total Calls</div></div>
+      <div class="stat"><div class="stat-v" id="stat-90d">&mdash;</div><div class="stat-l">Last 90 Days</div></div>
+      <div class="stat"><div class="stat-v hi" id="stat-median">&mdash;</div><div class="stat-l">Median Peak</div></div>
+      <div class="stat"><div class="stat-v hi" id="stat-best">&mdash;</div><div class="stat-l">Best Peak</div></div>
+    </div>
+
+    <div class="hero-ctas">
+      <a class="cta-primary" href="#subscribe">Subscribe in SOL &rarr;</a>
+      <a class="cta-ghost" href="#feed">See the calls</a>
+    </div>
+    <div class="hero-dex-line">
+      <span>or</span> <a href="https://swap.verixiaapps.com" target="_blank" rel="noopener" class="hero-dex-link">trade on Verixia DEX &rarr;</a>
+    </div>
+
+    <div class="hero-meta" id="hero-meta">Loading&hellip;</div>
+  </div>
+</section>
+
+<!-- DEX EMBED ON HOMEPAGE -->
+<section class="dex-section" id="trade">
+  <div class="section-head">
+    <div class="section-eyebrow"><span class="dot"></span>Trade</div>
+    <h2 class="section-h2">Swap on Verixia DEX. Right here.</h2>
+    <p class="section-sub">Direct on-chain swaps on Solana. No KYC, no middleman. Connect your wallet and trade without leaving the page.</p>
+  </div>
+  <div class="dex-embed-wrap">
+    <iframe
+      src="https://swap.verixiaapps.com"
+      class="dex-iframe"
+      title="Verixia DEX"
+      allow="clipboard-read; clipboard-write; payment; web-share"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+    ></iframe>
+    <div class="dex-iframe-fallback">
+      If the swap widget doesn&rsquo;t load, your browser may be blocking the embed.
+      <a href="https://swap.verixiaapps.com" target="_blank" rel="noopener">Open Verixia DEX in a new tab &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEED -->
+<section class="feed-section" id="feed">
+  <div class="section-head">
+    <div class="section-eyebrow"><span class="dot"></span><span id="feed-eyebrow">Live calls</span></div>
+    <h2 class="section-h2">Every call. Every outcome.</h2>
+    <p class="section-sub" id="feed-sub">Loading&hellip;</p>
+  </div>
+  <div class="feed" id="feed-list">
+    <div class="feed-loading">Loading feed&hellip;</div>
+  </div>
+  <div class="feed-foot" id="feed-foot"></div>
+</section>
+
+<!-- SMART WALLET TRACKER -->
+<section class="tracker-section" id="tracker">
+  <div class="section-head">
+    <div class="section-eyebrow"><span class="dot"></span>Smart wallets</div>
+    <h2 class="section-h2">What proven winners are buying right now.</h2>
+    <p class="section-sub">
+      Wallets that were in a past call that hit 5x or more are flagged as proven. We watch them. When they buy, you see it.
+    </p>
+  </div>
+  <div class="tracker" id="tracker-list">
+    <div class="feed-loading">Loading&hellip;</div>
+  </div>
+</section>
+
+<!-- RUG PRE-MORTEM -->
+<section class="rug-section" id="rug">
+  <div class="section-head">
+    <div class="section-eyebrow"><span class="dot"></span>Rug pre-mortem</div>
+    <h2 class="section-h2">Is this thing going to rug?</h2>
+    <p class="section-sub">Paste any Solana mint. Authority checks, top-holder concentration, liquidity health. Thirty-second verdict.</p>
+  </div>
+  <div class="rug-tool">
+    <div class="rug-row">
+      <input type="text" id="rug-input" class="rug-input" placeholder="Paste Solana mint address (43-44 chars)">
+      <button id="rug-go" class="rug-go">Check &rarr;</button>
+    </div>
+    <div id="rug-result"></div>
+  </div>
+</section>
+
+<!-- TOKEN DEEP DIVE -->
+<section class="deep-section" id="deep">
+  <div class="section-head">
+    <div class="section-eyebrow"><span class="dot"></span>Token deep dive</div>
+    <h2 class="section-h2">Paste any token. Get the whole picture.</h2>
+    <p class="section-sub">Holder concentration, deployer history, smart-money positions, what the top holders are buying elsewhere, and price-action authenticity. One paste, full report.</p>
+  </div>
+  <div class="deep-tool">
+    <div class="rug-row">
+      <input type="text" id="deep-input" class="rug-input" placeholder="Paste Solana mint address">
+      <button id="deep-go" class="rug-go">Analyze &rarr;</button>
+    </div>
+    <div id="deep-result"></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-head">
+    <div class="section-eyebrow"><span class="dot"></span>How it works</div>
+    <h2 class="section-h2">Four checks. No filters. No noise.</h2>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">01</div>
+      <div class="how-h">Fresh token</div>
+      <div class="how-d">Solana token under six hours old, priced under one ten-millionth of a dollar, with at least $2K liquidity.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">02</div>
+      <div class="how-h">Same-day wallets</div>
+      <div class="how-d">Three to ten wallets &mdash; each less than 24 hours old &mdash; each spending $2,000+ in SOL on the token.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">03</div>
+      <div class="how-h">Tight window</div>
+      <div class="how-d">All those buys happen within 30 minutes of each other. Real coordination, not random buyers stumbling in.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">04</div>
+      <div class="how-h">Clean signal</div>
+      <div class="how-d">Mint authority revoked. Freeze authority revoked. Top-10 holders under 40%. No deployer-funded buyers. No single funder behind the cluster.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSCRIBE -->
+<section class="subscribe" id="subscribe">
+  <div class="sub-card">
+    <div class="sub-eyebrow">SUBSCRIBE</div>
+    <div class="sub-price-row">
+      <div class="sub-price"><span id="sub-sol">0.15</span><span class="sub-unit">SOL</span></div>
+      <div class="sub-per">per month &middot; ~$30</div>
+    </div>
+    <div class="sub-cap" id="sub-cap">Loading&hellip;</div>
+    <ul class="sub-feats">
+      <li>Insider Calls feed &mdash; live, no delay</li>
+      <li>Smart Wallet Tracker &mdash; what proven winners are buying</li>
+      <li>Rug Pre-Mortem &mdash; unlimited mint checks</li>
+      <li>Token Deep Dive &mdash; full inside picture on any token</li>
+      <li>Insider wallet addresses revealed on every call</li>
+      <li>Discord, Slack, Telegram webhook delivery</li>
+      <li>Three days free, no card</li>
+      <li>Price locked &mdash; if we raise, you keep your rate</li>
+    </ul>
+    <div id="sub-flow">
+      <div id="sub-step-init" class="sub-step">
+        <p class="sub-hint">Connect your Solana wallet to subscribe. The wallet you pay from is your identity &mdash; no email needed.</p>
+        <button class="sub-btn-large" id="sub-init">Connect Wallet to Subscribe</button>
+        <div class="sub-trial" id="sub-trial-line">Checking trial&hellip;</div>
+      </div>
+      <div id="sub-step-pay" class="sub-step" style="display:none">
+        <div class="pay-grid">
+          <div class="pay-block">
+            <div class="pay-label">Send EXACTLY</div>
+            <div class="pay-amount"><span id="pay-sol">&mdash;</span> SOL</div>
+            <button class="copy-btn" id="copy-amount">Copy amount</button>
+          </div>
+          <div class="pay-arrow">&rarr;</div>
+          <div class="pay-block">
+            <div class="pay-label">To this wallet</div>
+            <div class="pay-wallet" id="pay-wallet">&mdash;</div>
+            <button class="copy-btn" id="copy-wallet">Copy</button>
+          </div>
+        </div>
+        <div class="pay-note">
+          The exact amount is unique to your invoice. Send from your connected wallet (or any wallet you control &mdash; payment is matched to the sender address). Activation within 60 seconds of confirmation.
+        </div>
+        <div class="pay-status">
+          <span class="pulse"></span>
+          <span id="pay-status-text">Waiting for payment&hellip; (expires in <span id="pay-countdown">60:00</span>)</span>
+        </div>
+        <button class="pay-cancel" id="pay-cancel">Cancel</button>
+      </div>
+      <div id="sub-step-done" class="sub-step" style="display:none">
+        <div class="done-icon">&check;</div>
+        <div class="done-h">Subscription active</div>
+        <div class="done-d">Paid through <span id="done-until"></span>. Locked at <span id="done-rate"></span> SOL/month.</div>
+        <div class="webhook-block">
+          <label class="sub-label">Webhook URL (Discord / Slack / Telegram) &mdash; optional</label>
+          <div class="sub-row">
+            <input type="url" id="webhook-input" class="sub-input" placeholder="https://discord.com/api/webhooks/&hellip;">
+            <button class="sub-btn" id="webhook-save">Save</button>
+          </div>
+          <div class="webhook-note" id="webhook-note">Optional. Calls also show live on this page once you sign in with your wallet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-line"><strong>What this is:</strong> A detection feed. We surface a specific on-chain pattern in real time. We don&rsquo;t guarantee profits.</div>
+    <div class="foot-line"><strong>What this is not:</strong> Financial advice. Memecoins fail more often than they succeed.</div>
+    <div class="foot-line">
+      <strong>Trade on Verixia DEX:</strong> <a href="https://swap.verixiaapps.com" target="_blank" rel="noopener" class="foot-link">swap.verixiaapps.com</a> &mdash; direct on-chain swaps, no KYC.
+    </div>
+    <div class="foot-line dim">On-chain analysis &middot; Pay in SOL &middot; Wallet-based identity</div>
+  </div>
+</footer>
+
+<!-- WALLET MODAL -->
+<div class="modal-overlay" id="wallet-modal" onclick="if(event.target===this)closeWalletModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeWalletModal()">&times;</button>
+    <div class="modal-title">Connect Wallet</div>
+    <div class="modal-sub">Choose your Solana wallet</div>
+    <div class="wallet-list" id="wallet-list"></div>
+    <div class="wallet-help">Don&rsquo;t have one? Install <a href="https://phantom.app" target="_blank" rel="noopener">Phantom</a>, <a href="https://solflare.com" target="_blank" rel="noopener">Solflare</a>, or <a href="https://backpack.app" target="_blank" rel="noopener">Backpack</a>.</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================================
+// CONFIG
+// =====================================================================
+const API = "";  // same origin via reverse proxy; or set to full URL
+const RECEIVING_WALLET = "GBmnZawAWuYfJtm2GhqS5aAXtxjgiEZ2BWKqNtsyrdLA";
+
+let connectedWallet = null;     // { address, provider, providerName }
+let currentInvoice = null;
+let pollInterval = null;
+let countdownInterval = null;
+let userSubscription = null;
+
+// =====================================================================
+// INIT
+// =====================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  loadFeed();
+  loadTracker();
+  loadTrialStatus();
+  setInterval(loadFeed, 60_000);
+  setInterval(loadTracker, 5 * 60_000);
+
+  document.getElementById("wallet-btn").addEventListener("click", openWalletModal);
+  document.getElementById("sub-init").addEventListener("click", initSubscribe);
+  document.getElementById("pay-cancel").addEventListener("click", cancelInvoice);
+  document.getElementById("copy-amount").addEventListener("click", () => {
+    if (currentInvoice) { navigator.clipboard.writeText(currentInvoice.sol); toast("Amount copied"); }
+  });
+  document.getElementById("copy-wallet").addEventListener("click", () => {
+    navigator.clipboard.writeText(RECEIVING_WALLET); toast("Wallet copied");
+  });
+  document.getElementById("webhook-save").addEventListener("click", saveWebhook);
+  document.getElementById("rug-go").addEventListener("click", runRugCheck);
+  document.getElementById("rug-input").addEventListener("keydown", e => { if (e.key === "Enter") runRugCheck(); });
+  document.getElementById("deep-go").addEventListener("click", runDeepDive);
+  document.getElementById("deep-input").addEventListener("keydown", e => { if (e.key === "Enter") runDeepDive(); });
+
+  // Restore wallet from localStorage if present
+  const savedWallet = localStorage.getItem("insiders_wallet");
+  if (savedWallet) {
+    connectedWallet = JSON.parse(savedWallet);
+    renderWalletButton();
+    verifySubscription();
+  }
+});
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+function fmtUsd(n) {
+  if (!n || n <= 0) return "—";
+  if (n >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
+  if (n >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
+  if (n >= 1e3) return "$" + (n / 1e3).toFixed(1) + "K";
+  return "$" + Math.round(n);
+}
+
+function fmtAgo(ts) {
+  const ms = Date.now() - ts;
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return min + "m ago";
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return hr + "h ago";
+  return Math.floor(hr / 24) + "d ago";
+}
+
+// =====================================================================
+// WALLET CONNECT (vanilla, no React)
+// =====================================================================
+function detectWallets() {
+  const list = [];
+  if (typeof window !== "undefined") {
+    if (window.phantom?.solana?.isPhantom) {
+      list.push({ name: "Phantom", icon: "👻", provider: window.phantom.solana });
+    } else if (window.solana?.isPhantom) {
+      list.push({ name: "Phantom", icon: "👻", provider: window.solana });
+    }
+    if (window.solflare?.isSolflare) {
+      list.push({ name: "Solflare", icon: "🔆", provider: window.solflare });
+    }
+    if (window.backpack?.isBackpack) {
+      list.push({ name: "Backpack", icon: "🎒", provider: window.backpack });
+    }
+  }
+  return list;
+}
+
+function openWalletModal() {
+  if (connectedWallet) {
+    if (confirm("Disconnect wallet?")) {
+      connectedWallet = null;
+      userSubscription = null;
+      localStorage.removeItem("insiders_wallet");
+      localStorage.removeItem("insiders_session");
+      renderWalletButton();
+      loadFeed();
+      loadTracker();
+    }
+    return;
+  }
+  const list = detectWallets();
+  const box = document.getElementById("wallet-list");
+  if (list.length === 0) {
+    box.innerHTML = '<div class="wallet-empty">No Solana wallets detected. Install one to continue.</div>';
+  } else {
+    box.innerHTML = list.map(w => `
+      <button class="wallet-option" data-name="${escapeHtml(w.name)}">
+        <span class="wo-icon">${w.icon}</span>
+        <span class="wo-name">${escapeHtml(w.name)}</span>
+        <span class="wo-arrow">&rarr;</span>
+      </button>
+    `).join("");
+    box.querySelectorAll(".wallet-option").forEach(btn => {
+      btn.addEventListener("click", () => connectWallet(btn.dataset.name));
+    });
+  }
+  document.getElementById("wallet-modal").classList.add("show");
+}
+
+function closeWalletModal() {
+  document.getElementById("wallet-modal").classList.remove("show");
+}
+
+async function connectWallet(name) {
+  const list = detectWallets();
+  const w = list.find(x => x.name === name);
+  if (!w) { toast("Wallet not found"); return; }
+  try {
+    const resp = await w.provider.connect();
+    const address = resp.publicKey ? resp.publicKey.toString() : w.provider.publicKey?.toString();
+    if (!address) { toast("Could not get address"); return; }
+
+    // Sign-in: get nonce, sign, verify
+    const nonceRes = await fetch(`${API}/api/auth/nonce`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet: address }),
+    });
+    const nonceData = await nonceRes.json();
+    if (!nonceData.nonce) { toast("Auth failed"); return; }
+
+    const message = new TextEncoder().encode(nonceData.message);
+    const signed = await w.provider.signMessage(message, "utf8");
+    const sigBytes = signed.signature || signed;
+    const sigB58 = window.bs58 ? window.bs58.default.encode(sigBytes) : bs58encode(sigBytes);
+
+    const verifyRes = await fetch(`${API}/api/auth/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet: address, signature: sigB58 }),
+    });
+    const verifyData = await verifyRes.json();
+    if (!verifyData.ok) { toast(verifyData.error || "Verify failed"); return; }
+
+    connectedWallet = { address, providerName: w.name };
+    userSubscription = verifyData.subscription;
+    localStorage.setItem("insiders_wallet", JSON.stringify(connectedWallet));
+    closeWalletModal();
+    renderWalletButton();
+    loadFeed();
+    loadTracker();
+    if (verifyData.subscription) {
+      enterDoneState(verifyData.subscription.activeUntil, verifyData.subscription.planRate);
+    }
+    toast("Connected as " + address.slice(0, 4) + "…" + address.slice(-4));
+  } catch (e) {
+    toast("Connect failed: " + (e.message || e));
+  }
+}
+
+function renderWalletButton() {
+  const btn = document.getElementById("wallet-btn");
+  if (connectedWallet) {
+    const addr = connectedWallet.address;
+    btn.textContent = `${addr.slice(0, 4)}…${addr.slice(-4)}`;
+    btn.classList.add("connected");
+  } else {
+    btn.textContent = "Connect Wallet";
+    btn.classList.remove("connected");
+  }
+}
+
+async function verifySubscription() {
+  if (!connectedWallet) return;
+  // Re-fetch nonce + sign would be needed for a fresh signature, but we already
+  // have a session — for simplicity, just hit a status endpoint with the wallet
+  // (we trust the wallet param for read-only access).
+  // Feed endpoint returns access info based on wallet param.
+}
+
+// Fallback base58 encoder if the CDN script hasn't loaded yet
+function bs58encode(buffer) {
+  const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const bytes = Array.from(buffer);
+  let num = 0n;
+  for (const b of bytes) num = num * 256n + BigInt(b);
+  let str = "";
+  while (num > 0n) {
+    str = ALPHABET[Number(num % 58n)] + str;
+    num = num / 58n;
+  }
+  for (const b of bytes) {
+    if (b === 0) str = "1" + str;
+    else break;
+  }
+  return str;
+}
+
+// =====================================================================
+// FEED
+// =====================================================================
+async function loadFeed() {
+  try {
+    const wallet = connectedWallet?.address;
+    const url = `${API}/api/feed?limit=50` + (wallet ? `&wallet=${encodeURIComponent(wallet)}` : "");
+    const r = await fetch(url);
+    if (!r.ok) throw 0;
+    const data = await r.json();
+    renderFeed(data);
+    renderStats(data);
+  } catch {
+    document.getElementById("feed-list").innerHTML =
+      '<div class="feed-empty"><div class="feed-empty-h">Feed unavailable</div><div class="feed-empty-d">Server unreachable. Refresh in a moment.</div></div>';
+  }
+}
+
+function renderStats(data) {
+  document.getElementById("stat-total").textContent = data.totalDetections > 0 ? data.totalDetections : "—";
+  document.getElementById("stat-90d").textContent = data.last90dCount || "—";
+  document.getElementById("stat-median").textContent = data.medianPeakPct != null ? `+${data.medianPeakPct.toLocaleString()}%` : "—";
+  document.getElementById("stat-best").textContent = data.bestPeakPct != null ? `+${data.bestPeakPct.toLocaleString()}%` : "—";
+
+  const access = data.access || {};
+  const cap = data.subscriberCap;
+  const count = data.subscriberCount || 0;
+  const remaining = Math.max(0, cap - count);
+  document.getElementById("sub-cap").innerHTML =
+    `<strong>${count}</strong> / ${cap} subscribers &middot; <strong>${remaining}</strong> spots remaining`;
+
+  let metaText;
+  if (access.kind === "paid") metaText = "Subscription active &middot; Live feed";
+  else if (access.kind === "trial") {
+    const h = Math.floor((access.trialMsLeft || 0) / (60 * 60 * 1000));
+    metaText = `Trial active &middot; ${h}h remaining &middot; Full access`;
+  } else metaText = "Feed shown delayed by 60 minutes &middot; Subscribe for live";
+  document.getElementById("hero-meta").innerHTML = metaText;
+
+  document.getElementById("feed-eyebrow").textContent = access.access ? "Live calls" : "Delayed view (60 min behind)";
+
+  const sub = document.getElementById("feed-sub");
+  if (data.totalDetections === 0) {
+    sub.textContent = "Detection engine is running. This signal is rare by design — expect 2-4 calls per month.";
+  } else if (access.access) {
+    sub.textContent = `${data.totalDetections} total call${data.totalDetections === 1 ? "" : "s"} in the archive. Newest first.`;
+  } else {
+    sub.textContent = "Showing calls older than 60 minutes. Subscribe to see live calls within seconds of firing, with insider wallet addresses.";
+  }
+}
+
+function renderFeed(data) {
+  const list = document.getElementById("feed-list");
+  const plays = data.plays || [];
+  const access = data.access || {};
+
+  if (plays.length === 0) {
+    list.innerHTML = `
+      <div class="feed-empty">
+        <div class="feed-empty-mark">○</div>
+        <div class="feed-empty-h">No calls yet</div>
+        <div class="feed-empty-d">
+          Detection engine scans Solana every two minutes. This pattern is rare — typically 2-4 calls per month.
+          When it fires, calls appear here with full performance tracking from that moment forward.
+          No fabricated past calls are shown.
+        </div>
+      </div>`;
+    document.getElementById("feed-foot").innerHTML = "";
+    return;
+  }
+
+  list.innerHTML = plays.map((p, i) => renderRow(p, i, access.access)).join("");
+  document.getElementById("feed-foot").innerHTML = access.access ? "" : `
+    <div class="paywall-strip">
+      <div class="paywall-h">Subscribe to see live calls within 2 minutes of firing</div>
+      <div class="paywall-d">Free view shows calls delayed by an hour. By then, the play is over.</div>
+      <a class="paywall-btn" href="#subscribe">Get access &rarr;</a>
+    </div>`;
+}
+
+function renderRow(p, idx, hasFullAccess) {
+  const peak = typeof p.peakPctGain === "number" ? (p.peakPctGain >= 0 ? `+${p.peakPctGain.toLocaleString()}%` : `${p.peakPctGain.toLocaleString()}%`) : "—";
+  const cur = typeof p.currentPctGain === "number" ? (p.currentPctGain >= 0 ? `+${p.currentPctGain.toLocaleString()}%` : `${p.currentPctGain.toLocaleString()}%`) : "—";
+  const peakCls = typeof p.peakPctGain === "number" && p.peakPctGain >= 400 ? "win" : typeof p.peakPctGain === "number" && p.peakPctGain >= 0 ? "up" : typeof p.peakPctGain === "number" ? "down" : "neutral";
+  const curCls = typeof p.currentPctGain === "number" && p.currentPctGain >= 0 ? "up" : typeof p.currentPctGain === "number" ? "down" : "neutral";
+  const sym = escapeHtml(p.symbol || "?");
+
+  let cexTag = "";
+  if (p.cexFundedCount > 0) {
+    cexTag = `<span class="row-tag">⚡ ${p.cexFundedCount}/${p.clusterSize} CEX-FUNDED</span>`;
+  }
+
+  // New badges row
+  const badges = [];
+  if (p.detectionSource === "websocket") {
+    badges.push(`<span class="badge badge-source-ws">Live stream</span>`);
+  }
+  if (p.riskSnapshot && p.riskSnapshot.tier) {
+    const tier = p.riskSnapshot.tier.toLowerCase();
+    badges.push(`<span class="badge badge-risk-${tier}">Risk: ${p.riskSnapshot.tier} (${p.riskSnapshot.score}/100)</span>`);
+  }
+  if (typeof p.clusterPnlUsd === "number" && Math.abs(p.clusterPnlUsd) > 0) {
+    const cls = p.clusterPnlUsd > 0 ? "badge-pnl-pos" : "badge-pnl-neg";
+    const sign = p.clusterPnlUsd > 0 ? "+" : "−";
+    const absVal = Math.abs(p.clusterPnlUsd);
+    const fmt = absVal >= 1000 ? `$${(absVal / 1000).toFixed(1)}K` : `$${absVal}`;
+    badges.push(`<span class="badge ${cls}">Cluster 30d PnL: ${sign}${fmt}</span>`);
+  }
+  if (p.cexFundedCount > 0) {
+    badges.push(`<span class="badge badge-cex">${p.cexFundedCount} CEX-funded</span>`);
+  }
+  const badgesHtml = badges.length ? `<div class="row-badges">${badges.join("")}</div>` : "";
+
+  let buyersHtml = "";
+  if (hasFullAccess && Array.isArray(p.clusterWallets) && p.clusterWallets.length > 0) {
+    buyersHtml = `
+      <div class="row-buyers">
+        <div class="row-buyers-h">Insider wallets &middot; tap to copy &middot; PnL = realized 30d</div>
+        ${p.clusterWallets.slice(0, 10).map(b => {
+          const age = b.walletAgeHours != null ? (b.walletAgeHours < 1 ? `${Math.round(b.walletAgeHours * 60)}m old` : `${b.walletAgeHours}h old`) : "—";
+          let pnlHtml = "";
+          if (typeof b.pnl30dUsd === "number") {
+            const cls = b.pnl30dUsd > 50 ? "pos" : b.pnl30dUsd < -50 ? "neg" : "neutral";
+            const sign = b.pnl30dUsd > 0 ? "+" : b.pnl30dUsd < 0 ? "−" : "";
+            const absV = Math.abs(b.pnl30dUsd);
+            const fmt = absV >= 1000 ? `$${(absV / 1000).toFixed(1)}K` : `$${absV}`;
+            pnlHtml = `<span class="row-buyer-pnl ${cls}">${sign}${fmt}</span>`;
+          }
+          return `<div class="row-buyer" data-wallet="${escapeHtml(b.wallet)}">
+            <span class="rb-tag">${age}</span>
+            <span class="rb-addr">${b.wallet.slice(0, 4)}…${b.wallet.slice(-4)}</span>
+            <span class="rb-amt">$${(b.usd || 0).toLocaleString()}</span>
+            ${pnlHtml}
+          </div>`;
+        }).join("")}
+      </div>`;
+  } else if (!Array.isArray(p.clusterWallets)) {
+    buyersHtml = `<div class="row-buyers locked"><div class="row-buyers-h">Insider wallets revealed to subscribers</div></div>`;
+  }
+
+  return `
+    <article class="row" style="animation-delay:${idx * 0.04}s">
+      <div class="row-top">
+        <div class="row-sym-block">
+          <div class="row-sym">$${sym}</div>
+          <div class="row-name">${escapeHtml((p.name || "").slice(0, 40))}</div>
+          ${cexTag}
+        </div>
+        <div class="row-time">${fmtAgo(p.detectedAt)}</div>
+      </div>
+      <div class="row-sub">${p.clusterSize} same-day wallets &middot; ${Math.round(p.temporalSpanSec / 60)}min window &middot; token was ${escapeHtml(p.tokenAgeDisplay || "—")} old</div>
+      ${badgesHtml}
+      <div class="row-perf">
+        <div class="perf-block"><div class="perf-l">Peak since call</div><div class="perf-v ${peakCls}">${peak}</div></div>
+        <div class="perf-block"><div class="perf-l">Current</div><div class="perf-v ${curCls}">${cur}</div></div>
+        <div class="perf-block"><div class="perf-l">Mcap</div><div class="perf-v">${fmtUsd(p.currentMcap)}</div></div>
+      </div>
+      ${buyersHtml}
+    </article>`;
+}
+
+document.addEventListener("click", e => {
+  const buyer = e.target.closest(".row-buyer");
+  if (buyer && buyer.dataset.wallet) {
+    navigator.clipboard.writeText(buyer.dataset.wallet);
+    toast("Wallet copied");
+  }
+});
+
+// =====================================================================
+// SMART WALLET TRACKER
+// =====================================================================
+async function loadTracker() {
+  try {
+    const wallet = connectedWallet?.address;
+    const url = `${API}/api/smart-tracker` + (wallet ? `?wallet=${encodeURIComponent(wallet)}` : "");
+    const r = await fetch(url);
+    if (!r.ok) throw 0;
+    const data = await r.json();
+    renderTracker(data);
+  } catch {
+    document.getElementById("tracker-list").innerHTML =
+      '<div class="feed-empty"><div class="feed-empty-d">Tracker unavailable.</div></div>';
+  }
+}
+
+function renderTracker(data) {
+  const list = document.getElementById("tracker-list");
+  if (data.locked) {
+    list.innerHTML = `
+      <div class="feed-empty">
+        <div class="feed-empty-mark">🔒</div>
+        <div class="feed-empty-h">Subscribers only</div>
+        <div class="feed-empty-d">${data.provenCount} proven wallets tracked. Subscribe to see what they're buying in real time.</div>
+        <a class="paywall-btn" href="#subscribe">Subscribe &rarr;</a>
+      </div>`;
+    return;
+  }
+  const items = data.items || [];
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="feed-empty">
+        <div class="feed-empty-mark">○</div>
+        <div class="feed-empty-h">No recent buys from proven wallets</div>
+        <div class="feed-empty-d">
+          ${data.provenCount} wallets tracked. They haven't bought anything new in the last 24h.
+          When they do, you'll see it here within minutes.
+        </div>
+      </div>`;
+    return;
+  }
+  list.innerHTML = items.map(item => `
+    <div class="track-row" data-wallet="${escapeHtml(item.wallet)}">
+      <div class="track-wallet">
+        <span class="track-tag">⚡ +${item.walletPeak.toLocaleString()}% prior</span>
+        <span class="track-addr">${item.wallet.slice(0, 4)}…${item.wallet.slice(-4)}</span>
+      </div>
+      <div class="track-action">bought</div>
+      <div class="track-mint" data-mint="${escapeHtml(item.mint)}">${item.mint.slice(0, 6)}…${item.mint.slice(-4)}</div>
+      <div class="track-time">${fmtAgo(item.ts)}</div>
+    </div>
+  `).join("");
+}
+
+document.addEventListener("click", e => {
+  const m = e.target.closest("[data-mint]");
+  if (m && m.dataset.mint) {
+    navigator.clipboard.writeText(m.dataset.mint);
+    toast("Mint copied");
+  }
+});
+
+// =====================================================================
+// TRIAL STATUS
+// =====================================================================
+async function loadTrialStatus() {
+  try {
+    const r = await fetch(`${API}/api/trial-status`);
+    const data = await r.json();
+    const line = document.getElementById("sub-trial-line");
+    if (data.active) {
+      const h = Math.floor(data.msLeft / (60 * 60 * 1000));
+      line.textContent = `Free trial active · ${h}h remaining`;
+      line.className = "sub-trial active";
+    } else {
+      line.textContent = "Trial expired · Subscribe to unlock live access";
+      line.className = "sub-trial expired";
+    }
+  } catch {}
+}
+
+// =====================================================================
+// SUBSCRIBE FLOW
+// =====================================================================
+function initSubscribe() {
+  if (!connectedWallet) { openWalletModal(); return; }
+  createInvoice();
+}
+
+async function createInvoice() {
+  if (!connectedWallet) return;
+  const btn = document.getElementById("sub-init");
+  btn.disabled = true;
+  btn.textContent = "Generating…";
+  try {
+    const r = await fetch(`${API}/api/invoice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet: connectedWallet.address }),
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      if (data.error === "subscriber_cap_reached") {
+        toast(`Cap reached (${data.cap} subscribers). Existing subs can still renew.`);
+      } else {
+        toast(data.error || "Failed");
+      }
+      return;
+    }
+    if (data.alreadyActive) {
+      toast("Already subscribed");
+      enterDoneState(data.activeUntil, data.planRate);
+      return;
+    }
+    currentInvoice = data;
+    document.getElementById("pay-sol").textContent = data.sol;
+    document.getElementById("pay-wallet").textContent = data.wallet;
+    document.getElementById("sub-step-init").style.display = "none";
+    document.getElementById("sub-step-pay").style.display = "block";
+    startPolling(data.invoiceId);
+    startCountdown(data.expiresAt);
+  } catch (e) {
+    toast("Network error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Connect Wallet to Subscribe";
+  }
+}
+
+function cancelInvoice() {
+  stopPolling();
+  stopCountdown();
+  currentInvoice = null;
+  document.getElementById("sub-step-init").style.display = "block";
+  document.getElementById("sub-step-pay").style.display = "none";
+}
+
+function startPolling(id) {
+  stopPolling();
+  pollInterval = setInterval(async () => {
+    try {
+      const r = await fetch(`${API}/api/invoice/${encodeURIComponent(id)}`);
+      const data = await r.json();
+      if (data.status === "paid") {
+        stopPolling();
+        stopCountdown();
+        toast("Payment received");
+        enterDoneState(data.activeUntil, currentInvoice?.lamports || null);
+        loadFeed();
+        loadTracker();
+      } else if (data.status === "expired") {
+        stopPolling();
+        stopCountdown();
+        document.getElementById("pay-status-text").textContent = "Invoice expired. Start a new one.";
+      }
+    } catch {}
+  }, 5000);
+}
+function stopPolling() { if (pollInterval) { clearInterval(pollInterval); pollInterval = null; } }
+function startCountdown(exp) {
+  stopCountdown();
+  const tick = () => {
+    const left = exp - Date.now();
+    if (left <= 0) { stopCountdown(); document.getElementById("pay-countdown").textContent = "00:00"; return; }
+    const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+    document.getElementById("pay-countdown").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+function stopCountdown() { if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; } }
+
+function enterDoneState(activeUntil, planRate) {
+  document.getElementById("sub-step-init").style.display = "none";
+  document.getElementById("sub-step-pay").style.display = "none";
+  document.getElementById("sub-step-done").style.display = "block";
+  const d = new Date(activeUntil);
+  document.getElementById("done-until").textContent = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  document.getElementById("done-rate").textContent = ((planRate || 150_000_000) / 1e9).toFixed(3);
+}
+
+// =====================================================================
+// WEBHOOK
+// =====================================================================
+async function saveWebhook() {
+  if (!connectedWallet) { toast("Connect wallet first"); return; }
+  const url = (document.getElementById("webhook-input").value || "").trim();
+  if (!/^https?:\/\//i.test(url)) { toast("Invalid URL"); return; }
+  const btn = document.getElementById("webhook-save");
+  btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    const r = await fetch(`${API}/api/webhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet: connectedWallet.address, url }),
+    });
+    const data = await r.json();
+    if (!r.ok) { toast(data.error || "Failed"); return; }
+    const note = document.getElementById("webhook-note");
+    note.textContent = `✓ Webhook saved (${data.type})`;
+    note.classList.add("ok");
+  } catch {
+    toast("Network error");
+  } finally {
+    btn.disabled = false; btn.textContent = "Save";
+  }
+}
+
+// =====================================================================
+// RUG CHECK
+// =====================================================================
+async function runRugCheck() {
+  const mint = (document.getElementById("rug-input").value || "").trim();
+  if (mint.length < 32) { toast("Paste a valid Solana mint"); return; }
+  const result = document.getElementById("rug-result");
+  result.innerHTML = '<div class="rug-loading">Running checks&hellip;</div>';
+  try {
+    const r = await fetch(`${API}/api/rug-check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mint }),
+    });
+    const data = await r.json();
+    if (!r.ok) { result.innerHTML = `<div class="rug-error">${escapeHtml(data.error || "Failed")}</div>`; return; }
+    const verdictClass = data.color === "green" ? "ok" : data.color === "amber" ? "warn" : "bad";
+    result.innerHTML = `
+      <div class="rug-card ${verdictClass}">
+        <div class="rug-card-head">
+          <div class="rug-verdict">${escapeHtml(data.verdict)}</div>
+          <div class="rug-score">${data.score}/100</div>
+        </div>
+        <div class="rug-sym">$${escapeHtml(data.symbol)} &middot; ${escapeHtml(data.name)}</div>
+        <div class="rug-flags">
+          ${(data.flags && data.flags.length > 0) ? data.flags.map(f => `<div class="rug-flag rf-${f.level}"><span class="rf-dot"></span>${escapeHtml(f.text)}</div>`).join("") : '<div class="rug-flag rf-ok"><span class="rf-dot"></span>No flags found. All authority and concentration checks pass.</div>'}
+        </div>
+        <div class="rug-details">
+          <div>Mint authority: <strong>${data.details.mintAuthorityRevoked ? "Revoked ✓" : "Active ✗"}</strong></div>
+          <div>Freeze authority: <strong>${data.details.freezeAuthorityRevoked ? "Revoked ✓" : "Active ✗"}</strong></div>
+          <div>Top 10 holders (excl. LP): <strong>${data.details.top10ExclLpPct}%</strong></div>
+          <div>Liquidity: <strong>${fmtUsd(data.details.liquidity)}</strong></div>
+        </div>
+      </div>`;
+  } catch (e) {
+    result.innerHTML = `<div class="rug-error">Network error</div>`;
+  }
+}
+
+// =====================================================================
+// TOKEN DEEP DIVE
+// =====================================================================
+async function runDeepDive() {
+  const mint = (document.getElementById("deep-input").value || "").trim();
+  if (mint.length < 32) { toast("Paste a valid Solana mint"); return; }
+  const result = document.getElementById("deep-result");
+  result.innerHTML = '<div class="rug-loading">Analyzing on-chain data&hellip; (15-30 sec)</div>';
+  try {
+    const payload = { mint };
+    if (connectedWallet?.address) payload.wallet = connectedWallet.address;
+    const r = await fetch(`${API}/api/deep-dive`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json();
+    if (r.status === 403) {
+      result.innerHTML = `
+        <div class="deep-locked">
+          <div class="deep-locked-h">Subscription or active trial required</div>
+          <div class="deep-locked-d">Token Deep Dive is available during your 3-day trial and to paying subscribers. Connect your wallet to subscribe, or wait — your trial gives you full access for 3 days.</div>
+          <a class="paywall-btn" href="#subscribe">Subscribe &rarr;</a>
+        </div>`;
+      return;
+    }
+    if (!r.ok) {
+      result.innerHTML = `<div class="rug-error">${escapeHtml(data.error || "Analysis failed")}</div>`;
+      return;
+    }
+    renderDeepDive(data);
+  } catch (e) {
+    result.innerHTML = `<div class="rug-error">Network error</div>`;
+  }
+}
+
+function renderDeepDive(d) {
+  const result = document.getElementById("deep-result");
+  const m = d.market;
+  const ageDisplay = d.deploy?.ageMs != null
+    ? d.deploy.ageMs < 60 * 60 * 1000
+      ? `${Math.floor(d.deploy.ageMs / 60000)}m`
+      : d.deploy.ageMs < 24 * 60 * 60 * 1000
+        ? `${Math.floor(d.deploy.ageMs / (60 * 60 * 1000))}h`
+        : `${Math.floor(d.deploy.ageMs / (24 * 60 * 60 * 1000))}d`
+    : "unknown";
+
+  // Build sections, each independently honest about missing data
+  const marketHtml = m ? `
+    <div class="deep-card">
+      <div class="deep-card-h">Market</div>
+      <div class="deep-grid">
+        <div><div class="deep-l">Price</div><div class="deep-v">$${m.priceUsd.toFixed(m.priceUsd < 0.001 ? 9 : 6)}</div></div>
+        <div><div class="deep-l">Mcap</div><div class="deep-v">${fmtUsd(m.mcap)}</div></div>
+        <div><div class="deep-l">Liquidity</div><div class="deep-v">${fmtUsd(m.liquidity)}</div></div>
+        <div><div class="deep-l">24h Vol</div><div class="deep-v">${fmtUsd(m.volume24h)}</div></div>
+        <div><div class="deep-l">24h Change</div><div class="deep-v ${m.priceChange24h >= 0 ? "up" : "down"}">${m.priceChange24h >= 0 ? "+" : ""}${m.priceChange24h.toFixed(1)}%</div></div>
+        <div><div class="deep-l">1h Change</div><div class="deep-v ${m.priceChange1h >= 0 ? "up" : "down"}">${m.priceChange1h >= 0 ? "+" : ""}${m.priceChange1h.toFixed(1)}%</div></div>
+        <div><div class="deep-l">24h Txns</div><div class="deep-v">${m.txns24h.toLocaleString()}</div></div>
+        <div><div class="deep-l">Buy:Sell</div><div class="deep-v">${m.sells24h > 0 ? (m.buys24h/m.sells24h).toFixed(2) : m.buys24h}</div></div>
+      </div>
+    </div>` : `
+    <div class="deep-card"><div class="deep-card-h">Market</div><div class="deep-empty">No active DexScreener pair found.</div></div>`;
+
+  const safetyHtml = `
+    <div class="deep-card">
+      <div class="deep-card-h">Safety</div>
+      <div class="deep-list">
+        <div class="deep-row ${d.safety.mintAuthorityRevoked ? "ok" : "bad"}">
+          <span class="deep-dot"></span>
+          <span>Mint authority: <strong>${d.safety.mintAuthorityRevoked ? "Revoked" : "ACTIVE (creator can mint)"}</strong></span>
+        </div>
+        <div class="deep-row ${d.safety.freezeAuthorityRevoked ? "ok" : "bad"}">
+          <span class="deep-dot"></span>
+          <span>Freeze authority: <strong>${d.safety.freezeAuthorityRevoked ? "Revoked" : "ACTIVE (honeypot risk)"}</strong></span>
+        </div>
+        <div class="deep-row ${d.safety.top10ExclLpPct == null ? "neutral" : d.safety.top10ExclLpPct < 25 ? "ok" : d.safety.top10ExclLpPct < 40 ? "warn" : "bad"}">
+          <span class="deep-dot"></span>
+          <span>Top 10 (excl. LP): <strong>${d.safety.top10ExclLpPct != null ? d.safety.top10ExclLpPct + "%" : "unavailable"}</strong></span>
+        </div>
+      </div>
+    </div>`;
+
+  const deployHtml = d.deploy ? `
+    <div class="deep-card">
+      <div class="deep-card-h">Deployer</div>
+      <div class="deep-list">
+        <div class="deep-row neutral">
+          <span class="deep-dot"></span>
+          <span>Token age: <strong>${ageDisplay}</strong></span>
+        </div>
+        <div class="deep-row neutral">
+          <span class="deep-dot"></span>
+          <span>Deployer wallet: <strong class="mono-addr" data-copy="${escapeHtml(d.deploy.deployer || "")}">${d.deploy.deployer ? d.deploy.deployer.slice(0,6) + "…" + d.deploy.deployer.slice(-4) : "unknown"}</strong></span>
+        </div>
+        ${d.deployerHistory ? `
+        <div class="deep-row ${d.deployerHistory.totalTxs > 500 ? "warn" : "ok"}">
+          <span class="deep-dot"></span>
+          <span>Deployer tx count: <strong>${d.deployerHistory.totalTxs}</strong>${d.deployerHistory.totalTxs > 500 ? " (high &mdash; may be serial deployer)" : " (looks normal)"}</span>
+        </div>` : ""}
+      </div>
+    </div>` : `
+    <div class="deep-card"><div class="deep-card-h">Deployer</div><div class="deep-empty">Deployer info unavailable.</div></div>`;
+
+  const smartMoneyHtml = `
+    <div class="deep-card">
+      <div class="deep-card-h">Smart money in holders</div>
+      ${d.smartMoneyInHolders.length > 0
+        ? d.smartMoneyInHolders.map(s => `
+          <div class="deep-row ok">
+            <span class="deep-dot"></span>
+            <span class="mono-addr" data-copy="${escapeHtml(s.wallet)}">${s.wallet.slice(0,6)}…${s.wallet.slice(-4)}</span>
+            <span class="deep-tag">+${s.peakSeen.toLocaleString()}% prior · ${s.detectionsCount} of our calls</span>
+            <span class="deep-pct">${s.pct.toFixed(2)}%</span>
+          </div>`).join("")
+        : `<div class="deep-empty">No tracked smart-money wallets in the top 20 holders.</div>`
+      }
+    </div>`;
+
+  const crossBuysHtml = `
+    <div class="deep-card">
+      <div class="deep-card-h">What top holders also bought (last 7d)</div>
+      ${d.topHolderRecentBuys.length > 0
+        ? (() => {
+            // Group by mint, count occurrences
+            const byMint = {};
+            for (const b of d.topHolderRecentBuys) {
+              if (!byMint[b.boughtMint]) byMint[b.boughtMint] = { count: 0, latestTs: 0 };
+              byMint[b.boughtMint].count++;
+              if (b.ts > byMint[b.boughtMint].latestTs) byMint[b.boughtMint].latestTs = b.ts;
+            }
+            const sorted = Object.entries(byMint).sort((a, b) => b[1].count - a[1].count).slice(0, 8);
+            return sorted.map(([mint, info]) => `
+              <div class="deep-row ${info.count >= 2 ? "ok" : "neutral"}">
+                <span class="deep-dot"></span>
+                <span class="mono-addr" data-copy="${escapeHtml(mint)}">${mint.slice(0,6)}…${mint.slice(-4)}</span>
+                <span class="deep-tag">${info.count} holder${info.count > 1 ? "s" : ""}</span>
+                <span class="deep-time">${fmtAgo(info.latestTs)}</span>
+              </div>`).join("");
+          })()
+        : `<div class="deep-empty">No recent buys from top holders in the last 7 days.</div>`
+      }
+    </div>`;
+
+  const authHtml = d.authenticity ? `
+    <div class="deep-card">
+      <div class="deep-card-h">Price action authenticity</div>
+      <div class="deep-list">
+        <div class="deep-row ${d.authenticity.score >= 70 ? "ok" : d.authenticity.score >= 40 ? "warn" : "bad"}">
+          <span class="deep-dot"></span>
+          <span>Authenticity score: <strong>${d.authenticity.score}/100</strong></span>
+        </div>
+        <div class="deep-row neutral">
+          <span class="deep-dot"></span>
+          <span>Avg trade size: <strong>$${d.authenticity.avgBuySize}</strong></span>
+        </div>
+        ${d.authenticity.flags.map(f => `
+          <div class="deep-row warn">
+            <span class="deep-dot"></span>
+            <span>${escapeHtml(f)}</span>
+          </div>`).join("")}
+      </div>
+    </div>` : `
+    <div class="deep-card"><div class="deep-card-h">Price action authenticity</div><div class="deep-empty">Insufficient volume data to compute.</div></div>`;
+
+  const ourCallHtml = d.ourDetection ? `
+    <div class="deep-card highlight">
+      <div class="deep-card-h">✓ We called this one</div>
+      <div class="deep-list">
+        <div class="deep-row ok">
+          <span class="deep-dot"></span>
+          <span>Detected: <strong>${fmtAgo(d.ourDetection.detectedAt)}</strong> at $${d.ourDetection.detectionPrice.toFixed(9)}</span>
+        </div>
+        <div class="deep-row ok">
+          <span class="deep-dot"></span>
+          <span>Peak since: <strong>+${d.ourDetection.peakPctGain.toLocaleString()}%</strong> · Current: ${d.ourDetection.currentPctGain >= 0 ? "+" : ""}${d.ourDetection.currentPctGain.toLocaleString()}%</span>
+        </div>
+      </div>
+    </div>` : "";
+
+  // Token risk verdict panel — combines contract + structural signals
+  const tr = d.tokenRisk;
+  const tokenRiskHtml = tr ? `
+    <div class="dd-risk-panel">
+      <div class="dd-risk-head">
+        <div>
+          <div class="dd-risk-title">Risk verdict</div>
+          <div class="dd-risk-tier ${tr.tier.toLowerCase()}">${tr.tier} risk</div>
+        </div>
+        <div style="text-align: right">
+          <div class="dd-risk-score">${tr.score}<span style="font-size: 14px; color: var(--ink-2);">/100</span></div>
+          <div class="dd-risk-score-l">Structural score</div>
+        </div>
+      </div>
+      <div class="dd-risk-cols">
+        ${tr.concerningIndicators && tr.concerningIndicators.length > 0 ? `
+          <div class="dd-risk-col bad">
+            <h4>Concerns</h4>
+            <ul>${tr.concerningIndicators.map(c => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+          </div>` : ""}
+        ${tr.legitimateElements && tr.legitimateElements.length > 0 ? `
+          <div class="dd-risk-col good">
+            <h4>Positives</h4>
+            <ul>${tr.legitimateElements.map(l => `<li>${escapeHtml(l)}</li>`).join("")}</ul>
+          </div>` : ""}
+      </div>
+    </div>` : "";
+
+  const symLine = m
+    ? `<div class="deep-symline">$${escapeHtml(m.symbol)} &middot; ${escapeHtml(m.name)} &middot; <span class="mono-addr" data-copy="${escapeHtml(d.mint)}">${d.mint.slice(0,6)}…${d.mint.slice(-4)}</span></div>`
+    : `<div class="deep-symline"><span class="mono-addr" data-copy="${escapeHtml(d.mint)}">${d.mint.slice(0,6)}…${d.mint.slice(-4)}</span></div>`;
+
+  result.innerHTML = `
+    <div class="deep-report">
+      ${symLine}
+      ${ourCallHtml}
+      ${tokenRiskHtml}
+      <div class="deep-cards">
+        ${marketHtml}
+        ${safetyHtml}
+        ${deployHtml}
+        ${authHtml}
+        ${smartMoneyHtml}
+        ${crossBuysHtml}
+      </div>
+      ${m ? `
+      <div class="dex-inline-wrap">
+        <div class="dex-inline-h">
+          <span>Trade $${escapeHtml(m.symbol)} on Verixia DEX</span>
+          <a href="https://swap.verixiaapps.com/?token=${encodeURIComponent(d.mint)}" target="_blank" rel="noopener" class="dex-inline-pop">Pop out &rarr;</a>
+        </div>
+        <iframe
+          src="https://swap.verixiaapps.com/?token=${encodeURIComponent(d.mint)}"
+          class="dex-iframe dex-iframe-inline"
+          title="Trade ${escapeHtml(m.symbol)} on Verixia DEX"
+          allow="clipboard-read; clipboard-write; payment; web-share"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>` : ""}
+    </div>`;
+}
+
+// Click-to-copy on mono addresses
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-copy]");
+  if (el && el.dataset.copy) {
+    navigator.clipboard.writeText(el.dataset.copy);
+    toast("Copied");
+  }
+});
+</script>
+
+</body>
+</html>
