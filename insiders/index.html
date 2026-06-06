@@ -52,6 +52,24 @@ button:disabled{opacity:.6;cursor:default;}
 .btn-teal:active{box-shadow:0 1px 0 var(--teal-dark);}
 .btn-ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);}
 .topbar .btn{padding:9px 18px;font-size:14px;}
+.topbar-actions{display:flex;align-items:center;gap:9px;}
+.btn-swap{background:rgba(31,199,212,.1);color:var(--teal);border:1px solid var(--teal);display:inline-flex;align-items:center;gap:5px;}
+.btn-swap:hover{background:rgba(31,199,212,.18);}
+
+/* SWAP STRIP — top, prominent */
+@keyframes strip-shift{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}
+.swap-strip{display:block;text-decoration:none;position:relative;overflow:hidden;background:linear-gradient(100deg,var(--teal),var(--purple),var(--pink),var(--teal));background-size:200% 100%;animation:strip-shift 6s linear infinite;}
+.swap-strip:hover{text-decoration:none;}
+.swap-strip-glow{position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(255,255,255,.18),transparent 60%);pointer-events:none;}
+.swap-strip-in{position:relative;max-width:1040px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.swap-strip-left{display:flex;align-items:center;gap:13px;min-width:0;}
+.swap-strip-ico{font-size:22px;color:#06303a;font-weight:800;flex:0 0 auto;background:rgba(255,255,255,.85);width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;}
+.swap-strip-text{display:flex;flex-direction:column;line-height:1.2;min-width:0;}
+.swap-strip-text b{font-family:var(--display);font-weight:800;font-size:15px;color:#06303a;}
+.swap-strip-sub{font-size:12px;color:rgba(6,48,58,.78);font-weight:600;}
+.swap-strip-btn{flex:0 0 auto;background:#06303a;color:#fff;font-weight:700;font-size:14px;padding:10px 20px;border-radius:12px;white-space:nowrap;transition:transform .12s;}
+.swap-strip:hover .swap-strip-btn{transform:translateY(-1px);}
+@media(max-width:520px){.swap-strip-sub{display:none;}.swap-strip-text b{font-size:13.5px;}.swap-strip-btn{padding:9px 14px;font-size:13px;}.swap-strip-in{padding:10px 14px;}}
 
 /* ---------- HERO ---------- */
 .hero{padding:46px 20px 30px;}
@@ -279,9 +297,24 @@ button:disabled{opacity:.6;cursor:default;}
       <a href="#rug">Rug Check</a>
       <a href="#deep">Deep Dive</a>
     </nav>
-    <button class="btn btn-teal" onclick="document.getElementById('subscribe').scrollIntoView({behavior:'smooth'})">Start free</button>
+    <div class="topbar-actions">
+      <a class="btn btn-swap" href="https://swap.verixiaapps.com" target="_blank" rel="noopener">⇄ Swap</a>
+      <button class="btn btn-teal" onclick="document.getElementById('subscribe').scrollIntoView({behavior:'smooth'})">Start free</button>
+    </div>
   </div>
 </header>
+
+<!-- SWAP STRIP (top, prominent) -->
+<a class="swap-strip" id="swap" href="https://swap.verixiaapps.com" target="_blank" rel="noopener">
+  <span class="swap-strip-glow"></span>
+  <span class="swap-strip-in">
+    <span class="swap-strip-left">
+      <span class="swap-strip-ico">⇄</span>
+      <span class="swap-strip-text"><b>Swap any Solana token on Verixia</b><span class="swap-strip-sub">Best-price routing · non-custodial · powered by Jupiter</span></span>
+    </span>
+    <span class="swap-strip-btn">Open Swap →</span>
+  </span>
+</a>
 
 <!-- HERO -->
 <section class="hero">
