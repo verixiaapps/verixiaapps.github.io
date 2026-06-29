@@ -54,7 +54,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://awake-integrity-production-faa0.up.railway.app" crossorigin>
-<link rel="dns-prefetch" href="https://js.stripe.com">
+<link rel="dns-prefetch" href="https://esm.sh">
+<link rel="dns-prefetch" href="https://api.mainnet-beta.solana.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -669,11 +670,11 @@ button{font-family:var(--font-body);}
           <button type="button" class="quick-example" onclick="loadExample('floki')">FLOKI</button>
         </div>
 
-        <div class="pricing-nudge">1 free check &middot; <a onclick="showUpgrade();return false;" href="#">Unlimited from $3.99/wk</a></div>
+        <div class="pricing-nudge">1 free check &middot; <a onclick="showUpgrade();return false;" href="#">Unlock unlimited from 0.15 SOL</a></div>
         <div class="note">No signup required &middot; Results in seconds</div>
-        <div class="price-anchor">Unlimited checks from $3.99 / week &middot; Cancel anytime</div>
-        <input id="email" type="email" placeholder="Already subscribed? Enter your payment email">
-        <div class="note">Use the same email entered during checkout to restore access</div>
+        <div class="price-anchor">Unlimited checks from 0.15 SOL &middot; One-time, no auto-renew</div>
+        <input id="email" type="email" placeholder="Optional: email for your records" autocomplete="off">
+        <div class="note">Access is saved on this device the moment your payment confirms on-chain</div>
         <div id="postPurchase" class="success">Unlimited token checks active</div>
         <div id="result"></div>
       </div>
@@ -690,31 +691,31 @@ button{font-family:var(--font-body);}
           <div class="plan-card hero-plan">
             <div><span class="plan-card-badge best-value">Best Value -- Save 80%</span></div>
             <div class="plan-card-label">Yearly Access</div>
-            <div class="plan-card-price">$39.99 / yr &nbsp;&middot;&nbsp; $3.33/mo</div>
-            <button class="plan-card-cta cta-hero" onclick="checkout('price_1T8KOQJjMzyHDzeQfcU1C1MQ')">Get Yearly -- $39.99</button>
+            <div class="plan-card-price">1.5 SOL / year</div>
+            <button class="plan-card-cta cta-hero" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('yearly');return false;">Get Yearly -- 1.5 SOL</button>
           </div>
           <div class="plan-card">
             <div><span class="plan-card-badge popular">Popular</span></div>
             <div class="plan-card-label">Monthly Access</div>
-            <div class="plan-card-price">$11.99 / month</div>
-            <button class="plan-card-cta cta-secondary" onclick="checkout('price_1T8KOUJjMzyHDzeQxaqPFOSB')">Monthly -- $11.99</button>
+            <div class="plan-card-price">0.5 SOL / month</div>
+            <button class="plan-card-cta cta-secondary" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('monthly');return false;">Monthly -- 0.5 SOL</button>
           </div>
           <div class="plan-card" style="border-color:rgba(0,240,208,.18);">
             <div><span class="plan-card-badge" style="background:rgba(0,240,208,.10);color:var(--cyan);border:1px solid rgba(0,240,208,.22);">Try it -- no commitment</span></div>
             <div class="plan-card-label" style="color:var(--cyan);">Weekly Access</div>
-            <div class="plan-card-price">$3.99 / week &middot; cancel anytime</div>
-            <button class="plan-card-cta cta-hero" onclick="checkout('price_1T8KOTJjMzyHDzeQDDg1A2TF')">Start This Week -- $3.99</button>
+            <div class="plan-card-price">0.15 SOL / week &middot; no auto-renew</div>
+            <button class="plan-card-cta cta-hero" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('weekly');return false;">Start This Week -- 0.15 SOL</button>
           </div>
         </div>
         <div class="trust-badge-strip">
-          <span class="trust-badge-item">SSL Secured</span>
-          <span class="trust-badge-item">Stripe</span>
-          <span class="trust-badge-item">Cancel anytime</span>
-          <span class="trust-badge-item">No hidden fees</span>
+          <span class="trust-badge-item">On-chain</span>
+          <span class="trust-badge-item">Solana Pay</span>
+          <span class="trust-badge-item">Any wallet</span>
+          <span class="trust-badge-item">No auto-renew</span>
         </div>
-        <div class="upgrade-footer">No contracts. Cancel anytime from your account.</div>
+        <div class="upgrade-footer">One-time access passes. No auto-renew, no account needed.</div>
         <div class="subscriber-link">
-          <button type="button" onclick="scrollToEmail()">Already subscribed? Enter email above</button>
+          <button type="button" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade('yearly')">Paid already? Access unlocks automatically once confirmed.</button>
         </div>
       </div>
 
@@ -1203,7 +1204,7 @@ function buildUpgradeCardHtml(p){
   var headline,sub;
   if(p.riskClass==="high"){headline="That token is high risk. Check every contract before you buy in.";sub="Unlimited on-chain checks across Solana and EVM. From $3.99/week, cancel anytime.";}
   else{headline="This token needs a closer look. Verify everything before you commit.";sub="Unlimited on-chain checks for $3.99/week. Cancel anytime.";}
-  return'<div class="post-result-upgrade"><div class="post-result-upgrade-headline">'+escapeHtml(headline)+'</div><div class="post-result-upgrade-sub">'+escapeHtml(sub)+'</div><button class="post-result-upgrade-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade(\'yearly\')">Unlock Unlimited Checks</button><div class="post-result-upgrade-trust"><span>Stripe secured</span><span>Cancel anytime</span><span>From $3.99/week</span></div></div>';
+  return'<div class="post-result-upgrade"><div class="post-result-upgrade-headline">'+escapeHtml(headline)+'</div><div class="post-result-upgrade-sub">'+escapeHtml(sub)+'</div><button class="post-result-upgrade-btn" onclick="window.openEmbeddedUpgrade&&window.openEmbeddedUpgrade(\'yearly\')">Unlock Unlimited Checks</button><div class="post-result-upgrade-trust"><span>On-chain</span><span>No auto-renew</span><span>From 0.15 SOL</span></div></div>';
 }
 
 function formatTokenResult(data){
@@ -1227,7 +1228,7 @@ async function check(){
   result.style.display="block";
   result.innerHTML='<div class="result-card unknown"><div class="result-top"><div class="risk unknown">[...] Analyzing...</div><div class="result-chip">On-chain check in progress</div></div><div class="result-summary">Checking contract structure, liquidity depth, holder distribution, and on-chain signals.</div></div>';
   try{
-    var response=await fetch(API+ANALYZE_PATH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,email:email,subscribed:subscribed})});
+    var response=await fetch(API+ANALYZE_PATH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,email:email,subscribed:subscribed,accessToken:(localStorage.getItem("token_risk_access_token")||"")})});
     var data=await response.json();
     if(data&&data.limit){result.innerHTML='<div class="result-card medium"><div class="result-top"><div class="risk medium">[~] Free Check Used</div><div class="result-chip">Upgrade for Unlimited</div></div><div class="result-summary">Unlock unlimited token checks to verify every contract before you buy in.</div></div>';if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return;}
     result.innerHTML=formatTokenResult(data||{});
@@ -1238,12 +1239,8 @@ function showUpgrade(){var el=document.getElementById("upgrade");if(!el)return;e
 function scrollToEmail(){var f=document.getElementById("email");if(!f)return;f.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(function(){f.focus();},150);}
 
 async function checkout(priceId){
-  var pageUrl=window.location.origin+window.location.pathname;
-  try{
-    var response=await fetch(API+"/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId:priceId,email:null,successUrl:pageUrl+"?subscribed=true",cancelUrl:pageUrl})});
-    var data=await response.json();
-    if(data.url){window.location=data.url;}else{alert("Checkout failed. Please try again.");}
-  }catch(e){alert("Checkout failed. Please try again.");}
+  var k=priceId==="weekly"||priceId==="monthly"||priceId==="yearly"?priceId:"yearly";
+  if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade(k);
 }
 
 function initLiveFeed(){
@@ -1365,103 +1362,216 @@ window.addEventListener("load",function(){
 });
 </script>
 
-<script>
+<script type="module">
+/* ===========================================================================
+   Verixia — Solana Pay one-time access passes (replaces Stripe checkout)
+   Payments go to RECIPIENT. Each checkout attaches a unique on-chain
+   "reference" so the browser can detect THIS visitor's payment with no backend.
+   Access is a time-limited local pass (7 / 30 / 365 days), no auto-renew.
+   =========================================================================== */
 (function(){
-if(window.__VERIXIA_EMBEDDED_UPGRADE__)return;
-window.__VERIXIA_EMBEDDED_UPGRADE__=true;
-var API_BASE="https://awake-integrity-production-faa0.up.railway.app";
-var STRIPE_KEY="pk_live_51T83ANJjMzyHDzeQlrggekWLypSX5CUd01DW8gCqjo32KnKrDsdDtg61CbbrJUzMF82T4z5INGWROuLMlIfp1zKE00oMYmW08Y";
-var TOKEN_RISK_BROWSER_SUB_KEY="token_risk_browser_subscribed";
-var LEGACY_BROWSER_SUB_KEY="scam_check_browser_subscribed";
-var VERIFIED_EMAIL_KEY="token_risk_verified_subscriber_email";
-var PRICES={weekly:"price_1T8KOTJjMzyHDzeQDDg1A2TF",monthly:"price_1T8KOUJjMzyHDzeQxaqPFOSB",yearly:"price_1T8KOQJjMzyHDzeQfcU1C1MQ"};
-var stripe=null,checkoutInstance=null,selectedPlanKey="yearly",isInitializingCheckout=false,stripeScriptPromise=null;
-var wrapper,buttonRow,checkoutCard,compactRow,compactText,changePlanBtn,planRow,weeklyBtn,monthlyBtn,yearlyBtn,helper,checkoutContainer,status,closeBtn;
-function normalizeEmail(v){return String(v||"").trim().toLowerCase();}
-function getEmailInput(){return document.getElementById("email");}
-function getEnteredEmail(){var i=getEmailInput();return i?normalizeEmail(i.value):"";}
-function getStoredEmail(){return normalizeEmail(localStorage.getItem(VERIFIED_EMAIL_KEY)||"");}
-function isBrowserSubscribed(){return localStorage.getItem(TOKEN_RISK_BROWSER_SUB_KEY)==="true"||localStorage.getItem(LEGACY_BROWSER_SUB_KEY)==="true";}
-function markSubscribed(v){if(v){localStorage.setItem(TOKEN_RISK_BROWSER_SUB_KEY,"true");localStorage.setItem(LEGACY_BROWSER_SUB_KEY,"true");}else{localStorage.removeItem(TOKEN_RISK_BROWSER_SUB_KEY);localStorage.removeItem(LEGACY_BROWSER_SUB_KEY);}}
-function isVerifiedForCurrentUser(){var s=getStoredEmail(),e=getEnteredEmail();if(!isBrowserSubscribed()||!s||!e)return false;return e===s;}
-function shouldSuppress(){return isVerifiedForCurrentUser();}
-function syncPostPurchase(){var p=document.getElementById("postPurchase");if(!p)return;p.style.display=shouldSuppress()?"block":"none";}
-function setStatus(text){if(status)status.textContent=text||"";}
-function hideLegacyUpgrade(){var o=document.getElementById("upgrade");if(o){o.style.setProperty("display","none","important");}}
-function ensureStripeScript(){if(window.Stripe)return Promise.resolve();if(stripeScriptPromise)return stripeScriptPromise;stripeScriptPromise=new Promise(function(resolve,reject){var s=document.createElement("script");s.src="https://js.stripe.com/v3/";s.async=true;s.onload=function(){resolve();};s.onerror=function(){reject(new Error("Stripe failed to load."));};document.body.appendChild(s);});return stripeScriptPromise;}
-function makePlanButton(label,sublabel,key){
-  var btn=document.createElement("button");btn.type="button";btn.dataset.planKey=key;btn.dataset.planLabel=label;btn.dataset.planSubLabel=sublabel;
-  btn.style.cssText="padding:12px 10px;border-radius:13px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:#d0e4f8;cursor:pointer;text-align:left;min-height:68px;transition:transform .15s,border-color .15s;";
-  var top=document.createElement("div");top.style.cssText="font-size:13px;font-weight:900;line-height:1.2;color:#fff;";
-  var bot=document.createElement("div");bot.style.cssText="font-size:11px;color:#7a9abf;margin-top:4px;line-height:1.3;";
-  if(key==="yearly"){top.innerHTML='Best Value -- Yearly <span style="font-size:9px;background:linear-gradient(135deg,#00f0d0,#00e87a);color:#04070f;border-radius:999px;padding:2px 6px;font-weight:900;vertical-align:middle;">Save 80%</span>';bot.textContent="$39.99/yr -- under $4/mo";}
-  else if(key==="monthly"){top.innerHTML='Monthly <span style="font-size:9px;background:rgba(168,127,255,.28);color:#d4b8ff;border-radius:999px;padding:2px 6px;font-weight:900;border:1px solid rgba(168,127,255,.36);vertical-align:middle;">Popular</span>';bot.textContent="$11.99/month";}
-  else{top.textContent="Try This Week";bot.textContent="$3.99 -- cancel anytime";}
-  btn.appendChild(top);btn.appendChild(bot);
-  return btn;
-}
-function setActivePlan(key){[weeklyBtn,monthlyBtn,yearlyBtn].forEach(function(btn){if(!btn)return;var a=btn.dataset.planKey===key;btn.dataset.active=a?"true":"false";btn.style.background=a?"linear-gradient(135deg,rgba(0,240,208,.14) 0%,rgba(168,127,255,.10) 100%)":"rgba(255,255,255,.04)";btn.style.borderColor=a?"rgba(0,240,208,.46)":"rgba(255,255,255,.10)";btn.style.transform="translateY(0)";});}
-function showPlanSelector(){if(!compactRow||!planRow||!helper)return;compactRow.style.display="none";planRow.style.display="grid";helper.style.display="block";}
-function showCompactSelector(){if(!compactRow||!planRow||!helper)return;compactRow.style.display="flex";planRow.style.display="none";helper.style.display="none";}
-async function destroyCheckout(){if(checkoutInstance&&typeof checkoutInstance.destroy==="function"){try{await checkoutInstance.destroy();}catch(e){}}checkoutInstance=null;if(checkoutContainer){checkoutContainer.innerHTML="";checkoutContainer.style.display="none";checkoutContainer.style.minHeight="0";}}
-async function openCheckoutForPlan(planKey){
-  if(shouldSuppress()){hideLegacyUpgrade();return;}
-  if(isInitializingCheckout||!PRICES[planKey])return;
-  isInitializingCheckout=true;selectedPlanKey=planKey;setActivePlan(planKey);showCompactSelector();
-  helper.textContent="Loading secure checkout...";setStatus("");
-  checkoutContainer.style.display="block";checkoutContainer.style.minHeight="360px";checkoutContainer.innerHTML="";
-  try{
-    await ensureStripeScript();if(!window.Stripe)throw new Error("Stripe failed to load.");if(!stripe)stripe=Stripe(STRIPE_KEY);await destroyCheckout();
-    checkoutContainer.style.display="block";checkoutContainer.style.minHeight="520px";checkoutContainer.style.paddingBottom="24px";
-    var fetchClientSecret=async function(){var res=await fetch(API_BASE+"/create-embedded-subscription",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({priceId:PRICES[planKey],returnUrl:window.location.origin+window.location.pathname+"?subscribed=true"})});var d=await res.json();if(!res.ok||!d||!d.clientSecret)throw new Error((d&&d.error)||"No clientSecret");return d.clientSecret;};
-    checkoutInstance=await stripe.initEmbeddedCheckout({fetchClientSecret});checkoutInstance.mount("#verixia-checkout-mount");helper.textContent="Complete payment below.";
-  }catch(e){await destroyCheckout();showPlanSelector();helper.textContent="Select a plan to load secure checkout.";checkoutContainer.innerHTML="Unable to load checkout.";checkoutContainer.style.display="block";checkoutContainer.style.minHeight="100px";setStatus("Please try again.");}
-  finally{isInitializingCheckout=false;}
-}
-async function openSelectorInternal(){if(!checkoutCard||!buttonRow)return;if(shouldSuppress()){hideLegacyUpgrade();return;}hideLegacyUpgrade();await destroyCheckout();buttonRow.style.display="none";checkoutCard.style.display="block";setActivePlan(selectedPlanKey);showPlanSelector();helper.textContent="Select a plan to load secure checkout.";setStatus("");}
-async function closeCheckoutInternal(){await destroyCheckout();checkoutCard.style.display="none";buttonRow.style.display=shouldSuppress()?"none":"flex";helper.textContent="Select a plan to load secure checkout.";setStatus("");showPlanSelector();}
-function handleReturnState(){var p=new URLSearchParams(window.location.search);if(p.get("subscribed")==="true"){markSubscribed(true);}syncPostPurchase();if(p.get("subscribed")==="true"){try{window.history.replaceState({},document.title,window.location.pathname);}catch(e){}}}
-function patchLegacyButtons(){Array.from(document.querySelectorAll('.upgrade-top,.post-result-upgrade-btn')).forEach(function(btn){var t=(btn.textContent||"").toLowerCase();if(t.includes("unlock")||t.includes("upgrade")){btn.removeAttribute("onclick");btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}if(shouldSuppress()){return false;}hideLegacyUpgrade();if(window.openEmbeddedUpgrade)window.openEmbeddedUpgrade("yearly");return false;};}});}
-function patchSubscriberField(){var i=getEmailInput();if(!i||i.__VX_PATCHED__)return;i.__VX_PATCHED__=true;i.addEventListener("input",function(){syncPostPurchase();hideLegacyUpgrade();});}
-function buildEmbeddedUI(){
-  if(document.getElementById("verixia-upgrade-wrapper"))return;
-  wrapper=document.createElement("div");wrapper.id="verixia-upgrade-wrapper";wrapper.style.cssText="max-width:800px;margin:12px auto 14px;padding:0 12px;box-sizing:border-box;";
-  buttonRow=document.createElement("div");buttonRow.style.display="none";
-  checkoutCard=document.createElement("div");checkoutCard.style.cssText="display:none;margin-top:10px;background:linear-gradient(180deg,rgba(6,12,26,.96) 0%,rgba(2,5,8,.99) 100%);border:1px solid rgba(0,240,208,.14);border-radius:22px;padding:16px;box-shadow:0 0 32px rgba(0,240,208,.10),0 22px 56px rgba(0,0,0,.60);color:#d0e4f8;";
-  var title=document.createElement("div");title.textContent="Unlimited token risk checks";title.style.cssText="font-size:19px;font-weight:900;margin-bottom:4px;color:#fff;font-family:'Syne',sans-serif;";
-  var sub=document.createElement("div");sub.textContent="Verify every token before you buy in. Cancel anytime.";sub.style.cssText="font-size:13px;color:#6a8aae;margin-bottom:10px;";
-  compactRow=document.createElement("div");compactRow.style.cssText="display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:8px 10px;border-radius:12px;background:rgba(0,240,208,.06);border:1px solid rgba(0,240,208,.13);";
-  compactText=document.createElement("div");compactText.style.cssText="font-size:12px;line-height:1.35;";
-  changePlanBtn=document.createElement("button");changePlanBtn.type="button";changePlanBtn.textContent="Change";changePlanBtn.style.cssText="padding:6px 10px;border-radius:999px;border:1px solid rgba(0,240,208,.20);background:rgba(0,240,208,.08);color:#00f0d0;font-weight:800;cursor:pointer;font-size:12px;flex:0 0 auto;";
-  compactRow.appendChild(compactText);compactRow.appendChild(changePlanBtn);
-  planRow=document.createElement("div");planRow.style.cssText="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;";
-  yearlyBtn=makePlanButton("Best Value -- Yearly","$39.99/yr","yearly");
-  monthlyBtn=makePlanButton("Monthly","$11.99/mo","monthly");
-  weeklyBtn=makePlanButton("Try This Week","$3.99/wk","weekly");
-  planRow.appendChild(yearlyBtn);planRow.appendChild(monthlyBtn);planRow.appendChild(weeklyBtn);
-  helper=document.createElement("div");helper.textContent="Select a plan to load secure checkout.";helper.style.cssText="font-size:12px;color:#5a7898;margin-bottom:8px;line-height:1.45;";
-  checkoutContainer=document.createElement("div");checkoutContainer.id="verixia-checkout-mount";checkoutContainer.style.cssText="min-height:0;border-radius:13px;overflow:hidden;display:none;";
-  status=document.createElement("div");status.style.cssText="margin-top:8px;font-size:12px;color:#6a8aae;";
-  closeBtn=document.createElement("button");closeBtn.type="button";closeBtn.textContent="Close";closeBtn.style.cssText="margin-top:9px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05);color:#8aa0c0;font-weight:800;cursor:pointer;font-size:12px;";
-  checkoutCard.appendChild(title);checkoutCard.appendChild(sub);checkoutCard.appendChild(compactRow);checkoutCard.appendChild(planRow);checkoutCard.appendChild(helper);checkoutCard.appendChild(checkoutContainer);checkoutCard.appendChild(status);checkoutCard.appendChild(closeBtn);
-  wrapper.appendChild(buttonRow);wrapper.appendChild(checkoutCard);
-  document.body.insertBefore(wrapper,document.body.firstChild);
-  yearlyBtn.addEventListener("click",function(){openCheckoutForPlan("yearly");});
-  monthlyBtn.addEventListener("click",function(){openCheckoutForPlan("monthly");});
-  weeklyBtn.addEventListener("click",function(){openCheckoutForPlan("weekly");});
-  closeBtn.addEventListener("click",function(){closeCheckoutInternal();});
-  changePlanBtn.addEventListener("click",async function(){await destroyCheckout();showPlanSelector();helper.textContent="Select a plan.";setStatus("");setActivePlan(selectedPlanKey);});
-  if(window.innerWidth<=640){planRow.style.gridTemplateColumns="1fr";}
-  setActivePlan(selectedPlanKey);
-}
-window.openEmbeddedUpgrade=async function(planKey){
-  if(shouldSuppress()){hideLegacyUpgrade();return;}
-  await openSelectorInternal();
-  setTimeout(function(){var el=document.getElementById("verixia-upgrade-wrapper");if(el){try{el.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}}},120);
-  if(planKey&&PRICES[planKey])openCheckoutForPlan(planKey);
+if(window.__VERIXIA_SOL_PAY__)return; window.__VERIXIA_SOL_PAY__=true;
+
+/* ----- CONFIG (edit these) ------------------------------------------------ */
+var RECIPIENT = "47sLuYEAy1zVLvnXyVd4m2YxK2Vmffnzab3xX3j9wkc5";   // your Solana address
+/* Public RPC is rate-limited. For reliability, paste a free Helius/QuickNode URL:
+   e.g. "https://mainnet.helius-rpc.com/?api-key=YOUR_KEY"                     */
+var RPC_URL   = "https://api.mainnet-beta.solana.com";
+/* Your backend (the Express server with the /solana/verify section). */
+var API = (window.API || "https://awake-integrity-production-faa0.up.railway.app").replace(/\/+$/,"");
+var PLANS = {
+  weekly:  { sol:0.15, days:7,   label:"1 Week",  api:"week"  },
+  monthly: { sol:0.5,  days:30,  label:"1 Month", api:"month" },
+  yearly:  { sol:1.5,  days:365, label:"1 Year",  api:"year"  }
 };
-function init(){handleReturnState();buildEmbeddedUI();patchLegacyButtons();patchSubscriberField();setTimeout(function(){patchLegacyButtons();patchSubscriberField();syncPostPurchase();},150);}
-if(document.readyState==="loading"){window.addEventListener("DOMContentLoaded",init);}else{init();}
+/* -------------------------------------------------------------------------- */
+
+var SUB_KEY="token_risk_browser_subscribed", LEGACY_KEY="scam_check_browser_subscribed";
+var EXP_KEY="token_risk_pass_expiry", PENDING_KEY="token_risk_pending_pay";
+var ACCESS_KEY="token_risk_access_token";
+
+/* ----- pass state --------------------------------------------------------- */
+function passExpiry(){var v=localStorage.getItem(EXP_KEY);return v?parseInt(v,10):0;}
+function clearPass(){localStorage.removeItem(SUB_KEY);localStorage.removeItem(LEGACY_KEY);localStorage.removeItem(EXP_KEY);}
+function grantPass(days){localStorage.setItem(SUB_KEY,"true");localStorage.setItem(LEGACY_KEY,"true");localStorage.setItem(EXP_KEY,String(Date.now()+days*86400000));}
+function hasValidPass(){var e=passExpiry();if(e&&Date.now()>e){clearPass();return false;}return localStorage.getItem(SUB_KEY)==="true"||localStorage.getItem(LEGACY_KEY)==="true";}
+function hideLegacyUpgrade(){var o=document.getElementById("upgrade");if(o)o.style.setProperty("display","none","important");}
+function syncAccess(){var p=document.getElementById("postPurchase");var ok=hasValidPass();if(p)p.style.display=ok?"block":"none";if(ok)hideLegacyUpgrade();}
+
+/* ----- pending (resume after reload / closed tab) ------------------------- */
+function savePending(ref,plan){try{localStorage.setItem(PENDING_KEY,JSON.stringify({ref:ref,plan:plan,ts:Date.now()}));}catch(e){}}
+function readPending(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||"null");}catch(e){return null;}}
+function clearPending(){localStorage.removeItem(PENDING_KEY);}
+
+/* ----- lazy Solana libs --------------------------------------------------- */
+var _w3=null,_qr=null,_conn=null;
+async function ensureLibs(){
+  if(_w3&&_qr)return;
+  var r=await Promise.all([
+    import("https://esm.sh/@solana/web3.js@1.95.8?bundle"),
+    import("https://esm.sh/qrcode@1.5.4?bundle")
+  ]);
+  _w3=r[0]; _qr=r[1].default||r[1];
+}
+function conn(){if(!_conn)_conn=new _w3.Connection(RPC_URL,"confirmed");return _conn;}
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms);});};
+
+/* ----- payment URL + verification ---------------------------------------- */
+function payURL(plan,ref){
+  var p=new URLSearchParams();
+  p.set("amount",String(plan.sol));
+  p.set("reference",ref);
+  p.set("label","Verixia Token Risk");
+  p.set("message","Unlimited token risk checks - "+plan.label+" pass");
+  return "solana:"+RECIPIENT+"?"+p.toString();
+}
+/* Hand the discovered signature to the backend, which re-verifies it on-chain
+   (amount + recipient + reference), burns it so it can't be reused, and returns
+   a server access token. That token — not a local flag — is what unlocks checks. */
+async function claimWithBackend(plan,refStr,signature){
+  try{
+    var r=await fetch(API+"/solana/verify",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({signature:signature,plan:plan.api,reference:refStr})});
+    var d=null; try{ d=await r.json(); }catch(e){}
+    if(r.ok && d && d.accessToken){ localStorage.setItem(ACCESS_KEY,d.accessToken); return {ok:true}; }
+    if(r.status===202) return {pending:true};               // not confirmed yet — keep polling
+    return {error:(d&&d.error)||("HTTP "+r.status)};
+  }catch(e){ return {error:String((e&&e.message)||e)}; }
+}
+var pollGen=0;
+async function startPoll(plan,refStr,visible){
+  var gen=++pollGen, ref=new _w3.PublicKey(refStr);
+  if(visible)setStatus("Waiting for payment...");
+  var deadline=Date.now()+12*60*1000;
+  while(gen===pollGen && Date.now()<deadline){
+    try{
+      var sigs=await conn().getSignaturesForAddress(ref,{limit:5},"confirmed");
+      if(sigs&&sigs.length){
+        if(visible)setStatus("Payment detected - verifying...");
+        for(var j=0;j<sigs.length;j++){
+          var res=await claimWithBackend(plan,refStr,sigs[j].signature);
+          if(res&&res.ok){ if(gen!==pollGen)return; onPaid(plan,sigs[j].signature); return; }
+          /* pending / transient error: keep polling until it confirms */
+        }
+      }
+    }catch(e){/* transient / rate-limit: keep trying */}
+    await sleep(4000);
+  }
+  if(gen===pollGen && visible)setStatus('No payment seen yet. If you already paid, tap "Re-check".');
+}
+function onPaid(plan,sig){grantPass(plan.days);clearPending();syncAccess();showUnlocked(plan,sig);}
+
+/* ----- UI ----------------------------------------------------------------- */
+var card,planRow,payPanel,amountLine,qrImg,openLink,hintLine,statusEl,recheckBtn,changeBtn,closeBtn,selected="yearly";
+function setStatus(t){if(statusEl)statusEl.textContent=t||"";}
+function planButton(key){
+  var pl=PLANS[key];
+  var b=document.createElement("button");b.type="button";b.dataset.k=key;
+  b.style.cssText="padding:13px 12px;border-radius:13px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:#d0e4f8;cursor:pointer;text-align:left;min-height:66px;transition:transform .15s,border-color .15s;";
+  var top=document.createElement("div");top.style.cssText="font-size:13px;font-weight:900;color:#fff;line-height:1.2;";
+  var bot=document.createElement("div");bot.style.cssText="font-size:11px;color:#7a9abf;margin-top:4px;line-height:1.3;";
+  if(key==="yearly"){top.innerHTML='1 Year <span style="font-size:9px;background:linear-gradient(135deg,#00f0d0,#00e87a);color:#04070f;border-radius:999px;padding:2px 6px;font-weight:900;vertical-align:middle;">Best value</span>';bot.textContent="1.5 SOL - best per-day rate";}
+  else if(key==="monthly"){top.innerHTML='1 Month <span style="font-size:9px;background:rgba(153,69,255,.28);color:#d4b8ff;border-radius:999px;padding:2px 6px;font-weight:900;border:1px solid rgba(153,69,255,.36);vertical-align:middle;">Popular</span>';bot.textContent="0.5 SOL";}
+  else{top.textContent="1 Week";bot.textContent="0.15 SOL - try it out";}
+  b.appendChild(top);b.appendChild(bot);
+  b.addEventListener("click",function(){openCheckoutForPlan(key);});
+  return b;
+}
+function setActive(key){[].forEach.call(planRow.children,function(b){var a=b.dataset.k===key;b.style.borderColor=a?"rgba(0,240,208,.46)":"rgba(255,255,255,.10)";b.style.background=a?"linear-gradient(135deg,rgba(0,240,208,.12),rgba(153,69,255,.10))":"rgba(255,255,255,.04)";});}
+function build(){
+  if(document.getElementById("verixia-sol-wrapper"))return;
+  var wrap=document.createElement("div");wrap.id="verixia-sol-wrapper";wrap.style.cssText="max-width:800px;margin:12px auto 14px;padding:0 12px;box-sizing:border-box;";
+  card=document.createElement("div");card.style.cssText="display:none;margin-top:10px;background:linear-gradient(180deg,rgba(6,12,26,.96),rgba(2,5,8,.99));border:1px solid rgba(0,240,208,.16);border-radius:22px;padding:18px;box-shadow:0 0 32px rgba(0,240,208,.10),0 22px 56px rgba(0,0,0,.6);color:#d0e4f8;";
+  var title=document.createElement("div");title.textContent="Unlimited token risk checks";title.style.cssText="font-size:19px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;margin-bottom:4px;";
+  var sub=document.createElement("div");sub.textContent="Pay once in SOL. Access is saved on this device - no auto-renew, no account.";sub.style.cssText="font-size:13px;color:#6a8aae;margin-bottom:12px;";
+  planRow=document.createElement("div");planRow.style.cssText="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;";
+  planRow.appendChild(planButton("yearly"));planRow.appendChild(planButton("monthly"));planRow.appendChild(planButton("weekly"));
+  if(window.innerWidth<=640)planRow.style.gridTemplateColumns="1fr";
+
+  payPanel=document.createElement("div");payPanel.style.cssText="display:none;text-align:center;border-top:1px solid rgba(255,255,255,.07);padding-top:14px;";
+  amountLine=document.createElement("div");amountLine.style.cssText="font-size:15px;font-weight:900;color:#fff;margin-bottom:10px;";
+  qrImg=document.createElement("img");qrImg.alt="Solana Pay QR";qrImg.style.cssText="width:220px;height:220px;border-radius:14px;background:#fff;padding:8px;display:inline-block;";
+  openLink=document.createElement("a");openLink.textContent="Open in wallet";openLink.style.cssText="display:block;max-width:280px;margin:12px auto 0;padding:13px;border-radius:13px;text-decoration:none;text-align:center;font-weight:900;color:#04070f;background:linear-gradient(135deg,#9945ff,#00f0d0);box-shadow:0 0 22px rgba(153,69,255,.30);";
+  hintLine=document.createElement("div");hintLine.style.cssText="font-size:11px;color:#5a7898;margin-top:10px;line-height:1.5;";
+  hintLine.innerHTML="Scan the code with your phone's wallet, or tap <b>Open in wallet</b> on this device.<br>Pay through this code/button so your payment is detected automatically.";
+  statusEl=document.createElement("div");statusEl.style.cssText="margin-top:12px;font-size:13px;font-weight:700;color:#00f0d0;min-height:18px;";
+  var btnRow=document.createElement("div");btnRow.style.cssText="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;";
+  recheckBtn=mkGhost("Re-check");recheckBtn.addEventListener("click",function(){if(_curr){setStatus("Checking...");startPoll(PLANS[_curr.plan],_curr.ref,true);}});
+  changeBtn=mkGhost("Change plan");changeBtn.addEventListener("click",function(){pollGen++;showPlans();});
+  btnRow.appendChild(recheckBtn);btnRow.appendChild(changeBtn);
+  payPanel.appendChild(amountLine);payPanel.appendChild(qrImg);payPanel.appendChild(openLink);payPanel.appendChild(hintLine);payPanel.appendChild(statusEl);payPanel.appendChild(btnRow);
+
+  closeBtn=mkGhost("Close");closeBtn.style.marginTop="12px";closeBtn.addEventListener("click",function(){pollGen++;card.style.display="none";});
+
+  card.appendChild(title);card.appendChild(sub);card.appendChild(planRow);card.appendChild(payPanel);card.appendChild(closeBtn);
+  wrap.appendChild(card);document.body.insertBefore(wrap,document.body.firstChild);
+  setActive(selected);
+}
+function mkGhost(label){var b=document.createElement("button");b.type="button";b.textContent=label;b.style.cssText="padding:9px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#9ab2d0;font-weight:800;font-size:12px;cursor:pointer;";return b;}
+function showPlans(){if(payPanel)payPanel.style.display="none";if(planRow)planRow.style.display=window.innerWidth<=640?"block":"grid";if(planRow&&window.innerWidth<=640)planRow.style.gridTemplateColumns="1fr";}
+function showUnlocked(plan,sig){
+  if(!payPanel)return;
+  planRow.style.display="none";payPanel.style.display="block";
+  amountLine.innerHTML='&#10003; Unlocked - '+plan.label+' pass active';amountLine.style.color="#00e87a";
+  qrImg.style.display="none";hintLine.style.display="none";
+  openLink.textContent="View payment on Solscan";openLink.href="https://solscan.io/tx/"+sig;openLink.target="_blank";openLink.rel="noopener";
+  openLink.style.background="rgba(0,232,122,.12)";openLink.style.color="#00e87a";openLink.style.boxShadow="none";
+  setStatus("Unlimited checks are now active on this device.");
+  recheckBtn.style.display="none";changeBtn.style.display="none";
+}
+function showUnlockedAlready(){build();card.style.display="block";planRow.style.display="none";payPanel.style.display="block";amountLine.innerHTML="&#10003; You already have an active pass";amountLine.style.color="#00e87a";qrImg.style.display="none";openLink.style.display="none";hintLine.style.display="none";recheckBtn.style.display="none";changeBtn.style.display="none";setStatus("Unlimited checks are active on this device.");}
+
+var _curr=null;
+async function openCheckoutForPlan(key){
+  if(!PLANS[key])return;
+  if(hasValidPass()){showUnlockedAlready();return;}
+  build();card.style.display="block";selected=key;setActive(key);
+  planRow.style.display="none";payPanel.style.display="block";
+  qrImg.style.display="inline-block";hintLine.style.display="block";openLink.style.display="block";openLink.target="";openLink.rel="";
+  recheckBtn.style.display="";changeBtn.style.display="";
+  amountLine.style.color="#fff";amountLine.textContent="Send "+PLANS[key].sol+" SOL";
+  setStatus("Loading secure payment...");
+  try{ await ensureLibs(); }
+  catch(e){ setStatus("Couldn't load the payment module. Refresh and try again."); return; }
+  var ref=_w3.Keypair.generate().publicKey.toBase58();
+  _curr={plan:key,ref:ref};
+  savePending(ref,key);
+  var url=payURL(PLANS[key],ref);
+  openLink.href=url;
+  try{ qrImg.src=await _qr.toDataURL(url,{margin:1,width:240}); }catch(e){ qrImg.style.display="none"; }
+  startPoll(PLANS[key],ref,true);
+}
+
+/* ----- legacy buttons + public entrypoint -------------------------------- */
+function patchLegacy(){
+  [].forEach.call(document.querySelectorAll('.upgrade-top,.post-result-upgrade-btn'),function(btn){
+    var t=(btn.textContent||"").toLowerCase();
+    if(t.indexOf("unlock")>-1||t.indexOf("upgrade")>-1){
+      btn.removeAttribute("onclick");
+      btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}window.openEmbeddedUpgrade("yearly");return false;};
+    }
+  });
+}
+window.openEmbeddedUpgrade=function(key){
+  build();
+  if(hasValidPass()){showUnlockedAlready();}
+  else{ card.style.display="block"; if(key&&PLANS[key])openCheckoutForPlan(key); else showPlans(); }
+  setTimeout(function(){var el=document.getElementById("verixia-sol-wrapper");if(el){try{el.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}}},120);
+};
+
+function init(){
+  if(passExpiry()&&Date.now()>passExpiry())clearPass();   // expire stale passes
+  syncAccess();
+  build();
+  patchLegacy();
+  setTimeout(function(){patchLegacy();syncAccess();},200);
+  // resume an in-flight payment (reload / closed tab) in the background
+  var pend=readPending();
+  if(pend&&pend.plan&&PLANS[pend.plan]&&(Date.now()-pend.ts)<30*60*1000&&!hasValidPass()){
+    ensureLibs().then(function(){_curr={plan:pend.plan,ref:pend.ref};startPoll(PLANS[pend.plan],pend.ref,false);}).catch(function(){});
+  }else if(pend){clearPending();}
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
 
