@@ -30,6 +30,12 @@ TITLE_SUFFIXES_TO_STRIP = [
     " - Token Risk",
 ]
 
+# Strip everything from the first " | " or " - " (or em/en dash) onward.
+# Anything after the first separator is brand boilerplate, not the page title.
+# This is what catches titles like "X | Token Risk, Liquidity & Warning Signs"
+# that the literal-suffix list above misses.
+TITLE_SUFFIX_PATTERN = re.compile(r"\s+[|\-–—]\s+.*$")
+
 SECTION_RULES: List[Tuple[str, List[str]]] = [
     (
         "Token Safety & Legitimacy",
@@ -172,6 +178,19 @@ def extract_title_from_html(content: str) -> str:
 
 def clean_title(title: str) -> str:
     cleaned = html.unescape(re.sub(r"\s+", " ", title).strip())
+
+    # Strip brand suffix after first separator (catches all real title shapes)
+    cleaned = TITLE_SUFFIX_PATTERN.sub("", cleaned)
+
+    # Belt-and-suspenders: collapse "Token Risk Token Risk" if it slipped through
+    cleaned = re.sub(
+        r"\b(token\s+risk)\s+token\s+risk\b",
+        r"\1",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    # Keep the original literal-suffix loop as a final safety net
     for suffix in TITLE_SUFFIXES_TO_STRIP:
         if cleaned.endswith(suffix):
             cleaned = cleaned[:-len(suffix)].rstrip()
