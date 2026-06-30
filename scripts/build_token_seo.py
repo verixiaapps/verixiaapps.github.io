@@ -4,7 +4,7 @@ import json
 from html import escape
 from pathlib import Path
 
-from generate_token_content import generate_token_content
+from generate_token_content import generate_token_content, merge_live_fields
 
 # -----------------------------
 # CONFIG
@@ -228,6 +228,10 @@ def clean_base_keyword(text):
     kw = re.sub(r"\s+risky$", "", kw)
     kw = re.sub(r"\s+real$", "", kw)
     kw = re.sub(r"\s+scam$", "", kw)
+
+    # Prevents " Token Risk" suffix doubling in build_related_anchor
+    kw = re.sub(r"\s+token\s+risk$", "", kw)
+    kw = re.sub(r"\s+risk$", "", kw)
 
     kw = re.sub(r"\s+", " ", kw).strip()
     return kw
@@ -665,6 +669,11 @@ def build_related_anchor(keyword):
             anchor += "?"
         return anchor
 
+    # If the readable phrase already contains "risk", don't append "Token Risk"
+    # again — this is what produced "Coin Risk Scanner Token Risk" on live pages.
+    if re.search(r"\brisk\b", readable, flags=re.IGNORECASE):
+        return readable
+
     return f"{readable} Token Risk"
 
 
@@ -712,17 +721,26 @@ def call_engine(keyword):
 
     Backward-compat: if generate_token_content returns a plain string,
     treat it as content-only and fall back to Python-side meta builders.
+
+    enrichmentData (DexScreener tier + data) is preserved if present so the
+    live-data panel placeholders can be filled downstream.
     """
     result = generate_token_content(keyword)
 
     if isinstance(result, dict):
         return {
-            "content": result.get("content") or "",
-            "meta":    result.get("meta") or {},
+            "content":        result.get("content") or "",
+            "meta":           result.get("meta") or {},
+            # Preserve enrichment for the live-data panel. May live at top level
+            # or inside meta depending on engine wrapper version.
+            "enrichmentData": result.get("enrichmentData")
+                              or (result.get("meta") or {}).get("enrichmentData"),
+            "liveToken":      result.get("liveToken")
+                              or (result.get("meta") or {}).get("liveToken"),
         }
 
     # Legacy shape (string only)
-    return {"content": str(result or ""), "meta": {}}
+    return {"content": str(result or ""), "meta": {}, "enrichmentData": None, "liveToken": None}
 
 
 # -----------------------------
@@ -925,6 +943,14 @@ for page in pages:
     html = html.replace("{{SUBJECT_TYPE}}", escape_html(subject_type))
     html = html.replace("{{SUB_INTENT}}", escape_html(sub_intent))
     html = html.replace("{{CANONICAL_PAIR_ADDRESS}}", escape_html(canonical_pair_address))
+
+    # Live data panel + robots gate. merge_live_fields fills {{LIVE_*}}
+    # placeholders from enrichmentData (or '—' if absent) and sets {{ROBOTS}}
+    # to noindex,follow only on explicit tier=none, default index otherwise.
+    live_replacements = {}
+    merge_live_fields(live_replacements, engine_result)
+    for placeholder, value in live_replacements.items():
+        html = html.replace(placeholder, str(value))
 
     try:
         with open(path, "w", encoding="utf-8") as f:
