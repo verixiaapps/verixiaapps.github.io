@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{TITLE}}</title>
 <meta name="description" content="{{DESCRIPTION}}">
-<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+<meta name="robots" content="{{ROBOTS}}">
 <link rel="canonical" href="{{CANONICAL_URL}}">
 <meta property="article:modified_time" content="{{MODIFIED_DATE}}">
 <meta property="article:published_time" content="{{PUBLISHED_DATE}}">
@@ -40,7 +40,7 @@
 {"@context":"https://schema.org","@type":"HowTo","name":"How to check if a crypto token is safe","totalTime":"PT30S","step":[{"@type":"HowToStep","position":1,"name":"Paste contract address","text":"Copy the token's contract address from an official source and paste it into the scanner."},{"@type":"HowToStep","position":2,"name":"Run on-chain scan","text":"The scanner reads contract permissions, liquidity, and holder distribution directly from the blockchain."},{"@type":"HowToStep","position":3,"name":"Review risk signals","text":"Honeypot patterns, mint authority, LP lock status, and top wallet concentration are surfaced as a risk verdict."}]}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Verixia Token Risk Checker","applicationCategory":"FinanceApplication","operatingSystem":"Web","description":"{{DESCRIPTION_JSON}}","url":"{{CANONICAL_URL_JSON}}","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"aggregateRating":{{AGGREGATE_RATING_JSON}}}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Verixia Token Risk Checker","applicationCategory":"FinanceApplication","operatingSystem":"Web","description":"{{DESCRIPTION_JSON}}","url":"{{CANONICAL_URL_JSON}}","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"Verixia","url":"https://verixiaapps.com/","logo":"https://verixiaapps.com/logo.png","sameAs":["https://twitter.com/verixia","https://github.com/verixia"]}
@@ -133,6 +133,23 @@ button{font-family:var(--font-body);}
 .hero-visual-frame{position:relative;border-radius:var(--radius-xl);overflow:hidden;border:1px solid rgba(224,40,80,.20);background:radial-gradient(ellipse 90% 70% at 50% 35%,rgba(224,40,80,.10) 0%,rgba(6,12,26,.98) 55%,rgba(2,5,8,1) 100%);box-shadow:0 0 80px rgba(224,40,80,.10),0 0 44px rgba(0,240,208,.06),var(--shadow-xl),inset 0 1px 0 rgba(0,240,208,.10);}
 .hero-visual-frame::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 22%,rgba(224,40,80,.10),transparent 38%),radial-gradient(circle at 82% 78%,rgba(0,240,208,.10),transparent 42%);mix-blend-mode:screen;}
 .hero-visual-frame svg{display:block;width:100%;height:auto;position:relative;z-index:1;}
+
+.live-panel{max-width:800px;margin:18px auto 14px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(6,12,26,.98) 0%,rgba(2,5,8,1) 100%);border:1px solid rgba(0,240,208,.20);box-shadow:var(--glow-cyan),var(--shadow-xl);overflow:hidden;}
+.live-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid rgba(0,240,208,.10);background:rgba(0,240,208,.03);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.06em;flex-wrap:wrap;gap:8px;}
+.live-head .src{color:rgba(0,240,208,.65);text-transform:uppercase;}
+.live-head .ts{color:var(--muted);font-size:10px;}
+.live-head .ts strong{color:var(--ink-strong);}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--emerald);box-shadow:0 0 8px rgba(0,232,122,.8);margin-right:8px;animation:pulse-dot 2s ease-in-out infinite;}
+.live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(0,240,208,.06);}
+@media(max-width:640px){.live-grid{grid-template-columns:repeat(2,1fr);}}
+.live-cell{padding:14px 16px;background:#020714;}
+.live-cell .lab{display:block;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.live-cell .val{font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--ink-strong);letter-spacing:-.01em;}
+.live-cell .val.good{color:var(--emerald);}
+.live-cell .val.warn{color:var(--amber);}
+.live-cell .val.bad{color:var(--danger);}
+.live-foot{padding:10px 18px;border-top:1px solid rgba(0,240,208,.08);font-family:var(--font-mono);font-size:10px;color:var(--muted-2);text-align:center;}
+.live-foot a{font-size:10px;color:var(--cyan);}
 
 .scanner-section{max-width:800px;margin:0 auto 14px;padding:0 14px;}
 .swap-widget-wrap{position:relative;border-radius:var(--radius-lg);overflow:hidden;background:linear-gradient(rgba(0,240,208,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,208,.025) 1px,transparent 1px),linear-gradient(180deg,rgba(6,12,26,.98) 0%,rgba(2,5,8,1) 100%);background-size:44px 44px,44px 44px,100% 100%;border:1px solid rgba(0,240,208,.18);box-shadow:0 0 60px rgba(0,240,208,.07),var(--shadow-xl);}
@@ -628,6 +645,24 @@ button{font-family:var(--font-body);}
     </div>
   </div>
 
+  <section class="live-panel" id="liveMarketPanel" aria-label="Verified market data">
+    <div class="live-head">
+      <span class="src"><span class="live-dot"></span>Verified &middot; DexScreener</span>
+      <span class="ts">Last fetched <strong>{{LIVE_FETCHED_AGO}}</strong> &middot; {{LIVE_FETCHED_UTC}}</span>
+    </div>
+    <div class="live-grid">
+      <div class="live-cell"><span class="lab">Pool depth (USD)</span><span class="val {{POOL_TIER}}">{{POOL_DEPTH_USD}}</span></div>
+      <div class="live-cell"><span class="lab">Market cap (USD)</span><span class="val">{{MARKET_CAP_USD}}</span></div>
+      <div class="live-cell"><span class="lab">24h volume (USD)</span><span class="val {{VOLUME_TIER}}">{{VOLUME_24H_USD}}</span></div>
+      <div class="live-cell"><span class="lab">Pair age</span><span class="val {{AGE_TIER}}">{{PAIR_AGE}}</span></div>
+      <div class="live-cell"><span class="lab">Top 10 holders</span><span class="val {{HOLDER_TIER}}">{{HOLDER_CONCENTRATION}}</span></div>
+      <div class="live-cell"><span class="lab">LP lock</span><span class="val {{LP_TIER}}">{{LP_LOCK_STATUS}}</span></div>
+    </div>
+    <div class="live-foot">
+      {{REFERENCE_CONTEXT}} &middot; <a href="https://verixiaapps.com/methodology/">how we calculate this</a>
+    </div>
+  </section>
+
   <section class="swap-section" id="riskSection" aria-label="Token risk scanner">
     <div class="swap-section-label">Contract Scanner</div>
     <div class="swap-widget-wrap">
@@ -866,10 +901,6 @@ button{font-family:var(--font-body);}
     </div>
     <div class="content-close" id="contentClose">Verify the contract address before you buy in. Paste it into the scanner above for the full on-chain breakdown.</div>
 
-    <div class="supplementary-content" id="supplementaryContent">
-      <h3 id="suppHeading">Why on-chain signals matter</h3>
-      <div class="supp-cards" id="suppCards"></div>
-    </div>
   </section>
 
   <div class="trust-section" aria-label="Why trust Verixia">
