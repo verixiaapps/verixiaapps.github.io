@@ -440,6 +440,11 @@ def render_page(template_html: str, keyword: str, payload: dict,
     }
 
     rendered = template_html
+    # Fill the live data panel placeholders ({{LIVE_*}}, {{ROBOTS}}) from the
+    # engine's enrichmentData. Safe to call even if engine returned no data —
+    # the helper falls back to '—' values and noindex's the page.
+    merge_live_fields(substitutions, payload)
+
     for placeholder, value in substitutions.items():
         rendered = rendered.replace(placeholder, str(value))
 
@@ -568,4 +573,239 @@ if __name__ == "__main__":
 # Routing decision lives in select_engine_endpoint() above. The legacy
 # /seo-page route handles solana-dex-aggregator and defi-perpetuals hubs;
 # everything else goes to /token-risk-page.
+# =========================================================================
+
+# =========================================================================
+# v13.2 PATCH -- Live data panel + noindex gate
+# =========================================================================
+#
+# Surfaces the DexScreener numbers the engine fetches (which currently only
+# exist inside the AI prompt) as visible HTML, fills the new {{LIVE_*}}
+# placeholders in token-risk-template-a.html, and noindex's pages where
+# enrichment data was unavailable.
+#
+# Call merge_live_fields(replacements, engine_result) just before applying
+# replacements to the template string.
+# =========================================================================
+from datetime import datetime, timezone
+
+
+def _fmt_usd(n):
+    """48210 -> '$48,210'; 1840000 -> '$1.84M'."""
+    if n is None:
+        return "—"
+    try:
+        v = float(n)
+    except (TypeError, ValueError):
+        return "—"
+    if v >= 1_000_000_000:
+        return f"${v / 1_000_000_000:.2f}B"
+    if v >= 1_000_000:
+        return f"${v / 1_000_000:.2f}M"
+    if v >= 1_000:
+        return f"${v:,.0f}"
+    return f"${v:.2f}"
+
+
+def _fmt_pct(n):
+    if n is None:
+        return "—"
+    try:
+        return f"{float(n):.1f}%"
+    except (TypeError, ValueError):
+        return "—"
+
+
+def _fmt_age(days):
+    if days is None:
+        return "—"
+    try:
+        d = int(days)
+    except (TypeError, ValueError):
+        return "—"
+    if d < 1:
+        return "< 1 day"
+    if d == 1:
+        return "1 day"
+    if d < 30:
+        return f"{d} days"
+    if d < 365:
+        return f"{d // 30} mo"
+    return f"{d // 365}y {(d % 365) // 30}mo"
+
+
+def _ago(fetched_at_iso):
+    """'14 sec ago' / '3 min ago' / '2 hr ago' from an ISO timestamp."""
+    if not fetched_at_iso:
+        return "just now"
+    try:
+        t = datetime.fromisoformat(str(fetched_at_iso).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return "just now"
+    delta = (datetime.now(timezone.utc) - t).total_seconds()
+    if delta < 60:
+        return f"{int(delta)} sec ago"
+    if delta < 3600:
+        return f"{int(delta // 60)} min ago"
+    if delta < 86400:
+        return f"{int(delta // 3600)} hr ago"
+    return f"{int(delta // 86400)} d ago"
+
+
+def _tier(value, good_above=None, warn_above=None, bad_above=None,
+          good_below=None, warn_below=None, bad_below=None):
+    """Returns CSS class: 'good' / 'warn' / 'bad' / ''."""
+    if value is None:
+        return ""
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return ""
+    if bad_above is not None and v >= bad_above:
+        return "bad"
+    if warn_above is not None and v >= warn_above:
+        return "warn"
+    if good_above is not None and v >= good_above:
+        return "good"
+    if bad_below is not None and v <= bad_below:
+        return "bad"
+    if warn_below is not None and v <= warn_below:
+        return "warn"
+    if good_below is not None and v <= good_below:
+        return "good"
+    return ""
+
+
+def _live_panel_empty():
+    """Fallback when enrichment unavailable. Page will also be noindex'd."""
+    return {
+        "{{LIVE_FETCHED_AGO}}":     "—",
+        "{{LIVE_FETCHED_UTC}}":     "—",
+        "{{POOL_DEPTH_USD}}":       "—",
+        "{{POOL_TIER}}":            "",
+        "{{MARKET_CAP_USD}}":       "—",
+        "{{VOLUME_24H_USD}}":       "—",
+        "{{VOLUME_TIER}}":          "",
+        "{{PAIR_AGE}}":             "—",
+        "{{AGE_TIER}}":             "",
+        "{{HOLDER_CONCENTRATION}}": "—",
+        "{{HOLDER_TIER}}":          "",
+        "{{LP_LOCK_STATUS}}":       "—",
+        "{{LP_TIER}}":              "",
+        "{{REFERENCE_CONTEXT}}":    "Live data unavailable",
+    }
+
+
+def build_live_panel_fields(enrichment):
+    """Map engine enrichmentData -> template {{LIVE_*}} placeholders.
+
+    Accepts the same enrichmentData shape produced by resolveKeywordEnrichment
+    in riskEngine.js. Safe to call with None.
+    """
+    if not enrichment:
+        return _live_panel_empty()
+
+    data = enrichment.get("data") or {}
+    tier = enrichment.get("tier") or data.get("tier") or "none"
+    fetched_at = data.get("fetchedAt") or data.get("fetched_at")
+
+    if tier == "token":
+        pool       = data.get("poolDepthUsd")
+        volume     = data.get("volume24hUsd")
+        age_days   = data.get("ageDays")
+        holders    = data.get("topHolderPct")  # 0-100
+        lp_locked  = data.get("lpLocked")  # bool
+
+        lp_status = "Locked" if lp_locked else "Unlocked"
+        lp_class  = "good" if lp_locked else "bad"
+
+        ref_line = (
+            f"Sample reference: {data.get('refSampleSize', '—')} top-liquidity tokens "
+            f"&middot; median pool {_fmt_usd(data.get('refMedianPoolUsd'))} "
+            f"&middot; median pair age {_fmt_age(data.get('refMedianAgeDays'))}"
+        )
+
+        return {
+            "{{LIVE_FETCHED_AGO}}":     _ago(fetched_at),
+            "{{LIVE_FETCHED_UTC}}":     (str(fetched_at) or "")[:16].replace("T", " ") + " UTC",
+            "{{POOL_DEPTH_USD}}":       _fmt_usd(pool),
+            "{{POOL_TIER}}":            _tier(pool, good_above=100_000, warn_below=50_000, bad_below=10_000),
+            "{{MARKET_CAP_USD}}":       _fmt_usd(data.get("marketCapUsd")),
+            "{{VOLUME_24H_USD}}":       _fmt_usd(volume),
+            "{{VOLUME_TIER}}":          _tier(volume, good_above=100_000, warn_below=20_000, bad_below=5_000),
+            "{{PAIR_AGE}}":             _fmt_age(age_days),
+            "{{AGE_TIER}}":             _tier(age_days, good_above=90, warn_below=14, bad_below=3),
+            "{{HOLDER_CONCENTRATION}}": _fmt_pct(holders),
+            "{{HOLDER_TIER}}":          _tier(holders, bad_above=60, warn_above=40, good_below=25),
+            "{{LP_LOCK_STATUS}}":       lp_status,
+            "{{LP_TIER}}":              lp_class,
+            "{{REFERENCE_CONTEXT}}":    ref_line,
+        }
+
+    if tier in ("category", "anchor"):
+        sample = data.get("sampleSize") or "—"
+        cat = data.get("category", "top-liquidity")
+        return {
+            "{{LIVE_FETCHED_AGO}}":     _ago(fetched_at),
+            "{{LIVE_FETCHED_UTC}}":     (str(fetched_at) or "")[:16].replace("T", " ") + " UTC",
+            "{{POOL_DEPTH_USD}}":       _fmt_usd(data.get("medianPoolDepthUsd")) + " (median)",
+            "{{POOL_TIER}}":            "",
+            "{{MARKET_CAP_USD}}":       _fmt_usd(data.get("medianMarketCapUsd")) + " (median)",
+            "{{VOLUME_24H_USD}}":       _fmt_usd(data.get("medianVolume24hUsd")) + " (median)",
+            "{{VOLUME_TIER}}":          "",
+            "{{PAIR_AGE}}":             _fmt_age(data.get("medianAgeDays")) + " (median)",
+            "{{AGE_TIER}}":             "",
+            "{{HOLDER_CONCENTRATION}}": "Category view",
+            "{{HOLDER_TIER}}":          "",
+            "{{LP_LOCK_STATUS}}":       "Category view",
+            "{{LP_TIER}}":              "",
+            "{{REFERENCE_CONTEXT}}":    f"Reference set: {sample} top-liquidity tokens in {cat} category",
+        }
+
+    return _live_panel_empty()
+
+
+def merge_live_fields(replacements, engine_result):
+    """Merge live-panel fields into the replacements dict and set robots meta.
+
+    Call this just before the template string is .replace()d with replacements.
+    The template's <meta name="robots"> needs to be {{ROBOTS}} for the
+    noindex gate to take effect (see comment at bottom of file).
+
+    Noindex policy (conservative):
+      - tier == "none" (engine fetched and got nothing) -> noindex,follow
+      - enrichment field absent entirely (engine doesn't pass it through yet)
+        -> default index. The live panel shows '—' placeholders until the
+        engine begins exposing enrichmentData. Existing pages keep indexing.
+      - tier == "token"/"category"/"anchor" -> index (real data present)
+    """
+    if not isinstance(engine_result, dict):
+        engine_result = {}
+
+    enrichment = (
+        engine_result.get("enrichmentData")
+        or engine_result.get("meta", {}).get("enrichmentData")
+    )
+    replacements.update(build_live_panel_fields(enrichment))
+
+    # Only noindex on an EXPLICIT tier=none signal. Missing field = default index.
+    if enrichment and enrichment.get("tier") == "none":
+        replacements["{{ROBOTS}}"] = "noindex,follow"
+    else:
+        replacements["{{ROBOTS}}"] = (
+            "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1"
+        )
+
+    return replacements
+
+
+# =========================================================================
+# REQUIRED TEMPLATE EDIT FOR THE NOINDEX GATE TO WORK
+# =========================================================================
+# In token-risk-template-a.html, change:
+#     <meta name="robots" content="index,follow,max-snippet:-1,...">
+# to:
+#     <meta name="robots" content="{{ROBOTS}}">
+#
+# (The new placeholder is filled by merge_live_fields() above.)
 # =========================================================================
