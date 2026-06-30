@@ -11,7 +11,7 @@ SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
 if SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, SCRIPTS_DIR)
 
-from generate_token_content import generate_token_content
+from generate_token_content import generate_token_content, merge_live_fields
 
 # -------------------------
 # CONFIG
@@ -253,6 +253,9 @@ def clean_base_keyword(text):
     kw = re.sub(r"\s+warning$",            "", kw)
     kw = re.sub(r"\s+alert$",              "", kw)
     kw = re.sub(r"\s+danger$",             "", kw)
+    # Prevents " Token Risk" suffix doubling in build_related_anchor
+    kw = re.sub(r"\s+token\s+risk$",       "", kw)
+    kw = re.sub(r"\s+risk$",               "", kw)
     return re.sub(r"\s+", " ", kw).strip()
 
 
@@ -343,8 +346,17 @@ def build_page_signals(keyword,
                        social_proof_checks=None):
     """Deterministic per-page rating, review count, and social proof check
     count. Same formula as the JS engine's buildPageSignals(). Override
-    values with explicit args when you have real data."""
+    values with explicit args when you have real data.
+
+    The returned dict carries `hasRealData: True` only when an explicit
+    `rating_value` was passed in (i.e. genuinely measured). The
+    `build_aggregate_rating_json()` serializer checks this flag and emits
+    EMPTY schema unless real data is present — protecting against shipping
+    fabricated AggregateRating on YMYL pages.
+    """
     h = stable_hash(keyword)
+    # Track whether the rating is real (explicit override) or hashed default
+    has_real_rating = rating_value is not None
     if rating_value is None:
         rating_choices = [4.6, 4.7, 4.8, 4.9]
         rating = rating_choices[h % len(rating_choices)]
@@ -364,20 +376,33 @@ def build_page_signals(keyword,
         "socialProofChecks":   checks,
         "ratingDisplay":       f"{rating:.1f} / 5 from {review_count:,} users",
         "socialProofDisplay":  f"{checks:,} risk checks run",
+        "hasRealData":         has_real_rating,
     }
 
 
 def build_aggregate_rating_json(signals):
-    """Serialize the AggregateRating snippet exactly the way the JS engine
-    does. Returned string is ready to be substituted into the SoftwareApplication
-    schema where the old hardcoded {ratingValue:4.8,...} object used to sit."""
+    """Serialize the AggregateRating snippet for the SoftwareApplication schema.
+
+    Returns the COMMA-PREFIXED key:value fragment ready to drop into the
+    template after the offers object, OR an empty string when no real rating
+    data exists. The template expansion looks like:
+        ...,"offers":{...}{{AGGREGATE_RATING_JSON}}}
+    So an empty string produces clean valid JSON with no rating field.
+
+    Pass signals=None (or {}) to emit nothing. This is the safe default until
+    real, verifiable reviews are collected — shipping a fabricated rating in
+    Google's eyes is a manual-action risk for YMYL pages.
+    """
+    if not signals or not signals.get("hasRealData"):
+        return ""
+
     payload = {
         "@type":       "AggregateRating",
         "ratingValue": f"{signals['ratingValue']:.1f}",
         "reviewCount": str(signals["reviewCount"]),
         "bestRating":  "5",
     }
-    return json.dumps(payload, ensure_ascii=False)
+    return ',"aggregateRating":' + json.dumps(payload, ensure_ascii=False)
 
 
 def is_guidance_style_keyword(keyword):
@@ -661,6 +686,10 @@ def build_related_anchor(keyword):
         if is_question_style_keyword(raw) and not anchor.endswith("?"):
             anchor += "?"
         return anchor
+    # If readable already contains "risk", don't double up — this is what produced
+    # "Coin Risk Scanner Token Risk" on live pages.
+    if re.search(r"\brisk\b", readable, flags=re.IGNORECASE):
+        return readable
     return f"{readable} Token Risk"
 
 
@@ -802,14 +831,22 @@ def is_usable_ai_text(text):
 def call_engine(keyword):
     """Single call into the risk engine via generate_token_content.
     Expected return shape: dict with `content` (str) and `meta` (dict).
-    Backward-compat: if a plain string is returned, treat as content-only."""
+    Backward-compat: if a plain string is returned, treat as content-only.
+
+    enrichmentData (DexScreener tier + data) is preserved if present so the
+    live-data panel placeholders can be filled downstream.
+    """
     result = generate_token_content(keyword)
     if isinstance(result, dict):
         return {
-            "content": result.get("content") or "",
-            "meta":    result.get("meta") or {},
+            "content":        result.get("content") or "",
+            "meta":           result.get("meta") or {},
+            "enrichmentData": result.get("enrichmentData")
+                              or (result.get("meta") or {}).get("enrichmentData"),
+            "liveToken":      result.get("liveToken")
+                              or (result.get("meta") or {}).get("liveToken"),
         }
-    return {"content": str(result or ""), "meta": {}}
+    return {"content": str(result or ""), "meta": {}, "enrichmentData": None, "liveToken": None}
 
 
 # -------------------------
@@ -1121,6 +1158,11 @@ for page in queue_pages:
 
     if TEMPLATE_HAS_PAGE_META:
         replacements["{{PAGE_META_SCRIPT}}"] = page_meta_html
+
+    # Live data panel + robots gate. merge_live_fields fills {{LIVE_*}}
+    # placeholders from enrichmentData (or '—' if absent) and sets {{ROBOTS}}
+    # to noindex,follow only on explicit tier=none, default index otherwise.
+    merge_live_fields(replacements, engine_result)
 
     try:
         html = render_page_html(template, replacements)
