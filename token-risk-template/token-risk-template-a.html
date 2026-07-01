@@ -1725,18 +1725,15 @@ function writeCache(symbol, data){
 
 function pickBestPair(pairs, symbol){
   if(!pairs || !pairs.length) return null;
-  // Filter to pairs where this token is the base (avoids reverse-pair confusion)
   var symU = symbol.toUpperCase();
   var matches = pairs.filter(function(p){
     return p && p.baseToken && (p.baseToken.symbol || "").toUpperCase() === symU;
   });
   var pool = matches.length ? matches : pairs;
-  // Sort by liquidity USD descending
   pool.sort(function(a, b){
     return (b.liquidity && b.liquidity.usd || 0) - (a.liquidity && a.liquidity.usd || 0);
   });
   var top = pool[0];
-  // Require a minimum liquidity to be worth showing
   if(!top || !top.liquidity || (top.liquidity.usd || 0) < 1000) return null;
   return top;
 }
@@ -1770,8 +1767,6 @@ function fillPanel(panel, pair, symbol){
   setField("pairAge",    fmtAge(age),
     tier(age, {goodAbove:90, warnBelow:14, badBelow:3}));
 
-  // Holder concentration + LP lock aren't in the public DexScreener payload.
-  // Show "n/a" honestly rather than fabricating.
   setField("topHolders", "n/a", "");
   setField("lpLock",     "n/a", "");
 
@@ -1787,7 +1782,6 @@ function fillPanel(panel, pair, symbol){
     (chainName ? " on " + chainName : "") +
     (dexName ? " (" + dexName + ")" : ""));
 
-  // Link the DexScreener label to the actual pair
   var srcLink = document.getElementById("liveSrcLink");
   if(srcLink && pair.url) srcLink.href = pair.url;
 
@@ -1795,7 +1789,6 @@ function fillPanel(panel, pair, symbol){
 }
 
 function showUnavailable(panel, reason){
-  // The empty state is already rendered server-side. Just tag it.
   panel.setAttribute("data-state", reason || "unavailable");
 }
 
@@ -1803,14 +1796,12 @@ async function load(){
   var panel = document.getElementById("liveMarketPanel");
   if(!panel) return;
 
-  // Read the keyword that build_token_seo wrote at the top of this page
   var kw = null;
   try {
     if (typeof window.RAW_KEYWORD === "string") kw = window.RAW_KEYWORD;
     else if (typeof RAW_KEYWORD === "string") kw = RAW_KEYWORD;
   } catch(e) {}
   if(!kw){
-    // Fallback: try the H1 text
     var titleEl = document.querySelector("h1");
     if(titleEl) kw = titleEl.textContent || "";
   }
@@ -1820,7 +1811,6 @@ async function load(){
     return;
   }
 
-  // Cache check
   var cached = readCache(symbol);
   if(cached){
     fillPanel(panel, cached, symbol);
