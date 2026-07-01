@@ -134,6 +134,7 @@ button{font-family:var(--font-body);}
 .hero-visual-frame::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 22%,rgba(224,40,80,.10),transparent 38%),radial-gradient(circle at 82% 78%,rgba(0,240,208,.10),transparent 42%);mix-blend-mode:screen;}
 .hero-visual-frame svg{display:block;width:100%;height:auto;position:relative;z-index:1;}
 
+.live-panel{max-width:800px;margin:18px auto 14px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(6,12,26,.98) 0%,rgba(2,5,8,1) 100%);border:1px solid rgba(0,240,208,.20);box-shadow:var(--glow-cyan),var(--shadow-xl);overflow:hidden;}
 .live-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid rgba(0,240,208,.10);background:rgba(0,240,208,.03);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.06em;flex-wrap:wrap;gap:8px;}
 .live-head .src{color:rgba(0,240,208,.65);text-transform:uppercase;}
 .live-head .ts{color:var(--muted);font-size:10px;}
@@ -718,7 +719,26 @@ button{font-family:var(--font-body);}
     </div>
   </section>
 
-  <!-- ─── AMPLIFIED SWAP CTA — prominent, immediately under scanner ──────── -->
+  <!-- ─── LIVE MARKET DATA — moved below scanner per Option A ─────────────── -->
+  <section class="live-panel" id="liveMarketPanel" data-state="initial" aria-label="Verified market data">
+    <div class="live-head">
+      <span class="src"><span class="live-dot"></span>Verified &middot; <a href="https://dexscreener.com/" target="_blank" rel="noopener" id="liveSrcLink" style="color:inherit;text-decoration:none;">DexScreener</a></span>
+      <span class="ts">Last fetched <strong data-field="fetchedAgo">{{LIVE_FETCHED_AGO}}</strong> &middot; <span data-field="fetchedUtc">{{LIVE_FETCHED_UTC}}</span></span>
+    </div>
+    <div class="live-grid">
+      <div class="live-cell"><span class="lab">Pool depth (USD)</span><span class="val {{POOL_TIER}}" data-field="poolDepth">{{POOL_DEPTH_USD}}</span></div>
+      <div class="live-cell"><span class="lab">Market cap (USD)</span><span class="val" data-field="marketCap">{{MARKET_CAP_USD}}</span></div>
+      <div class="live-cell"><span class="lab">24h volume (USD)</span><span class="val {{VOLUME_TIER}}" data-field="volume24h">{{VOLUME_24H_USD}}</span></div>
+      <div class="live-cell"><span class="lab">Pair age</span><span class="val {{AGE_TIER}}" data-field="pairAge">{{PAIR_AGE}}</span></div>
+      <div class="live-cell"><span class="lab">Top 10 holders</span><span class="val {{HOLDER_TIER}}" data-field="topHolders">{{HOLDER_CONCENTRATION}}</span></div>
+      <div class="live-cell"><span class="lab">LP lock</span><span class="val {{LP_TIER}}" data-field="lpLock">{{LP_LOCK_STATUS}}</span></div>
+    </div>
+    <div class="live-foot">
+      <span data-field="refContext">{{REFERENCE_CONTEXT}}</span> &middot; <a href="https://verixiaapps.com/methodology/">how we calculate this</a>
+    </div>
+  </section>
+
+  <!-- ─── AMPLIFIED SWAP CTA — prominent, immediately under live data ──────── -->
   <section class="swap-cta-prominent" aria-label="Swap on Verixia">
     <div class="swap-cta-prominent-inner">
       <div class="swap-cta-prominent-header">
@@ -1615,6 +1635,221 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 })();
 </script>
 
+<!-- ────────────────────────────────────────────────────────────────────
+     Live Market Data Panel — client-side DexScreener fetch
+     Picks the highest-liquidity pair for the symbol extracted from
+     RAW_KEYWORD. Cached in sessionStorage to be polite to the API.
+     Falls back to "Live data unavailable" if extraction or fetch fails.
+     ──────────────────────────────────────────────────────────────────── -->
+<script>
+(function(){
+"use strict";
+
+var DEX_BASE = "https://api.dexscreener.com";
+var CACHE_TTL_MS = 5 * 60 * 1000;
+var CACHE_PREFIX = "vx_live_";
+
+var STOP = {token:1,coin:1,safe:1,legit:1,risky:1,rug:1,scam:1,honeypot:1,
+  liquidity:1,volume:1,risk:1,price:1,chart:1,worth:1,investment:1,
+  buying:1,buy:1,sell:1,a:1,the:1,is:1,this:1,what:1,why:1,when:1,where:1,
+  how:1,should:1,can:1,i:1,it:1,my:1,me:1,you:1,we:1,solana:1,ethereum:1,
+  eth:1,base:1,bsc:1,bnb:1,arbitrum:1,arb:1,polygon:1,poly:1,avalanche:1,
+  avax:1,blast:1,sui:1,ton:1,tron:1,bitcoin:1,btc:1,defi:1,dex:1,swap:1,
+  with:1,on:1,in:1,of:1,to:1,for:1,and:1,or:1,from:1,scanner:1,checker:1,
+  detection:1,detector:1,analysis:1,engine:1,tool:1,test:1,review:1,
+  monitoring:1,verifier:1,verify:1,check:1,new:1,top:1,best:1,trending:1,
+  viral:1,meme:1,memecoin:1,low:1,cap:1,micro:1,microcap:1,token's:1,
+  unlocked:1,locked:1,burned:1,real:1,fake:1,unsellable:1,address:1,
+  contract:1,wallet:1,holder:1,holders:1,mint:1,freeze:1,blacklist:1,
+  approval:1,authority:1,does:1,have:1,was:1,were:1,been:1,not:1,now:1,
+  bep20:1,erc20:1,spl:1,page:1,pair:1,age:1,fdv:1
+};
+
+function extractSymbol(kw){
+  if(!kw) return null;
+  var tokens = String(kw).toLowerCase()
+    .replace(/[^a-z0-9 ]+/g," ").split(/\s+/).filter(Boolean);
+  for(var i=0; i<tokens.length; i++){
+    var t = tokens[i];
+    if(t.length < 2 || t.length > 12) continue;
+    if(STOP[t]) continue;
+    return t;
+  }
+  return null;
+}
+
+function fmtUsd(n){
+  if(n == null || isNaN(n)) return "—";
+  n = +n;
+  if(n >= 1e9) return "$"+(n/1e9).toFixed(2)+"B";
+  if(n >= 1e6) return "$"+(n/1e6).toFixed(2)+"M";
+  if(n >= 1e3) return "$"+Math.round(n).toLocaleString();
+  return "$"+n.toFixed(2);
+}
+function fmtAge(days){
+  if(days == null || isNaN(days)) return "—";
+  days = +days;
+  if(days < 1) return "< 1 day";
+  if(days === 1) return "1 day";
+  if(days < 30) return Math.floor(days)+" days";
+  if(days < 365) return Math.floor(days/30)+" mo";
+  return Math.floor(days/365)+"y "+Math.floor((days%365)/30)+"mo";
+}
+function tier(value, opts){
+  if(value == null || isNaN(value)) return "";
+  value = +value;
+  if(opts.badAbove != null && value >= opts.badAbove) return "bad";
+  if(opts.warnAbove != null && value >= opts.warnAbove) return "warn";
+  if(opts.goodAbove != null && value >= opts.goodAbove) return "good";
+  if(opts.badBelow != null && value <= opts.badBelow) return "bad";
+  if(opts.warnBelow != null && value <= opts.warnBelow) return "warn";
+  if(opts.goodBelow != null && value <= opts.goodBelow) return "good";
+  return "";
+}
+
+function readCache(symbol){
+  try {
+    var raw = sessionStorage.getItem(CACHE_PREFIX + symbol);
+    if(!raw) return null;
+    var obj = JSON.parse(raw);
+    if(!obj || !obj.t || (Date.now() - obj.t) > CACHE_TTL_MS) return null;
+    return obj.data;
+  } catch(e) { return null; }
+}
+function writeCache(symbol, data){
+  try {
+    sessionStorage.setItem(CACHE_PREFIX + symbol,
+      JSON.stringify({t: Date.now(), data: data}));
+  } catch(e) {}
+}
+
+function pickBestPair(pairs, symbol){
+  if(!pairs || !pairs.length) return null;
+  // Filter to pairs where this token is the base (avoids reverse-pair confusion)
+  var symU = symbol.toUpperCase();
+  var matches = pairs.filter(function(p){
+    return p && p.baseToken && (p.baseToken.symbol || "").toUpperCase() === symU;
+  });
+  var pool = matches.length ? matches : pairs;
+  // Sort by liquidity USD descending
+  pool.sort(function(a, b){
+    return (b.liquidity && b.liquidity.usd || 0) - (a.liquidity && a.liquidity.usd || 0);
+  });
+  var top = pool[0];
+  // Require a minimum liquidity to be worth showing
+  if(!top || !top.liquidity || (top.liquidity.usd || 0) < 1000) return null;
+  return top;
+}
+
+function ageDays(createdAtMs){
+  if(!createdAtMs) return null;
+  return Math.floor((Date.now() - createdAtMs) / (1000 * 60 * 60 * 24));
+}
+
+function fillPanel(panel, pair, symbol){
+  function setField(name, value, cls){
+    var el = panel.querySelector('[data-field="'+name+'"]');
+    if(!el) return;
+    el.textContent = value;
+    if(cls !== undefined){
+      el.classList.remove("good","warn","bad");
+      if(cls) el.classList.add(cls);
+    }
+  }
+
+  var poolUsd = pair.liquidity && pair.liquidity.usd;
+  var marketCap = pair.marketCap || pair.fdv;
+  var vol24 = pair.volume && pair.volume.h24;
+  var age = ageDays(pair.pairCreatedAt);
+
+  setField("poolDepth",  fmtUsd(poolUsd),
+    tier(poolUsd, {goodAbove:100000, warnBelow:50000, badBelow:10000}));
+  setField("marketCap",  fmtUsd(marketCap));
+  setField("volume24h",  fmtUsd(vol24),
+    tier(vol24, {goodAbove:100000, warnBelow:20000, badBelow:5000}));
+  setField("pairAge",    fmtAge(age),
+    tier(age, {goodAbove:90, warnBelow:14, badBelow:3}));
+
+  // Holder concentration + LP lock aren't in the public DexScreener payload.
+  // Show "n/a" honestly rather than fabricating.
+  setField("topHolders", "n/a", "");
+  setField("lpLock",     "n/a", "");
+
+  setField("fetchedAgo", "just now");
+  var now = new Date();
+  setField("fetchedUtc",
+    now.toISOString().slice(0,16).replace("T"," ") + " UTC");
+
+  var chainName = (pair.chainId || "").toUpperCase();
+  var dexName = (pair.dexId || "").replace(/\b\w/g, function(c){return c.toUpperCase();});
+  setField("refContext",
+    "Highest-liquidity pair: " + symbol.toUpperCase() +
+    (chainName ? " on " + chainName : "") +
+    (dexName ? " (" + dexName + ")" : ""));
+
+  // Link the DexScreener label to the actual pair
+  var srcLink = document.getElementById("liveSrcLink");
+  if(srcLink && pair.url) srcLink.href = pair.url;
+
+  panel.setAttribute("data-state", "populated");
+}
+
+function showUnavailable(panel, reason){
+  // The empty state is already rendered server-side. Just tag it.
+  panel.setAttribute("data-state", reason || "unavailable");
+}
+
+async function load(){
+  var panel = document.getElementById("liveMarketPanel");
+  if(!panel) return;
+
+  // Read the keyword that build_token_seo wrote at the top of this page
+  var kw = null;
+  try {
+    if (typeof window.RAW_KEYWORD === "string") kw = window.RAW_KEYWORD;
+    else if (typeof RAW_KEYWORD === "string") kw = RAW_KEYWORD;
+  } catch(e) {}
+  if(!kw){
+    // Fallback: try the H1 text
+    var titleEl = document.querySelector("h1");
+    if(titleEl) kw = titleEl.textContent || "";
+  }
+  var symbol = extractSymbol(kw);
+  if(!symbol){
+    showUnavailable(panel, "no-symbol");
+    return;
+  }
+
+  // Cache check
+  var cached = readCache(symbol);
+  if(cached){
+    fillPanel(panel, cached, symbol);
+    return;
+  }
+
+  try {
+    var resp = await fetch(
+      DEX_BASE + "/latest/dex/search?q=" + encodeURIComponent(symbol),
+      { headers: { "Accept": "application/json" } }
+    );
+    if(!resp.ok){ showUnavailable(panel, "http-"+resp.status); return; }
+    var data = await resp.json();
+    var pair = pickBestPair(data && data.pairs, symbol);
+    if(!pair){ showUnavailable(panel, "no-pair"); return; }
+    writeCache(symbol, pair);
+    fillPanel(panel, pair, symbol);
+  } catch(e){
+    showUnavailable(panel, "fetch-error");
+  }
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", load);
+} else {
+  load();
+}
+})();
+</script>
 
 </body>
 </html>
